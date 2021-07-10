@@ -26,13 +26,33 @@ public class HelloWorld {
         return "Hello int <b>%d</b>!".formatted(id);
     }
 
+    @GET(url="/int/{id}/{y}")
+    public String int_int(int x, int y) {
+        return "Hello int/int x=<b>%d</b> y=<b>%d</b>!".formatted(x, y);
+    }
+
     @GET(url="/str/{name}")
     public String string(@NotNull HttpRequest request, String name) {
         return "Hello str <b>%s</b> from <b>%s</b>!".formatted(name, request.uri());
     }
 
+    @GET(url="/istr/{str}/{y}")
+    public String string(String str, int y) {
+        return "Hello istr <b>%s</b> and <b>%d</b>!".formatted(str, y);
+    }
+
     @GET(url="/buf/{buf}")
     public String buffer(@NotNull FullHttpRequest request, CharBuffer buf) {
         return "Hello buf <b>%s</b> from <i>%s</i>!".formatted(buf, request.uri());
+    }
+
+    @GET(url="/buf/{buf}/{str}")
+    public String buf_buf(@NotNull FullHttpRequest request, CharBuffer buf1, CharBuffer buf2) {
+        return "Hello buf/buf <b>%s</b> and <b>%s</b> from <i>%s</i>!".formatted(buf1, buf2, request.uri());
+    }
+
+    @GET(url="/seq/{seq}")
+    public String seq(CharSequence buf) {
+        return "Hello seq <b>%s</b>!".formatted(buf);
     }
 }

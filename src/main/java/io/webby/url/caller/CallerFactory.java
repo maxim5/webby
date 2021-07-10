@@ -35,24 +35,64 @@ public class CallerFactory {
         }
 
         if (parameters.length == 0) {
-            UrlConfigError.failIf(vars.size() > 0, "Incomplete method %s arguments: variables=%s".formatted(method, vars));
+            UrlConfigError.failIf(vars.size() != 0, "Incomplete method %s arguments: variables=%s".formatted(method, vars));
             return new EmptyCaller(instance, method, wantsRequest);
         }
 
         if (parameters.length == 1) {
-            UrlConfigError.failIf(vars.size() > 1, "Incomplete method %s arguments: variables=%s".formatted(method, vars));
-            String var = vars.get(0);
             Class<?> type = parameters[0].getType();
-            if (type.equals(int.class)) {
+
+            if (type.equals(Map.class)) {
+                return new MapCaller(instance, method, validators, wantsRequest);
+            }
+
+            UrlConfigError.failIf(vars.size() != 1, "Incomplete method %s arguments: variables=%s".formatted(method, vars));
+            String var = vars.get(0);
+
+            if (isInt(type)) {
                 IntValidator validator = getValidator(validators, var, DEFAULT_INT);
                 return new IntCaller(instance, method, validator, var, wantsRequest);
             }
-            if (CharSequence.class.isAssignableFrom(type)) {
+
+            if (isStringLike(type)) {
                 StringValidator validator = getValidator(validators, var, DEFAULT_STR);
-                return new StringCaller(instance, method, validator, var, wantsRequest, type.equals(CharBuffer.class));
+                return new StringCaller(instance, method, validator, var, wantsRequest, canPassBuffer(type));
             }
-            if (type.equals(Map.class)) {
-                return new MapCaller(instance, method, validators, wantsRequest);
+        }
+
+        if (parameters.length == 2) {
+            Class<?> type1 = parameters[0].getType();
+            Class<?> type2 = parameters[1].getType();
+
+            UrlConfigError.failIf(vars.size() != 2, "Incomplete method %s arguments: variables=%s".formatted(method, vars));
+            String var1 = vars.get(0);
+            String var2 = vars.get(1);
+
+            if (isInt(type1) && isInt(type2)) {
+                IntValidator validator1 = getValidator(validators, var1, DEFAULT_INT);
+                IntValidator validator2 = getValidator(validators, var2, DEFAULT_INT);
+                return new IntIntCaller(instance, method, validator1, validator2, var1, var2, wantsRequest);
+            }
+
+            if (isInt(type1) && isStringLike(type2)) {
+                IntValidator intValidator = getValidator(validators, var1, DEFAULT_INT);
+                StringValidator strValidator = getValidator(validators, var2, DEFAULT_STR);
+                return new IntStrCaller(instance, method, intValidator, strValidator, var1, var2,
+                        wantsRequest, canPassBuffer(type2), false);
+            }
+
+            if (isStringLike(type1) && isInt(type2)) {
+                StringValidator strValidator = getValidator(validators, var1, DEFAULT_STR);
+                IntValidator intValidator = getValidator(validators, var2, DEFAULT_INT);
+                return new IntStrCaller(instance, method, intValidator, strValidator, var2, var1,
+                        wantsRequest, canPassBuffer(type1), true);
+            }
+
+            if (isStringLike(type1) && isStringLike(type2)) {
+                StringValidator validator1 = getValidator(validators, var1, DEFAULT_STR);
+                StringValidator validator2 = getValidator(validators, var2, DEFAULT_STR);
+                return new StrStrCaller(instance, method, validator1, validator2, var1, var2,
+                        wantsRequest, canPassBuffer(type1), canPassBuffer(type2));
             }
         }
 
@@ -67,5 +107,17 @@ public class CallerFactory {
         } catch (ClassCastException e) {
             throw new UrlConfigError("%s validator must be %s".formatted(name, def.getClass()));
         }
+    }
+
+    private static boolean isInt(Class<?> type) {
+        return type.equals(int.class);
+    }
+
+    private static boolean isStringLike(Class<?> type) {
+        return CharSequence.class.isAssignableFrom(type);
+    }
+
+    private static boolean canPassBuffer(Class<?> type) {
+        return type.isAssignableFrom(CharBuffer.class);
     }
 }
