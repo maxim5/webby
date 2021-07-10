@@ -47,13 +47,9 @@ public class CallerFactory {
                 IntValidator validator = getValidator(validators, var, DEFAULT_INT);
                 return new IntCaller(instance, method, validator, var, wantsRequest);
             }
-            if (type.equals(String.class)) {
+            if (CharSequence.class.isAssignableFrom(type)) {
                 StringValidator validator = getValidator(validators, var, DEFAULT_STR);
-                return new StringCaller(instance, method, validator, var, wantsRequest);
-            }
-            if (type.equals(CharBuffer.class)) {
-                StringValidator validator = getValidator(validators, var, DEFAULT_STR);
-                return new BufferCaller(instance, method, validator, var, wantsRequest);
+                return new StringCaller(instance, method, validator, var, wantsRequest, type.equals(CharBuffer.class));
             }
             if (type.equals(Map.class)) {
                 return new MapCaller(instance, method, validators, wantsRequest);

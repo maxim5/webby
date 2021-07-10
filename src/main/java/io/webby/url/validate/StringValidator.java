@@ -1,6 +1,5 @@
 package io.webby.url.validate;
 
-import io.routekit.util.CharBuffer;
 import io.webby.url.caller.ValidationError;
 import org.jetbrains.annotations.NotNull;
 
