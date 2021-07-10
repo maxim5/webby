@@ -13,6 +13,7 @@ import io.routekit.Match;
 import io.routekit.Router;
 import io.routekit.RouterSetup;
 import io.webby.netty.NettyChannelHandler;
+import io.webby.url.UrlModule;
 import io.webby.url.UrlRouter;
 
 import java.io.FileInputStream;
@@ -30,7 +31,8 @@ public class Main {
     }
 
     private static void runNetty(int port) throws InterruptedException {
-        Injector injector = Guice.createInjector();
+        log.at(Level.INFO).log("Bootstrapping server");
+        Injector injector = Guice.createInjector(new UrlModule());
 
         EventLoopGroup masterGroup = new NioEventLoopGroup();
         EventLoopGroup workerGroup = new NioEventLoopGroup();

@@ -19,7 +19,7 @@ public class UrlRouter {
         Stopwatch stopwatch = Stopwatch.createStarted();
         this.router = binder.bindRouter();
         long elapsedMillis = stopwatch.stop().elapsed(TimeUnit.MILLISECONDS);
-        log.at(Level.INFO).log("Router built in %dms", elapsedMillis);
+        log.at(Level.INFO).log("URL router built in %d ms", elapsedMillis);
     }
 
     @NotNull
