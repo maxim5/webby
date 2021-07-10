@@ -8,11 +8,11 @@ import org.jetbrains.annotations.NotNull;
 import java.lang.reflect.Method;
 import java.util.Map;
 
-public record StringCaller(Object instance, Method method, StringValidator validator, String name) implements Caller {
+public record StringCaller(Object instance, Method method, StringValidator validator, String name, boolean wantsRequest) implements Caller {
     @Override
     public Object call(@NotNull FullHttpRequest request, @NotNull Map<String, CharBuffer> variables) throws Exception {
-        CharBuffer value = variables.get(name);
+        String value = variables.get(name).toString();
         validator.validateString(name, value);
-        return method.invoke(instance, value.toString());
+        return wantsRequest ? method.invoke(instance, request, value) : method.invoke(instance, value);
     }
 }

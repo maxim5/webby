@@ -1,5 +1,6 @@
 package io.webby.url.caller;
 
+import io.netty.handler.codec.http.FullHttpRequest;
 import io.routekit.util.CharBuffer;
 import io.webby.url.Binding;
 import io.webby.url.UrlConfigError;
@@ -10,6 +11,7 @@ import org.jetbrains.annotations.NotNull;
 
 import java.lang.reflect.Method;
 import java.lang.reflect.Parameter;
+import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
 
@@ -26,9 +28,15 @@ public class CallerFactory {
         Method method = binding.method();
         Parameter[] parameters = method.getParameters();
 
+        boolean wantsRequest = false;
+        if (parameters.length > 0 && parameters[0].getType().isAssignableFrom(FullHttpRequest.class)) {
+            wantsRequest = true;
+            parameters = Arrays.copyOfRange(parameters, 1, parameters.length);
+        }
+
         if (parameters.length == 0) {
             UrlConfigError.failIf(vars.size() > 0, "Incomplete method %s arguments: variables=%s".formatted(method, vars));
-            return new EmptyCaller(instance, method);
+            return new EmptyCaller(instance, method, wantsRequest);
         }
 
         if (parameters.length == 1) {
@@ -37,18 +45,18 @@ public class CallerFactory {
             Class<?> type = parameters[0].getType();
             if (type.equals(int.class)) {
                 IntValidator validator = getValidator(validators, var, DEFAULT_INT);
-                return new IntCaller(instance, method, validator, var);
+                return new IntCaller(instance, method, validator, var, wantsRequest);
             }
             if (type.equals(String.class)) {
                 StringValidator validator = getValidator(validators, var, DEFAULT_STR);
-                return new StringCaller(instance, method, validator, var);
+                return new StringCaller(instance, method, validator, var, wantsRequest);
             }
             if (type.equals(CharBuffer.class)) {
                 StringValidator validator = getValidator(validators, var, DEFAULT_STR);
-                return new CharBufferCaller(instance, method, validator, var);
+                return new BufferCaller(instance, method, validator, var, wantsRequest);
             }
             if (type.equals(Map.class)) {
-                return new MapCaller(instance, method, validators);
+                return new MapCaller(instance, method, validators, wantsRequest);
             }
         }
 

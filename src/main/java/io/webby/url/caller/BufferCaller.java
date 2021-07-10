@@ -8,11 +8,11 @@ import org.jetbrains.annotations.NotNull;
 import java.lang.reflect.Method;
 import java.util.Map;
 
-public record CharBufferCaller(Object instance, Method method, StringValidator validator, String name) implements Caller {
+public record BufferCaller(Object instance, Method method, StringValidator validator, String name, boolean wantsRequest) implements Caller {
     @Override
     public Object call(@NotNull FullHttpRequest request, @NotNull Map<String, CharBuffer> variables) throws Exception {
         CharBuffer value = variables.get(name);
         validator.validateString(name, value);
-        return method.invoke(instance, value);
+        return wantsRequest ? method.invoke(instance, request, value) : method.invoke(instance, value);
     }
 }

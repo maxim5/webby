@@ -8,10 +8,10 @@ import org.jetbrains.annotations.NotNull;
 import java.lang.reflect.Method;
 import java.util.Map;
 
-public record MapCaller(Object instance, Method method, @NotNull Map<String, Validator> validators) implements Caller {
+public record MapCaller(Object instance, Method method, Map<String, Validator> validators, boolean wantsRequest) implements Caller {
     @Override
     public Object call(@NotNull FullHttpRequest request, @NotNull Map<String, CharBuffer> variables) throws Exception {
         // TODO: call validators?
-        return method.invoke(instance, variables);
+        return wantsRequest ? method.invoke(instance, request, variables) : method.invoke(instance, variables);
     }
 }

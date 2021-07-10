@@ -14,7 +14,7 @@ public class StringValidator implements Validator {
         this.maxLength = maxLength;
     }
 
-    public void validateString(@NotNull String name, @NotNull CharBuffer value) {
+    public void validateString(@NotNull String name, @NotNull CharSequence value) {
         ValidationError.failIf(value.length() > maxLength, "`%s` value exceeds max length %d".formatted(name, maxLength));
     }
 
