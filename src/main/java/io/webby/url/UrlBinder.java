@@ -18,7 +18,7 @@ public class UrlBinder {
     @Inject private Injector injector;
 
     public Router<Caller> bindRouter() {
-        ArrayList<Binding> bindings = bindHandlers();
+        ArrayList<Binding> bindings = bindHandlersFromClasspath();
 
         RouterSetup<Caller> setup = new RouterSetup<>();
         bindings.forEach(binding -> {
@@ -31,7 +31,7 @@ public class UrlBinder {
     }
 
     @NotNull
-    private ArrayList<Binding> bindHandlers() {
+    private ArrayList<Binding> bindHandlersFromClasspath() {
         ArrayList<Binding> bindings = new ArrayList<>();
         finder.getHandlerClasses().forEach(klass -> {
             for (Method method : klass.getDeclaredMethods()) {
