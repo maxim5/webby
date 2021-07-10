@@ -40,12 +40,6 @@ public class NettyChannelHandler extends SimpleChannelInboundHandler<FullHttpReq
         FullHttpResponse response;
         try {
             response = handle(request);
-        } catch (ValidationError e) {
-            response = newResponse400();
-            log.at(Level.INFO).withCause(e).log("Request validation failed: %s", e.getMessage());
-        } catch (NotFoundException e) {
-            response = newResponse404();
-            log.at(Level.WARNING).withCause(e).log("Request handler returned: %s", e.getMessage());
         } catch (Throwable throwable) {
             response = newResponse503("Unexpected failure", throwable);
             log.at(Level.SEVERE).withCause(throwable).log("Unexpected failure: %s", throwable.getMessage());
@@ -66,12 +60,18 @@ public class NettyChannelHandler extends SimpleChannelInboundHandler<FullHttpReq
 
         Object result;
         try {
-            result = match.handler().call(uri, match.variables());
+            result = match.handler().call(request, match.variables());
             if (result == null) {
                 return newResponse503("Request handler returned null: %s".formatted(match.handler().method()));
             }
+        } catch (ValidationError e) {
+            log.at(Level.INFO).withCause(e).log("Request validation failed: %s", e.getMessage());
+            return newResponse400();
+        } catch (NotFoundException e) {
+            log.at(Level.WARNING).withCause(e).log("Request handler returned: %s", e.getMessage());
+            return newResponse404();
         } catch (Exception e) {
-            log.at(Level.WARNING).withCause(e).log("Failed to call method: %s", match.handler().method());
+            log.at(Level.SEVERE).withCause(e).log("Failed to call method: %s", match.handler().method());
             return newResponse503("Failed to call method: %s".formatted(match.handler().method()), e);
         }
 
