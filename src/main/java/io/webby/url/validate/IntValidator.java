@@ -26,6 +26,6 @@ public class IntValidator implements Validator {
 
     @Override
     public String toString() {
-        return "IntValidator[" + min + ", " + max + "]";
+        return "IntValidator[%d, %d]".formatted(min, max);
     }
 }

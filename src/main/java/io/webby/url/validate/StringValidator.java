@@ -20,6 +20,6 @@ public class StringValidator implements Validator {
 
     @Override
     public String toString() {
-        return "StringValidator[" + maxLength + "]";
+        return "StringValidator[%d]".formatted(maxLength);
     }
 }
