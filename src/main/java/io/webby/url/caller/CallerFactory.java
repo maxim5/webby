@@ -2,12 +2,15 @@ package io.webby.url.caller;
 
 import io.routekit.util.CharBuffer;
 import io.webby.url.UrlConfigError;
+import io.webby.url.validate.IntValidator;
+import io.webby.url.validate.StringValidator;
 import org.jetbrains.annotations.NotNull;
 
 import java.lang.annotation.Annotation;
 import java.lang.reflect.Method;
 import java.lang.reflect.Parameter;
 import java.util.List;
+import java.util.Map;
 
 // TODO: handle default values
 public class CallerFactory {
@@ -22,15 +25,19 @@ public class CallerFactory {
 
         if (parameters.length == 1) {
             UrlConfigError.failIf(vars.size() > 1, "Incomplete method %s arguments: variables=%s".formatted(method, vars));
+            String var = vars.get(0);
             Class<?> type = parameters[0].getType();
             if (type.equals(int.class)) {
-                return new IntCaller(instance, method);
+                return new IntCaller(instance, method, IntValidator.ANY, var);
             }
             if (type.equals(String.class)) {
-                return new StringCaller(instance, method);
+                return new StringCaller(instance, method, StringValidator.DEFAULT_256, var);
             }
             if (type.equals(CharBuffer.class)) {
-                return new CharBufferCaller(instance, method);
+                return new CharBufferCaller(instance, method, StringValidator.DEFAULT_256, var);
+            }
+            if (type.equals(Map.class)) {
+                return new MapCaller(instance, method);
             }
         }
 

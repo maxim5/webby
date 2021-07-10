@@ -12,4 +12,10 @@ public class ValidationError extends RuntimeException {
     public ValidationError(Throwable cause) {
         super(cause);
     }
+
+    public static void failIf(boolean cond, String message) {
+        if (cond) {
+            throw new ValidationError(message);
+        }
+    }
 }
