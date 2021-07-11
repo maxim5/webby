@@ -36,9 +36,9 @@ public class HelloWorld {
         return "Hello str <b>%s</b> from <b>%s</b>!".formatted(name, request.uri());
     }
 
-    @GET(url="/istr/{str}/{y}")
+    @GET(url="/intstr/{str}/{y}")
     public String string(String str, int y) {
-        return "Hello istr <b>%s</b> and <b>%d</b>!".formatted(str, y);
+        return "Hello int-str <b>%s</b> and <b>%d</b>!".formatted(str, y);
     }
 
     @GET(url="/buf/{buf}")

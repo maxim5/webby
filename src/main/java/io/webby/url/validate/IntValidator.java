@@ -18,10 +18,15 @@ public class IntValidator implements Validator {
     }
 
     public int validateInt(@NotNull String name, @NotNull CharBuffer value) {
-        int result = Integer.parseInt(value, 0, value.length(), 10);
-        ValidationError.failIf(result < min || result > max,
-                "`%s` value `%d` is out of bounds: [%d, %d]".formatted(name, result, min, max));
-        return result;
+        try {
+            int result = Integer.parseInt(value, 0, value.length(), 10);
+            ValidationError.failIf(
+                    result < min || result > max,
+                    "`%s` value `%d` is out of bounds: [%d, %d]".formatted(name, result, min, max));
+            return result;
+        } catch (NumberFormatException e) {
+            throw new ValidationError("Malformed integer: %s".formatted(value), e);
+        }
     }
 
     @Override

@@ -13,13 +13,12 @@ import io.netty.util.CharsetUtil;
 import io.routekit.Match;
 import io.routekit.Router;
 import io.routekit.util.CharBuffer;
-import io.webby.url.UrlBinder;
 import io.webby.url.UrlRouter;
-import io.webby.url.caller.CallException;
 import io.webby.url.caller.Caller;
 import io.webby.url.caller.ValidationError;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
+import org.jetbrains.annotations.VisibleForTesting;
 
 import java.util.concurrent.TimeUnit;
 import java.util.logging.Level;
@@ -51,7 +50,8 @@ public class NettyChannelHandler extends SimpleChannelInboundHandler<FullHttpReq
     }
 
     @NotNull
-    private FullHttpResponse handle(@NotNull FullHttpRequest request) {
+    @VisibleForTesting
+    FullHttpResponse handle(@NotNull FullHttpRequest request) {
         CharBuffer uri = new CharBuffer(request.uri());
         Match<Caller> match = router.routeOrNull(uri);
         if (match == null) {
