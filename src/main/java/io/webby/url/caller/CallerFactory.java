@@ -5,8 +5,6 @@ import io.netty.handler.codec.http.FullHttpRequest;
 import io.routekit.util.CharBuffer;
 import io.webby.url.impl.Binding;
 import io.webby.url.UrlConfigError;
-import io.webby.url.impl.ContentProvider;
-import io.webby.url.impl.ContentProviderFactory;
 import io.webby.url.validate.IntValidator;
 import io.webby.url.validate.StringValidator;
 import io.webby.url.validate.Validator;

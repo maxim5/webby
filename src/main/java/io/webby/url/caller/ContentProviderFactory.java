@@ -1,6 +1,7 @@
-package io.webby.url.impl;
+package io.webby.url.caller;
 
 import io.webby.url.SerializeMethod;
+import io.webby.url.impl.EndpointOptions;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 

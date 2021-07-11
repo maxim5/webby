@@ -1,4 +1,4 @@
-package io.webby.url.impl;
+package io.webby.url.caller;
 
 import io.netty.buffer.ByteBuf;
 import org.jetbrains.annotations.NotNull;

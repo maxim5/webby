@@ -1,6 +1,5 @@
 package io.webby.url.caller;
 
-import io.webby.url.impl.ContentProvider;
 import org.jetbrains.annotations.Nullable;
 
 class RichCallOptions extends CallOptions {

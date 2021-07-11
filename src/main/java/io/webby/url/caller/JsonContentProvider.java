@@ -1,6 +1,8 @@
-package io.webby.url.impl;
+package io.webby.url.caller;
 
 import com.google.gson.Gson;
+import com.google.gson.JsonIOException;
+import com.google.gson.JsonSyntaxException;
 import io.netty.buffer.ByteBuf;
 import io.netty.buffer.ByteBufInputStream;
 import org.jetbrains.annotations.NotNull;
@@ -18,6 +20,10 @@ public class JsonContentProvider implements ContentProvider {
 
     @Override
     public Object getContent(@NotNull ByteBuf byteBuf, @NotNull Charset charset) {
-        return gson.fromJson(new InputStreamReader(new ByteBufInputStream(byteBuf), charset), this.clazz);
+        try {
+            return gson.fromJson(new InputStreamReader(new ByteBufInputStream(byteBuf), charset), this.clazz);
+        } catch (JsonSyntaxException | JsonIOException e) {
+            throw new ValidationError("Failed to parse JSON content", e);
+        }
     }
 }
