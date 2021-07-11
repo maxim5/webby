@@ -14,7 +14,7 @@ import io.routekit.Router;
 import io.routekit.RouterSetup;
 import io.webby.netty.NettyChannelHandler;
 import io.webby.url.UrlModule;
-import io.webby.url.UrlRouter;
+import io.webby.url.impl.UrlRouter;
 
 import java.io.FileInputStream;
 import java.util.logging.Level;

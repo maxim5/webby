@@ -2,7 +2,7 @@ package io.webby.url.caller;
 
 import io.netty.handler.codec.http.FullHttpRequest;
 import io.routekit.util.CharBuffer;
-import io.webby.url.Binding;
+import io.webby.url.impl.Binding;
 import io.webby.url.UrlConfigError;
 import io.webby.url.validate.IntValidator;
 import io.webby.url.validate.StringValidator;

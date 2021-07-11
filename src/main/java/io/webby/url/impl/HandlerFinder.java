@@ -1,8 +1,9 @@
-package io.webby.url;
+package io.webby.url.impl;
 
 import com.google.common.base.Stopwatch;
 import com.google.common.flogger.FluentLogger;
 import com.google.common.reflect.ClassPath;
+import io.webby.url.Serve;
 import org.jetbrains.annotations.NotNull;
 
 import java.io.IOException;

@@ -1,6 +1,9 @@
 package io.webby.url;
 
 import com.google.inject.AbstractModule;
+import io.webby.url.impl.HandlerFinder;
+import io.webby.url.impl.UrlBinder;
+import io.webby.url.impl.UrlRouter;
 
 public class UrlModule extends AbstractModule {
     @Override

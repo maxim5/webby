@@ -9,7 +9,7 @@ import io.netty.buffer.Unpooled;
 import io.netty.handler.codec.http.*;
 import io.netty.util.CharsetUtil;
 import io.webby.url.UrlModule;
-import io.webby.url.UrlRouter;
+import io.webby.url.impl.UrlRouter;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import org.junit.jupiter.api.BeforeEach;
@@ -58,6 +58,19 @@ public class NettyChannelHandlerIntegrationTest {
 
         assert200(get("/buf/foo"), "Hello buf <b>foo</b> from <i>/buf/foo</i>!");
         assert400(get("/buf/foo-bar-baz"));
+
+        assert200(get("/misc/void"), "");
+        assert200(get("/misc/null"), "");
+    }
+
+    @Test
+    public void post_hello_world_simple_pages() {
+        assert404(post("/"));
+
+        assert200(post("/int/10"), "{}");
+        assert400(post("/int/0"));
+        assert400(post("/int/-1"));
+        assert400(post("/int/foo"));
     }
 
     @NotNull

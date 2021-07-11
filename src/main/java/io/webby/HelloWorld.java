@@ -4,11 +4,14 @@ import io.netty.handler.codec.http.FullHttpRequest;
 import io.netty.handler.codec.http.HttpRequest;
 import io.routekit.util.CharBuffer;
 import io.webby.url.GET;
+import io.webby.url.POST;
 import io.webby.url.Serve;
 import io.webby.url.validate.IntValidator;
 import io.webby.url.validate.StringValidator;
 import io.webby.url.validate.Validator;
 import org.jetbrains.annotations.NotNull;
+
+import java.util.HashMap;
 
 @Serve
 public class HelloWorld {
@@ -54,5 +57,19 @@ public class HelloWorld {
     @GET(url="/seq/{seq}")
     public String seq(CharSequence buf) {
         return "Hello seq <b>%s</b>!".formatted(buf);
+    }
+
+    @POST(url="/int/{id}")
+    public Object update_integer(int id) {
+        return new HashMap<>();
+    }
+
+    @GET(url="/misc/void")
+    public void misc_void(@NotNull HttpRequest request) {
+    }
+
+    @GET(url="/misc/null")
+    public Object misc_null() {
+        return null;
     }
 }

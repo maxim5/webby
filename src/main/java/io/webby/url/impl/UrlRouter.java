@@ -1,10 +1,9 @@
-package io.webby.url;
+package io.webby.url.impl;
 
 import com.google.common.base.Stopwatch;
 import com.google.common.flogger.FluentLogger;
 import com.google.inject.Inject;
 import io.routekit.Router;
-import io.webby.url.caller.Caller;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.concurrent.TimeUnit;
@@ -13,7 +12,7 @@ import java.util.logging.Level;
 public class UrlRouter {
     private static final FluentLogger log = FluentLogger.forEnclosingClass();
 
-    private final Router<Caller> router;
+    private final Router<RouteEndpoint> router;
 
     @Inject
     public UrlRouter(@NotNull UrlBinder binder) {
@@ -23,7 +22,7 @@ public class UrlRouter {
     }
 
     @NotNull
-    public Router<Caller> getRouter() {
+    public Router<RouteEndpoint> getRouter() {
         return router;
     }
 }

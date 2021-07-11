@@ -7,7 +7,9 @@ import java.lang.annotation.Target;
 
 @Retention(RetentionPolicy.RUNTIME)
 @Target({ElementType.TYPE, ElementType.METHOD})
-public @interface GET {
+public @interface POST {
     String url();
     String contentType() default "";
+    boolean jsonIn() default true;
+    boolean jsonOut() default true;
 }
