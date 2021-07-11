@@ -1,9 +1,12 @@
 package io.webby.url.caller;
 
+import com.google.inject.Inject;
 import io.netty.handler.codec.http.FullHttpRequest;
 import io.routekit.util.CharBuffer;
 import io.webby.url.impl.Binding;
 import io.webby.url.UrlConfigError;
+import io.webby.url.impl.ContentProvider;
+import io.webby.url.impl.ContentProviderFactory;
 import io.webby.url.validate.IntValidator;
 import io.webby.url.validate.StringValidator;
 import io.webby.url.validate.Validator;
@@ -20,6 +23,8 @@ public class CallerFactory {
     private static final IntValidator DEFAULT_INT = IntValidator.ANY;
     private static final StringValidator DEFAULT_STR = StringValidator.DEFAULT_256;
 
+    @Inject private ContentProviderFactory contentProviderFactory;
+
     @NotNull
     public Caller create(@NotNull Object instance,
                          @NotNull Binding binding,
@@ -34,16 +39,28 @@ public class CallerFactory {
             parameters = Arrays.copyOfRange(parameters, 1, parameters.length);
         }
 
+        ContentProvider contentProvider = null;
+        if (binding.options().wantsContent() && parameters.length > 0) {
+            int contentIndex = parameters.length - 1;  // last
+            Class<?> type = parameters[contentIndex].getType();
+            if (!type.isPrimitive() && !isStringLike(type)) {
+                contentProvider = contentProviderFactory.getContentProvider(binding.options(), type);
+                parameters = Arrays.copyOfRange(parameters, 0, contentIndex);
+            }
+        }
+
+        CallOptions options = new CallOptions(wantsRequest, contentProvider);
+
         if (parameters.length == 0) {
             UrlConfigError.failIf(vars.size() != 0, "Incomplete method %s arguments: variables=%s".formatted(method, vars));
-            return new EmptyCaller(instance, method, wantsRequest);
+            return new EmptyCaller(instance, method, options);
         }
 
         if (parameters.length == 1) {
             Class<?> type = parameters[0].getType();
 
             if (type.equals(Map.class)) {
-                return new MapCaller(instance, method, validators, wantsRequest);
+                return new MapCaller(instance, method, validators, options);
             }
 
             UrlConfigError.failIf(vars.size() != 1, "Incomplete method %s arguments: variables=%s".formatted(method, vars));
@@ -51,12 +68,12 @@ public class CallerFactory {
 
             if (isInt(type)) {
                 IntValidator validator = getValidator(validators, var, DEFAULT_INT);
-                return new IntCaller(instance, method, validator, var, wantsRequest);
+                return new IntCaller(instance, method, validator, var, options);
             }
 
             if (isStringLike(type)) {
                 StringValidator validator = getValidator(validators, var, DEFAULT_STR);
-                return new StringCaller(instance, method, validator, var, wantsRequest, canPassBuffer(type));
+                return new StringCaller(instance, method, validator, var, options.toRichStr(canPassBuffer(type)));
             }
         }
 
@@ -71,28 +88,28 @@ public class CallerFactory {
             if (isInt(type1) && isInt(type2)) {
                 IntValidator validator1 = getValidator(validators, var1, DEFAULT_INT);
                 IntValidator validator2 = getValidator(validators, var2, DEFAULT_INT);
-                return new IntIntCaller(instance, method, validator1, validator2, var1, var2, wantsRequest);
+                return new IntIntCaller(instance, method, validator1, validator2, var1, var2, options);
             }
 
             if (isInt(type1) && isStringLike(type2)) {
                 IntValidator intValidator = getValidator(validators, var1, DEFAULT_INT);
                 StringValidator strValidator = getValidator(validators, var2, DEFAULT_STR);
                 return new IntStrCaller(instance, method, intValidator, strValidator, var1, var2,
-                        wantsRequest, canPassBuffer(type2), false);
+                        options.toRichStrInt(canPassBuffer(type2), false));
             }
 
             if (isStringLike(type1) && isInt(type2)) {
                 StringValidator strValidator = getValidator(validators, var1, DEFAULT_STR);
                 IntValidator intValidator = getValidator(validators, var2, DEFAULT_INT);
                 return new IntStrCaller(instance, method, intValidator, strValidator, var2, var1,
-                        wantsRequest, canPassBuffer(type1), true);
+                        options.toRichStrInt(canPassBuffer(type1), true));
             }
 
             if (isStringLike(type1) && isStringLike(type2)) {
                 StringValidator validator1 = getValidator(validators, var1, DEFAULT_STR);
                 StringValidator validator2 = getValidator(validators, var2, DEFAULT_STR);
                 return new StrStrCaller(instance, method, validator1, validator2, var1, var2,
-                        wantsRequest, canPassBuffer(type1), canPassBuffer(type2));
+                        options.toRichStrStr(canPassBuffer(type1), canPassBuffer(type2)));
             }
         }
 

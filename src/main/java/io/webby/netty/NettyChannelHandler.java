@@ -126,7 +126,7 @@ public class NettyChannelHandler extends SimpleChannelInboundHandler<FullHttpReq
 
     @NotNull
     private static FullHttpResponse newResponse400() {
-        return newResponse("<h1>404: Bad Request</h1>", HttpResponseStatus.BAD_REQUEST, HttpHeaderValues.TEXT_HTML);
+        return newResponse("<h1>400: Bad Request</h1>", HttpResponseStatus.BAD_REQUEST, HttpHeaderValues.TEXT_HTML);
     }
 
     @NotNull

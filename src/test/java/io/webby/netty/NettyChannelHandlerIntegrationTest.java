@@ -1,6 +1,7 @@
 package io.webby.netty;
 
 import com.google.common.truth.Truth;
+import com.google.gson.Gson;
 import com.google.inject.Guice;
 import com.google.inject.Injector;
 import io.netty.buffer.ByteBuf;
@@ -19,6 +20,7 @@ import java.util.logging.Level;
 import java.util.logging.LogManager;
 
 public class NettyChannelHandlerIntegrationTest {
+    private static final boolean VERBOSE = true;
     private NettyChannelHandler handler;
 
     @BeforeEach
@@ -61,6 +63,7 @@ public class NettyChannelHandlerIntegrationTest {
 
         assert200(get("/misc/void"), "");
         assert200(get("/misc/null"), "");
+        assert503(get("/error/npe"));
     }
 
     @Test
@@ -71,21 +74,31 @@ public class NettyChannelHandlerIntegrationTest {
         assert400(post("/int/0"));
         assert400(post("/int/-1"));
         assert400(post("/int/foo"));
+
+        assert200(post("/intstr/foo/10", new int[] {1, 2, 3}), "Vars: str=foo y=10 content=<[1.0, 2.0, 3.0]>");
     }
 
     @NotNull
     private FullHttpResponse get(String uri) {
-        return call(HttpMethod.GET, uri);
+        return call(HttpMethod.GET, uri, null);
     }
 
     @NotNull
     private FullHttpResponse post(String uri) {
-        return call(HttpMethod.POST, uri);
+        return post(uri, null);
     }
 
     @NotNull
-    private FullHttpResponse call(HttpMethod method, String uri) {
-        return handler.handle(new DefaultFullHttpRequest(HttpVersion.HTTP_1_1, method, uri));
+    private FullHttpResponse post(String uri, @Nullable Object content) {
+        return call(HttpMethod.POST, uri, content);
+    }
+
+    @NotNull
+    private FullHttpResponse call(HttpMethod method, String uri, @Nullable Object content) {
+        ByteBuf byteBuf = asByteBuf((content instanceof String str) ? str : toJson(content));
+        FullHttpRequest request = new DefaultFullHttpRequest(HttpVersion.HTTP_1_1, method, uri, byteBuf);
+        FullHttpResponse response = handler.handle(request);
+        return VERBOSE ? readable(response) : response;
     }
 
     private void assert200(FullHttpResponse response, String content) {
@@ -108,6 +121,10 @@ public class NettyChannelHandlerIntegrationTest {
         assertResponse(response, HttpResponseStatus.NOT_FOUND, content);
     }
 
+    private void assert503(FullHttpResponse response) {
+        assertResponse(response, HttpResponseStatus.SERVICE_UNAVAILABLE, null);
+    }
+
     private void assertResponse(FullHttpResponse response, HttpResponseStatus status, String content) {
         assertResponse(response, HttpVersion.HTTP_1_1, status, content, null);
     }
@@ -117,12 +134,25 @@ public class NettyChannelHandlerIntegrationTest {
                                        HttpResponseStatus status,
                                        @Nullable String content,
                                        @Nullable HttpHeaders headers) {
-        response = response.replace(readable(response.content()));
-        ByteBuf buffer = content != null ? readable(Unpooled.copiedBuffer(content, CharsetUtil.UTF_8)) : response.content();
+        ByteBuf byteBuf = content != null ? asByteBuf(content) : response.content();
         HttpHeaders httpHeaders = (headers != null) ? headers : response.headers();
         HttpHeaders trailingHeaders = response.trailingHeaders();
         Truth.assertThat(response)
-                .isEqualTo(new DefaultFullHttpResponse(version, status, buffer, httpHeaders, trailingHeaders));
+                .isEqualTo(new DefaultFullHttpResponse(version, status, byteBuf, httpHeaders, trailingHeaders));
+    }
+
+    @Nullable
+    private static String toJson(@Nullable Object obj) {
+        return new Gson().toJson(obj);
+    }
+
+    @NotNull
+    private static ByteBuf asByteBuf(@Nullable String content) {
+        return readable(content != null ? Unpooled.copiedBuffer(content, CharsetUtil.UTF_8) : Unpooled.buffer(0));
+    }
+
+    private static FullHttpResponse readable(@NotNull FullHttpResponse response) {
+        return response.replace(readable(response.content()));
     }
 
     private static ByteBuf readable(ByteBuf buf) {

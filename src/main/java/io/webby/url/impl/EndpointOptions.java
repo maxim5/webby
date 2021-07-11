@@ -6,7 +6,7 @@ import org.jetbrains.annotations.Nullable;
 public record EndpointOptions(CharSequence contentType,
                               @Nullable SerializeMethod in,
                               SerializeMethod out) {
-    boolean wantsContent() {
+    public boolean wantsContent() {
         return in != null;
     }
 }

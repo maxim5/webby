@@ -64,6 +64,11 @@ public class HelloWorld {
         return new HashMap<>();
     }
 
+    @POST(url="/intstr/{str}/{y}")
+    public String update_str_int(CharSequence str, int y, Object content) {
+        return "Vars: str=%s y=%d content=<%s>".formatted(str, y, content.toString());
+    }
+
     @GET(url="/misc/void")
     public void misc_void(@NotNull HttpRequest request) {
     }
@@ -71,5 +76,10 @@ public class HelloWorld {
     @GET(url="/misc/null")
     public Object misc_null() {
         return null;
+    }
+
+    @GET(url="/error/npe")
+    public Object error_npe() {
+        throw new NullPointerException("Message");
     }
 }

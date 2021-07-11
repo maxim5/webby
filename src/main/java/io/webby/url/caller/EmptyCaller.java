@@ -7,8 +7,13 @@ import org.jetbrains.annotations.NotNull;
 import java.lang.reflect.Method;
 import java.util.Map;
 
-public record EmptyCaller(Object instance, Method method, boolean wantsRequest) implements Caller {
+public record EmptyCaller(Object instance, Method method, CallOptions opts) implements Caller {
     public Object call(@NotNull FullHttpRequest request, @NotNull Map<String, CharBuffer> variables) throws Exception {
-        return wantsRequest ? method.invoke(instance, request) : method.invoke(instance);
+        if (opts.wantsContent()) {
+            Object content = opts.contentProvider.getContent(request);
+            return opts.wantsRequest ? method.invoke(instance, request, content) : method.invoke(instance, content);
+        } else {
+            return opts.wantsRequest ? method.invoke(instance, request) : method.invoke(instance);
+        }
     }
 }

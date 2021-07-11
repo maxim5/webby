@@ -12,19 +12,30 @@ import java.util.Map;
 public record IntStrCaller(Object instance, Method method,
                            IntValidator intValidator, StringValidator strValidator,
                            String intName, String strName,
-                           boolean wantsRequest, boolean wantsBuffer, boolean swapArgs) implements Caller {
+                           RichCallOptions opts) implements Caller {
     @Override
     public Object call(@NotNull FullHttpRequest request, @NotNull Map<String, CharBuffer> variables) throws Exception {
         int intValue = intValidator.validateInt(intName, variables.get(intName));
-        CharSequence strValue = (wantsBuffer) ? variables.get(strName) : variables.get(strName).toString();
+        CharSequence strValue = (opts.wantsBuffer2) ? variables.get(strName) : variables.get(strName).toString();
         strValidator.validateString(strName, strValue);
 
-        return swapArgs ?
-                wantsRequest ?
-                        method.invoke(instance, request, strValue, intValue) :
-                        method.invoke(instance, strValue, intValue) :
-                wantsRequest ?
-                        method.invoke(instance, request, intValue, strValue) :
-                        method.invoke(instance, intValue, strValue);
+        if (opts.wantsContent()) {
+            Object content = opts.contentProvider.getContent(request);
+            return opts.swapArgs ?
+                    opts.wantsRequest ?
+                            method.invoke(instance, request, strValue, intValue, content) :
+                            method.invoke(instance, strValue, intValue, content) :
+                    opts.wantsRequest ?
+                            method.invoke(instance, request, intValue, strValue, content) :
+                            method.invoke(instance, intValue, strValue, content);
+        } else {
+            return opts.swapArgs ?
+                    opts.wantsRequest ?
+                            method.invoke(instance, request, strValue, intValue) :
+                            method.invoke(instance, strValue, intValue) :
+                    opts.wantsRequest ?
+                            method.invoke(instance, request, intValue, strValue) :
+                            method.invoke(instance, intValue, strValue);
+        }
     }
 }
