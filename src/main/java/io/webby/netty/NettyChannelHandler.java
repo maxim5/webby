@@ -83,7 +83,11 @@ public class NettyChannelHandler extends SimpleChannelInboundHandler<FullHttpReq
         } catch (NotFoundException e) {
             log.at(Level.WARNING).withCause(e).log("Request handler returned: %s", e.getMessage());
             return newResponse404();
-        } catch (Exception e) {
+        } catch (RedirectException e) {
+            log.at(Level.WARNING).withCause(e).log("Redirecting to %s (%s): %s",
+                    e.uri(), e.isPermanent() ? "permanent" : "temporary", e.getMessage());
+            return newResponseRedirect(e.uri(), e.isPermanent());
+        } catch (Throwable e) {
             log.at(Level.SEVERE).withCause(e).log("Failed to call method: %s", caller.method());
             return newResponse503("Failed to call method: %s".formatted(caller.method()), e);
         }
@@ -132,6 +136,17 @@ public class NettyChannelHandler extends SimpleChannelInboundHandler<FullHttpReq
     @NotNull
     private static FullHttpResponse newResponse404() {
         return newResponse("<h1>404: Not Found</h1>", HttpResponseStatus.NOT_FOUND, HttpHeaderValues.TEXT_HTML);
+    }
+
+    @NotNull
+    private static FullHttpResponse newResponseRedirect(@NotNull String uri, boolean permanent) {
+        HttpResponseStatus status = permanent ?
+                HttpResponseStatus.PERMANENT_REDIRECT :
+                HttpResponseStatus.TEMPORARY_REDIRECT;
+        String content = "%d %s".formatted(status.code(), status.codeAsText());
+        FullHttpResponse response = newResponse(content, status, HttpHeaderValues.NONE);
+        response.headers().add(HttpHeaderNames.LOCATION, uri);
+        return response;
     }
 
     @NotNull
