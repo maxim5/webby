@@ -4,28 +4,30 @@ import com.google.common.base.Stopwatch;
 import com.google.common.flogger.FluentLogger;
 import com.google.gson.Gson;
 import io.netty.buffer.ByteBuf;
-import io.netty.buffer.Unpooled;
 import io.netty.channel.ChannelFutureListener;
 import io.netty.channel.ChannelHandlerContext;
 import io.netty.channel.SimpleChannelInboundHandler;
-import io.netty.handler.codec.http.*;
-import io.netty.util.CharsetUtil;
+import io.netty.handler.codec.http.FullHttpRequest;
+import io.netty.handler.codec.http.FullHttpResponse;
+import io.netty.handler.codec.http.HttpHeaderValues;
+import io.netty.handler.codec.http.HttpResponseStatus;
 import io.routekit.Match;
 import io.routekit.Router;
 import io.routekit.util.CharBuffer;
+import io.webby.url.SerializeMethod;
+import io.webby.url.caller.Caller;
+import io.webby.url.caller.ValidationError;
+import io.webby.url.impl.EndpointCaller;
 import io.webby.url.impl.EndpointOptions;
 import io.webby.url.impl.RouteEndpoint;
-import io.webby.url.SerializeMethod;
 import io.webby.url.impl.UrlRouter;
-import io.webby.url.caller.Caller;
-import io.webby.url.impl.EndpointCaller;
-import io.webby.url.caller.ValidationError;
 import org.jetbrains.annotations.NotNull;
-import org.jetbrains.annotations.Nullable;
 import org.jetbrains.annotations.VisibleForTesting;
 
 import java.util.concurrent.TimeUnit;
 import java.util.logging.Level;
+
+import static io.webby.netty.HttpResponseFactory.*;
 
 public class NettyChannelHandler extends SimpleChannelInboundHandler<FullHttpRequest> {
     private static final FluentLogger log = FluentLogger.forEnclosingClass();
@@ -96,7 +98,8 @@ public class NettyChannelHandler extends SimpleChannelInboundHandler<FullHttpReq
     }
 
     @NotNull
-    private FullHttpResponse convertToResponse(Object callResult, EndpointOptions options) {
+    @VisibleForTesting
+    static FullHttpResponse convertToResponse(Object callResult, EndpointOptions options) {
         if (callResult instanceof FullHttpResponse response) {
             return response;
         }
@@ -124,60 +127,9 @@ public class NettyChannelHandler extends SimpleChannelInboundHandler<FullHttpReq
 
     @Override
     public void exceptionCaught(ChannelHandlerContext context, Throwable cause) {
-        context.channel().writeAndFlush(newResponse503("Unexpected failure", cause)).addListener(ChannelFutureListener.CLOSE);
+        context.channel()
+                .writeAndFlush(newResponse503("Unexpected failure", cause))
+                .addListener(ChannelFutureListener.CLOSE);
         log.at(Level.SEVERE).withCause(cause).log("Unexpected failure: %s", cause.getMessage());
-    }
-
-    @NotNull
-    private static FullHttpResponse newResponse400() {
-        return newResponse("<h1>400: Bad Request</h1>", HttpResponseStatus.BAD_REQUEST, HttpHeaderValues.TEXT_HTML);
-    }
-
-    @NotNull
-    private static FullHttpResponse newResponse404() {
-        return newResponse("<h1>404: Not Found</h1>", HttpResponseStatus.NOT_FOUND, HttpHeaderValues.TEXT_HTML);
-    }
-
-    @NotNull
-    private static FullHttpResponse newResponseRedirect(@NotNull String uri, boolean permanent) {
-        HttpResponseStatus status = permanent ?
-                HttpResponseStatus.PERMANENT_REDIRECT :
-                HttpResponseStatus.TEMPORARY_REDIRECT;
-        String content = "%d %s".formatted(status.code(), status.codeAsText());
-        FullHttpResponse response = newResponse(content, status, HttpHeaderValues.NONE);
-        response.headers().add(HttpHeaderNames.LOCATION, uri);
-        return response;
-    }
-
-    @NotNull
-    private static FullHttpResponse newResponse503(@NotNull String debugError) {
-        return newResponse503(debugError, null);
-    }
-
-    @NotNull
-    private static FullHttpResponse newResponse503(@NotNull String debugError, @Nullable Throwable throwable) {
-        // TODO: hide debug info in prod
-        return newResponse(
-                "<h1>503: Service Unavailable</h1><p>%s</p><p>%s</p>".formatted(debugError, throwable),
-                HttpResponseStatus.SERVICE_UNAVAILABLE,
-                HttpHeaderValues.TEXT_HTML);
-    }
-
-    @NotNull
-    private static FullHttpResponse newResponse(@NotNull CharSequence content,
-                                                @NotNull HttpResponseStatus status,
-                                                @NotNull CharSequence contentType) {
-        ByteBuf byteBuf = Unpooled.copiedBuffer(content, CharsetUtil.UTF_8);
-        return newResponse(byteBuf, status, contentType);
-    }
-
-    @NotNull
-    private static FullHttpResponse newResponse(@NotNull ByteBuf byteBuf,
-                                                @NotNull HttpResponseStatus status,
-                                                @NotNull CharSequence contentType) {
-        FullHttpResponse response = new DefaultFullHttpResponse(HttpVersion.HTTP_1_1, status, byteBuf);
-        response.headers().set(HttpHeaderNames.CONTENT_TYPE, contentType);
-        response.headers().set(HttpHeaderNames.CONTENT_LENGTH, byteBuf.readableBytes());
-        return response;
     }
 }
