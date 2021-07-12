@@ -1,14 +1,15 @@
 package io.webby.url.caller;
 
 import com.google.inject.Inject;
-import io.netty.handler.codec.http.FullHttpRequest;
+import io.netty.handler.codec.http.HttpRequest;
 import io.routekit.util.CharBuffer;
-import io.webby.url.impl.Binding;
 import io.webby.url.UrlConfigError;
+import io.webby.url.impl.Binding;
 import io.webby.url.validate.IntValidator;
 import io.webby.url.validate.StringValidator;
 import io.webby.url.validate.Validator;
 import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.VisibleForTesting;
 
 import java.lang.reflect.Method;
 import java.lang.reflect.Parameter;
@@ -16,7 +17,6 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
 
-// TODO: handle default values
 public class CallerFactory {
     private static final IntValidator DEFAULT_INT = IntValidator.ANY;
     private static final StringValidator DEFAULT_STR = StringValidator.DEFAULT_256;
@@ -32,7 +32,7 @@ public class CallerFactory {
         Parameter[] parameters = method.getParameters();
 
         boolean wantsRequest = false;
-        if (parameters.length > 0 && parameters[0].getType().isAssignableFrom(FullHttpRequest.class)) {
+        if (parameters.length > 0 && canPassHttpRequest(parameters[0].getType())) {
             wantsRequest = true;
             parameters = Arrays.copyOfRange(parameters, 1, parameters.length);
         }
@@ -50,7 +50,8 @@ public class CallerFactory {
         CallOptions options = new CallOptions(wantsRequest, contentProvider);
 
         if (parameters.length == 0) {
-            UrlConfigError.failIf(vars.size() != 0, "Incomplete method %s arguments: variables=%s".formatted(method, vars));
+            UrlConfigError.failIf(vars.size() != 0,
+                    "Method %s does not accept enough arguments for requested URL variables=%s".formatted(method, vars));
             return new EmptyCaller(instance, method, options);
         }
 
@@ -61,7 +62,8 @@ public class CallerFactory {
                 return new MapCaller(instance, method, validators, options);
             }
 
-            UrlConfigError.failIf(vars.size() != 1, "Incomplete method %s arguments: variables=%s".formatted(method, vars));
+            UrlConfigError.failIf(vars.size() != 1,
+                    "Method %s does not accept enough arguments for requested URL variables=%s".formatted(method, vars));
             String var = vars.get(0);
 
             if (isInt(type)) {
@@ -79,7 +81,8 @@ public class CallerFactory {
             Class<?> type1 = parameters[0].getType();
             Class<?> type2 = parameters[1].getType();
 
-            UrlConfigError.failIf(vars.size() != 2, "Incomplete method %s arguments: variables=%s".formatted(method, vars));
+            UrlConfigError.failIf(vars.size() != 2,
+                    "Method %s does not accept enough arguments for requested URL variables=%s".formatted(method, vars));
             String var1 = vars.get(0);
             String var2 = vars.get(1);
 
@@ -124,15 +127,23 @@ public class CallerFactory {
         }
     }
 
-    private static boolean isInt(Class<?> type) {
+    @VisibleForTesting
+    static boolean isInt(Class<?> type) {
         return type.equals(int.class);
     }
 
-    private static boolean isStringLike(Class<?> type) {
+    @VisibleForTesting
+    static boolean isStringLike(Class<?> type) {
         return CharSequence.class.isAssignableFrom(type);
     }
 
-    private static boolean canPassBuffer(Class<?> type) {
+    @VisibleForTesting
+    static boolean canPassHttpRequest(Class<?> type) {
+        return HttpRequest.class.isAssignableFrom(type);
+    }
+
+    @VisibleForTesting
+    static boolean canPassBuffer(Class<?> type) {
         return type.isAssignableFrom(CharBuffer.class);
     }
 }
