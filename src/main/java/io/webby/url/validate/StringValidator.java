@@ -2,6 +2,7 @@ package io.webby.url.validate;
 
 import io.webby.url.caller.ValidationError;
 import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 
 public class StringValidator implements Validator {
     public static final StringValidator UNLIMITED = new StringValidator(Integer.MAX_VALUE);
@@ -13,7 +14,8 @@ public class StringValidator implements Validator {
         this.maxLength = maxLength;
     }
 
-    public void validateString(@NotNull String name, @NotNull CharSequence value) {
+    public void validateString(@NotNull String name, @Nullable CharSequence value) {
+        ValidationError.failIf(value == null, "Variable %s is expected, but not provided".formatted(name));
         ValidationError.failIf(value.length() > maxLength, "`%s` value exceeds max length %d".formatted(name, maxLength));
     }
 

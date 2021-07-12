@@ -3,6 +3,7 @@ package io.webby.url.validate;
 import io.routekit.util.CharBuffer;
 import io.webby.url.caller.ValidationError;
 import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 
 public class IntValidator implements Validator {
     public static IntValidator ANY = new IntValidator(Integer.MIN_VALUE, Integer.MAX_VALUE);
@@ -17,7 +18,8 @@ public class IntValidator implements Validator {
         this.max = max;
     }
 
-    public int validateInt(@NotNull String name, @NotNull CharBuffer value) {
+    public int validateInt(@NotNull String name, @Nullable CharBuffer value) {
+        ValidationError.failIf(value == null, "Variable %s is expected, but not provided".formatted(name));
         try {
             int result = Integer.parseInt(value, 0, value.length(), 10);
             ValidationError.failIf(
