@@ -85,8 +85,24 @@ public class CallerFactoryTest {
     public void one_var_primitive_int() throws Exception {
         IntFunction<String> instance = String::valueOf;
         Caller caller = factory.create(instance, binding(instance), asMap(), List.of("i"));
+
         Assertions.assertEquals("10", caller.call(get(), vars("i", 10)));
         Assertions.assertEquals("10", caller.call(post(), vars("i", 10)));
+        Assertions.assertThrows(ValidationError.class, () -> caller.call(get(), vars("x", 10)));
+    }
+
+    @Test
+    public void one_var_primitive_int_with_request() throws Exception {
+        interface IntRequestFunction {
+            String apply(HttpRequest request, int i);
+        }
+        IntRequestFunction instance = (request, i) -> "%s:%s".formatted(request.method(), i);
+        Caller caller = factory.create(instance, binding(instance), asMap(), List.of("i"));
+
+        Assertions.assertEquals("GET:10", caller.call(get(), vars("i", 10)));
+        Assertions.assertEquals("GET:0", caller.call(get(), vars("i", 0)));
+        Assertions.assertEquals("POST:10", caller.call(post(), vars("i", 10)));
+        Assertions.assertThrows(ValidationError.class, () -> caller.call(get(), vars("i", "foo")));
         Assertions.assertThrows(ValidationError.class, () -> caller.call(get(), vars("x", 10)));
     }
 
@@ -94,6 +110,7 @@ public class CallerFactoryTest {
     public void one_var_primitive_string() throws Exception {
         StringFunction<String> instance = String::toUpperCase;
         Caller caller = factory.create(instance, binding(instance), asMap(), List.of("str"));
+
         Assertions.assertEquals("FOO", caller.call(get(), vars("str", "foo")));
         Assertions.assertEquals("BAR", caller.call(post(), vars("str", "bar")));
     }
