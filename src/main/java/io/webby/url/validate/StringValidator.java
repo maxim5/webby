@@ -1,10 +1,13 @@
 package io.webby.url.validate;
 
+import io.routekit.util.CharBuffer;
 import io.webby.url.caller.ValidationError;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
-public class StringValidator implements Validator {
+import java.util.Objects;
+
+public class StringValidator implements Validator, Converter<String> {
     public static final StringValidator UNLIMITED = new StringValidator(Integer.MAX_VALUE);
     public static final StringValidator DEFAULT_256 = new StringValidator(256);
 
@@ -15,8 +18,22 @@ public class StringValidator implements Validator {
     }
 
     public void validateString(@NotNull String name, @Nullable CharSequence value) {
-        ValidationError.failIf(value == null, "Variable %s is expected, but not provided".formatted(name));
+        ValidationError.failIf(value == null, "Variable `%s` is expected, but not provided".formatted(name));
         ValidationError.failIf(value.length() > maxLength, "`%s` value exceeds max length %d".formatted(name, maxLength));
+    }
+
+    @Override
+    public String convert(@Nullable CharBuffer value) {
+        validateString("%string%", value);
+        return Objects.toString(value);
+    }
+
+    @NotNull
+    public SimpleConverter<String> asSimpleConverter() {
+        return value -> {
+            validateString("%string%", value);
+            return value;
+        };
     }
 
     @Override

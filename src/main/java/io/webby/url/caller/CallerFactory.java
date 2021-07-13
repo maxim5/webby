@@ -1,26 +1,50 @@
 package io.webby.url.caller;
 
+import com.google.common.collect.ImmutableMap;
+import com.google.common.flogger.FluentLogger;
 import com.google.inject.Inject;
+import com.google.inject.Injector;
 import io.netty.handler.codec.http.HttpRequest;
 import io.routekit.util.CharBuffer;
 import io.webby.url.UrlConfigError;
 import io.webby.url.impl.Binding;
-import io.webby.url.validate.IntValidator;
-import io.webby.url.validate.StringValidator;
-import io.webby.url.validate.Validator;
+import io.webby.url.validate.*;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.VisibleForTesting;
 
 import java.lang.reflect.Method;
 import java.lang.reflect.Parameter;
-import java.util.Arrays;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
+import java.util.logging.Level;
 
 public class CallerFactory {
+    private static final FluentLogger log = FluentLogger.forEnclosingClass();
+
     private static final IntValidator DEFAULT_INT = IntValidator.ANY;
     private static final StringValidator DEFAULT_STR = StringValidator.DEFAULT_256;
+    private static final ImmutableMap<Class<?>, SimpleConverter<?>> DEFAULT_CONVERTERS =
+            ImmutableMap.<Class<?>, SimpleConverter<?>>builder()
+            .put(int.class, DEFAULT_INT.asSimpleConverter())
+            .put(Integer.class, DEFAULT_INT.asSimpleConverter())
+            .put(long.class, Long::parseLong)
+            .put(Long.class, Long::valueOf)
+            .put(short.class, Short::parseShort)
+            .put(Short.class, Short::valueOf)
+            .put(byte.class, Byte::parseByte)
+            .put(Byte.class, Byte::valueOf)
+            .put(char.class, s -> (char) Integer.parseInt(s))
+            .put(Character.class, s -> (char) Integer.parseInt(s))
+            .put(float.class, Float::parseFloat)
+            .put(Float.class, Float::valueOf)
+            .put(double.class, Double::parseDouble)
+            .put(Double.class, Double::valueOf)
+            .put(boolean.class, Boolean::parseBoolean)
+            .put(Boolean.class, Boolean::valueOf)
+            .put(CharSequence.class, DEFAULT_STR.asSimpleConverter())
+            .put(String.class, DEFAULT_STR.asSimpleConverter())
+            .build();
 
+    @Inject private Injector injector;
     @Inject private ContentProviderFactory contentProviderFactory;
 
     @NotNull
@@ -114,7 +138,78 @@ public class CallerFactory {
             }
         }
 
+        List<CallArgumentFunction> mapping = tryCreateGenericMapping(method, binding, validators, vars);
+        if (mapping != null) {
+            return new GenericCaller(instance, method, mapping);
+        }
+
         throw new UrlConfigError("Failed to recognize method signature: %s".formatted(method));
+    }
+
+    @VisibleForTesting
+    List<CallArgumentFunction> tryCreateGenericMapping(@NotNull Method method,
+                                                       @NotNull Binding binding,
+                                                       @NotNull Map<String, Validator> validators,
+                                                       @NotNull List<String> vars) {
+        Parameter[] params = method.getParameters();  // forget about previous guesses
+        List<CallArgumentFunction> argMapping = new ArrayList<>(params.length);
+        Queue<String> varz = new ArrayDeque<>(vars);
+        int last = params.length - 1;
+
+        for (int i = 0; i <= last; i++) {
+            Class<?> type = params[i].getType();
+
+            if (isAllowedToInject(type)) {
+                try {
+                    Object injectorInstance = injector.getInstance(type);
+                    argMapping.add((request, varsMap) -> injectorInstance);
+                    continue;
+                } catch (Exception ignore) {}
+            }
+
+            if (canPassHttpRequest(type)) {
+                argMapping.add((request, varsMap) -> request);
+                continue;
+            }
+
+            if (!varz.isEmpty()) {
+                String var = varz.peek();
+                Validator validator = validators.computeIfAbsent(var, (k) -> DEFAULT_CONVERTERS.get(type));
+                if (validator instanceof Converter<?> converter) {
+                    varz.poll();
+                    argMapping.add(((request, varsMap) -> {
+                        try {
+                            return converter.convert(varsMap.get(var));
+                        } catch (ValidationError e) {
+                            throw e;
+                        } catch (RuntimeException e) {
+                            throw new ValidationError("Failed to validate %s".formatted(var), e);
+                        }
+                    }));
+                    continue;
+                }
+            }
+
+            if ((i == last) && canPassContent(type) && binding.options().wantsContent()) {
+                ContentProvider provider = contentProviderFactory.getContentProvider(binding.options(), type);
+                if (provider != null) {
+                    argMapping.add((request, varsMap) -> provider.getContent(request));
+                }
+            }
+        }
+
+        if (argMapping.size() < params.length) {
+            log.at(Level.FINE).log("Generic caller could match only %d arguments out of %d for method %s"
+                    .formatted(argMapping.size(), params.length, method));
+            return null;
+        }
+        if (!varz.isEmpty()) {
+            log.at(Level.FINE).log("Method %s does not accept enough arguments for requested URL variables=%s"
+                    .formatted(method, varz));
+            return null;
+        }
+
+        return argMapping;
     }
 
     @SuppressWarnings("unchecked")
@@ -135,6 +230,10 @@ public class CallerFactory {
     @VisibleForTesting
     static boolean isStringLike(Class<?> type) {
         return CharSequence.class.isAssignableFrom(type);
+    }
+
+    private static boolean isAllowedToInject(Class<?> type) {
+        return !type.isPrimitive() && !isStringLike(type);
     }
 
     @VisibleForTesting

@@ -1,8 +1,8 @@
 package io.webby.url.validate;
 
 import io.routekit.util.CharBuffer;
-import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 
 public interface Converter<T> extends Validator {
-    T convert(@NotNull CharBuffer value);
+    T convert(@Nullable CharBuffer value);
 }

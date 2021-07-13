@@ -16,10 +16,7 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
 import java.lang.reflect.Method;
-import java.util.Arrays;
-import java.util.LinkedHashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 import java.util.function.IntFunction;
 import java.util.function.IntSupplier;
 import java.util.stream.Collectors;
@@ -34,6 +31,8 @@ public class CallerFactoryTest {
     void setup() {
         Injector injector = Guice.createInjector(new UrlModule());
         factory = injector.getInstance(CallerFactory.class);
+
+        Locale.setDefault(Locale.US);  // any way to remove this?
     }
 
     @Test
@@ -44,6 +43,7 @@ public class CallerFactoryTest {
         Assertions.assertFalse(CallerFactory.isInt(byte.class));
         Assertions.assertFalse(CallerFactory.isInt(char.class));
         Assertions.assertFalse(CallerFactory.isInt(Integer.class));
+        Assertions.assertFalse(CallerFactory.isInt(Number.class));
 
         Assertions.assertTrue(CallerFactory.isStringLike(String.class));
         Assertions.assertTrue(CallerFactory.isStringLike(CharSequence.class));
@@ -126,6 +126,59 @@ public class CallerFactoryTest {
 
         Assertions.assertEquals("FOO", caller.call(get(), vars("str", "foo")));
         Assertions.assertEquals("BAR", caller.call(post(), vars("str", "bar")));
+    }
+
+    @Test
+    public void generic_primitive_args_1() throws Exception {
+        interface GenericFunction {
+            String apply(HttpRequest request, Integer x, long y, byte z, String s);
+        }
+        GenericFunction instance = (request, x, y, z, s) -> "%s:%d:%d:%d:%s".formatted(request.method(), x, y, z, s);
+        Caller caller = factory.create(instance, binding(instance), asMap(), List.of("x", "y", "z", "s"));
+
+        Assertions.assertEquals(
+                "GET:1:2:3:foobar",
+                caller.call(get(), vars("x", 1, "y", 2, "z", 3, "s", "foobar"))
+        );
+        Assertions.assertEquals(
+                "GET:0:9223372036854775807:127:foo",
+                caller.call(get(), vars("x", 0, "y", Long.MAX_VALUE, "z", 127, "s", "foo"))
+        );
+        Assertions.assertEquals(
+                "GET:-10:-9223372036854775808:-128:bar",
+                caller.call(get(), vars("x", -10, "y", Long.MIN_VALUE, "z", -128, "s", "bar"))
+        );
+
+        Assertions.assertThrows(ValidationError.class, () ->
+                caller.call(get(), vars("x", 1, "y", 2, "z", 256, "s", "foo")));
+        Assertions.assertThrows(ValidationError.class, () ->
+                caller.call(get(), vars("x", 1, "y", 2, "z", 3, "str", "foo")));
+    }
+
+    @Test
+    public void generic_primitive_args_2() throws Exception {
+        interface GenericFunction {
+            String apply(short x, float y, Double z, boolean b);
+        }
+        GenericFunction instance = "%d:%.2f:%.2f:%s"::formatted;
+        Caller caller = factory.create(instance, binding(instance), asMap(), List.of("x", "y", "z", "b"));
+
+        Assertions.assertEquals("1:2.00:3.00:false", caller.call(get(), vars("x", 1, "y", 2.0, "z", 3.0, "b", false)));
+        Assertions.assertThrows(ValidationError.class, () -> caller.call(get(), vars("x", 1_000_000, "y", 0, "z", 0, "b", true)));
+    }
+
+    @Test
+    public void generic_primitive_args_character() throws Exception {
+        interface GenericFunction {
+            String apply(char ch1, Character ch2);
+        }
+        GenericFunction instance = "%s:%s"::formatted;
+        Caller caller = factory.create(instance, binding(instance), asMap(), List.of("x", "y"));
+
+        Assertions.assertEquals("A:B", caller.call(get(), vars("x", 65, "y", 66)));
+        Assertions.assertEquals("\u90AB:\u0000", caller.call(get(), vars("x", 0x90AB, "y", 0)));
+        // Assertions.assertThrows(ValidationError.class, () -> caller.call(get(), vars("x", -1, "y", -2)));
+        Assertions.assertThrows(ValidationError.class, () -> caller.call(get(), vars("x", -1, "y", Long.MAX_VALUE)));
     }
 
     @NotNull
