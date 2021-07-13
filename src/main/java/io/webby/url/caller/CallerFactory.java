@@ -41,7 +41,7 @@ public class CallerFactory {
         if (binding.options().wantsContent() && parameters.length > 0) {
             int contentIndex = parameters.length - 1;  // last
             Class<?> type = parameters[contentIndex].getType();
-            if (!type.isPrimitive() && !isStringLike(type)) {
+            if (canPassContent(type)) {
                 contentProvider = contentProviderFactory.getContentProvider(binding.options(), type);
                 parameters = Arrays.copyOfRange(parameters, 0, contentIndex);
             }
@@ -140,6 +140,11 @@ public class CallerFactory {
     @VisibleForTesting
     static boolean canPassHttpRequest(Class<?> type) {
         return HttpRequest.class.isAssignableFrom(type);
+    }
+
+    @VisibleForTesting
+    static boolean canPassContent(Class<?> type) {
+        return !type.isPrimitive() && !isStringLike(type);
     }
 
     @VisibleForTesting

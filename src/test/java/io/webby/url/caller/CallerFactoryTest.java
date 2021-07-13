@@ -26,7 +26,7 @@ import java.util.stream.Collectors;
 
 @SuppressWarnings("unused")
 public class CallerFactoryTest {
-    private static final String URL = "/";
+    private static final String URL = "/dummy/CallerFactoryTest";
 
     private CallerFactory factory;
 
@@ -58,6 +58,12 @@ public class CallerFactoryTest {
         Assertions.assertTrue(CallerFactory.canPassHttpRequest(DefaultHttpRequest.class));
         Assertions.assertTrue(CallerFactory.canPassHttpRequest(DefaultFullHttpRequest.class));
         Assertions.assertFalse(CallerFactory.canPassHttpRequest(Object.class));
+
+        Assertions.assertTrue(CallerFactory.canPassContent(Object.class));
+        Assertions.assertTrue(CallerFactory.canPassContent(Map.class));
+        Assertions.assertFalse(CallerFactory.canPassContent(int.class));
+        Assertions.assertFalse(CallerFactory.canPassContent(String.class));
+        Assertions.assertFalse(CallerFactory.canPassContent(CharSequence.class));
 
         Assertions.assertTrue(CallerFactory.canPassBuffer(CharSequence.class));
         Assertions.assertTrue(CallerFactory.canPassBuffer(CharBuffer.class));
