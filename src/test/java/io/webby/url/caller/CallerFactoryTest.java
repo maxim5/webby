@@ -41,16 +41,22 @@ public class CallerFactoryTest {
         Assertions.assertTrue(CallerFactory.isInt(int.class));
         Assertions.assertFalse(CallerFactory.isInt(short.class));
         Assertions.assertFalse(CallerFactory.isInt(long.class));
+        Assertions.assertFalse(CallerFactory.isInt(byte.class));
+        Assertions.assertFalse(CallerFactory.isInt(char.class));
+        Assertions.assertFalse(CallerFactory.isInt(Integer.class));
 
         Assertions.assertTrue(CallerFactory.isStringLike(String.class));
         Assertions.assertTrue(CallerFactory.isStringLike(CharSequence.class));
         Assertions.assertTrue(CallerFactory.isStringLike(CharBuffer.class));
+        Assertions.assertTrue(CallerFactory.isStringLike(MutableCharBuffer.class));
         Assertions.assertTrue(CallerFactory.isStringLike(AsciiString.class));
         Assertions.assertTrue(CallerFactory.isStringLike(StringBuilder.class));
+        Assertions.assertFalse(CallerFactory.isStringLike(Object.class));
 
         Assertions.assertTrue(CallerFactory.canPassHttpRequest(HttpRequest.class));
         Assertions.assertTrue(CallerFactory.canPassHttpRequest(FullHttpRequest.class));
         Assertions.assertTrue(CallerFactory.canPassHttpRequest(DefaultHttpRequest.class));
+        Assertions.assertTrue(CallerFactory.canPassHttpRequest(DefaultFullHttpRequest.class));
         Assertions.assertFalse(CallerFactory.canPassHttpRequest(Object.class));
 
         Assertions.assertTrue(CallerFactory.canPassBuffer(CharSequence.class));
@@ -58,6 +64,7 @@ public class CallerFactoryTest {
         Assertions.assertFalse(CallerFactory.canPassBuffer(MutableCharBuffer.class));  // routekit contains immutable
         Assertions.assertFalse(CallerFactory.canPassBuffer(String.class));
         Assertions.assertFalse(CallerFactory.canPassBuffer(StringBuilder.class));
+        Assertions.assertFalse(CallerFactory.canPassBuffer(Object.class));
     }
 
     @Test

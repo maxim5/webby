@@ -144,6 +144,6 @@ public class CallerFactory {
 
     @VisibleForTesting
     static boolean canPassBuffer(Class<?> type) {
-        return type.isAssignableFrom(CharBuffer.class);
+        return type.isAssignableFrom(CharBuffer.class) && !type.equals(Object.class);
     }
 }
