@@ -6,10 +6,7 @@ import com.google.inject.ConfigurationException;
 import com.google.inject.Inject;
 import com.google.inject.Injector;
 import io.routekit.*;
-import io.webby.url.GET;
-import io.webby.url.POST;
-import io.webby.url.SerializeMethod;
-import io.webby.url.UrlConfigError;
+import io.webby.url.*;
 import io.webby.url.caller.Caller;
 import io.webby.url.caller.CallerFactory;
 import io.webby.url.validate.Validator;
@@ -41,21 +38,37 @@ public class UrlBinder {
         ArrayList<Binding> bindings = new ArrayList<>();
         try {
             finder.getHandlerClasses().forEach(klass -> {
+                Serve serve = klass.getAnnotation(Serve.class);
+                SerializeMethod defaultIn = serve.defaultIn();
+                SerializeMethod defaultOut = serve.defaultOut();
+
                 for (Method method : klass.getDeclaredMethods()) {
                     if (method.isAnnotationPresent(GET.class)) {
                         GET ann = method.getAnnotation(GET.class);
                         method.setAccessible(true);
-                        EndpointOptions options = new EndpointOptions(ann.contentType(), null, SerializeMethod.JSON);
+                        EndpointOptions options = new EndpointOptions(ann.contentType(), null, defaultOut);
                         Binding binding = new Binding(ann.url(), method, "GET", options);
                         bindings.add(binding);
                     }
                     if (method.isAnnotationPresent(POST.class)) {
                         POST ann = method.getAnnotation(POST.class);
                         method.setAccessible(true);
-                        EndpointOptions options = new EndpointOptions(ann.contentType(),
-                                ann.jsonIn() ? SerializeMethod.JSON : SerializeMethod.TO_STRING,
-                                ann.jsonOut() ? SerializeMethod.JSON : SerializeMethod.TO_STRING);
+                        EndpointOptions options = new EndpointOptions(ann.contentType(), defaultIn, defaultOut);
                         Binding binding = new Binding(ann.url(), method, "POST", options);
+                        bindings.add(binding);
+                    }
+                    if (method.isAnnotationPresent(PUT.class)) {
+                        PUT ann = method.getAnnotation(PUT.class);
+                        method.setAccessible(true);
+                        EndpointOptions options = new EndpointOptions(ann.contentType(), defaultIn, defaultOut);
+                        Binding binding = new Binding(ann.url(), method, "PUT", options);
+                        bindings.add(binding);
+                    }
+                    if (method.isAnnotationPresent(DELETE.class)) {
+                        DELETE ann = method.getAnnotation(DELETE.class);
+                        method.setAccessible(true);
+                        EndpointOptions options = new EndpointOptions(ann.contentType(), defaultIn, defaultOut);
+                        Binding binding = new Binding(ann.url(), method, "DELETE", options);
                         bindings.add(binding);
                     }
                 }

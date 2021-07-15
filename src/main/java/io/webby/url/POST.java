@@ -10,6 +10,4 @@ import java.lang.annotation.Target;
 public @interface POST {
     String url();
     String contentType() default "";
-    boolean jsonIn() default true;
-    boolean jsonOut() default true;
 }

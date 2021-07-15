@@ -17,7 +17,7 @@ public class ContentProviderFactory {
             return switch (method) {
                 case JSON -> new JsonContentProvider(type);
                 case PROTOBUF -> throw new UnsupportedOperationException();
-                case TO_STRING -> new SimpleContentProvider();
+                case AS_STRING -> new SimpleContentProvider();
             };
         }
         return null;

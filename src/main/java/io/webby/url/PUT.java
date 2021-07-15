@@ -6,8 +6,8 @@ import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
 
 @Retention(RetentionPolicy.RUNTIME)
-@Target(ElementType.TYPE)
-public @interface Serve {
-    SerializeMethod defaultIn() default SerializeMethod.JSON;
-    SerializeMethod defaultOut() default SerializeMethod.AS_STRING;
+@Target({ElementType.TYPE, ElementType.METHOD})
+public @interface PUT {
+    String url();
+    String contentType() default "";
 }

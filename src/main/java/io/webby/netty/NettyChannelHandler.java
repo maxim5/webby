@@ -119,8 +119,8 @@ public class NettyChannelHandler extends SimpleChannelInboundHandler<FullHttpReq
         }
 
         return switch (options.out()) {
-            case JSON -> newResponse(new Gson().toJson(callResult), HttpResponseStatus.OK, contentType);
-            case TO_STRING -> newResponse(callResult.toString(), HttpResponseStatus.OK, contentType);
+            case JSON -> newResponse(new Gson().toJson(callResult), HttpResponseStatus.OK, HttpHeaderValues.APPLICATION_JSON);
+            case AS_STRING -> newResponse(callResult.toString(), HttpResponseStatus.OK, contentType);
             case PROTOBUF -> throw new UnsupportedOperationException();
         };
     }
