@@ -3,6 +3,7 @@ package io.webby.netty;
 import com.google.common.base.Stopwatch;
 import com.google.common.flogger.FluentLogger;
 import com.google.gson.Gson;
+import com.google.inject.Inject;
 import io.netty.buffer.ByteBuf;
 import io.netty.channel.ChannelFutureListener;
 import io.netty.channel.ChannelHandlerContext;
@@ -14,6 +15,7 @@ import io.netty.handler.codec.http.HttpResponseStatus;
 import io.routekit.Match;
 import io.routekit.Router;
 import io.routekit.util.CharBuffer;
+import io.webby.app.AppSettings;
 import io.webby.url.SerializeMethod;
 import io.webby.url.caller.Caller;
 import io.webby.url.caller.ValidationError;
@@ -32,9 +34,12 @@ import static io.webby.netty.HttpResponseFactory.*;
 public class NettyChannelHandler extends SimpleChannelInboundHandler<FullHttpRequest> {
     private static final FluentLogger log = FluentLogger.forEnclosingClass();
 
+    private final AppSettings settings;
     private final Router<RouteEndpoint> router;
 
-    public NettyChannelHandler(@NotNull UrlRouter urlRouter) {
+    @Inject
+    public NettyChannelHandler(@NotNull AppSettings settings, @NotNull UrlRouter urlRouter) {
+        this.settings = settings;
         this.router = urlRouter.getRouter();
     }
 
@@ -131,5 +136,10 @@ public class NettyChannelHandler extends SimpleChannelInboundHandler<FullHttpReq
                 .writeAndFlush(newResponse503("Unexpected failure", cause))
                 .addListener(ChannelFutureListener.CLOSE);
         log.at(Level.SEVERE).withCause(cause).log("Unexpected failure: %s", cause.getMessage());
+    }
+
+    @NotNull
+    private FullHttpResponse newResponse503(String message, Throwable cause) {
+        return HttpResponseFactory.newResponse503(message, cause, settings.devMode());
     }
 }

@@ -25,8 +25,6 @@ public class Main {
 
     public static void main(String[] args) throws Exception {
         LogManager.getLogManager().readConfiguration(new FileInputStream("build/resources/main/logging.properties"));
-
-        // checkRouter();
         runNetty(8888);
     }
 
@@ -46,7 +44,7 @@ public class Main {
                             ChannelPipeline pipeline = ch.pipeline();
                             pipeline.addLast(new HttpServerCodec());
                             pipeline.addLast(new HttpObjectAggregator(Integer.MAX_VALUE));
-                            pipeline.addLast(new NettyChannelHandler(injector.getInstance(UrlRouter.class)));
+                            pipeline.addLast(injector.getInstance(NettyChannelHandler.class));
                         }
                     })
                     .option(ChannelOption.SO_BACKLOG, 128)
@@ -58,21 +56,5 @@ public class Main {
             workerGroup.shutdownGracefully();
             masterGroup.shutdownGracefully();
         }
-    }
-
-    private static void checkRouter() {
-        Router<String> router = new RouterSetup<String>()
-                .add("/", "home")
-                .add("/index", "index")
-                .add("/user", "all_users")
-                .add("/user/{id}", "user")
-                .add("/post", "all_posts")
-                .add("/post/{id}", "post")
-                .add("/post/{id}/{slug}", "post")
-                .build();
-
-        String url = "/post/12345/java-microbenchmark-harness";
-        Match<String> match = router.routeOrNull(url);
-        log.at(Level.INFO).log("%s -> %s", url, match);
     }
 }

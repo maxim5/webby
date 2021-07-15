@@ -19,6 +19,16 @@ record MultiRouteEndpoint(@NotNull Map<HttpMethod, SingleRouteEndpoint> map,
         return endpoint != null ? endpoint.caller() : null;
     }
 
+    @Override
+    @NotNull
+    public String describe() {
+        StringBuilder builder = new StringBuilder("\n");
+        for (SingleRouteEndpoint value : map.values()) {
+            builder.append(" ").append(value.describe()).append("\n");
+        }
+        return builder.toString();
+    }
+
     /*package*/ static MultiRouteEndpoint fromEndpoints(@NotNull List<SingleRouteEndpoint> endpoints) {
         Map<HttpMethod, SingleRouteEndpoint> map = endpoints.stream().collect(Collectors.groupingBy(
                 SingleRouteEndpoint::httpMethod,

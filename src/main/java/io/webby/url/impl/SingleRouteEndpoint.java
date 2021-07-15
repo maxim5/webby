@@ -13,6 +13,12 @@ record SingleRouteEndpoint(EndpointCaller caller, @Nullable HttpMethod httpMetho
         return (httpMethod == null || httpMethod.equals(request.method())) ? caller : null;
     }
 
+    @Override
+    @NotNull
+    public String describe() {
+        return "%s %s".formatted(httpMethod != null ? httpMethod.name() : "<ANY>", caller.caller().method());
+    }
+
     /*package*/ static SingleRouteEndpoint fromBinding(@NotNull Binding binding, @NotNull Caller caller) {
         return new SingleRouteEndpoint(
                 new EndpointCaller(caller, binding.options()),

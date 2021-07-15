@@ -9,6 +9,7 @@ import io.netty.buffer.DuplicatedByteBuf;
 import io.netty.buffer.Unpooled;
 import io.netty.handler.codec.http.*;
 import io.netty.util.CharsetUtil;
+import io.webby.app.AppSettings;
 import io.webby.url.UrlModule;
 import io.webby.url.impl.UrlRouter;
 import org.jetbrains.annotations.NotNull;
@@ -28,8 +29,7 @@ public class NettyChannelHandlerIntegrationTest {
         LogManager.getLogManager().getLogger("").setLevel(Level.WARNING);  // reduces the noise
 
         Injector injector = Guice.createInjector(new UrlModule());
-        UrlRouter router = injector.getInstance(UrlRouter.class);
-        handler = new NettyChannelHandler(router);
+        handler = injector.getInstance(NettyChannelHandler.class);
     }
 
     @Test

@@ -30,17 +30,19 @@ public class HttpResponseFactory {
     }
 
     @NotNull
-    public static FullHttpResponse newResponse503(@NotNull String debugError) {
-        return newResponse503(debugError, null);
+    public static FullHttpResponse newResponse503(@NotNull String debugError, boolean isDevMode) {
+        return newResponse503(debugError, null, isDevMode);
     }
 
     @NotNull
-    public static FullHttpResponse newResponse503(@NotNull String debugError, @Nullable Throwable throwable) {
-        // TODO: hide debug info in prod
-        return newResponse(
-                "<h1>503: Service Unavailable</h1><p>%s</p><p>%s</p>".formatted(debugError, throwable),
-                HttpResponseStatus.SERVICE_UNAVAILABLE,
-                HttpHeaderValues.TEXT_HTML);
+    public static FullHttpResponse newResponse503(@NotNull String debugError,
+                                                  @Nullable Throwable cause,
+                                                  boolean isDevMode) {
+        StringBuilder content = new StringBuilder("<h1>503: Service Unavailable</h1>");
+        if (isDevMode) {
+            content.append("<p>%s</p><p>%s</p>".formatted(debugError, cause));
+        }
+        return newResponse(content, HttpResponseStatus.SERVICE_UNAVAILABLE, HttpHeaderValues.TEXT_HTML);
     }
 
     @NotNull

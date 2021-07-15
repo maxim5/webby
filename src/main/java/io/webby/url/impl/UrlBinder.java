@@ -2,6 +2,7 @@ package io.webby.url.impl;
 
 import com.google.common.annotations.VisibleForTesting;
 import com.google.common.flogger.FluentLogger;
+import com.google.common.flogger.LazyArgs;
 import com.google.inject.ConfigurationException;
 import com.google.inject.Inject;
 import com.google.inject.Injector;
@@ -114,10 +115,11 @@ public class UrlBinder {
 
                 String url = group.stream().map(Binding::url).findFirst().orElseThrow();
                 RouteEndpoint endpoint = endpoints.size() == 1 ? endpoints.get(0) : MultiRouteEndpoint.fromEndpoints(endpoints);
+                log.at(Level.FINEST).log("Rule: %s -> %s", url, LazyArgs.lazy(endpoint::describe));
                 setup.add(url, endpoint);
             });
         } catch (ConfigurationException e) {
-            throw new UrlConfigError("Handler instance not found (use @Inject to register a constructor)", e);
+            throw new UrlConfigError("Handler instance can't be found or created (use @Inject to register a constructor)", e);
         } catch (QueryParseException e) {
             throw new UrlConfigError(e);
         }
