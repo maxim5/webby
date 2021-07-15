@@ -74,7 +74,7 @@ public class CallerFactoryTest {
     }
 
     @Test
-    public void zero_vars() throws Exception {
+    public void zero_vars_native() throws Exception {
         IntSupplier instance = () -> 42;
         Caller caller = factory.create(instance, binding(instance), asMap(), List.of());
 
@@ -83,7 +83,7 @@ public class CallerFactoryTest {
     }
 
     @Test
-    public void zero_vars_with_request() throws Exception {
+    public void zero_vars_native_with_request() throws Exception {
         interface RequestFunction {
             String apply(HttpRequest request);
         }
@@ -95,7 +95,7 @@ public class CallerFactoryTest {
     }
 
     @Test
-    public void one_var_primitive_int() throws Exception {
+    public void one_var_native_int() throws Exception {
         IntFunction<String> instance = String::valueOf;
         Caller caller = factory.create(instance, binding(instance), asMap(), List.of("i"));
 
@@ -105,7 +105,7 @@ public class CallerFactoryTest {
     }
 
     @Test
-    public void one_var_primitive_int_with_request() throws Exception {
+    public void one_var_native_int_with_request() throws Exception {
         interface IntRequestFunction {
             String apply(HttpRequest request, int i);
         }
@@ -120,7 +120,7 @@ public class CallerFactoryTest {
     }
 
     @Test
-    public void one_var_primitive_string() throws Exception {
+    public void one_var_native_string() throws Exception {
         StringFunction<String> instance = String::toUpperCase;
         Caller caller = factory.create(instance, binding(instance), asMap(), List.of("str"));
 
@@ -129,9 +129,31 @@ public class CallerFactoryTest {
     }
 
     @Test
-    public void generic_primitive_args_1() throws Exception {
+    public void zero_vars_generic_injected_deps() throws Exception {
+        interface InjectedFunction {
+            String apply(Injector injector);
+        }
+        InjectedFunction instance = (injector) -> "%s".formatted(injector.getClass().getName());
+        Caller caller = factory.create(instance, binding(instance), asMap(), List.of());
+
+        Assertions.assertEquals("com.google.inject.internal.InjectorImpl", caller.call(get(), vars()));
+    }
+
+    @Test
+    public void one_var_generic_injected_deps() throws Exception {
+        interface IntInjectedFunction {
+            String apply(Injector injector, int i);
+        }
+        IntInjectedFunction instance = (injector, i) -> "%s:%d".formatted(injector.getClass().getName(), i);
+        Caller caller = factory.create(instance, binding(instance), asMap(), List.of("i"));
+
+        Assertions.assertEquals("com.google.inject.internal.InjectorImpl:10", caller.call(get(), vars("i", 10)));
+    }
+
+    @Test
+    public void many_vars_generic_primitive_with_request() throws Exception {
         interface GenericFunction {
-            String apply(HttpRequest request, Integer x, long y, byte z, String s);
+            String apply(HttpRequest request, int x, long y, byte z, String s);
         }
         GenericFunction instance = (request, x, y, z, s) -> "%s:%d:%d:%d:%s".formatted(request.method(), x, y, z, s);
         Caller caller = factory.create(instance, binding(instance), asMap(), List.of("x", "y", "z", "s"));
@@ -156,7 +178,25 @@ public class CallerFactoryTest {
     }
 
     @Test
-    public void generic_primitive_args_2() throws Exception {
+    public void many_vars_generic_boxed() throws Exception {
+        interface GenericFunction {
+            String apply(Integer x, Long y, Byte z);
+        }
+        GenericFunction instance = "%d:%d:%d"::formatted;
+        Caller caller = factory.create(instance, binding(instance), asMap(), List.of("x", "y", "z"));
+
+        Assertions.assertEquals("1:2:3",caller.call(get(), vars("x", 1, "y", 2, "z", 3)));
+        Assertions.assertEquals("0:9223372036854775807:127", caller.call(get(), vars("x", 0, "y", Long.MAX_VALUE, "z", 127)));
+        Assertions.assertEquals("-10:-9223372036854775808:-128", caller.call(get(), vars("x", -10, "y", Long.MIN_VALUE, "z", -128)));
+
+        Assertions.assertThrows(ValidationError.class, () ->
+                caller.call(get(), vars("x", 1, "y", 2, "z", 256)));
+        Assertions.assertThrows(ValidationError.class, () ->
+                caller.call(get(), vars("x", 1, "y", 2, "w", 3)));
+    }
+
+    @Test
+    public void many_vars_generic_primitive_and_boxed() throws Exception {
         interface GenericFunction {
             String apply(short x, float y, Double z, boolean b);
         }
@@ -168,7 +208,7 @@ public class CallerFactoryTest {
     }
 
     @Test
-    public void generic_primitive_args_character() throws Exception {
+    public void two_vars_generic_primitive_and_boxed_character() throws Exception {
         interface GenericFunction {
             String apply(char ch1, Character ch2);
         }

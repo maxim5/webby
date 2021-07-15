@@ -10,6 +10,7 @@ import io.webby.url.UrlConfigError;
 import io.webby.url.impl.Binding;
 import io.webby.url.validate.*;
 import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 import org.jetbrains.annotations.VisibleForTesting;
 
 import java.lang.reflect.Method;
@@ -53,6 +54,27 @@ public class CallerFactory {
                          @NotNull Map<String, Validator> validators,
                          @NotNull List<String> vars) {
         Method method = binding.method();
+
+        Caller caller = tryCreateNativeCaller(instance, method, binding, validators, vars);
+        if (caller != null) {
+            return caller;
+        }
+
+        List<CallArgumentFunction> mapping = tryCreateGenericMapping(method, binding, validators, vars);
+        if (mapping != null) {
+            return new GenericCaller(instance, method, mapping);
+        }
+
+        throw new UrlConfigError("Failed to recognize method signature: %s".formatted(method));
+    }
+
+    @VisibleForTesting
+    @Nullable
+    Caller tryCreateNativeCaller(@NotNull Object instance,
+                                 @NotNull Method method,
+                                 @NotNull Binding binding,
+                                 @NotNull Map<String, Validator> validators,
+                                 @NotNull List<String> vars) {
         Parameter[] parameters = method.getParameters();
 
         boolean wantsRequest = false;
@@ -74,8 +96,7 @@ public class CallerFactory {
         CallOptions options = new CallOptions(wantsRequest, contentProvider);
 
         if (parameters.length == 0) {
-            UrlConfigError.failIf(vars.size() != 0,
-                    "Method %s does not accept enough arguments for requested URL variables=%s".formatted(method, vars));
+            assertVarsMatchParams(vars, 0, method);
             return new EmptyCaller(instance, method, options);
         }
 
@@ -85,9 +106,11 @@ public class CallerFactory {
             if (type.equals(Map.class)) {
                 return new MapCaller(instance, method, validators, options);
             }
+            if (!isNativeSupport(type)) {
+                return null;
+            }
 
-            UrlConfigError.failIf(vars.size() != 1,
-                    "Method %s does not accept enough arguments for requested URL variables=%s".formatted(method, vars));
+            assertVarsMatchParams(vars, 1, method);
             String var = vars.get(0);
 
             if (isInt(type)) {
@@ -105,8 +128,11 @@ public class CallerFactory {
             Class<?> type1 = parameters[0].getType();
             Class<?> type2 = parameters[1].getType();
 
-            UrlConfigError.failIf(vars.size() != 2,
-                    "Method %s does not accept enough arguments for requested URL variables=%s".formatted(method, vars));
+            if (!(isNativeSupport(type1) && isNativeSupport(type2))) {
+                return null;
+            }
+
+            assertVarsMatchParams(vars, 2, method);
             String var1 = vars.get(0);
             String var2 = vars.get(1);
 
@@ -137,16 +163,22 @@ public class CallerFactory {
                         options.toRichStrStr(canPassBuffer(type1), canPassBuffer(type2)));
             }
         }
+        return null;
+    }
 
-        List<CallArgumentFunction> mapping = tryCreateGenericMapping(method, binding, validators, vars);
-        if (mapping != null) {
-            return new GenericCaller(instance, method, mapping);
-        }
-
-        throw new UrlConfigError("Failed to recognize method signature: %s".formatted(method));
+    private static void assertVarsMatchParams(@NotNull List<String> vars, int params, @NotNull Method method) {
+        UrlConfigError.failIf(
+                vars.size() < params,
+                "Method %s has extra arguments that can't be matched to URL variables: %s".formatted(method, vars)
+        );
+        UrlConfigError.failIf(
+                vars.size() > params,
+                "Method %s does not accept enough arguments for requested URL variables: %s".formatted(method, vars)
+        );
     }
 
     @VisibleForTesting
+    @Nullable
     List<CallArgumentFunction> tryCreateGenericMapping(@NotNull Method method,
                                                        @NotNull Binding binding,
                                                        @NotNull Map<String, Validator> validators,
@@ -230,6 +262,11 @@ public class CallerFactory {
     @VisibleForTesting
     static boolean isStringLike(Class<?> type) {
         return CharSequence.class.isAssignableFrom(type);
+    }
+
+    @VisibleForTesting
+    static boolean isNativeSupport(Class<?> type) {
+        return isInt(type) || isStringLike(type);
     }
 
     private static boolean isAllowedToInject(Class<?> type) {
