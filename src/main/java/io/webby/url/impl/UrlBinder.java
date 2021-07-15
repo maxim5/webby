@@ -15,6 +15,7 @@ import org.jetbrains.annotations.NotNull;
 import java.lang.reflect.Field;
 import java.lang.reflect.Method;
 import java.util.*;
+import java.util.function.Consumer;
 import java.util.logging.Level;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -43,33 +44,36 @@ public class UrlBinder {
                 SerializeMethod defaultOut = serve.defaultOut();
 
                 for (Method method : klass.getDeclaredMethods()) {
+                    Consumer<Binding> sink = binding -> {
+                        method.setAccessible(true);
+                        bindings.add(binding);
+                    };
+
                     if (method.isAnnotationPresent(GET.class)) {
                         GET ann = method.getAnnotation(GET.class);
-                        method.setAccessible(true);
-                        EndpointOptions options = new EndpointOptions(ann.contentType(), null, defaultOut);
-                        Binding binding = new Binding(ann.url(), method, "GET", options);
-                        bindings.add(binding);
+                        sink.accept(getBinding("GET", ann.url(), ann.contentType(), null, defaultOut, method));
                     }
                     if (method.isAnnotationPresent(POST.class)) {
                         POST ann = method.getAnnotation(POST.class);
-                        method.setAccessible(true);
-                        EndpointOptions options = new EndpointOptions(ann.contentType(), defaultIn, defaultOut);
-                        Binding binding = new Binding(ann.url(), method, "POST", options);
-                        bindings.add(binding);
+                        sink.accept(getBinding("POST", ann.url(), ann.contentType(), defaultIn, defaultOut, method));
                     }
                     if (method.isAnnotationPresent(PUT.class)) {
                         PUT ann = method.getAnnotation(PUT.class);
-                        method.setAccessible(true);
-                        EndpointOptions options = new EndpointOptions(ann.contentType(), defaultIn, defaultOut);
-                        Binding binding = new Binding(ann.url(), method, "PUT", options);
-                        bindings.add(binding);
+                        sink.accept(getBinding("PUT", ann.url(), ann.contentType(), defaultIn, defaultOut, method));
                     }
                     if (method.isAnnotationPresent(DELETE.class)) {
                         DELETE ann = method.getAnnotation(DELETE.class);
-                        method.setAccessible(true);
-                        EndpointOptions options = new EndpointOptions(ann.contentType(), defaultIn, defaultOut);
-                        Binding binding = new Binding(ann.url(), method, "DELETE", options);
-                        bindings.add(binding);
+                        sink.accept(getBinding("DELETE", ann.url(), ann.contentType(), defaultIn, defaultOut, method));
+                    }
+                    if (method.isAnnotationPresent(Call.class)) {
+                        Call ann = method.getAnnotation(Call.class);
+                        for (String type : ann.methods()) {
+                            if (!type.equals(type.toUpperCase())) {
+                                log.at(Level.WARNING).log(
+                                        "@Call http method is not upper-case: %s (at %s)".formatted(type, method));
+                            }
+                            sink.accept(getBinding(type, ann.url(), ann.contentType(), defaultIn, defaultOut, method));
+                        }
                     }
                 }
             });
@@ -77,6 +81,14 @@ public class UrlBinder {
             throw new UrlConfigError(e);
         }
         return bindings;
+    }
+
+    @NotNull
+    private static Binding getBinding(String type, String url, String contentType,
+                                      SerializeMethod in, SerializeMethod out,
+                                      Method method) {
+        EndpointOptions options = new EndpointOptions(contentType, in, out);
+        return new Binding(url, method, type, options);
     }
 
     @VisibleForTesting
