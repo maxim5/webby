@@ -15,31 +15,28 @@ import io.netty.handler.codec.http.HttpResponseStatus;
 import io.routekit.Match;
 import io.routekit.Router;
 import io.routekit.util.CharBuffer;
-import io.webby.app.AppSettings;
 import io.webby.url.SerializeMethod;
 import io.webby.url.caller.Caller;
-import io.webby.url.validate.ValidationError;
 import io.webby.url.impl.EndpointCaller;
 import io.webby.url.impl.EndpointOptions;
 import io.webby.url.impl.RouteEndpoint;
 import io.webby.url.impl.UrlRouter;
+import io.webby.url.validate.ValidationError;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.VisibleForTesting;
 
 import java.util.concurrent.TimeUnit;
 import java.util.logging.Level;
 
-import static io.webby.netty.HttpResponseFactory.*;
-
 public class NettyChannelHandler extends SimpleChannelInboundHandler<FullHttpRequest> {
     private static final FluentLogger log = FluentLogger.forEnclosingClass();
 
-    private final AppSettings settings;
+    private final HttpResponseFactory factory;
     private final Router<RouteEndpoint> router;
 
     @Inject
-    public NettyChannelHandler(@NotNull AppSettings settings, @NotNull UrlRouter urlRouter) {
-        this.settings = settings;
+    public NettyChannelHandler(@NotNull HttpResponseFactory factory, @NotNull UrlRouter urlRouter) {
+        this.factory = factory;
         this.router = urlRouter.getRouter();
     }
 
@@ -51,7 +48,7 @@ public class NettyChannelHandler extends SimpleChannelInboundHandler<FullHttpReq
         try {
             response = handle(request);
         } catch (Throwable throwable) {
-            response = newResponse503("Unexpected failure", throwable);
+            response = factory.newResponse503("Unexpected failure", throwable);
             log.at(Level.SEVERE).withCause(throwable).log("Unexpected failure: %s", throwable.getMessage());
         }
         context.writeAndFlush(response);
@@ -67,13 +64,13 @@ public class NettyChannelHandler extends SimpleChannelInboundHandler<FullHttpReq
         Match<RouteEndpoint> match = router.routeOrNull(uri);
         if (match == null) {
             log.at(Level.FINE).log("No associated endpoint for url: %s", uri);
-            return newResponse404();
+            return factory.newResponse404();
         }
 
         EndpointCaller endpoint = match.handler().getAcceptedCallerOrNull(request);
         if (endpoint == null) {
             log.at(Level.INFO).log("Endpoint does not accept the request %s for url: %s", request.method(), uri);
-            return newResponse404();
+            return factory.newResponse404();
         }
 
         Caller caller = endpoint.caller();
@@ -86,17 +83,17 @@ public class NettyChannelHandler extends SimpleChannelInboundHandler<FullHttpReq
             }
         } catch (ValidationError e) {
             log.at(Level.INFO).withCause(e).log("Request validation failed: %s", e.getMessage());
-            return newResponse400();
+            return factory.newResponse400(e);
         } catch (NotFoundException e) {
             log.at(Level.WARNING).withCause(e).log("Request handler returned: %s", e.getMessage());
-            return newResponse404();
+            return factory.newResponse404(e);
         } catch (RedirectException e) {
             log.at(Level.WARNING).withCause(e).log("Redirecting to %s (%s): %s",
                     e.uri(), e.isPermanent() ? "permanent" : "temporary", e.getMessage());
-            return newResponseRedirect(e.uri(), e.isPermanent());
+            return factory.newResponseRedirect(e.uri(), e.isPermanent());
         } catch (Throwable e) {
             log.at(Level.SEVERE).withCause(e).log("Failed to call method: %s", caller.method());
-            return newResponse503("Failed to call method: %s".formatted(caller.method()), e);
+            return factory.newResponse503("Failed to call method: %s".formatted(caller.method()), e);
         }
 
         return convertToResponse(callResult, endpoint.options());
@@ -104,7 +101,7 @@ public class NettyChannelHandler extends SimpleChannelInboundHandler<FullHttpReq
 
     @NotNull
     @VisibleForTesting
-    static FullHttpResponse convertToResponse(Object callResult, EndpointOptions options) {
+    FullHttpResponse convertToResponse(Object callResult, EndpointOptions options) {
         if (callResult instanceof FullHttpResponse response) {
             return response;
         }
@@ -117,15 +114,15 @@ public class NettyChannelHandler extends SimpleChannelInboundHandler<FullHttpReq
 
         // Also: byte[], InputStream
         if (callResult instanceof CharSequence string) {
-            return newResponse(string, HttpResponseStatus.OK, contentType);
+            return factory.newResponse(string, HttpResponseStatus.OK, contentType);
         }
         if (callResult instanceof ByteBuf byteBuf) {
-            return newResponse(byteBuf, HttpResponseStatus.OK, contentType);
+            return factory.newResponse(byteBuf, HttpResponseStatus.OK, contentType);
         }
 
         return switch (options.out()) {
-            case JSON -> newResponse(new Gson().toJson(callResult), HttpResponseStatus.OK, HttpHeaderValues.APPLICATION_JSON);
-            case AS_STRING -> newResponse(callResult.toString(), HttpResponseStatus.OK, contentType);
+            case JSON -> factory.newResponse(new Gson().toJson(callResult), HttpResponseStatus.OK, HttpHeaderValues.APPLICATION_JSON);
+            case AS_STRING -> factory.newResponse(callResult.toString(), HttpResponseStatus.OK, contentType);
             case PROTOBUF -> throw new UnsupportedOperationException();
         };
     }
@@ -133,13 +130,8 @@ public class NettyChannelHandler extends SimpleChannelInboundHandler<FullHttpReq
     @Override
     public void exceptionCaught(ChannelHandlerContext context, Throwable cause) {
         context.channel()
-                .writeAndFlush(newResponse503("Unexpected failure", cause))
+                .writeAndFlush(factory.newResponse503("Unexpected failure", cause))
                 .addListener(ChannelFutureListener.CLOSE);
         log.at(Level.SEVERE).withCause(cause).log("Unexpected failure: %s", cause.getMessage());
-    }
-
-    @NotNull
-    private FullHttpResponse newResponse503(String message, Throwable cause) {
-        return HttpResponseFactory.newResponse503(message, cause, settings.devMode());
     }
 }

@@ -1,6 +1,8 @@
 package io.webby.url;
 
-public class UrlConfigError extends RuntimeException {
+import io.webby.app.AppConfigException;
+
+public class UrlConfigError extends AppConfigException {
     public UrlConfigError(String message) {
         super(message);
     }
