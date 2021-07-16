@@ -25,6 +25,7 @@ import io.webby.url.validate.ValidationError;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.VisibleForTesting;
 
+import java.io.InputStream;
 import java.util.concurrent.TimeUnit;
 import java.util.logging.Level;
 
@@ -112,9 +113,14 @@ public class NettyChannelHandler extends SimpleChannelInboundHandler<FullHttpReq
                         HttpHeaderValues.APPLICATION_JSON :
                         HttpHeaderValues.TEXT_HTML;
 
-        // Also: byte[], InputStream
         if (callResult instanceof CharSequence string) {
             return factory.newResponse(string, HttpResponseStatus.OK, contentType);
+        }
+        if (callResult instanceof byte[] bytes) {
+            return factory.newResponse(bytes, HttpResponseStatus.OK, contentType);
+        }
+        if (callResult instanceof InputStream stream) {
+            return factory.newResponse(stream, HttpResponseStatus.OK, contentType);
         }
         if (callResult instanceof ByteBuf byteBuf) {
             return factory.newResponse(byteBuf, HttpResponseStatus.OK, contentType);

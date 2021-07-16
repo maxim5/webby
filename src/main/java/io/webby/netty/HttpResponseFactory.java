@@ -20,7 +20,7 @@ import java.util.logging.Level;
 public class HttpResponseFactory {
     private static final FluentLogger log = FluentLogger.forEnclosingClass();
 
-    private static final String DEFAULT_WEB = "/web/";
+    private static final String DEFAULT_WEB = "/web";
 
     private final AppSettings settings;
 
@@ -42,6 +42,26 @@ public class HttpResponseFactory {
                                         @NotNull HttpResponseStatus status,
                                         @NotNull CharSequence contentType) {
         return withContentType(newResponse(content, status), contentType);
+    }
+
+    @NotNull
+    public FullHttpResponse newResponse(byte[] content,
+                                        @NotNull HttpResponseStatus status,
+                                        @NotNull CharSequence contentType) {
+        ByteBuf byteBuf = Unpooled.wrappedBuffer(content);
+        return newResponse(byteBuf, status, contentType);
+    }
+
+    @NotNull
+    public FullHttpResponse newResponse(@NotNull InputStream content,
+                                        @NotNull HttpResponseStatus status,
+                                        @NotNull CharSequence contentType) {
+        try {
+            ByteBuf byteBuf = Unpooled.wrappedBuffer(content.readAllBytes());
+            return newResponse(byteBuf, status, contentType);
+        } catch (IOException e) {
+            return newResponse503("Failed to read content bytes", e);
+        }
     }
 
     @NotNull
