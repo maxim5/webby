@@ -1,5 +1,6 @@
 package io.webby.netty;
 
+import com.google.common.base.Throwables;
 import com.google.common.flogger.FluentLogger;
 import com.google.inject.Inject;
 import io.netty.buffer.ByteBuf;
@@ -13,6 +14,7 @@ import org.jetbrains.annotations.Nullable;
 import java.io.*;
 import java.nio.MappedByteBuffer;
 import java.nio.channels.FileChannel;
+import java.nio.charset.Charset;
 import java.util.logging.Level;
 
 public class HttpResponseFactory {
@@ -55,7 +57,7 @@ public class HttpResponseFactory {
 
     @NotNull
     public FullHttpResponse newResponse400(@Nullable Throwable error) {
-        return newErrorResponse(HttpResponseStatus.BAD_REQUEST);
+        return newErrorResponse(HttpResponseStatus.BAD_REQUEST, null, error);
     }
 
     @NotNull
@@ -65,25 +67,32 @@ public class HttpResponseFactory {
 
     @NotNull
     public FullHttpResponse newResponse404(@Nullable Throwable error) {
-        return newErrorResponse(HttpResponseStatus.NOT_FOUND);
+        return newErrorResponse(HttpResponseStatus.NOT_FOUND, null, error);
     }
 
     @NotNull
     public FullHttpResponse newResponse503(@NotNull String debugError, @Nullable Throwable cause) {
-        return newErrorResponse(HttpResponseStatus.SERVICE_UNAVAILABLE);
+        return newErrorResponse(HttpResponseStatus.SERVICE_UNAVAILABLE, debugError, cause);
     }
 
     @NotNull
-    public FullHttpResponse newErrorResponse(@NotNull HttpResponseStatus status) {
-        /*
-        if (settings.devMode()) {
-            content.append("<p>%s</p><p>%s</p>".formatted(debugError, cause));
-        }
-        */
-
+    public FullHttpResponse newErrorResponse(@NotNull HttpResponseStatus status,
+                                             @Nullable String debugError,
+                                             @Nullable Throwable cause) {
         String name = "%d.html".formatted(status.code());
         try {
-            return newResponse(getResourceAsByteBuf(name), status, HttpHeaderValues.TEXT_HTML);
+            ByteBuf resource = getResourceAsByteBuf(name);
+            if (resource == null) {
+                return newResponse(statusLine(status), status, HttpHeaderValues.TEXT_HTML);
+            }
+            if (settings.isDevMode() && (debugError != null || cause != null)) {
+                String content = resource.toString(Charset.defaultCharset()).formatted(
+                        debugError != null ? debugError : "",
+                        cause != null ? Throwables.getStackTraceAsString(cause) : ""
+                );
+                return newResponse(content, status, HttpHeaderValues.TEXT_HTML);
+            }
+            return newResponse(resource, status, HttpHeaderValues.TEXT_HTML);
         } catch (Exception e) {
             log.at(Level.SEVERE).withCause(e).log("Failed to read the resource: %s, returning default response", name);
             return newResponse(statusLine(status), status, HttpHeaderValues.TEXT_HTML);
@@ -116,19 +125,23 @@ public class HttpResponseFactory {
         return "%d %s".formatted(status.code(), status.codeAsText());
     }
 
-    @NotNull
+    @Nullable
     private ByteBuf getResourceAsByteBuf(@NotNull String name) throws IOException {
         File file = new File(settings.webPath(), name);
         if (file.exists()) {
             return fileToByteBuf(file);
         }
 
-        String resource = "%s/%s".formatted(DEFAULT_WEB, name);
-        InputStream inputStream = getClass().getResourceAsStream(resource);
-        if (inputStream == null) {
-            throw new FileNotFoundException("The resource %s is not found in classpath".formatted(resource));
+        if (settings.isDevMode()) {
+            String resource = "%s/%s".formatted(DEFAULT_WEB, name);
+            InputStream inputStream = getClass().getResourceAsStream(resource);
+            if (inputStream == null) {
+                throw new FileNotFoundException("The resource %s is not found in classpath".formatted(resource));
+            }
+            return Unpooled.wrappedBuffer(inputStream.readAllBytes());
         }
-        return Unpooled.wrappedBuffer(inputStream.readAllBytes());
+
+        return null;
     }
 
     @NotNull

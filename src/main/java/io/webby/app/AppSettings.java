@@ -4,7 +4,7 @@ public final class AppSettings {
     private boolean devMode = true;
     private String webPath = "/web/";
 
-    public boolean devMode() {
+    public boolean isDevMode() {
         return devMode;
     }
 
