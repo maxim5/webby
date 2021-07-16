@@ -5,6 +5,7 @@ import com.google.gson.JsonIOException;
 import com.google.gson.JsonSyntaxException;
 import io.netty.buffer.ByteBuf;
 import io.netty.buffer.ByteBufInputStream;
+import io.webby.url.validate.ValidationError;
 import org.jetbrains.annotations.NotNull;
 
 import java.io.InputStreamReader;

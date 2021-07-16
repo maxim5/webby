@@ -1,4 +1,4 @@
-package io.webby.url.caller;
+package io.webby.url.validate;
 
 public class ValidationError extends RuntimeException {
     public ValidationError(String message) {

@@ -18,7 +18,7 @@ import io.routekit.util.CharBuffer;
 import io.webby.app.AppSettings;
 import io.webby.url.SerializeMethod;
 import io.webby.url.caller.Caller;
-import io.webby.url.caller.ValidationError;
+import io.webby.url.validate.ValidationError;
 import io.webby.url.impl.EndpointCaller;
 import io.webby.url.impl.EndpointOptions;
 import io.webby.url.impl.RouteEndpoint;

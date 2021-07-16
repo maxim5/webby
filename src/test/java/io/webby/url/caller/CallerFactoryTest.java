@@ -10,6 +10,7 @@ import io.routekit.util.MutableCharBuffer;
 import io.webby.url.UrlModule;
 import io.webby.url.impl.Binding;
 import io.webby.url.impl.EndpointOptions;
+import io.webby.url.validate.ValidationError;
 import org.jetbrains.annotations.NotNull;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
