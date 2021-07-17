@@ -14,6 +14,7 @@ import io.webby.url.*;
 import io.webby.url.caller.Caller;
 import io.webby.url.caller.CallerFactory;
 import io.webby.url.validate.Validator;
+import io.webby.util.TriConsumer;
 import org.jetbrains.annotations.NotNull;
 
 import java.io.IOException;
@@ -22,7 +23,6 @@ import java.lang.reflect.Method;
 import java.util.*;
 import java.util.concurrent.TimeUnit;
 import java.util.function.BiConsumer;
-import java.util.function.Consumer;
 import java.util.logging.Level;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -81,30 +81,46 @@ public class UrlBinder {
         try {
             finder.getHandlerClasses().forEach(klass -> {
                 Serve serve = klass.getAnnotation(Serve.class);
+                String defaultUrl = serve.url();
                 SerializeMethod defaultIn = serve.defaultIn();
                 SerializeMethod defaultOut = serve.defaultOut();
 
                 for (Method method : klass.getDeclaredMethods()) {
-                    Consumer<Binding> sink = binding -> {
+                    boolean isJson = method.isAnnotationPresent(Json.class);
+                    boolean isProto = method.isAnnotationPresent(Protobuf.class);
+                    UrlConfigError.failIf(isProto && isJson, "Incompatible method definition: %s".formatted(method));
+                    SerializeMethod in = defaultIn;  // TODO: drop?
+                    SerializeMethod out = isJson ? SerializeMethod.JSON : isProto ? SerializeMethod.PROTOBUF : defaultOut;
+
+                    TriConsumer<String, String, String> sink = (type, url, contentType) -> {
+                        if (url.isEmpty()) {
+                            UrlConfigError.failIf(defaultUrl.isEmpty(),
+                                    "URL is not set neither in class nor in method for %s".formatted(method));
+                            url = defaultUrl;
+                        }
+
                         method.setAccessible(true);
+
+                        EndpointOptions options = new EndpointOptions(contentType, in, out);
+                        Binding binding = new Binding(url, method, type, options);
                         bindings.add(binding);
                     };
 
                     if (method.isAnnotationPresent(GET.class)) {
                         GET ann = method.getAnnotation(GET.class);
-                        sink.accept(getBinding("GET", ann.url(), ann.contentType(), null, defaultOut, method));
+                        sink.accept("GET", ann.url(), ann.contentType());
                     }
                     if (method.isAnnotationPresent(POST.class)) {
                         POST ann = method.getAnnotation(POST.class);
-                        sink.accept(getBinding("POST", ann.url(), ann.contentType(), defaultIn, defaultOut, method));
+                        sink.accept("POST", ann.url(), ann.contentType());
                     }
                     if (method.isAnnotationPresent(PUT.class)) {
                         PUT ann = method.getAnnotation(PUT.class);
-                        sink.accept(getBinding("PUT", ann.url(), ann.contentType(), defaultIn, defaultOut, method));
+                        sink.accept("PUT", ann.url(), ann.contentType());
                     }
                     if (method.isAnnotationPresent(DELETE.class)) {
                         DELETE ann = method.getAnnotation(DELETE.class);
-                        sink.accept(getBinding("DELETE", ann.url(), ann.contentType(), defaultIn, defaultOut, method));
+                        sink.accept("DELETE", ann.url(), ann.contentType());
                     }
                     if (method.isAnnotationPresent(Call.class)) {
                         Call ann = method.getAnnotation(Call.class);
@@ -113,23 +129,15 @@ public class UrlBinder {
                                 log.at(Level.WARNING).log(
                                         "@Call http method is not upper-case: %s (at %s)".formatted(type, method));
                             }
-                            sink.accept(getBinding(type, ann.url(), ann.contentType(), defaultIn, defaultOut, method));
+                            sink.accept(type, ann.url(), ann.contentType());
                         }
                     }
                 }
             });
         } catch (Exception e) {
-            throw new UrlConfigError(e);
+            throw (e instanceof UrlConfigError configError ? configError : new UrlConfigError(e));
         }
         return bindings;
-    }
-
-    @NotNull
-    private static Binding getBinding(String type, String url, String contentType,
-                                      SerializeMethod in, SerializeMethod out,
-                                      Method method) {
-        EndpointOptions options = new EndpointOptions(contentType, in, out);
-        return new Binding(url, method, type, options);
     }
 
     @VisibleForTesting

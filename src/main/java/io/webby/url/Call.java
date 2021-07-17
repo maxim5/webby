@@ -8,7 +8,7 @@ import java.lang.annotation.Target;
 @Retention(RetentionPolicy.RUNTIME)
 @Target({ElementType.TYPE, ElementType.METHOD})
 public @interface Call {
-    String url();
+    String url() default "";
     String contentType() default "";
     String[] methods() default {};
 }

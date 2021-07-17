@@ -4,6 +4,7 @@ import io.netty.handler.codec.http.FullHttpRequest;
 import io.netty.handler.codec.http.HttpRequest;
 import io.routekit.util.CharBuffer;
 import io.webby.url.GET;
+import io.webby.url.Json;
 import io.webby.url.POST;
 import io.webby.url.Serve;
 import io.webby.url.validate.IntValidator;
@@ -12,6 +13,7 @@ import io.webby.url.validate.Validator;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.HashMap;
+import java.util.Map;
 
 @Serve
 public class HelloWorld {
@@ -81,5 +83,11 @@ public class HelloWorld {
     @GET(url="/error/npe")
     public Object error_npe() {
         throw new NullPointerException("Message");
+    }
+
+    @GET(url="/json/{*var}")
+    @Json
+    public Object json(String var) {
+        return Map.of("foo", 1, "var", var.split("/"));
     }
 }
