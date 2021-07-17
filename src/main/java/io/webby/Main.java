@@ -1,7 +1,6 @@
 package io.webby;
 
 import com.google.common.flogger.FluentLogger;
-import com.google.inject.Guice;
 import com.google.inject.Injector;
 import io.netty.bootstrap.ServerBootstrap;
 import io.netty.channel.*;
@@ -11,7 +10,6 @@ import io.netty.handler.codec.http.HttpObjectAggregator;
 import io.netty.handler.codec.http.HttpServerCodec;
 import io.webby.app.AppSettings;
 import io.webby.netty.NettyChannelHandler;
-import io.webby.url.UrlModule;
 
 import java.io.FileInputStream;
 import java.util.logging.Level;

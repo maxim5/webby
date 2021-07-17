@@ -20,6 +20,7 @@ public class Testing {
 
         AppSettings settings = new AppSettings();
         settings.setWebPath("src/test/resources");
+        settings.setPackage(Testing.class.getPackageName());
         return Guice.createInjector(new AppModule(settings), new NettyModule(), new UrlModule());
     }
 }
