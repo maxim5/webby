@@ -2,23 +2,17 @@ package io.webby.netty;
 
 import com.google.common.truth.Truth;
 import com.google.gson.Gson;
-import com.google.inject.Guice;
 import com.google.inject.Injector;
 import io.netty.buffer.ByteBuf;
 import io.netty.buffer.DuplicatedByteBuf;
 import io.netty.buffer.Unpooled;
 import io.netty.handler.codec.http.*;
 import io.netty.util.CharsetUtil;
-import io.webby.app.AppSettings;
-import io.webby.url.UrlModule;
-import io.webby.url.impl.UrlRouter;
+import io.webby.Testing;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-
-import java.util.logging.Level;
-import java.util.logging.LogManager;
 
 public class NettyChannelHandlerIntegrationTest {
     private static final boolean VERBOSE = true;
@@ -26,9 +20,7 @@ public class NettyChannelHandlerIntegrationTest {
 
     @BeforeEach
     void setup() {
-        LogManager.getLogManager().getLogger("").setLevel(Level.WARNING);  // reduces the noise
-
-        Injector injector = Guice.createInjector(new UrlModule());
+        Injector injector = Testing.testStartup();
         handler = injector.getInstance(NettyChannelHandler.class);
     }
 

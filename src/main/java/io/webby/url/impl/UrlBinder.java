@@ -1,21 +1,27 @@
 package io.webby.url.impl;
 
 import com.google.common.annotations.VisibleForTesting;
+import com.google.common.base.Stopwatch;
 import com.google.common.flogger.FluentLogger;
 import com.google.common.flogger.LazyArgs;
 import com.google.inject.ConfigurationException;
 import com.google.inject.Inject;
 import com.google.inject.Injector;
 import io.routekit.*;
+import io.webby.app.AppSettings;
+import io.webby.netty.StaticServing;
 import io.webby.url.*;
 import io.webby.url.caller.Caller;
 import io.webby.url.caller.CallerFactory;
 import io.webby.url.validate.Validator;
 import org.jetbrains.annotations.NotNull;
 
+import java.io.IOException;
 import java.lang.reflect.Field;
 import java.lang.reflect.Method;
 import java.util.*;
+import java.util.concurrent.TimeUnit;
+import java.util.function.BiConsumer;
 import java.util.function.Consumer;
 import java.util.logging.Level;
 import java.util.regex.Matcher;
@@ -26,13 +32,45 @@ public class UrlBinder {
     private static final FluentLogger log = FluentLogger.forEnclosingClass();
     private static final Pattern PARAM_PATTERN = Pattern.compile("param_([a-zA-Z0-9_$]+)");
 
+    @Inject private AppSettings settings;
     @Inject private HandlerFinder finder;
     @Inject private Injector injector;
     @Inject private CallerFactory callerFactory;
+    @Inject private StaticServing staticServing;
 
     public Router<RouteEndpoint> bindRouter() {
         ArrayList<Binding> bindings = bindHandlersFromClasspath();
-        return buildRouter(bindings);
+        RouterSetup<RouteEndpoint> setup = getRouterSetup(bindings);
+        return setup.build();
+    }
+
+    @NotNull
+    private RouterSetup<RouteEndpoint> getRouterSetup(ArrayList<Binding> bindings) {
+        RouterSetup<RouteEndpoint> setup = new RouterSetup<>();
+        SimpleQueryParser parser = settings.urlParser();
+
+        {
+            Stopwatch stopwatch = Stopwatch.createStarted();
+            processBindings(bindings, parser, (url, endpoint) -> {
+                setup.add(url, endpoint);
+                log.at(Level.FINEST).log("Rule: %s -> %s", url, LazyArgs.lazy(endpoint::describe));
+            });
+            log.at(Level.INFO).log("Handlers processed in %d ms", stopwatch.stop().elapsed(TimeUnit.MILLISECONDS));
+        }
+
+        try {
+            Stopwatch stopwatch = Stopwatch.createStarted();
+            staticServing.iterateStaticFiles(path -> {
+                String url = "/%s".formatted(path);
+                setup.add(url, new StaticRouteEndpoint(path, staticServing));
+                log.at(Level.FINEST).log("Rule: %s -> %s", url, path);
+            });
+            log.at(Level.INFO).log("Static files processed in %d ms", stopwatch.stop().elapsed(TimeUnit.MILLISECONDS));
+        } catch (IOException e) {
+            throw new UrlConfigError("Failed to add static files to URL router", e);
+        }
+
+        return setup.withParser(parser);
     }
 
     @NotNull
@@ -93,9 +131,9 @@ public class UrlBinder {
     }
 
     @VisibleForTesting
-    Router<RouteEndpoint> buildRouter(@NotNull Collection<Binding> bindings) {
-        SimpleQueryParser parser = SimpleQueryParser.DEFAULT;
-        RouterSetup<RouteEndpoint> setup = new RouterSetup<>();
+    void processBindings(@NotNull Collection<Binding> bindings,
+                         @NotNull SimpleQueryParser parser,
+                         @NotNull BiConsumer<String, RouteEndpoint> consumer) {
         try {
             bindings.stream().collect(Collectors.groupingBy(Binding::url)).values().forEach(group -> {
                 List<SingleRouteEndpoint> endpoints = group.stream().map(binding -> {
@@ -115,15 +153,13 @@ public class UrlBinder {
 
                 String url = group.stream().map(Binding::url).findFirst().orElseThrow();
                 RouteEndpoint endpoint = endpoints.size() == 1 ? endpoints.get(0) : MultiRouteEndpoint.fromEndpoints(endpoints);
-                log.at(Level.FINEST).log("Rule: %s -> %s", url, LazyArgs.lazy(endpoint::describe));
-                setup.add(url, endpoint);
+                consumer.accept(url, endpoint);
             });
         } catch (ConfigurationException e) {
             throw new UrlConfigError("Handler instance can't be found or created (use @Inject to register a constructor)", e);
         } catch (QueryParseException e) {
             throw new UrlConfigError(e);
         }
-        return setup.withParser(parser).build();
     }
 
     @VisibleForTesting

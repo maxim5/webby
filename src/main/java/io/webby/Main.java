@@ -27,10 +27,11 @@ public class Main {
 
     private static void runNetty(int port) throws InterruptedException {
         log.at(Level.INFO).log("Bootstrapping server");
-        Injector injector = Guice.createInjector(new UrlModule());
-        AppSettings settings = injector.getInstance(AppSettings.class);
+
+        AppSettings settings = new AppSettings();
         settings.setWebPath("build/resources/main/web/");
         settings.setDevMode(true);
+        Injector injector = Webby.startup(settings);
 
         EventLoopGroup masterGroup = new NioEventLoopGroup();
         EventLoopGroup workerGroup = new NioEventLoopGroup();

@@ -1,13 +1,12 @@
 package io.webby.url.caller;
 
 import com.google.common.collect.Streams;
-import com.google.inject.Guice;
 import com.google.inject.Injector;
 import io.netty.handler.codec.http.*;
 import io.netty.util.AsciiString;
 import io.routekit.util.CharBuffer;
 import io.routekit.util.MutableCharBuffer;
-import io.webby.url.UrlModule;
+import io.webby.Testing;
 import io.webby.url.impl.Binding;
 import io.webby.url.impl.EndpointOptions;
 import io.webby.url.validate.ValidationError;
@@ -17,7 +16,10 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
 import java.lang.reflect.Method;
-import java.util.*;
+import java.util.Arrays;
+import java.util.LinkedHashMap;
+import java.util.List;
+import java.util.Map;
 import java.util.function.IntFunction;
 import java.util.function.IntSupplier;
 import java.util.stream.Collectors;
@@ -30,10 +32,8 @@ public class CallerFactoryTest {
 
     @BeforeEach
     void setup() {
-        Injector injector = Guice.createInjector(new UrlModule());
+        Injector injector = Testing.testStartup();
         factory = injector.getInstance(CallerFactory.class);
-
-        Locale.setDefault(Locale.US);  // any way to remove this?
     }
 
     @Test
