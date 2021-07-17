@@ -17,10 +17,7 @@ import io.routekit.Router;
 import io.routekit.util.CharBuffer;
 import io.webby.url.SerializeMethod;
 import io.webby.url.caller.Caller;
-import io.webby.url.impl.EndpointCaller;
-import io.webby.url.impl.EndpointOptions;
-import io.webby.url.impl.RouteEndpoint;
-import io.webby.url.impl.UrlRouter;
+import io.webby.url.impl.*;
 import io.webby.url.validate.ValidationError;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.VisibleForTesting;
@@ -77,7 +74,8 @@ public class NettyChannelHandler extends SimpleChannelInboundHandler<FullHttpReq
         Caller caller = endpoint.caller();
         Object callResult;
         try {
-            callResult = caller.call(request, match.variables());
+            FullHttpRequest clientRequest = wrapRequestIfNeeded(request, endpoint.context());
+            callResult = caller.call(clientRequest, match.variables());
             if (callResult == null) {
                 log.at(Level.INFO).log("Request handler returned null or void: %s", caller.method());
                 return convertToResponse("", endpoint.options());
@@ -98,6 +96,11 @@ public class NettyChannelHandler extends SimpleChannelInboundHandler<FullHttpReq
         }
 
         return convertToResponse(callResult, endpoint.options());
+    }
+
+    @NotNull
+    private static FullHttpRequest wrapRequestIfNeeded(@NotNull FullHttpRequest request, @NotNull EndpointContext context) {
+        return context.rawRequest() ? request : new DefaultHttpRequestEx(request, context.validators());
     }
 
     @NotNull

@@ -38,6 +38,8 @@ public class UrlBinder {
     @Inject private CallerFactory callerFactory;
     @Inject private StaticServing staticServing;
 
+    private final Map<Class<?>, EndpointContext> contextCache = new HashMap<>();
+
     public Router<RouteEndpoint> bindRouter() {
         ArrayList<Binding> bindings = bindHandlersFromClasspath();
         RouterSetup<RouteEndpoint> setup = getRouterSetup(bindings);
@@ -139,7 +141,8 @@ public class UrlBinder {
                 List<SingleRouteEndpoint> endpoints = group.stream().map(binding -> {
                     Class<?> klass = binding.method().getDeclaringClass();
                     Object instance = injector.getInstance(klass);
-                    Map<String, Validator> validators = extractValidators(klass, instance);  // TODO: cache
+                    EndpointContext context = contextCache.computeIfAbsent(klass,
+                            key -> new EndpointContext(extractValidators(klass, instance), false));
 
                     List<String> vars = parser.parse(binding.url())
                             .stream()
@@ -147,8 +150,8 @@ public class UrlBinder {
                             .filter(Objects::nonNull)
                             .toList();
 
-                    Caller caller = callerFactory.create(instance, binding, validators, vars);
-                    return SingleRouteEndpoint.fromBinding(binding, caller);
+                    Caller caller = callerFactory.create(instance, binding, context.validators(), vars);
+                    return SingleRouteEndpoint.fromBinding(binding, caller, context);
                 }).toList();
 
                 String url = group.stream().map(Binding::url).findFirst().orElseThrow();

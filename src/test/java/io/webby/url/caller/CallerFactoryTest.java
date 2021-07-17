@@ -7,6 +7,7 @@ import io.netty.util.AsciiString;
 import io.routekit.util.CharBuffer;
 import io.routekit.util.MutableCharBuffer;
 import io.webby.Testing;
+import io.webby.netty.HttpRequestEx;
 import io.webby.url.impl.Binding;
 import io.webby.url.impl.EndpointOptions;
 import io.webby.url.validate.ValidationError;
@@ -58,6 +59,7 @@ public class CallerFactoryTest {
         Assertions.assertTrue(CallerFactory.canPassHttpRequest(FullHttpRequest.class));
         Assertions.assertTrue(CallerFactory.canPassHttpRequest(DefaultHttpRequest.class));
         Assertions.assertTrue(CallerFactory.canPassHttpRequest(DefaultFullHttpRequest.class));
+        Assertions.assertTrue(CallerFactory.canPassHttpRequest(HttpRequestEx.class));
         Assertions.assertFalse(CallerFactory.canPassHttpRequest(Object.class));
 
         Assertions.assertTrue(CallerFactory.canPassContent(Object.class));
@@ -92,7 +94,8 @@ public class CallerFactoryTest {
         Caller caller = factory.create(instance, binding(instance, "POST"), asMap(), List.of());
 
         Assertions.assertEquals("POST", caller.call(post(), vars()));
-        Assertions.assertEquals("GET", caller.call(get(), vars()));  // TODO: must fail (type not checked!)
+        // Note: does not fail: RouteEndpoint is responsible for cutting off wrong requests.
+        Assertions.assertEquals("GET", caller.call(get(), vars()));
     }
 
     @Test
@@ -229,7 +232,7 @@ public class CallerFactoryTest {
 
     @NotNull
     private static Binding binding(Object instance, String type) {
-        return new Binding(URL, getDeclaredMethod(instance), type, new EndpointOptions(null, null, null));
+        return new Binding(URL, getDeclaredMethod(instance), type, EndpointOptions.DEFAULT);
     }
 
     @NotNull

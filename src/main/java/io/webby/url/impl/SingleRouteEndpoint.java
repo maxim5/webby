@@ -6,7 +6,7 @@ import io.webby.url.caller.Caller;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
-record SingleRouteEndpoint(EndpointCaller caller, @Nullable HttpMethod httpMethod) implements RouteEndpoint {
+record SingleRouteEndpoint(@NotNull EndpointCaller caller, @Nullable HttpMethod httpMethod) implements RouteEndpoint {
     @Override
     @Nullable
     public EndpointCaller getAcceptedCallerOrNull(@NotNull HttpRequest request) {
@@ -19,9 +19,12 @@ record SingleRouteEndpoint(EndpointCaller caller, @Nullable HttpMethod httpMetho
         return "%s %s".formatted(httpMethod != null ? httpMethod.name() : "<ANY>", caller.caller().method());
     }
 
-    /*package*/ static SingleRouteEndpoint fromBinding(@NotNull Binding binding, @NotNull Caller caller) {
+    @NotNull
+    /*package*/ static SingleRouteEndpoint fromBinding(@NotNull Binding binding,
+                                                       @NotNull Caller caller,
+                                                       @NotNull EndpointContext context) {
         return new SingleRouteEndpoint(
-                new EndpointCaller(caller, binding.options()),
+                new EndpointCaller(caller, context, binding.options()),
                 HttpMethod.valueOf(binding.type())
         );
     }
