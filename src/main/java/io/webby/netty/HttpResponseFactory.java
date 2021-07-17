@@ -11,9 +11,9 @@ import io.webby.app.AppSettings;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
-import java.io.*;
-import java.nio.MappedByteBuffer;
-import java.nio.channels.FileChannel;
+import java.io.FileNotFoundException;
+import java.io.IOException;
+import java.io.InputStream;
 import java.nio.charset.Charset;
 import java.util.logging.Level;
 
@@ -22,13 +22,8 @@ public class HttpResponseFactory {
 
     private static final String DEFAULT_WEB = "/web";
 
-    private final AppSettings settings;
-
-    @Inject
-    public HttpResponseFactory(@NotNull AppSettings settings) {
-        validateSettings(settings);
-        this.settings = settings;
-    }
+    @Inject private AppSettings settings;
+    @Inject private StaticServing staticServing;
 
     @NotNull
     public FullHttpResponse newResponse(@NotNull CharSequence content,
@@ -101,22 +96,23 @@ public class HttpResponseFactory {
                                              @Nullable Throwable cause) {
         String name = "%d.html".formatted(status.code());
         try {
-            ByteBuf resource = getResourceAsByteBuf(name);
-            if (resource == null) {
-                return newResponse(statusLine(status), status, HttpHeaderValues.TEXT_HTML);
-            }
-            if (settings.isDevMode() && (debugError != null || cause != null)) {
+            ByteBuf clientError = staticServing.getByteBufOrNull(name);
+            if (settings.isDevMode()) {
+                ByteBuf resource = (clientError != null) ? clientError : getDefaultResource(name);
                 String content = resource.toString(Charset.defaultCharset()).formatted(
                         debugError != null ? debugError : "",
                         cause != null ? Throwables.getStackTraceAsString(cause) : ""
                 );
                 return newResponse(content, status, HttpHeaderValues.TEXT_HTML);
+            } else {
+                if (clientError != null) {
+                    return newResponse(clientError, status, HttpHeaderValues.TEXT_HTML);
+                }
             }
-            return newResponse(resource, status, HttpHeaderValues.TEXT_HTML);
         } catch (Exception e) {
             log.at(Level.SEVERE).withCause(e).log("Failed to read the resource: %s, returning default response", name);
-            return newResponse(statusLine(status), status, HttpHeaderValues.TEXT_HTML);
         }
+        return newResponse(statusLine(status), status, HttpHeaderValues.TEXT_HTML);
     }
 
     @NotNull
@@ -132,44 +128,18 @@ public class HttpResponseFactory {
         return response;
     }
 
-    private static void validateSettings(@NotNull AppSettings settings) {
-        if (settings.webPath() == null) {
-            log.at(Level.WARNING).log("Invalid app settings: static web path is not set");
-        }
-        if (!new File(settings.webPath()).exists()) {
-            log.at(Level.WARNING).log("Invalid app settings: static web path does not exist: %s", settings.webPath());
-        }
-    }
-
     private static String statusLine(@NotNull HttpResponseStatus status) {
         return "%d %s".formatted(status.code(), status.codeAsText());
     }
 
-    @Nullable
-    private ByteBuf getResourceAsByteBuf(@NotNull String name) throws IOException {
-        File file = new File(settings.webPath(), name);
-        if (file.exists()) {
-            return fileToByteBuf(file);
-        }
-
-        if (settings.isDevMode()) {
-            String resource = "%s/%s".formatted(DEFAULT_WEB, name);
-            InputStream inputStream = getClass().getResourceAsStream(resource);
-            if (inputStream == null) {
-                throw new FileNotFoundException("The resource %s is not found in classpath".formatted(resource));
-            }
-            return Unpooled.wrappedBuffer(inputStream.readAllBytes());
-        }
-
-        return null;
-    }
-
     @NotNull
-    private static ByteBuf fileToByteBuf(@NotNull File file) throws IOException {
-        FileInputStream fileInputStream = new FileInputStream(file);
-        FileChannel fileChannel = fileInputStream.getChannel();
-        MappedByteBuffer mappedByteBuffer = fileChannel.map(FileChannel.MapMode.READ_ONLY, 0, file.length());
-        return Unpooled.wrappedBuffer(mappedByteBuffer);
+    private ByteBuf getDefaultResource(@NotNull String name) throws IOException {
+        String resource = "%s/%s".formatted(DEFAULT_WEB, name);
+        InputStream inputStream = getClass().getResourceAsStream(resource);
+        if (inputStream == null) {
+            throw new FileNotFoundException("The resource %s is not found in classpath".formatted(resource));
+        }
+        return Unpooled.wrappedBuffer(inputStream.readAllBytes());
     }
 
     @NotNull
