@@ -1,16 +1,18 @@
 package io.webby.app;
 
+import io.routekit.QueryParser;
 import io.routekit.SimpleQueryParser;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.function.Predicate;
 
-public final class AppSettings {
+public final class AppSettings implements Settings {
     private boolean devMode = true;
     private String webPath = "/web/";
     private Predicate<String> packageTester = null;
-    private SimpleQueryParser urlParser = SimpleQueryParser.DEFAULT;
+    private QueryParser urlParser = SimpleQueryParser.DEFAULT;
 
+    @Override
     public boolean isDevMode() {
         return devMode;
     }
@@ -19,6 +21,7 @@ public final class AppSettings {
         this.devMode = devMode;
     }
 
+    @Override
     public String webPath() {
         return webPath;
     }
@@ -27,6 +30,7 @@ public final class AppSettings {
         this.webPath = webPath;
     }
 
+    @Override
     public Predicate<String> packageTester() {
         return packageTester;
     }
@@ -39,11 +43,12 @@ public final class AppSettings {
         this.packageTester = packageTester;
     }
 
-    public SimpleQueryParser urlParser() {
+    @Override
+    public QueryParser urlParser() {
         return urlParser;
     }
 
-    public void setUrlParser(@NotNull SimpleQueryParser urlParser) {
+    public void setUrlParser(@NotNull QueryParser urlParser) {
         this.urlParser = urlParser;
     }
 }

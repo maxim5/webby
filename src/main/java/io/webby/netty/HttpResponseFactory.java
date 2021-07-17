@@ -7,7 +7,7 @@ import io.netty.buffer.ByteBuf;
 import io.netty.buffer.Unpooled;
 import io.netty.handler.codec.http.*;
 import io.netty.util.CharsetUtil;
-import io.webby.app.AppSettings;
+import io.webby.app.Settings;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
@@ -22,7 +22,7 @@ public class HttpResponseFactory {
 
     private static final String DEFAULT_WEB = "/web";
 
-    @Inject private AppSettings settings;
+    @Inject private Settings settings;
     @Inject private StaticServing staticServing;
 
     @NotNull

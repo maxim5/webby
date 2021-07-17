@@ -11,6 +11,7 @@ public class AppModule extends AbstractModule {
     }
 
     public void configure() {
+        bind(Settings.class).toInstance(settings);
         bind(AppSettings.class).toInstance(settings);
     }
 }

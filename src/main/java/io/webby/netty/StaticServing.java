@@ -5,7 +5,7 @@ import com.google.inject.Inject;
 import io.netty.buffer.ByteBuf;
 import io.netty.buffer.Unpooled;
 import io.netty.handler.codec.http.*;
-import io.webby.app.AppSettings;
+import io.webby.app.Settings;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import org.jetbrains.annotations.VisibleForTesting;
@@ -25,7 +25,7 @@ import java.util.logging.Level;
 public class StaticServing {
     private static final FluentLogger log = FluentLogger.forEnclosingClass();
 
-    @Inject private AppSettings settings;
+    @Inject private Settings settings;
     @Inject private HttpResponseFactory factory;
 
     public void iterateStaticFiles(@NotNull Consumer<String> consumer) throws IOException {

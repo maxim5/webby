@@ -8,7 +8,7 @@ import com.google.inject.ConfigurationException;
 import com.google.inject.Inject;
 import com.google.inject.Injector;
 import io.routekit.*;
-import io.webby.app.AppSettings;
+import io.webby.app.Settings;
 import io.webby.netty.StaticServing;
 import io.webby.url.*;
 import io.webby.url.caller.Caller;
@@ -32,7 +32,7 @@ public class UrlBinder {
     private static final FluentLogger log = FluentLogger.forEnclosingClass();
     private static final Pattern PARAM_PATTERN = Pattern.compile("param_([a-zA-Z0-9_$]+)");
 
-    @Inject private AppSettings settings;
+    @Inject private Settings settings;
     @Inject private HandlerFinder finder;
     @Inject private Injector injector;
     @Inject private CallerFactory callerFactory;
@@ -49,7 +49,7 @@ public class UrlBinder {
     @NotNull
     private RouterSetup<RouteEndpoint> getRouterSetup(ArrayList<Binding> bindings) {
         RouterSetup<RouteEndpoint> setup = new RouterSetup<>();
-        SimpleQueryParser parser = settings.urlParser();
+        QueryParser parser = settings.urlParser();
 
         {
             Stopwatch stopwatch = Stopwatch.createStarted();
@@ -142,7 +142,7 @@ public class UrlBinder {
 
     @VisibleForTesting
     void processBindings(@NotNull Collection<Binding> bindings,
-                         @NotNull SimpleQueryParser parser,
+                         @NotNull QueryParser parser,
                          @NotNull BiConsumer<String, RouteEndpoint> consumer) {
         try {
             bindings.stream().collect(Collectors.groupingBy(Binding::url)).values().forEach(group -> {

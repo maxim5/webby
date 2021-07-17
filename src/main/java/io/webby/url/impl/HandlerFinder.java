@@ -4,7 +4,7 @@ import com.google.common.base.Stopwatch;
 import com.google.common.flogger.FluentLogger;
 import com.google.common.reflect.ClassPath;
 import com.google.inject.Inject;
-import io.webby.app.AppSettings;
+import io.webby.app.Settings;
 import io.webby.url.Serve;
 import org.jetbrains.annotations.NotNull;
 
@@ -19,7 +19,7 @@ import java.util.stream.Collectors;
 public class HandlerFinder {
     private static final FluentLogger log = FluentLogger.forEnclosingClass();
 
-    @Inject private AppSettings appSettings;
+    @Inject private Settings appSettings;
 
     public Set<? extends Class<?>> getHandlerClasses() {
         try {
