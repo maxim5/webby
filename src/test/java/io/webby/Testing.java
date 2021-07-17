@@ -13,14 +13,23 @@ import java.util.logging.Level;
 import java.util.logging.LogManager;
 
 public class Testing {
+    public static final boolean VERBOSE = false;
+
     @NotNull
     public static Injector testStartup() {
-        LogManager.getLogManager().getLogger("").setLevel(Level.WARNING);  // reduces the noise
+        return testStartup(Testing.class);
+    }
+
+    @NotNull
+    public static Injector testStartup(Class<?> clazz) {
+        Level level = VERBOSE ? Level.ALL : Level.WARNING;
+        LogManager.getLogManager().getLogger("").setLevel(level);
+
         Locale.setDefault(Locale.US);  // any way to remove this?
 
         AppSettings settings = new AppSettings();
         settings.setWebPath("src/test/resources");
-        settings.setPackage(Testing.class.getPackageName());
+        settings.setPackage(clazz.getPackageName());
         return Guice.createInjector(new AppModule(settings), new NettyModule(), new UrlModule());
     }
 }

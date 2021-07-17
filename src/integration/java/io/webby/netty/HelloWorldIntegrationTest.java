@@ -9,23 +9,23 @@ import io.netty.buffer.Unpooled;
 import io.netty.handler.codec.http.*;
 import io.netty.util.CharsetUtil;
 import io.webby.Testing;
+import io.webby.hello.HelloWorld;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
-public class NettyChannelHandlerIntegrationTest {
-    private static final boolean VERBOSE = true;
+public class HelloWorldIntegrationTest {
     private NettyChannelHandler handler;
 
     @BeforeEach
     void setup() {
-        Injector injector = Testing.testStartup();
+        Injector injector = Testing.testStartup(HelloWorld.class);
         handler = injector.getInstance(NettyChannelHandler.class);
     }
 
     @Test
-    public void get_hello_world_simple_pages() {
+    public void get_simple() {
         assert200(get("/"), "Hello World!");
         assert404(get("//"));
 
@@ -59,7 +59,7 @@ public class NettyChannelHandlerIntegrationTest {
     }
 
     @Test
-    public void post_hello_world_simple_pages() {
+    public void post_simple() {
         assert404(post("/"));
 
         assert200(post("/int/10"), "{}");
@@ -90,7 +90,7 @@ public class NettyChannelHandlerIntegrationTest {
         ByteBuf byteBuf = asByteBuf((content instanceof String str) ? str : toJson(content));
         FullHttpRequest request = new DefaultFullHttpRequest(HttpVersion.HTTP_1_1, method, uri, byteBuf);
         FullHttpResponse response = handler.handle(request);
-        return VERBOSE ? readable(response) : response;
+        return Testing.VERBOSE ? readable(response) : response;
     }
 
     private void assert200(FullHttpResponse response, String content) {

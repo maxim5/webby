@@ -19,7 +19,7 @@ public class Main {
     private static final FluentLogger log = FluentLogger.forEnclosingClass();
 
     public static void main(String[] args) throws Exception {
-        LogManager.getLogManager().readConfiguration(new FileInputStream("build/resources/main/logging.properties"));
+        LogManager.getLogManager().readConfiguration(new FileInputStream("out/examples/resources/logging.properties"));
         runNetty(8888);
     }
 
@@ -27,7 +27,7 @@ public class Main {
         log.at(Level.INFO).log("Bootstrapping server");
 
         AppSettings settings = new AppSettings();
-        settings.setWebPath("build/resources/main/web/");
+        settings.setWebPath("out/examples/resources/web/");
         settings.setDevMode(true);
         Injector injector = Webby.startup(settings);
 

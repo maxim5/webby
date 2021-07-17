@@ -30,3 +30,25 @@ dependencies {
 test {
     useJUnitPlatform()
 }
+
+sourceSets {
+    examples
+    integration
+}
+
+configurations {
+    examplesImplementation.extendsFrom implementation
+    examplesRuntimeOnly.extendsFrom runtimeOnly
+
+    integrationImplementation.extendsFrom testImplementation
+    integrationRuntimeOnly.extendsFrom testRuntimeOnly
+}
+
+dependencies {
+    examplesImplementation sourceSets.main.output
+    examplesRuntimeOnly sourceSets.main.output
+
+    integrationImplementation sourceSets.main.output
+    integrationImplementation sourceSets.test.output
+    integrationImplementation sourceSets.examples.output
+}
