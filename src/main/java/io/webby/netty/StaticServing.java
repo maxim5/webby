@@ -48,8 +48,16 @@ public class StaticServing {
             log.at(Level.WARNING).log("Can't serve the static path: %s. Return 404", path);
             return factory.newResponse404();
         }
+
         CharSequence contentType = guessContentType(path);
-        return factory.newResponse(byteBuf, HttpResponseStatus.OK, contentType != null ? contentType : HttpHeaderValues.BINARY);
+        if (contentType == null) {
+            contentType = HttpHeaderValues.APPLICATION_OCTET_STREAM;
+        }
+
+        FullHttpResponse response = factory.newResponse(byteBuf, HttpResponseStatus.OK, contentType);
+        response.headers().add(HttpHeaderNames.CACHE_CONTROL, "max-age=31536000");
+
+        return response;
     }
 
     @Nullable
