@@ -1,8 +1,33 @@
 package io.webby.util;
 
-public record Pair<T, U>(T first, U second) {
+import java.util.Map;
+
+public record Pair<T, U>(T first, U second) implements Map.Entry<T, U> {
     public static <T, U> Pair<T, U> of(T first, U second) {
         return new Pair<>(first, second);
+    }
+
+    public static <T, U> Pair<T, U> of(Map.Entry<T, U> entry) {
+        return new Pair<>(entry.getKey(), entry.getValue());
+    }
+
+    public Pair<U, T> swap() {
+        return of(second, first);
+    }
+
+    @Override
+    public T getKey() {
+        return first;
+    }
+
+    @Override
+    public U getValue() {
+        return second;
+    }
+
+    @Override
+    public U setValue(U value) {
+        throw new UnsupportedOperationException("Pair is immutable");
     }
 
     @Override
