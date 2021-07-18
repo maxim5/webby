@@ -40,20 +40,20 @@ public class Webby {
     }
 
     private static void validatePackageTester(@NotNull AppSettings settings) {
-        if (settings.packageTester() == null) {
+        if (settings.filter() == null) {
             String className = getCallerClassName();
             if (className != null) {
                 log.at(Level.FINER).log("Caller class name: %s", className);
                 int dot = className.lastIndexOf('.');
                 if (dot > 0) {
                     String packageName = className.substring(0, dot);
-                    settings.setPackage(packageName);
+                    settings.setPackageOnly(packageName);
                     log.at(Level.INFO).log("Using package `%s` for classpath scanning", packageName);
                     return;
                 }
             }
 
-            settings.setPackageTester(name -> true);
+            settings.setFilter((pkg, cls) -> true);
             log.at(Level.WARNING).log("Failed to determine enclosing package for classpath scanning. " +
                     "Using the whole classpath (can cause a delay and errors in loading classes)");
         }

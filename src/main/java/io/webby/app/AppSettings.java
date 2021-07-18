@@ -2,15 +2,18 @@ package io.webby.app;
 
 import io.routekit.QueryParser;
 import io.routekit.SimpleQueryParser;
+import io.webby.url.Marshal;
 import org.jetbrains.annotations.NotNull;
 
-import java.util.function.Predicate;
+import java.util.function.BiPredicate;
 
 public final class AppSettings implements Settings {
     private boolean devMode = true;
     private String webPath = "/web/";
-    private Predicate<String> packageTester = null;
+    private BiPredicate<String, String> filter = null;
     private QueryParser urlParser = SimpleQueryParser.DEFAULT;
+    private Marshal defaultRequestContentMarshal = Marshal.JSON;
+    private Marshal defaultResponseContentMarshal = Marshal.AS_STRING;
 
     @Override
     public boolean isDevMode() {
@@ -31,16 +34,20 @@ public final class AppSettings implements Settings {
     }
 
     @Override
-    public Predicate<String> packageTester() {
-        return packageTester;
+    public BiPredicate<String, String> filter() {
+        return filter;
     }
 
-    public void setPackage(@NotNull String packageName) {
-        this.packageTester = pkg -> pkg.startsWith(packageName);
+    public void setPackageOnly(@NotNull String packageName) {
+        this.filter = (pkg, cls) -> pkg.startsWith(packageName);
     }
 
-    public void setPackageTester(@NotNull Predicate<String> packageTester) {
-        this.packageTester = packageTester;
+    public void setClassOnly(@NotNull Class<?> klass) {
+        this.filter = (pkg, cls) -> pkg.equals(klass.getPackageName()) && cls.equals(klass.getSimpleName());
+    }
+
+    public void setFilter(@NotNull BiPredicate<String, String> filter) {
+        this.filter = filter;
     }
 
     @Override
@@ -50,5 +57,23 @@ public final class AppSettings implements Settings {
 
     public void setUrlParser(@NotNull QueryParser urlParser) {
         this.urlParser = urlParser;
+    }
+
+    @Override
+    public Marshal defaultRequestContentMarshal() {
+        return defaultRequestContentMarshal;
+    }
+
+    public void setDefaultRequestContentMarshal(@NotNull Marshal marshal) {
+        this.defaultRequestContentMarshal = marshal;
+    }
+
+    @Override
+    public Marshal defaultResponseContentMarshal() {
+        return defaultResponseContentMarshal;
+    }
+
+    public void setDefaultResponseContentMarshal(@NotNull Marshal marshal) {
+        this.defaultResponseContentMarshal = marshal;
     }
 }

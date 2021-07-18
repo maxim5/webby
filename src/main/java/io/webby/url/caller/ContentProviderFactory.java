@@ -1,6 +1,6 @@
 package io.webby.url.caller;
 
-import io.webby.url.SerializeMethod;
+import io.webby.url.Marshal;
 import io.webby.url.impl.EndpointOptions;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
@@ -12,11 +12,12 @@ public class ContentProviderFactory {
     }
 
     @Nullable
-    public ContentProvider getContentProvider(@Nullable SerializeMethod method, @NotNull Class<?> type) {
-        if (method != null) {
-            return switch (method) {
+    public ContentProvider getContentProvider(@Nullable Marshal marshal, @NotNull Class<?> type) {
+        if (marshal != null) {
+            return switch (marshal) {
                 case JSON -> new JsonContentProvider(type);
-                case PROTOBUF -> throw new UnsupportedOperationException();
+                case PROTOBUF_BINARY -> throw new UnsupportedOperationException();
+                case PROTOBUF_JSON -> throw new UnsupportedOperationException();
                 case AS_STRING -> new SimpleContentProvider();
             };
         }

@@ -1,15 +1,20 @@
 package io.webby.app;
 
 import io.routekit.QueryParser;
+import io.webby.url.Marshal;
 
-import java.util.function.Predicate;
+import java.util.function.BiPredicate;
 
 public interface Settings {
     boolean isDevMode();
 
     String webPath();
 
-    Predicate<String> packageTester();
+    BiPredicate<String, String> filter();
 
     QueryParser urlParser();
+
+    Marshal defaultRequestContentMarshal();
+
+    Marshal defaultResponseContentMarshal();
 }

@@ -14,10 +14,10 @@ import io.webby.url.*;
 import io.webby.url.caller.Caller;
 import io.webby.url.caller.CallerFactory;
 import io.webby.url.validate.Validator;
-import io.webby.util.TriConsumer;
 import org.jetbrains.annotations.NotNull;
 
 import java.io.IOException;
+import java.lang.reflect.AnnotatedElement;
 import java.lang.reflect.Field;
 import java.lang.reflect.Method;
 import java.util.*;
@@ -41,7 +41,8 @@ public class UrlBinder {
     private final Map<Class<?>, EndpointContext> contextCache = new HashMap<>();
 
     public Router<RouteEndpoint> bindRouter() {
-        ArrayList<Binding> bindings = bindHandlersFromClasspath();
+        Set<? extends Class<?>> handlerClasses = finder.getHandlerClassesFromClasspath();
+        ArrayList<Binding> bindings = bindHandlers(handlerClasses);
         RouterSetup<RouteEndpoint> setup = getRouterSetup(bindings);
         return setup.build();
     }
@@ -75,52 +76,59 @@ public class UrlBinder {
         return setup.withParser(parser);
     }
 
+    @VisibleForTesting
     @NotNull
-    private ArrayList<Binding> bindHandlersFromClasspath() {
+    ArrayList<Binding> bindHandlers(@NotNull Iterable<? extends Class<?>> handlerClasses) {
         ArrayList<Binding> bindings = new ArrayList<>();
         try {
-            finder.getHandlerClasses().forEach(klass -> {
-                Serve serve = klass.getAnnotation(Serve.class);
-                String defaultUrl = serve.url();
-                SerializeMethod defaultIn = serve.defaultIn();
-                SerializeMethod defaultOut = serve.defaultOut();
+            Marshal defaultIn = settings.defaultRequestContentMarshal();
+            Marshal defaultOut = settings.defaultResponseContentMarshal();
+
+            handlerClasses.forEach(klass -> {
+                String classUrl = (klass.isAnnotationPresent(Serve.class)) ? klass.getAnnotation(Serve.class).url() : "";
+                Marshal classIn = getMarshalFromAnnotations(klass, defaultIn);
+                Marshal classOut = getMarshalFromAnnotations(klass, defaultOut);
 
                 for (Method method : klass.getDeclaredMethods()) {
-                    boolean isJson = method.isAnnotationPresent(Json.class);
-                    boolean isProto = method.isAnnotationPresent(Protobuf.class);
-                    UrlConfigError.failIf(isProto && isJson, "Incompatible method definition: %s".formatted(method));
-                    SerializeMethod in = defaultIn;  // TODO: drop?
-                    SerializeMethod out = isJson ? SerializeMethod.JSON : isProto ? SerializeMethod.PROTOBUF : defaultOut;
+                    Marshal in = method.getParameterCount() > 0 ?
+                            getMarshalFromAnnotations(method.getParameters()[method.getParameterCount() - 1], classIn) :
+                            null;
+                    Marshal out = getMarshalFromAnnotations(method, classOut);
 
-                    TriConsumer<String, String, String> sink = (type, url, contentType) -> {
+                    interface Sink {
+                        void accept(String type, String url, String contentType, boolean usuallyExpectsContent);
+                    }
+
+                    Sink sink = (type, url, contentType, usuallyExpectsContent) -> {
                         if (url.isEmpty()) {
-                            UrlConfigError.failIf(defaultUrl.isEmpty(),
-                                    "URL is not set neither in class nor in method for %s".formatted(method));
-                            url = defaultUrl;
+                            UrlConfigError.failIf(classUrl.isEmpty(),
+                                    "URL is not set neither in class %s nor in method %s".formatted(klass, method));
+                            url = classUrl;
                         }
 
                         method.setAccessible(true);
 
-                        EndpointOptions options = new EndpointOptions(contentType, in, out);
+                        boolean expectsContent = usuallyExpectsContent && in != null;
+                        EndpointOptions options = new EndpointOptions(in, out, contentType, expectsContent);
                         Binding binding = new Binding(url, method, type, options);
                         bindings.add(binding);
                     };
 
                     if (method.isAnnotationPresent(GET.class)) {
                         GET ann = method.getAnnotation(GET.class);
-                        sink.accept("GET", ann.url(), ann.contentType());
+                        sink.accept("GET", ann.url(), ann.contentType(), false);
                     }
                     if (method.isAnnotationPresent(POST.class)) {
                         POST ann = method.getAnnotation(POST.class);
-                        sink.accept("POST", ann.url(), ann.contentType());
+                        sink.accept("POST", ann.url(), ann.contentType(), true);
                     }
                     if (method.isAnnotationPresent(PUT.class)) {
                         PUT ann = method.getAnnotation(PUT.class);
-                        sink.accept("PUT", ann.url(), ann.contentType());
+                        sink.accept("PUT", ann.url(), ann.contentType(), true);
                     }
                     if (method.isAnnotationPresent(DELETE.class)) {
                         DELETE ann = method.getAnnotation(DELETE.class);
-                        sink.accept("DELETE", ann.url(), ann.contentType());
+                        sink.accept("DELETE", ann.url(), ann.contentType(), false);
                     }
                     if (method.isAnnotationPresent(Call.class)) {
                         Call ann = method.getAnnotation(Call.class);
@@ -129,7 +137,7 @@ public class UrlBinder {
                                 log.at(Level.WARNING).log(
                                         "@Call http method is not upper-case: %s (at %s)".formatted(type, method));
                             }
-                            sink.accept(type, ann.url(), ann.contentType());
+                            sink.accept(type, ann.url(), ann.contentType(), true);
                         }
                     }
                 }
@@ -200,5 +208,14 @@ public class UrlBinder {
             }
         }
         return map;
+    }
+
+    @VisibleForTesting
+    @NotNull
+    static Marshal getMarshalFromAnnotations(@NotNull AnnotatedElement elem, @NotNull Marshal def) {
+        boolean isJson = elem.isAnnotationPresent(Json.class);
+        boolean isProto = elem.isAnnotationPresent(Protobuf.class);
+        UrlConfigError.failIf(isProto && isJson, "Incompatible @Json and @Protobuf declaration for %s".formatted(elem));
+        return isJson ? Marshal.JSON : (isProto && def != Marshal.PROTOBUF_JSON) ? Marshal.PROTOBUF_BINARY : def;
     }
 }

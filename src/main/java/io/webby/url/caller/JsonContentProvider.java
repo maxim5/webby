@@ -13,16 +13,16 @@ import java.nio.charset.Charset;
 
 public class JsonContentProvider implements ContentProvider {
     private final Gson gson = new Gson();
-    private final Class<?> clazz;
+    private final Class<?> klass;
 
-    public JsonContentProvider(@NotNull Class<?> clazz) {
-        this.clazz = clazz;
+    public JsonContentProvider(@NotNull Class<?> klass) {
+        this.klass = klass;
     }
 
     @Override
     public Object getContent(@NotNull ByteBuf byteBuf, @NotNull Charset charset) {
         try {
-            return gson.fromJson(new InputStreamReader(new ByteBufInputStream(byteBuf), charset), this.clazz);
+            return gson.fromJson(new InputStreamReader(new ByteBufInputStream(byteBuf), charset), this.klass);
         } catch (JsonSyntaxException | JsonIOException e) {
             throw new ValidationError("Failed to parse JSON content", e);
         }

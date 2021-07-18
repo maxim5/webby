@@ -15,7 +15,7 @@ import io.netty.handler.codec.http.HttpResponseStatus;
 import io.routekit.Match;
 import io.routekit.Router;
 import io.routekit.util.CharBuffer;
-import io.webby.url.SerializeMethod;
+import io.webby.url.Marshal;
 import io.webby.url.caller.Caller;
 import io.webby.url.impl.*;
 import io.webby.url.validate.ValidationError;
@@ -112,7 +112,7 @@ public class NettyChannelHandler extends SimpleChannelInboundHandler<FullHttpReq
 
         CharSequence contentType = (!options.contentType().isEmpty()) ?
                 options.contentType() :
-                (options.out() == SerializeMethod.JSON) ?
+                (options.out() == Marshal.JSON) ?
                         HttpHeaderValues.APPLICATION_JSON :
                         HttpHeaderValues.TEXT_HTML;
 
@@ -132,7 +132,8 @@ public class NettyChannelHandler extends SimpleChannelInboundHandler<FullHttpReq
         return switch (options.out()) {
             case JSON -> factory.newResponse(new Gson().toJson(callResult), HttpResponseStatus.OK, HttpHeaderValues.APPLICATION_JSON);
             case AS_STRING -> factory.newResponse(callResult.toString(), HttpResponseStatus.OK, contentType);
-            case PROTOBUF -> throw new UnsupportedOperationException();
+            case PROTOBUF_BINARY -> throw new UnsupportedOperationException();
+            case PROTOBUF_JSON -> throw new UnsupportedOperationException();
         };
     }
 

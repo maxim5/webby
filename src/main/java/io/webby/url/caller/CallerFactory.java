@@ -6,6 +6,8 @@ import com.google.inject.Inject;
 import com.google.inject.Injector;
 import io.netty.handler.codec.http.HttpRequest;
 import io.routekit.util.CharBuffer;
+import io.webby.url.Json;
+import io.webby.url.Protobuf;
 import io.webby.url.UrlConfigError;
 import io.webby.url.impl.Binding;
 import io.webby.url.validate.*;
@@ -84,11 +86,11 @@ public class CallerFactory {
         }
 
         ContentProvider contentProvider = null;
-        if (binding.options().wantsContent() && parameters.length > 0) {
+        if (parameters.length > 0) {
             int contentIndex = parameters.length - 1;  // last
-            Class<?> type = parameters[contentIndex].getType();
-            if (canPassContent(type)) {
-                contentProvider = contentProviderFactory.getContentProvider(binding.options(), type);
+            Parameter parameter = parameters[contentIndex];
+            if (isContentParam(parameter, binding)) {
+                contentProvider = contentProviderFactory.getContentProvider(binding.options(), parameter.getType());
                 parameters = Arrays.copyOfRange(parameters, 0, contentIndex);
             }
         }
@@ -222,7 +224,7 @@ public class CallerFactory {
                 }
             }
 
-            if ((i == last) && canPassContent(type) && binding.options().wantsContent()) {
+            if (i == last && isContentParam(params[i], binding)) {
                 ContentProvider provider = contentProviderFactory.getContentProvider(binding.options(), type);
                 if (provider != null) {
                     argMapping.add((request, varsMap) -> provider.getContent(request));
@@ -286,5 +288,13 @@ public class CallerFactory {
     @VisibleForTesting
     static boolean canPassBuffer(Class<?> type) {
         return type.isAssignableFrom(CharBuffer.class) && !type.equals(Object.class);
+    }
+
+    private static boolean isContentParam(@NotNull Parameter parameter, @NotNull Binding binding) {
+        return wantsContent(parameter) || canPassContent(parameter.getType()) && binding.options().expectsContent();
+    }
+
+    private static boolean wantsContent(@NotNull Parameter parameter) {
+        return parameter.isAnnotationPresent(Json.class) || parameter.isAnnotationPresent(Protobuf.class);
     }
 }

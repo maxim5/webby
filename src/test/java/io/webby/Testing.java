@@ -16,21 +16,36 @@ public class Testing {
     public static final boolean VERBOSE = false;
     public static final boolean READABLE = true;
 
+    public static final String DEFAULT_WEB_PATH = "src/test/resources";
+
     @NotNull
     public static Injector testStartup() {
-        return testStartup(Testing.class);
+        return testStartup(Testing.class.getPackageName());
     }
 
     @NotNull
-    public static Injector testStartup(Class<?> clazz) {
+    public static Injector testStartup(@NotNull Class<?> clazz) {
+        AppSettings settings = new AppSettings();
+        settings.setWebPath(DEFAULT_WEB_PATH);
+        settings.setClassOnly(clazz);
+        return testStartup(settings);
+    }
+
+    @NotNull
+    public static Injector testStartup(@NotNull String packageName) {
+        AppSettings settings = new AppSettings();
+        settings.setWebPath(DEFAULT_WEB_PATH);
+        settings.setPackageOnly(packageName);
+        return testStartup(settings);
+    }
+
+    @NotNull
+    public static Injector testStartup(@NotNull AppSettings settings) {
         Level level = VERBOSE ? Level.ALL : Level.WARNING;
         LogManager.getLogManager().getLogger("").setLevel(level);
 
         Locale.setDefault(Locale.US);  // any way to remove this?
 
-        AppSettings settings = new AppSettings();
-        settings.setWebPath("src/test/resources");
-        settings.setPackage(clazz.getPackageName());
         return Guice.createInjector(new AppModule(settings), new NettyModule(), new UrlModule());
     }
 }

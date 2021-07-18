@@ -9,6 +9,4 @@ import java.lang.annotation.Target;
 @Target(ElementType.TYPE)
 public @interface Serve {
     String url() default "";
-    SerializeMethod defaultIn() default SerializeMethod.JSON;
-    SerializeMethod defaultOut() default SerializeMethod.AS_STRING;
 }
