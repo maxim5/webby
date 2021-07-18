@@ -30,6 +30,8 @@ public class HandlerFinder {
 
     @Inject private Settings settings;
 
+    // More precisely, handler candidates.
+    @NotNull
     public Set<? extends Class<?>> getHandlerClassesFromClasspath() {
         try {
             Stopwatch stopwatch = Stopwatch.createStarted();
@@ -63,6 +65,8 @@ public class HandlerFinder {
                 .collect(Collectors.toSet());
     }
 
+    // Note: if the class doesn't have any methods, it will be simply ignored down the line.
+    // Here a quick check will suffice.
     @VisibleForTesting
     static boolean isHandlerClass(@NotNull Class<?> klass,
                                   @NotNull Class<? extends Annotation> main,
