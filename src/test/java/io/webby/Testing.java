@@ -14,6 +14,7 @@ import java.util.logging.LogManager;
 
 public class Testing {
     public static final boolean VERBOSE = false;
+    public static final boolean READABLE = true;
 
     @NotNull
     public static Injector testStartup() {
