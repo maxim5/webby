@@ -271,7 +271,8 @@ public class CallerFactory {
         return isInt(type) || isStringLike(type);
     }
 
-    private static boolean isAllowedToInject(Class<?> type) {
+    @VisibleForTesting
+    static boolean isAllowedToInject(Class<?> type) {
         return !type.isPrimitive() && !isStringLike(type);
     }
 
@@ -290,11 +291,13 @@ public class CallerFactory {
         return type.isAssignableFrom(CharBuffer.class) && !type.equals(Object.class);
     }
 
-    private static boolean isContentParam(@NotNull Parameter parameter, @NotNull Binding binding) {
+    @VisibleForTesting
+    static boolean isContentParam(@NotNull Parameter parameter, @NotNull Binding binding) {
         return wantsContent(parameter) || canPassContent(parameter.getType()) && binding.options().expectsContent();
     }
 
-    private static boolean wantsContent(@NotNull Parameter parameter) {
+    @VisibleForTesting
+    static boolean wantsContent(@NotNull Parameter parameter) {
         return parameter.isAnnotationPresent(Json.class) || parameter.isAnnotationPresent(Protobuf.class);
     }
 }

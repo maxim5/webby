@@ -19,8 +19,11 @@ public class Testing {
     public static final String DEFAULT_WEB_PATH = "src/test/resources";
 
     @NotNull
-    public static Injector testStartup() {
-        return testStartup(Testing.class.getPackageName());
+    public static Injector testStartupNoHandlers() {
+        AppSettings settings = new AppSettings();
+        settings.setWebPath(DEFAULT_WEB_PATH);
+        settings.setFilter((pkg, cls) -> false);
+        return testStartup(settings);
     }
 
     @NotNull

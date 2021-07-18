@@ -33,7 +33,7 @@ public class CallerFactoryTest {
 
     @BeforeEach
     void setup() {
-        Injector injector = Testing.testStartup();
+        Injector injector = Testing.testStartupNoHandlers();
         factory = injector.getInstance(CallerFactory.class);
     }
 
