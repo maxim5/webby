@@ -3,6 +3,7 @@ package io.webby.netty;
 import com.google.common.base.Stopwatch;
 import com.google.common.flogger.FluentLogger;
 import com.google.gson.Gson;
+import com.google.gson.JsonElement;
 import com.google.inject.Inject;
 import io.netty.buffer.ByteBuf;
 import io.netty.channel.ChannelFutureListener;
@@ -122,11 +123,17 @@ public class NettyChannelHandler extends SimpleChannelInboundHandler<FullHttpReq
         if (callResult instanceof byte[] bytes) {
             return factory.newResponse(bytes, HttpResponseStatus.OK, contentType);
         }
+        if (callResult instanceof char[] chars) {
+            return factory.newResponse(new CharBuffer(chars), HttpResponseStatus.OK, contentType);
+        }
         if (callResult instanceof InputStream stream) {
             return factory.newResponse(stream, HttpResponseStatus.OK, contentType);
         }
         if (callResult instanceof ByteBuf byteBuf) {
             return factory.newResponse(byteBuf, HttpResponseStatus.OK, contentType);
+        }
+        if (callResult instanceof JsonElement element) {
+            return factory.newResponse(new Gson().toJson(element), HttpResponseStatus.OK, HttpHeaderValues.APPLICATION_JSON);
         }
 
         return switch (options.out()) {
