@@ -1,4 +1,5 @@
 apply plugin: 'java'
+apply plugin: 'idea'
 
 group 'io.webby'
 version '0.1.0-SNAPSHOT'
@@ -51,4 +52,11 @@ dependencies {
     integrationImplementation sourceSets.main.output
     integrationImplementation sourceSets.test.output
     integrationImplementation sourceSets.examples.output
+}
+
+idea {
+    module {
+        testSourceDirs += project.sourceSets.integration.java.srcDirs
+        testResourceDirs = project.sourceSets.integration.resources.srcDirs
+    }
 }
