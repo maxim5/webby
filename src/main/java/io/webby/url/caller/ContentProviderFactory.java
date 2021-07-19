@@ -1,6 +1,6 @@
 package io.webby.url.caller;
 
-import io.webby.url.Marshal;
+import io.webby.url.annotate.Marshal;
 import io.webby.url.impl.EndpointOptions;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;

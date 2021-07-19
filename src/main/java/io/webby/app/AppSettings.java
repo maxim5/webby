@@ -2,7 +2,7 @@ package io.webby.app;
 
 import io.routekit.QueryParser;
 import io.routekit.SimpleQueryParser;
-import io.webby.url.Marshal;
+import io.webby.url.annotate.Marshal;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.function.BiPredicate;

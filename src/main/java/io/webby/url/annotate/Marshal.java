@@ -1,4 +1,4 @@
-package io.webby.url;
+package io.webby.url.annotate;
 
 public enum Marshal {
     JSON,

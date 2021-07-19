@@ -21,7 +21,7 @@ import io.webby.netty.exceptions.NotFoundException;
 import io.webby.netty.exceptions.RedirectException;
 import io.webby.netty.request.DefaultHttpRequestEx;
 import io.webby.netty.response.HttpResponseFactory;
-import io.webby.url.Marshal;
+import io.webby.url.annotate.Marshal;
 import io.webby.url.caller.Caller;
 import io.webby.url.impl.*;
 import io.webby.url.validate.ValidationError;

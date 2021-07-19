@@ -1,8 +1,8 @@
 package io.webby.hello;
 
-import io.webby.url.GET;
-import io.webby.url.Json;
-import io.webby.url.Serve;
+import io.webby.url.annotate.GET;
+import io.webby.url.annotate.Json;
+import io.webby.url.annotate.Serve;
 
 import java.io.Serializable;
 import java.util.LinkedHashMap;

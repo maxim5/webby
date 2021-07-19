@@ -1,7 +1,7 @@
 package io.webby.hello;
 
-import io.webby.url.POST;
-import io.webby.url.Serve;
+import io.webby.url.annotate.POST;
+import io.webby.url.annotate.Serve;
 import io.webby.url.validate.IntValidator;
 import io.webby.url.validate.Validator;
 

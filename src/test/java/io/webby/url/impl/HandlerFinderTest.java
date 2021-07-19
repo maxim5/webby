@@ -1,6 +1,6 @@
 package io.webby.url.impl;
 
-import io.webby.url.*;
+import io.webby.url.annotate.*;
 import org.jetbrains.annotations.NotNull;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
@@ -12,7 +12,8 @@ import static io.webby.url.impl.HandlerFinder.*;
 public class HandlerFinderTest {
     @Test
     public void matchesAny_class_one_annotation() {
-        @Json interface Foo {}
+        @Json
+        interface Foo {}
 
         Assertions.assertTrue(matchesAny(Foo.class, Set.of(Json.class)));
         Assertions.assertFalse(matchesAny(Foo.class, Set.of(Serve.class)));
@@ -43,7 +44,8 @@ public class HandlerFinderTest {
     @Test
     public void isHandlerClass_serve_class_get_method_matches() {
         @Serve interface Foo {
-            @GET void foo();
+            @GET
+            void foo();
         }
 
         Assertions.assertTrue(isHandlerClassDefault(Foo.class));
@@ -61,7 +63,8 @@ public class HandlerFinderTest {
     @Test
     public void isHandlerClass_only_post_method_matches() {
         interface Foo {
-            @POST void foo();
+            @POST
+            void foo();
         }
 
         Assertions.assertTrue(isHandlerClassDefault(Foo.class));
@@ -70,7 +73,8 @@ public class HandlerFinderTest {
     @Test
     public void isHandlerClass_only_call_method_matches() {
         interface Foo {
-            @Call void foo();
+            @Call
+            void foo();
         }
 
         Assertions.assertTrue(isHandlerClassDefault(Foo.class));

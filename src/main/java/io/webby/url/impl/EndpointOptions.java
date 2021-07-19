@@ -1,6 +1,6 @@
 package io.webby.url.impl;
 
-import io.webby.url.Marshal;
+import io.webby.url.annotate.Marshal;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 

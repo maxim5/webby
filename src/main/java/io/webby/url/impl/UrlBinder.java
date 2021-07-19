@@ -11,6 +11,7 @@ import io.routekit.*;
 import io.webby.app.Settings;
 import io.webby.netty.response.StaticServing;
 import io.webby.url.*;
+import io.webby.url.annotate.*;
 import io.webby.url.caller.Caller;
 import io.webby.url.caller.CallerFactory;
 import io.webby.url.validate.Validator;

@@ -6,7 +6,7 @@ import com.google.common.flogger.FluentLogger;
 import com.google.common.reflect.ClassPath;
 import com.google.inject.Inject;
 import io.webby.app.Settings;
-import io.webby.url.*;
+import io.webby.url.annotate.*;
 import org.jetbrains.annotations.NotNull;
 
 import java.io.IOException;

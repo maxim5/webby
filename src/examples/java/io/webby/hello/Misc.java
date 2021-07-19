@@ -1,8 +1,8 @@
 package io.webby.hello;
 
 import io.netty.handler.codec.http.HttpRequest;
-import io.webby.url.GET;
-import io.webby.url.Serve;
+import io.webby.url.annotate.GET;
+import io.webby.url.annotate.Serve;
 import org.jetbrains.annotations.NotNull;
 
 @Serve
