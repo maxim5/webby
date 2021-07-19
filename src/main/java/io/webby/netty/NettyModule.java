@@ -1,6 +1,8 @@
 package io.webby.netty;
 
 import com.google.inject.AbstractModule;
+import io.webby.netty.response.HttpResponseFactory;
+import io.webby.netty.response.StaticServing;
 
 public class NettyModule extends AbstractModule {
     @Override

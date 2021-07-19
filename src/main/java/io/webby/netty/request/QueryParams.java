@@ -1,4 +1,4 @@
-package io.webby.netty;
+package io.webby.netty.request;
 
 import io.routekit.util.CharBuffer;
 import io.webby.url.validate.Converter;

@@ -3,7 +3,7 @@ package io.webby.url.impl;
 import io.netty.handler.codec.http.FullHttpRequest;
 import io.netty.handler.codec.http.HttpRequest;
 import io.routekit.util.CharBuffer;
-import io.webby.netty.StaticServing;
+import io.webby.netty.response.StaticServing;
 import io.webby.url.caller.Caller;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;

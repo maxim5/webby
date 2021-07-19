@@ -1,4 +1,4 @@
-package io.webby.netty;
+package io.webby.netty.response;
 
 import com.google.common.flogger.FluentLogger;
 import com.google.inject.Inject;

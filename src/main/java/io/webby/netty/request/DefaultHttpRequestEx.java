@@ -1,4 +1,4 @@
-package io.webby.netty;
+package io.webby.netty.request;
 
 import io.netty.handler.codec.http.DefaultFullHttpRequest;
 import io.netty.handler.codec.http.FullHttpRequest;

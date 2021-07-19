@@ -9,7 +9,7 @@ import com.google.inject.Inject;
 import com.google.inject.Injector;
 import io.routekit.*;
 import io.webby.app.Settings;
-import io.webby.netty.StaticServing;
+import io.webby.netty.response.StaticServing;
 import io.webby.url.*;
 import io.webby.url.caller.Caller;
 import io.webby.url.caller.CallerFactory;
