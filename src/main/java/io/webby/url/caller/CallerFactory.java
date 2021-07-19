@@ -9,6 +9,9 @@ import io.routekit.util.CharBuffer;
 import io.webby.url.Json;
 import io.webby.url.Protobuf;
 import io.webby.url.UrlConfigError;
+import io.webby.url.handle.Handler;
+import io.webby.url.handle.IntHandler;
+import io.webby.url.handle.StringHandler;
 import io.webby.url.impl.Binding;
 import io.webby.url.validate.*;
 import org.jetbrains.annotations.NotNull;
@@ -16,6 +19,7 @@ import org.jetbrains.annotations.Nullable;
 import org.jetbrains.annotations.VisibleForTesting;
 
 import java.lang.reflect.Method;
+import java.lang.reflect.Modifier;
 import java.lang.reflect.Parameter;
 import java.util.*;
 import java.util.logging.Level;
@@ -57,9 +61,14 @@ public class CallerFactory {
                          @NotNull List<String> vars) {
         Method method = binding.method();
 
-        Caller caller = tryCreateNativeCaller(instance, method, binding, validators, vars);
-        if (caller != null) {
-            return caller;
+        Caller nativeCaller = tryCreateNativeCaller(instance, method, validators, vars);
+        if (nativeCaller != null) {
+            return nativeCaller;
+        }
+
+        Caller optimizedCaller = tryCreateOptimizedCaller(instance, method, binding, validators, vars);
+        if (optimizedCaller != null) {
+            return optimizedCaller;
         }
 
         List<CallArgumentFunction> mapping = tryCreateGenericMapping(method, binding, validators, vars);
@@ -74,9 +83,45 @@ public class CallerFactory {
     @Nullable
     Caller tryCreateNativeCaller(@NotNull Object instance,
                                  @NotNull Method method,
-                                 @NotNull Binding binding,
                                  @NotNull Map<String, Validator> validators,
                                  @NotNull List<String> vars) {
+        if (instance instanceof Handler<?> handler && isMethodImplementsInterface(method, Handler.class)) {
+            return new NativeCaller(handler);
+        }
+
+        if (instance instanceof IntHandler<?> handler && isMethodImplementsInterface(method, IntHandler.class)) {
+            assertVarsMatchParams(vars, 1, method);
+            String var = vars.get(0);
+            IntValidator validator = getValidator(validators, var, DEFAULT_INT);
+            return new NativeIntCaller(handler, validator, var);
+        }
+
+        if (instance instanceof StringHandler<?> handler && isMethodImplementsInterface(method, StringHandler.class)) {
+            assertVarsMatchParams(vars, 1, method);
+            String var = vars.get(0);
+            StringValidator validator = getValidator(validators, var, DEFAULT_STR);
+            return new NativeStringCaller(handler, validator, var);
+        }
+
+        return null;
+    }
+
+    private boolean isMethodImplementsInterface(@NotNull Method method, @NotNull Class<?> interfaceClass) {
+        assert Modifier.isInterface(interfaceClass.getModifiers()) : "Expected the interface, but got " + interfaceClass;
+        Method[] methods = interfaceClass.getDeclaredMethods();
+        assert methods.length == 1 : "Internal error: the interface declares several methods";
+        Method declared = methods[0];
+        return method.getName().equals(declared.getName()) &&
+                Arrays.equals(method.getParameterTypes(), declared.getParameterTypes());
+    }
+
+    @VisibleForTesting
+    @Nullable
+    Caller tryCreateOptimizedCaller(@NotNull Object instance,
+                                    @NotNull Method method,
+                                    @NotNull Binding binding,
+                                    @NotNull Map<String, Validator> validators,
+                                    @NotNull List<String> vars) {
         Parameter[] parameters = method.getParameters();
 
         boolean wantsRequest = false;
@@ -165,6 +210,7 @@ public class CallerFactory {
                         options.toRichStrStr(canPassBuffer(type1), canPassBuffer(type2)));
             }
         }
+
         return null;
     }
 
@@ -252,7 +298,7 @@ public class CallerFactory {
             Validator validator = validators.getOrDefault(name, def);
             return (T) validator;
         } catch (ClassCastException e) {
-            throw new UrlConfigError("%s validator must be %s".formatted(name, def.getClass()));
+            throw new UrlConfigError("%s validator must be %s".formatted(name, def.getClass()), e);
         }
     }
 

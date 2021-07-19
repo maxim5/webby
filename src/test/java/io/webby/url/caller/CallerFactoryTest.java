@@ -7,7 +7,11 @@ import io.netty.util.AsciiString;
 import io.routekit.util.CharBuffer;
 import io.routekit.util.MutableCharBuffer;
 import io.webby.Testing;
+import io.webby.netty.DefaultHttpRequestEx;
 import io.webby.netty.HttpRequestEx;
+import io.webby.url.handle.Handler;
+import io.webby.url.handle.IntHandler;
+import io.webby.url.handle.StringHandler;
 import io.webby.url.impl.Binding;
 import io.webby.url.impl.EndpointOptions;
 import io.webby.url.validate.ValidationError;
@@ -77,7 +81,41 @@ public class CallerFactoryTest {
     }
 
     @Test
-    public void zero_vars_native() throws Exception {
+    public void native_handler() throws Exception {
+        Handler<String> instance = (request, variables) -> "%s:%s".formatted(request.method(), variables.keySet());
+        Caller caller = factory.create(instance, binding(instance), asMap(), List.of("foo", "bar"));
+
+        Assertions.assertTrue(caller instanceof NativeCaller);
+        Assertions.assertEquals("GET:[foo]", caller.call(get(), vars("foo", 1)));
+        Assertions.assertEquals("POST:[bar]", caller.call(post(), vars("bar", "x")));
+        Assertions.assertEquals("GET:[foo, bar]", caller.call(get(), vars("foo", 1, "bar", 2)));
+    }
+
+    @Test
+    public void native_int_handler() throws Exception {
+        IntHandler<String> instance = (request, val) -> "%s:%d".formatted(request.method(), val);
+        Caller caller = factory.create(instance, binding(instance), asMap(), List.of("foo"));
+
+        Assertions.assertTrue(caller instanceof NativeIntCaller);
+        Assertions.assertEquals("GET:1", caller.call(get(), vars("foo", 1)));
+        Assertions.assertEquals("POST:-1", caller.call(post(), vars("foo", -1)));
+        Assertions.assertThrows(ValidationError.class, () -> caller.call(post(), vars("bar", 1)));
+        Assertions.assertThrows(ValidationError.class, () -> caller.call(post(), vars("foo", "x")));
+    }
+
+    @Test
+    public void native_string_handler() throws Exception {
+        StringHandler<String> instance = (request, val) -> "%s:%s".formatted(request.method(), val);
+        Caller caller = factory.create(instance, binding(instance), asMap(), List.of("foo"));
+
+        Assertions.assertTrue(caller instanceof NativeStringCaller);
+        Assertions.assertEquals("GET:1", caller.call(get(), vars("foo", "1")));
+        Assertions.assertEquals("POST:bar", caller.call(post(), vars("foo", "bar")));
+        Assertions.assertThrows(ValidationError.class, () -> caller.call(post(), vars("bar", "foo")));
+    }
+
+    @Test
+    public void zero_vars_optimized() throws Exception {
         IntSupplier instance = () -> 42;
         Caller caller = factory.create(instance, binding(instance), asMap(), List.of());
 
@@ -86,7 +124,7 @@ public class CallerFactoryTest {
     }
 
     @Test
-    public void zero_vars_native_with_request() throws Exception {
+    public void zero_vars_optimized_with_request() throws Exception {
         interface RequestFunction {
             String apply(HttpRequest request);
         }
@@ -99,7 +137,7 @@ public class CallerFactoryTest {
     }
 
     @Test
-    public void one_var_native_int() throws Exception {
+    public void one_var_optimized_int() throws Exception {
         IntFunction<String> instance = String::valueOf;
         Caller caller = factory.create(instance, binding(instance), asMap(), List.of("i"));
 
@@ -109,7 +147,7 @@ public class CallerFactoryTest {
     }
 
     @Test
-    public void one_var_native_int_with_request() throws Exception {
+    public void one_var_optimized_int_with_request() throws Exception {
         interface IntRequestFunction {
             String apply(HttpRequest request, int i);
         }
@@ -124,7 +162,7 @@ public class CallerFactoryTest {
     }
 
     @Test
-    public void one_var_native_string() throws Exception {
+    public void one_var_optimized_string() throws Exception {
         StringFunction<String> instance = String::toUpperCase;
         Caller caller = factory.create(instance, binding(instance), asMap(), List.of("str"));
 
@@ -266,18 +304,19 @@ public class CallerFactoryTest {
     }
 
     @NotNull
-    private static DefaultFullHttpRequest get() {
+    private static HttpRequestEx get() {
         return request(HttpMethod.GET);
     }
 
     @NotNull
-    private static DefaultFullHttpRequest post() {
+    private static HttpRequestEx post() {
         return request(HttpMethod.POST);
     }
 
     @NotNull
-    private static DefaultFullHttpRequest request(HttpMethod method) {
-        return new DefaultFullHttpRequest(HttpVersion.HTTP_1_1, method, URL);
+    private static HttpRequestEx request(HttpMethod method) {
+        // Do not care about QueryParams for now
+        return new DefaultHttpRequestEx(new DefaultFullHttpRequest(HttpVersion.HTTP_1_1, method, URL), Map.of());
     }
 
     private interface StringFunction<T> {
