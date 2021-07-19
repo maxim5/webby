@@ -1,6 +1,6 @@
-package io.webby.netty;
+package io.webby.netty.exceptions;
 
-public class RedirectException extends RuntimeException {
+public class RedirectException extends ServeException {
     private final String uri;
     private final boolean permanent;
 

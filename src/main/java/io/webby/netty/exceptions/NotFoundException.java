@@ -1,6 +1,6 @@
-package io.webby.netty;
+package io.webby.netty.exceptions;
 
-public class NotFoundException extends RuntimeException {
+public class NotFoundException extends ServeException {
     public NotFoundException(String message) {
         super(message);
     }

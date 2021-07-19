@@ -16,6 +16,9 @@ import io.netty.handler.codec.http.HttpResponseStatus;
 import io.routekit.Match;
 import io.routekit.Router;
 import io.routekit.util.CharBuffer;
+import io.webby.netty.exceptions.BadRequestException;
+import io.webby.netty.exceptions.NotFoundException;
+import io.webby.netty.exceptions.RedirectException;
 import io.webby.url.Marshal;
 import io.webby.url.caller.Caller;
 import io.webby.url.impl.*;
@@ -85,8 +88,11 @@ public class NettyChannelHandler extends SimpleChannelInboundHandler<FullHttpReq
             log.at(Level.INFO).withCause(e).log("Request validation failed: %s", e.getMessage());
             return factory.newResponse400(e);
         } catch (NotFoundException e) {
-            log.at(Level.WARNING).withCause(e).log("Request handler returned: %s", e.getMessage());
+            log.at(Level.WARNING).withCause(e).log("Request handler raised NOT_FOUND: %s", e.getMessage());
             return factory.newResponse404(e);
+        } catch (BadRequestException e) {
+            log.at(Level.WARNING).withCause(e).log("Request handler raised BAD_REQUEST: %s", e.getMessage());
+            return factory.newResponse400(e);
         } catch (RedirectException e) {
             log.at(Level.WARNING).withCause(e).log("Redirecting to %s (%s): %s",
                     e.uri(), e.isPermanent() ? "permanent" : "temporary", e.getMessage());
