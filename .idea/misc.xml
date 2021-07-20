@@ -1,9 +1,8 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <project version="4">
   <component name="EntryPointsManager">
-    <list size="2">
-      <item index="0" class="java.lang.String" itemvalue="io.webby.url.annotations.GET" />
-      <item index="1" class="java.lang.String" itemvalue="io.webby.url.annotations.POST" />
+    <list size="1">
+      <item index="0" class="java.lang.String" itemvalue="io.webby.url.annotate.*" />
     </list>
     <writeAnnotations>
       <writeAnnotation name="com.google.inject.Inject" />

@@ -1,12 +1,13 @@
 package io.webby.hello;
 
 import io.webby.url.annotate.GET;
+import io.webby.url.annotate.Param;
 import io.webby.url.annotate.Serve;
 import io.webby.url.convert.IntConverter;
 
 @Serve
 public class HelloWorld {
-    public static final IntConverter param_id = IntConverter.POSITIVE;
+    @Param public static final IntConverter id = IntConverter.POSITIVE;
 
     @GET(url="/")
     public String home() {

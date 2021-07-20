@@ -1,6 +1,7 @@
 package io.webby.hello;
 
 import io.webby.url.annotate.POST;
+import io.webby.url.annotate.Param;
 import io.webby.url.annotate.Serve;
 import io.webby.url.convert.IntConverter;
 
@@ -8,7 +9,7 @@ import java.util.HashMap;
 
 @Serve
 public class AcceptContent {
-    public static final IntConverter param_id = IntConverter.POSITIVE;
+    @Param(var="id") public static final IntConverter paramId = IntConverter.POSITIVE;
 
     @POST(url="/int/{id}")
     public Object update_integer(int id) {

@@ -10,7 +10,7 @@ import com.google.inject.Injector;
 import io.routekit.*;
 import io.webby.app.Settings;
 import io.webby.netty.response.StaticServing;
-import io.webby.url.*;
+import io.webby.url.UrlConfigError;
 import io.webby.url.annotate.*;
 import io.webby.url.caller.Caller;
 import io.webby.url.caller.CallerFactory;
@@ -25,13 +25,10 @@ import java.util.*;
 import java.util.concurrent.TimeUnit;
 import java.util.function.BiConsumer;
 import java.util.logging.Level;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 
 public class UrlBinder {
     private static final FluentLogger log = FluentLogger.forEnclosingClass();
-    private static final Pattern PARAM_PATTERN = Pattern.compile("param_([a-zA-Z0-9_$]+)");
 
     @Inject private Settings settings;
     @Inject private HandlerFinder finder;
@@ -186,25 +183,31 @@ public class UrlBinder {
     static Map<String, Constraint<?>> extractConstraints(Class<?> klass, Object instance) {
         Map<String, Constraint<?>> map = new HashMap<>();
         for (Field field : klass.getDeclaredFields()) {
-            String fieldName = field.getName();
-            Matcher matcher = PARAM_PATTERN.matcher(fieldName);
-            if (!matcher.matches()) {
+            if (!field.isAnnotationPresent(Param.class)) {
                 continue;
             }
+            String var = field.getAnnotation(Param.class).var();
+            String fieldName = field.getName();
+            if (var.isEmpty()) {
+                var = fieldName;
+            }
+
             field.setAccessible(true);
             try {
                 Object value = field.get(instance);
                 if (value instanceof Constraint<?> constraint) {
-                    map.put(matcher.group(1), constraint);
+                    UrlConfigError.failIf(map.containsKey(var), "Duplicate constraints for %s variable".formatted(var));
+                    map.put(var, constraint);
+                    log.at(Level.FINE).log("Recognized a constraint for %s variable".formatted(var));
                 } else {
                     log.at(Level.WARNING).log(
-                            "Field %s.%s is not used as validator/converter because is not a Validator instance " +
+                            "Field %s.%s is not used as converter/validator because is not a Constraint instance " +
                             "(rename to stop seeing this warning)",
                             instance, fieldName);
                 }
             } catch (IllegalAccessException e) {
                 log.at(Level.WARNING).log(
-                        "Field %s.%s can't be accessed (rename to stop seeing this warning)",
+                        "Field %s.%s can't be accessed (remove @Param annotation to stop seeing this warning)",
                         instance, fieldName);
             }
         }
