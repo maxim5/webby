@@ -5,7 +5,7 @@ import com.google.gson.JsonIOException;
 import com.google.gson.JsonSyntaxException;
 import io.netty.buffer.ByteBuf;
 import io.netty.buffer.ByteBufInputStream;
-import io.webby.url.validate.ValidationError;
+import io.webby.url.convert.ConversionError;
 import org.jetbrains.annotations.NotNull;
 
 import java.io.InputStreamReader;
@@ -24,7 +24,7 @@ public class JsonContentProvider implements ContentProvider {
         try {
             return gson.fromJson(new InputStreamReader(new ByteBufInputStream(byteBuf), charset), this.klass);
         } catch (JsonSyntaxException | JsonIOException e) {
-            throw new ValidationError("Failed to parse JSON content", e);
+            throw new ConversionError("Failed to parse JSON content", e);
         }
     }
 }

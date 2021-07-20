@@ -2,14 +2,14 @@ package io.webby.url.caller;
 
 import io.netty.handler.codec.http.FullHttpRequest;
 import io.routekit.util.CharBuffer;
-import io.webby.url.validate.IntValidator;
+import io.webby.url.convert.IntConverter;
 import org.jetbrains.annotations.NotNull;
 
 import java.lang.reflect.Method;
 import java.util.Map;
 
 public record IntIntCaller(Object instance, Method method,
-                           IntValidator validator1, IntValidator validator2,
+                           IntConverter validator1, IntConverter validator2,
                            String name1, String name2,
                            CallOptions opts) implements Caller {
     @Override

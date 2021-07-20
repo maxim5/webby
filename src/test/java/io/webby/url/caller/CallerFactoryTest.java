@@ -14,7 +14,7 @@ import io.webby.url.handle.IntHandler;
 import io.webby.url.handle.StringHandler;
 import io.webby.url.impl.Binding;
 import io.webby.url.impl.EndpointOptions;
-import io.webby.url.validate.ValidationError;
+import io.webby.url.convert.ConversionError;
 import org.jetbrains.annotations.NotNull;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
@@ -99,8 +99,8 @@ public class CallerFactoryTest {
         Assertions.assertTrue(caller instanceof NativeIntCaller);
         Assertions.assertEquals("GET:1", caller.call(get(), vars("foo", 1)));
         Assertions.assertEquals("POST:-1", caller.call(post(), vars("foo", -1)));
-        Assertions.assertThrows(ValidationError.class, () -> caller.call(post(), vars("bar", 1)));
-        Assertions.assertThrows(ValidationError.class, () -> caller.call(post(), vars("foo", "x")));
+        Assertions.assertThrows(ConversionError.class, () -> caller.call(post(), vars("bar", 1)));
+        Assertions.assertThrows(ConversionError.class, () -> caller.call(post(), vars("foo", "x")));
     }
 
     @Test
@@ -111,7 +111,7 @@ public class CallerFactoryTest {
         Assertions.assertTrue(caller instanceof NativeStringCaller);
         Assertions.assertEquals("GET:1", caller.call(get(), vars("foo", "1")));
         Assertions.assertEquals("POST:bar", caller.call(post(), vars("foo", "bar")));
-        Assertions.assertThrows(ValidationError.class, () -> caller.call(post(), vars("bar", "foo")));
+        Assertions.assertThrows(ConversionError.class, () -> caller.call(post(), vars("bar", "foo")));
     }
 
     @Test
@@ -143,7 +143,7 @@ public class CallerFactoryTest {
 
         Assertions.assertEquals("10", caller.call(get(), vars("i", 10)));
         Assertions.assertEquals("10", caller.call(post(), vars("i", 10)));
-        Assertions.assertThrows(ValidationError.class, () -> caller.call(get(), vars("x", 10)));
+        Assertions.assertThrows(ConversionError.class, () -> caller.call(get(), vars("x", 10)));
     }
 
     @Test
@@ -157,8 +157,8 @@ public class CallerFactoryTest {
         Assertions.assertEquals("GET:10", caller.call(get(), vars("i", 10)));
         Assertions.assertEquals("GET:0", caller.call(get(), vars("i", 0)));
         Assertions.assertEquals("POST:10", caller.call(post(), vars("i", 10)));
-        Assertions.assertThrows(ValidationError.class, () -> caller.call(get(), vars("i", "foo")));
-        Assertions.assertThrows(ValidationError.class, () -> caller.call(get(), vars("x", 10)));
+        Assertions.assertThrows(ConversionError.class, () -> caller.call(get(), vars("i", "foo")));
+        Assertions.assertThrows(ConversionError.class, () -> caller.call(get(), vars("x", 10)));
     }
 
     @Test
@@ -213,9 +213,9 @@ public class CallerFactoryTest {
                 caller.call(get(), vars("x", -10, "y", Long.MIN_VALUE, "z", -128, "s", "bar"))
         );
 
-        Assertions.assertThrows(ValidationError.class, () ->
+        Assertions.assertThrows(ConversionError.class, () ->
                 caller.call(get(), vars("x", 1, "y", 2, "z", 256, "s", "foo")));
-        Assertions.assertThrows(ValidationError.class, () ->
+        Assertions.assertThrows(ConversionError.class, () ->
                 caller.call(get(), vars("x", 1, "y", 2, "z", 3, "str", "foo")));
     }
 
@@ -231,9 +231,9 @@ public class CallerFactoryTest {
         Assertions.assertEquals("0:9223372036854775807:127", caller.call(get(), vars("x", 0, "y", Long.MAX_VALUE, "z", 127)));
         Assertions.assertEquals("-10:-9223372036854775808:-128", caller.call(get(), vars("x", -10, "y", Long.MIN_VALUE, "z", -128)));
 
-        Assertions.assertThrows(ValidationError.class, () ->
+        Assertions.assertThrows(ConversionError.class, () ->
                 caller.call(get(), vars("x", 1, "y", 2, "z", 256)));
-        Assertions.assertThrows(ValidationError.class, () ->
+        Assertions.assertThrows(ConversionError.class, () ->
                 caller.call(get(), vars("x", 1, "y", 2, "w", 3)));
     }
 
@@ -246,7 +246,7 @@ public class CallerFactoryTest {
         Caller caller = factory.create(instance, binding(instance), asMap(), List.of("x", "y", "z", "b"));
 
         Assertions.assertEquals("1:2.00:3.00:false", caller.call(get(), vars("x", 1, "y", 2.0, "z", 3.0, "b", false)));
-        Assertions.assertThrows(ValidationError.class, () -> caller.call(get(), vars("x", 1_000_000, "y", 0, "z", 0, "b", true)));
+        Assertions.assertThrows(ConversionError.class, () -> caller.call(get(), vars("x", 1_000_000, "y", 0, "z", 0, "b", true)));
     }
 
     @Test
@@ -260,7 +260,7 @@ public class CallerFactoryTest {
         Assertions.assertEquals("A:B", caller.call(get(), vars("x", 65, "y", 66)));
         Assertions.assertEquals("\u90AB:\u0000", caller.call(get(), vars("x", 0x90AB, "y", 0)));
         // Assertions.assertThrows(ValidationError.class, () -> caller.call(get(), vars("x", -1, "y", -2)));
-        Assertions.assertThrows(ValidationError.class, () -> caller.call(get(), vars("x", -1, "y", Long.MAX_VALUE)));
+        Assertions.assertThrows(ConversionError.class, () -> caller.call(get(), vars("x", -1, "y", Long.MAX_VALUE)));
     }
 
     @NotNull

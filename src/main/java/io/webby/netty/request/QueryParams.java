@@ -1,9 +1,8 @@
 package io.webby.netty.request;
 
 import io.routekit.util.CharBuffer;
-import io.webby.url.validate.Converter;
-import io.webby.url.validate.SimpleConverter;
-import io.webby.url.validate.Validator;
+import io.webby.url.convert.Constraint;
+import io.webby.url.convert.ConversionError;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
@@ -14,12 +13,12 @@ public class QueryParams {
     private final String path;
     private final String rawQuery;
     private final Map<String, List<String>> parameters;
-    private final Map<String, Validator> validators;
+    private final Map<String, Constraint<?>> validators;
 
     public QueryParams(@NotNull String path,
                        @NotNull String rawQuery,
                        @NotNull Map<String, List<String>> parameters,
-                       @NotNull Map<String, Validator> validators) {
+                       @NotNull Map<String, Constraint<?>> validators) {
         this.path = path;
         this.rawQuery = rawQuery;
         this.parameters = parameters;
@@ -49,20 +48,13 @@ public class QueryParams {
 
     @SuppressWarnings("unchecked")
     @Nullable
-    public <T> T getValidatedParam(@NotNull String name) {
+    public <T> T getValidatedParam(@NotNull String name) throws ConversionError {
         String value = getRawParameter(name);
         if (value == null) {
             return null;
         }
 
-        Validator validator = validators.get(name);
-        if (validator instanceof SimpleConverter<?> converter) {
-            return (T) converter.convert(value);
-        }
-        if (validator instanceof Converter<?> converter) {
-            return (T) converter.convert(new CharBuffer(value));
-        }
-        // TODO: call validate?
-        return null;
+        Constraint<?> constraint = validators.get(name);
+        return (T) constraint.applyWithName(name, new CharBuffer(value));
     }
 }

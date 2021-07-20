@@ -24,7 +24,7 @@ import io.webby.netty.response.HttpResponseFactory;
 import io.webby.url.annotate.Marshal;
 import io.webby.url.caller.Caller;
 import io.webby.url.impl.*;
-import io.webby.url.validate.ValidationError;
+import io.webby.url.convert.ConversionError;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.VisibleForTesting;
 
@@ -86,7 +86,7 @@ public class NettyChannelHandler extends SimpleChannelInboundHandler<FullHttpReq
                 log.at(Level.INFO).log("Request handler returned null or void: %s", caller.method());
                 return convertToResponse("", endpoint.options());
             }
-        } catch (ValidationError e) {
+        } catch (ConversionError e) {
             log.at(Level.INFO).withCause(e).log("Request validation failed: %s", e.getMessage());
             return factory.newResponse400(e);
         } catch (NotFoundException e) {
@@ -109,7 +109,7 @@ public class NettyChannelHandler extends SimpleChannelInboundHandler<FullHttpReq
 
     @NotNull
     private static FullHttpRequest wrapRequestIfNeeded(@NotNull FullHttpRequest request, @NotNull EndpointContext context) {
-        return context.rawRequest() ? request : new DefaultHttpRequestEx(request, context.validators());
+        return context.rawRequest() ? request : new DefaultHttpRequestEx(request, context.constraints());
     }
 
     @NotNull

@@ -13,7 +13,7 @@ import io.webby.url.handle.Handler;
 import io.webby.url.handle.IntHandler;
 import io.webby.url.handle.StringHandler;
 import io.webby.url.impl.Binding;
-import io.webby.url.validate.*;
+import io.webby.url.convert.*;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import org.jetbrains.annotations.VisibleForTesting;
@@ -27,12 +27,12 @@ import java.util.logging.Level;
 public class CallerFactory {
     private static final FluentLogger log = FluentLogger.forEnclosingClass();
 
-    private static final IntValidator DEFAULT_INT = IntValidator.ANY;
-    private static final StringValidator DEFAULT_STR = StringValidator.DEFAULT_256;
-    private static final ImmutableMap<Class<?>, SimpleConverter<?>> DEFAULT_CONVERTERS =
-            ImmutableMap.<Class<?>, SimpleConverter<?>>builder()
-            .put(int.class, DEFAULT_INT.asSimpleConverter())
-            .put(Integer.class, DEFAULT_INT.asSimpleConverter())
+    private static final IntConverter DEFAULT_INT = IntConverter.ANY;
+    private static final StringConverter DEFAULT_STR = StringConverter.DEFAULT_256;
+    private static final ImmutableMap<Class<?>, Converter<?>> DEFAULT_CONVERTERS =
+            ImmutableMap.<Class<?>, Converter<?>>builder()
+            .put(int.class, DEFAULT_INT)
+            .put(Integer.class, DEFAULT_INT)
             .put(long.class, Long::parseLong)
             .put(Long.class, Long::valueOf)
             .put(short.class, Short::parseShort)
@@ -47,8 +47,8 @@ public class CallerFactory {
             .put(Double.class, Double::valueOf)
             .put(boolean.class, Boolean::parseBoolean)
             .put(Boolean.class, Boolean::valueOf)
-            .put(CharSequence.class, DEFAULT_STR.asSimpleConverter())
-            .put(String.class, DEFAULT_STR.asSimpleConverter())
+            .put(CharSequence.class, DEFAULT_STR)
+            .put(String.class, DEFAULT_STR)
             .build();
 
     @Inject private Injector injector;
@@ -57,21 +57,21 @@ public class CallerFactory {
     @NotNull
     public Caller create(@NotNull Object instance,
                          @NotNull Binding binding,
-                         @NotNull Map<String, Validator> validators,
+                         @NotNull Map<String, Constraint<?>> constraints,
                          @NotNull List<String> vars) {
         Method method = binding.method();
 
-        Caller nativeCaller = tryCreateNativeCaller(instance, method, validators, vars);
+        Caller nativeCaller = tryCreateNativeCaller(instance, method, constraints, vars);
         if (nativeCaller != null) {
             return nativeCaller;
         }
 
-        Caller optimizedCaller = tryCreateOptimizedCaller(instance, method, binding, validators, vars);
+        Caller optimizedCaller = tryCreateOptimizedCaller(instance, method, binding, constraints, vars);
         if (optimizedCaller != null) {
             return optimizedCaller;
         }
 
-        List<CallArgumentFunction> mapping = tryCreateGenericMapping(method, binding, validators, vars);
+        List<CallArgumentFunction> mapping = tryCreateGenericMapping(method, binding, constraints, vars);
         if (mapping != null) {
             return new GenericCaller(instance, method, mapping);
         }
@@ -83,7 +83,7 @@ public class CallerFactory {
     @Nullable
     Caller tryCreateNativeCaller(@NotNull Object instance,
                                  @NotNull Method method,
-                                 @NotNull Map<String, Validator> validators,
+                                 @NotNull Map<String, Constraint<?>> constraints,
                                  @NotNull List<String> vars) {
         if (instance instanceof Handler<?> handler && isMethodImplementsInterface(method, Handler.class)) {
             return new NativeCaller(handler);
@@ -92,14 +92,14 @@ public class CallerFactory {
         if (instance instanceof IntHandler<?> handler && isMethodImplementsInterface(method, IntHandler.class)) {
             assertVarsMatchParams(vars, 1, method);
             String var = vars.get(0);
-            IntValidator validator = getValidator(validators, var, DEFAULT_INT);
+            IntConverter validator = getConstraint(constraints, var, DEFAULT_INT);
             return new NativeIntCaller(handler, validator, var);
         }
 
         if (instance instanceof StringHandler<?> handler && isMethodImplementsInterface(method, StringHandler.class)) {
             assertVarsMatchParams(vars, 1, method);
             String var = vars.get(0);
-            StringValidator validator = getValidator(validators, var, DEFAULT_STR);
+            StringConverter validator = getConstraint(constraints, var, DEFAULT_STR);
             return new NativeStringCaller(handler, validator, var);
         }
 
@@ -120,7 +120,7 @@ public class CallerFactory {
     Caller tryCreateOptimizedCaller(@NotNull Object instance,
                                     @NotNull Method method,
                                     @NotNull Binding binding,
-                                    @NotNull Map<String, Validator> validators,
+                                    @NotNull Map<String, Constraint<?>> constraints,
                                     @NotNull List<String> vars) {
         Parameter[] parameters = method.getParameters();
 
@@ -151,7 +151,7 @@ public class CallerFactory {
             Class<?> type = parameters[0].getType();
 
             if (type.equals(Map.class)) {
-                return new MapCaller(instance, method, validators, options);
+                return new MapCaller(instance, method, constraints, options);
             }
             if (!isNativeSupport(type)) {
                 return null;
@@ -161,12 +161,12 @@ public class CallerFactory {
             String var = vars.get(0);
 
             if (isInt(type)) {
-                IntValidator validator = getValidator(validators, var, DEFAULT_INT);
+                IntConverter validator = getConstraint(constraints, var, DEFAULT_INT);
                 return new IntCaller(instance, method, validator, var, options);
             }
 
             if (isStringLike(type)) {
-                StringValidator validator = getValidator(validators, var, DEFAULT_STR);
+                StringConverter validator = getConstraint(constraints, var, DEFAULT_STR);
                 return new StringCaller(instance, method, validator, var, options.toRichStr(canPassBuffer(type)));
             }
         }
@@ -184,28 +184,28 @@ public class CallerFactory {
             String var2 = vars.get(1);
 
             if (isInt(type1) && isInt(type2)) {
-                IntValidator validator1 = getValidator(validators, var1, DEFAULT_INT);
-                IntValidator validator2 = getValidator(validators, var2, DEFAULT_INT);
+                IntConverter validator1 = getConstraint(constraints, var1, DEFAULT_INT);
+                IntConverter validator2 = getConstraint(constraints, var2, DEFAULT_INT);
                 return new IntIntCaller(instance, method, validator1, validator2, var1, var2, options);
             }
 
             if (isInt(type1) && isStringLike(type2)) {
-                IntValidator intValidator = getValidator(validators, var1, DEFAULT_INT);
-                StringValidator strValidator = getValidator(validators, var2, DEFAULT_STR);
-                return new IntStrCaller(instance, method, intValidator, strValidator, var1, var2,
+                IntConverter intConverter = getConstraint(constraints, var1, DEFAULT_INT);
+                StringConverter strValidator = getConstraint(constraints, var2, DEFAULT_STR);
+                return new IntStrCaller(instance, method, intConverter, strValidator, var1, var2,
                         options.toRichStrInt(canPassBuffer(type2), false));
             }
 
             if (isStringLike(type1) && isInt(type2)) {
-                StringValidator strValidator = getValidator(validators, var1, DEFAULT_STR);
-                IntValidator intValidator = getValidator(validators, var2, DEFAULT_INT);
-                return new IntStrCaller(instance, method, intValidator, strValidator, var2, var1,
+                StringConverter strValidator = getConstraint(constraints, var1, DEFAULT_STR);
+                IntConverter intConverter = getConstraint(constraints, var2, DEFAULT_INT);
+                return new IntStrCaller(instance, method, intConverter, strValidator, var2, var1,
                         options.toRichStrInt(canPassBuffer(type1), true));
             }
 
             if (isStringLike(type1) && isStringLike(type2)) {
-                StringValidator validator1 = getValidator(validators, var1, DEFAULT_STR);
-                StringValidator validator2 = getValidator(validators, var2, DEFAULT_STR);
+                StringConverter validator1 = getConstraint(constraints, var1, DEFAULT_STR);
+                StringConverter validator2 = getConstraint(constraints, var2, DEFAULT_STR);
                 return new StrStrCaller(instance, method, validator1, validator2, var1, var2,
                         options.toRichStrStr(canPassBuffer(type1), canPassBuffer(type2)));
             }
@@ -229,7 +229,7 @@ public class CallerFactory {
     @Nullable
     List<CallArgumentFunction> tryCreateGenericMapping(@NotNull Method method,
                                                        @NotNull Binding binding,
-                                                       @NotNull Map<String, Validator> validators,
+                                                       @NotNull Map<String, Constraint<?>> constraints,
                                                        @NotNull List<String> vars) {
         Parameter[] params = method.getParameters();  // forget about previous guesses
         List<CallArgumentFunction> argMapping = new ArrayList<>(params.length);
@@ -253,21 +253,10 @@ public class CallerFactory {
             }
 
             if (!varz.isEmpty()) {
-                String var = varz.peek();
-                Validator validator = validators.computeIfAbsent(var, (k) -> DEFAULT_CONVERTERS.get(type));
-                if (validator instanceof Converter<?> converter) {
-                    varz.poll();
-                    argMapping.add(((request, varsMap) -> {
-                        try {
-                            return converter.convert(varsMap.get(var));
-                        } catch (ValidationError e) {
-                            throw e;
-                        } catch (RuntimeException e) {
-                            throw new ValidationError("Failed to validate %s".formatted(var), e);
-                        }
-                    }));
-                    continue;
-                }
+                String var = varz.poll();
+                Constraint<?> constraint = constraints.computeIfAbsent(var, (k) -> DEFAULT_CONVERTERS.get(type));
+                argMapping.add(((request, varsMap) -> constraint.applyWithName(var, varsMap.get(var))));
+                continue;
             }
 
             if (i == last && isContentParam(params[i], binding)) {
@@ -293,10 +282,10 @@ public class CallerFactory {
     }
 
     @SuppressWarnings("unchecked")
-    private static <T extends Validator> T getValidator(Map<String, Validator> validators, String name, T def) {
+    private static <T extends Constraint<?>> T getConstraint(Map<String, Constraint<?>> constraints, String name, T def) {
         try {
-            Validator validator = validators.getOrDefault(name, def);
-            return (T) validator;
+            Constraint<?> constraint = constraints.getOrDefault(name, def);
+            return (T) constraint;
         } catch (ClassCastException e) {
             throw new UrlConfigError("%s validator must be %s".formatted(name, def.getClass()), e);
         }

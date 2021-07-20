@@ -5,14 +5,14 @@ import io.netty.handler.codec.http.HttpRequest;
 import io.routekit.util.CharBuffer;
 import io.webby.url.annotate.GET;
 import io.webby.url.annotate.Serve;
-import io.webby.url.validate.StringValidator;
-import io.webby.url.validate.Validator;
+import io.webby.url.convert.Converter;
+import io.webby.url.convert.StringConverter;
 import org.jetbrains.annotations.NotNull;
 
 @Serve
 public class AcceptRequest {
-    private static final Validator param_name = StringValidator.DEFAULT_256;
-    final Validator param_buf = new StringValidator(10);
+    private static final Converter<String> param_name = StringConverter.DEFAULT_256;
+    final Converter<String> param_buf = new StringConverter(10);
 
     @GET(url="/str/{name}")
     public String string(@NotNull HttpRequest request, String name) {

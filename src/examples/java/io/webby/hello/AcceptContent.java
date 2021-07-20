@@ -2,14 +2,13 @@ package io.webby.hello;
 
 import io.webby.url.annotate.POST;
 import io.webby.url.annotate.Serve;
-import io.webby.url.validate.IntValidator;
-import io.webby.url.validate.Validator;
+import io.webby.url.convert.IntConverter;
 
 import java.util.HashMap;
 
 @Serve
 public class AcceptContent {
-    public static final Validator param_id = IntValidator.POSITIVE;
+    public static final IntConverter param_id = IntConverter.POSITIVE;
 
     @POST(url="/int/{id}")
     public Object update_integer(int id) {

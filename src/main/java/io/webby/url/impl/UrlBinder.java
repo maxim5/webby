@@ -14,7 +14,7 @@ import io.webby.url.*;
 import io.webby.url.annotate.*;
 import io.webby.url.caller.Caller;
 import io.webby.url.caller.CallerFactory;
-import io.webby.url.validate.Validator;
+import io.webby.url.convert.Constraint;
 import org.jetbrains.annotations.NotNull;
 
 import java.io.IOException;
@@ -159,7 +159,7 @@ public class UrlBinder {
                     Class<?> klass = binding.method().getDeclaringClass();
                     Object instance = injector.getInstance(klass);
                     EndpointContext context = contextCache.computeIfAbsent(klass,
-                            key -> new EndpointContext(extractValidators(klass, instance), false));
+                            key -> new EndpointContext(extractConstraints(klass, instance), false));
 
                     List<String> vars = parser.parse(binding.url())
                             .stream()
@@ -167,7 +167,7 @@ public class UrlBinder {
                             .filter(Objects::nonNull)
                             .toList();
 
-                    Caller caller = callerFactory.create(instance, binding, context.validators(), vars);
+                    Caller caller = callerFactory.create(instance, binding, context.constraints(), vars);
                     return SingleRouteEndpoint.fromBinding(binding, caller, context);
                 }).toList();
 
@@ -183,8 +183,8 @@ public class UrlBinder {
     }
 
     @VisibleForTesting
-    static Map<String, Validator> extractValidators(Class<?> klass, Object instance) {
-        HashMap<String, Validator> map = new HashMap<>();
+    static Map<String, Constraint<?>> extractConstraints(Class<?> klass, Object instance) {
+        Map<String, Constraint<?>> map = new HashMap<>();
         for (Field field : klass.getDeclaredFields()) {
             String fieldName = field.getName();
             Matcher matcher = PARAM_PATTERN.matcher(fieldName);
@@ -194,8 +194,8 @@ public class UrlBinder {
             field.setAccessible(true);
             try {
                 Object value = field.get(instance);
-                if (value instanceof Validator validator) {
-                    map.put(matcher.group(1), validator);
+                if (value instanceof Constraint<?> constraint) {
+                    map.put(matcher.group(1), constraint);
                 } else {
                     log.at(Level.WARNING).log(
                             "Field %s.%s is not used as validator/converter because is not a Validator instance " +

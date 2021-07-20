@@ -1,24 +1,36 @@
 package io.webby.url.caller;
 
+import com.google.mu.util.stream.BiStream;
 import io.netty.handler.codec.http.FullHttpRequest;
 import io.routekit.util.CharBuffer;
-import io.webby.url.validate.Validator;
+import io.webby.url.convert.Constraint;
 import org.jetbrains.annotations.NotNull;
 
 import java.lang.reflect.Method;
 import java.util.Map;
 
-public record MapCaller(Object instance, Method method, Map<String, Validator> validators, CallOptions opts) implements Caller {
+public record MapCaller(Object instance, Method method,
+                        Map<String, Constraint<?>> constraints,
+                        CallOptions opts) implements Caller {
+    private static final Constraint<CharBuffer> identity = value -> value;
+
     @Override
     public Object call(@NotNull FullHttpRequest request, @NotNull Map<String, CharBuffer> variables) throws Exception {
-        // TODO: call validators?
+        Map<String, ?> converted = convert(variables);
         if (opts.wantsContent()) {
             Object content = opts.contentProvider.getContent(request);
             return opts.wantsRequest ?
-                    method.invoke(instance, request, variables, content) :
-                    method.invoke(instance, variables, content);
+                    method.invoke(instance, request, converted, content) :
+                    method.invoke(instance, converted, content);
         } else {
-            return opts.wantsRequest ? method.invoke(instance, request, variables) : method.invoke(instance, variables);
+            return opts.wantsRequest ? method.invoke(instance, request, converted) : method.invoke(instance, converted);
         }
+    }
+
+    @NotNull
+    private Map<String, ?> convert(@NotNull Map<String, CharBuffer> variables) {
+        return BiStream.from(variables.entrySet())
+                .mapValues((key, value) -> constraints.getOrDefault(key, identity).applyWithName(key, value))
+                .toMap();
     }
 }

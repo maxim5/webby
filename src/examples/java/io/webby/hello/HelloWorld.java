@@ -2,12 +2,11 @@ package io.webby.hello;
 
 import io.webby.url.annotate.GET;
 import io.webby.url.annotate.Serve;
-import io.webby.url.validate.IntValidator;
-import io.webby.url.validate.Validator;
+import io.webby.url.convert.IntConverter;
 
 @Serve
 public class HelloWorld {
-    public static final Validator param_id = IntValidator.POSITIVE;
+    public static final IntConverter param_id = IntConverter.POSITIVE;
 
     @GET(url="/")
     public String home() {

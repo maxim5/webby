@@ -3,7 +3,7 @@ package io.webby.netty.request;
 import io.netty.handler.codec.http.DefaultFullHttpRequest;
 import io.netty.handler.codec.http.FullHttpRequest;
 import io.netty.handler.codec.http.QueryStringDecoder;
-import io.webby.url.validate.Validator;
+import io.webby.url.convert.Constraint;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.Map;
@@ -12,11 +12,12 @@ import java.util.function.Supplier;
 
 public class DefaultHttpRequestEx extends DefaultFullHttpRequest implements HttpRequestEx {
     private final AtomicReference<QueryParams> params = new AtomicReference<>(null);
-    private final Map<String, Validator> validators;
+    private final Map<String, Constraint<?>> constraints;
 
-    public DefaultHttpRequestEx(@NotNull FullHttpRequest request, @NotNull Map<String, Validator> validators) {
-        super(request.protocolVersion(), request.method(), request.uri(), request.content(), request.headers(), request.trailingHeaders());
-        this.validators = validators;
+    public DefaultHttpRequestEx(@NotNull FullHttpRequest request, @NotNull Map<String, Constraint<?>> constraints) {
+        super(request.protocolVersion(), request.method(), request.uri(), request.content(),
+                request.headers(), request.trailingHeaders());
+        this.constraints = constraints;
     }
 
     @NotNull
@@ -27,7 +28,7 @@ public class DefaultHttpRequestEx extends DefaultFullHttpRequest implements Http
     @NotNull
     private QueryParams parseQuery() {
         QueryStringDecoder decoder = new QueryStringDecoder(uri());
-        return new QueryParams(decoder.path(), decoder.rawQuery(), decoder.parameters(), validators);
+        return new QueryParams(decoder.path(), decoder.rawQuery(), decoder.parameters(), constraints);
     }
 
     @NotNull

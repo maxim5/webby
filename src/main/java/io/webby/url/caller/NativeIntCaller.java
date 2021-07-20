@@ -4,12 +4,12 @@ import io.netty.handler.codec.http.FullHttpRequest;
 import io.routekit.util.CharBuffer;
 import io.webby.netty.request.HttpRequestEx;
 import io.webby.url.handle.IntHandler;
-import io.webby.url.validate.IntValidator;
+import io.webby.url.convert.IntConverter;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.Map;
 
-public record NativeIntCaller(IntHandler<?> handler, IntValidator validator, String name) implements Caller {
+public record NativeIntCaller(IntHandler<?> handler, IntConverter validator, String name) implements Caller {
     @Override
     public Object call(@NotNull FullHttpRequest request, @NotNull Map<String, CharBuffer> variables) throws Exception {
         CharBuffer value = variables.get(name);
