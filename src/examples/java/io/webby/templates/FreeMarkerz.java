@@ -4,6 +4,8 @@ import freemarker.cache.ClassTemplateLoader;
 import freemarker.template.Configuration;
 import freemarker.template.Template;
 import io.webby.url.annotate.GET;
+import io.webby.url.annotate.View;
+import io.webby.url.view.RenderUtil;
 
 import java.io.IOException;
 import java.util.Map;
@@ -12,12 +14,27 @@ public class FreeMarkerz {
     private static final Template HELLO = getTemplate("hello.ftl");
 
     @GET(url = "/templates/freemarker/hello")
-    public String hello() throws Exception {
+    @View(template = "hello.ftl")
+    public Map<String, Object> hello() {
         return hello("Big Joe");
     }
 
     @GET(url = "/templates/freemarker/hello/{name}")
-    public String hello(String name) throws Exception {
+    @View(template = "hello.ftl")
+    public Map<String, Object> hello(String name) {
+        return Map.of(
+                "user", name,
+                "latestProduct", new Product("products/green-mouse.html", "Green Mouse")
+        );
+    }
+
+    // @GET(url = "/templates/freemarker/hello")
+    public String obsolete_hello() throws Exception {
+        return obsolete_hello("Big Joe");
+    }
+
+    // @GET(url = "/templates/freemarker/hello/{name}")
+    public String obsolete_hello(String name) throws Exception {
         Map<String, Object> root = Map.of(
             "user", name,
             "latestProduct", new Product("products/green-mouse.html", "Green Mouse")
@@ -26,7 +43,7 @@ public class FreeMarkerz {
     }
 
     @GET(url = "/templates/freemarker/hello-bytes/{name}")
-    public byte[] hello_bytes(String name) throws Exception {
+    public byte[] obsolete_hello_bytes(String name) throws Exception {
         Map<String, Object> root = Map.of(
                 "user", name,
                 "latestProduct", new Product("products/green-mouse.html", "Green Mouse")

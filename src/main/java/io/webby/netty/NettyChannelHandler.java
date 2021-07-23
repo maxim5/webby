@@ -22,10 +22,13 @@ import io.webby.url.annotate.Marshal;
 import io.webby.url.caller.Caller;
 import io.webby.url.impl.*;
 import io.webby.url.convert.ConversionError;
+import io.webby.url.view.Renderer;
+import io.webby.url.view.RendererProvider;
 import io.webby.util.Pair;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.VisibleForTesting;
 
+import java.io.IOException;
 import java.io.InputStream;
 import java.util.List;
 import java.util.concurrent.TimeUnit;
@@ -36,11 +39,13 @@ public class NettyChannelHandler extends SimpleChannelInboundHandler<FullHttpReq
 
     private final HttpResponseFactory factory;
     private final Router<RouteEndpoint> router;
+    private final Renderer renderer;
 
     @Inject
-    public NettyChannelHandler(@NotNull HttpResponseFactory factory, @NotNull UrlRouter urlRouter) {
+    public NettyChannelHandler(@NotNull HttpResponseFactory factory, @NotNull UrlRouter urlRouter, @NotNull RendererProvider provider) {
         this.factory = factory;
         this.router = urlRouter.getRouter();
+        this.renderer = provider.getRenderer();
     }
 
     @Override
@@ -77,14 +82,14 @@ public class NettyChannelHandler extends SimpleChannelInboundHandler<FullHttpReq
         }
 
         Caller caller = endpoint.caller();
-        Object callResult;
         try {
             FullHttpRequest clientRequest = wrapRequestIfNeeded(request, endpoint.context());
-            callResult = caller.call(clientRequest, match.variables());
+            Object callResult = caller.call(clientRequest, match.variables());
             if (callResult == null) {
                 log.at(Level.INFO).log("Request handler returned null or void: %s", caller.method());
                 return createResponse("", endpoint.options());
             }
+            return createResponse(callResult, endpoint.options());
         } catch (ConversionError e) {
             log.at(Level.INFO).withCause(e).log("Request validation failed: %s", e.getMessage());
             return factory.newResponse400(e);
@@ -102,8 +107,6 @@ public class NettyChannelHandler extends SimpleChannelInboundHandler<FullHttpReq
             log.at(Level.SEVERE).withCause(e).log("Failed to call method: %s", caller.method());
             return factory.newResponse503("Failed to call method: %s".formatted(caller.method()), e);
         }
-
-        return createResponse(callResult, endpoint.options());
     }
 
     @NotNull
@@ -112,14 +115,14 @@ public class NettyChannelHandler extends SimpleChannelInboundHandler<FullHttpReq
     }
 
     @NotNull
-    private FullHttpResponse createResponse(@NotNull Object callResult, @NotNull EndpointOptions options) {
+    private FullHttpResponse createResponse(@NotNull Object callResult, @NotNull EndpointOptions options) throws Exception {
         FullHttpResponse response = convertToResponse(callResult, options);
         return applyHeaders(response, options);
     }
 
     @NotNull
     @VisibleForTesting
-    FullHttpResponse convertToResponse(@NotNull Object callResult, @NotNull EndpointOptions options) {
+    FullHttpResponse convertToResponse(@NotNull Object callResult, @NotNull EndpointOptions options) throws Exception {
         if (callResult instanceof FullHttpResponse response) {
             return response;
         }
@@ -129,6 +132,21 @@ public class NettyChannelHandler extends SimpleChannelInboundHandler<FullHttpReq
                 (options.out() == Marshal.JSON) ?
                         HttpHeaderValues.APPLICATION_JSON :
                         HttpHeaderValues.TEXT_HTML;
+
+        if (options.view() != null) {
+            String template = options.view().template();
+            return switch (renderer.support()) {
+                case BYTE_ARRAY -> {
+                    byte[] bytes = renderer.renderToBytes(template, callResult);
+                    yield factory.newResponse(bytes, HttpResponseStatus.OK, contentType);
+                }
+                case STRING -> {
+                    String content = renderer.renderToString(template, callResult);
+                    yield factory.newResponse(content, HttpResponseStatus.OK, contentType);
+                }
+                case BYTE_STREAM -> throw new UnsupportedOperationException();
+            };
+        }
 
         if (callResult instanceof CharSequence string) {
             return factory.newResponse(string, HttpResponseStatus.OK, contentType);
@@ -150,7 +168,10 @@ public class NettyChannelHandler extends SimpleChannelInboundHandler<FullHttpReq
         }
 
         return switch (options.out()) {
-            case JSON -> factory.newResponse(new Gson().toJson(callResult), HttpResponseStatus.OK, HttpHeaderValues.APPLICATION_JSON);
+            case JSON -> {
+                String json = new Gson().toJson(callResult);
+                yield factory.newResponse(json, HttpResponseStatus.OK, HttpHeaderValues.APPLICATION_JSON);
+            }
             case AS_STRING -> factory.newResponse(callResult.toString(), HttpResponseStatus.OK, contentType);
             case PROTOBUF_BINARY -> throw new UnsupportedOperationException();
             case PROTOBUF_JSON -> throw new UnsupportedOperationException();

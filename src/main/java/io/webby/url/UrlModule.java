@@ -6,6 +6,7 @@ import io.webby.url.caller.ContentProviderFactory;
 import io.webby.url.impl.HandlerFinder;
 import io.webby.url.impl.UrlBinder;
 import io.webby.url.impl.UrlRouter;
+import io.webby.url.view.RendererProvider;
 
 public class UrlModule extends AbstractModule {
     @Override
@@ -13,6 +14,7 @@ public class UrlModule extends AbstractModule {
         bind(CallerFactory.class).asEagerSingleton();
         bind(ContentProviderFactory.class).asEagerSingleton();
         bind(HandlerFinder.class).asEagerSingleton();
+        bind(RendererProvider.class).asEagerSingleton();
         bind(UrlBinder.class).asEagerSingleton();
         bind(UrlRouter.class).asEagerSingleton();
     }

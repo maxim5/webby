@@ -19,6 +19,7 @@ import io.webby.url.caller.CallerFactory;
 import io.webby.url.convert.Constraint;
 import io.webby.util.Pair;
 import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 
 import java.io.IOException;
 import java.lang.reflect.AnnotatedElement;
@@ -108,7 +109,8 @@ public class UrlBinder {
                             getMarshalFromAnnotations(method.getParameters()[method.getParameterCount() - 1], classIn) :
                             null;
                     Marshal out = getMarshalFromAnnotations(method, classOut);
-                    EndpointHttp endpointHttp = getEndpointHttpFromAnnotation(method).mergeWithDefault(classHttp);
+                    EndpointHttp http = getEndpointHttpFromAnnotation(method).mergeWithDefault(classHttp);
+                    EndpointView view = getEndpointViewFromAnnotation(method);
 
                     interface Sink {
                         void accept(String type, String url, boolean usuallyExpectsContent);
@@ -124,7 +126,7 @@ public class UrlBinder {
                         method.setAccessible(true);
 
                         boolean expectsContent = usuallyExpectsContent && in != null;
-                        EndpointOptions options = new EndpointOptions(in, out, endpointHttp, expectsContent);
+                        EndpointOptions options = new EndpointOptions(in, out, http, view, expectsContent);
                         Binding binding = new Binding(url, method, type, options);
                         bindings.add(binding);
                     };
@@ -163,19 +165,6 @@ public class UrlBinder {
             throw new HandlerConfigError("Failed to bind handlers", e);
         }
         return bindings;
-    }
-
-    @NotNull
-    private EndpointHttp getEndpointHttpFromAnnotation(@NotNull AnnotatedElement element) {
-        if (element.isAnnotationPresent(Http.class)) {
-            Http http = element.getAnnotation(Http.class);
-            String contentType = http.contentType();
-            List<Pair<String, String>> headers = Arrays.stream(http.headers())
-                    .map(header -> Pair.of(header.name(), header.value()))
-                    .toList();
-            return new EndpointHttp(contentType, headers);
-        }
-        return EndpointHttp.EMPTY;
     }
 
     @VisibleForTesting
@@ -251,7 +240,32 @@ public class UrlBinder {
     static Marshal getMarshalFromAnnotations(@NotNull AnnotatedElement elem, @NotNull Marshal def) {
         boolean isJson = elem.isAnnotationPresent(Json.class);
         boolean isProto = elem.isAnnotationPresent(Protobuf.class);
+        // TODO: View.class
         HandlerConfigError.failIf(isProto && isJson, "Incompatible @Json and @Protobuf declaration for %s".formatted(elem));
         return isJson ? Marshal.JSON : (isProto && def != Marshal.PROTOBUF_JSON) ? Marshal.PROTOBUF_BINARY : def;
+    }
+
+    @VisibleForTesting
+    @NotNull
+    static EndpointHttp getEndpointHttpFromAnnotation(@NotNull AnnotatedElement element) {
+        if (element.isAnnotationPresent(Http.class)) {
+            Http http = element.getAnnotation(Http.class);
+            String contentType = http.contentType();
+            List<Pair<String, String>> headers = Arrays.stream(http.headers())
+                    .map(header -> Pair.of(header.name(), header.value()))
+                    .toList();
+            return new EndpointHttp(contentType, headers);
+        }
+        return EndpointHttp.EMPTY;
+    }
+
+    @VisibleForTesting
+    @Nullable
+    static EndpointView getEndpointViewFromAnnotation(@NotNull AnnotatedElement element) {
+        if (element.isAnnotationPresent(View.class)) {
+            View view = element.getAnnotation(View.class);
+            return new EndpointView(view.template());
+        }
+        return null;
     }
 }

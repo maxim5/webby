@@ -7,6 +7,7 @@ import gg.jte.TemplateOutput;
 import gg.jte.output.StringOutput;
 import gg.jte.resolve.ResourceCodeResolver;
 import io.webby.url.annotate.GET;
+import io.webby.url.annotate.View;
 
 import java.nio.file.Path;
 
@@ -14,7 +15,13 @@ public class Jtez {
     private final TemplateEngine templateEngine = create();
 
     @GET(url = "/templates/jte/hello")
-    public String example() {
+    @View(template = "example.jte")
+    public Object example() {
+        return new Page("Fancy Title", "Fancy Description");
+    }
+
+    // @GET(url = "/templates/jte/hello")
+    public String obsolete_example() {
         Page page = new Page("Fancy Title", "Fancy Description");
         return renderToString("example.jte", page);
     }
@@ -25,8 +32,7 @@ public class Jtez {
         return output.toString();
     }
 
-    public static record Page(String title, String description) {
-    }
+    public record Page(String title, String description) {}
 
     private static TemplateEngine create() {
         CodeResolver codeResolver = new ResourceCodeResolver("web/jte");
