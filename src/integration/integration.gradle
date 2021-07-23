@@ -3,7 +3,7 @@ sourceSets {
 }
 
 configurations {
-    integrationImplementation.extendsFrom testImplementation
+    integrationImplementation.extendsFrom(testImplementation, implementation, compileOnly)
     integrationRuntimeOnly.extendsFrom testRuntimeOnly
 }
 
