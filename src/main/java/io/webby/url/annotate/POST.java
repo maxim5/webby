@@ -9,5 +9,4 @@ import java.lang.annotation.Target;
 @Target({ElementType.TYPE, ElementType.METHOD})
 public @interface POST {
     String url() default "";
-    String contentType() default "";
 }

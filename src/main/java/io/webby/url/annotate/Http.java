@@ -7,6 +7,7 @@ import java.lang.annotation.Target;
 
 @Retention(RetentionPolicy.RUNTIME)
 @Target({ElementType.TYPE, ElementType.METHOD})
-public @interface DELETE {
-    String url() default "";
+public @interface Http {
+    String contentType() default "";
+    Header[] headers();
 }

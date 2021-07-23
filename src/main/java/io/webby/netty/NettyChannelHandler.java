@@ -119,8 +119,9 @@ public class NettyChannelHandler extends SimpleChannelInboundHandler<FullHttpReq
             return response;
         }
 
-        CharSequence contentType = (!options.contentType().isEmpty()) ?
-                options.contentType() :
+        EndpointHttp http = options.http();
+        CharSequence contentType = http.hasContentType() ?
+                http.contentType() :
                 (options.out() == Marshal.JSON) ?
                         HttpHeaderValues.APPLICATION_JSON :
                         HttpHeaderValues.TEXT_HTML;

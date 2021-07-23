@@ -15,6 +15,7 @@ import io.webby.url.annotate.*;
 import io.webby.url.caller.Caller;
 import io.webby.url.caller.CallerFactory;
 import io.webby.url.convert.Constraint;
+import io.webby.util.Pair;
 import org.jetbrains.annotations.NotNull;
 
 import java.io.IOException;
@@ -86,18 +87,20 @@ public class UrlBinder {
                 String classUrl = (klass.isAnnotationPresent(Serve.class)) ? klass.getAnnotation(Serve.class).url() : "";
                 Marshal classIn = getMarshalFromAnnotations(klass, defaultIn);
                 Marshal classOut = getMarshalFromAnnotations(klass, defaultOut);
+                EndpointHttp classHttp = getEndpointHttpFromAnnotation(klass);
 
                 for (Method method : klass.getDeclaredMethods()) {
                     Marshal in = method.getParameterCount() > 0 ?
                             getMarshalFromAnnotations(method.getParameters()[method.getParameterCount() - 1], classIn) :
                             null;
                     Marshal out = getMarshalFromAnnotations(method, classOut);
+                    EndpointHttp endpointHttp = getEndpointHttpFromAnnotation(method).mergeWithDefault(classHttp);
 
                     interface Sink {
-                        void accept(String type, String url, String contentType, boolean usuallyExpectsContent);
+                        void accept(String type, String url, boolean usuallyExpectsContent);
                     }
 
-                    Sink sink = (type, url, contentType, usuallyExpectsContent) -> {
+                    Sink sink = (type, url, usuallyExpectsContent) -> {
                         if (url.isEmpty()) {
                             UrlConfigError.failIf(classUrl.isEmpty(),
                                     "URL is not set neither in class %s nor in method %s".formatted(klass, method));
@@ -107,26 +110,26 @@ public class UrlBinder {
                         method.setAccessible(true);
 
                         boolean expectsContent = usuallyExpectsContent && in != null;
-                        EndpointOptions options = new EndpointOptions(in, out, contentType, expectsContent);
+                        EndpointOptions options = new EndpointOptions(in, out, endpointHttp, expectsContent);
                         Binding binding = new Binding(url, method, type, options);
                         bindings.add(binding);
                     };
 
                     if (method.isAnnotationPresent(GET.class)) {
                         GET ann = method.getAnnotation(GET.class);
-                        sink.accept("GET", ann.url(), ann.contentType(), false);
+                        sink.accept("GET", ann.url(), false);
                     }
                     if (method.isAnnotationPresent(POST.class)) {
                         POST ann = method.getAnnotation(POST.class);
-                        sink.accept("POST", ann.url(), ann.contentType(), true);
+                        sink.accept("POST", ann.url(), true);
                     }
                     if (method.isAnnotationPresent(PUT.class)) {
                         PUT ann = method.getAnnotation(PUT.class);
-                        sink.accept("PUT", ann.url(), ann.contentType(), true);
+                        sink.accept("PUT", ann.url(), true);
                     }
                     if (method.isAnnotationPresent(DELETE.class)) {
                         DELETE ann = method.getAnnotation(DELETE.class);
-                        sink.accept("DELETE", ann.url(), ann.contentType(), false);
+                        sink.accept("DELETE", ann.url(), false);
                     }
                     if (method.isAnnotationPresent(Call.class)) {
                         Call ann = method.getAnnotation(Call.class);
@@ -135,7 +138,7 @@ public class UrlBinder {
                                 log.at(Level.WARNING).log(
                                         "@Call http method is not upper-case: %s (at %s)".formatted(type, method));
                             }
-                            sink.accept(type, ann.url(), ann.contentType(), true);
+                            sink.accept(type, ann.url(), true);
                         }
                     }
                 }
@@ -144,6 +147,19 @@ public class UrlBinder {
             throw (e instanceof UrlConfigError configError ? configError : new UrlConfigError(e));
         }
         return bindings;
+    }
+
+    @NotNull
+    private EndpointHttp getEndpointHttpFromAnnotation(@NotNull AnnotatedElement element) {
+        if (element.isAnnotationPresent(Http.class)) {
+            Http http = element.getAnnotation(Http.class);
+            String contentType = http.contentType();
+            List<Pair<String, String>> headers = Arrays.stream(http.headers())
+                    .map(header -> Pair.of(header.name(), header.value()))
+                    .toList();
+            return new EndpointHttp(contentType, headers);
+        }
+        return EndpointHttp.EMPTY;
     }
 
     @VisibleForTesting
