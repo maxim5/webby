@@ -8,8 +8,10 @@ import com.google.inject.ConfigurationException;
 import com.google.inject.Inject;
 import com.google.inject.Injector;
 import io.routekit.*;
+import io.webby.app.AppConfigException;
 import io.webby.app.Settings;
 import io.webby.netty.response.StaticServing;
+import io.webby.url.HandlerConfigError;
 import io.webby.url.UrlConfigError;
 import io.webby.url.annotate.*;
 import io.webby.url.caller.Caller;
@@ -39,7 +41,8 @@ public class UrlBinder {
 
     private final Map<Class<?>, EndpointContext> contextCache = new HashMap<>();
 
-    public Router<RouteEndpoint> bindRouter() {
+    @NotNull
+    public Router<RouteEndpoint> bindRouter() throws AppConfigException {
         Set<? extends Class<?>> handlerClasses = finder.getHandlerClassesFromClasspath();
         ArrayList<Binding> bindings = bindHandlers(handlerClasses);
         RouterSetup<RouteEndpoint> setup = getRouterSetup(bindings);
@@ -47,7 +50,7 @@ public class UrlBinder {
     }
 
     @NotNull
-    private RouterSetup<RouteEndpoint> getRouterSetup(ArrayList<Binding> bindings) {
+    private RouterSetup<RouteEndpoint> getRouterSetup(ArrayList<Binding> bindings) throws AppConfigException {
         RouterSetup<RouteEndpoint> setup = new RouterSetup<>();
         QueryParser parser = settings.urlParser();
 
@@ -102,7 +105,7 @@ public class UrlBinder {
 
                     Sink sink = (type, url, usuallyExpectsContent) -> {
                         if (url.isEmpty()) {
-                            UrlConfigError.failIf(classUrl.isEmpty(),
+                            HandlerConfigError.failIf(classUrl.isEmpty(),
                                     "URL is not set neither in class %s nor in method %s".formatted(klass, method));
                             url = classUrl;
                         }
@@ -143,8 +146,10 @@ public class UrlBinder {
                     }
                 }
             });
+        } catch (AppConfigException e) {
+            throw e;
         } catch (Exception e) {
-            throw (e instanceof UrlConfigError configError ? configError : new UrlConfigError(e));
+            throw new HandlerConfigError("Failed to bind handlers", e);
         }
         return bindings;
     }
@@ -189,7 +194,7 @@ public class UrlBinder {
                 consumer.accept(url, endpoint);
             });
         } catch (ConfigurationException e) {
-            throw new UrlConfigError("Handler instance can't be found or created (use @Inject to register a constructor)", e);
+            throw new HandlerConfigError("Handler instance can't be found or created (use @Inject to register a constructor)", e);
         } catch (QueryParseException e) {
             throw new UrlConfigError(e);
         }
@@ -212,7 +217,7 @@ public class UrlBinder {
             try {
                 Object value = field.get(instance);
                 if (value instanceof Constraint<?> constraint) {
-                    UrlConfigError.failIf(map.containsKey(var), "Duplicate constraints for %s variable".formatted(var));
+                    HandlerConfigError.failIf(map.containsKey(var), "Duplicate constraints for %s variable".formatted(var));
                     map.put(var, constraint);
                     log.at(Level.FINE).log("Recognized a constraint for %s variable".formatted(var));
                 } else {
@@ -235,7 +240,7 @@ public class UrlBinder {
     static Marshal getMarshalFromAnnotations(@NotNull AnnotatedElement elem, @NotNull Marshal def) {
         boolean isJson = elem.isAnnotationPresent(Json.class);
         boolean isProto = elem.isAnnotationPresent(Protobuf.class);
-        UrlConfigError.failIf(isProto && isJson, "Incompatible @Json and @Protobuf declaration for %s".formatted(elem));
+        HandlerConfigError.failIf(isProto && isJson, "Incompatible @Json and @Protobuf declaration for %s".formatted(elem));
         return isJson ? Marshal.JSON : (isProto && def != Marshal.PROTOBUF_JSON) ? Marshal.PROTOBUF_BINARY : def;
     }
 }

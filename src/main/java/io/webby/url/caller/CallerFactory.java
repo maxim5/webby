@@ -6,6 +6,8 @@ import com.google.inject.Inject;
 import com.google.inject.Injector;
 import io.netty.handler.codec.http.HttpRequest;
 import io.routekit.util.CharBuffer;
+import io.webby.app.AppConfigException;
+import io.webby.url.HandlerConfigError;
 import io.webby.url.annotate.Json;
 import io.webby.url.annotate.Protobuf;
 import io.webby.url.UrlConfigError;
@@ -58,7 +60,7 @@ public class CallerFactory {
     public Caller create(@NotNull Object instance,
                          @NotNull Binding binding,
                          @NotNull Map<String, Constraint<?>> constraints,
-                         @NotNull List<String> vars) {
+                         @NotNull List<String> vars) throws AppConfigException {
         Method method = binding.method();
 
         Caller nativeCaller = tryCreateNativeCaller(instance, method, constraints, vars);
@@ -76,7 +78,7 @@ public class CallerFactory {
             return new GenericCaller(instance, method, mapping);
         }
 
-        throw new UrlConfigError("Failed to recognize method signature: %s".formatted(method));
+        throw new HandlerConfigError("Failed to recognize method signature: %s".formatted(method));
     }
 
     @VisibleForTesting
@@ -215,11 +217,11 @@ public class CallerFactory {
     }
 
     private static void assertVarsMatchParams(@NotNull List<String> vars, int params, @NotNull Method method) {
-        UrlConfigError.failIf(
+        HandlerConfigError.failIf(
                 vars.size() < params,
                 "Method %s has extra arguments that can't be matched to URL variables: %s".formatted(method, vars)
         );
-        UrlConfigError.failIf(
+        HandlerConfigError.failIf(
                 vars.size() > params,
                 "Method %s does not accept enough arguments for requested URL variables: %s".formatted(method, vars)
         );
@@ -287,7 +289,7 @@ public class CallerFactory {
             Constraint<?> constraint = constraints.getOrDefault(name, def);
             return (T) constraint;
         } catch (ClassCastException e) {
-            throw new UrlConfigError("%s validator must be %s".formatted(name, def.getClass()), e);
+            throw new HandlerConfigError("%s validator must be %s".formatted(name, def.getClass()), e);
         }
     }
 
