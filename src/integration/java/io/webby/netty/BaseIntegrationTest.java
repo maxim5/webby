@@ -55,6 +55,10 @@ public abstract class BaseIntegrationTest {
         return new ReadableByteBuf(buf);
     }
 
+    protected static void assert200(FullHttpResponse response) {
+        assert200(response, null);
+    }
+
     protected static void assert200(FullHttpResponse response, String content) {
         assertResponse(response, HttpResponseStatus.OK, content);
     }
