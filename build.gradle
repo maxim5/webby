@@ -1,5 +1,6 @@
 plugins {
     id 'java'
+    id 'java-library'
     id 'idea'
     id 'nu.studer.rocker' version '3.0.2'
 }
@@ -12,17 +13,29 @@ repositories {
 }
 
 dependencies {
-    implementation 'com.google.code.gson:gson:2.8.7'
+    // API
+    api 'com.google.code.gson:gson:2.8.7'
+    api 'com.google.inject:guice:5.0.1'
+    api 'io.netty:netty-all:4.1.65.Final'
+
+    // Implementation
     implementation 'com.google.guava:guava:30.1.1-jre'
-    implementation 'com.google.inject:guice:5.0.1'
     implementation 'com.google.mug:mug:5.4'
-    implementation 'io.netty:netty-all:4.1.65.Final'
     implementation 'org.jetbrains:annotations:20.1.0'
+
     // RouteKit
     implementation files('libs/routekit-0.1.2.jar')
+
     // Google Flogger
-    implementation 'com.google.flogger:flogger:0.6'
+    compileOnly 'com.google.flogger:flogger:0.6'
     runtimeOnly 'com.google.flogger:flogger-system-backend:0.6'
+
+    // Templates
+    compileOnly group: 'com.fizzed', name: 'rocker-runtime', version: '1.3.0'
+    compileOnly group: 'com.github.jknack', name: 'handlebars', version: '4.2.0'
+    compileOnly group: 'gg.jte', name: 'jte', version: '1.11.1'
+    compileOnly group: 'io.pebbletemplates', name: 'pebble', version: '3.1.5'
+    compileOnly group: 'org.freemarker', name: 'freemarker', version: '2.3.31'
 
     // JUnit
     testImplementation 'org.junit.jupiter:junit-jupiter-api:5.7.0'
@@ -35,54 +48,5 @@ test {
     useJUnitPlatform()
 }
 
-sourceSets {
-    examples
-    integration
-}
-
-configurations {
-    examplesImplementation.extendsFrom implementation
-    examplesRuntimeOnly.extendsFrom runtimeOnly
-
-    integrationImplementation.extendsFrom testImplementation
-    integrationRuntimeOnly.extendsFrom testRuntimeOnly
-}
-
-dependencies {
-    examplesImplementation sourceSets.main.output
-    examplesRuntimeOnly sourceSets.main.output
-
-    // Templates
-    examplesImplementation group: 'com.fizzed', name: 'rocker-runtime', version: '1.3.0'
-    examplesImplementation group: 'com.github.jknack', name: 'handlebars', version: '4.2.0'
-    examplesImplementation group: 'gg.jte', name: 'jte', version: '1.11.1'
-    examplesImplementation group: 'io.pebbletemplates', name: 'pebble', version: '3.1.5'
-    examplesImplementation group: 'org.freemarker', name: 'freemarker', version: '2.3.31'
-
-    integrationImplementation sourceSets.main.output
-    integrationImplementation sourceSets.test.output
-    integrationImplementation sourceSets.examples.output
-}
-
-idea {
-    module {
-        testSourceDirs += project.sourceSets.integration.java.srcDirs
-        testResourceDirs = project.sourceSets.integration.resources.srcDirs
-    }
-}
-
-// Templates
-
-// https://github.com/etiennestuder/gradle-rocker-plugin
-rocker {
-    version = '1.3.0'  // optional
-    configurations {
-        examples {
-            templateDir = file('src/examples/resources/web/rocker')
-            outputDir = file('build/generated/rocker/examples/java')
-            optimize = true
-        }
-    }
-}
-
-sourceSets.examples.java.srcDirs += [rocker.configurations.examples.outputDir]
+apply from: 'src/examples/examples.gradle'
+apply from: 'src/integration/integration.gradle'

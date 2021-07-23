@@ -1,0 +1,21 @@
+sourceSets {
+    integration
+}
+
+configurations {
+    integrationImplementation.extendsFrom testImplementation
+    integrationRuntimeOnly.extendsFrom testRuntimeOnly
+}
+
+dependencies {
+    integrationImplementation sourceSets.main.output
+    integrationImplementation sourceSets.test.output
+    integrationImplementation sourceSets.examples.output
+}
+
+idea {
+    module {
+        testSourceDirs += project.sourceSets.integration.java.srcDirs
+        testResourceDirs = project.sourceSets.integration.resources.srcDirs
+    }
+}
