@@ -9,4 +9,5 @@ import java.lang.annotation.Target;
 @Target(ElementType.TYPE)
 public @interface Serve {
     String url() default "";
+    boolean disabled() default false;
 }

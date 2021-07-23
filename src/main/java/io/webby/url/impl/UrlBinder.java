@@ -87,7 +87,18 @@ public class UrlBinder {
             Marshal defaultOut = settings.defaultResponseContentMarshal();
 
             handlerClasses.forEach(klass -> {
-                String classUrl = (klass.isAnnotationPresent(Serve.class)) ? klass.getAnnotation(Serve.class).url() : "";
+                String classUrl;
+                if (klass.isAnnotationPresent(Serve.class)) {
+                    Serve serve = klass.getAnnotation(Serve.class);
+                    if (serve.disabled()) {
+                        log.at(Level.CONFIG).log("Ignoring disabled handler class: %s", klass);
+                        return;
+                    }
+                    classUrl = serve.url();
+                } else {
+                    classUrl = "";
+                }
+
                 Marshal classIn = getMarshalFromAnnotations(klass, defaultIn);
                 Marshal classOut = getMarshalFromAnnotations(klass, defaultOut);
                 EndpointHttp classHttp = getEndpointHttpFromAnnotation(klass);
