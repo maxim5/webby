@@ -9,10 +9,7 @@ import io.netty.buffer.ByteBuf;
 import io.netty.channel.ChannelFutureListener;
 import io.netty.channel.ChannelHandlerContext;
 import io.netty.channel.SimpleChannelInboundHandler;
-import io.netty.handler.codec.http.FullHttpRequest;
-import io.netty.handler.codec.http.FullHttpResponse;
-import io.netty.handler.codec.http.HttpHeaderValues;
-import io.netty.handler.codec.http.HttpResponseStatus;
+import io.netty.handler.codec.http.*;
 import io.routekit.Match;
 import io.routekit.Router;
 import io.routekit.util.CharBuffer;
@@ -25,10 +22,12 @@ import io.webby.url.annotate.Marshal;
 import io.webby.url.caller.Caller;
 import io.webby.url.impl.*;
 import io.webby.url.convert.ConversionError;
+import io.webby.util.Pair;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.VisibleForTesting;
 
 import java.io.InputStream;
+import java.util.List;
 import java.util.concurrent.TimeUnit;
 import java.util.logging.Level;
 
@@ -84,7 +83,7 @@ public class NettyChannelHandler extends SimpleChannelInboundHandler<FullHttpReq
             callResult = caller.call(clientRequest, match.variables());
             if (callResult == null) {
                 log.at(Level.INFO).log("Request handler returned null or void: %s", caller.method());
-                return convertToResponse("", endpoint.options());
+                return createResponse("", endpoint.options());
             }
         } catch (ConversionError e) {
             log.at(Level.INFO).withCause(e).log("Request validation failed: %s", e.getMessage());
@@ -104,7 +103,7 @@ public class NettyChannelHandler extends SimpleChannelInboundHandler<FullHttpReq
             return factory.newResponse503("Failed to call method: %s".formatted(caller.method()), e);
         }
 
-        return convertToResponse(callResult, endpoint.options());
+        return createResponse(callResult, endpoint.options());
     }
 
     @NotNull
@@ -113,15 +112,20 @@ public class NettyChannelHandler extends SimpleChannelInboundHandler<FullHttpReq
     }
 
     @NotNull
+    private FullHttpResponse createResponse(@NotNull Object callResult, @NotNull EndpointOptions options) {
+        FullHttpResponse response = convertToResponse(callResult, options);
+        return applyHeaders(response, options);
+    }
+
+    @NotNull
     @VisibleForTesting
-    FullHttpResponse convertToResponse(Object callResult, EndpointOptions options) {
+    FullHttpResponse convertToResponse(@NotNull Object callResult, @NotNull EndpointOptions options) {
         if (callResult instanceof FullHttpResponse response) {
             return response;
         }
 
-        EndpointHttp http = options.http();
-        CharSequence contentType = http.hasContentType() ?
-                http.contentType() :
+        CharSequence contentType = options.http().hasContentType() ?
+                options.http().contentType() :
                 (options.out() == Marshal.JSON) ?
                         HttpHeaderValues.APPLICATION_JSON :
                         HttpHeaderValues.TEXT_HTML;
@@ -151,6 +155,17 @@ public class NettyChannelHandler extends SimpleChannelInboundHandler<FullHttpReq
             case PROTOBUF_BINARY -> throw new UnsupportedOperationException();
             case PROTOBUF_JSON -> throw new UnsupportedOperationException();
         };
+    }
+
+    @NotNull
+    @VisibleForTesting
+    static FullHttpResponse applyHeaders(@NotNull FullHttpResponse response, @NotNull EndpointOptions options) {
+        List<Pair<String, String>> clientHeaders = options.http().headers();
+        HttpHeaders headers = response.headers();
+        for (Pair<String, String> header : clientHeaders) {
+            headers.add(header.getKey(), header.getValue());
+        }
+        return response;
     }
 
     @Override

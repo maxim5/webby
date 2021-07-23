@@ -9,5 +9,5 @@ import java.lang.annotation.Target;
 @Target({ElementType.TYPE, ElementType.METHOD})
 public @interface Http {
     String contentType() default "";
-    Header[] headers();
+    Header[] headers() default {};
 }
