@@ -11,6 +11,7 @@ import io.webby.netty.NettyModule;
 import io.webby.url.UrlModule;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
+import org.jetbrains.annotations.VisibleForTesting;
 
 import java.io.File;
 import java.util.logging.Level;
@@ -19,9 +20,14 @@ public class Webby {
     private static final FluentLogger log = FluentLogger.forEnclosingClass();
 
     @NotNull
-    public static Injector startup(@NotNull AppSettings settings) throws AppConfigException {
+    public static Injector initDependencies(@NotNull AppSettings settings) throws AppConfigException {
         log.at(Level.INFO).log("Initializing Webby dependencies");
         validateSettings(settings);
+        return initGuice(settings);
+    }
+
+    @VisibleForTesting
+    /*package*/ static Injector initGuice(@NotNull AppSettings settings) {
         return Guice.createInjector(new AppModule(settings), new NettyModule(), new UrlModule());
     }
 

@@ -1,11 +1,7 @@
 package io.webby;
 
-import com.google.inject.Guice;
 import com.google.inject.Injector;
-import io.webby.app.AppModule;
 import io.webby.app.AppSettings;
-import io.webby.netty.NettyModule;
-import io.webby.url.UrlModule;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.Locale;
@@ -49,6 +45,6 @@ public class Testing {
 
         Locale.setDefault(Locale.US);  // any way to remove this?
 
-        return Guice.createInjector(new AppModule(settings), new NettyModule(), new UrlModule());
+        return Webby.initGuice(settings);
     }
 }
