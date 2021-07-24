@@ -6,27 +6,40 @@ import com.fizzed.rocker.runtime.ArrayOfByteArraysOutput;
 import io.webby.url.annotate.GET;
 import io.webby.url.annotate.Render;
 import io.webby.url.annotate.Serve;
+import io.webby.url.annotate.View;
 import views.HelloRock;
 
 import java.io.InputStream;
+import java.util.Map;
 
 @Serve(render = Render.ROCKER)
-public class Rockerz {
+public class RockerExample {
     @GET(url = "/templates/rocker/hello")
-    public Object hello() {
-        // Default: ArrayOfByteArraysOutput
-        return HelloRock.template("World").render();
+    @View(template = "views/HelloRock.rocker.html")
+    public HelloRock hello_bound_template() {
+        return HelloRock.template("World");
     }
 
-    @GET(url = "/templates/rocker/hello/string")
-    public String hello_string() {
+    @GET(url = "/templates/rocker/hello/model")
+    @View(template = "views/HelloRock.rocker.html")
+    public Map<String, Object> hello_model() {
+        return Map.of("message", "Model");
+    }
+
+    @GET(url = "/templates/manual/rocker/hello")
+    public Object manual_hello() {
+        return HelloRock.template("World").render();  // Default: ArrayOfByteArraysOutput
+    }
+
+    @GET(url = "/templates/manual/rocker/hello/string")
+    public String manual_hello_string() {
         RockerOutput<?> output = HelloRock.template("String").render();
         // Charset: UTF-8, byte length: 14
         return output.toString();
     }
 
-    @GET(url = "/templates/rocker/hello/stream")
-    public InputStream hello_stream() {
+    @GET(url = "/templates/manual/rocker/hello/stream")
+    public InputStream manual_hello_stream() {
         ArrayOfByteArraysOutput output = Rocker.template("views/HelloRock.rocker.html")
                 .bind("message", "Stream")
                 .render(ArrayOfByteArraysOutput::new);
@@ -34,8 +47,8 @@ public class Rockerz {
         return output.asInputStream();
     }
 
-    @GET(url = "/templates/rocker/hello/bytes")
-    public byte[] hello_bytes() {
+    @GET(url = "/templates/manual/rocker/hello/bytes")
+    public byte[] manual_hello_bytes() {
         return HelloRock.template("Bytes")
                 .render(ArrayOfByteArraysOutput::new)
                 .toByteArray();
