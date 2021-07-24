@@ -106,6 +106,13 @@ public abstract class BaseIntegrationTest {
                 .isEqualTo(new DefaultFullHttpResponse(version, status, byteBuf, httpHeaders, trailingHeaders));
     }
 
+    protected static void assertContentContains(FullHttpResponse response, String ... substrings) {
+        String content = response.content().toString();
+        for (String string : substrings) {
+            Truth.assertThat(content).contains(string);
+        }
+    }
+
     @SuppressWarnings("deprecation")
     protected static class ReadableByteBuf extends DuplicatedByteBuf {
         public ReadableByteBuf(ByteBuf buffer) {

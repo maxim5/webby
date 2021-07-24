@@ -16,8 +16,9 @@ import java.nio.file.Path;
 import java.util.function.Supplier;
 
 @Serve(render = Render.JTE)
-public class Jtez {
-    private static final Supplier<TemplateEngine> templateEngine = Suppliers.memoize(Jtez::create);
+// JTE: must be public
+public class JteExample {
+    private static final Supplier<TemplateEngine> templateEngine = Suppliers.memoize(JteExample::create);
 
     @GET(url = "/templates/jte/hello")
     @View(template = "jte/example.jte")
@@ -25,24 +26,19 @@ public class Jtez {
         return new Page("Fancy Title", "Fancy Description");
     }
 
-    // @GET(url = "/templates/jte/hello")
-    public String obsolete_example() {
-        Page page = new Page("Fancy Title", "Fancy Description");
-        return renderToString("example.jte", page);
-    }
-
-    private String renderToString(String template, Object model) {
+    @GET(url = "/templates/manual/jte/hello")
+    public String manual_example() {
         TemplateOutput output = new StringOutput();
-        templateEngine.get().render(template, model, output);
+        Object model = example();
+        templateEngine.get().render("jte/example.jte", model, output);
         return output.toString();
     }
 
+    // JTE: must be public
     public record Page(String title, String description) {}
 
     private static TemplateEngine create() {
-        CodeResolver codeResolver = new ResourceCodeResolver("web/jte");
-        TemplateEngine engine = TemplateEngine.create(codeResolver, Path.of("build/generated/jte/examples/java"), ContentType.Html);
-        engine.prepareForRendering("example.jte");
-        return engine;
+        CodeResolver codeResolver = new ResourceCodeResolver("web");
+        return TemplateEngine.create(codeResolver, Path.of("build/generated/jte/examples/java"), ContentType.Html);
     }
 }
