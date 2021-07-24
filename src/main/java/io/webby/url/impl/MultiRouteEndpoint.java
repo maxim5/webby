@@ -37,8 +37,7 @@ record MultiRouteEndpoint(@NotNull Map<HttpMethod, SingleRouteEndpoint> map,
                         return e2;
                     }
                     throw new UrlConfigError(
-                            "Multiple endpoints on the same URL and method: %s and %s"
-                                    .formatted(e1.caller().caller().method(), e2.caller().caller().method())
+                        "Multiple endpoints on the same URL and HTTP method: %s and %s".formatted(e1.describe(), e2.describe())
                     );
                 })
         ));
