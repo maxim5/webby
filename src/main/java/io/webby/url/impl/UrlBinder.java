@@ -284,8 +284,10 @@ public class UrlBinder {
     static Marshal getMarshalFromAnnotations(@NotNull AnnotatedElement elem, @NotNull Marshal def) {
         boolean isJson = elem.isAnnotationPresent(Json.class);
         boolean isProto = elem.isAnnotationPresent(Protobuf.class);
-        // TODO: View.class
+        boolean isView = elem.isAnnotationPresent(View.class);
         HandlerConfigError.failIf(isProto && isJson, "Incompatible @Json and @Protobuf declaration for %s".formatted(elem));
+        HandlerConfigError.failIf(isProto && isView, "Incompatible @View and @Protobuf declaration for %s".formatted(elem));
+        HandlerConfigError.failIf(isJson && isView, "Incompatible @Json and @View declaration for %s".formatted(elem));
         return isJson ? Marshal.JSON : (isProto && def != Marshal.PROTOBUF_JSON) ? Marshal.PROTOBUF_BINARY : def;
     }
 
