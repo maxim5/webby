@@ -55,4 +55,10 @@ public class RenderUtil {
         }
         throw error.apply(object);
     }
+
+    @SuppressWarnings("unchecked")
+    @NotNull
+    public static <R, T> R castAny(@NotNull T object) {
+        return (R) object;
+    }
 }
