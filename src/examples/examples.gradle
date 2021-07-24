@@ -12,9 +12,8 @@ dependencies {
     examplesRuntimeOnly sourceSets.main.output
 
     // Silence SLF4J: https://stackoverflow.com/questions/66386000/how-to-disable-slf4j-in-jetty
-    examplesImplementation 'org.slf4j:slf4j-nop:2.0.0-alpha2'
+    examplesRuntimeOnly 'org.slf4j:slf4j-nop:2.0.0-alpha2'
 }
-
 
 // https://github.com/etiennestuder/gradle-rocker-plugin
 rocker {
