@@ -1,7 +1,9 @@
 package io.webby.url.view;
 
+import com.google.common.io.Closeables;
 import io.webby.util.ThrowConsumer;
 import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 
 import java.io.*;
 import java.util.Map;
@@ -31,6 +33,7 @@ public class RenderUtil {
         ByteArrayOutputStream output = new ByteArrayOutputStream(size);
         Writer writer = new OutputStreamWriter(output);
         consumer.accept(writer);
+        closeQuietly(writer);
         return output.toByteArray();
     }
 
@@ -60,5 +63,14 @@ public class RenderUtil {
     @NotNull
     public static <R, T> R castAny(@NotNull T object) {
         return (R) object;
+    }
+
+    @SuppressWarnings("UnstableApiUsage")
+    public static void closeQuietly(@Nullable Closeable closeable) {
+        try {
+            Closeables.close(closeable, true);
+        } catch (IOException impossible) {
+            throw new AssertionError(impossible);
+        }
     }
 }
