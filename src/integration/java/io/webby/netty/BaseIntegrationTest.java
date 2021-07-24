@@ -2,17 +2,24 @@ package io.webby.netty;
 
 import com.google.common.truth.Truth;
 import com.google.gson.Gson;
+import com.google.inject.Injector;
 import io.netty.buffer.ByteBuf;
 import io.netty.buffer.DuplicatedByteBuf;
 import io.netty.buffer.Unpooled;
 import io.netty.handler.codec.http.*;
 import io.netty.util.CharsetUtil;
 import io.webby.Testing;
+import io.webby.hello.AcceptContent;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
 public abstract class BaseIntegrationTest {
     protected NettyChannelHandler handler;
+
+    protected void testStartup(@NotNull Class<?> clazz) {
+        Injector injector = Testing.testStartup(clazz);
+        handler = injector.getInstance(NettyChannelHandler.class);
+    }
 
     @NotNull
     protected FullHttpResponse get(String uri) {

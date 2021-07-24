@@ -1,16 +1,13 @@
-package io.webby.netty;
+package io.webby.hello;
 
-import com.google.inject.Injector;
-import io.webby.Testing;
-import io.webby.hello.HelloWorld;
+import io.webby.netty.BaseIntegrationTest;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
 public class HelloWorldIntegrationTest extends BaseIntegrationTest {
     @BeforeEach
     void setup() {
-        Injector injector = Testing.testStartup(HelloWorld.class);
-        handler = injector.getInstance(NettyChannelHandler.class);
+        testStartup(HelloWorld.class);
     }
 
     @Test

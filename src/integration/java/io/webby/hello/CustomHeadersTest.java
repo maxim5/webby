@@ -1,10 +1,8 @@
-package io.webby.netty;
+package io.webby.hello;
 
 import com.google.common.io.ByteStreams;
-import com.google.inject.Injector;
 import io.netty.handler.codec.http.FullHttpResponse;
-import io.webby.Testing;
-import io.webby.hello.CustomHeaders;
+import io.webby.netty.BaseIntegrationTest;
 import org.jetbrains.annotations.NotNull;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
@@ -20,8 +18,7 @@ import java.util.zip.ZipInputStream;
 public class CustomHeadersTest extends BaseIntegrationTest {
     @BeforeEach
     void setup() {
-        Injector injector = Testing.testStartup(CustomHeaders.class);
-        handler = injector.getInstance(NettyChannelHandler.class);
+        testStartup(CustomHeaders.class);
     }
 
     @Test
