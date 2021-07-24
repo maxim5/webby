@@ -60,8 +60,7 @@ public class RenderUtil {
     }
 
     @SuppressWarnings("unchecked")
-    @NotNull
-    public static <R, T> R castAny(@NotNull T object) {
+    public static <R, T> R castAny(T object) {
         return (R) object;
     }
 
