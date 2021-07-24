@@ -18,10 +18,11 @@ import io.webby.netty.exceptions.NotFoundException;
 import io.webby.netty.exceptions.RedirectException;
 import io.webby.netty.request.DefaultHttpRequestEx;
 import io.webby.netty.response.HttpResponseFactory;
+import io.webby.netty.response.ResponseMapper;
 import io.webby.url.annotate.Marshal;
 import io.webby.url.caller.Caller;
-import io.webby.url.impl.*;
 import io.webby.url.convert.ConversionError;
+import io.webby.url.impl.*;
 import io.webby.url.view.Renderer;
 import io.webby.util.Pair;
 import org.jetbrains.annotations.NotNull;
@@ -30,17 +31,24 @@ import org.jetbrains.annotations.VisibleForTesting;
 import java.io.InputStream;
 import java.util.List;
 import java.util.concurrent.TimeUnit;
+import java.util.function.Function;
 import java.util.logging.Level;
+
+import static io.webby.netty.response.HttpResponseFactory.withContentType;
 
 public class NettyChannelHandler extends SimpleChannelInboundHandler<FullHttpRequest> {
     private static final FluentLogger log = FluentLogger.forEnclosingClass();
 
     private final HttpResponseFactory factory;
+    private final ResponseMapper mapper;
     private final Router<RouteEndpoint> router;
 
     @Inject
-    public NettyChannelHandler(@NotNull HttpResponseFactory factory, @NotNull UrlRouter urlRouter) {
+    public NettyChannelHandler(@NotNull HttpResponseFactory factory,
+                               @NotNull ResponseMapper mapper,
+                               @NotNull UrlRouter urlRouter) {
         this.factory = factory;
+        this.mapper = mapper;
         this.router = urlRouter.getRouter();
     }
 
@@ -105,19 +113,21 @@ public class NettyChannelHandler extends SimpleChannelInboundHandler<FullHttpReq
         }
     }
 
+    @VisibleForTesting
     @NotNull
-    private static FullHttpRequest wrapRequestIfNeeded(@NotNull FullHttpRequest request, @NotNull EndpointContext context) {
+    static FullHttpRequest wrapRequestIfNeeded(@NotNull FullHttpRequest request, @NotNull EndpointContext context) {
         return context.rawRequest() ? request : new DefaultHttpRequestEx(request, context.constraints());
     }
 
+    @VisibleForTesting
     @NotNull
-    private FullHttpResponse createResponse(@NotNull Object callResult, @NotNull EndpointOptions options) throws Exception {
+    FullHttpResponse createResponse(@NotNull Object callResult, @NotNull EndpointOptions options) throws Exception {
         FullHttpResponse response = convertToResponse(callResult, options);
         return applyHeaders(response, options);
     }
 
-    @NotNull
     @VisibleForTesting
+    @NotNull
     FullHttpResponse convertToResponse(@NotNull Object callResult, @NotNull EndpointOptions options) throws Exception {
         if (callResult instanceof FullHttpResponse response) {
             return response;
@@ -134,20 +144,12 @@ public class NettyChannelHandler extends SimpleChannelInboundHandler<FullHttpReq
             return renderResponse(view, callResult, contentType);
         }
 
+        Function<Object, FullHttpResponse> responseFunction = mapper.lookup(callResult.getClass());
+        if (responseFunction != null) {
+            return withContentType(responseFunction.apply(callResult), contentType);
+        }
         if (callResult instanceof CharSequence string) {
             return factory.newResponse(string, HttpResponseStatus.OK, contentType);
-        }
-        if (callResult instanceof byte[] bytes) {
-            return factory.newResponse(bytes, HttpResponseStatus.OK, contentType);
-        }
-        if (callResult instanceof char[] chars) {
-            return factory.newResponse(new CharBuffer(chars), HttpResponseStatus.OK, contentType);
-        }
-        if (callResult instanceof InputStream stream) {
-            return factory.newResponse(stream, HttpResponseStatus.OK, contentType);
-        }
-        if (callResult instanceof ByteBuf byteBuf) {
-            return factory.newResponse(byteBuf, HttpResponseStatus.OK, contentType);
         }
         if (callResult instanceof JsonElement element) {
             return factory.newResponse(new Gson().toJson(element), HttpResponseStatus.OK, HttpHeaderValues.APPLICATION_JSON);

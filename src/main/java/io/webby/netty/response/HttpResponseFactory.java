@@ -116,13 +116,13 @@ public class HttpResponseFactory {
     }
 
     @NotNull
-    private static FullHttpResponse newResponse(@NotNull CharSequence content, @NotNull HttpResponseStatus status) {
+    public static FullHttpResponse newResponse(@NotNull CharSequence content, @NotNull HttpResponseStatus status) {
         ByteBuf byteBuf = Unpooled.copiedBuffer(content, CharsetUtil.UTF_8);
         return newResponse(byteBuf, status);
     }
 
     @NotNull
-    private static FullHttpResponse newResponse(@NotNull ByteBuf byteBuf, @NotNull HttpResponseStatus status) {
+    public static FullHttpResponse newResponse(@NotNull ByteBuf byteBuf, @NotNull HttpResponseStatus status) {
         FullHttpResponse response = new DefaultFullHttpResponse(HttpVersion.HTTP_1_1, status, byteBuf);
         response.headers().set(HttpHeaderNames.CONTENT_LENGTH, byteBuf.readableBytes());
         return response;
@@ -143,7 +143,7 @@ public class HttpResponseFactory {
     }
 
     @NotNull
-    private static FullHttpResponse withContentType(@NotNull FullHttpResponse response, @NotNull CharSequence contentType) {
+    public static FullHttpResponse withContentType(@NotNull FullHttpResponse response, @NotNull CharSequence contentType) {
         response.headers().set(HttpHeaderNames.CONTENT_TYPE, contentType);
         return response;
     }
