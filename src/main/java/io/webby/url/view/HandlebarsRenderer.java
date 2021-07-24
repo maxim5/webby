@@ -79,7 +79,7 @@ public class HandlebarsRenderer implements Renderer<Template> {
         log.at(Level.FINE).log("Using Handlebars config: %s", null);
 
         TemplateLoader loader = new ClassPathTemplateLoader();
-        loader.setPrefix("/web/handlebars");
+        loader.setPrefix("/web");
         return new Handlebars(loader).with(cache);
     }
 }
