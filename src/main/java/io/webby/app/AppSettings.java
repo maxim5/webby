@@ -3,17 +3,22 @@ package io.webby.app;
 import io.routekit.QueryParser;
 import io.routekit.SimpleQueryParser;
 import io.webby.url.annotate.Marshal;
+import io.webby.url.annotate.Render;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.function.BiPredicate;
 
 public final class AppSettings implements Settings {
     private boolean devMode = true;
+    private boolean hotReload = true;
+    private boolean hotReloadDefault = true;
     private String webPath = "/web/";
+    private String viewPath = "/web/";
     private BiPredicate<String, String> filter = null;
     private QueryParser urlParser = SimpleQueryParser.DEFAULT;
     private Marshal defaultRequestContentMarshal = Marshal.JSON;
     private Marshal defaultResponseContentMarshal = Marshal.AS_STRING;
+    private Render defaultRender = Render.JTE;
 
     @Override
     public boolean isDevMode() {
@@ -25,12 +30,35 @@ public final class AppSettings implements Settings {
     }
 
     @Override
+    public boolean isHotReload() {
+        return hotReload;
+    }
+
+    public boolean isHotReloadDefault() {
+        return hotReloadDefault;
+    }
+
+    public void setHotReload(boolean hotReload) {
+        this.hotReload = hotReload;
+        hotReloadDefault = false;
+    }
+
+    @Override
     public String webPath() {
         return webPath;
     }
 
     public void setWebPath(@NotNull String webPath) {
         this.webPath = webPath;
+    }
+
+    @Override
+    public String viewPath() {
+        return viewPath;
+    }
+
+    public void setViewPath(@NotNull String viewPath) {
+        this.viewPath = viewPath;
     }
 
     @Override
@@ -75,5 +103,14 @@ public final class AppSettings implements Settings {
 
     public void setDefaultResponseContentMarshal(@NotNull Marshal marshal) {
         this.defaultResponseContentMarshal = marshal;
+    }
+
+    @Override
+    public Render defaultRender() {
+        return defaultRender;
+    }
+
+    public void setDefaultRender(@NotNull Render defaultRender) {
+        this.defaultRender = defaultRender;
     }
 }

@@ -22,6 +22,7 @@ public class Main {
 
         AppSettings settings = new AppSettings();
         settings.setWebPath("out/examples/resources/web/");
+        settings.setViewPath("out/examples/resources/web/");
         settings.setDevMode(true);
         Injector injector = Webby.initDependencies(settings);
         NettyStartup startup = injector.getInstance(NettyStartup.class);

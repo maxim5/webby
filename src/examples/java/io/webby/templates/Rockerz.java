@@ -4,10 +4,13 @@ import com.fizzed.rocker.Rocker;
 import com.fizzed.rocker.RockerOutput;
 import com.fizzed.rocker.runtime.ArrayOfByteArraysOutput;
 import io.webby.url.annotate.GET;
+import io.webby.url.annotate.Render;
+import io.webby.url.annotate.Serve;
 import views.HelloRock;
 
 import java.io.InputStream;
 
+@Serve(render = Render.ROCKER)
 public class Rockerz {
     @GET(url = "/templates/rocker/hello")
     public Object hello() {

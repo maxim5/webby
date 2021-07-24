@@ -4,6 +4,8 @@ import io.webby.util.ThrowConsumer;
 import org.jetbrains.annotations.NotNull;
 
 import java.io.*;
+import java.util.Map;
+import java.util.function.Function;
 
 public class RenderUtil {
     private static final int DEFAULT_SIZE_BYTES = 1024;
@@ -40,5 +42,17 @@ public class RenderUtil {
         ByteArrayOutputStream output = new ByteArrayOutputStream(size);
         consumer.accept(output);
         return output.toByteArray();
+    }
+
+    @SuppressWarnings("unchecked")
+    public static <K, V> Map<K, V> cast(Map<?, ?> map) {
+        return (Map<K, V>) map;
+    }
+
+    public static <T, K, V, E extends Throwable> Map<K, V> cast(T object, Function<T, E> error) throws E {
+        if (object instanceof Map<?, ?> map) {
+            return cast(map);
+        }
+        throw error.apply(object);
     }
 }

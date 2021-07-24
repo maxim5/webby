@@ -1,26 +1,31 @@
 package io.webby.templates;
 
+import com.google.common.base.Suppliers;
 import freemarker.cache.ClassTemplateLoader;
 import freemarker.template.Configuration;
 import freemarker.template.Template;
 import io.webby.url.annotate.GET;
+import io.webby.url.annotate.Render;
+import io.webby.url.annotate.Serve;
 import io.webby.url.annotate.View;
 import io.webby.url.view.RenderUtil;
 
 import java.io.IOException;
 import java.util.Map;
+import java.util.function.Supplier;
 
+@Serve(render = Render.FREEMARKER)
 public class FreeMarkerz {
-    private static final Template HELLO = getTemplate("hello.ftl");
+    private static final Supplier<Template> HELLO = Suppliers.memoize(() -> getTemplate("hello.ftl"));
 
     @GET(url = "/templates/freemarker/hello")
-    @View(template = "hello.ftl")
+    @View(template = "freemarker/hello.ftl")
     public Map<String, Object> hello() {
         return hello("Big Joe");
     }
 
     @GET(url = "/templates/freemarker/hello/{name}")
-    @View(template = "hello.ftl")
+    @View(template = "freemarker/hello.ftl")
     public Map<String, Object> hello(String name) {
         return Map.of(
                 "user", name,
@@ -39,7 +44,7 @@ public class FreeMarkerz {
             "user", name,
             "latestProduct", new Product("products/green-mouse.html", "Green Mouse")
         );
-        return renderToString(HELLO, root);
+        return renderToString(HELLO.get(), root);
     }
 
     @GET(url = "/templates/freemarker/hello-bytes/{name}")
@@ -48,7 +53,7 @@ public class FreeMarkerz {
                 "user", name,
                 "latestProduct", new Product("products/green-mouse.html", "Green Mouse")
         );
-        return renderToBytes(HELLO, root);
+        return renderToBytes(HELLO.get(), root);
     }
 
     private static String renderToString(Template template, Map<String, Object> root) throws Exception {

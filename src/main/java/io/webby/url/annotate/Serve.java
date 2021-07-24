@@ -9,5 +9,9 @@ import java.lang.annotation.Target;
 @Target(ElementType.TYPE)
 public @interface Serve {
     String url() default "";
+
+    // Note: can not have more than 1 render
+    Render[] render() default {};
+
     boolean disabled() default false;
 }

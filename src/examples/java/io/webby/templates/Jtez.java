@@ -1,5 +1,6 @@
 package io.webby.templates;
 
+import com.google.common.base.Suppliers;
 import gg.jte.CodeResolver;
 import gg.jte.ContentType;
 import gg.jte.TemplateEngine;
@@ -7,15 +8,19 @@ import gg.jte.TemplateOutput;
 import gg.jte.output.StringOutput;
 import gg.jte.resolve.ResourceCodeResolver;
 import io.webby.url.annotate.GET;
+import io.webby.url.annotate.Render;
+import io.webby.url.annotate.Serve;
 import io.webby.url.annotate.View;
 
 import java.nio.file.Path;
+import java.util.function.Supplier;
 
+@Serve(render = Render.JTE)
 public class Jtez {
-    private final TemplateEngine templateEngine = create();
+    private static final Supplier<TemplateEngine> templateEngine = Suppliers.memoize(Jtez::create);
 
     @GET(url = "/templates/jte/hello")
-    @View(template = "example.jte")
+    @View(template = "jte/example.jte")
     public Object example() {
         return new Page("Fancy Title", "Fancy Description");
     }
@@ -28,7 +33,7 @@ public class Jtez {
 
     private String renderToString(String template, Object model) {
         TemplateOutput output = new StringOutput();
-        templateEngine.render(template, model, output);
+        templateEngine.get().render(template, model, output);
         return output.toString();
     }
 

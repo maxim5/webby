@@ -33,15 +33,36 @@ public class Webby {
 
     private static void validateSettings(@NotNull AppSettings settings) {
         validateWebPath(settings.webPath());
+        validateViewPath(settings.viewPath());
+        validateHotReload(settings);
         validatePackageTester(settings);
     }
 
     private static void validateWebPath(@Nullable String webPath) {
         if (webPath == null) {
-            throw new AppConfigException("Invalid app settings: static web path is not set");
+            throw new AppConfigException("Invalid settings: static web path is not set");
         }
         if (!new File(webPath).exists()) {
-            throw new AppConfigException("Invalid app settings: static web path does not exist: %s".formatted(webPath));
+            throw new AppConfigException("Invalid settings: static web path does not exist: %s".formatted(webPath));
+        }
+    }
+
+    private static void validateViewPath(@Nullable String viewPath) {
+        if (viewPath == null) {
+            throw new AppConfigException("Invalid settings: view path is not set");
+        }
+        if (!new File(viewPath).exists()) {
+            throw new AppConfigException("Invalid settings: view path does not exist: %s".formatted(viewPath));
+        }
+    }
+
+    private static void validateHotReload(@NotNull AppSettings settings) {
+        if (settings.isHotReloadDefault()) {
+            settings.setHotReload(settings.isDevMode());
+        } else {
+            if (settings.isHotReload() && !settings.isDevMode()) {
+                log.at(Level.WARNING).log("Configured hot reload in production mode");
+            }
         }
     }
 

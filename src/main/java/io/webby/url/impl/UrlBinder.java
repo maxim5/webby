@@ -17,11 +17,14 @@ import io.webby.url.annotate.*;
 import io.webby.url.caller.Caller;
 import io.webby.url.caller.CallerFactory;
 import io.webby.url.convert.Constraint;
+import io.webby.url.view.Renderer;
+import io.webby.url.view.RendererFactory;
 import io.webby.util.Pair;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
 import java.io.IOException;
+import java.lang.annotation.Annotation;
 import java.lang.reflect.AnnotatedElement;
 import java.lang.reflect.Field;
 import java.lang.reflect.Method;
@@ -38,6 +41,7 @@ public class UrlBinder {
     @Inject private HandlerFinder finder;
     @Inject private Injector injector;
     @Inject private CallerFactory callerFactory;
+    @Inject private RendererFactory rendererFactory;
     @Inject private StaticServing staticServing;
 
     private final Map<Class<?>, EndpointContext> contextCache = new HashMap<>();
@@ -86,20 +90,18 @@ public class UrlBinder {
         try {
             Marshal defaultIn = settings.defaultRequestContentMarshal();
             Marshal defaultOut = settings.defaultResponseContentMarshal();
+            Render defaultRender = settings.defaultRender();
 
             handlerClasses.forEach(klass -> {
-                String classUrl;
-                if (klass.isAnnotationPresent(Serve.class)) {
-                    Serve serve = klass.getAnnotation(Serve.class);
-                    if (serve.disabled()) {
-                        log.at(Level.CONFIG).log("Ignoring disabled handler class: %s", klass);
-                        return;
-                    }
-                    classUrl = serve.url();
-                } else {
-                    classUrl = "";
-                }
+                log.at(Level.ALL).log("Processing %s", klass);
 
+                Serve serve = getServeAnnotation(klass);
+                if (serve.disabled()) {
+                    log.at(Level.CONFIG).log("Ignoring disabled handler class: %s", klass);
+                    return;
+                }
+                String classUrl = serve.url();
+                Render classRender = serve.render().length > 0 ? serve.render()[0] : defaultRender;
                 Marshal classIn = getMarshalFromAnnotations(klass, defaultIn);
                 Marshal classOut = getMarshalFromAnnotations(klass, defaultOut);
                 EndpointHttp classHttp = getEndpointHttpFromAnnotation(klass);
@@ -110,7 +112,7 @@ public class UrlBinder {
                             null;
                     Marshal out = getMarshalFromAnnotations(method, classOut);
                     EndpointHttp http = getEndpointHttpFromAnnotation(method).mergeWithDefault(classHttp);
-                    EndpointView view = getEndpointViewFromAnnotation(method);
+                    EndpointView<?> view = getEndpointViewFromAnnotation(method, classRender);
 
                     interface Sink {
                         void accept(String type, String url, boolean usuallyExpectsContent);
@@ -174,6 +176,8 @@ public class UrlBinder {
         try {
             bindings.stream().collect(Collectors.groupingBy(Binding::url)).values().forEach(group -> {
                 List<SingleRouteEndpoint> endpoints = group.stream().map(binding -> {
+                    log.at(Level.ALL).log("Processing %s", binding.method());
+
                     Class<?> klass = binding.method().getDeclaringClass();
                     Object instance = injector.getInstance(klass);
                     EndpointContext context = contextCache.computeIfAbsent(klass,
@@ -237,6 +241,37 @@ public class UrlBinder {
 
     @VisibleForTesting
     @NotNull
+    static Serve getServeAnnotation(@NotNull AnnotatedElement elem) {
+        if (elem.isAnnotationPresent(Serve.class)) {
+            Serve serve = elem.getAnnotation(Serve.class);
+            HandlerConfigError.failIf(serve.render().length > 1, "@Serve can have only one render: %s".formatted(elem));
+            return serve;
+        }
+        return new Serve() {
+            @Override
+            public Class<? extends Annotation> annotationType() {
+                return Serve.class;
+            }
+
+            @Override
+            public String url() {
+                return "";
+            }
+
+            @Override
+            public Render[] render() {
+                return new Render[0];
+            }
+
+            @Override
+            public boolean disabled() {
+                return false;
+            }
+        };
+    }
+
+    @VisibleForTesting
+    @NotNull
     static Marshal getMarshalFromAnnotations(@NotNull AnnotatedElement elem, @NotNull Marshal def) {
         boolean isJson = elem.isAnnotationPresent(Json.class);
         boolean isProto = elem.isAnnotationPresent(Protobuf.class);
@@ -261,10 +296,12 @@ public class UrlBinder {
 
     @VisibleForTesting
     @Nullable
-    static EndpointView getEndpointViewFromAnnotation(@NotNull AnnotatedElement element) {
+    EndpointView<?> getEndpointViewFromAnnotation(@NotNull AnnotatedElement element, @NotNull Render render) {
         if (element.isAnnotationPresent(View.class)) {
             View view = element.getAnnotation(View.class);
-            return new EndpointView(view.template());
+            String templateName = view.template();
+            Renderer<?> renderer = rendererFactory.getRenderer(render, templateName);
+            return EndpointView.of(renderer, templateName);
         }
         return null;
     }

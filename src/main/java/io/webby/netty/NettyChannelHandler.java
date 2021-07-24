@@ -23,12 +23,10 @@ import io.webby.url.caller.Caller;
 import io.webby.url.impl.*;
 import io.webby.url.convert.ConversionError;
 import io.webby.url.view.Renderer;
-import io.webby.url.view.RendererProvider;
 import io.webby.util.Pair;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.VisibleForTesting;
 
-import java.io.IOException;
 import java.io.InputStream;
 import java.util.List;
 import java.util.concurrent.TimeUnit;
@@ -39,13 +37,11 @@ public class NettyChannelHandler extends SimpleChannelInboundHandler<FullHttpReq
 
     private final HttpResponseFactory factory;
     private final Router<RouteEndpoint> router;
-    private final Renderer renderer;
 
     @Inject
-    public NettyChannelHandler(@NotNull HttpResponseFactory factory, @NotNull UrlRouter urlRouter, @NotNull RendererProvider provider) {
+    public NettyChannelHandler(@NotNull HttpResponseFactory factory, @NotNull UrlRouter urlRouter) {
         this.factory = factory;
         this.router = urlRouter.getRouter();
-        this.renderer = provider.getRenderer();
     }
 
     @Override
@@ -133,19 +129,9 @@ public class NettyChannelHandler extends SimpleChannelInboundHandler<FullHttpReq
                         HttpHeaderValues.APPLICATION_JSON :
                         HttpHeaderValues.TEXT_HTML;
 
-        if (options.view() != null) {
-            String template = options.view().template();
-            return switch (renderer.support()) {
-                case BYTE_ARRAY -> {
-                    byte[] bytes = renderer.renderToBytes(template, callResult);
-                    yield factory.newResponse(bytes, HttpResponseStatus.OK, contentType);
-                }
-                case STRING -> {
-                    String content = renderer.renderToString(template, callResult);
-                    yield factory.newResponse(content, HttpResponseStatus.OK, contentType);
-                }
-                case BYTE_STREAM -> throw new UnsupportedOperationException();
-            };
+        EndpointView<?> view = options.view();
+        if (view != null) {
+            return renderResponse(view, callResult, contentType);
         }
 
         if (callResult instanceof CharSequence string) {
@@ -175,6 +161,26 @@ public class NettyChannelHandler extends SimpleChannelInboundHandler<FullHttpReq
             case AS_STRING -> factory.newResponse(callResult.toString(), HttpResponseStatus.OK, contentType);
             case PROTOBUF_BINARY -> throw new UnsupportedOperationException();
             case PROTOBUF_JSON -> throw new UnsupportedOperationException();
+        };
+    }
+
+    @NotNull
+    @VisibleForTesting
+    <T> FullHttpResponse renderResponse(@NotNull EndpointView<T> view,
+                                        @NotNull Object callResult,
+                                        @NotNull CharSequence contentType) throws Exception {
+        Renderer<T> renderer = view.renderer();
+        T template = view.template();
+        return switch (renderer.support()) {
+            case BYTE_ARRAY -> {
+                byte[] bytes = renderer.renderToBytes(template, callResult);
+                yield factory.newResponse(bytes, HttpResponseStatus.OK, contentType);
+            }
+            case STRING -> {
+                String content = renderer.renderToString(template, callResult);
+                yield factory.newResponse(content, HttpResponseStatus.OK, contentType);
+            }
+            case BYTE_STREAM -> throw new UnsupportedOperationException();
         };
     }
 

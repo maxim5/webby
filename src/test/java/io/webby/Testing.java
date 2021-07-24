@@ -13,11 +13,13 @@ public class Testing {
     public static final boolean READABLE = true;
 
     public static final String DEFAULT_WEB_PATH = "src/test/resources";
+    public static final String DEFAULT_VIEW_PATH = "src/test/resources";
 
     @NotNull
     public static Injector testStartupNoHandlers() {
         AppSettings settings = new AppSettings();
         settings.setWebPath(DEFAULT_WEB_PATH);
+        settings.setViewPath(DEFAULT_VIEW_PATH);
         settings.setFilter((pkg, cls) -> false);
         return testStartup(settings);
     }
@@ -26,6 +28,7 @@ public class Testing {
     public static Injector testStartup(@NotNull Class<?> clazz) {
         AppSettings settings = new AppSettings();
         settings.setWebPath(DEFAULT_WEB_PATH);
+        settings.setViewPath(DEFAULT_VIEW_PATH);
         settings.setClassOnly(clazz);
         return testStartup(settings);
     }
@@ -34,6 +37,7 @@ public class Testing {
     public static Injector testStartup(@NotNull String packageName) {
         AppSettings settings = new AppSettings();
         settings.setWebPath(DEFAULT_WEB_PATH);
+        settings.setViewPath(DEFAULT_VIEW_PATH);
         settings.setPackageOnly(packageName);
         return testStartup(settings);
     }
