@@ -15,7 +15,8 @@ import java.util.Map;
 import java.util.function.Supplier;
 
 @Serve(render = Render.FREEMARKER)
-public class FreeMarkerz {
+// FreeMarker: allows package-local
+class FreeMarkerExample {
     private static final Supplier<Template> HELLO = Suppliers.memoize(() -> getTemplate("hello.ftl"));
 
     @GET(url = "/templates/freemarker/hello")
@@ -33,44 +34,30 @@ public class FreeMarkerz {
         );
     }
 
-    // @GET(url = "/templates/freemarker/hello")
-    public String obsolete_hello() throws Exception {
-        return obsolete_hello("Big Joe");
+    @GET(url = "/templates/manual/freemarker/hello")
+    public String manual_hello() throws Exception {
+        return manual_hello("Big Joe");
     }
 
-    // @GET(url = "/templates/freemarker/hello/{name}")
-    public String obsolete_hello(String name) throws Exception {
-        Map<String, Object> root = Map.of(
-            "user", name,
-            "latestProduct", new Product("products/green-mouse.html", "Green Mouse")
-        );
-        return renderToString(HELLO.get(), root);
+    @GET(url = "/templates/manual/freemarker/hello/{name}")
+    public String manual_hello(String name) throws Exception {
+        Map<String, Object> root = hello(name);
+        return RenderUtil.writeToString(writer -> HELLO.get().process(root, writer));
     }
 
-    @GET(url = "/templates/freemarker/hello-bytes/{name}")
-    public byte[] obsolete_hello_bytes(String name) throws Exception {
-        Map<String, Object> root = Map.of(
-                "user", name,
-                "latestProduct", new Product("products/green-mouse.html", "Green Mouse")
-        );
-        return renderToBytes(HELLO.get(), root);
+    @GET(url = "/templates/manual/freemarker/hello-bytes/{name}")
+    public byte[] manual_hello_bytes(String name) throws Exception {
+        Map<String, Object> root = hello(name);
+        return RenderUtil.writeToBytes(writer -> HELLO.get().process(root, writer));
     }
 
-    private static String renderToString(Template template, Map<String, Object> root) throws Exception {
-        return RenderUtil.writeToString(writer -> template.process(root, writer));
-    }
-
-    private static byte[] renderToBytes(Template template, Map<String, Object> root) throws Exception {
-        return RenderUtil.writeToBytes(writer -> template.process(root, writer));
-    }
-
-    // Public for FreeMarker
+    // FreeMarker: must be public
     public record Product(String url, String name) {}
 
     private static Template getTemplate(String name) {
         try {
             Configuration configuration = new Configuration(Configuration.VERSION_2_3_31);
-            configuration.setTemplateLoader(new ClassTemplateLoader(FreeMarkerz.class, "/web/freemarker"));
+            configuration.setTemplateLoader(new ClassTemplateLoader(FreeMarkerExample.class, "/web/freemarker"));
             return configuration.getTemplate(name);
         } catch (IOException e) {
             throw new RuntimeException(e);
