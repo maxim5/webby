@@ -31,6 +31,7 @@ import java.lang.reflect.Method;
 import java.util.*;
 import java.util.concurrent.TimeUnit;
 import java.util.function.BiConsumer;
+import java.util.function.Consumer;
 import java.util.logging.Level;
 import java.util.stream.Collectors;
 
@@ -49,13 +50,13 @@ public class UrlBinder {
     @NotNull
     public Router<RouteEndpoint> bindRouter() throws AppConfigException {
         Set<? extends Class<?>> handlerClasses = finder.getHandlerClassesFromClasspath();
-        ArrayList<Binding> bindings = bindHandlers(handlerClasses);
+        List<Binding> bindings = getBindings(handlerClasses);
         RouterSetup<RouteEndpoint> setup = getRouterSetup(bindings);
         return setup.build();
     }
 
     @NotNull
-    private RouterSetup<RouteEndpoint> getRouterSetup(ArrayList<Binding> bindings) throws AppConfigException {
+    private RouterSetup<RouteEndpoint> getRouterSetup(@NotNull List<Binding> bindings) throws AppConfigException {
         RouterSetup<RouteEndpoint> setup = new RouterSetup<>();
         QueryParser parser = settings.urlParser();
 
@@ -65,7 +66,7 @@ public class UrlBinder {
                 setup.add(url, endpoint);
                 log.at(Level.FINEST).log("Rule: %s -> %s", url, LazyArgs.lazy(endpoint::describe));
             });
-            log.at(Level.INFO).log("Handlers processed in %d ms", stopwatch.stop().elapsed(TimeUnit.MILLISECONDS));
+            log.at(Level.INFO).log("Endpoints mapped to urls in %d ms", stopwatch.stop().elapsed(TimeUnit.MILLISECONDS));
         }
 
         try {
@@ -85,88 +86,96 @@ public class UrlBinder {
 
     @VisibleForTesting
     @NotNull
-    ArrayList<Binding> bindHandlers(@NotNull Iterable<? extends Class<?>> handlerClasses) {
-        ArrayList<Binding> bindings = new ArrayList<>();
+    List<Binding> getBindings(@NotNull Iterable<? extends Class<?>> handlerClasses) {
         try {
-            Marshal defaultIn = settings.defaultRequestContentMarshal();
-            Marshal defaultOut = settings.defaultResponseContentMarshal();
-            Render defaultRender = settings.defaultRender();
-
-            handlerClasses.forEach(klass -> {
-                log.at(Level.ALL).log("Processing %s", klass);
-
-                Serve serve = getServeAnnotation(klass);
-                if (serve.disabled()) {
-                    log.at(Level.CONFIG).log("Ignoring disabled handler class: %s", klass);
-                    return;
-                }
-                String classUrl = serve.url();
-                Render classRender = serve.render().length > 0 ? serve.render()[0] : defaultRender;
-                Marshal classIn = getMarshalFromAnnotations(klass, defaultIn);
-                Marshal classOut = getMarshalFromAnnotations(klass, defaultOut);
-                EndpointHttp classHttp = getEndpointHttpFromAnnotation(klass);
-
-                for (Method method : klass.getDeclaredMethods()) {
-                    Marshal in = method.getParameterCount() > 0 ?
-                            getMarshalFromAnnotations(method.getParameters()[method.getParameterCount() - 1], classIn) :
-                            null;
-                    Marshal out = getMarshalFromAnnotations(method, classOut);
-                    EndpointHttp http = getEndpointHttpFromAnnotation(method).mergeWithDefault(classHttp);
-                    EndpointView<?> view = getEndpointViewFromAnnotation(method, classRender);
-
-                    interface Sink {
-                        void accept(String type, String url, boolean usuallyExpectsContent);
-                    }
-
-                    Sink sink = (type, url, usuallyExpectsContent) -> {
-                        if (url.isEmpty()) {
-                            HandlerConfigError.failIf(classUrl.isEmpty(),
-                                    "URL is not set neither in class %s nor in method %s".formatted(klass, method));
-                            url = classUrl;
-                        }
-
-                        method.setAccessible(true);
-
-                        boolean expectsContent = usuallyExpectsContent && in != null;
-                        EndpointOptions options = new EndpointOptions(in, out, http, view, expectsContent);
-                        Binding binding = new Binding(url, method, type, options);
-                        bindings.add(binding);
-                    };
-
-                    if (method.isAnnotationPresent(GET.class)) {
-                        GET ann = method.getAnnotation(GET.class);
-                        sink.accept("GET", ann.url(), false);
-                    }
-                    if (method.isAnnotationPresent(POST.class)) {
-                        POST ann = method.getAnnotation(POST.class);
-                        sink.accept("POST", ann.url(), true);
-                    }
-                    if (method.isAnnotationPresent(PUT.class)) {
-                        PUT ann = method.getAnnotation(PUT.class);
-                        sink.accept("PUT", ann.url(), true);
-                    }
-                    if (method.isAnnotationPresent(DELETE.class)) {
-                        DELETE ann = method.getAnnotation(DELETE.class);
-                        sink.accept("DELETE", ann.url(), false);
-                    }
-                    if (method.isAnnotationPresent(Call.class)) {
-                        Call ann = method.getAnnotation(Call.class);
-                        for (String type : ann.methods()) {
-                            if (!type.equals(type.toUpperCase())) {
-                                log.at(Level.WARNING).log(
-                                        "@Call http method is not upper-case: %s (at %s)".formatted(type, method));
-                            }
-                            sink.accept(type, ann.url(), true);
-                        }
-                    }
-                }
-            });
+            Stopwatch stopwatch = Stopwatch.createStarted();
+            ArrayList<Binding> bindings = new ArrayList<>();
+            bindHandlers(handlerClasses, bindings::add);
+            long elapsedMillis = stopwatch.stop().elapsed(TimeUnit.MILLISECONDS);
+            log.at(Level.INFO).log("Extracted %d bindings in %d ms", bindings.size(), elapsedMillis);
+            return bindings;
         } catch (AppConfigException e) {
             throw e;
         } catch (Exception e) {
-            throw new HandlerConfigError("Failed to bind handlers", e);
+            throw new HandlerConfigError("Failed to extract bindings", e);
         }
-        return bindings;
+    }
+
+    @VisibleForTesting
+    void bindHandlers(@NotNull Iterable<? extends Class<?>> handlerClasses, @NotNull Consumer<Binding> consumer) {
+        Marshal defaultIn = settings.defaultRequestContentMarshal();
+        Marshal defaultOut = settings.defaultResponseContentMarshal();
+        Render defaultRender = settings.defaultRender();
+
+        handlerClasses.forEach(klass -> {
+            log.at(Level.ALL).log("Processing %s", klass);
+
+            Serve serve = getServeAnnotation(klass);
+            if (serve.disabled()) {
+                log.at(Level.CONFIG).log("Ignoring disabled handler class: %s", klass);
+                return;
+            }
+            String classUrl = serve.url();
+            Render classRender = serve.render().length > 0 ? serve.render()[0] : defaultRender;
+            Marshal classIn = getMarshalFromAnnotations(klass, defaultIn);
+            Marshal classOut = getMarshalFromAnnotations(klass, defaultOut);
+            EndpointHttp classHttp = getEndpointHttpFromAnnotation(klass);
+
+            for (Method method : klass.getDeclaredMethods()) {
+                Marshal in = method.getParameterCount() > 0 ?
+                        getMarshalFromAnnotations(method.getParameters()[method.getParameterCount() - 1], classIn) :
+                        null;
+                Marshal out = getMarshalFromAnnotations(method, classOut);
+                EndpointHttp http = getEndpointHttpFromAnnotation(method).mergeWithDefault(classHttp);
+                EndpointView<?> view = getEndpointViewFromAnnotation(method, classRender);
+
+                interface Sink {
+                    void accept(String type, String url, boolean usuallyExpectsContent);
+                }
+
+                Sink sink = (type, url, usuallyExpectsContent) -> {
+                    if (url.isEmpty()) {
+                        HandlerConfigError.failIf(classUrl.isEmpty(),
+                                "URL is not set neither in class %s nor in method %s".formatted(klass, method));
+                        url = classUrl;
+                    }
+
+                    method.setAccessible(true);
+
+                    boolean expectsContent = usuallyExpectsContent && in != null;
+                    EndpointOptions options = new EndpointOptions(in, out, http, view, expectsContent);
+                    Binding binding = new Binding(url, method, type, options);
+                    consumer.accept(binding);
+                };
+
+                if (method.isAnnotationPresent(GET.class)) {
+                    GET ann = method.getAnnotation(GET.class);
+                    sink.accept("GET", ann.url(), false);
+                }
+                if (method.isAnnotationPresent(POST.class)) {
+                    POST ann = method.getAnnotation(POST.class);
+                    sink.accept("POST", ann.url(), true);
+                }
+                if (method.isAnnotationPresent(PUT.class)) {
+                    PUT ann = method.getAnnotation(PUT.class);
+                    sink.accept("PUT", ann.url(), true);
+                }
+                if (method.isAnnotationPresent(DELETE.class)) {
+                    DELETE ann = method.getAnnotation(DELETE.class);
+                    sink.accept("DELETE", ann.url(), false);
+                }
+                if (method.isAnnotationPresent(Call.class)) {
+                    Call ann = method.getAnnotation(Call.class);
+                    for (String type : ann.methods()) {
+                        if (!type.equals(type.toUpperCase())) {
+                            log.at(Level.WARNING).log(
+                                    "@Call http method is not upper-case: %s (at %s)".formatted(type, method));
+                        }
+                        sink.accept(type, ann.url(), true);
+                    }
+                }
+            }
+        });
     }
 
     @VisibleForTesting
