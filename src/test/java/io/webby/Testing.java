@@ -5,6 +5,7 @@ import io.webby.app.AppSettings;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.Locale;
+import java.util.function.Consumer;
 import java.util.logging.Level;
 import java.util.logging.LogManager;
 
@@ -17,28 +18,25 @@ public class Testing {
 
     @NotNull
     public static Injector testStartupNoHandlers() {
-        AppSettings settings = new AppSettings();
-        settings.setWebPath(DEFAULT_WEB_PATH);
-        settings.setViewPath(DEFAULT_VIEW_PATH);
-        settings.setFilter((pkg, cls) -> false);
-        return testStartup(settings);
+        return testStartup(settings -> settings.setFilter((pkg, cls) -> false));
     }
 
     @NotNull
     public static Injector testStartup(@NotNull Class<?> clazz) {
-        AppSettings settings = new AppSettings();
-        settings.setWebPath(DEFAULT_WEB_PATH);
-        settings.setViewPath(DEFAULT_VIEW_PATH);
-        settings.setClassOnly(clazz);
-        return testStartup(settings);
+        return testStartup(settings -> settings.setClassOnly(clazz));
     }
 
     @NotNull
     public static Injector testStartup(@NotNull String packageName) {
+        return testStartup(settings -> settings.setPackageOnly(packageName));
+    }
+
+    @NotNull
+    public static Injector testStartup(@NotNull Consumer<AppSettings> consumer) {
         AppSettings settings = new AppSettings();
         settings.setWebPath(DEFAULT_WEB_PATH);
         settings.setViewPath(DEFAULT_VIEW_PATH);
-        settings.setPackageOnly(packageName);
+        consumer.accept(settings);
         return testStartup(settings);
     }
 

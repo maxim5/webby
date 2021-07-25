@@ -19,9 +19,10 @@ import java.util.function.Supplier;
 // JTE: must be public
 public class JteExample {
     private static final Supplier<TemplateEngine> templateEngine = Suppliers.memoize(JteExample::create);
+    public static final String CLASS_DIR = "build/generated/jte/examples/java";
 
     @GET(url = "/templates/jte/hello")
-    @View(template = "jte/example.jte")
+    @View(template = "example.jte")
     public Object example() {
         return new Page("Fancy Title", "Fancy Description");
     }
@@ -30,7 +31,7 @@ public class JteExample {
     public String manual_example() {
         TemplateOutput output = new StringOutput();
         Object model = example();
-        templateEngine.get().render("jte/example.jte", model, output);
+        templateEngine.get().render("example.jte", model, output);
         return output.toString();
     }
 
@@ -38,7 +39,7 @@ public class JteExample {
     public record Page(String title, String description) {}
 
     private static TemplateEngine create() {
-        CodeResolver codeResolver = new ResourceCodeResolver("web");
-        return TemplateEngine.create(codeResolver, Path.of("build/generated/jte/examples/java"), ContentType.Html);
+        CodeResolver codeResolver = new ResourceCodeResolver("web/jte");
+        return TemplateEngine.create(codeResolver, Path.of(CLASS_DIR), ContentType.Html);
     }
 }

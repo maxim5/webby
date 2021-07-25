@@ -14,15 +14,22 @@ import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import org.junit.jupiter.api.Assertions;
 
+import java.util.function.Consumer;
+
 public abstract class BaseIntegrationTest {
     protected NettyChannelHandler handler;
 
     protected void testStartup(@NotNull Class<?> clazz) {
-        AppSettings settings = new AppSettings();
-        settings.setWebPath("src/examples/resources/web");
-        settings.setViewPath("src/examples/resources/web");
-        settings.setClassOnly(clazz);
-        Injector injector = Testing.testStartup(settings);
+        testStartup(clazz, __ -> {});
+    }
+
+    protected void testStartup(@NotNull Class<?> clazz, @NotNull Consumer<AppSettings> consumer) {
+        Injector injector = Testing.testStartup(settings -> {
+            settings.setWebPath("src/examples/resources/web");
+            settings.setViewPath("src/examples/resources/web");
+            settings.setClassOnly(clazz);
+            consumer.accept(settings);
+        });
         handler = injector.getInstance(NettyChannelHandler.class);
     }
 

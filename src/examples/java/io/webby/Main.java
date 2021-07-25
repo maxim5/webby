@@ -4,6 +4,7 @@ import com.google.common.flogger.FluentLogger;
 import com.google.inject.Injector;
 import io.webby.app.AppSettings;
 import io.webby.netty.NettyBootstrap;
+import io.webby.templates.JteExample;
 
 import java.io.FileInputStream;
 import java.util.logging.Level;
@@ -24,6 +25,7 @@ public class Main {
         settings.setWebPath("out/examples/resources/web/");
         settings.setViewPath("out/examples/resources/web/");
         settings.setDevMode(true);
+        settings.setProperty("jte.class.directory", JteExample.CLASS_DIR);
 
         Injector injector = Webby.initGuice(settings);
         NettyBootstrap startup = injector.getInstance(NettyBootstrap.class);

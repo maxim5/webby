@@ -9,7 +9,10 @@ import org.junit.jupiter.api.Test;
 public class JteExampleTest extends BaseIntegrationTest {
     @BeforeEach
     void setup() {
-        testStartup(JteExample.class);
+        testStartup(JteExample.class, settings -> {
+            settings.setViewPath("src/examples/resources/web/jte");
+            settings.setProperty("jte.class.directory", JteExample.CLASS_DIR);
+        });
     }
 
     @Test

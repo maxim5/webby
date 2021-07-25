@@ -2,13 +2,13 @@ package io.webby.url.view;
 
 import com.google.common.flogger.FluentLogger;
 import com.google.inject.Inject;
-import gg.jte.CodeResolver;
 import gg.jte.ContentType;
 import gg.jte.TemplateEngine;
 import gg.jte.output.StringOutput;
 import gg.jte.output.StringOutputPool;
 import gg.jte.output.Utf8ByteOutput;
-import gg.jte.resolve.ResourceCodeResolver;
+import gg.jte.resolve.DirectoryCodeResolver;
+import gg.jte.runtime.Constants;
 import io.webby.app.Settings;
 import io.webby.util.ThrowConsumer;
 import org.jetbrains.annotations.NotNull;
@@ -31,7 +31,7 @@ public class JteRenderer implements Renderer<String> {
 
     @Inject
     private void init() {
-        templateEngine = helper.getOrDefault(TemplateEngine.class, () -> createDefault(new JteConfig()));
+        templateEngine = helper.getOrDefault(TemplateEngine.class, this::createDefault);
         if (settings.isHotReload()) {
             log.at(Level.INFO).log("JTE hot reload enabled");
         } else {
@@ -84,16 +84,31 @@ public class JteRenderer implements Renderer<String> {
     }
 
     @NotNull
-    private TemplateEngine createDefault(@NotNull JteConfig config) {
-        String root = "web";
-        ClassLoader classLoader = Thread.currentThread().getContextClassLoader();
-        String classDir = "build/generated/jte/examples/java";
-        boolean utf8Byte = true;
-        log.at(Level.FINE).log("Using JTE engine config: %s", config);
+    private TemplateEngine createDefault() {
+        DirectoryCodeResolver[] resolvers = settings.viewPaths()
+                .stream()
+                .map(DirectoryCodeResolver::new)
+                .toArray(DirectoryCodeResolver[]::new);
+        DirectoryCodeResolver codeResolver = resolvers[0];
+        if (resolvers.length > 1) {
+            log.at(Level.INFO)
+                .log("JTE engine does not support multiple source directories. Using %s", codeResolver.getRoot());
+        }
 
-        CodeResolver codeResolver = new ResourceCodeResolver(root, classLoader);
-        TemplateEngine templateEngine = TemplateEngine.create(codeResolver, Path.of(classDir), ContentType.Html);
-        if (utf8Byte) {
+        Path classDir = Path.of(settings.getProperty("jte.class.directory", "build"));
+        ContentType contentType = settings.getBoolProperty("jte.output.plain") ? ContentType.Plain : ContentType.Html;
+        ClassLoader classLoader = Thread.currentThread().getContextClassLoader();
+        String packageName = settings.getProperty("jte.output.package", Constants.PACKAGE_NAME_ON_DEMAND);
+        boolean isUtf8Byte = settings.getBoolProperty("jte.output.utf8byte.enabled", true);
+
+        TemplateEngine templateEngine = TemplateEngine.create(
+                codeResolver,
+                classDir,
+                contentType,
+                classLoader,
+                packageName
+        );
+        if (isUtf8Byte) {
             templateEngine.setBinaryStaticContent(true);
         }
         return templateEngine;
