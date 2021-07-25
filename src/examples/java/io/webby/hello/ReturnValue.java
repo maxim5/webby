@@ -1,5 +1,7 @@
 package io.webby.hello;
 
+import com.google.gson.Gson;
+import com.google.gson.JsonElement;
 import io.netty.buffer.ByteBuf;
 import io.netty.buffer.Unpooled;
 import io.webby.url.annotate.GET;
@@ -16,6 +18,7 @@ import java.nio.channels.Channels;
 import java.nio.channels.ReadableByteChannel;
 import java.nio.charset.Charset;
 import java.util.LinkedHashMap;
+import java.util.List;
 import java.util.Map;
 
 @Serve
@@ -65,12 +68,18 @@ public class ReturnValue {
         return new StringReader(val);
     }
 
-    @GET(url="/r/json/{*var}")
+    @GET(url="/r/json/map/{*var}")
     @Json
     public Object json_map(String var) {
         Map<String, Serializable> map = new LinkedHashMap<>();
         map.put("foo", 1);
         map.put("var", var.split("/"));
         return map;
+    }
+
+    @GET(url="/r/json/tree/{var}")
+    public JsonElement json_tree(String var) {
+        List<Character> characters = var.chars().boxed().map(i -> (char) i.intValue()).toList();
+        return new Gson().toJsonTree(characters);
     }
 }

@@ -15,6 +15,7 @@ import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.InputStream;
 import java.nio.charset.Charset;
+import java.util.function.Consumer;
 import java.util.logging.Level;
 
 public class HttpResponseFactory {
@@ -26,10 +27,23 @@ public class HttpResponseFactory {
     @Inject private StaticServing staticServing;
 
     @NotNull
+    public FullHttpResponse newResponse(@NotNull CharSequence content, @NotNull HttpResponseStatus status) {
+        ByteBuf byteBuf = Unpooled.copiedBuffer(content, CharsetUtil.UTF_8);
+        return newResponse(byteBuf, status);
+    }
+
+    @NotNull
     public FullHttpResponse newResponse(@NotNull CharSequence content,
                                         @NotNull HttpResponseStatus status,
                                         @NotNull CharSequence contentType) {
         return withContentType(newResponse(content, status), contentType);
+    }
+
+    @NotNull
+    public FullHttpResponse newResponse(@NotNull ByteBuf byteBuf, @NotNull HttpResponseStatus status) {
+        FullHttpResponse response = new DefaultFullHttpResponse(HttpVersion.HTTP_1_1, status, byteBuf);
+        response.headers().set(HttpHeaderNames.CONTENT_LENGTH, byteBuf.readableBytes());
+        return response;
     }
 
     @NotNull
@@ -40,20 +54,16 @@ public class HttpResponseFactory {
     }
 
     @NotNull
-    public FullHttpResponse newResponse(byte[] content,
-                                        @NotNull HttpResponseStatus status,
-                                        @NotNull CharSequence contentType) {
+    public FullHttpResponse newResponse(byte[] content, @NotNull HttpResponseStatus status) {
         ByteBuf byteBuf = Unpooled.wrappedBuffer(content);
-        return newResponse(byteBuf, status, contentType);
+        return newResponse(byteBuf, status);
     }
 
     @NotNull
-    public FullHttpResponse newResponse(@NotNull InputStream content,
-                                        @NotNull HttpResponseStatus status,
-                                        @NotNull CharSequence contentType) {
+    public FullHttpResponse newResponse(@NotNull InputStream content, @NotNull HttpResponseStatus status) {
         try {
             ByteBuf byteBuf = Unpooled.wrappedBuffer(content.readAllBytes());
-            return newResponse(byteBuf, status, contentType);
+            return newResponse(byteBuf, status);
         } catch (IOException e) {
             return newResponse503("Failed to read content bytes", e);
         }
@@ -115,19 +125,6 @@ public class HttpResponseFactory {
         return newResponse(statusLine(status), status, HttpHeaderValues.TEXT_HTML);
     }
 
-    @NotNull
-    public static FullHttpResponse newResponse(@NotNull CharSequence content, @NotNull HttpResponseStatus status) {
-        ByteBuf byteBuf = Unpooled.copiedBuffer(content, CharsetUtil.UTF_8);
-        return newResponse(byteBuf, status);
-    }
-
-    @NotNull
-    public static FullHttpResponse newResponse(@NotNull ByteBuf byteBuf, @NotNull HttpResponseStatus status) {
-        FullHttpResponse response = new DefaultFullHttpResponse(HttpVersion.HTTP_1_1, status, byteBuf);
-        response.headers().set(HttpHeaderNames.CONTENT_LENGTH, byteBuf.readableBytes());
-        return response;
-    }
-
     private static String statusLine(@NotNull HttpResponseStatus status) {
         return "%d %s".formatted(status.code(), status.codeAsText());
     }
@@ -145,6 +142,13 @@ public class HttpResponseFactory {
     @NotNull
     public static FullHttpResponse withContentType(@NotNull FullHttpResponse response, @NotNull CharSequence contentType) {
         response.headers().set(HttpHeaderNames.CONTENT_TYPE, contentType);
+        return response;
+    }
+
+    @NotNull
+    public static FullHttpResponse withHeaders(@NotNull FullHttpResponse response, @NotNull Consumer<HttpHeaders> consumer) {
+        HttpHeaders headers = response.headers();
+        consumer.accept(headers);
         return response;
     }
 }

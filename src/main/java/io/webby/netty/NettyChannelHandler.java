@@ -2,6 +2,7 @@ package io.webby.netty;
 
 import com.google.common.base.Stopwatch;
 import com.google.common.flogger.FluentLogger;
+import com.google.errorprone.annotations.CanIgnoreReturnValue;
 import com.google.gson.Gson;
 import com.google.gson.JsonElement;
 import com.google.inject.Inject;
@@ -31,8 +32,6 @@ import java.util.List;
 import java.util.concurrent.TimeUnit;
 import java.util.function.Function;
 import java.util.logging.Level;
-
-import static io.webby.netty.response.HttpResponseFactory.withContentType;
 
 public class NettyChannelHandler extends SimpleChannelInboundHandler<FullHttpRequest> {
     private static final FluentLogger log = FluentLogger.forEnclosingClass();
@@ -121,7 +120,9 @@ public class NettyChannelHandler extends SimpleChannelInboundHandler<FullHttpReq
     @NotNull
     FullHttpResponse createResponse(@NotNull Object callResult, @NotNull EndpointOptions options) throws Exception {
         FullHttpResponse response = convertToResponse(callResult, options);
-        return applyHeaders(response, options);
+        withHeaders(response, getDefaultHeaders(options), false);
+        withHeaders(response, options.http().headers(), true);
+        return response;
     }
 
     @VisibleForTesting
@@ -131,21 +132,14 @@ public class NettyChannelHandler extends SimpleChannelInboundHandler<FullHttpReq
             return response;
         }
 
-        CharSequence contentType = options.http().hasContentType() ?
-                options.http().contentType() :
-                (options.out() == Marshal.JSON) ?
-                        HttpHeaderValues.APPLICATION_JSON :
-                        HttpHeaderValues.TEXT_HTML;
-
         EndpointView<?> view = options.view();
         if (view != null) {
-            return renderResponse(view, callResult, contentType);
+            return renderResponse(view, callResult);
         }
 
         Function<Object, FullHttpResponse> responseFunction = mapper.mapInstance(callResult);
         if (responseFunction != null) {
-            FullHttpResponse response = responseFunction.apply(callResult);
-            return withContentType(response, contentType);
+            return responseFunction.apply(callResult);
         }
         if (callResult instanceof JsonElement element) {
             return factory.newResponse(new Gson().toJson(element), HttpResponseStatus.OK, HttpHeaderValues.APPLICATION_JSON);
@@ -156,41 +150,57 @@ public class NettyChannelHandler extends SimpleChannelInboundHandler<FullHttpReq
                 String json = new Gson().toJson(callResult);
                 yield factory.newResponse(json, HttpResponseStatus.OK, HttpHeaderValues.APPLICATION_JSON);
             }
-            case AS_STRING -> factory.newResponse(callResult.toString(), HttpResponseStatus.OK, contentType);
+            case AS_STRING -> factory.newResponse(callResult.toString(), HttpResponseStatus.OK);
             case PROTOBUF_BINARY -> throw new UnsupportedOperationException();
             case PROTOBUF_JSON -> throw new UnsupportedOperationException();
         };
     }
 
-    @NotNull
     @VisibleForTesting
-    <T> FullHttpResponse renderResponse(@NotNull EndpointView<T> view,
-                                        @NotNull Object callResult,
-                                        @NotNull CharSequence contentType) throws Exception {
+    @NotNull
+    <T> FullHttpResponse renderResponse(@NotNull EndpointView<T> view, @NotNull Object callResult) throws Exception {
         Renderer<T> renderer = view.renderer();
         T template = view.template();
         return switch (renderer.support()) {
             case BYTE_ARRAY -> {
                 byte[] bytes = renderer.renderToBytes(template, callResult);
-                yield factory.newResponse(bytes, HttpResponseStatus.OK, contentType);
+                yield factory.newResponse(bytes, HttpResponseStatus.OK);
             }
             case STRING -> {
                 String content = renderer.renderToString(template, callResult);
-                yield factory.newResponse(content, HttpResponseStatus.OK, contentType);
+                yield factory.newResponse(content, HttpResponseStatus.OK);
             }
             case BYTE_STREAM -> throw new UnsupportedOperationException();
         };
     }
 
-    @NotNull
     @VisibleForTesting
-    static FullHttpResponse applyHeaders(@NotNull FullHttpResponse response, @NotNull EndpointOptions options) {
-        List<Pair<String, String>> clientHeaders = options.http().headers();
-        HttpHeaders headers = response.headers();
-        for (Pair<String, String> header : clientHeaders) {
-            headers.add(header.getKey(), header.getValue());
-        }
-        return response;
+    @NotNull
+    Iterable<Pair<CharSequence, CharSequence>> getDefaultHeaders(@NotNull EndpointOptions options) {
+        CharSequence contentType = options.http().hasContentType() ?
+                options.http().contentType() :
+                (options.out() == Marshal.JSON) ?
+                        HttpHeaderValues.APPLICATION_JSON :
+                        HttpHeaderValues.TEXT_HTML;
+
+        return List.of(
+            Pair.of(HttpHeaderNames.CONTENT_TYPE, contentType)
+        );
+    }
+
+    @VisibleForTesting
+    @NotNull
+    @CanIgnoreReturnValue
+    static <T extends CharSequence, U> FullHttpResponse withHeaders(
+            @NotNull FullHttpResponse response,
+            @NotNull Iterable<Pair<T, U>> values,
+            boolean canOverwrite) {
+        return HttpResponseFactory.withHeaders(response, headers -> {
+            for (Pair<T, U> header : values) {
+                if (canOverwrite || !headers.contains(header.getKey()))
+                    headers.set(header.getKey(), header.getValue());
+            }
+        });
     }
 
     @Override

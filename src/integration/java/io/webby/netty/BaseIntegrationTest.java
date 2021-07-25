@@ -9,9 +9,9 @@ import io.netty.buffer.Unpooled;
 import io.netty.handler.codec.http.*;
 import io.netty.util.CharsetUtil;
 import io.webby.Testing;
-import io.webby.hello.AcceptContent;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
+import org.junit.jupiter.api.Assertions;
 
 public abstract class BaseIntegrationTest {
     protected NettyChannelHandler handler;
@@ -99,11 +99,23 @@ public abstract class BaseIntegrationTest {
                                          HttpResponseStatus status,
                                          @Nullable String content,
                                          @Nullable HttpHeaders headers) {
+        Truth.assertThat(response).isNotNull();
         ByteBuf byteBuf = content != null ? BaseIntegrationTest.asByteBuf(content) : response.content();
         HttpHeaders httpHeaders = (headers != null) ? headers : response.headers();
         HttpHeaders trailingHeaders = response.trailingHeaders();
         Truth.assertThat(response)
                 .isEqualTo(new DefaultFullHttpResponse(version, status, byteBuf, httpHeaders, trailingHeaders));
+    }
+
+    protected static void assertHeaders(FullHttpResponse response, CharSequence key, CharSequence value) {
+        Assertions.assertEquals(value.toString(), response.headers().get(key));
+    }
+
+    protected static void assertHeaders(FullHttpResponse response,
+                                        CharSequence key1, CharSequence value1,
+                                        CharSequence key2, CharSequence value2) {
+        Assertions.assertEquals(value1.toString(), response.headers().get(key1));
+        Assertions.assertEquals(value2.toString(), response.headers().get(key2));
     }
 
     protected static void assertContentContains(FullHttpResponse response, String ... substrings) {

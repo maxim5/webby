@@ -1,5 +1,8 @@
 package io.webby.hello;
 
+import io.netty.handler.codec.http.FullHttpResponse;
+import io.netty.handler.codec.http.HttpHeaderNames;
+import io.netty.handler.codec.http.HttpHeaderValues;
 import io.webby.netty.BaseIntegrationTest;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -29,12 +32,28 @@ public class ReturnValueIntegrationTest extends BaseIntegrationTest {
 
     @Test
     public void json_map() {
-        assert200(get("/r/json/bar"), """
+        FullHttpResponse response = get("/r/json/map/bar");
+        assert200(response, """
             {"foo":1,"var":["bar"]}
         """.trim());
+        assertHeaders(response, HttpHeaderNames.CONTENT_TYPE, HttpHeaderValues.APPLICATION_JSON);
+    }
 
-        assert200(get("/r/json/bar/baz"), """
+    @Test
+    public void json_map_value_with_slash() {
+        FullHttpResponse response = get("/r/json/map/bar/baz");
+        assert200(response, """
             {"foo":1,"var":["bar","baz"]}
         """.trim());
+        assertHeaders(response, HttpHeaderNames.CONTENT_TYPE, HttpHeaderValues.APPLICATION_JSON);
+    }
+
+    @Test
+    public void json_tree() {
+        FullHttpResponse response = get("/r/json/tree/foobar");
+        assert200(response, """
+            ["f","o","o","b","a","r"]
+        """.trim());
+        assertHeaders(response, HttpHeaderNames.CONTENT_TYPE, HttpHeaderValues.APPLICATION_JSON);
     }
 }

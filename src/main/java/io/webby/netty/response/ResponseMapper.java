@@ -42,10 +42,7 @@ public class ResponseMapper {
         add(ReadableByteChannel.class, byteChannel -> respond(Channels.newInputStream(byteChannel)));
 
         add(char[].class, chars -> respond(new CharBuffer(chars)));
-        add(java.nio.CharBuffer.class, buffer ->
-                buffer.hasArray() ?
-                        respond(Unpooled.copiedBuffer(buffer.array(), charset)) :
-                        respond(buffer.toString()));
+        add(java.nio.CharBuffer.class, buf -> buf.hasArray() ? respond(asByteBuf(buf)) : respond(buf.toString()));
 
         add(CharSequence.class, this::respond);
         add(String.class, this::respond);
@@ -54,42 +51,6 @@ public class ResponseMapper {
         add(InputStream.class, this::respond);
         add(Readable.class, readable -> respond(readToString(readable)));
         add(Reader.class, reader -> respond(readToString(reader)));
-    }
-
-    @NotNull
-    private String readToString(Readable readable) {
-        try {
-            return CharStreams.toString(readable);
-        } catch (IOException e) {
-            throw new RuntimeException(e);
-        } finally {
-            if (readable instanceof Closeable closeable) {
-                closeQuietly(closeable);
-            }
-        }
-    }
-
-    @NotNull
-    private FullHttpResponse respond(ByteBuf byteBuf) {
-        return factory.newResponse(byteBuf, HttpResponseStatus.OK);
-    }
-
-    @NotNull
-    private FullHttpResponse respond(InputStream stream) {
-        return factory.newResponse(stream, HttpResponseStatus.OK, ""); // TODO: content type
-    }
-
-    @NotNull
-    private FullHttpResponse respond(CharSequence string) {
-        return factory.newResponse(string, HttpResponseStatus.OK);
-    }
-
-    private <B> void add(@NotNull Class<B> key, @NotNull Function<B, FullHttpResponse> value) {
-        if (key.isInterface()) {
-            interfaceMap.put(key, value);
-        } else {
-            classMap.put(key, value);
-        }
     }
 
     @Nullable
@@ -121,5 +82,51 @@ public class ResponseMapper {
             return castAny(lookupClass(superclass));
         }
         return castAny(value);
+    }
+
+    @NotNull
+    private FullHttpResponse respond(ByteBuf byteBuf) {
+        return factory.newResponse(byteBuf, HttpResponseStatus.OK);
+    }
+
+    @NotNull
+    private FullHttpResponse respond(InputStream stream) {
+        return factory.newResponse(stream, HttpResponseStatus.OK);
+    }
+
+    @NotNull
+    private FullHttpResponse respond(CharSequence string) {
+        return factory.newResponse(string, HttpResponseStatus.OK);
+    }
+
+    private <B> void add(@NotNull Class<B> key, @NotNull Function<B, FullHttpResponse> value) {
+        if (key.isInterface()) {
+            interfaceMap.put(key, value);
+        } else {
+            classMap.put(key, value);
+        }
+    }
+
+    @NotNull
+    private static ByteBuf asByteBuf(java.nio.CharBuffer buffer) {
+        return Unpooled.copiedBuffer(
+                buffer.array(),
+                buffer.arrayOffset() + buffer.position(),
+                buffer.arrayOffset() + buffer.limit(),
+                charset
+        );
+    }
+
+    @NotNull
+    private static String readToString(Readable readable) {
+        try {
+            return CharStreams.toString(readable);
+        } catch (IOException e) {
+            throw new RuntimeException(e);
+        } finally {
+            if (readable instanceof Closeable closeable) {
+                closeQuietly(closeable);
+            }
+        }
     }
 }
