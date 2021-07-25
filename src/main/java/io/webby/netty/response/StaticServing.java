@@ -29,7 +29,7 @@ public class StaticServing {
     @Inject private HttpResponseFactory factory;
 
     public void iterateStaticFiles(@NotNull Consumer<String> consumer) throws IOException {
-        Path webPath = Paths.get(settings.webPath());
+        Path webPath = settings.webPath();
         Files.walk(webPath).forEach(path -> {
             if (path.toFile().isFile()) {
                 consumer.accept(webPath.relativize(path).toString());
@@ -62,17 +62,17 @@ public class StaticServing {
 
     @Nullable
     /*package*/ ByteBuf getByteBufOrNull(@NotNull String path) throws IOException {
-        File file = new File(settings.webPath(), path);
-        if (file.exists()) {
-            return fileToByteBuf(file);
+        Path resolve = settings.webPath().resolve(path);
+        if (Files.exists(resolve)) {
+            return fileToByteBuf(resolve.toFile());
         }
         return null;
     }
 
     /*package*/ byte[] getBytesOrNull(@NotNull String path) throws IOException {
-        File file = new File(settings.webPath(), path);
-        if (file.exists()) {
-            return Files.readAllBytes(file.toPath());
+        Path resolve = settings.webPath().resolve(path);
+        if (Files.exists(resolve)) {
+            return Files.readAllBytes(resolve);
         }
         return null;
     }

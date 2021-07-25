@@ -11,13 +11,14 @@ import com.google.inject.util.Modules;
 import io.webby.app.AppConfigException;
 import io.webby.app.AppModule;
 import io.webby.app.AppSettings;
-import io.webby.netty.NettyModule;
 import io.webby.netty.NettyBootstrap;
+import io.webby.netty.NettyModule;
 import io.webby.url.UrlModule;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
-import java.io.File;
+import java.nio.file.Files;
+import java.nio.file.Path;
 import java.util.List;
 import java.util.logging.Level;
 
@@ -46,27 +47,32 @@ public class Webby {
 
     private static void validateSettings(@NotNull AppSettings settings) {
         validateWebPath(settings.webPath());
-        validateViewPath(settings.viewPath());
+        validateViewPaths(settings.viewPaths());
         validateHotReload(settings);
         validatePackageTester(settings);
     }
 
-    private static void validateWebPath(@Nullable String webPath) {
+    private static void validateWebPath(@Nullable Path webPath) {
         if (webPath == null) {
             throw new AppConfigException("Invalid settings: static web path is not set");
         }
-        if (!new File(webPath).exists()) {
+        if (!Files.exists(webPath)) {
             throw new AppConfigException("Invalid settings: static web path does not exist: %s".formatted(webPath));
         }
     }
 
-    private static void validateViewPath(@Nullable String viewPath) {
-        if (viewPath == null) {
-            throw new AppConfigException("Invalid settings: view path is not set");
+    private static void validateViewPaths(@Nullable List<Path> viewPaths) {
+        if (viewPaths == null) {
+            throw new AppConfigException("Invalid settings: view paths are not set");
         }
-        if (!new File(viewPath).exists()) {
-            throw new AppConfigException("Invalid settings: view path does not exist: %s".formatted(viewPath));
-        }
+        viewPaths.forEach(viewPath -> {
+            if (viewPath == null) {
+                throw new AppConfigException("Invalid settings: view path is null");
+            }
+            if (!Files.exists(viewPath)) {
+                throw new AppConfigException("Invalid settings: view path does not exist: %s".formatted(viewPath));
+            }
+        });
     }
 
     private static void validateHotReload(@NotNull AppSettings settings) {
