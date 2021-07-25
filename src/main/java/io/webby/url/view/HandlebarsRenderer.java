@@ -2,8 +2,12 @@ package io.webby.url.view;
 
 import com.github.jknack.handlebars.Handlebars;
 import com.github.jknack.handlebars.Template;
+import com.github.jknack.handlebars.cache.ConcurrentMapTemplateCache;
 import com.github.jknack.handlebars.cache.HighConcurrencyTemplateCache;
-import com.github.jknack.handlebars.io.ClassPathTemplateLoader;
+import com.github.jknack.handlebars.cache.NullTemplateCache;
+import com.github.jknack.handlebars.cache.TemplateCache;
+import com.github.jknack.handlebars.io.CompositeTemplateLoader;
+import com.github.jknack.handlebars.io.FileTemplateLoader;
 import com.github.jknack.handlebars.io.TemplateLoader;
 import com.google.common.flogger.FluentLogger;
 import com.google.inject.Inject;
@@ -15,6 +19,7 @@ import org.jetbrains.annotations.NotNull;
 import java.io.IOException;
 import java.io.OutputStream;
 import java.io.OutputStreamWriter;
+import java.nio.file.Path;
 import java.util.logging.Level;
 
 public class HandlebarsRenderer implements Renderer<Template> {
@@ -74,12 +79,23 @@ public class HandlebarsRenderer implements Renderer<Template> {
 
     @NotNull
     private Handlebars createDefault() {
-        HighConcurrencyTemplateCache cache = new HighConcurrencyTemplateCache();
-        cache.setReload(settings.isHotReload());
-        log.at(Level.FINE).log("Using Handlebars config: %s", null);
+        String suffix = settings.getProperty("handlebars.filename.suffix", TemplateLoader.DEFAULT_SUFFIX);
+        TemplateLoader[] loaders = settings.viewPaths()
+                .stream()
+                .map(Path::toFile)
+                .map(file -> new FileTemplateLoader(file, suffix))
+                .toArray(TemplateLoader[]::new);
+        TemplateLoader templateLoader = loaders.length == 1 ? loaders[0] : new CompositeTemplateLoader(loaders);
 
-        TemplateLoader loader = new ClassPathTemplateLoader();
-        loader.setPrefix("/web");
-        return new Handlebars(loader).with(cache);
+        String type = settings.getProperty("handlebars.cache.type", "HighConcurrency");
+        TemplateCache cache = switch (type) {
+            case "HighConcurrency" -> new HighConcurrencyTemplateCache();
+            case "ConcurrentMap" -> new ConcurrentMapTemplateCache();
+            case "Null" -> NullTemplateCache.INSTANCE;
+            default -> NullTemplateCache.INSTANCE;
+        };
+        cache.setReload(settings.isHotReload());
+
+        return new Handlebars(templateLoader).with(cache);
     }
 }
