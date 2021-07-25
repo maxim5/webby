@@ -16,13 +16,15 @@ public class ReturnValueIntegrationTest extends BaseIntegrationTest {
         assert200(get("/r/byteBuf/foo-bar"), "foo-bar");
         assert200(get("/r/byteBuffer/foo-bar"), "foo-bar");
         assert200(get("/r/stream/foo-bar"), "foo-bar");
-        // assert200(get("/r/byteChannel/foo-bar"), "foo-bar");     // TODO: not supported yet
+        assert200(get("/r/byteChannel/foo-bar"), "foo-bar");
     }
 
     @Test
     public void char_array_like() {
         assert200(get("/r/chars/foo-bar"), "foo-bar");
+        assert200(get("/r/charBuffer/foo-bar"), "foo-bar");
         assert200(get("/r/charSeq/foo-bar"), "foo-bar");
+        assert200(get("/r/reader/foo-bar"), "foo-bar");
     }
 
     @Test

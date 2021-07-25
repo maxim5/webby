@@ -5,7 +5,6 @@ import com.google.common.flogger.FluentLogger;
 import com.google.gson.Gson;
 import com.google.gson.JsonElement;
 import com.google.inject.Inject;
-import io.netty.buffer.ByteBuf;
 import io.netty.channel.ChannelFutureListener;
 import io.netty.channel.ChannelHandlerContext;
 import io.netty.channel.SimpleChannelInboundHandler;
@@ -28,7 +27,6 @@ import io.webby.util.Pair;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.VisibleForTesting;
 
-import java.io.InputStream;
 import java.util.List;
 import java.util.concurrent.TimeUnit;
 import java.util.function.Function;
@@ -144,12 +142,10 @@ public class NettyChannelHandler extends SimpleChannelInboundHandler<FullHttpReq
             return renderResponse(view, callResult, contentType);
         }
 
-        Function<Object, FullHttpResponse> responseFunction = mapper.lookup(callResult.getClass());
+        Function<Object, FullHttpResponse> responseFunction = mapper.mapInstance(callResult);
         if (responseFunction != null) {
-            return withContentType(responseFunction.apply(callResult), contentType);
-        }
-        if (callResult instanceof CharSequence string) {
-            return factory.newResponse(string, HttpResponseStatus.OK, contentType);
+            FullHttpResponse response = responseFunction.apply(callResult);
+            return withContentType(response, contentType);
         }
         if (callResult instanceof JsonElement element) {
             return factory.newResponse(new Gson().toJson(element), HttpResponseStatus.OK, HttpHeaderValues.APPLICATION_JSON);

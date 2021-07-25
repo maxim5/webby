@@ -7,8 +7,11 @@ import io.webby.url.annotate.Json;
 import io.webby.url.annotate.Serve;
 
 import java.io.ByteArrayInputStream;
+import java.io.Reader;
 import java.io.Serializable;
+import java.io.StringReader;
 import java.nio.ByteBuffer;
+import java.nio.CharBuffer;
 import java.nio.channels.Channels;
 import java.nio.channels.ReadableByteChannel;
 import java.nio.charset.Charset;
@@ -47,9 +50,19 @@ public class ReturnValue {
         return val.toCharArray();
     }
 
+    @GET(url = "/r/charBuffer/{val}")
+    public CharBuffer charBuffer(String val) {
+        return CharBuffer.wrap(val);
+    }
+
     @GET(url = "/r/charSeq/{val}")
     public CharSequence char_sequence(String val) {
         return new StringBuilder(val);
+    }
+
+    @GET(url = "/r/reader/{val}")
+    public Reader reader(String val) {
+        return new StringReader(val);
     }
 
     @GET(url="/r/json/{*var}")
