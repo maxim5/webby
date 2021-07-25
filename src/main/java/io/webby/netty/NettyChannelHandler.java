@@ -87,7 +87,11 @@ public class NettyChannelHandler extends SimpleChannelInboundHandler<FullHttpReq
             FullHttpRequest clientRequest = wrapRequestIfNeeded(request, endpoint.context());
             Object callResult = caller.call(clientRequest, match.variables());
             if (callResult == null) {
-                log.at(Level.INFO).log("Request handler returned null or void: %s", caller.method());
+                if (endpoint.context().isVoid()) {
+                    log.at(Level.FINE).log("Request handler is void, transforming into empty string");
+                } else {
+                    log.at(Level.INFO).log("Request handler returned null: %s", caller.method());
+                }
                 return createResponse("", endpoint.options());
             }
             return createResponse(callResult, endpoint.options());
@@ -113,7 +117,7 @@ public class NettyChannelHandler extends SimpleChannelInboundHandler<FullHttpReq
     @VisibleForTesting
     @NotNull
     static FullHttpRequest wrapRequestIfNeeded(@NotNull FullHttpRequest request, @NotNull EndpointContext context) {
-        return context.rawRequest() ? request : new DefaultHttpRequestEx(request, context.constraints());
+        return context.isRawRequest() ? request : new DefaultHttpRequestEx(request, context.constraints());
     }
 
     @VisibleForTesting

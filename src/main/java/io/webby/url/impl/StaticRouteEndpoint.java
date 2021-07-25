@@ -12,7 +12,7 @@ import java.util.Collections;
 import java.util.Map;
 
 public final class StaticRouteEndpoint implements RouteEndpoint {
-    private static final EndpointContext EMPTY_CONTEXT = new EndpointContext(Collections.emptyMap(), true);
+    private static final EndpointContext EMPTY_CONTEXT = new EndpointContext(Collections.emptyMap(), true, false);
 
     private final EndpointCaller caller;
     private final StaticServing serving;

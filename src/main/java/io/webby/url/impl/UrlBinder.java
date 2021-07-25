@@ -185,12 +185,13 @@ public class UrlBinder {
         try {
             bindings.stream().collect(Collectors.groupingBy(Binding::url)).values().forEach(group -> {
                 List<SingleRouteEndpoint> endpoints = group.stream().map(binding -> {
-                    log.at(Level.ALL).log("Processing %s", binding.method());
+                    Method method = binding.method();
+                    log.at(Level.ALL).log("Processing %s", method);
 
-                    Class<?> klass = binding.method().getDeclaringClass();
+                    Class<?> klass = method.getDeclaringClass();
                     Object instance = injector.getInstance(klass);
                     EndpointContext context = contextCache.computeIfAbsent(klass,
-                            key -> new EndpointContext(extractConstraints(klass, instance), false));
+                            key -> new EndpointContext(extractConstraints(klass, instance), false, isVoid(method)));
 
                     List<String> vars = parser.parse(binding.url())
                             .stream()
@@ -315,5 +316,9 @@ public class UrlBinder {
             return EndpointView.of(renderer, templateName);
         }
         return null;
+    }
+
+    private static boolean isVoid(Method method) {
+        return method.getReturnType().equals(Void.TYPE);
     }
 }

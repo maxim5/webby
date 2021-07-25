@@ -5,5 +5,5 @@ import org.jetbrains.annotations.NotNull;
 
 import java.util.Map;
 
-public record EndpointContext(@NotNull Map<String, Constraint<?>> constraints, boolean rawRequest) {
+public record EndpointContext(@NotNull Map<String, Constraint<?>> constraints, boolean isRawRequest, boolean isVoid) {
 }
