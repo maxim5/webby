@@ -1,5 +1,6 @@
 package io.webby.app;
 
+import com.google.errorprone.annotations.CanIgnoreReturnValue;
 import io.routekit.QueryParser;
 import io.routekit.SimpleQueryParser;
 import io.webby.url.annotate.Marshal;
@@ -149,6 +150,7 @@ public final class AppSettings implements Settings {
         this.defaultRender = defaultRender;
     }
 
+    @CanIgnoreReturnValue
     @Nullable
     public String setProperty(@NotNull String key, @NotNull String value) {
         return properties.put(key, value);
