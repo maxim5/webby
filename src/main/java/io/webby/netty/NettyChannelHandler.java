@@ -184,7 +184,14 @@ public class NettyChannelHandler extends SimpleChannelInboundHandler<FullHttpReq
                         HttpHeaderValues.TEXT_HTML;
 
         return List.of(
-            Pair.of(HttpHeaderNames.CONTENT_TYPE, contentType)
+            Pair.of(HttpHeaderNames.CONTENT_TYPE, contentType),
+            Pair.of(HttpHeaderNames.X_FRAME_OPTIONS, "SAMEORIGIN"),  // iframe attack
+            Pair.of("X-XSS-Protection", "1;mode=block"),  // XSS Filtering
+            Pair.of(HttpHeaderNames.CONTENT_SECURITY_POLICY, "script-src 'self'"),  // Whitelisting Sources
+            Pair.of("X-Content-Type-Options", "nosniff")  // MIME-sniffing attacks
+
+            // Content-Security-Policy: upgrade-insecure-requests
+            // Strict-Transport-Security: max-age=1000; includeSubDomains; preload
         );
     }
 
