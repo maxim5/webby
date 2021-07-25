@@ -10,11 +10,11 @@ import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
-import java.io.BufferedInputStream;
-import java.io.ByteArrayInputStream;
+import java.io.*;
 import java.nio.ByteBuffer;
 import java.nio.charset.Charset;
 import java.util.ArrayList;
+import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.function.Function;
 
 public class ResponseMapperTest {
@@ -89,28 +89,56 @@ public class ResponseMapperTest {
         assertMapInstance(new Object[0], null);
     }
 
+    @Test
+    public void should_close_input_stream() {
+        byte[] bytes = "foo".getBytes(Charset.defaultCharset());
+        AtomicBoolean closed = new AtomicBoolean(false);
+        InputStream stream = new ByteArrayInputStream(bytes) {
+            @Override
+            public void close() {
+                closed.set(true);
+            }
+        };
+        mapper.mapInstance(stream).apply(stream);
+        Assertions.assertTrue(closed.get());
+    }
+
+    @Test
+    public void should_close_reader() {
+        AtomicBoolean closed = new AtomicBoolean(false);
+        Reader reader = new StringReader("foo") {
+            @Override
+            public void close() {
+                super.close();
+                closed.set(true);
+            }
+        };
+        mapper.mapInstance(reader).apply(reader);
+        Assertions.assertTrue(closed.get());
+    }
+
     private void assertLookupClass(Object obj, String expected) {
-        Class<?> klass = obj.getClass();
-        Function<Object, FullHttpResponse> lookup = mapper.lookupClass(klass);
-        if (expected != null) {
-            Assertions.assertNotNull(lookup, () -> "%s super classes: %s".formatted(obj, getAllSupers(klass)));
-            FullHttpResponse response = lookup.apply(obj);
-            Assertions.assertEquals(expected, response.content().toString(Charset.defaultCharset()));
-        } else {
-            Assertions.assertNull(lookup, () -> "%s super classes: %s".formatted(obj, getAllSupers(klass)));
-        }
+        Function<Object, FullHttpResponse> lookup = mapper.lookupClass(obj.getClass());
+        assertResponseFunction(lookup, obj, expected);
     }
 
     private void assertMapInstance(Object obj, String expected) {
-        Class<?> klass = obj.getClass();
         Function<Object, FullHttpResponse> lookup = mapper.mapInstance(obj);
+        assertResponseFunction(lookup, obj, expected);
+    }
+
+    private void assertResponseFunction(Function<Object, FullHttpResponse> lookup, Object obj, String expected) {
         if (expected != null) {
-            Assertions.assertNotNull(lookup, () -> "%s super classes: %s".formatted(obj, getAllSupers(klass)));
+            Assertions.assertNotNull(lookup, () -> describe(obj));
             FullHttpResponse response = lookup.apply(obj);
             Assertions.assertEquals(expected, response.content().toString(Charset.defaultCharset()));
         } else {
-            Assertions.assertNull(lookup, () -> "%s super classes: %s".formatted(obj, getAllSupers(klass)));
+            Assertions.assertNull(lookup, () -> describe(obj));
         }
+    }
+
+    private static String describe(Object obj) {
+        return "%s super classes: %s".formatted(obj, getAllSupers(obj.getClass()));
     }
 
     private static ArrayList<Class<?>> getAllSupers(Class<?> klass) {
