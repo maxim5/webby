@@ -80,14 +80,12 @@ public class FreeMarkerRenderer implements Renderer<Template> {
 
     @NotNull
     private Configuration createDefault() {
-        List<Path> viewPaths = settings.viewPaths();
-        List<FileTemplateLoader> loaders = viewPaths.stream()
+        TemplateLoader[] loaders = settings.viewPaths()
+                .stream()
                 .map(Path::toFile)
                 .map(rethrow(FileTemplateLoader::new))
-                .toList();
-        TemplateLoader templateLoader = loaders.size() == 1 ?
-                loaders.get(0) :
-                new MultiTemplateLoader(loaders.toArray(TemplateLoader[]::new));
+                .toArray(TemplateLoader[]::new);
+        TemplateLoader templateLoader = loaders.length == 1 ? loaders[0] : new MultiTemplateLoader(loaders);
 
         Version version = new Version(settings.getProperty("freemarker.version", Configuration.getVersion()));
 
