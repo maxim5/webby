@@ -9,7 +9,9 @@ import org.junit.jupiter.api.Test;
 public class PebbleExampleTest extends BaseIntegrationTest {
     @BeforeEach
     void setup() {
-        testStartup(PebbleExample.class);
+        testStartup(PebbleExample.class, settings -> {
+            settings.setViewPath("src/examples/resources/web/pebble");
+        });
     }
 
     @Test

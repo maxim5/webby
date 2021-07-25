@@ -26,6 +26,7 @@ public class Main {
         settings.setViewPath("out/examples/resources/web/");
         settings.setDevMode(true);
         settings.setProperty("jte.class.directory", JteExample.CLASS_DIR);
+        settings.setProperty("pebble.view.paths", "out/examples/resources/web/pebble");
 
         Injector injector = Webby.initGuice(settings);
         NettyBootstrap startup = injector.getInstance(NettyBootstrap.class);
