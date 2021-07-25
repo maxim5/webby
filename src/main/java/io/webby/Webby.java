@@ -4,7 +4,9 @@ import com.google.common.flogger.FluentLogger;
 import com.google.common.flogger.util.CallerFinder;
 import com.google.inject.Guice;
 import com.google.inject.Injector;
+import com.google.inject.Module;
 import com.google.inject.Stage;
+import com.google.inject.util.Modules;
 import io.webby.app.AppConfigException;
 import io.webby.app.AppModule;
 import io.webby.app.AppSettings;
@@ -22,15 +24,20 @@ public class Webby {
 
     @NotNull
     public static Injector initDependencies(@NotNull AppSettings settings) throws AppConfigException {
-        log.at(Level.INFO).log("Initializing Webby dependencies");
-        validateSettings(settings);
+        log.at(Level.INFO).log("Initializing Webby module");
         return initGuice(settings);
+    }
+
+    @NotNull
+    public static Module mainModule(@NotNull AppSettings settings) throws AppConfigException {
+        validateSettings(settings);
+        return Modules.combine(new AppModule(settings), new NettyModule(), new UrlModule());
     }
 
     @VisibleForTesting
     /*package*/ static Injector initGuice(@NotNull AppSettings settings) {
         Stage stage = (settings.isDevMode()) ? Stage.DEVELOPMENT : Stage.PRODUCTION;
-        return Guice.createInjector(stage, new AppModule(settings), new NettyModule(), new UrlModule());
+        return Guice.createInjector(stage, mainModule(settings));
     }
 
     private static void validateSettings(@NotNull AppSettings settings) {
