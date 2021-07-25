@@ -12,7 +12,7 @@ import io.netty.handler.codec.http.HttpServerCodec;
 
 import java.util.logging.Level;
 
-public class NettyStartup {
+public class NettyBootstrap {
     private static final FluentLogger log = FluentLogger.forEnclosingClass();
 
     @Inject private Provider<NettyChannelHandler> nettyChannelHandler;

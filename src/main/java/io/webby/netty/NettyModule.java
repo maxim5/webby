@@ -8,8 +8,9 @@ public class NettyModule extends AbstractModule {
     @Override
     protected void configure() {
         bind(HttpResponseFactory.class).asEagerSingleton();
-        bind(NettyChannelHandler.class);  // not a singleton!
-        bind(NettyStartup.class).asEagerSingleton();
+        bind(NettyBootstrap.class).asEagerSingleton();
         bind(StaticServing.class).asEagerSingleton();
+
+        bind(NettyChannelHandler.class);  // not a singleton!
     }
 }

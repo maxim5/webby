@@ -1,5 +1,6 @@
 package io.webby;
 
+import com.google.common.collect.Iterables;
 import com.google.common.flogger.FluentLogger;
 import com.google.common.flogger.util.CallerFinder;
 import com.google.inject.Guice;
@@ -11,33 +12,36 @@ import io.webby.app.AppConfigException;
 import io.webby.app.AppModule;
 import io.webby.app.AppSettings;
 import io.webby.netty.NettyModule;
+import io.webby.netty.NettyBootstrap;
 import io.webby.url.UrlModule;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
-import org.jetbrains.annotations.VisibleForTesting;
 
 import java.io.File;
+import java.util.List;
 import java.util.logging.Level;
 
 public class Webby {
     private static final FluentLogger log = FluentLogger.forEnclosingClass();
 
     @NotNull
-    public static Injector initDependencies(@NotNull AppSettings settings) throws AppConfigException {
-        log.at(Level.INFO).log("Initializing Webby module");
-        return initGuice(settings);
+    public static NettyBootstrap nettyBootstrap(@NotNull AppSettings settings, @NotNull Module ... modules) {
+        Injector injector = initGuice(settings, modules);
+        return injector.getInstance(NettyBootstrap.class);
+    }
+
+    @NotNull
+    public static Injector initGuice(@NotNull AppSettings settings, @NotNull Module ... modules) {
+        log.at(Level.INFO).log("Initializing Webby Guice module");
+        Stage stage = (settings.isDevMode()) ? Stage.DEVELOPMENT : Stage.PRODUCTION;
+        Iterable<Module> iterable = Iterables.concat(List.of(mainModule(settings)), List.of(modules));
+        return Guice.createInjector(stage, iterable);
     }
 
     @NotNull
     public static Module mainModule(@NotNull AppSettings settings) throws AppConfigException {
         validateSettings(settings);
         return Modules.combine(new AppModule(settings), new NettyModule(), new UrlModule());
-    }
-
-    @VisibleForTesting
-    /*package*/ static Injector initGuice(@NotNull AppSettings settings) {
-        Stage stage = (settings.isDevMode()) ? Stage.DEVELOPMENT : Stage.PRODUCTION;
-        return Guice.createInjector(stage, mainModule(settings));
     }
 
     private static void validateSettings(@NotNull AppSettings settings) {

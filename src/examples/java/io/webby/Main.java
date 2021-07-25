@@ -3,7 +3,7 @@ package io.webby;
 import com.google.common.flogger.FluentLogger;
 import com.google.inject.Injector;
 import io.webby.app.AppSettings;
-import io.webby.netty.NettyStartup;
+import io.webby.netty.NettyBootstrap;
 
 import java.io.FileInputStream;
 import java.util.logging.Level;
@@ -24,8 +24,9 @@ public class Main {
         settings.setWebPath("out/examples/resources/web/");
         settings.setViewPath("out/examples/resources/web/");
         settings.setDevMode(true);
-        Injector injector = Webby.initDependencies(settings);
-        NettyStartup startup = injector.getInstance(NettyStartup.class);
+
+        Injector injector = Webby.initGuice(settings);
+        NettyBootstrap startup = injector.getInstance(NettyBootstrap.class);
         startup.runLocally(port);
     }
 }
