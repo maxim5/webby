@@ -6,6 +6,7 @@ import io.webby.url.annotate.Render;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
+import java.nio.charset.Charset;
 import java.nio.file.Path;
 import java.util.List;
 import java.util.function.BiPredicate;
@@ -18,6 +19,8 @@ public interface Settings {
     Path webPath();
 
     List<Path> viewPaths();
+
+    Charset charset();
 
     BiPredicate<String, String> filter();
 

@@ -7,6 +7,7 @@ import io.webby.url.annotate.Render;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
+import java.nio.charset.Charset;
 import java.nio.file.Path;
 import java.util.Arrays;
 import java.util.HashMap;
@@ -20,6 +21,7 @@ public final class AppSettings implements Settings {
     private boolean hotReloadDefault = true;
     private Path webPath = Path.of("/web/");
     private List<Path> viewPaths = List.of(Path.of("/web/"));
+    private Charset charset = Charset.defaultCharset();
     private BiPredicate<String, String> filter = null;
     private QueryParser urlParser = SimpleQueryParser.DEFAULT;
     private Marshal defaultRequestContentMarshal = Marshal.JSON;
@@ -83,6 +85,15 @@ public final class AppSettings implements Settings {
 
     public void setViewPaths(@NotNull Path @NotNull ... viewPaths) {
         this.viewPaths = List.of(viewPaths);
+    }
+
+    @Override
+    public Charset charset() {
+        return charset;
+    }
+
+    public void setCharset(@NotNull Charset charset) {
+        this.charset = charset;
     }
 
     @Override

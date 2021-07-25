@@ -8,7 +8,7 @@ import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
-import java.nio.charset.StandardCharsets;
+import java.nio.charset.Charset;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipOutputStream;
 
@@ -36,7 +36,7 @@ public class CustomHeaders {
             for (int i = 0; i < 3; i++) {
                 ZipEntry entry = new ZipEntry("%d.txt".formatted(i));
                 zipOutput.putNextEntry(entry);
-                zipOutput.write("File content for %d".formatted(i).getBytes(StandardCharsets.UTF_8));
+                zipOutput.write("File content for %d".formatted(i).getBytes(Charset.defaultCharset()));
                 zipOutput.closeEntry();
             }
         }

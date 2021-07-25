@@ -6,7 +6,6 @@ import com.google.inject.Inject;
 import io.netty.buffer.ByteBuf;
 import io.netty.buffer.Unpooled;
 import io.netty.handler.codec.http.*;
-import io.netty.util.CharsetUtil;
 import io.webby.app.Settings;
 import io.webby.url.view.RenderUtil;
 import org.jetbrains.annotations.NotNull;
@@ -15,7 +14,6 @@ import org.jetbrains.annotations.Nullable;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.InputStream;
-import java.nio.charset.Charset;
 import java.util.function.Consumer;
 import java.util.logging.Level;
 
@@ -29,7 +27,7 @@ public class HttpResponseFactory {
 
     @NotNull
     public FullHttpResponse newResponse(@NotNull CharSequence content, @NotNull HttpResponseStatus status) {
-        ByteBuf byteBuf = Unpooled.copiedBuffer(content, CharsetUtil.UTF_8);
+        ByteBuf byteBuf = Unpooled.copiedBuffer(content, settings.charset());
         return newResponse(byteBuf, status);
     }
 
@@ -112,7 +110,7 @@ public class HttpResponseFactory {
             ByteBuf clientError = staticServing.getByteBufOrNull(name);
             if (settings.isDevMode()) {
                 ByteBuf resource = (clientError != null) ? clientError : getDefaultResource(name);
-                String content = resource.toString(Charset.defaultCharset()).formatted(
+                String content = resource.toString(settings.charset()).formatted(
                         debugError != null ? debugError : "",
                         cause != null ? Throwables.getStackTraceAsString(cause) : ""
                 );

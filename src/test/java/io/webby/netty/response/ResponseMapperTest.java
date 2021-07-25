@@ -12,7 +12,6 @@ import org.junit.jupiter.api.Test;
 
 import java.io.*;
 import java.nio.ByteBuffer;
-import java.nio.charset.Charset;
 import java.util.ArrayList;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.function.Function;
@@ -28,7 +27,7 @@ public class ResponseMapperTest {
 
     @Test
     public void lookup_or_map_byte_buffer() {
-        byte[] bytes = "foo".getBytes(Charset.defaultCharset());
+        byte[] bytes = "foo".getBytes(Testing.CHARSET);
         assertLookupClass(bytes, "foo");
 
         ByteBuf byteBuf = Unpooled.wrappedBuffer(bytes);
@@ -60,7 +59,7 @@ public class ResponseMapperTest {
 
     @Test
     public void lookup_or_map_input_stream() {
-        byte[] bytes = "foo".getBytes(Charset.defaultCharset());
+        byte[] bytes = "foo".getBytes(Testing.CHARSET);
 
         ByteArrayInputStream byteArrayInputStream = new ByteArrayInputStream(bytes);
         assertLookupClass(byteArrayInputStream, "foo");
@@ -91,7 +90,7 @@ public class ResponseMapperTest {
 
     @Test
     public void should_close_input_stream() {
-        byte[] bytes = "foo".getBytes(Charset.defaultCharset());
+        byte[] bytes = "foo".getBytes(Testing.CHARSET);
         AtomicBoolean closed = new AtomicBoolean(false);
         InputStream stream = new ByteArrayInputStream(bytes) {
             @Override
@@ -131,7 +130,7 @@ public class ResponseMapperTest {
         if (expected != null) {
             Assertions.assertNotNull(lookup, () -> describe(obj));
             FullHttpResponse response = lookup.apply(obj);
-            Assertions.assertEquals(expected, response.content().toString(Charset.defaultCharset()));
+            Assertions.assertEquals(expected, response.content().toString(Testing.CHARSET));
         } else {
             Assertions.assertNull(lookup, () -> describe(obj));
         }

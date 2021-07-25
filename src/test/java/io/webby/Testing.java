@@ -4,6 +4,7 @@ import com.google.inject.Injector;
 import io.webby.app.AppSettings;
 import org.jetbrains.annotations.NotNull;
 
+import java.nio.charset.Charset;
 import java.util.Locale;
 import java.util.function.Consumer;
 import java.util.logging.Level;
@@ -15,6 +16,8 @@ public class Testing {
 
     public static final String DEFAULT_WEB_PATH = "src/test/resources";
     public static final String DEFAULT_VIEW_PATH = "src/test/resources";
+
+    public static final Charset CHARSET = Charset.defaultCharset();
 
     @NotNull
     public static Injector testStartupNoHandlers() {

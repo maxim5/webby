@@ -79,7 +79,7 @@ public class PebbleRenderer implements Renderer<PebbleTemplate> {
     }
 
     private PebbleEngine createDefault() {
-        Charset charset = Charset.defaultCharset();  // TODO: charset
+        Charset charset = settings.charset();
         String viewPathsProp = settings.getProperty("pebble.view.paths");
         String suffix = settings.getProperty("pebble.filename.suffix");
         boolean cache = settings.isHotReload() ?

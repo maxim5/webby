@@ -7,7 +7,6 @@ import io.netty.buffer.ByteBuf;
 import io.netty.buffer.DuplicatedByteBuf;
 import io.netty.buffer.Unpooled;
 import io.netty.handler.codec.http.*;
-import io.netty.util.CharsetUtil;
 import io.webby.Testing;
 import io.webby.app.AppSettings;
 import org.jetbrains.annotations.NotNull;
@@ -63,7 +62,7 @@ public abstract class BaseIntegrationTest {
 
     @NotNull
     protected static ByteBuf asByteBuf(@Nullable String content) {
-        return BaseIntegrationTest.readable(content != null ? Unpooled.copiedBuffer(content, CharsetUtil.UTF_8) : Unpooled.buffer(0));
+        return BaseIntegrationTest.readable(content != null ? Unpooled.copiedBuffer(content, Testing.CHARSET) : Unpooled.buffer(0));
     }
 
     protected static FullHttpResponse readable(@NotNull FullHttpResponse response) {
@@ -145,7 +144,7 @@ public abstract class BaseIntegrationTest {
 
         @Override
         public String toString() {
-            return unwrap().toString(CharsetUtil.UTF_8);
+            return unwrap().toString(Testing.CHARSET);
         }
     }
 }

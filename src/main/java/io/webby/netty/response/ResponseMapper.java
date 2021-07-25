@@ -7,6 +7,7 @@ import io.netty.buffer.Unpooled;
 import io.netty.handler.codec.http.FullHttpResponse;
 import io.netty.handler.codec.http.HttpResponseStatus;
 import io.routekit.util.CharBuffer;
+import io.webby.app.Settings;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
@@ -17,7 +18,6 @@ import java.io.Reader;
 import java.nio.ByteBuffer;
 import java.nio.channels.Channels;
 import java.nio.channels.ReadableByteChannel;
-import java.nio.charset.Charset;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.function.Function;
@@ -26,15 +26,16 @@ import static io.webby.url.view.RenderUtil.castAny;
 import static io.webby.url.view.RenderUtil.closeQuietly;
 
 public class ResponseMapper {
-    private static final Charset charset = Charset.defaultCharset();        // TODO: make a setting
-
-    private final HttpResponseFactory factory;
     private final Map<Class<?>, Function<?, FullHttpResponse>> classMap = new HashMap<>();
     private final Map<Class<?>, Function<?, FullHttpResponse>> interfaceMap = new HashMap<>();
 
+    private final HttpResponseFactory factory;
+    private final Settings settings;
+
     @Inject
-    public ResponseMapper(@NotNull HttpResponseFactory factory) {
+    public ResponseMapper(@NotNull HttpResponseFactory factory, @NotNull Settings settings) {
         this.factory = factory;
+        this.settings = settings;
 
         add(byte[].class, bytes -> respond(Unpooled.wrappedBuffer(bytes)));
         add(ByteBuf.class, this::respond);
@@ -108,12 +109,12 @@ public class ResponseMapper {
     }
 
     @NotNull
-    private static ByteBuf asByteBuf(java.nio.CharBuffer buffer) {
+    private ByteBuf asByteBuf(java.nio.CharBuffer buffer) {
         return Unpooled.copiedBuffer(
                 buffer.array(),
                 buffer.arrayOffset() + buffer.position(),
                 buffer.arrayOffset() + buffer.limit(),
-                charset
+                settings.charset()
         );
     }
 
