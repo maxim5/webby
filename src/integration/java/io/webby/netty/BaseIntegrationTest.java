@@ -9,6 +9,7 @@ import io.netty.buffer.Unpooled;
 import io.netty.handler.codec.http.*;
 import io.netty.util.CharsetUtil;
 import io.webby.Testing;
+import io.webby.app.AppSettings;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import org.junit.jupiter.api.Assertions;
@@ -17,7 +18,11 @@ public abstract class BaseIntegrationTest {
     protected NettyChannelHandler handler;
 
     protected void testStartup(@NotNull Class<?> clazz) {
-        Injector injector = Testing.testStartup(clazz);
+        AppSettings settings = new AppSettings();
+        settings.setWebPath("src/examples/resources/web");
+        settings.setViewPath("src/examples/resources/web");
+        settings.setClassOnly(clazz);
+        Injector injector = Testing.testStartup(settings);
         handler = injector.getInstance(NettyChannelHandler.class);
     }
 

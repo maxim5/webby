@@ -2,9 +2,12 @@ package io.webby.url.view;
 
 import com.google.common.flogger.FluentLogger;
 import com.google.inject.Inject;
-import freemarker.cache.ClassTemplateLoader;
+import freemarker.cache.FileTemplateLoader;
+import freemarker.cache.MultiTemplateLoader;
+import freemarker.cache.TemplateLoader;
 import freemarker.template.Configuration;
 import freemarker.template.Template;
+import freemarker.template.Version;
 import io.webby.app.Settings;
 import io.webby.url.HandlerConfigError;
 import io.webby.util.ThrowConsumer;
@@ -13,8 +16,12 @@ import org.jetbrains.annotations.NotNull;
 import java.io.IOException;
 import java.io.OutputStream;
 import java.io.OutputStreamWriter;
+import java.nio.file.Path;
 import java.time.Duration;
+import java.util.List;
 import java.util.logging.Level;
+
+import static io.webby.util.Rethrow.Functions.rethrow;
 
 public class FreeMarkerRenderer implements Renderer<Template> {
     private static final FluentLogger log = FluentLogger.forEnclosingClass();
@@ -73,13 +80,23 @@ public class FreeMarkerRenderer implements Renderer<Template> {
 
     @NotNull
     private Configuration createDefault() {
-        String root = "web";
-        ClassLoader classLoader = Thread.currentThread().getContextClassLoader();
-        Duration reloadDelay = settings.isHotReload() ? Duration.ofMillis(100) : Duration.ofDays(365);
-        log.at(Level.FINE).log("Using FreeMarker config: %s", null);
+        List<Path> viewPaths = settings.viewPaths();
+        List<FileTemplateLoader> loaders = viewPaths.stream()
+                .map(Path::toFile)
+                .map(rethrow(FileTemplateLoader::new))
+                .toList();
+        TemplateLoader templateLoader = loaders.size() == 1 ?
+                loaders.get(0) :
+                new MultiTemplateLoader(loaders.toArray(TemplateLoader[]::new));
 
-        Configuration configuration = new Configuration(Configuration.VERSION_2_3_31);
-        configuration.setTemplateLoader(new ClassTemplateLoader(classLoader, root));
+        Version version = new Version(settings.getProperty("freemarker.version", Configuration.getVersion()));
+
+        Duration reloadDelay = settings.isHotReload() ?
+                Duration.ofMillis(settings.getIntProperty("freemarker.dev.reload.millis", 100)) :
+                Duration.ofDays(settings.getIntProperty("freemarker.prod.reload.days", 365));
+
+        Configuration configuration = new Configuration(version);
+        configuration.setTemplateLoader(templateLoader);
         configuration.setTemplateUpdateDelayMilliseconds(reloadDelay.toMillis());
         return configuration;
     }
