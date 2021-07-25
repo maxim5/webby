@@ -172,6 +172,12 @@ public final class AppSettings implements Settings {
         }
     }
 
+    @Override
+    public boolean getBoolProperty(@NotNull String key) {
+        return getBoolProperty(key, false);
+    }
+
+    @Override
     public boolean getBoolProperty(@NotNull String key, boolean def) {
         String property = getProperty(key);
         return property != null ? Boolean.parseBoolean(property) : def;

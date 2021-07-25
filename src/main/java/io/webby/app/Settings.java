@@ -36,4 +36,8 @@ public interface Settings {
     @NotNull String getProperty(@NotNull String key, @NotNull Object def);
 
     int getIntProperty(@NotNull String key, int def);
+
+    boolean getBoolProperty(@NotNull String key);
+
+    boolean getBoolProperty(@NotNull String key, boolean def);
 }

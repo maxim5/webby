@@ -62,7 +62,7 @@ public class Webby {
     }
 
     private static void validateViewPaths(@Nullable List<Path> viewPaths) {
-        if (viewPaths == null) {
+        if (viewPaths == null || viewPaths.isEmpty()) {
             throw new AppConfigException("Invalid settings: view paths are not set");
         }
         viewPaths.forEach(viewPath -> {
