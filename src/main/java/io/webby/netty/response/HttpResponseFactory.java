@@ -66,7 +66,7 @@ public class HttpResponseFactory {
         } catch (IOException e) {
             return newResponse503("Failed to read content bytes", e);
         } finally {
-            RenderUtil.closeQuietly(content);
+            RenderUtil.closeRethrow(content);
         }
     }
 

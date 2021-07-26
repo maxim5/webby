@@ -23,7 +23,7 @@ import java.util.Map;
 import java.util.function.Function;
 
 import static io.webby.url.view.RenderUtil.castAny;
-import static io.webby.url.view.RenderUtil.closeQuietly;
+import static io.webby.url.view.RenderUtil.closeRethrow;
 
 public class ResponseMapper {
     private final Map<Class<?>, Function<?, FullHttpResponse>> classMap = new HashMap<>();
@@ -126,7 +126,7 @@ public class ResponseMapper {
             throw new RuntimeException(e);
         } finally {
             if (readable instanceof Closeable closeable) {
-                closeQuietly(closeable);
+                closeRethrow(closeable);
             }
         }
     }

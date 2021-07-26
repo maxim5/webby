@@ -1,6 +1,7 @@
 package io.webby.url.view;
 
 import com.google.common.io.Closeables;
+import io.webby.util.Rethrow;
 import io.webby.util.ThrowConsumer;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
@@ -74,6 +75,15 @@ public class RenderUtil {
             Closeables.close(closeable, true);
         } catch (IOException impossible) {
             throw new AssertionError(impossible);
+        }
+    }
+
+    @SuppressWarnings("UnstableApiUsage")
+    public static void closeRethrow(@Nullable Closeable closeable) {
+        try {
+            Closeables.close(closeable, false);
+        } catch (IOException e) {
+            Rethrow.rethrow(e);
         }
     }
 }
