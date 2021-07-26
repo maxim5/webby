@@ -16,6 +16,7 @@ import io.routekit.util.CharBuffer;
 import io.webby.netty.exceptions.BadRequestException;
 import io.webby.netty.exceptions.NotFoundException;
 import io.webby.netty.exceptions.RedirectException;
+import io.webby.netty.intercept.Interceptors;
 import io.webby.netty.request.DefaultHttpRequestEx;
 import io.webby.netty.response.HttpResponseFactory;
 import io.webby.netty.response.ResponseMapper;
@@ -36,14 +37,17 @@ import java.util.logging.Level;
 public class NettyChannelHandler extends SimpleChannelInboundHandler<FullHttpRequest> {
     private static final FluentLogger log = FluentLogger.forEnclosingClass();
 
+    private final Interceptors interceptors;
     private final HttpResponseFactory factory;
     private final ResponseMapper mapper;
     private final Router<RouteEndpoint> router;
 
     @Inject
-    public NettyChannelHandler(@NotNull HttpResponseFactory factory,
+    public NettyChannelHandler(@NotNull Interceptors interceptors,
+                               @NotNull HttpResponseFactory factory,
                                @NotNull ResponseMapper mapper,
                                @NotNull UrlRouter urlRouter) {
+        this.interceptors = interceptors;
         this.factory = factory;
         this.mapper = mapper;
         this.router = urlRouter.getRouter();
@@ -82,10 +86,26 @@ public class NettyChannelHandler extends SimpleChannelInboundHandler<FullHttpReq
             return factory.newResponse404();
         }
 
+        if (endpoint.context().isRawRequest()) {
+            return call(request, match, endpoint);
+        } else {
+            DefaultHttpRequestEx requestEx = new DefaultHttpRequestEx(request, endpoint.context().constraints());
+            FullHttpResponse intercepted = interceptors.enter(requestEx);
+            if (intercepted != null) {
+                return intercepted;
+            }
+            FullHttpResponse response = call(requestEx, match, endpoint);
+            return interceptors.exit(requestEx, response);
+        }
+    }
+
+    @NotNull
+    private FullHttpResponse call(@NotNull FullHttpRequest request,
+                                  @NotNull Match<RouteEndpoint> match,
+                                  @NotNull EndpointCaller endpoint) {
         Caller caller = endpoint.caller();
         try {
-            FullHttpRequest clientRequest = wrapRequestIfNeeded(request, endpoint.context());
-            Object callResult = caller.call(clientRequest, match.variables());
+            Object callResult = caller.call(request, match.variables());
             if (callResult == null) {
                 if (endpoint.context().isVoid()) {
                     log.at(Level.FINE).log("Request handler is void, transforming into empty string");
@@ -121,12 +141,6 @@ public class NettyChannelHandler extends SimpleChannelInboundHandler<FullHttpReq
         // TODO: handle '#'
         // TODO: handle trailing slash (settings)
         return uri.substringUntil(uri.indexOf('?', 0, uri.length()));
-    }
-
-    @VisibleForTesting
-    @NotNull
-    static FullHttpRequest wrapRequestIfNeeded(@NotNull FullHttpRequest request, @NotNull EndpointContext context) {
-        return context.isRawRequest() ? request : new DefaultHttpRequestEx(request, context.constraints());
     }
 
     @VisibleForTesting
