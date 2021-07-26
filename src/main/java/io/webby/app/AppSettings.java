@@ -8,6 +8,7 @@ import io.webby.url.annotate.Render;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
+import java.io.File;
 import java.nio.charset.Charset;
 import java.nio.file.Path;
 import java.util.Arrays;
@@ -194,5 +195,13 @@ public final class AppSettings implements Settings {
     public boolean getBoolProperty(@NotNull String key, boolean def) {
         String property = getProperty(key);
         return property != null ? Boolean.parseBoolean(property) : def;
+    }
+
+    @Override
+    public @NotNull List<Path> getViewPaths(@NotNull String key) {
+        String property = getProperty(key);
+        return property != null ?
+                Arrays.stream(property.split(File.pathSeparator)).map(Path::of).toList() :
+                viewPaths();
     }
 }

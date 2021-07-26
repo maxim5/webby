@@ -43,4 +43,6 @@ public interface Settings {
     boolean getBoolProperty(@NotNull String key);
 
     boolean getBoolProperty(@NotNull String key, boolean def);
+
+    @NotNull List<Path> getViewPaths(@NotNull String key);
 }

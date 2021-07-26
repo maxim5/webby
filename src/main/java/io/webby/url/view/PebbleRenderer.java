@@ -12,12 +12,10 @@ import io.webby.url.HandlerConfigError;
 import io.webby.util.ThrowConsumer;
 import org.jetbrains.annotations.NotNull;
 
-import java.io.File;
 import java.io.OutputStream;
 import java.io.OutputStreamWriter;
 import java.nio.charset.Charset;
 import java.nio.file.Path;
-import java.util.Arrays;
 import java.util.List;
 import java.util.logging.Level;
 
@@ -80,15 +78,12 @@ public class PebbleRenderer implements Renderer<PebbleTemplate> {
 
     private PebbleEngine createDefault() {
         Charset charset = settings.charset();
-        String viewPathsProp = settings.getProperty("pebble.view.paths");
+        List<Path> viewPaths = settings.getViewPaths("pebble.view.paths");
         String suffix = settings.getProperty("pebble.filename.suffix");
         boolean cache = settings.isHotReload() ?
                 settings.getBoolProperty("pebble.dev.cache.enabled", false) :
                 settings.getBoolProperty("pebble.prod.cache.enabled", true);
 
-        List<Path> viewPaths = viewPathsProp != null ?
-                Arrays.stream(viewPathsProp.split(File.pathSeparator)).map(Path::of).toList() :
-                settings.viewPaths();
         List<FileLoader> loaders = viewPaths.stream()
                 .map(path -> {
                     FileLoader fileLoader = new FileLoader();

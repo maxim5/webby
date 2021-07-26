@@ -17,6 +17,7 @@ import java.io.IOException;
 import java.io.OutputStream;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Path;
+import java.util.List;
 import java.util.Map;
 import java.util.logging.Level;
 
@@ -86,15 +87,7 @@ public class JteRenderer implements Renderer<String> {
 
     @NotNull
     private TemplateEngine createDefault() {
-        DirectoryCodeResolver codeResolver = settings.viewPaths()
-                .stream()
-                .map(DirectoryCodeResolver::new)
-                .findFirst().orElseThrow();
-        if (settings.viewPaths().size() > 1) {
-            log.at(Level.INFO)
-                .log("JTE engine does not support multiple source directories. Using %s", codeResolver.getRoot());
-        }
-
+        List<Path> paths = settings.getViewPaths("jte.view.paths");
         Path classDir = Path.of(settings.getProperty("jte.class.directory", "build"));
         ContentType contentType = settings.getBoolProperty("jte.output.plain") ? ContentType.Plain : ContentType.Html;
         ClassLoader classLoader = Thread.currentThread().getContextClassLoader();
@@ -102,6 +95,14 @@ public class JteRenderer implements Renderer<String> {
         boolean isUtf8 = settings.charset().equals(StandardCharsets.UTF_8);
         boolean isUtf8Byte = settings.getBoolProperty("jte.output.utf8byte.enabled", isUtf8);
         boolean precompile = settings.getBoolProperty("jte.class.precompile.enabled", !settings.isDevMode());
+
+        DirectoryCodeResolver codeResolver = paths.stream()
+                .map(DirectoryCodeResolver::new)
+                .findFirst().orElseThrow();
+        if (paths.size() > 1) {
+            log.at(Level.INFO)
+                .log("JTE engine does not support multiple source directories. Using %s", codeResolver.getRoot());
+        }
 
         if (isUtf8Byte && !isUtf8) {
             log.at(Level.INFO).log("JTE Utf8ByteOutput is enabled but the charset is %s", settings.charset());
@@ -118,7 +119,7 @@ public class JteRenderer implements Renderer<String> {
             templateEngine.setBinaryStaticContent(true);
         }
         if (precompile) {
-            log.at(Level.INFO).log("Precompiling all JTE sources. This can take some time");
+            log.at(Level.INFO).log("Pre-compiling all JTE sources. This can take some time");
             templateEngine.precompileAll();
         }
         return templateEngine;
