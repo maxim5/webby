@@ -18,7 +18,6 @@ import java.io.OutputStream;
 import java.io.OutputStreamWriter;
 import java.nio.file.Path;
 import java.time.Duration;
-import java.util.List;
 import java.util.logging.Level;
 
 import static io.webby.util.Rethrow.Functions.rethrow;
@@ -64,12 +63,12 @@ public class FreeMarkerRenderer implements Renderer<Template> {
     @Override
     @NotNull
     public String renderToString(@NotNull Template template, @NotNull Object model) throws Exception {
-        return RenderUtil.writeToString(writer -> template.process(model, writer));
+        return EasyRender.writeToString(writer -> template.process(model, writer));
     }
 
     @Override
     public byte[] renderToBytes(@NotNull Template template, @NotNull Object model) throws Exception {
-        return RenderUtil.writeToBytes(writer -> template.process(model, writer));
+        return EasyRender.writeToBytes(writer -> template.process(model, writer));
     }
 
     @Override

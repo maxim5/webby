@@ -8,7 +8,7 @@ import io.webby.url.annotate.GET;
 import io.webby.url.annotate.Render;
 import io.webby.url.annotate.Serve;
 import io.webby.url.annotate.View;
-import io.webby.url.view.RenderUtil;
+import io.webby.url.view.EasyRender;
 import org.jetbrains.annotations.NotNull;
 
 import java.io.*;
@@ -28,13 +28,13 @@ class PebbleExample {
     @GET(url = "/templates/manual/pebble/hello")
     public String manual_hello() throws IOException {
         Map<String, Object> context = hello();
-        return RenderUtil.writeToString(writer -> HELLO.get().evaluate(writer, context));
+        return EasyRender.writeToString(writer -> HELLO.get().evaluate(writer, context));
     }
 
     @GET(url = "/templates/manual/pebble/hello/bytes")
     public byte[] manual_hello_bytes() throws IOException {
         Map<String, Object> context = hello();
-        return RenderUtil.writeToBytes(writer -> HELLO.get().evaluate(writer, context));
+        return EasyRender.writeToBytes(writer -> HELLO.get().evaluate(writer, context));
     }
 
     @NotNull

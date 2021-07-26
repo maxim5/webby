@@ -8,7 +8,7 @@ import io.webby.url.annotate.GET;
 import io.webby.url.annotate.Render;
 import io.webby.url.annotate.Serve;
 import io.webby.url.annotate.View;
-import io.webby.url.view.RenderUtil;
+import io.webby.url.view.EasyRender;
 
 import java.io.IOException;
 import java.util.Map;
@@ -42,13 +42,13 @@ class FreeMarkerExample {
     @GET(url = "/templates/manual/freemarker/hello/{name}")
     public String manual_hello(String name) throws Exception {
         Map<String, Object> root = hello(name);
-        return RenderUtil.writeToString(writer -> HELLO.get().process(root, writer));
+        return EasyRender.writeToString(writer -> HELLO.get().process(root, writer));
     }
 
     @GET(url = "/templates/manual/freemarker/hello-bytes/{name}")
     public byte[] manual_hello_bytes(String name) throws Exception {
         Map<String, Object> root = hello(name);
-        return RenderUtil.writeToBytes(writer -> HELLO.get().process(root, writer));
+        return EasyRender.writeToBytes(writer -> HELLO.get().process(root, writer));
     }
 
     // FreeMarker: must be public

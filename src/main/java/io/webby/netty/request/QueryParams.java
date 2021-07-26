@@ -5,7 +5,6 @@ import io.netty.handler.codec.http.QueryStringDecoder;
 import io.routekit.util.CharBuffer;
 import io.webby.url.convert.Constraint;
 import io.webby.url.convert.ConversionError;
-import io.webby.url.view.RenderUtil;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 

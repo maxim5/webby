@@ -68,7 +68,7 @@ public class HandlebarsRenderer implements Renderer<Template> {
 
     @Override
     public byte[] renderToBytes(@NotNull Template template, @NotNull Object model) throws Exception {
-        return RenderUtil.writeToBytes(writer -> template.apply(model, writer));
+        return EasyRender.writeToBytes(writer -> template.apply(model, writer));
     }
 
     @Override

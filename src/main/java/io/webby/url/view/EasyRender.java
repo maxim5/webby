@@ -10,7 +10,7 @@ import java.util.function.Function;
 
 import static io.webby.util.EasyIO.Close.closeQuietly;
 
-public class RenderUtil {
+public class EasyRender {
     private static final int DEFAULT_SIZE_BYTES = 1024;
     private static final int DEFAULT_SIZE_CHARS = 1024;
 

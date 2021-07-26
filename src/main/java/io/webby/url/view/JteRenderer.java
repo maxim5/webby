@@ -10,7 +10,6 @@ import gg.jte.output.Utf8ByteOutput;
 import gg.jte.resolve.DirectoryCodeResolver;
 import gg.jte.runtime.Constants;
 import io.webby.app.Settings;
-import io.webby.util.Casting;
 import io.webby.util.ThrowConsumer;
 import org.jetbrains.annotations.NotNull;
 
@@ -74,7 +73,7 @@ public class JteRenderer implements Renderer<String> {
     public byte[] renderToBytes(@NotNull String template, @NotNull Object model) throws IOException {
         Utf8ByteOutput output = new Utf8ByteOutput();
         templateEngine.render(template, model, output);
-        return RenderUtil.outputToBytes(output::writeTo, output.getContentLength());
+        return EasyRender.outputToBytes(output::writeTo, output.getContentLength());
     }
 
     @Override

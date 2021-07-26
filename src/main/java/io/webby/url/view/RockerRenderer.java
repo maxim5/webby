@@ -14,7 +14,7 @@ import org.jetbrains.annotations.NotNull;
 
 import java.io.OutputStream;
 
-import static io.webby.url.view.RenderUtil.castMapOrFail;
+import static io.webby.url.view.EasyRender.castMapOrFail;
 
 public class RockerRenderer implements Renderer<BindableRockerModel> {
     @Override

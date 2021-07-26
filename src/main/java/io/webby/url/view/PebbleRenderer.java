@@ -21,7 +21,7 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.logging.Level;
 
-import static io.webby.url.view.RenderUtil.castMapOrFail;
+import static io.webby.url.view.EasyRender.castMapOrFail;
 import static io.webby.util.Casting.castAny;
 
 public class PebbleRenderer implements Renderer<PebbleTemplate> {
@@ -61,12 +61,12 @@ public class PebbleRenderer implements Renderer<PebbleTemplate> {
     @Override
     @NotNull
     public String renderToString(@NotNull PebbleTemplate template, @NotNull Object model) throws Exception {
-        return RenderUtil.writeToString(writer -> template.evaluate(writer, castMapOrFail(model, this::incompatibleError)));
+        return EasyRender.writeToString(writer -> template.evaluate(writer, castMapOrFail(model, this::incompatibleError)));
     }
 
     @Override
     public byte[] renderToBytes(@NotNull PebbleTemplate template, @NotNull Object model) throws Exception {
-        return RenderUtil.writeToBytes(writer -> template.evaluate(writer, castMapOrFail(model, this::incompatibleError)));
+        return EasyRender.writeToBytes(writer -> template.evaluate(writer, castMapOrFail(model, this::incompatibleError)));
     }
 
     @Override
