@@ -14,7 +14,7 @@ import org.jetbrains.annotations.NotNull;
 
 import java.io.OutputStream;
 
-import static io.webby.url.view.RenderUtil.cast;
+import static io.webby.url.view.RenderUtil.castMapOrFail;
 
 public class RockerRenderer implements Renderer<BindableRockerModel> {
     @Override
@@ -62,7 +62,7 @@ public class RockerRenderer implements Renderer<BindableRockerModel> {
         if (model instanceof DefaultRockerModel bound) {
             return bound;
         }
-        return template.bind(cast(model, RockerRenderer::incompatibleModelError));
+        return template.bind(castMapOrFail(model, RockerRenderer::incompatibleModelError));
     }
 
     private static RenderingException incompatibleModelError(Object model) {

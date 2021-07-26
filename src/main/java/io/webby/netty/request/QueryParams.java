@@ -14,6 +14,8 @@ import java.util.Map;
 import java.util.Set;
 import java.util.stream.Stream;
 
+import static io.webby.util.Casting.castAny;
+
 public class QueryParams {
     private final String path;
     private final String query;
@@ -97,7 +99,7 @@ public class QueryParams {
         }
 
         Constraint<?> constraint = constraints.get(name);
-        return RenderUtil.castAny(constraint.applyWithName(name, new CharBuffer(value)));
+        return castAny(constraint.applyWithName(name, new CharBuffer(value)));
     }
 
     public int getInt(@NotNull String name, int def) {

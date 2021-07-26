@@ -10,6 +10,7 @@ import gg.jte.output.Utf8ByteOutput;
 import gg.jte.resolve.DirectoryCodeResolver;
 import gg.jte.runtime.Constants;
 import io.webby.app.Settings;
+import io.webby.util.Casting;
 import io.webby.util.ThrowConsumer;
 import org.jetbrains.annotations.NotNull;
 
@@ -20,7 +21,7 @@ import java.nio.file.Path;
 import java.util.Map;
 import java.util.logging.Level;
 
-import static io.webby.url.view.RenderUtil.cast;
+import static io.webby.util.Casting.castMap;
 
 public class JteRenderer implements Renderer<String> {
     private static final FluentLogger log = FluentLogger.forEnclosingClass();
@@ -62,7 +63,7 @@ public class JteRenderer implements Renderer<String> {
     public String renderToString(@NotNull String template, @NotNull Object model) {
         StringOutput output = pool.get();
         if (model instanceof Map<?, ?> mapModel) {
-            templateEngine.render(template, cast(mapModel), output);
+            templateEngine.render(template, castMap(mapModel), output);
         } else {
             templateEngine.render(template, model, output);
         }

@@ -1,6 +1,7 @@
 package io.webby.url.view;
 
 import com.google.common.io.Closeables;
+import io.webby.util.Casting;
 import io.webby.util.Rethrow;
 import io.webby.util.ThrowConsumer;
 import org.jetbrains.annotations.NotNull;
@@ -48,26 +49,15 @@ public class RenderUtil {
         return output.toByteArray();
     }
 
-    // TODO: extract utils below:
-    // Casting
-    // IOUtil
-
-    @SuppressWarnings("unchecked")
-    public static <K, V> Map<K, V> cast(Map<?, ?> map) {
-        return (Map<K, V>) map;
-    }
-
-    public static <T, K, V, E extends Throwable> Map<K, V> cast(T object, Function<T, E> error) throws E {
+    public static <T, K, V, E extends Throwable> Map<K, V> castMapOrFail(T object, Function<T, E> error) throws E {
         if (object instanceof Map<?, ?> map) {
-            return cast(map);
+            return Casting.castMap(map);
         }
         throw error.apply(object);
     }
 
-    @SuppressWarnings("unchecked")
-    public static <R, T> R castAny(T object) {
-        return (R) object;
-    }
+    // TODO: extract utils below:
+    // IOUtil
 
     @SuppressWarnings("UnstableApiUsage")
     public static void closeQuietly(@Nullable Closeable closeable) {

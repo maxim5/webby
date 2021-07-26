@@ -21,8 +21,8 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.logging.Level;
 
-import static io.webby.url.view.RenderUtil.cast;
-import static io.webby.url.view.RenderUtil.castAny;
+import static io.webby.url.view.RenderUtil.castMapOrFail;
+import static io.webby.util.Casting.castAny;
 
 public class PebbleRenderer implements Renderer<PebbleTemplate> {
     private static final FluentLogger log = FluentLogger.forEnclosingClass();
@@ -61,12 +61,12 @@ public class PebbleRenderer implements Renderer<PebbleTemplate> {
     @Override
     @NotNull
     public String renderToString(@NotNull PebbleTemplate template, @NotNull Object model) throws Exception {
-        return RenderUtil.writeToString(writer -> template.evaluate(writer, cast(model, this::incompatibleModelError)));
+        return RenderUtil.writeToString(writer -> template.evaluate(writer, castMapOrFail(model, this::incompatibleError)));
     }
 
     @Override
     public byte[] renderToBytes(@NotNull PebbleTemplate template, @NotNull Object model) throws Exception {
-        return RenderUtil.writeToBytes(writer -> template.evaluate(writer, cast(model, this::incompatibleModelError)));
+        return RenderUtil.writeToBytes(writer -> template.evaluate(writer, castMapOrFail(model, this::incompatibleError)));
     }
 
     @Override
@@ -74,7 +74,7 @@ public class PebbleRenderer implements Renderer<PebbleTemplate> {
     public ThrowConsumer<OutputStream, Exception> renderToByteStream(@NotNull PebbleTemplate template, @NotNull Object model) {
         return outputStream -> template.evaluate(
                 new OutputStreamWriter(outputStream),
-                cast(model, this::incompatibleModelError)
+                castMapOrFail(model, this::incompatibleError)
         );
     }
 
@@ -103,7 +103,7 @@ public class PebbleRenderer implements Renderer<PebbleTemplate> {
         return new PebbleEngine.Builder().loader(loader).cacheActive(cache).build();
     }
 
-    private RenderException incompatibleModelError(@NotNull Object model) {
+    private RenderException incompatibleError(@NotNull Object model) {
         return new RenderException(
             "Pebble engine accepts only Map<String, Object> context, but got instead: %s".formatted(model)
         );
