@@ -1,15 +1,14 @@
 package io.webby.url.view;
 
-import com.google.common.io.Closeables;
 import io.webby.util.Casting;
-import io.webby.util.Rethrow;
 import io.webby.util.ThrowConsumer;
 import org.jetbrains.annotations.NotNull;
-import org.jetbrains.annotations.Nullable;
 
 import java.io.*;
 import java.util.Map;
 import java.util.function.Function;
+
+import static io.webby.util.EasyIO.Close.closeQuietly;
 
 public class RenderUtil {
     private static final int DEFAULT_SIZE_BYTES = 1024;
@@ -54,26 +53,5 @@ public class RenderUtil {
             return Casting.castMap(map);
         }
         throw error.apply(object);
-    }
-
-    // TODO: extract utils below:
-    // IOUtil
-
-    @SuppressWarnings("UnstableApiUsage")
-    public static void closeQuietly(@Nullable Closeable closeable) {
-        try {
-            Closeables.close(closeable, true);
-        } catch (IOException impossible) {
-            throw new AssertionError(impossible);
-        }
-    }
-
-    @SuppressWarnings("UnstableApiUsage")
-    public static void closeRethrow(@Nullable Closeable closeable) {
-        try {
-            Closeables.close(closeable, false);
-        } catch (IOException e) {
-            Rethrow.rethrow(e);
-        }
     }
 }

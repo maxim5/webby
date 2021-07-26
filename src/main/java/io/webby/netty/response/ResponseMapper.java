@@ -22,8 +22,8 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.function.Function;
 
-import static io.webby.url.view.RenderUtil.closeRethrow;
 import static io.webby.util.Casting.castAny;
+import static io.webby.util.EasyIO.Close.closeRethrow;
 
 public class ResponseMapper {
     private final Map<Class<?>, Function<?, FullHttpResponse>> classMap = new HashMap<>();

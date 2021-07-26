@@ -7,7 +7,6 @@ import io.netty.buffer.ByteBuf;
 import io.netty.buffer.Unpooled;
 import io.netty.handler.codec.http.*;
 import io.webby.app.Settings;
-import io.webby.url.view.RenderUtil;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
@@ -16,6 +15,8 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.util.function.Consumer;
 import java.util.logging.Level;
+
+import static io.webby.util.EasyIO.Close.closeRethrow;
 
 public class HttpResponseFactory {
     private static final FluentLogger log = FluentLogger.forEnclosingClass();
@@ -66,7 +67,7 @@ public class HttpResponseFactory {
         } catch (IOException e) {
             return newResponse503("Failed to read content bytes", e);
         } finally {
-            RenderUtil.closeRethrow(content);
+            closeRethrow(content);
         }
     }
 
