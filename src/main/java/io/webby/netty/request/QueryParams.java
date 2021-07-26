@@ -100,20 +100,6 @@ public class QueryParams {
         return RenderUtil.castAny(constraint.applyWithName(name, new CharBuffer(value)));
     }
 
-    /*
-    @Nullable
-    public <T> T getConvertedOrNull(@NotNull String name, @NotNull Function<String, T> convert) throws ConversionError {
-        String value = getOrNull(name);
-        if (value == null) {
-            return null;
-        }
-
-        Constraint<?> constraint = constraints.getOrDefault(name,
-                chars -> chars != null ? convert.apply(chars.toString()) : null);
-        return RenderUtil.castAny(constraint.applyWithName(name, new CharBuffer(value)));
-    }
-    */
-
     public int getInt(@NotNull String name, int def) {
         try {
             String value = getOrNull(name);
