@@ -15,6 +15,7 @@ import org.jetbrains.annotations.NotNull;
 
 import java.io.IOException;
 import java.io.OutputStream;
+import java.nio.charset.StandardCharsets;
 import java.nio.file.Path;
 import java.util.Map;
 import java.util.logging.Level;
@@ -85,12 +86,11 @@ public class JteRenderer implements Renderer<String> {
 
     @NotNull
     private TemplateEngine createDefault() {
-        DirectoryCodeResolver[] resolvers = settings.viewPaths()
+        DirectoryCodeResolver codeResolver = settings.viewPaths()
                 .stream()
                 .map(DirectoryCodeResolver::new)
-                .toArray(DirectoryCodeResolver[]::new);
-        DirectoryCodeResolver codeResolver = resolvers[0];
-        if (resolvers.length > 1) {
+                .findFirst().orElseThrow();
+        if (settings.viewPaths().size() > 1) {
             log.at(Level.INFO)
                 .log("JTE engine does not support multiple source directories. Using %s", codeResolver.getRoot());
         }
@@ -99,7 +99,13 @@ public class JteRenderer implements Renderer<String> {
         ContentType contentType = settings.getBoolProperty("jte.output.plain") ? ContentType.Plain : ContentType.Html;
         ClassLoader classLoader = Thread.currentThread().getContextClassLoader();
         String packageName = settings.getProperty("jte.output.package", Constants.PACKAGE_NAME_ON_DEMAND);
-        boolean isUtf8Byte = settings.getBoolProperty("jte.output.utf8byte.enabled", true);
+        boolean isUtf8 = settings.charset().equals(StandardCharsets.UTF_8);
+        boolean isUtf8Byte = settings.getBoolProperty("jte.output.utf8byte.enabled", isUtf8);
+        boolean precompile = settings.getBoolProperty("jte.class.precompile.enabled", !settings.isDevMode());
+
+        if (isUtf8Byte && !isUtf8) {
+            log.at(Level.INFO).log("JTE Utf8ByteOutput is enabled but the charset is %s", settings.charset());
+        }
 
         TemplateEngine templateEngine = TemplateEngine.create(
                 codeResolver,
@@ -110,6 +116,10 @@ public class JteRenderer implements Renderer<String> {
         );
         if (isUtf8Byte) {
             templateEngine.setBinaryStaticContent(true);
+        }
+        if (precompile) {
+            log.at(Level.INFO).log("Precompiling all JTE sources. This can take some time");
+            templateEngine.precompileAll();
         }
         return templateEngine;
     }
