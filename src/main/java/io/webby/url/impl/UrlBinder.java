@@ -39,7 +39,7 @@ public class UrlBinder {
     private static final FluentLogger log = FluentLogger.forEnclosingClass();
 
     @Inject private Settings settings;
-    @Inject private HandlerFinder finder;
+    @Inject private HandlerScanner scanner;
     @Inject private Injector injector;
     @Inject private CallerFactory callerFactory;
     @Inject private RendererFactory rendererFactory;
@@ -49,7 +49,7 @@ public class UrlBinder {
 
     @NotNull
     public Router<RouteEndpoint> bindRouter() throws AppConfigException {
-        Set<? extends Class<?>> handlerClasses = finder.getHandlerClassesFromClasspath();
+        Set<? extends Class<?>> handlerClasses = scanner.getHandlerClassesFromClasspath();
         List<Binding> bindings = getBindings(handlerClasses);
         RouterSetup<RouteEndpoint> setup = getRouterSetup(bindings);
         return setup.build();

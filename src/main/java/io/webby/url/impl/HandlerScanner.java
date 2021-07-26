@@ -19,7 +19,7 @@ import java.util.function.BiPredicate;
 import java.util.logging.Level;
 import java.util.stream.Collectors;
 
-public class HandlerFinder {
+public class HandlerScanner {
     private static final FluentLogger log = FluentLogger.forEnclosingClass();
 
     static final Class<? extends Annotation> MAIN_HANDLER_ANNOTATION = Serve.class;

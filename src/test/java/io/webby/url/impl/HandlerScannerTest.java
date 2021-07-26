@@ -7,9 +7,9 @@ import org.junit.jupiter.api.Test;
 
 import java.util.Set;
 
-import static io.webby.url.impl.HandlerFinder.*;
+import static io.webby.url.impl.HandlerScanner.*;
 
-public class HandlerFinderTest {
+public class HandlerScannerTest {
     @Test
     public void matchesAny_class_one_annotation() {
         @Json
@@ -82,13 +82,13 @@ public class HandlerFinderTest {
 
     @Test
     public void isHandlerClass_simple_class_no_match() {
-        Assertions.assertFalse(isHandlerClassDefault(HandlerFinder.class));
-        Assertions.assertFalse(isHandlerClassDefault(HandlerFinderTest.class));
+        Assertions.assertFalse(isHandlerClassDefault(HandlerScanner.class));
+        Assertions.assertFalse(isHandlerClassDefault(HandlerScannerTest.class));
     }
 
     @Test
     public void isHandlerClass_test_method_match() {
-        Assertions.assertTrue(isHandlerClass(HandlerFinderTest.class, Serve.class, Set.of(), Set.of(Test.class)));
+        Assertions.assertTrue(isHandlerClass(HandlerScannerTest.class, Serve.class, Set.of(), Set.of(Test.class)));
     }
 
     private static boolean isHandlerClassDefault(@NotNull Class<?> klass) {
