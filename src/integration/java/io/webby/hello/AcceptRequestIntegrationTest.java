@@ -12,11 +12,26 @@ public class AcceptRequestIntegrationTest extends BaseIntegrationTest {
 
     @Test
     public void get_simple() {
-        assert200(get("/str/10"), "Hello str <b>10</b> from <b>/str/10</b>!");
-        assert200(get("/str/foo"), "Hello str <b>foo</b> from <b>/str/foo</b>!");
-        assert404(get("/str/foo/"));
+        assert200(get("/request/simple"), "Hello <b>/request/simple</b>!");
+        // assert200(get("/request/simple?key=value"), "Hello <b>/request/simple?key=value</b>"); // TODO
+    }
 
-        assert200(get("/buf/foo"), "Hello buf <b>foo</b> from <i>/buf/foo</i>!");
-        assert400(get("/buf/foo-bar-baz"));
+    @Test
+    public void test_string_var() {
+        assert200(get("/request/str/10"), "Hello str <b>10</b> from <b>/request/str/10</b>!");
+        assert200(get("/request/str/foo"), "Hello str <b>foo</b> from <b>/request/str/foo</b>!");
+        assert404(get("/request/str/foo/"));
+    }
+
+    @Test
+    public void test_buffer_var() {
+        assert200(get("/request/buffer/foo"), "Hello buffer <b>foo</b> from <i>/request/buffer/foo</i>!");
+        assert400(get("/request/buffer/foo-bar-baz"));
+    }
+
+    @Test
+    public void test_two_buffer_vars() {
+        assert200(get("/request/buffer/foo/bar"),
+                "Hello buffer <b>foo</b> and buffer <b>bar</b> from <i>/request/buffer/foo/bar</i>!");
     }
 }
