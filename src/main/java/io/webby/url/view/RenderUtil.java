@@ -47,6 +47,10 @@ public class RenderUtil {
         return output.toByteArray();
     }
 
+    // TODO: extract utils below:
+    // Casting
+    // IOUtil
+
     @SuppressWarnings("unchecked")
     public static <K, V> Map<K, V> cast(Map<?, ?> map) {
         return (Map<K, V>) map;
