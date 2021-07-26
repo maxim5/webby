@@ -69,16 +69,16 @@ public class NettyChannelHandler extends SimpleChannelInboundHandler<FullHttpReq
     @NotNull
     @VisibleForTesting
     FullHttpResponse handle(@NotNull FullHttpRequest request) {
-        CharBuffer uri = new CharBuffer(request.uri());
-        Match<RouteEndpoint> match = router.routeOrNull(uri);
+        CharBuffer path = extractPath(request);
+        Match<RouteEndpoint> match = router.routeOrNull(path);
         if (match == null) {
-            log.at(Level.FINE).log("No associated endpoint for url: %s", uri);
+            log.at(Level.FINE).log("No associated endpoint for url: %s", path);
             return factory.newResponse404();
         }
 
         EndpointCaller endpoint = match.handler().getAcceptedCallerOrNull(request);
         if (endpoint == null) {
-            log.at(Level.INFO).log("Endpoint does not accept the request %s for url: %s", request.method(), uri);
+            log.at(Level.INFO).log("Endpoint does not accept the request %s for url: %s", request.method(), path);
             return factory.newResponse404();
         }
 
@@ -112,6 +112,15 @@ public class NettyChannelHandler extends SimpleChannelInboundHandler<FullHttpReq
             log.at(Level.SEVERE).withCause(e).log("Failed to call method: %s", caller.method());
             return factory.newResponse503("Failed to call method: %s".formatted(caller.method()), e);
         }
+    }
+
+    @VisibleForTesting
+    @NotNull
+    CharBuffer extractPath(@NotNull FullHttpRequest request) {
+        CharBuffer uri = new CharBuffer(request.uri());
+        // TODO: handle '#'
+        // TODO: handle trailing slash (settings)
+        return uri.substringUntil(uri.indexOf('?', 0, uri.length()));
     }
 
     @VisibleForTesting

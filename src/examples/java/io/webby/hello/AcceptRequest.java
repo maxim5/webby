@@ -1,8 +1,12 @@
 package io.webby.hello;
 
+import io.netty.handler.codec.http.DefaultFullHttpRequest;
+import io.netty.handler.codec.http.DefaultHttpRequest;
 import io.netty.handler.codec.http.FullHttpRequest;
 import io.netty.handler.codec.http.HttpRequest;
 import io.routekit.util.CharBuffer;
+import io.webby.netty.request.DefaultHttpRequestEx;
+import io.webby.netty.request.HttpRequestEx;
 import io.webby.url.annotate.GET;
 import io.webby.url.annotate.Param;
 import io.webby.url.annotate.Serve;
@@ -21,7 +25,7 @@ public class AcceptRequest {
     }
 
     @GET(url="/request/str/{name}")
-    public String string(@NotNull HttpRequest request, String name) {
+    public String string(@NotNull DefaultHttpRequest request, String name) {
         return "Hello str <b>%s</b> from <b>%s</b>!".formatted(name, request.uri());
     }
 
@@ -31,7 +35,17 @@ public class AcceptRequest {
     }
 
     @GET(url="/request/buffer/{buf}/{str}")
-    public String buffer(@NotNull FullHttpRequest request, CharBuffer buf1, CharBuffer buf2) {
+    public String buffer(@NotNull DefaultFullHttpRequest request, CharBuffer buf1, CharBuffer buf2) {
         return "Hello buffer <b>%s</b> and buffer <b>%s</b> from <i>%s</i>!".formatted(buf1, buf2, request.uri());
+    }
+
+    @GET(url="/request/int/{val}")
+    public String integer(HttpRequestEx request, int val) {
+        return "Hello %d from <b>%s</b>!".formatted(val, request.path());
+    }
+
+    @GET(url="/request/int/{val}/{other}")
+    public String integer(DefaultHttpRequestEx request, int val, int other) {
+        return "Hello %d + %d from <b>%s</b>!".formatted(val, other, request.path());
     }
 }
