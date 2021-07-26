@@ -22,7 +22,7 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.function.Function;
 
-import static io.webby.util.Casting.castAny;
+import static io.webby.util.EasyCast.castAny;
 import static io.webby.util.EasyIO.Close.closeRethrow;
 
 public class ResponseMapper {

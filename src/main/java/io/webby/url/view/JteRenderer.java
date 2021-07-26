@@ -21,7 +21,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.logging.Level;
 
-import static io.webby.util.Casting.castMap;
+import static io.webby.util.EasyCast.castMap;
 
 public class JteRenderer implements Renderer<String> {
     private static final FluentLogger log = FluentLogger.forEnclosingClass();

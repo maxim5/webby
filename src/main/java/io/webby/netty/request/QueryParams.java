@@ -13,7 +13,7 @@ import java.util.Map;
 import java.util.Set;
 import java.util.stream.Stream;
 
-import static io.webby.util.Casting.castAny;
+import static io.webby.util.EasyCast.castAny;
 
 public class QueryParams {
     private final String path;

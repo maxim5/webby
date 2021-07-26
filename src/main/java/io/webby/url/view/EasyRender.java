@@ -1,6 +1,6 @@
 package io.webby.url.view;
 
-import io.webby.util.Casting;
+import io.webby.util.EasyCast;
 import io.webby.util.ThrowConsumer;
 import org.jetbrains.annotations.NotNull;
 
@@ -50,7 +50,7 @@ public class EasyRender {
 
     public static <T, K, V, E extends Throwable> Map<K, V> castMapOrFail(T object, Function<T, E> error) throws E {
         if (object instanceof Map<?, ?> map) {
-            return Casting.castMap(map);
+            return EasyCast.castMap(map);
         }
         throw error.apply(object);
     }
