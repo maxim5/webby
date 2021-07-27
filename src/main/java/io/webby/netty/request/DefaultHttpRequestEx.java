@@ -14,7 +14,7 @@ import java.util.Map;
 import java.util.concurrent.atomic.AtomicReference;
 import java.util.function.Supplier;
 
-public class DefaultHttpRequestEx extends DefaultFullHttpRequest implements HttpRequestEx {
+public class DefaultHttpRequestEx extends DefaultFullHttpRequest implements MutableHttpRequestEx {
     private final AtomicReference<QueryParams> params = new AtomicReference<>(null);
     private final Map<String, Constraint<?>> constraints;
     private final Object[] attributes;
@@ -63,6 +63,7 @@ public class DefaultHttpRequestEx extends DefaultFullHttpRequest implements Http
         return attributes[position];
     }
 
+    @Override
     public void setAttr(int position, @NotNull Object attr) {
         assert attributes[position] == null : "Attributes can't be overwritten: %d".formatted(position);
         attributes[position] = attr;

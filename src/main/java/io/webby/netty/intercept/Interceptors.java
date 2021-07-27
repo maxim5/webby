@@ -27,13 +27,13 @@ public class Interceptors {
 
     private final List<InterceptItem> stack;
     private final int attrBufferSize;
+    private final boolean safeWrapper;
     private final Map<Integer, Interceptor> unsafeOwners;
 
-    @Inject private Settings settings;
     @Inject private HttpResponseFactory factory;
 
     @Inject
-    public Interceptors(@NotNull InterceptorScanner scanner) {
+    public Interceptors(@NotNull InterceptorScanner scanner, @NotNull Settings settings) {
         List<InterceptItem> items = scanner.getInterceptorsFromClasspath();
         int maxPosition = AttributesValidator.validateAttributeOwners(items).maxPosition();
 
@@ -43,14 +43,15 @@ public class Interceptors {
                 .filter(InterceptItem::isOwner)
                 .filter(InterceptItem::canBeDisabled)
                 .collect(Collectors.toMap(InterceptItem::position, InterceptItem::instance));
+        boolean isSafeMode = settings.isDevMode();      // TODO: make a setting
+        safeWrapper = isSafeMode && !unsafeOwners.isEmpty();
     }
 
     @NotNull
     public DefaultHttpRequestEx createRequest(@NotNull FullHttpRequest request, @NotNull EndpointContext context) {
         Object[] attributes = new Object[attrBufferSize];  // empty, to be filled by interceptors
         DefaultHttpRequestEx requestEx = new DefaultHttpRequestEx(request, context.constraints(), attributes);
-        boolean isSafeMode = settings.isDevMode();      // TODO: make a setting
-        if (isSafeMode && !unsafeOwners.isEmpty()) {
+        if (safeWrapper) {
             return new DefaultHttpRequestEx(requestEx) {
                 @Override
                 public @Nullable Object attr(int position) {
