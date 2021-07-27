@@ -108,7 +108,8 @@ public class Webby {
 
     @Nullable
     private static String getCallerClassName() {
-        StackTraceElement caller = CallerFinder.findCallerOf(Webby.class, new Throwable(), 3);
+        StackTraceElement caller = CallerFinder.findCallerOf(Webby.class, new Throwable(), 3);  // TODO: ??
+        System.out.println(caller);
         return caller != null ? caller.getClassName() : null;
     }
 }

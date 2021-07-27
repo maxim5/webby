@@ -316,7 +316,7 @@ public class CallerFactoryTest {
     @NotNull
     private static HttpRequestEx request(HttpMethod method) {
         // Do not care about QueryParams for now
-        return new DefaultHttpRequestEx(new DefaultFullHttpRequest(HttpVersion.HTTP_1_1, method, URL), Map.of());
+        return new DefaultHttpRequestEx(new DefaultFullHttpRequest(HttpVersion.HTTP_1_1, method, URL), Map.of(), new Object[0]);
     }
 
     private interface StringFunction<T> {

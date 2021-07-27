@@ -6,6 +6,10 @@ import io.webby.netty.request.HttpRequestEx;
 import org.jetbrains.annotations.NotNull;
 
 public interface Interceptor {
+    default boolean isEnabled() {
+        return true;
+    }
+
     default void enter(@NotNull HttpRequestEx request) throws ServeException {
         // Do nothing
     }

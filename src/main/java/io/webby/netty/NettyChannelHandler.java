@@ -18,6 +18,7 @@ import io.webby.netty.exceptions.NotFoundException;
 import io.webby.netty.exceptions.RedirectException;
 import io.webby.netty.intercept.Interceptors;
 import io.webby.netty.request.DefaultHttpRequestEx;
+import io.webby.netty.request.HttpRequestEx;
 import io.webby.netty.response.HttpResponseFactory;
 import io.webby.netty.response.ResponseMapper;
 import io.webby.url.annotate.Marshal;
@@ -89,7 +90,7 @@ public class NettyChannelHandler extends SimpleChannelInboundHandler<FullHttpReq
         if (endpoint.context().isRawRequest()) {
             return call(request, match, endpoint);
         } else {
-            DefaultHttpRequestEx requestEx = new DefaultHttpRequestEx(request, endpoint.context().constraints());
+            DefaultHttpRequestEx requestEx = interceptors.createRequest(request, endpoint.context());
             FullHttpResponse intercepted = interceptors.enter(requestEx);
             if (intercepted != null) {
                 return intercepted;

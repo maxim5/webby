@@ -1,21 +1,10 @@
-package io.webby.netty.intercept;
+package io.webby.netty.intercept.attr;
 
-import com.google.inject.Injector;
-import io.webby.Testing;
 import io.webby.app.AppConfigException;
 import org.junit.jupiter.api.Assertions;
-import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
-public class InterceptorScannerTest {
-    private InterceptorScanner scanner;
-
-    @BeforeEach
-    void setup() {
-        Injector injector = Testing.testStartupNoHandlers();
-        scanner = injector.getInstance(InterceptorScanner.class);
-    }
-
+public class AttributesValidatorTest {
     @Test
     public void validatePositions_valid() {
         assertPositions(0, 0);
@@ -37,10 +26,10 @@ public class InterceptorScannerTest {
     }
 
     private void assertPositions(int expected, int... positions) {
-        Assertions.assertEquals(expected, InterceptorScanner.validatePositions(positions, value -> null));
+        Assertions.assertEquals(expected, AttributesValidator.validatePositions(positions, value -> null));
     }
 
     private void assertPositionsThrows(int... positions) {
-        Assertions.assertThrows(AppConfigException.class, () -> InterceptorScanner.validatePositions(positions, value -> null));
+        Assertions.assertThrows(AppConfigException.class, () -> AttributesValidator.validatePositions(positions, value -> null));
     }
 }
