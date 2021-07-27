@@ -19,4 +19,6 @@ public interface HttpRequestEx extends FullHttpRequest {
     <T> @NotNull T contentAsJson(@NotNull Class<T> klass) throws JsonParseException;
 
     @Nullable Object attr(int position);
+
+    <T> @NotNull T attrOrDie(int position);
 }

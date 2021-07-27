@@ -14,6 +14,7 @@ import io.webby.app.AppSettings;
 import io.webby.common.CommonModule;
 import io.webby.netty.NettyBootstrap;
 import io.webby.netty.NettyModule;
+import io.webby.perf.PerfModule;
 import io.webby.url.UrlModule;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
@@ -43,7 +44,13 @@ public class Webby {
     @NotNull
     public static Module mainModule(@NotNull AppSettings settings) throws AppConfigException {
         validateSettings(settings);
-        return Modules.combine(new AppModule(settings), new CommonModule(), new NettyModule(), new UrlModule());
+        return Modules.combine(
+            new AppModule(settings),
+            new CommonModule(),
+            new NettyModule(),
+            new PerfModule(),
+            new UrlModule()
+        );
     }
 
     private static void validateSettings(@NotNull AppSettings settings) {
@@ -108,8 +115,12 @@ public class Webby {
 
     @Nullable
     private static String getCallerClassName() {
-        StackTraceElement caller = CallerFinder.findCallerOf(Webby.class, new Throwable(), 3);  // TODO: ??
-        System.out.println(caller);
+        // `mainModule` is the earliest possible external call. The trace counts right now:
+        //  - getCallerClassName     0
+        //  - validatePackageTester  1
+        //  - validateSettings       2
+        //  - mainModule             3
+        StackTraceElement caller = CallerFinder.findCallerOf(Webby.class, new Throwable(), 3);
         return caller != null ? caller.getClassName() : null;
     }
 }

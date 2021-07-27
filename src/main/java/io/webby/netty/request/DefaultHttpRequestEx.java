@@ -14,6 +14,8 @@ import java.util.Map;
 import java.util.concurrent.atomic.AtomicReference;
 import java.util.function.Supplier;
 
+import static io.webby.util.EasyCast.castAny;
+
 public class DefaultHttpRequestEx extends DefaultFullHttpRequest implements MutableHttpRequestEx {
     private final AtomicReference<QueryParams> params = new AtomicReference<>(null);
     private final Map<String, Constraint<?>> constraints;
@@ -61,6 +63,13 @@ public class DefaultHttpRequestEx extends DefaultFullHttpRequest implements Muta
     @Override
     public @Nullable Object attr(int position) {
         return attributes[position];
+    }
+
+    @Override
+    public <T> @NotNull T attrOrDie(int position) {
+        Object value = attr(position);
+        assert value != null : "Attribute %d is expected to be set".formatted(position);
+        return castAny(value);
     }
 
     @Override

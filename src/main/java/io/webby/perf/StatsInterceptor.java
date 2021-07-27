@@ -8,6 +8,7 @@ import io.webby.netty.intercept.attr.AttributeOwner;
 import io.webby.netty.request.MutableHttpRequestEx;
 import org.jetbrains.annotations.NotNull;
 
+import java.util.concurrent.TimeUnit;
 import java.util.logging.Level;
 
 @AttributeOwner(position = Attributes.Stats)
@@ -16,12 +17,13 @@ public class StatsInterceptor implements Interceptor {
 
     @Override
     public void enter(@NotNull MutableHttpRequestEx request) {
-        log.at(Level.INFO).log("Before %s", request.uri());
+        request.setAttr(Attributes.Stats, StatsTracker.create());
     }
 
     @Override
     public @NotNull FullHttpResponse exit(@NotNull MutableHttpRequestEx request, @NotNull FullHttpResponse response) {
-        log.at(Level.INFO).log("After  %s: %s", request.uri(), response.status());
+        StatsTracker stats = request.attrOrDie(Attributes.Stats);
+        log.at(Level.FINE).log("Handler time for %s: %d ms", request.uri(), stats.stopwatch().elapsed(TimeUnit.MILLISECONDS));
         return response;
     }
 }
