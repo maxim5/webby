@@ -13,6 +13,11 @@ public interface Rethrow {
         throw new RuntimeException(exception);
     }
 
+    @CanIgnoreReturnValue
+    static <T> T rethrow(@NotNull String message, @NotNull Throwable exception) {
+        throw new RuntimeException(message, exception);
+    }
+
     interface Consumers {
         @NotNull
         static <T, E extends Throwable> Consumer<T> rethrow(@NotNull ThrowConsumer<T, E> consumer) {
