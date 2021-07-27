@@ -1,5 +1,6 @@
 package io.webby.netty.request;
 
+import com.google.common.collect.ImmutableMap;
 import com.google.mu.util.stream.BiStream;
 import io.netty.handler.codec.http.QueryStringDecoder;
 import io.routekit.util.CharBuffer;
@@ -18,7 +19,7 @@ import static io.webby.util.EasyCast.castAny;
 public class QueryParams {
     private final String path;
     private final String query;
-    private final Map<String, List<String>> parameters;  // TODO: make immutable
+    private final ImmutableMap<String, List<String>> parameters;
     private final Map<String, Constraint<?>> constraints;
 
     public QueryParams(@NotNull String path,
@@ -27,7 +28,7 @@ public class QueryParams {
                        @NotNull Map<String, Constraint<?>> constraints) {
         this.path = path;
         this.query = query;
-        this.parameters = parameters;
+        this.parameters = ImmutableMap.copyOf(parameters);
         this.constraints = constraints;
     }
 
