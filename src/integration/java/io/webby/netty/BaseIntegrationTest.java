@@ -26,7 +26,7 @@ public abstract class BaseIntegrationTest {
         Injector injector = Testing.testStartup(settings -> {
             settings.setWebPath("src/examples/resources/web");
             settings.setViewPath("src/examples/resources/web");
-            settings.setClassOnly(clazz);
+            settings.setHandlerClassOnly(clazz);
             consumer.accept(settings);
         });
         handler = injector.getInstance(NettyChannelHandler.class);

@@ -22,6 +22,7 @@ public class Main {
         log.at(Level.INFO).log("Bootstrapping server");
 
         AppSettings settings = new AppSettings();
+        settings.setSecurityKey("12345678901234567890123456789012");
         settings.setWebPath("out/examples/resources/web/");
         settings.setViewPath("out/examples/resources/web/");
         settings.setDevMode(true);

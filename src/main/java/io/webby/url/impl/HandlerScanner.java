@@ -26,7 +26,7 @@ public class HandlerScanner {
     @NotNull
     public Set<? extends Class<?>> getHandlerClassesFromClasspath() {
         return scanner.getMatchingClasses(
-            settings.filter(),
+            settings.handlerFilter(),
             klass -> isHandlerClass(klass, MAIN_HANDLER_ANNOTATION, HANDLER_CLASS_ANNOTATIONS, HANDLER_METHOD_ANNOTATIONS),
             "handler"
         );

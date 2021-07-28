@@ -56,10 +56,23 @@ public class Webby {
     }
 
     private static void validateSettings(@NotNull AppSettings settings) {
+        validateSecurityKey(settings.securityKey());
         validateWebPath(settings.webPath());
         validateViewPaths(settings.viewPaths());
         validateHotReload(settings);
-        validatePackageTester(settings);
+        validateSafeMode(settings);
+        validateHandlerFilter(settings);
+        validateInterceptorFilter(settings);
+    }
+
+    private static void validateSecurityKey(byte[] securityKey) {
+        if (securityKey.length == 0) {
+            throw new AppConfigException("Invalid settings: security key is not set. " +
+                    "Please generate the secure random 32-byte string and use it in the app settings");
+        }
+        if (securityKey.length != 32) {
+            throw new AppConfigException("Invalid settings: security key length must be 32 bytes");
+        }
     }
 
     private static void validateWebPath(@Nullable Path webPath) {
@@ -90,26 +103,56 @@ public class Webby {
             settings.setHotReload(settings.isDevMode());
         } else {
             if (settings.isHotReload() && !settings.isDevMode()) {
-                log.at(Level.WARNING).log("Configured hot reload in production mode");
+                log.at(Level.WARNING).log("Configured hot reload in production");
             }
         }
     }
 
-    private static void validatePackageTester(@NotNull AppSettings settings) {
-        if (settings.filter() == null) {
+    private static void validateSafeMode(@NotNull AppSettings settings) {
+        if (settings.isSafeModeDefault()) {
+            settings.setSafeMode(settings.isDevMode());
+        } else {
+            if (settings.isSafeMode() && !settings.isDevMode()) {
+                log.at(Level.WARNING).log("Configured safe mode in production");
+            }
+        }
+    }
+
+    private static void validateHandlerFilter(@NotNull AppSettings settings) {
+        if (!settings.isHandlerFilterSet()) {
             String className = getCallerClassName();
             if (className != null) {
                 log.at(Level.FINER).log("Caller class name: %s", className);
                 int dot = className.lastIndexOf('.');
                 if (dot > 0) {
                     String packageName = className.substring(0, dot);
-                    settings.setPackageOnly(packageName);
-                    log.at(Level.INFO).log("Using package `%s` for classpath scanning", packageName);
+                    settings.setHandlerPackageOnly(packageName);
+                    log.at(Level.INFO).log("Using package `%s` for classpath scanning (handlers)", packageName);
                     return;
                 }
             }
 
-            settings.setFilter((pkg, cls) -> true);
+            settings.setHandlerFilter((pkg, cls) -> true);
+            log.at(Level.WARNING).log("Failed to determine enclosing package for classpath scanning. " +
+                    "Using the whole classpath (can cause a delay and errors in loading classes)");
+        }
+    }
+
+    private static void validateInterceptorFilter(@NotNull AppSettings settings) {
+        if (!settings.isInterceptorFilterSet()) {
+            String className = getCallerClassName();
+            if (className != null) {
+                log.at(Level.FINER).log("Caller class name: %s", className);
+                int dot = className.lastIndexOf('.');
+                if (dot > 0) {
+                    String packageName = className.substring(0, dot);
+                    settings.setInterceptorPackageOnly(packageName);
+                    log.at(Level.INFO).log("Using package `%s` for classpath scanning (interceptors)", packageName);
+                    return;
+                }
+            }
+
+            settings.setInterceptorFilter((pkg, cls) -> true);
             log.at(Level.WARNING).log("Failed to determine enclosing package for classpath scanning. " +
                     "Using the whole classpath (can cause a delay and errors in loading classes)");
         }
@@ -119,7 +162,7 @@ public class Webby {
     private static String getCallerClassName() {
         // `mainModule` is the earliest possible external call. The trace counts right now:
         //  - getCallerClassName     0
-        //  - validatePackageTester  1
+        //  - validateHandlerFilter  1
         //  - validateSettings       2
         //  - mainModule             3
         StackTraceElement caller = CallerFinder.findCallerOf(Webby.class, new Throwable(), 3);

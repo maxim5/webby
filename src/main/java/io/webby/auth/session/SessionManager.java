@@ -31,8 +31,7 @@ public class SessionManager {
         cipher = Cipher.getInstance("AES");
         decipher = Cipher.getInstance("AES");
 
-        String serverKey = "0123456789123456";  // TODO: to the settings
-        Key key = new SecretKeySpec(serverKey.getBytes(), "AES");
+        Key key = new SecretKeySpec(settings.securityKey(), "AES");
         cipher.init(Cipher.ENCRYPT_MODE, key);
         decipher.init(Cipher.DECRYPT_MODE, key);
     }

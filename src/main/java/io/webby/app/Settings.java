@@ -16,21 +16,27 @@ public interface Settings {
 
     boolean isHotReload();
 
-    Path webPath();
+    boolean isSafeMode();
 
-    List<Path> viewPaths();
+    byte[] securityKey();
 
-    Charset charset();
+    @NotNull Path webPath();
 
-    BiPredicate<String, String> filter();
+    @NotNull List<Path> viewPaths();
 
-    QueryParser urlParser();
+    @NotNull Charset charset();
 
-    Marshal defaultRequestContentMarshal();
+    @NotNull BiPredicate<String, String> handlerFilter();
 
-    Marshal defaultResponseContentMarshal();
+    @NotNull BiPredicate<String, String> interceptorFilter();
 
-    Render defaultRender();
+    @NotNull QueryParser urlParser();
+
+    @NotNull Marshal defaultRequestContentMarshal();
+
+    @NotNull Marshal defaultResponseContentMarshal();
+
+    @NotNull Render defaultRender();
 
     @Nullable String getProperty(@NotNull String key);
 

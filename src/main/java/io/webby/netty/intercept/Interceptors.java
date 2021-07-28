@@ -27,7 +27,7 @@ public class Interceptors {
 
     private final List<InterceptItem> stack;
     private final int attrBufferSize;
-    private final boolean safeWrapper;
+    private final boolean safeWrapperEnabled;
     private final Map<Integer, Interceptor> unsafeOwners;
 
     @Inject private HttpResponseFactory factory;
@@ -43,15 +43,14 @@ public class Interceptors {
                 .filter(InterceptItem::isOwner)
                 .filter(InterceptItem::canBeDisabled)
                 .collect(Collectors.toMap(InterceptItem::position, InterceptItem::instance));
-        boolean isSafeMode = settings.isDevMode();      // TODO: make a setting
-        safeWrapper = isSafeMode && !unsafeOwners.isEmpty();
+        safeWrapperEnabled = settings.isSafeMode() && !unsafeOwners.isEmpty();
     }
 
     @NotNull
     public DefaultHttpRequestEx createRequest(@NotNull FullHttpRequest request, @NotNull EndpointContext context) {
         Object[] attributes = new Object[attrBufferSize];  // empty, to be filled by interceptors
         DefaultHttpRequestEx requestEx = new DefaultHttpRequestEx(request, context.constraints(), attributes);
-        if (safeWrapper) {
+        if (safeWrapperEnabled) {
             return new DefaultHttpRequestEx(requestEx) {
                 @Override
                 public @Nullable Object attr(int position) {

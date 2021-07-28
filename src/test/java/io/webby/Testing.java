@@ -21,22 +21,23 @@ public class Testing {
 
     @NotNull
     public static Injector testStartupNoHandlers() {
-        return testStartup(settings -> settings.setFilter((pkg, cls) -> false));
+        return testStartup(settings -> settings.setHandlerFilter((pkg, cls) -> false));
     }
 
     @NotNull
     public static Injector testStartup(@NotNull Class<?> clazz) {
-        return testStartup(settings -> settings.setClassOnly(clazz));
+        return testStartup(settings -> settings.setHandlerClassOnly(clazz));
     }
 
     @NotNull
     public static Injector testStartup(@NotNull String packageName) {
-        return testStartup(settings -> settings.setPackageOnly(packageName));
+        return testStartup(settings -> settings.setHandlerPackageOnly(packageName));
     }
 
     @NotNull
     public static Injector testStartup(@NotNull Consumer<AppSettings> consumer) {
         AppSettings settings = new AppSettings();
+        settings.setSecurityKey("12345678901234567890123456789012");
         settings.setWebPath(DEFAULT_WEB_PATH);
         settings.setViewPath(DEFAULT_VIEW_PATH);
         consumer.accept(settings);

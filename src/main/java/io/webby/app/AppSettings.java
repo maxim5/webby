@@ -21,11 +21,20 @@ public final class AppSettings implements Settings {
     private boolean devMode = true;
     private boolean hotReload = true;
     private boolean hotReloadDefault = true;
+    private boolean safeMode = true;
+    private boolean safeModeDefault = true;
+
+    private byte[] securityKey = new byte[0];
+
     private Path webPath = Path.of("/web/");
     private List<Path> viewPaths = List.of(Path.of("/web/"));
     private Charset charset = Charset.defaultCharset();
-    private BiPredicate<String, String> filter = null;
+
+    private BiPredicate<String, String> handlerFilter = null;
+    private BiPredicate<String, String> interceptorFilter = null;
+
     private QueryParser urlParser = SimpleQueryParser.DEFAULT;
+
     private Marshal defaultRequestContentMarshal = Marshal.JSON;
     private Marshal defaultResponseContentMarshal = Marshal.AS_STRING;
     private Render defaultRender = Render.JTE;
@@ -52,11 +61,38 @@ public final class AppSettings implements Settings {
 
     public void setHotReload(boolean hotReload) {
         this.hotReload = hotReload;
-        hotReloadDefault = false;
+        this.hotReloadDefault = false;
     }
 
     @Override
-    public Path webPath() {
+    public boolean isSafeMode() {
+        return safeMode;
+    }
+
+    public boolean isSafeModeDefault() {
+        return safeModeDefault;
+    }
+
+    public void setSafeMode(boolean safeMode) {
+        this.safeMode = safeMode;
+        this.safeModeDefault = false;
+    }
+
+    @Override
+    public byte[] securityKey() {
+        return securityKey;
+    }
+
+    public void setSecurityKey(@NotNull String securityKey) {
+        this.securityKey = securityKey.getBytes(charset);
+    }
+
+    public void setSecurityKey(byte[] securityKey) {
+        this.securityKey = securityKey;
+    }
+
+    @Override
+    public @NotNull Path webPath() {
         return webPath;
     }
 
@@ -69,7 +105,7 @@ public final class AppSettings implements Settings {
     }
 
     @Override
-    public List<Path> viewPaths() {
+    public @NotNull List<Path> viewPaths() {
         return viewPaths;
     }
 
@@ -90,7 +126,7 @@ public final class AppSettings implements Settings {
     }
 
     @Override
-    public Charset charset() {
+    public @NotNull Charset charset() {
         return charset;
     }
 
@@ -99,24 +135,49 @@ public final class AppSettings implements Settings {
     }
 
     @Override
-    public BiPredicate<String, String> filter() {
-        return filter;
+    public @NotNull BiPredicate<String, String> handlerFilter() {
+        return handlerFilter;
     }
 
-    public void setPackageOnly(@NotNull String packageName) {
-        this.filter = (pkg, cls) -> pkg.startsWith(packageName);
+    public boolean isHandlerFilterSet() {
+        return handlerFilter != null;
     }
 
-    public void setClassOnly(@NotNull Class<?> klass) {
-        this.filter = (pkg, cls) -> pkg.equals(klass.getPackageName()) && cls.equals(klass.getSimpleName());
+    public void setHandlerPackageOnly(@NotNull String packageName) {
+        this.handlerFilter = (pkg, cls) -> pkg.startsWith(packageName);
     }
 
-    public void setFilter(@NotNull BiPredicate<String, String> filter) {
-        this.filter = filter;
+    public void setHandlerClassOnly(@NotNull Class<?> klass) {
+        this.handlerFilter = (pkg, cls) -> pkg.equals(klass.getPackageName()) && cls.equals(klass.getSimpleName());
+    }
+
+    public void setHandlerFilter(@NotNull BiPredicate<String, String> filter) {
+        this.handlerFilter = filter;
     }
 
     @Override
-    public QueryParser urlParser() {
+    public @NotNull BiPredicate<String, String> interceptorFilter() {
+        return interceptorFilter;
+    }
+
+    public boolean isInterceptorFilterSet() {
+        return interceptorFilter != null;
+    }
+
+    public void setInterceptorPackageOnly(@NotNull String packageName) {
+        this.interceptorFilter = (pkg, cls) -> pkg.startsWith(packageName);
+    }
+
+    public void setInterceptorClassOnly(@NotNull Class<?> klass) {
+        this.interceptorFilter = (pkg, cls) -> pkg.equals(klass.getPackageName()) && cls.equals(klass.getSimpleName());
+    }
+
+    public void setInterceptorFilter(@NotNull BiPredicate<String, String> filter) {
+        this.interceptorFilter = filter;
+    }
+
+    @Override
+    public @NotNull QueryParser urlParser() {
         return urlParser;
     }
 
@@ -125,7 +186,7 @@ public final class AppSettings implements Settings {
     }
 
     @Override
-    public Marshal defaultRequestContentMarshal() {
+    public @NotNull Marshal defaultRequestContentMarshal() {
         return defaultRequestContentMarshal;
     }
 
@@ -134,7 +195,7 @@ public final class AppSettings implements Settings {
     }
 
     @Override
-    public Marshal defaultResponseContentMarshal() {
+    public @NotNull Marshal defaultResponseContentMarshal() {
         return defaultResponseContentMarshal;
     }
 
@@ -143,7 +204,7 @@ public final class AppSettings implements Settings {
     }
 
     @Override
-    public Render defaultRender() {
+    public @NotNull Render defaultRender() {
         return defaultRender;
     }
 
