@@ -8,11 +8,13 @@ import io.webby.app.Settings;
 import io.webby.util.Rethrow;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
+import org.jetbrains.annotations.VisibleForTesting;
 
 import javax.crypto.Cipher;
-import javax.crypto.NoSuchPaddingException;
 import javax.crypto.spec.SecretKeySpec;
-import java.security.*;
+import java.security.GeneralSecurityException;
+import java.security.Key;
+import java.security.SecureRandom;
 import java.time.Instant;
 import java.util.Arrays;
 import java.util.Base64;
@@ -26,7 +28,7 @@ public class SessionManager {
     private final Cipher decipher;
 
     @Inject
-    public SessionManager(@NotNull Settings settings) throws NoSuchPaddingException, NoSuchAlgorithmException, InvalidKeyException {
+    public SessionManager(@NotNull Settings settings) throws Exception {
         secureRandom = SecureRandom.getInstance("SHA1PRNG");
         cipher = Cipher.getInstance("AES");
         decipher = Cipher.getInstance("AES");
@@ -51,7 +53,7 @@ public class SessionManager {
             return null;
         }
         try {
-            long sessionId = decodeCookie(cookie);
+            long sessionId = decodeSessionId(cookie.value());
             return new Session(sessionId, Instant.now());   // TODO: get from storage
         } catch (Throwable throwable) {
             log.at(Level.WARNING).withCause(throwable).log("Failed to decode a cookie: %s".formatted(cookie));
@@ -66,18 +68,21 @@ public class SessionManager {
     }
 
     @NotNull
-    public String encodeSession(Session session) {
+    public String encodeSession(@NotNull Session session) {
         return encodeSessionId(session.sessionId());
     }
 
-    private String encodeSessionId(long sessionId) {
+    @VisibleForTesting
+    @NotNull
+    String encodeSessionId(long sessionId) {
         byte[] bytes = Longs.toByteArray(sessionId);
         byte[] encryptedBytes = encryptBytes(bytes);
-        return Base64.getUrlEncoder().encodeToString(encryptedBytes);
+        return Base64.getUrlEncoder().withoutPadding().encodeToString(encryptedBytes);
     }
 
-    private long decodeCookie(@NotNull Cookie cookie) {
-        byte[] encryptedBytes = Base64.getUrlDecoder().decode(cookie.value());
+    @VisibleForTesting
+    long decodeSessionId(@NotNull String value) {
+        byte[] encryptedBytes = Base64.getUrlDecoder().decode(value);
         byte[] decryptedBytes = decryptBytes(encryptedBytes);
         return Longs.fromByteArray(decryptedBytes);
     }
@@ -94,7 +99,6 @@ public class SessionManager {
         try {
             return decipher.doFinal(encrypted);
         } catch (GeneralSecurityException e) {
-            e.printStackTrace();
             return Rethrow.rethrow("Failed to decrypt the data: %s".formatted(Arrays.toString(encrypted)), e);
         }
     }
