@@ -4,12 +4,17 @@ import com.google.gson.Gson;
 import com.google.gson.JsonParseException;
 import io.netty.buffer.ByteBufInputStream;
 import io.netty.handler.codec.http.*;
+import io.netty.handler.codec.http.cookie.Cookie;
+import io.netty.handler.codec.http.cookie.ServerCookieDecoder;
+import io.webby.auth.session.Session;
+import io.webby.netty.intercept.attr.Attributes;
 import io.webby.url.convert.Constraint;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
 import java.io.InputStreamReader;
 import java.nio.charset.Charset;
+import java.util.List;
 import java.util.Map;
 import java.util.concurrent.atomic.AtomicReference;
 import java.util.function.Supplier;
@@ -76,6 +81,17 @@ public class DefaultHttpRequestEx extends DefaultFullHttpRequest implements Muta
     public void setAttr(int position, @NotNull Object attr) {
         assert attributes[position] == null : "Attributes can't be overwritten: %d".formatted(position);
         attributes[position] = attr;
+    }
+
+    @Override
+    public @NotNull List<Cookie> cookies() {
+        String cookieHeader = headers().get(HttpHeaderNames.COOKIE);
+        return cookieHeader != null ? ServerCookieDecoder.LAX.decodeAll(cookieHeader) : List.of();
+    }
+
+    @Override
+    public @NotNull Session session() {
+        return attrOrDie(Attributes.Session);
     }
 
     @NotNull

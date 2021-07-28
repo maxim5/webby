@@ -11,6 +11,7 @@ import com.google.inject.util.Modules;
 import io.webby.app.AppConfigException;
 import io.webby.app.AppModule;
 import io.webby.app.AppSettings;
+import io.webby.auth.AuthModule;
 import io.webby.common.CommonModule;
 import io.webby.netty.NettyBootstrap;
 import io.webby.netty.NettyModule;
@@ -46,6 +47,7 @@ public class Webby {
         validateSettings(settings);
         return Modules.combine(
             new AppModule(settings),
+            new AuthModule(),
             new CommonModule(),
             new NettyModule(),
             new PerfModule(),
