@@ -49,6 +49,6 @@ public class SessionInterceptor implements Interceptor {
             response.headers().set(HttpHeaderNames.SET_COOKIE, CookieUtil.encode(cookie));
             log.at(Level.FINER).log("Response set-cookie: %s", cookie);
         }
-        return Interceptor.super.exit(request, response);
+        return response;
     }
 }
