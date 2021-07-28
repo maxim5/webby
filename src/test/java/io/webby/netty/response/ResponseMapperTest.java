@@ -1,13 +1,11 @@
 package io.webby.netty.response;
 
-import com.google.inject.Injector;
 import io.netty.buffer.ByteBuf;
 import io.netty.buffer.Unpooled;
 import io.netty.handler.codec.http.FullHttpResponse;
 import io.routekit.util.CharBuffer;
 import io.webby.Testing;
 import org.junit.jupiter.api.Assertions;
-import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
 import java.io.*;
@@ -17,13 +15,7 @@ import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.function.Function;
 
 public class ResponseMapperTest {
-    private ResponseMapper mapper;
-
-    @BeforeEach
-    void setup() {
-        Injector injector = Testing.testStartupNoHandlers();
-        mapper = injector.getInstance(ResponseMapper.class);
-    }
+    private final ResponseMapper mapper = Testing.testStartupNoHandlers().getInstance(ResponseMapper.class);
 
     @Test
     public void lookup_or_map_byte_buffer() {
