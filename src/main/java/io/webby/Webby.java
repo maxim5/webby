@@ -13,6 +13,7 @@ import io.webby.app.AppModule;
 import io.webby.app.AppSettings;
 import io.webby.auth.AuthModule;
 import io.webby.common.CommonModule;
+import io.webby.db.DbModule;
 import io.webby.netty.NettyBootstrap;
 import io.webby.netty.NettyModule;
 import io.webby.perf.PerfModule;
@@ -49,6 +50,7 @@ public class Webby {
             new AppModule(settings),
             new AuthModule(),
             new CommonModule(),
+            new DbModule(),
             new NettyModule(),
             new PerfModule(),
             new UrlModule()

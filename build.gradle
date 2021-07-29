@@ -37,6 +37,9 @@ dependencies {
     compileOnly group: 'io.pebbletemplates', name: 'pebble', version: '3.1.5'
     compileOnly group: 'org.freemarker', name: 'freemarker', version: '2.3.31'
 
+    // Key-Values
+    implementation 'org.mapdb:mapdb:3.0.8'
+
     // JUnit
     testImplementation 'org.junit.jupiter:junit-jupiter-api:5.7.0'
     testRuntimeOnly 'org.junit.jupiter:junit-jupiter-engine:5.7.0'

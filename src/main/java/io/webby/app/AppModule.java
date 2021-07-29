@@ -1,6 +1,7 @@
 package io.webby.app;
 
 import com.google.inject.AbstractModule;
+import io.webby.util.Lifetime;
 import org.jetbrains.annotations.NotNull;
 
 public class AppModule extends AbstractModule {
@@ -12,6 +13,7 @@ public class AppModule extends AbstractModule {
 
     public void configure() {
         bind(Settings.class).toInstance(settings);
-        bind(AppSettings.class).toInstance(settings);
+        bind(AppLifetime.class).asEagerSingleton();
+        bind(Lifetime.class).toProvider(AppLifetime.class);
     }
 }

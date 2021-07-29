@@ -67,7 +67,7 @@ public abstract class Lifetime {
             }
         }
 
-        public boolean terminate() {
+        public boolean terminate() {  // TODO: is terminating
             if (this == Eternal) {
                 return false;
             }
@@ -85,24 +85,21 @@ public abstract class Lifetime {
 
         private void deconstruct() {
             while (!resources.isEmpty()) {
-                Object resource = resources.pollLast();
-                if (resource instanceof Closeable closeable) {
-                    runAndLogErrors(closeable::close);
-                } else if (resource instanceof ThrowRunnable<?> runnable) {
-                    runAndLogErrors(runnable);
-                } else if (resource instanceof Definition definition) {
-                    definition.terminate();
-                } else {
-                    log.at(Level.SEVERE).log("Failed to terminal unexpected resource: %s", resource);
+                Object resource = resources.pollFirst();
+                try {
+                    if (resource instanceof Closeable closeable) {
+                        closeable.close();
+                    } else if (resource instanceof ThrowRunnable<?> runnable) {
+                        runnable.run();
+                    } else if (resource instanceof Definition definition) {
+                        definition.terminate();
+                    } else {
+                        log.at(Level.SEVERE).log("Failed to terminal unexpected resource: %s", resource);
+                    }
+                } catch (Throwable throwable) {
+                    throwable.printStackTrace();
+                    log.at(Level.WARNING).withCause(throwable).log("Runnable failed: %s", throwable.getMessage());
                 }
-            }
-        }
-
-        private static <E extends Throwable> void runAndLogErrors(@NotNull ThrowRunnable<E> runnable) {
-            try {
-                runnable.run();
-            } catch (Throwable throwable) {
-                log.at(Level.WARNING).withCause(throwable).log("Runnable failed: %s", throwable.getMessage());
             }
         }
 

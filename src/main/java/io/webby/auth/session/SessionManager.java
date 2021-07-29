@@ -5,6 +5,8 @@ import com.google.common.primitives.Longs;
 import com.google.inject.Inject;
 import io.netty.handler.codec.http.cookie.Cookie;
 import io.webby.app.Settings;
+import io.webby.db.kv.KeyValueDb;
+import io.webby.db.kv.KeyValueDbFactory;
 import io.webby.util.Rethrow;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
@@ -26,9 +28,10 @@ public class SessionManager {
     private final SecureRandom secureRandom;
     private final Cipher cipher;
     private final Cipher decipher;
+    private final KeyValueDb<Long, Session> db;
 
     @Inject
-    public SessionManager(@NotNull Settings settings) throws Exception {
+    public SessionManager(@NotNull Settings settings, @NotNull KeyValueDbFactory dbFactory) throws Exception {
         secureRandom = SecureRandom.getInstance("SHA1PRNG");
         cipher = Cipher.getInstance("AES");
         decipher = Cipher.getInstance("AES");
@@ -36,6 +39,8 @@ public class SessionManager {
         Key key = new SecretKeySpec(settings.securityKey(), "AES");
         cipher.init(Cipher.ENCRYPT_MODE, key);
         decipher.init(Cipher.DECRYPT_MODE, key);
+
+        db = dbFactory.getDb("sessions", Long.class, Session.class);
     }
 
     @NotNull
@@ -54,7 +59,7 @@ public class SessionManager {
         }
         try {
             long sessionId = decodeSessionId(cookie.value());
-            return new Session(sessionId, Instant.now());   // TODO: get from storage
+            return db.get(sessionId);
         } catch (Throwable throwable) {
             log.at(Level.WARNING).withCause(throwable).log("Failed to decode a cookie: %s".formatted(cookie));
             return null;
@@ -64,7 +69,9 @@ public class SessionManager {
     @NotNull
     public Session createNewSession() {
         long randomLong = secureRandom.nextLong();
-        return new Session(randomLong, Instant.now());  // TODO: persist
+        Session session = new Session(randomLong, Instant.now());
+        db.set(session.sessionId(), session);
+        return session;
     }
 
     @NotNull

@@ -3,32 +3,38 @@ package io.webby.netty;
 import com.google.common.flogger.FluentLogger;
 import com.google.inject.Inject;
 import com.google.inject.Provider;
-import com.google.inject.Provides;
 import io.netty.bootstrap.ServerBootstrap;
 import io.netty.channel.*;
 import io.netty.channel.nio.NioEventLoopGroup;
 import io.netty.channel.socket.nio.NioServerSocketChannel;
 import io.netty.handler.codec.http.HttpObjectAggregator;
 import io.netty.handler.codec.http.HttpServerCodec;
+import io.webby.app.AppLifetime;
 import io.webby.util.Lifetime;
+import org.jetbrains.annotations.NotNull;
 
 import java.util.logging.Level;
 
 public class NettyBootstrap {
     private static final FluentLogger log = FluentLogger.forEnclosingClass();
 
-    private final Lifetime.Definition rootLifetime = new Lifetime.Definition();
-
     @Inject private Provider<NettyChannelHandler> nettyChannelHandler;
+
+    private final Lifetime.Definition lifetime;
+
+    @Inject
+    public NettyBootstrap(@NotNull AppLifetime appLifetime) {
+        lifetime = appLifetime.getLifetime();
+    }
 
     public void runLocally(int port) throws InterruptedException {
         attachShutdownHook();
 
         EventLoopGroup masterGroup = new NioEventLoopGroup();
-        rootLifetime.onTerminate(masterGroup::shutdownGracefully);
+        lifetime.onTerminate(masterGroup::shutdownGracefully);
 
         EventLoopGroup workerGroup = new NioEventLoopGroup();
-        rootLifetime.onTerminate(workerGroup::shutdownGracefully);
+        lifetime.onTerminate(workerGroup::shutdownGracefully);
 
         try {
             ServerBootstrap bootstrap = new ServerBootstrap();
@@ -49,19 +55,14 @@ public class NettyBootstrap {
             log.at(Level.INFO).log("Server running at %d", port);
             httpChannel.channel().closeFuture().sync();
         } finally {
-            rootLifetime.terminate();
+            lifetime.terminate();
         }
-    }
-
-    @Provides
-    public Lifetime getLifetime() {
-        return rootLifetime;
     }
 
     private void attachShutdownHook() {
         Runtime.getRuntime().addShutdownHook(new Thread(() -> {
             log.at(Level.WARNING).log("Shutdown hook received. Terminating");
-            rootLifetime.terminate();
+            lifetime.terminate();
             log.at(Level.WARNING).log("Terminated");
             System.out.println("Terminated");
         }));
