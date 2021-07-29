@@ -5,6 +5,7 @@ import org.jetbrains.annotations.NotNull;
 
 import java.io.Closeable;
 import java.util.ArrayDeque;
+import java.util.concurrent.atomic.AtomicReference;
 import java.util.function.Consumer;
 import java.util.function.Function;
 import java.util.logging.Level;
@@ -14,6 +15,9 @@ public abstract class Lifetime {
     // and https://stackoverflow.com/questions/50021182/java-static-initializers-referring-to-subclasses-avoid-class-loading-deadlock
     @SuppressWarnings("StaticInitializerReferencesSubClass")
     public static final Lifetime Eternal = new Definition();
+
+    @NotNull
+    public abstract Status status();
 
     @NotNull
     public Lifetime.Definition createNested() {
@@ -26,7 +30,7 @@ public abstract class Lifetime {
     public Lifetime.Definition createNested(@NotNull Consumer<Definition> atomicAction) {
         Definition nested = createNested();
         try {
-            nested.execute(() -> atomicAction.accept(nested));
+            nested.executeIfAlive(() -> atomicAction.accept(nested));
             return nested;
         } catch (Throwable throwable) {
             nested.terminate();
@@ -51,6 +55,13 @@ public abstract class Lifetime {
         private static final FluentLogger log = FluentLogger.forEnclosingClass();
 
         private final ArrayDeque<Object> resources = new ArrayDeque<>();
+        private final AtomicReference<Status> status = new AtomicReference<>(Status.Alive);
+
+        @Override
+        @NotNull
+        public Status status() {
+            return status.get();
+        }
 
         @Override
         public void onTerminate(@NotNull Closeable closeable) {
@@ -62,25 +73,34 @@ public abstract class Lifetime {
             if (child == Eternal) {
                 throw new IllegalArgumentException("Eternal lifetime can't be attached");
             }
-            if (!tryToAdd(child)) {
-                log.at(Level.WARNING).log("Failed to attach a child lifetime: %s", child);
-            }
+            tryToAdd(child);
         }
 
-        public boolean terminate() {  // TODO: is terminating
+        public boolean terminate() {
             if (this == Eternal) {
                 return false;
             }
-            deconstruct();
-            return true;
+            if (status.compareAndSet(Status.Alive, Status.Terminating)) {
+                deconstruct();
+                status.set(Status.Terminated);
+                return true;
+            } else {
+                if (status.get() == Status.Terminating) {
+                    log.at(Level.SEVERE).log("Lifetime is already terminating");
+                }
+                return false;
+            }
         }
 
-        private boolean tryToAdd(@NotNull Object resource) {
+        private void tryToAdd(@NotNull Object resource) {
             if (this == Eternal) {
-                return true;
+                return;
             }
-            resources.add(resource);
-            return true;
+            if (status.get() == Status.Alive) {
+                resources.addLast(resource);
+            } else {
+                log.at(Level.WARNING).log("Failed to add a resource due to status=%s: %s", status.get(), resource);
+            }
         }
 
         private void deconstruct() {
@@ -103,8 +123,16 @@ public abstract class Lifetime {
             }
         }
 
-        public <E extends Throwable> void execute(@NotNull ThrowRunnable<E> runnable) throws E {
-            runnable.run();
+        public <E extends Throwable> void executeIfAlive(@NotNull ThrowRunnable<E> runnable) throws E {
+            if (status.compareAndSet(Status.Alive, Status.Alive)) {
+                runnable.run();
+            }
         }
+    }
+
+    public enum Status {
+        Alive,
+        Terminating,
+        Terminated
     }
 }
