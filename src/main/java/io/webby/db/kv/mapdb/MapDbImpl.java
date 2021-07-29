@@ -15,25 +15,6 @@ public class MapDbImpl<K, V> implements KeyValueDb<K, V> {
         this.map = map;
     }
 
-    /*@NotNull
-    public static <K, V> MapDbImpl<K, V> persistentHashMap(@NotNull String path,
-                                                           @NotNull String name,
-                                                           @NotNull Serializer<K> keySerializer,
-                                                           @NotNull Serializer<V> valueSerializer) {
-        DB db = DBMaker.fileDB(path).make();
-        HTreeMap<K, V> map = db.hashMap(name, keySerializer, valueSerializer).createOrOpen();
-        return new MapDbImpl<>(db, map);
-    }
-
-    @NotNull
-    public static <K, V> MapDbImpl<K, V> inMemoryHashMap(@NotNull String name,
-                                                         @NotNull Serializer<K> keySerializer,
-                                                         @NotNull Serializer<V> valueSerializer) {
-        DB db = DBMaker.memoryDB().make();
-        HTreeMap<K, V> map = db.hashMap(name, keySerializer, valueSerializer).createOrOpen();
-        return new MapDbImpl<>(db, map);
-    }*/
-
     @Override
     public void set(@NotNull K key, @NotNull V value) {
         map.put(key, value);
