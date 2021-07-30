@@ -44,7 +44,7 @@ public class SessionManagerTest {
         Session session = manager.createNewSession();
         String encoded = manager.encodeSession(session);
         Session returned = manager.getOrCreateSession(new DefaultCookie("name", encoded));
-        Assertions.assertEquals(session.sessionId(), returned.sessionId());     // TODO: fix after persist
+        Assertions.assertEquals(session, returned);
     }
 
     private void assertEncodeDecode(long id, int expectedLength) {
