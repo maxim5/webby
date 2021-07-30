@@ -32,6 +32,11 @@ public class JavaMapKeyValueFactory extends BaseKeyValueFactory {
         }
 
         @Override
+        public @Nullable V remove(@NotNull K key) {
+            return map.remove(key);
+        }
+
+        @Override
         public void flush() {}
 
         @Override

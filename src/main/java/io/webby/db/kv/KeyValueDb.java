@@ -6,7 +6,7 @@ import org.jetbrains.annotations.Nullable;
 import java.io.Closeable;
 import java.util.function.Supplier;
 
-// remove, replace, compute
+// More Map methods: replace, compute
 public interface KeyValueDb<K, V> extends Closeable {
     void set(@NotNull K key, @NotNull V value);
 
@@ -35,6 +35,8 @@ public interface KeyValueDb<K, V> extends Closeable {
         V value = get(key);
         return value != null ? value : supplier.get();
     }
+
+    @Nullable V remove(@NotNull K key);
 
     void flush();
 

@@ -33,6 +33,11 @@ public class MapDbImpl<K, V> implements KeyValueDb<K, V> {
     }
 
     @Override
+    public @Nullable V remove(@NotNull K key) {
+        return map.remove(key);
+    }
+
+    @Override
     public @Nullable V put(@NotNull K key, @NotNull V value) {
         return map.put(key, value);
     }
