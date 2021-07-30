@@ -27,8 +27,9 @@ public final class AppSettings implements Settings {
 
     private byte[] securityKey = new byte[0];
 
-    private Path webPath = Path.of("/web/");
-    private List<Path> viewPaths = List.of(Path.of("/web/"));
+    private Path webPath = Path.of("web");
+    private List<Path> viewPaths = List.of(Path.of("web"));
+    private Path storagePath = Path.of("storage");
     private Charset charset = Charset.defaultCharset();
 
     private BiPredicate<String, String> handlerFilter = null;
@@ -126,6 +127,19 @@ public final class AppSettings implements Settings {
 
     public void setViewPaths(@NotNull Path @NotNull ... viewPaths) {
         this.viewPaths = List.of(viewPaths);
+    }
+
+    @Override
+    public @NotNull Path storagePath() {
+        return storagePath;
+    }
+
+    public void setStoragePath(@NotNull Path storagePath) {
+        this.storagePath = storagePath;
+    }
+
+    public void setStoragePath(@NotNull String storagePath) {
+        this.storagePath = Path.of(storagePath);
     }
 
     @Override
@@ -254,6 +268,16 @@ public final class AppSettings implements Settings {
         try {
             String property = getProperty(key);
             return property != null ? Integer.parseInt(property) : def;
+        } catch (NumberFormatException ignore) {
+            return def;
+        }
+    }
+
+    @Override
+    public long getLongProperty(@NotNull String key, long def) {
+        try {
+            String property = getProperty(key);
+            return property != null ? Long.parseLong(property) : def;
         } catch (NumberFormatException ignore) {
             return def;
         }

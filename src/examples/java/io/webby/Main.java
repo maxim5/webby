@@ -23,8 +23,9 @@ public class Main {
 
         AppSettings settings = new AppSettings();
         settings.setSecurityKey("12345678901234567890123456789012");
-        settings.setWebPath("out/examples/resources/web/");
-        settings.setViewPath("out/examples/resources/web/");
+        settings.setWebPath("out/examples/resources/web");
+        settings.setViewPath("out/examples/resources/web");
+        settings.setStoragePath(".data/mapdb");
         settings.setDevMode(true);
         settings.setProperty("jte.class.directory", JteExample.CLASS_DIR);
         settings.setProperty("jte.view.paths", "out/examples/resources/web/jte");

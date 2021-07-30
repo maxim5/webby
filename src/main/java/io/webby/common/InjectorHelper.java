@@ -6,10 +6,12 @@ import com.google.inject.spi.BindingScopingVisitor;
 import com.google.inject.spi.BindingTargetVisitor;
 import com.google.inject.spi.ElementVisitor;
 import com.google.inject.util.Providers;
+import io.webby.app.Settings;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.function.Function;
 import java.util.function.Supplier;
 import java.util.logging.Level;
 
@@ -19,11 +21,17 @@ public class InjectorHelper {
     private static final FluentLogger log = FluentLogger.forEnclosingClass();
 
     @Inject private Injector injector;
+    @Inject private Settings settings;
     private final Map<Key<?>, Binding<?>> singletons = new ConcurrentHashMap<>();
 
     @NotNull
     public <T> T getOrDefault(@NotNull Class<T> klass, @NotNull Supplier<T> defaultSupplier) {
         return getOrDefault(injector, klass, defaultSupplier);
+    }
+
+    @NotNull
+    public <T> T getOrDefault(@NotNull Class<T> klass, @NotNull Function<Settings, T> defaultSupplier) {
+        return getOrDefault(injector, klass, () -> defaultSupplier.apply(settings));
     }
 
     @NotNull

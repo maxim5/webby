@@ -2,6 +2,7 @@ package io.webby.db.kv.mapdb;
 
 import com.google.common.collect.ImmutableMap;
 import com.google.inject.Inject;
+import io.webby.app.Settings;
 import io.webby.common.InjectorHelper;
 import io.webby.db.kv.BaseKeyValueFactory;
 import io.webby.db.kv.SerializeProvider;
@@ -23,15 +24,7 @@ public class MapDbFactory extends BaseKeyValueFactory {
 
     @Inject
     public MapDbFactory(@NotNull InjectorHelper helper) {
-        // TODO: settings
-        // - path
-        // - transaction
-        // - checksum bypass
-        // - hash or tree
-
-        Path storagePath = Path.of(".data");
-        db = DBMaker.fileDB(storagePath.resolve("mapdb/mapdb.data").toFile()).checksumHeaderBypass().make();
-
+        db = helper.getOrDefault(DB.class, this::createDefaultMapDB);
         creator = helper.getOrDefault(MapDbCreator.class, () -> (db, name, key, value) -> null);
     }
 
@@ -50,6 +43,35 @@ public class MapDbFactory extends BaseKeyValueFactory {
             HTreeMap<K, V> map = maker.createOrOpen();
             return new MapDbImpl<>(db, map);
         });
+    }
+
+    @Override
+    public void close() throws IOException {
+        db.close();
+    }
+
+    @NotNull
+    private DB createDefaultMapDB(@NotNull Settings settings) {
+        // Consider options: hash or tree
+        Path storagePath = settings.storagePath();
+        String filename = settings.getProperty("db.mapdb.filename", "mapdb.data");
+        boolean checksumEnabled = settings.getBoolProperty("db.mapdb.checksum.enabled", true);
+        boolean concurrencyEnabled = settings.getBoolProperty("db.mapdb.concurrency.enabled", true);
+        boolean transactionsEnabled = settings.getBoolProperty("db.mapdb.transactions.enabled", false);
+        long allocateStartSize = settings.getLongProperty("db.mapdb.start.size", 0);
+
+        DBMaker.Maker maker = DBMaker.fileDB(storagePath.resolve(filename).toFile());
+        if (!checksumEnabled) {
+            maker = maker.checksumHeaderBypass();
+        }
+        if (!concurrencyEnabled) {
+            maker = maker.concurrencyDisable();
+        }
+        if (transactionsEnabled) {
+            maker = maker.transactionEnable();
+        }
+
+        return maker.allocateStartSize(allocateStartSize).make();
     }
 
     private static final ImmutableMap<Class<?>, Serializer<?>> OUT_OF_BOX =
@@ -97,10 +119,5 @@ public class MapDbFactory extends BaseKeyValueFactory {
         }
 
         return castAny(Serializer.JAVA);
-    }
-
-    @Override
-    public void close() throws IOException {
-        db.close();
     }
 }

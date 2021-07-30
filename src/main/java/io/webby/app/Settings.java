@@ -25,6 +25,8 @@ public interface Settings {
 
     @NotNull List<Path> viewPaths();
 
+    @NotNull Path storagePath();
+
     @NotNull Charset charset();
 
     @NotNull BiPredicate<String, String> handlerFilter();
@@ -48,6 +50,8 @@ public interface Settings {
     @NotNull String getProperty(@NotNull String key, @NotNull Object def);
 
     int getIntProperty(@NotNull String key, int def);
+
+    long getLongProperty(@NotNull String key, long def);
 
     boolean getBoolProperty(@NotNull String key);
 
