@@ -2,6 +2,7 @@ package io.webby;
 
 import com.google.inject.Injector;
 import io.webby.app.AppSettings;
+import io.webby.db.kv.StorageType;
 import org.jetbrains.annotations.NotNull;
 
 import java.nio.charset.Charset;
@@ -40,6 +41,7 @@ public class Testing {
         settings.setSecurityKey("12345678901234567890123456789012");
         settings.setWebPath(DEFAULT_WEB_PATH);
         settings.setViewPath(DEFAULT_VIEW_PATH);
+        settings.setStorageType(StorageType.JAVA_MAP);
         consumer.accept(settings);
         return testStartup(settings);
     }

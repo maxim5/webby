@@ -3,6 +3,7 @@ package io.webby.app;
 import com.google.errorprone.annotations.CanIgnoreReturnValue;
 import io.routekit.QueryParser;
 import io.routekit.SimpleQueryParser;
+import io.webby.db.kv.StorageType;
 import io.webby.url.annotate.Marshal;
 import io.webby.url.annotate.Render;
 import org.jetbrains.annotations.NotNull;
@@ -38,6 +39,8 @@ public final class AppSettings implements Settings {
     private Marshal defaultRequestContentMarshal = Marshal.JSON;
     private Marshal defaultResponseContentMarshal = Marshal.AS_STRING;
     private Render defaultRender = Render.JTE;
+
+    private StorageType storageType = StorageType.MAP_DB;
 
     private final Map<String, String> properties = new HashMap<>();
 
@@ -210,6 +213,15 @@ public final class AppSettings implements Settings {
 
     public void setDefaultRender(@NotNull Render defaultRender) {
         this.defaultRender = defaultRender;
+    }
+
+    @Override
+    public @NotNull StorageType storageType() {
+        return storageType;
+    }
+
+    public void setStorageType(@NotNull StorageType storageType) {
+        this.storageType = storageType;
     }
 
     @CanIgnoreReturnValue
