@@ -38,7 +38,8 @@ dependencies {
     compileOnly group: 'org.freemarker', name: 'freemarker', version: '2.3.31'
 
     // Key-Values
-    implementation 'org.mapdb:mapdb:3.0.8'
+    compileOnly 'net.openhft:chronicle-map:3.21ea81'
+    compileOnly 'org.mapdb:mapdb:3.0.8'
 
     // JUnit
     testImplementation 'org.junit.jupiter:junit-jupiter-api:5.7.0'
