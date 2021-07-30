@@ -2,10 +2,9 @@ package io.webby.db.kv.mapdb;
 
 import com.google.common.collect.ImmutableMap;
 import com.google.inject.Inject;
-import io.webby.db.kv.KeyValueDbFactory;
-import io.webby.db.kv.SerializeProvider;
 import io.webby.common.InjectorHelper;
-import io.webby.util.Lifetime;
+import io.webby.db.kv.BaseKeyValueFactory;
+import io.webby.db.kv.SerializeProvider;
 import org.jetbrains.annotations.NotNull;
 import org.mapdb.*;
 import org.mapdb.serializer.GroupSerializerObjectArray;
@@ -16,38 +15,41 @@ import java.util.Date;
 
 import static io.webby.util.EasyCast.castAny;
 
-public class MapDbFactory implements KeyValueDbFactory {
+public class MapDbFactory extends BaseKeyValueFactory {
     @Inject private SerializeProvider serializeProvider;
+
     private final DB db;
     private final MapDbCreator creator;
 
     @Inject
-    public MapDbFactory(@NotNull Lifetime lifetime, @NotNull InjectorHelper helper) {
+    public MapDbFactory(@NotNull InjectorHelper helper) {
         // TODO: settings
         // - path
         // - transaction
         // - checksum bypass
         // - hash or tree
+
         Path storagePath = Path.of(".data");
         db = DBMaker.fileDB(storagePath.resolve("mapdb/mapdb.data").toFile()).checksumHeaderBypass().make();
-        lifetime.onTerminate(db);
 
         creator = helper.getOrDefault(MapDbCreator.class, () -> (db, name, key, value) -> null);
     }
 
     @NotNull
     public <K, V> MapDbImpl<K, V> getDb(@NotNull String name, @NotNull Class<K> key, @NotNull Class<V> value) {
-        DB.Maker<HTreeMap<?, ?>> customMaker = creator.getMaker(db, name, key, value);
+        return cacheIfAbsent(name, () -> {
+            DB.Maker<HTreeMap<?, ?>> customMaker = creator.getMaker(db, name, key, value);
 
-        DB.Maker<HTreeMap<K, V>> maker;
-        if (customMaker != null) {
-            maker = castAny(customMaker);
-        } else {
-            maker = db.hashMap(name, pickSerializer(key), pickSerializer(value));
-        }
+            DB.Maker<HTreeMap<K, V>> maker;
+            if (customMaker != null) {
+                maker = castAny(customMaker);
+            } else {
+                maker = db.hashMap(name, pickSerializer(key), pickSerializer(value));
+            }
 
-        HTreeMap<K, V> map = maker.createOrOpen();
-        return new MapDbImpl<>(db, map);
+            HTreeMap<K, V> map = maker.createOrOpen();
+            return new MapDbImpl<>(db, map);
+        });
     }
 
     private static final ImmutableMap<Class<?>, Serializer<?>> OUT_OF_BOX =
@@ -95,5 +97,10 @@ public class MapDbFactory implements KeyValueDbFactory {
         }
 
         return castAny(Serializer.JAVA);
+    }
+
+    @Override
+    public void close() throws IOException {
+        db.close();
     }
 }

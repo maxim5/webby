@@ -6,7 +6,7 @@ import com.google.inject.Inject;
 import io.netty.handler.codec.http.cookie.Cookie;
 import io.webby.app.Settings;
 import io.webby.db.kv.KeyValueDb;
-import io.webby.db.kv.KeyValueDbFactory;
+import io.webby.db.kv.KeyValueFactory;
 import io.webby.util.Rethrow;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
@@ -31,7 +31,7 @@ public class SessionManager {
     private final KeyValueDb<Long, Session> db;
 
     @Inject
-    public SessionManager(@NotNull Settings settings, @NotNull KeyValueDbFactory dbFactory) throws Exception {
+    public SessionManager(@NotNull Settings settings, @NotNull KeyValueFactory factory) throws Exception {
         secureRandom = SecureRandom.getInstance("SHA1PRNG");
         cipher = Cipher.getInstance("AES");
         decipher = Cipher.getInstance("AES");
@@ -40,7 +40,7 @@ public class SessionManager {
         cipher.init(Cipher.ENCRYPT_MODE, key);
         decipher.init(Cipher.DECRYPT_MODE, key);
 
-        db = dbFactory.getDb("sessions", Long.class, Session.class);
+        db = factory.getDb("sessions", Long.class, Session.class);
     }
 
     @NotNull
