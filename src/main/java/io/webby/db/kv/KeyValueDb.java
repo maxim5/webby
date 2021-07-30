@@ -6,7 +6,7 @@ import org.jetbrains.annotations.Nullable;
 import java.io.Closeable;
 import java.util.function.Supplier;
 
-// remove, replace
+// remove, replace, compute
 public interface KeyValueDb<K, V> extends Closeable {
     void set(@NotNull K key, @NotNull V value);
 

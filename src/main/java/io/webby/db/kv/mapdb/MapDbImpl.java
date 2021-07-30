@@ -6,6 +6,8 @@ import org.jetbrains.annotations.Nullable;
 import org.mapdb.DB;
 import org.mapdb.HTreeMap;
 
+import java.util.function.Supplier;
+
 public class MapDbImpl<K, V> implements KeyValueDb<K, V> {
     private final DB db;
     private final HTreeMap<K, V> map;
@@ -23,6 +25,11 @@ public class MapDbImpl<K, V> implements KeyValueDb<K, V> {
     @Override
     public @Nullable V get(@NotNull K key) {
         return map.get(key);
+    }
+
+    @Override
+    public @NotNull V getOrCompute(@NotNull K key, @NotNull Supplier<V> supplier) {
+        return map.compute(key, (k, v) -> supplier.get());
     }
 
     @Override

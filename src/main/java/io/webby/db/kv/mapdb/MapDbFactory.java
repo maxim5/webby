@@ -74,6 +74,7 @@ public class MapDbFactory extends BaseKeyValueFactory {
         return maker.allocateStartSize(allocateStartSize).make();
     }
 
+    // More settings: choose default for string, etc?
     private static final ImmutableMap<Class<?>, Serializer<?>> OUT_OF_BOX =
             ImmutableMap.<Class<?>, Serializer<?>>builder()
                     .put(String.class, Serializer.STRING)
