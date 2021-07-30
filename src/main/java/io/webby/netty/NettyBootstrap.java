@@ -55,16 +55,15 @@ public class NettyBootstrap {
             log.at(Level.INFO).log("Server running at %d", port);
             httpChannel.channel().closeFuture().sync();
         } finally {
-            lifetime.terminate();
+            lifetime.terminateIfAlive();    // normally a shutdown hook is called, so it shouldn't do anything
         }
     }
 
     private void attachShutdownHook() {
         Runtime.getRuntime().addShutdownHook(new Thread(() -> {
-            log.at(Level.WARNING).log("Shutdown hook received. Terminating");
+            log.at(Level.WARNING).log("Shutdown hook received. Terminating application lifetime");
             lifetime.terminate();
-            log.at(Level.WARNING).log("Terminated");
-            System.out.println("Terminated");
+            log.at(Level.WARNING).log("Lifetime terminated");
         }));
     }
 }

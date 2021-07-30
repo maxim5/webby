@@ -6,15 +6,12 @@ import io.webby.app.AppSettings;
 import io.webby.netty.NettyBootstrap;
 import io.webby.templates.JteExample;
 
-import java.io.FileInputStream;
 import java.util.logging.Level;
-import java.util.logging.LogManager;
 
 public class Main {
     private static final FluentLogger log = FluentLogger.forEnclosingClass();
 
     public static void main(String[] args) throws Exception {
-        LogManager.getLogManager().readConfiguration(new FileInputStream("out/examples/resources/logging.properties"));
         runNetty(8888);
     }
 

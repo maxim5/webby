@@ -1,6 +1,7 @@
 package io.webby.util;
 
 import com.google.common.flogger.FluentLogger;
+import com.google.errorprone.annotations.CanIgnoreReturnValue;
 import org.jetbrains.annotations.NotNull;
 
 import java.io.Closeable;
@@ -8,7 +9,6 @@ import java.util.ArrayDeque;
 import java.util.concurrent.atomic.AtomicReference;
 import java.util.function.Consumer;
 import java.util.function.Function;
-import java.util.logging.Level;
 
 public abstract class Lifetime {
     // See https://stackoverflow.com/questions/48755164/referencing-subclass-in-static-variable
@@ -76,6 +76,7 @@ public abstract class Lifetime {
             tryToAdd(child);
         }
 
+        @CanIgnoreReturnValue
         public boolean terminate() {
             if (this == Eternal) {
                 return false;
@@ -86,9 +87,15 @@ public abstract class Lifetime {
                 return true;
             } else {
                 if (status.get() == Status.Terminating) {
-                    log.at(Level.SEVERE).log("Lifetime is already terminating");
+                    log.atSevere().log("Lifetime is already terminating");
                 }
                 return false;
+            }
+        }
+
+        public void terminateIfAlive() {
+            if (status.get() == Status.Alive) {
+                terminate();
             }
         }
 
@@ -99,7 +106,7 @@ public abstract class Lifetime {
             if (status.get() == Status.Alive) {
                 resources.addLast(resource);
             } else {
-                log.at(Level.WARNING).log("Failed to add a resource due to status=%s: %s", status.get(), resource);
+                log.atWarning().log("Failed to add a resource due to status=%s: %s", status.get(), resource);
             }
         }
 
@@ -114,11 +121,11 @@ public abstract class Lifetime {
                     } else if (resource instanceof Definition definition) {
                         definition.terminate();
                     } else {
-                        log.at(Level.SEVERE).log("Failed to terminal unexpected resource: %s", resource);
+                        log.atSevere().log("Failed to terminal unexpected resource: %s", resource);
                     }
                 } catch (Throwable throwable) {
                     throwable.printStackTrace();
-                    log.at(Level.WARNING).withCause(throwable).log("Runnable failed: %s", throwable.getMessage());
+                    log.atWarning().withCause(throwable).log("Runnable failed: %s", throwable.getMessage());
                 }
             }
         }
