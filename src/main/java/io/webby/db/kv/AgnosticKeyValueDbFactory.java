@@ -1,7 +1,7 @@
 package io.webby.db.kv;
 
 import com.google.inject.Inject;
-import com.google.inject.Injector;
+import io.webby.common.InjectorHelper;
 import io.webby.db.kv.mapdb.MapDbFactory;
 import org.jetbrains.annotations.NotNull;
 
@@ -9,10 +9,10 @@ public class AgnosticKeyValueDbFactory implements KeyValueDbFactory {
     private final KeyValueDbFactory delegate;
 
     @Inject
-    public AgnosticKeyValueDbFactory(@NotNull Injector injector) {
+    public AgnosticKeyValueDbFactory(@NotNull InjectorHelper helper) {
         StorageType type = StorageType.MAP_DB;  // TODO: settings
         delegate = switch (type) {
-            case MAP_DB -> injector.getInstance(MapDbFactory.class);
+            case MAP_DB -> helper.lazySingleton(MapDbFactory.class);
         };
     }
 

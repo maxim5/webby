@@ -4,7 +4,7 @@ import com.google.common.collect.ImmutableMap;
 import com.google.inject.Inject;
 import io.webby.db.kv.KeyValueDbFactory;
 import io.webby.db.kv.SerializeProvider;
-import io.webby.url.view.InjectorHelper;
+import io.webby.common.InjectorHelper;
 import io.webby.util.Lifetime;
 import org.jetbrains.annotations.NotNull;
 import org.mapdb.*;
@@ -23,7 +23,12 @@ public class MapDbFactory implements KeyValueDbFactory {
 
     @Inject
     public MapDbFactory(@NotNull Lifetime lifetime, @NotNull InjectorHelper helper) {
-        Path storagePath = Path.of(".data");  // TODO: settings
+        // TODO: settings
+        // - path
+        // - transaction
+        // - checksum bypass
+        // - hash or tree
+        Path storagePath = Path.of(".data");
         db = DBMaker.fileDB(storagePath.resolve("mapdb/mapdb.data").toFile()).checksumHeaderBypass().make();
         lifetime.onTerminate(db);
 

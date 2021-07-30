@@ -12,6 +12,7 @@ import com.github.jknack.handlebars.io.TemplateLoader;
 import com.google.common.flogger.FluentLogger;
 import com.google.inject.Inject;
 import io.webby.app.Settings;
+import io.webby.common.InjectorHelper;
 import io.webby.url.HandlerConfigError;
 import io.webby.util.ThrowConsumer;
 import org.jetbrains.annotations.NotNull;

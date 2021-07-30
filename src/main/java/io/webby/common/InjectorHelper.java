@@ -1,4 +1,4 @@
-package io.webby.url.view;
+package io.webby.common;
 
 import com.google.common.flogger.FluentLogger;
 import com.google.inject.*;

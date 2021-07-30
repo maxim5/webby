@@ -9,6 +9,7 @@ import freemarker.template.Configuration;
 import freemarker.template.Template;
 import freemarker.template.Version;
 import io.webby.app.Settings;
+import io.webby.common.InjectorHelper;
 import io.webby.url.HandlerConfigError;
 import io.webby.util.ThrowConsumer;
 import org.jetbrains.annotations.NotNull;

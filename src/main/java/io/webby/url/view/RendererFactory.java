@@ -3,6 +3,7 @@ package io.webby.url.view;
 import com.google.common.flogger.FluentLogger;
 import com.google.inject.Inject;
 import io.webby.app.Settings;
+import io.webby.common.InjectorHelper;
 import io.webby.url.annotate.Render;
 import org.jetbrains.annotations.NotNull;
 

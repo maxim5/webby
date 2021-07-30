@@ -8,6 +8,7 @@ import com.mitchellbosecke.pebble.loader.FileLoader;
 import com.mitchellbosecke.pebble.loader.Loader;
 import com.mitchellbosecke.pebble.template.PebbleTemplate;
 import io.webby.app.Settings;
+import io.webby.common.InjectorHelper;
 import io.webby.url.HandlerConfigError;
 import io.webby.util.ThrowConsumer;
 import org.jetbrains.annotations.NotNull;
