@@ -3,13 +3,14 @@ package io.webby;
 import com.google.inject.Injector;
 import io.webby.app.AppSettings;
 import io.webby.db.kv.StorageType;
+import org.apache.logging.log4j.Level;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.core.config.Configurator;
 import org.jetbrains.annotations.NotNull;
 
 import java.nio.charset.Charset;
 import java.util.Locale;
 import java.util.function.Consumer;
-import java.util.logging.Level;
-import java.util.logging.LogManager;
 
 public class Testing {
     public static final boolean VERBOSE = false;
@@ -22,7 +23,7 @@ public class Testing {
 
     @NotNull
     public static Injector testStartupNoHandlers() {
-        return testStartup(settings -> settings.setHandlerFilter((pkg, cls) -> false));
+        return testStartup(settings -> {});
     }
 
     @NotNull
@@ -41,6 +42,8 @@ public class Testing {
         settings.setSecurityKey("12345678901234567890123456789012");
         settings.setWebPath(DEFAULT_WEB_PATH);
         settings.setViewPath(DEFAULT_VIEW_PATH);
+        settings.setHandlerFilter((pkg, cls) -> false);
+        settings.setInterceptorFilter((pkg, cls) -> false);
         settings.setStorageType(StorageType.JAVA_MAP);
         consumer.accept(settings);
         return testStartup(settings);
@@ -48,8 +51,7 @@ public class Testing {
 
     @NotNull
     public static Injector testStartup(@NotNull AppSettings settings) {
-        Level level = VERBOSE ? Level.ALL : Level.WARNING;
-        LogManager.getLogManager().getLogger("").setLevel(level);
+        Configurator.setAllLevels(LogManager.ROOT_LOGGER_NAME, VERBOSE ? Level.TRACE : Level.WARN);
 
         Locale.setDefault(Locale.US);  // any way to remove this?
 
