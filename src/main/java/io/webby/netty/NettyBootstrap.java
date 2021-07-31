@@ -10,6 +10,7 @@ import io.netty.channel.socket.nio.NioServerSocketChannel;
 import io.netty.handler.codec.http.HttpObjectAggregator;
 import io.netty.handler.codec.http.HttpServerCodec;
 import io.webby.app.AppLifetime;
+import io.webby.util.AnyLog;
 import io.webby.util.Lifetime;
 import org.jetbrains.annotations.NotNull;
 
@@ -64,6 +65,7 @@ public class NettyBootstrap {
             log.at(Level.WARNING).log("Shutdown hook received. Terminating application lifetime");
             lifetime.terminate();
             log.at(Level.WARNING).log("Lifetime terminated");
+            AnyLog.shutdown();
         }));
     }
 }

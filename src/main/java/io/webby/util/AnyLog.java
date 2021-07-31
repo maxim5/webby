@@ -15,6 +15,11 @@ public final class AnyLog {
         return Log4j2.setAllLevels(level) || JavaLogging.setRootLogLevel(level);
     }
 
+    @CanIgnoreReturnValue
+    public static boolean shutdown() {
+        return Log4j2.shutdown() || JavaLogging.shutdown();
+    }
+
     public static class JavaLogging {
         public static boolean setRootLogLevel(Object level) {
             LogManager.getLogManager().getLogger("").setLevel(getLevel(level));
@@ -23,6 +28,10 @@ public final class AnyLog {
 
         public static Level getLevel(Object level) {
             return level instanceof Level ? (Level) level : Level.parse(level.toString());
+        }
+
+        public static boolean shutdown() {
+            return false;   // unsupported
         }
     }
 
@@ -59,6 +68,10 @@ public final class AnyLog {
                 return callStatic(LEVEL, "forName", lvl.getName(), value);
             }
             return level;
+        }
+
+        public static boolean shutdown() {
+            return callStatic(LOG_MANAGER, "shutdown") != null;
         }
     }
 

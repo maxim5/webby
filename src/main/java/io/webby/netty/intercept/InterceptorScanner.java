@@ -18,6 +18,8 @@ public class InterceptorScanner {
     @Inject private ClasspathScanner scanner;
     @Inject private Injector injector;
 
+    // TODO: always find default interceptors
+    // TODO: do not load renderers and kv maps
     @NotNull
     public List<InterceptItem> getInterceptorsFromClasspath() {
         return scanner.getDerivedClasses(settings.interceptorFilter(), Interceptor.class)
