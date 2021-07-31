@@ -10,6 +10,7 @@ import io.netty.channel.socket.nio.NioServerSocketChannel;
 import io.netty.handler.codec.http.HttpObjectAggregator;
 import io.netty.handler.codec.http.HttpServerCodec;
 import io.webby.app.AppLifetime;
+import io.webby.app.AppMaintenance;
 import io.webby.util.AnyLog;
 import io.webby.util.Lifetime;
 import org.jetbrains.annotations.NotNull;
@@ -20,6 +21,7 @@ public class NettyBootstrap {
     private static final FluentLogger log = FluentLogger.forEnclosingClass();
 
     @Inject private Provider<NettyChannelHandler> nettyChannelHandler;
+    @Inject private AppMaintenance maintenance;
 
     private final Lifetime.Definition lifetime;
 
@@ -62,9 +64,15 @@ public class NettyBootstrap {
 
     private void attachShutdownHook() {
         Runtime.getRuntime().addShutdownHook(new Thread(() -> {
-            log.at(Level.WARNING).log("Shutdown hook received. Terminating application lifetime");
+            log.at(Level.WARNING).log("Shutdown hook received: gracefully terminating the application");
+
+            maintenance.trySetMaintenanceMode();
+
+            log.at(Level.WARNING).log("Terminating application lifetime...");
             lifetime.terminate();
             log.at(Level.WARNING).log("Lifetime terminated");
+
+            log.at(Level.FINE).log("Shutting down the logger...");
             AnyLog.shutdown();
         }));
     }

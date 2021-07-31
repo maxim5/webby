@@ -14,6 +14,7 @@ public class AppModule extends AbstractModule {
     public void configure() {
         bind(Settings.class).toInstance(settings);
         bind(AppLifetime.class).asEagerSingleton();
+        bind(AppMaintenance.class).asEagerSingleton();
         bind(Lifetime.class).toProvider(AppLifetime.class);
     }
 }

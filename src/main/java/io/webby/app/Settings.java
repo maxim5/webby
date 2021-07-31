@@ -15,6 +15,8 @@ import java.util.function.BiPredicate;
 public interface Settings {
     boolean isDevMode();
 
+    boolean isProdMode();
+
     boolean isHotReload();
 
     boolean isSafeMode();

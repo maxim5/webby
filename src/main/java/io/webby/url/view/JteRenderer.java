@@ -95,7 +95,7 @@ public class JteRenderer implements Renderer<String> {
         String packageName = settings.getProperty("jte.output.package", Constants.PACKAGE_NAME_ON_DEMAND);
         boolean isUtf8 = settings.charset().equals(StandardCharsets.UTF_8);
         boolean isUtf8Byte = settings.getBoolProperty("jte.output.utf8byte.enabled", isUtf8);
-        boolean precompile = settings.getBoolProperty("jte.class.precompile.enabled", !settings.isDevMode());
+        boolean precompile = settings.getBoolProperty("jte.class.precompile.enabled", settings.isProdMode());
 
         DirectoryCodeResolver codeResolver = paths.stream()
                 .map(DirectoryCodeResolver::new)

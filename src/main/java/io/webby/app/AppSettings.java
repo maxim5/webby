@@ -50,6 +50,11 @@ public final class AppSettings implements Settings {
         return devMode;
     }
 
+    @Override
+    public boolean isProdMode() {
+        return !devMode;
+    }
+
     public void setDevMode(boolean devMode) {
         this.devMode = devMode;
     }

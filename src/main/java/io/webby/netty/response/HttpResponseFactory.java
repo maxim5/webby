@@ -7,6 +7,7 @@ import io.netty.buffer.ByteBuf;
 import io.netty.buffer.Unpooled;
 import io.netty.handler.codec.http.*;
 import io.webby.app.Settings;
+import io.webby.netty.exceptions.*;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
@@ -140,6 +141,37 @@ public class HttpResponseFactory {
             log.at(Level.SEVERE).withCause(e).log("Failed to read the resource: %s, returning default response", name);
         }
         return newResponse(statusLine(status), status, HttpHeaderValues.TEXT_HTML);
+    }
+
+    @NotNull
+    public FullHttpResponse handleServeException(@NotNull ServeException exception, @NotNull String source) {
+        try {
+            throw exception;
+        } catch (BadRequestException e) {
+            log.at(Level.INFO).withCause(e).log("%s raised BAD_REQUEST: %s", source, e.getMessage());
+            return newResponse400(e);
+        } catch (UnauthorizedException e) {
+            log.at(Level.INFO).withCause(e).log("%s raised UNAUTHORIZED: %s", source, e.getMessage());
+            return newResponse401(e);
+        } catch (ForbiddenException e) {
+            log.at(Level.INFO).withCause(e).log("%s raised FORBIDDEN: %s", source, e.getMessage());
+            return newResponse403(e);
+        } catch (NotFoundException e) {
+            log.at(Level.INFO).withCause(e).log("%s raised NOT_FOUND: %s", source, e.getMessage());
+            return newResponse404(e);
+        } catch (RedirectException e) {
+            log.at(Level.INFO).withCause(e).log("%s raised REDIRECT: %s (%s): %s",
+                   source, e.uri(), e.isPermanent() ? "permanent" : "temporary", e.getMessage());
+            return newResponseRedirect(e.uri(), e.isPermanent());
+        } catch (ServiceUnavailableException e) {
+            log.at(Level.WARNING).withCause(e).log("%s raised NOT_AVAILABLE: %s", source, e.getMessage());
+            return newResponse503("%s raised NOT_AVAILABLE".formatted(source), e);
+        } catch (HttpCodeException e) {
+            log.at(Level.WARNING).withCause(e).log("%s raised HttpCodeException(%s): %s", source, e.getStatus(), e.getMessage());
+            return newErrorResponse(e.getStatus(), null, e);
+        } catch (ServeException e) {
+            return newErrorResponse(HttpResponseStatus.NOT_ACCEPTABLE, null, e);
+        }
     }
 
     private static String statusLine(@NotNull HttpResponseStatus status) {

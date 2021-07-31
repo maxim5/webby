@@ -7,7 +7,7 @@ import com.google.inject.Inject;
 import io.netty.handler.codec.http.FullHttpRequest;
 import io.netty.handler.codec.http.FullHttpResponse;
 import io.webby.app.Settings;
-import io.webby.netty.exceptions.*;
+import io.webby.netty.exceptions.ServeException;
 import io.webby.netty.intercept.attr.AttributesValidator;
 import io.webby.netty.request.DefaultHttpRequestEx;
 import io.webby.netty.response.HttpResponseFactory;
@@ -18,6 +18,8 @@ import org.jetbrains.annotations.Nullable;
 
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
+import java.util.function.Predicate;
 import java.util.logging.Level;
 import java.util.stream.Collectors;
 
@@ -75,22 +77,8 @@ public class Interceptors {
                 } else {
                     instance.enter(request);
                 }
-            } catch (BadRequestException e) {
-                log.at(Level.INFO).withCause(e).log("Interceptor %s raised BAD_REQUEST: %s", instance, e.getMessage());
-                return factory.newResponse400(e);
-            } catch (UnauthorizedException e) {
-                log.at(Level.INFO).withCause(e).log("Interceptor %s raised UNAUTHORIZED: %s", instance, e.getMessage());
-                return factory.newResponse401(e);
-            } catch (ForbiddenException e) {
-                log.at(Level.INFO).withCause(e).log("Interceptor %s raised FORBIDDEN: %s", instance, e.getMessage());
-                return factory.newResponse403(e);
-            } catch (NotFoundException e) {
-                log.at(Level.INFO).withCause(e).log("Interceptor %s raised NOT_FOUND: %s", instance, e.getMessage());
-                return factory.newResponse404(e);
-            } catch (RedirectException e) {
-                log.at(Level.INFO).withCause(e).log("Interceptor %s raised REDIRECT: %s (%s): %s",
-                        instance, e.uri(), e.isPermanent() ? "permanent" : "temporary", e.getMessage());
-                return factory.newResponseRedirect(e.uri(), e.isPermanent());
+            } catch (ServeException e) {
+                return factory.handleServeException(e, "Interceptor %s".formatted(instance));
             }
         }
         return null;
@@ -102,5 +90,10 @@ public class Interceptors {
             response = item.instance().exit(request, response);
         }
         return response;
+    }
+
+    @NotNull
+    public Optional<Interceptor> findEnabledInterceptor(@NotNull Predicate<Interceptor> predicate) {
+        return stack.stream().map(InterceptItem::instance).filter(predicate).findFirst();
     }
 }

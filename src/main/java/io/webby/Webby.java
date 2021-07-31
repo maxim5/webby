@@ -104,7 +104,7 @@ public class Webby {
         if (settings.isHotReloadDefault()) {
             settings.setHotReload(settings.isDevMode());
         } else {
-            if (settings.isHotReload() && !settings.isDevMode()) {
+            if (settings.isHotReload() && settings.isProdMode()) {
                 log.at(Level.WARNING).log("Configured hot reload in production");
             }
         }
@@ -114,7 +114,7 @@ public class Webby {
         if (settings.isSafeModeDefault()) {
             settings.setSafeMode(settings.isDevMode());
         } else {
-            if (settings.isSafeMode() && !settings.isDevMode()) {
+            if (settings.isSafeMode() && settings.isProdMode()) {
                 log.at(Level.WARNING).log("Configured safe mode in production");
             }
         }

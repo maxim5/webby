@@ -39,6 +39,7 @@ public class Testing {
     @NotNull
     public static Injector testStartup(@NotNull Consumer<AppSettings> consumer) {
         AppSettings settings = new AppSettings();
+        settings.setDevMode(true);
         settings.setSecurityKey("12345678901234567890123456789012");
         settings.setWebPath(DEFAULT_WEB_PATH);
         settings.setViewPath(DEFAULT_VIEW_PATH);
