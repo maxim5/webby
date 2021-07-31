@@ -38,6 +38,21 @@ public class MapDbImpl<K, V> implements KeyValueDb<K, V> {
     }
 
     @Override
+    public int size() {
+        return map.size();
+    }
+
+    @Override
+    public long longSize() {
+        return map.sizeLong();
+    }
+
+    @Override
+    public boolean isEmpty() {
+        return map.isEmpty();
+    }
+
+    @Override
     public @Nullable V put(@NotNull K key, @NotNull V value) {
         return map.put(key, value);
     }

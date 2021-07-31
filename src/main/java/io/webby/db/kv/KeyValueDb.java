@@ -38,6 +38,16 @@ public interface KeyValueDb<K, V> extends Closeable {
 
     @Nullable V remove(@NotNull K key);
 
+    int size();
+
+    default long longSize() {
+        return size();
+    }
+
+    default boolean isEmpty() {
+        return size() == 0;
+    }
+
     void flush();
 
     void close();

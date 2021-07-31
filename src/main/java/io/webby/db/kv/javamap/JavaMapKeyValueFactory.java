@@ -37,6 +37,11 @@ public class JavaMapKeyValueFactory extends BaseKeyValueFactory {
         }
 
         @Override
+        public int size() {
+            return map.size();
+        }
+
+        @Override
         public void flush() {}
 
         @Override

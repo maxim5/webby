@@ -50,6 +50,21 @@ public class ChronicleDb<K, V> implements KeyValueDb<K, V> {
     }
 
     @Override
+    public int size() {
+        return map.size();
+    }
+
+    @Override
+    public long longSize() {
+        return map.longSize();
+    }
+
+    @Override
+    public boolean isEmpty() {
+        return map.isEmpty();
+    }
+
+    @Override
     public void flush() {
     }
 
