@@ -3,6 +3,7 @@ package io.webby.auth.session;
 import com.google.common.flogger.FluentLogger;
 import com.google.common.primitives.Longs;
 import com.google.inject.Inject;
+import io.netty.handler.codec.http.HttpRequest;
 import io.netty.handler.codec.http.cookie.Cookie;
 import io.webby.app.Settings;
 import io.webby.db.kv.KeyValueDb;
@@ -17,7 +18,6 @@ import javax.crypto.spec.SecretKeySpec;
 import java.security.GeneralSecurityException;
 import java.security.Key;
 import java.security.SecureRandom;
-import java.time.Instant;
 import java.util.Arrays;
 import java.util.Base64;
 import java.util.logging.Level;
@@ -44,10 +44,10 @@ public class SessionManager {
     }
 
     @NotNull
-    public Session getOrCreateSession(@Nullable Cookie cookie) {
+    public Session getOrCreateSession(@NotNull HttpRequest request, @Nullable Cookie cookie) {
         Session session = getSessionOrNull(cookie);
         if (session == null) {
-            return createNewSession();
+            return createNewSession(request);
         }
         return session;
     }
@@ -67,9 +67,9 @@ public class SessionManager {
     }
 
     @NotNull
-    public Session createNewSession() {
+    public Session createNewSession(@NotNull HttpRequest request) {
         long randomLong = secureRandom.nextLong();
-        Session session = new Session(randomLong, Instant.now());
+        Session session = Session.fromRequest(randomLong, request);
         db.set(session.sessionId(), session);
         return session;
     }

@@ -35,7 +35,7 @@ public class SessionInterceptor implements Interceptor {
                 .filter(cookie -> cookie.name().equals(COOKIE_ID))
                 .findFirst()
                 .orElse(null);
-        Session session = sessionManager.getOrCreateSession(sessionCookie);
+        Session session = sessionManager.getOrCreateSession(request, sessionCookie);
         request.setAttr(Attributes.Session, session);
     }
 

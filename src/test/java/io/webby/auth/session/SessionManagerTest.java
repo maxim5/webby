@@ -5,6 +5,8 @@ import io.webby.Testing;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 
+import static io.webby.FakeRequests.*;
+
 public class SessionManagerTest {
     private final SessionManager manager = Testing.testStartupNoHandlers().getInstance(SessionManager.class);
 
@@ -29,21 +31,21 @@ public class SessionManagerTest {
 
     @Test
     public void getOrCreateSession_null() {
-        Session session = manager.getOrCreateSession(null);
+        Session session = manager.getOrCreateSession(get("/"), null);
         Assertions.assertTrue(session.shouldRefresh());
     }
 
     @Test
     public void getOrCreateSession_invalid_cookie() {
-        Session session = manager.getOrCreateSession(new DefaultCookie("name", "foo"));
+        Session session = manager.getOrCreateSession(get("/"), new DefaultCookie("name", "foo"));
         Assertions.assertTrue(session.shouldRefresh());
     }
 
     @Test
     public void getOrCreateSession_valid_cookie() {
-        Session session = manager.createNewSession();
+        Session session = manager.createNewSession(get("/"));
         String encoded = manager.encodeSession(session);
-        Session returned = manager.getOrCreateSession(new DefaultCookie("name", encoded));
+        Session returned = manager.getOrCreateSession(get("/"), new DefaultCookie("name", encoded));
         Assertions.assertEquals(session, returned);
     }
 

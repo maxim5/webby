@@ -1,8 +1,6 @@
 package io.webby.auth.session;
 
-import com.google.common.primitives.Ints;
-import com.google.common.primitives.Longs;
-import io.webby.db.kv.Serializer;
+import io.webby.db.serialize.Serializer;
 import org.jetbrains.annotations.NotNull;
 
 import java.io.IOException;
@@ -10,20 +8,25 @@ import java.io.InputStream;
 import java.io.OutputStream;
 import java.time.Instant;
 
+import static io.webby.db.serialize.Serializers.*;
+
 public class SessionSerializer implements Serializer<Session> {
     @Override
     public int writeTo(@NotNull OutputStream output, @NotNull Session instance) throws IOException {
-        output.write(Longs.toByteArray(instance.sessionId()));  // 8
-        output.write(Longs.toByteArray(instance.created().getEpochSecond()));   // 8
-        output.write(Ints.toByteArray(instance.created().getNano()));  // 4
-        return 20;
+        return writeLong64(instance.sessionId(), output) +
+               writeLong64(instance.userId(), output) +
+               writeLong64(instance.created().getEpochSecond(), output) +
+               writeInt32(instance.created().getNano(), output) +
+               writeString(instance.userAgent(), output);
     }
 
     @Override
     public @NotNull Session readFrom(@NotNull InputStream input, int available) throws IOException {
-        long sessionId = Longs.fromByteArray(input.readNBytes(8));
-        long seconds = Longs.fromByteArray(input.readNBytes(8));
-        int nanos = Ints.fromByteArray(input.readNBytes(4));
-        return new Session(sessionId, Instant.ofEpochSecond(seconds, nanos));
+        long sessionId = readLong64(input);
+        long userId = readLong64(input);
+        long seconds = readLong64(input);
+        int nanos = readInt32(input);
+        String userAgent = readString(input);
+        return new Session(sessionId, userId, Instant.ofEpochSecond(seconds, nanos), userAgent);
     }
 }
