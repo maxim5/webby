@@ -97,6 +97,10 @@ public abstract class BaseIntegrationTest {
         assertResponse(response, HttpResponseStatus.NOT_FOUND, content);
     }
 
+    protected static void assert500(FullHttpResponse response) {
+        assertResponse(response, HttpResponseStatus.INTERNAL_SERVER_ERROR, null);
+    }
+
     protected static void assert503(FullHttpResponse response) {
         assertResponse(response, HttpResponseStatus.SERVICE_UNAVAILABLE, null);
     }

@@ -18,18 +18,18 @@ public class ReturnMiscIntegrationTest extends BaseIntegrationTest {
 
     @Test
     public void get_forced_failure() {
-        assert503(get("/r/error/npe"));
+        assert500(get("/r/error/npe"));
     }
 
     @Test
     public void get_return_stream_forced_failure() {
-        assert503(get("/r/error/stream/read"));
-        assert503(get("/r/error/stream/close"));
+        assert500(get("/r/error/stream/read"));
+        assert500(get("/r/error/stream/close"));
     }
 
     @Test
     public void get_return_reader_forced_failure() {
-        assert503(get("/r/error/reader/read"));
-        assert503(get("/r/error/reader/close"));
+        assert500(get("/r/error/reader/read"));
+        assert500(get("/r/error/reader/close"));
     }
 }

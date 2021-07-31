@@ -62,7 +62,7 @@ public class NettyChannelHandler extends SimpleChannelInboundHandler<FullHttpReq
         try {
             response = handle(request);
         } catch (Throwable throwable) {
-            response = factory.newResponse503("Unexpected failure", throwable);
+            response = factory.newResponse500("Unexpected failure", throwable);
             log.at(Level.SEVERE).withCause(throwable).log("Unexpected failure: %s", throwable.getMessage());
         }
         context.writeAndFlush(response);
@@ -134,7 +134,7 @@ public class NettyChannelHandler extends SimpleChannelInboundHandler<FullHttpReq
             return factory.newResponseRedirect(e.uri(), e.isPermanent());
         } catch (Throwable e) {
             log.at(Level.SEVERE).withCause(e).log("Failed to call method: %s", caller.method());
-            return factory.newResponse503("Failed to call method: %s".formatted(caller.method()), e);
+            return factory.newResponse500("Failed to call method: %s".formatted(caller.method()), e);
         }
     }
 
@@ -244,7 +244,7 @@ public class NettyChannelHandler extends SimpleChannelInboundHandler<FullHttpReq
     @Override
     public void exceptionCaught(ChannelHandlerContext context, Throwable cause) {
         context.channel()
-                .writeAndFlush(factory.newResponse503("Unexpected failure", cause))
+                .writeAndFlush(factory.newResponse500("Unexpected failure", cause))
                 .addListener(ChannelFutureListener.CLOSE);
         log.at(Level.SEVERE).withCause(cause).log("Unexpected failure: %s", cause.getMessage());
     }

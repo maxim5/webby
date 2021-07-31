@@ -65,7 +65,7 @@ public class HttpResponseFactory {
             ByteBuf byteBuf = Unpooled.wrappedBuffer(content.readAllBytes());
             return newResponse(byteBuf, status);
         } catch (IOException e) {
-            return newResponse503("Failed to read content bytes", e);
+            return newResponse500("Failed to read content bytes from the handler's input stream", e);
         } finally {
             closeRethrow(content);
         }
@@ -100,6 +100,11 @@ public class HttpResponseFactory {
     @NotNull
     public FullHttpResponse newResponse404(@Nullable Throwable error) {
         return newErrorResponse(HttpResponseStatus.NOT_FOUND, null, error);
+    }
+
+    @NotNull
+    public FullHttpResponse newResponse500(@NotNull String debugError, @Nullable Throwable cause) {
+        return newErrorResponse(HttpResponseStatus.INTERNAL_SERVER_ERROR, debugError, cause);
     }
 
     @NotNull
