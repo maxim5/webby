@@ -262,6 +262,24 @@ public final class AppSettings implements Settings {
         return properties.put(key, value);
     }
 
+    @CanIgnoreReturnValue
+    @Nullable
+    public String setProperty(@NotNull String key, long value) {
+        return properties.put(key, Long.toString(value));
+    }
+
+    @CanIgnoreReturnValue
+    @Nullable
+    public String setProperty(@NotNull String key, int value) {
+        return properties.put(key, Integer.toString(value));
+    }
+
+    @CanIgnoreReturnValue
+    @Nullable
+    public String setProperty(@NotNull String key, boolean value) {
+        return properties.put(key, Boolean.toString(value));
+    }
+
     @Override
     @Nullable
     public String getProperty(@NotNull String key) {
