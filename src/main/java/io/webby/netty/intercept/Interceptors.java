@@ -7,10 +7,7 @@ import com.google.inject.Inject;
 import io.netty.handler.codec.http.FullHttpRequest;
 import io.netty.handler.codec.http.FullHttpResponse;
 import io.webby.app.Settings;
-import io.webby.netty.exceptions.BadRequestException;
-import io.webby.netty.exceptions.NotFoundException;
-import io.webby.netty.exceptions.RedirectException;
-import io.webby.netty.exceptions.UnauthorizedException;
+import io.webby.netty.exceptions.*;
 import io.webby.netty.intercept.attr.AttributesValidator;
 import io.webby.netty.request.DefaultHttpRequestEx;
 import io.webby.netty.response.HttpResponseFactory;
@@ -84,6 +81,9 @@ public class Interceptors {
             } catch (UnauthorizedException e) {
                 log.at(Level.INFO).withCause(e).log("Interceptor %s raised UNAUTHORIZED: %s", instance, e.getMessage());
                 return factory.newResponse401(e);
+            } catch (ForbiddenException e) {
+                log.at(Level.INFO).withCause(e).log("Interceptor %s raised FORBIDDEN: %s", instance, e.getMessage());
+                return factory.newResponse403(e);
             } catch (NotFoundException e) {
                 log.at(Level.INFO).withCause(e).log("Interceptor %s raised NOT_FOUND: %s", instance, e.getMessage());
                 return factory.newResponse404(e);

@@ -93,6 +93,11 @@ public class HttpResponseFactory {
     }
 
     @NotNull
+    public FullHttpResponse newResponse403(@Nullable Throwable error) {
+        return newErrorResponse(HttpResponseStatus.FORBIDDEN, null, error);
+    }
+
+    @NotNull
     public FullHttpResponse newResponse404() {
         return newResponse404(null);
     }

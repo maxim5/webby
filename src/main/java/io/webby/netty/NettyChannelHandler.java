@@ -13,10 +13,7 @@ import io.netty.handler.codec.http.*;
 import io.routekit.Match;
 import io.routekit.Router;
 import io.routekit.util.CharBuffer;
-import io.webby.netty.exceptions.BadRequestException;
-import io.webby.netty.exceptions.NotFoundException;
-import io.webby.netty.exceptions.RedirectException;
-import io.webby.netty.exceptions.UnauthorizedException;
+import io.webby.netty.exceptions.*;
 import io.webby.netty.intercept.Interceptors;
 import io.webby.netty.request.DefaultHttpRequestEx;
 import io.webby.netty.response.HttpResponseFactory;
@@ -119,15 +116,18 @@ public class NettyChannelHandler extends SimpleChannelInboundHandler<FullHttpReq
         } catch (ConversionError e) {
             log.at(Level.INFO).withCause(e).log("Request validation failed: %s", e.getMessage());
             return factory.newResponse400(e);
-        } catch (UnauthorizedException e) {
-            log.at(Level.INFO).withCause(e).log("Unauthorized request: %s", e.getMessage());
-            return factory.newResponse401(e);
-        } catch (NotFoundException e) {
-            log.at(Level.INFO).withCause(e).log("Request handler raised NOT_FOUND: %s", e.getMessage());
-            return factory.newResponse404(e);
         } catch (BadRequestException e) {
             log.at(Level.INFO).withCause(e).log("Request handler raised BAD_REQUEST: %s", e.getMessage());
             return factory.newResponse400(e);
+        } catch (UnauthorizedException e) {
+            log.at(Level.INFO).withCause(e).log("Request handler raised UNAUTHORIZED: %s", e.getMessage());
+            return factory.newResponse401(e);
+        } catch (ForbiddenException e) {
+            log.at(Level.INFO).withCause(e).log("Request handler raised FORBIDDEN: %s", e.getMessage());
+            return factory.newResponse403(e);
+        } catch (NotFoundException e) {
+            log.at(Level.INFO).withCause(e).log("Request handler raised NOT_FOUND: %s", e.getMessage());
+            return factory.newResponse404(e);
         } catch (RedirectException e) {
             log.at(Level.INFO).withCause(e).log("Redirecting to %s (%s): %s",
                     e.uri(), e.isPermanent() ? "permanent" : "temporary", e.getMessage());
