@@ -45,6 +45,8 @@ public class Interceptors {
                 .filter(InterceptItem::canBeDisabled)
                 .collect(Collectors.toMap(InterceptItem::position, InterceptItem::instance));
         safeWrapperEnabled = settings.isSafeMode() && !unsafeOwners.isEmpty();
+
+        log.at(Level.FINE).log("Interceptors stack: %s", stack);
     }
 
     @NotNull

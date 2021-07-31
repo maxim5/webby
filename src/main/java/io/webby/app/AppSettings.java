@@ -3,6 +3,7 @@ package io.webby.app;
 import com.google.errorprone.annotations.CanIgnoreReturnValue;
 import io.routekit.QueryParser;
 import io.routekit.SimpleQueryParser;
+import io.webby.common.Packages;
 import io.webby.db.kv.StorageType;
 import io.webby.url.annotate.Marshal;
 import io.webby.url.annotate.Render;
@@ -32,6 +33,8 @@ public final class AppSettings implements Settings {
     private Path storagePath = Path.of("storage");
     private Charset charset = Charset.defaultCharset();
 
+    private final BiPredicate<String, String> excludeImplFilter =
+            (pkg, __) -> !pkg.startsWith(Packages.RENDER_IMPL) && !pkg.startsWith(Packages.DB_IMPL);
     private BiPredicate<String, String> handlerFilter = null;
     private BiPredicate<String, String> interceptorFilter = null;
 
@@ -166,11 +169,11 @@ public final class AppSettings implements Settings {
     }
 
     public void setHandlerPackageOnly(@NotNull String packageName) {
-        this.handlerFilter = (pkg, cls) -> pkg.startsWith(packageName);
+        this.handlerFilter = allInPackage(packageName).and(excludeImplFilter);
     }
 
     public void setHandlerClassOnly(@NotNull Class<?> klass) {
-        this.handlerFilter = (pkg, cls) -> pkg.equals(klass.getPackageName()) && cls.equals(klass.getSimpleName());
+        this.handlerFilter = onlyClass(klass).and(excludeImplFilter);
     }
 
     public void setHandlerFilter(@NotNull BiPredicate<String, String> filter) {
@@ -187,15 +190,25 @@ public final class AppSettings implements Settings {
     }
 
     public void setInterceptorPackageOnly(@NotNull String packageName) {
-        this.interceptorFilter = (pkg, cls) -> pkg.startsWith(packageName);
+        this.interceptorFilter = allInPackage(packageName).and(excludeImplFilter);
     }
 
     public void setInterceptorClassOnly(@NotNull Class<?> klass) {
-        this.interceptorFilter = (pkg, cls) -> pkg.equals(klass.getPackageName()) && cls.equals(klass.getSimpleName());
+        this.interceptorFilter = onlyClass(klass).and(excludeImplFilter);
     }
 
     public void setInterceptorFilter(@NotNull BiPredicate<String, String> filter) {
         this.interceptorFilter = filter;
+    }
+
+    @NotNull
+    private static BiPredicate<String, String> onlyClass(@NotNull Class<?> klass) {
+        return (pkg, cls) -> pkg.equals(klass.getPackageName()) && cls.equals(klass.getSimpleName());
+    }
+
+    @NotNull
+    private static BiPredicate<String, String> allInPackage(@NotNull String packageName) {
+        return (pkg, cls) -> pkg.startsWith(packageName);
     }
 
     @Override

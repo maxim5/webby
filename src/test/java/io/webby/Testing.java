@@ -23,7 +23,7 @@ public class Testing {
 
     @NotNull
     public static Injector testStartupNoHandlers() {
-        return testStartup(settings -> {});
+        return testStartup(settings -> settings.setInterceptorFilter((pkg, cls) -> false));
     }
 
     @NotNull
@@ -44,7 +44,6 @@ public class Testing {
         settings.setWebPath(DEFAULT_WEB_PATH);
         settings.setViewPath(DEFAULT_VIEW_PATH);
         settings.setHandlerFilter((pkg, cls) -> false);
-        settings.setInterceptorFilter((pkg, cls) -> false);
         settings.setStorageType(StorageType.JAVA_MAP);
         consumer.accept(settings);
         return testStartup(settings);
