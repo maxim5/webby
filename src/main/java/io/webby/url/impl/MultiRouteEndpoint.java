@@ -14,9 +14,9 @@ record MultiRouteEndpoint(@NotNull Map<HttpMethod, SingleRouteEndpoint> map,
                           @Nullable SingleRouteEndpoint def) implements RouteEndpoint {
     @Override
     @Nullable
-    public EndpointCaller getAcceptedCallerOrNull(@NotNull HttpRequest request) {
+    public Endpoint getAcceptedEndpointOrNull(@NotNull HttpRequest request) {
         SingleRouteEndpoint endpoint = map.getOrDefault(request.method(), def);
-        return endpoint != null ? endpoint.caller() : null;
+        return endpoint != null ? endpoint.endpoint() : null;
     }
 
     @Override

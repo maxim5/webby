@@ -81,7 +81,7 @@ public class NettyChannelHandler extends SimpleChannelInboundHandler<FullHttpReq
             return factory.newResponse404();
         }
 
-        EndpointCaller endpoint = match.handler().getAcceptedCallerOrNull(request);
+        Endpoint endpoint = match.handler().getAcceptedEndpointOrNull(request);
         if (endpoint == null) {
             log.at(Level.INFO).log("Endpoint does not accept the request %s for url: %s", request.method(), path);
             return factory.newResponse404();
@@ -103,7 +103,7 @@ public class NettyChannelHandler extends SimpleChannelInboundHandler<FullHttpReq
     @NotNull
     private FullHttpResponse call(@NotNull FullHttpRequest request,
                                   @NotNull Match<RouteEndpoint> match,
-                                  @NotNull EndpointCaller endpoint) {
+                                  @NotNull Endpoint endpoint) {
         Caller caller = endpoint.caller();
         try {
             Object callResult = caller.call(request, match.variables());

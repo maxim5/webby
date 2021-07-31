@@ -6,7 +6,7 @@ import org.jetbrains.annotations.Nullable;
 
 public interface RouteEndpoint {
     @Nullable
-    EndpointCaller getAcceptedCallerOrNull(@NotNull HttpRequest request);
+    Endpoint getAcceptedEndpointOrNull(@NotNull HttpRequest request);
 
     @NotNull
     String describe();

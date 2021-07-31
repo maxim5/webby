@@ -2,7 +2,7 @@ package io.webby.netty.intercept;
 
 import io.webby.netty.exceptions.ServeException;
 import io.webby.netty.request.MutableHttpRequestEx;
-import io.webby.url.impl.EndpointCaller;
+import io.webby.url.impl.Endpoint;
 import org.jetbrains.annotations.NotNull;
 
 public interface AdvancedInterceptor extends Interceptor {
@@ -11,5 +11,5 @@ public interface AdvancedInterceptor extends Interceptor {
         throw new UnsupportedOperationException("Endpoint must be provided");
     }
 
-    void enter(@NotNull MutableHttpRequestEx request, @NotNull EndpointCaller endpoint) throws ServeException;
+    void enter(@NotNull MutableHttpRequestEx request, @NotNull Endpoint endpoint) throws ServeException;
 }

@@ -14,7 +14,7 @@ import io.webby.netty.exceptions.UnauthorizedException;
 import io.webby.netty.intercept.attr.AttributesValidator;
 import io.webby.netty.request.DefaultHttpRequestEx;
 import io.webby.netty.response.HttpResponseFactory;
-import io.webby.url.impl.EndpointCaller;
+import io.webby.url.impl.Endpoint;
 import io.webby.url.impl.EndpointContext;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
@@ -69,7 +69,7 @@ public class Interceptors {
     }
 
     @Nullable
-    public FullHttpResponse enter(@NotNull DefaultHttpRequestEx request, @NotNull EndpointCaller endpoint) {
+    public FullHttpResponse enter(@NotNull DefaultHttpRequestEx request, @NotNull Endpoint endpoint) {
         for (InterceptItem item : stack) {
             Interceptor instance = item.instance();
             try {

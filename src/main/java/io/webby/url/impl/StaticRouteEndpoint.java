@@ -14,24 +14,24 @@ import java.util.Map;
 public final class StaticRouteEndpoint implements RouteEndpoint {
     private static final EndpointContext EMPTY_CONTEXT = new EndpointContext(Collections.emptyMap(), true, false);
 
-    private final EndpointCaller caller;
+    private final Endpoint endpoint;
     private final StaticServing serving;
 
     public StaticRouteEndpoint(@NotNull String path, @NotNull StaticServing serving) {
         this.serving = serving;
-        caller = new EndpointCaller(new StaticCaller(path), EMPTY_CONTEXT, EndpointOptions.DEFAULT);
+        endpoint = new Endpoint(new StaticCaller(path), EMPTY_CONTEXT, EndpointOptions.DEFAULT);
     }
 
     @Override
     @Nullable
-    public EndpointCaller getAcceptedCallerOrNull(@NotNull HttpRequest request) {
-        return serving.accept(request.method()) ? caller : null;
+    public Endpoint getAcceptedEndpointOrNull(@NotNull HttpRequest request) {
+        return serving.accept(request.method()) ? endpoint : null;
     }
 
     @Override
     @NotNull
     public String describe() {
-        return caller.caller().method().toString();
+        return endpoint.caller().method().toString();
     }
 
     private class StaticCaller implements Caller {

@@ -6,13 +6,13 @@ import io.webby.netty.intercept.AdvancedInterceptor;
 import io.webby.netty.intercept.attr.AttributeOwner;
 import io.webby.netty.intercept.attr.Attributes;
 import io.webby.netty.request.MutableHttpRequestEx;
-import io.webby.url.impl.EndpointCaller;
+import io.webby.url.impl.Endpoint;
 import org.jetbrains.annotations.NotNull;
 
 @AttributeOwner(position = Attributes.User)
 public class AuthInterceptor implements AdvancedInterceptor {
     @Override
-    public void enter(@NotNull MutableHttpRequestEx request, @NotNull EndpointCaller endpoint) throws ServeException {
+    public void enter(@NotNull MutableHttpRequestEx request, @NotNull Endpoint endpoint) throws ServeException {
         if (endpoint.options().requiresAuth()) {
             throw new UnauthorizedException("Endpoint requires authorization: %s".formatted(request.uri()));
         }
