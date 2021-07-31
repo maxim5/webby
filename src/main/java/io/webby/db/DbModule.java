@@ -3,7 +3,7 @@ package io.webby.db;
 import com.google.inject.AbstractModule;
 import io.webby.db.kv.AgnosticKeyValueFactory;
 import io.webby.db.kv.KeyValueFactory;
-import io.webby.db.kv.SerializeProvider;
+import io.webby.db.serialize.SerializeProvider;
 
 public class DbModule extends AbstractModule {
     @Override

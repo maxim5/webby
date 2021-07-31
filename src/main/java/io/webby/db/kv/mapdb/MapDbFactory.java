@@ -5,7 +5,7 @@ import com.google.inject.Inject;
 import io.webby.app.Settings;
 import io.webby.common.InjectorHelper;
 import io.webby.db.kv.BaseKeyValueFactory;
-import io.webby.db.kv.SerializeProvider;
+import io.webby.db.serialize.SerializeProvider;
 import org.jetbrains.annotations.NotNull;
 import org.mapdb.*;
 import org.mapdb.serializer.GroupSerializerObjectArray;
@@ -104,7 +104,7 @@ public class MapDbFactory extends BaseKeyValueFactory {
             return castAny(outOfBox);
         }
 
-        io.webby.db.kv.Serializer<T> ownCustom = serializeProvider.getSerializer(klass);
+        io.webby.db.serialize.Serializer<T> ownCustom = serializeProvider.getSerializer(klass);
         if (ownCustom != null) {
             return new GroupSerializerObjectArray<>() {
                 @Override

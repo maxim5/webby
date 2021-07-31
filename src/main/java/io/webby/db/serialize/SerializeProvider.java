@@ -1,4 +1,4 @@
-package io.webby.db.kv;
+package io.webby.db.serialize;
 
 import com.google.common.collect.ImmutableMap;
 import io.webby.auth.session.Session;
