@@ -88,6 +88,11 @@ public class HttpResponseFactory {
     }
 
     @NotNull
+    public FullHttpResponse newResponse401(@Nullable Throwable error) {
+        return newErrorResponse(HttpResponseStatus.UNAUTHORIZED, null, error);
+    }
+
+    @NotNull
     public FullHttpResponse newResponse404() {
         return newResponse404(null);
     }

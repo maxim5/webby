@@ -16,9 +16,9 @@ import io.routekit.util.CharBuffer;
 import io.webby.netty.exceptions.BadRequestException;
 import io.webby.netty.exceptions.NotFoundException;
 import io.webby.netty.exceptions.RedirectException;
+import io.webby.netty.exceptions.UnauthorizedException;
 import io.webby.netty.intercept.Interceptors;
 import io.webby.netty.request.DefaultHttpRequestEx;
-import io.webby.netty.request.HttpRequestEx;
 import io.webby.netty.response.HttpResponseFactory;
 import io.webby.netty.response.ResponseMapper;
 import io.webby.url.annotate.Marshal;
@@ -91,7 +91,7 @@ public class NettyChannelHandler extends SimpleChannelInboundHandler<FullHttpReq
             return call(request, match, endpoint);
         } else {
             DefaultHttpRequestEx requestEx = interceptors.createRequest(request, endpoint.context());
-            FullHttpResponse intercepted = interceptors.enter(requestEx);
+            FullHttpResponse intercepted = interceptors.enter(requestEx, endpoint);
             if (intercepted != null) {
                 return intercepted;
             }
@@ -119,14 +119,17 @@ public class NettyChannelHandler extends SimpleChannelInboundHandler<FullHttpReq
         } catch (ConversionError e) {
             log.at(Level.INFO).withCause(e).log("Request validation failed: %s", e.getMessage());
             return factory.newResponse400(e);
+        } catch (UnauthorizedException e) {
+            log.at(Level.INFO).withCause(e).log("Unauthorized request: %s", e.getMessage());
+            return factory.newResponse401(e);
         } catch (NotFoundException e) {
-            log.at(Level.WARNING).withCause(e).log("Request handler raised NOT_FOUND: %s", e.getMessage());
+            log.at(Level.INFO).withCause(e).log("Request handler raised NOT_FOUND: %s", e.getMessage());
             return factory.newResponse404(e);
         } catch (BadRequestException e) {
-            log.at(Level.WARNING).withCause(e).log("Request handler raised BAD_REQUEST: %s", e.getMessage());
+            log.at(Level.INFO).withCause(e).log("Request handler raised BAD_REQUEST: %s", e.getMessage());
             return factory.newResponse400(e);
         } catch (RedirectException e) {
-            log.at(Level.WARNING).withCause(e).log("Redirecting to %s (%s): %s",
+            log.at(Level.INFO).withCause(e).log("Redirecting to %s (%s): %s",
                     e.uri(), e.isPermanent() ? "permanent" : "temporary", e.getMessage());
             return factory.newResponseRedirect(e.uri(), e.isPermanent());
         } catch (Throwable e) {

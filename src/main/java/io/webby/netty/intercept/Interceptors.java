@@ -10,9 +10,11 @@ import io.webby.app.Settings;
 import io.webby.netty.exceptions.BadRequestException;
 import io.webby.netty.exceptions.NotFoundException;
 import io.webby.netty.exceptions.RedirectException;
+import io.webby.netty.exceptions.UnauthorizedException;
 import io.webby.netty.intercept.attr.AttributesValidator;
 import io.webby.netty.request.DefaultHttpRequestEx;
 import io.webby.netty.response.HttpResponseFactory;
+import io.webby.url.impl.EndpointCaller;
 import io.webby.url.impl.EndpointContext;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
@@ -67,19 +69,26 @@ public class Interceptors {
     }
 
     @Nullable
-    public FullHttpResponse enter(@NotNull DefaultHttpRequestEx request) {
+    public FullHttpResponse enter(@NotNull DefaultHttpRequestEx request, @NotNull EndpointCaller endpoint) {
         for (InterceptItem item : stack) {
             Interceptor instance = item.instance();
             try {
-                instance.enter(request);
+                if (instance instanceof AdvancedInterceptor advanced) {
+                    advanced.enter(request, endpoint);
+                } else {
+                    instance.enter(request);
+                }
             } catch (BadRequestException e) {
-                log.at(Level.WARNING).withCause(e).log("Interceptor %s raised BAD_REQUEST: %s", instance, e.getMessage());
+                log.at(Level.INFO).withCause(e).log("Interceptor %s raised BAD_REQUEST: %s", instance, e.getMessage());
                 return factory.newResponse400(e);
+            } catch (UnauthorizedException e) {
+                log.at(Level.INFO).withCause(e).log("Interceptor %s raised UNAUTHORIZED: %s", instance, e.getMessage());
+                return factory.newResponse401(e);
             } catch (NotFoundException e) {
-                log.at(Level.WARNING).withCause(e).log("Interceptor %s raised NOT_FOUND: %s", instance, e.getMessage());
+                log.at(Level.INFO).withCause(e).log("Interceptor %s raised NOT_FOUND: %s", instance, e.getMessage());
                 return factory.newResponse404(e);
             } catch (RedirectException e) {
-                log.at(Level.WARNING).withCause(e).log("Interceptor %s raised REDIRECT: %s (%s): %s",
+                log.at(Level.INFO).withCause(e).log("Interceptor %s raised REDIRECT: %s (%s): %s",
                         instance, e.uri(), e.isPermanent() ? "permanent" : "temporary", e.getMessage());
                 return factory.newResponseRedirect(e.uri(), e.isPermanent());
             }
