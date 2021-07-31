@@ -1,5 +1,9 @@
 package io.webby.auth;
 
+import com.google.inject.Inject;
+import io.webby.auth.session.Session;
+import io.webby.auth.user.User;
+import io.webby.auth.user.UserManager;
 import io.webby.netty.exceptions.ServeException;
 import io.webby.netty.exceptions.UnauthorizedException;
 import io.webby.netty.intercept.AdvancedInterceptor;
@@ -11,12 +15,18 @@ import org.jetbrains.annotations.NotNull;
 
 @AttributeOwner(position = Attributes.User)
 public class AuthInterceptor implements AdvancedInterceptor {
+    @Inject private UserManager userManager;
+
     @Override
     public void enter(@NotNull MutableHttpRequestEx request, @NotNull Endpoint endpoint) throws ServeException {
         if (endpoint.options().requiresAuth()) {
             throw new UnauthorizedException("Endpoint requires authorization: %s".formatted(request.uri()));
         }
 
-        // request.setAttr(Attributes.User, user);
+        Session session = request.session();
+        if (session.hasUser()) {
+            User user = userManager.findById(session.userId());
+            request.setNullableAttr(Attributes.User, user);
+        }
     }
 }

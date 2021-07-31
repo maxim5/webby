@@ -4,6 +4,7 @@ import com.google.gson.JsonParseException;
 import io.netty.handler.codec.http.FullHttpRequest;
 import io.netty.handler.codec.http.cookie.Cookie;
 import io.webby.auth.session.Session;
+import io.webby.auth.user.User;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
@@ -28,4 +29,10 @@ public interface HttpRequestEx extends FullHttpRequest {
     @NotNull List<Cookie> cookies();
 
     @NotNull Session session();
+
+    boolean isAuthenticated();
+
+    @Nullable User user();
+
+    @NotNull User userOrDie();
 }

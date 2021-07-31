@@ -21,8 +21,8 @@ public class Serializers {
         return input.read();
     }
 
-    public static int writeInt16(short value, @NotNull OutputStream output) throws IOException {
-        output.write(Shorts.toByteArray(value));
+    public static int writeInt16(int value, @NotNull OutputStream output) throws IOException {
+        output.write(Shorts.toByteArray((short) value));
         return 2;
     }
 

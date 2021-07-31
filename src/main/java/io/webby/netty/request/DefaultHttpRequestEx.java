@@ -7,6 +7,7 @@ import io.netty.handler.codec.http.*;
 import io.netty.handler.codec.http.cookie.Cookie;
 import io.webby.auth.CookieUtil;
 import io.webby.auth.session.Session;
+import io.webby.auth.user.User;
 import io.webby.netty.intercept.attr.Attributes;
 import io.webby.url.convert.Constraint;
 import org.jetbrains.annotations.NotNull;
@@ -84,6 +85,12 @@ public class DefaultHttpRequestEx extends DefaultFullHttpRequest implements Muta
     }
 
     @Override
+    public void setNullableAttr(int position, @Nullable Object attr) {
+        assert attributes[position] == null : "Attributes can't be overwritten: %d".formatted(position);
+        attributes[position] = attr;
+    }
+
+    @Override
     public @NotNull List<Cookie> cookies() {
         String cookieHeader = headers().get(HttpHeaderNames.COOKIE);
         return cookieHeader != null ? CookieUtil.decodeAll(cookieHeader) : List.of();
@@ -92,6 +99,21 @@ public class DefaultHttpRequestEx extends DefaultFullHttpRequest implements Muta
     @Override
     public @NotNull Session session() {
         return attrOrDie(Attributes.Session);
+    }
+
+    @Override
+    public boolean isAuthenticated() {
+        return session().hasUser();
+    }
+
+    @Override
+    public @Nullable User user() {
+        return (User) attr(Attributes.User);
+    }
+
+    @Override
+    public @NotNull User userOrDie() {
+        return attrOrDie(Attributes.User);
     }
 
     @NotNull
