@@ -15,6 +15,8 @@ import java.util.Map;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipInputStream;
 
+import static io.webby.AssertRequests.*;
+
 public class CustomHeadersTest extends BaseIntegrationTest {
     @BeforeEach
     void setup() {
