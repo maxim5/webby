@@ -44,7 +44,7 @@ public class SessionManagerTest {
     @Test
     public void getOrCreateSession_valid_cookie() {
         Session session = manager.createNewSession(get("/"));
-        String encoded = manager.encodeSession(session);
+        String encoded = manager.encodeSessionForCookie(session);
         Session returned = manager.getOrCreateSession(get("/"), new DefaultCookie("name", encoded));
         Assertions.assertEquals(session, returned);
     }

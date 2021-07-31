@@ -75,7 +75,7 @@ public class SessionManager {
     }
 
     @NotNull
-    public String encodeSession(@NotNull Session session) {
+    public String encodeSessionForCookie(@NotNull Session session) {
         return encodeSessionId(session.sessionId());
     }
 

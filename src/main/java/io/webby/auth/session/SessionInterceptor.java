@@ -43,7 +43,7 @@ public class SessionInterceptor implements Interceptor {
     public @NotNull FullHttpResponse exit(@NotNull MutableHttpRequestEx request, @NotNull FullHttpResponse response) {
         Session session = request.session();
         if (session.shouldRefresh()) {
-            String cookieValue = sessionManager.encodeSession(session);
+            String cookieValue = sessionManager.encodeSessionForCookie(session);
             Cookie cookie = new DefaultCookie(COOKIE_ID, cookieValue);
             cookie.setMaxAge(COOKIE_AGE);
             response.headers().set(HttpHeaderNames.SET_COOKIE, CookieUtil.encode(cookie));
