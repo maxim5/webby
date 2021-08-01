@@ -1,7 +1,7 @@
 package io.webby.app;
 
 import com.google.inject.Provider;
-import io.webby.util.Lifetime;
+import io.webby.common.Lifetime;
 import org.jetbrains.annotations.NotNull;
 
 public class AppLifetime implements Provider<Lifetime> {

@@ -1,7 +1,8 @@
-package io.webby.util;
+package io.webby.common;
 
 import com.google.common.flogger.FluentLogger;
 import com.google.errorprone.annotations.CanIgnoreReturnValue;
+import io.webby.util.ThrowRunnable;
 import org.jetbrains.annotations.NotNull;
 
 import java.io.Closeable;

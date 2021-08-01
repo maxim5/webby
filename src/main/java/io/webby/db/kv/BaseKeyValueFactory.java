@@ -1,7 +1,7 @@
 package io.webby.db.kv;
 
 import com.google.inject.Inject;
-import io.webby.util.Lifetime;
+import io.webby.common.Lifetime;
 import org.jetbrains.annotations.NotNull;
 
 import java.io.Closeable;

@@ -13,7 +13,7 @@ import io.netty.handler.stream.ChunkedWriteHandler;
 import io.webby.app.AppLifetime;
 import io.webby.app.AppMaintenance;
 import io.webby.util.AnyLog;
-import io.webby.util.Lifetime;
+import io.webby.common.Lifetime;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.logging.Level;
