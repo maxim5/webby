@@ -1,7 +1,7 @@
 package io.webby.hello;
 
 import com.google.common.io.ByteStreams;
-import io.netty.handler.codec.http.FullHttpResponse;
+import io.netty.handler.codec.http.HttpResponse;
 import io.webby.netty.BaseIntegrationTest;
 import org.jetbrains.annotations.NotNull;
 import org.junit.jupiter.api.Assertions;
@@ -15,7 +15,7 @@ import java.util.Map;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipInputStream;
 
-import static io.webby.AssertRequests.*;
+import static io.webby.AssertResponse.*;
 
 public class CustomHeadersTest extends BaseIntegrationTest {
     @BeforeEach
@@ -25,7 +25,7 @@ public class CustomHeadersTest extends BaseIntegrationTest {
 
     @Test
     public void get_plain_text() throws Exception {
-        FullHttpResponse response = get("/headers/plain/10");
+        HttpResponse response = get("/headers/plain/10");
         assert200(response, "Hello int <b>10</b>!");
         assertContentLength(response, "20");
         assertContentType(response, "text/plain");
@@ -33,7 +33,7 @@ public class CustomHeadersTest extends BaseIntegrationTest {
 
     @Test
     public void get_xml() throws Exception {
-        FullHttpResponse response = get("/headers/xml");
+        HttpResponse response = get("/headers/xml");
         assert200(response, "<foo><bar/></foo>");
         assertContentLength(response, "17");
         assertContentType(response, "application/xml");
@@ -41,14 +41,14 @@ public class CustomHeadersTest extends BaseIntegrationTest {
 
     @Test
     public void get_zip_stream() throws Exception {
-        FullHttpResponse response = get("/headers/zip");
+        HttpResponse response = get("/headers/zip");
         assert200(response);
         assertHeader(response, "content-disposition", "attachment; filename=\"webby-sample.zip\"");
         Map<String, String> expected = Map.of(
                 "0.txt", "File content for 0",
                 "1.txt", "File content for 1",
                 "2.txt", "File content for 2");
-        Assertions.assertEquals(expected, unzipBytes(response.content().array()));
+        Assertions.assertEquals(expected, unzipBytes(fullContent(response).array()));
     }
 
     @NotNull
@@ -64,15 +64,15 @@ public class CustomHeadersTest extends BaseIntegrationTest {
         return contents;
     }
 
-    private static void assertContentLength(FullHttpResponse response, String expected) {
+    private static void assertContentLength(HttpResponse response, String expected) {
         assertHeader(response, "content-length", expected);
     }
 
-    private static void assertContentType(FullHttpResponse response, String expected) {
+    private static void assertContentType(HttpResponse response, String expected) {
         assertHeader(response, "content-type", expected);
     }
 
-    private static void assertHeader(FullHttpResponse response, String name, String expected) {
+    private static void assertHeader(HttpResponse response, String name, String expected) {
         Assertions.assertEquals(expected, response.headers().get(name));
     }
 }

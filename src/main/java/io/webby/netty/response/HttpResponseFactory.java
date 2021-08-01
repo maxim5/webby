@@ -189,13 +189,13 @@ public class HttpResponseFactory {
     }
 
     @NotNull
-    public static FullHttpResponse withContentType(@NotNull FullHttpResponse response, @NotNull CharSequence contentType) {
+    public static <R extends HttpResponse> R withContentType(@NotNull R response, @NotNull CharSequence contentType) {
         response.headers().set(HttpHeaderNames.CONTENT_TYPE, contentType);
         return response;
     }
 
     @NotNull
-    public static FullHttpResponse withHeaders(@NotNull FullHttpResponse response, @NotNull Consumer<HttpHeaders> consumer) {
+    public static <R extends HttpResponse> R withHeaders(@NotNull R response, @NotNull Consumer<HttpHeaders> consumer) {
         HttpHeaders headers = response.headers();
         consumer.accept(headers);
         return response;

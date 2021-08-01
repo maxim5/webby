@@ -2,8 +2,8 @@ package io.webby.auth.session;
 
 import com.google.common.flogger.FluentLogger;
 import com.google.inject.Inject;
-import io.netty.handler.codec.http.FullHttpResponse;
 import io.netty.handler.codec.http.HttpHeaderNames;
+import io.netty.handler.codec.http.HttpResponse;
 import io.netty.handler.codec.http.cookie.Cookie;
 import io.netty.handler.codec.http.cookie.DefaultCookie;
 import io.webby.auth.CookieUtil;
@@ -40,7 +40,7 @@ public class SessionInterceptor implements Interceptor {
     }
 
     @Override
-    public @NotNull FullHttpResponse exit(@NotNull MutableHttpRequestEx request, @NotNull FullHttpResponse response) {
+    public @NotNull HttpResponse exit(@NotNull MutableHttpRequestEx request, @NotNull HttpResponse response) {
         Session session = request.session();
         if (session.shouldRefresh()) {
             String cookieValue = sessionManager.encodeSessionForCookie(session);

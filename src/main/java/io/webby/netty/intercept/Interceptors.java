@@ -5,7 +5,7 @@ import com.google.common.flogger.FluentLogger;
 import com.google.common.flogger.util.CallerFinder;
 import com.google.inject.Inject;
 import io.netty.handler.codec.http.FullHttpRequest;
-import io.netty.handler.codec.http.FullHttpResponse;
+import io.netty.handler.codec.http.HttpResponse;
 import io.webby.app.Settings;
 import io.webby.netty.exceptions.ServeException;
 import io.webby.netty.intercept.attr.AttributesValidator;
@@ -70,7 +70,7 @@ public class Interceptors {
     }
 
     @Nullable
-    public FullHttpResponse enter(@NotNull DefaultHttpRequestEx request, @NotNull Endpoint endpoint) {
+    public HttpResponse enter(@NotNull DefaultHttpRequestEx request, @NotNull Endpoint endpoint) {
         for (InterceptItem item : stack) {
             Interceptor instance = item.instance();
             try {
@@ -87,7 +87,7 @@ public class Interceptors {
     }
 
     @NotNull
-    public FullHttpResponse exit(@NotNull DefaultHttpRequestEx request, @NotNull FullHttpResponse response) {
+    public HttpResponse exit(@NotNull DefaultHttpRequestEx request, @NotNull HttpResponse response) {
         for (InterceptItem item : Lists.reverse(stack)) {
             response = item.instance().exit(request, response);
         }

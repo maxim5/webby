@@ -2,7 +2,7 @@ package io.webby.netty.response;
 
 import io.netty.buffer.ByteBuf;
 import io.netty.buffer.Unpooled;
-import io.netty.handler.codec.http.FullHttpResponse;
+import io.netty.handler.codec.http.HttpResponse;
 import io.routekit.util.CharBuffer;
 import io.webby.Testing;
 import org.junit.jupiter.api.Assertions;
@@ -13,6 +13,8 @@ import java.nio.ByteBuffer;
 import java.util.ArrayList;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.function.Function;
+
+import static io.webby.AssertResponse.fullContent;
 
 public class ResponseMapperTest {
     private final ResponseMapper mapper = Testing.testStartupNoHandlers().getInstance(ResponseMapper.class);
@@ -109,20 +111,20 @@ public class ResponseMapperTest {
     }
 
     private void assertLookupClass(Object obj, String expected) {
-        Function<Object, FullHttpResponse> lookup = mapper.lookupClass(obj.getClass());
+        Function<Object, HttpResponse> lookup = mapper.lookupClass(obj.getClass());
         assertResponseFunction(lookup, obj, expected);
     }
 
     private void assertMapInstance(Object obj, String expected) {
-        Function<Object, FullHttpResponse> lookup = mapper.mapInstance(obj);
+        Function<Object, HttpResponse> lookup = mapper.mapInstance(obj);
         assertResponseFunction(lookup, obj, expected);
     }
 
-    private void assertResponseFunction(Function<Object, FullHttpResponse> lookup, Object obj, String expected) {
+    private void assertResponseFunction(Function<Object, HttpResponse> lookup, Object obj, String expected) {
         if (expected != null) {
             Assertions.assertNotNull(lookup, () -> describe(obj));
-            FullHttpResponse response = lookup.apply(obj);
-            Assertions.assertEquals(expected, response.content().toString(Testing.CHARSET));
+            HttpResponse response = lookup.apply(obj);
+            Assertions.assertEquals(expected, fullContent(response).toString(Testing.CHARSET));
         } else {
             Assertions.assertNull(lookup, () -> describe(obj));
         }

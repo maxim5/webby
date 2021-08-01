@@ -56,7 +56,7 @@ public class NettyChannelHandler extends SimpleChannelInboundHandler<FullHttpReq
     protected void channelRead0(@NotNull ChannelHandlerContext context, @NotNull FullHttpRequest request) {
         Stopwatch stopwatch = Stopwatch.createStarted();
 
-        FullHttpResponse response;
+        HttpResponse response;
         try {
             response = withChannel(context.channel()).handle(request);
         } catch (Throwable throwable) {
@@ -92,7 +92,7 @@ public class NettyChannelHandler extends SimpleChannelInboundHandler<FullHttpReq
 
         @NotNull
         @VisibleForTesting
-        FullHttpResponse handle(@NotNull FullHttpRequest request) {
+        HttpResponse handle(@NotNull FullHttpRequest request) {
             CharBuffer path = extractPath(request);
             Match<RouteEndpoint> match = router.routeOrNull(path);
             if (match == null) {
@@ -110,19 +110,19 @@ public class NettyChannelHandler extends SimpleChannelInboundHandler<FullHttpReq
                 return call(request, match, endpoint);
             } else {
                 DefaultHttpRequestEx requestEx = interceptors.createRequest(request, endpoint.context());
-                FullHttpResponse intercepted = interceptors.enter(requestEx, endpoint);
+                HttpResponse intercepted = interceptors.enter(requestEx, endpoint);
                 if (intercepted != null) {
                     return intercepted;
                 }
-                FullHttpResponse response = call(requestEx, match, endpoint);
+                HttpResponse response = call(requestEx, match, endpoint);
                 return interceptors.exit(requestEx, response);
             }
         }
 
         @NotNull
-        private FullHttpResponse call(@NotNull FullHttpRequest request,
-                                      @NotNull Match<RouteEndpoint> match,
-                                      @NotNull Endpoint endpoint) {
+        private HttpResponse call(@NotNull FullHttpRequest request,
+                                  @NotNull Match<RouteEndpoint> match,
+                                  @NotNull Endpoint endpoint) {
             Caller caller = endpoint.caller();
             try {
                 Object callResult = caller.call(request, match.variables());
@@ -156,8 +156,8 @@ public class NettyChannelHandler extends SimpleChannelInboundHandler<FullHttpReq
 
         @VisibleForTesting
         @NotNull
-        FullHttpResponse createResponse(@NotNull Object callResult, @NotNull EndpointOptions options) throws Exception {
-            FullHttpResponse response = convertToResponse(callResult, options);
+        HttpResponse createResponse(@NotNull Object callResult, @NotNull EndpointOptions options) throws Exception {
+            HttpResponse response = convertToResponse(callResult, options);
             withHeaders(response, getDefaultHeaders(options), false);
             withHeaders(response, options.http().headers(), true);
             return response;
@@ -165,8 +165,8 @@ public class NettyChannelHandler extends SimpleChannelInboundHandler<FullHttpReq
 
         @VisibleForTesting
         @NotNull
-        FullHttpResponse convertToResponse(@NotNull Object callResult, @NotNull EndpointOptions options) throws Exception {
-            if (callResult instanceof FullHttpResponse response) {
+        HttpResponse convertToResponse(@NotNull Object callResult, @NotNull EndpointOptions options) throws Exception {
+            if (callResult instanceof HttpResponse response) {
                 return response;
             }
 
@@ -175,7 +175,7 @@ public class NettyChannelHandler extends SimpleChannelInboundHandler<FullHttpReq
                 return renderResponse(view, callResult);
             }
 
-            Function<Object, FullHttpResponse> responseFunction = mapper.mapInstance(callResult);
+            Function<Object, HttpResponse> responseFunction = mapper.mapInstance(callResult);
             if (responseFunction != null) {
                 return responseFunction.apply(callResult);
             }
@@ -236,8 +236,8 @@ public class NettyChannelHandler extends SimpleChannelInboundHandler<FullHttpReq
         @VisibleForTesting
         @NotNull
         @CanIgnoreReturnValue
-        static <T extends CharSequence, U> FullHttpResponse withHeaders(
-                @NotNull FullHttpResponse response,
+        static <T extends CharSequence, U> HttpResponse withHeaders(
+                @NotNull HttpResponse response,
                 @NotNull Iterable<Pair<T, U>> values,
                 boolean canOverwrite) {
             return HttpResponseFactory.withHeaders(response, headers -> {

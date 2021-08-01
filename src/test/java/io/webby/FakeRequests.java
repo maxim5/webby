@@ -30,10 +30,6 @@ public class FakeRequests {
         return readable(content != null ? Unpooled.copiedBuffer(content, Testing.CHARSET) : Unpooled.buffer(0));
     }
 
-    public static FullHttpResponse readable(@NotNull FullHttpResponse response) {
-        return response.replace(readable(response.content()));
-    }
-
     public static ByteBuf readable(ByteBuf buf) {
         return new ReadableByteBuf(buf);
     }

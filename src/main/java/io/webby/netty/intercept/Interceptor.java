@@ -1,6 +1,6 @@
 package io.webby.netty.intercept;
 
-import io.netty.handler.codec.http.FullHttpResponse;
+import io.netty.handler.codec.http.HttpResponse;
 import io.webby.netty.exceptions.ServeException;
 import io.webby.netty.request.MutableHttpRequestEx;
 import org.jetbrains.annotations.NotNull;
@@ -15,7 +15,7 @@ public interface Interceptor {
     }
 
     @NotNull
-    default FullHttpResponse exit(@NotNull MutableHttpRequestEx request, @NotNull FullHttpResponse response) {
+    default HttpResponse exit(@NotNull MutableHttpRequestEx request, @NotNull HttpResponse response) {
         return response;
     }
 }
