@@ -56,20 +56,21 @@ public class NettyChannelHandler extends SimpleChannelInboundHandler<FullHttpReq
     @Override
     protected void channelRead0(@NotNull ChannelHandlerContext context, @NotNull FullHttpRequest request) {
         Stopwatch stopwatch = Stopwatch.createStarted();
+        Channel channel = context.channel();
 
         HttpResponse response;
         try {
-            response = withChannel(context.channel()).handle(request);
+            response = withChannel(channel).handle(request);
         } catch (Throwable throwable) {
             response = factory.newResponse500("Unexpected failure", throwable);
             log.at(Level.SEVERE).withCause(throwable).log("Unexpected failure: %s", throwable.getMessage());
         }
 
         if (response instanceof StreamingHttpResponse streaming) {
-            context.write(streaming);
-            context.writeAndFlush(streaming.chunkedContent());
+            channel.write(streaming);
+            channel.writeAndFlush(streaming.chunkedContent());
         } else {
-            context.writeAndFlush(response);
+            channel.writeAndFlush(response);
         }
 
         long millis = stopwatch.stop().elapsed(TimeUnit.MILLISECONDS);

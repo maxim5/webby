@@ -48,7 +48,7 @@ public class CustomHeadersTest extends BaseIntegrationTest {
                 "0.txt", "File content for 0",
                 "1.txt", "File content for 1",
                 "2.txt", "File content for 2");
-        Assertions.assertEquals(expected, unzipBytes(fullContent(response).array()));
+        Assertions.assertEquals(expected, unzipBytes(content(response).array()));
     }
 
     @NotNull

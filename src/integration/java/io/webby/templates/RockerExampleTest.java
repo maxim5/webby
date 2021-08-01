@@ -38,6 +38,6 @@ public class RockerExampleTest extends BaseIntegrationTest {
         assert200(rendered);
         HttpResponse manual = get("/templates/manual/rocker/hello");
         assert200(manual);
-        Assertions.assertEquals(fullContent(manual), fullContent(rendered));
+        Assertions.assertEquals(content(manual), content(rendered));
     }
 }

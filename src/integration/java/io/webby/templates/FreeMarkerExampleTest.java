@@ -1,7 +1,6 @@
 package io.webby.templates;
 
 import io.netty.handler.codec.http.HttpResponse;
-import io.netty.handler.codec.http.HttpResponse;
 import io.webby.netty.BaseIntegrationTest;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
@@ -41,7 +40,7 @@ public class FreeMarkerExampleTest extends BaseIntegrationTest {
         assert200(rendered);
         HttpResponse manual = get("/templates/manual/freemarker/hello");
         assert200(manual);
-        Assertions.assertEquals(fullContent(manual), fullContent(rendered));
+        Assertions.assertEquals(content(manual), content(rendered));
     }
 
     @Test
@@ -50,7 +49,7 @@ public class FreeMarkerExampleTest extends BaseIntegrationTest {
         assert200(rendered);
         HttpResponse manual = get("/templates/manual/freemarker/hello/NamE");
         assert200(manual);
-        Assertions.assertEquals(fullContent(manual), fullContent(rendered));
+        Assertions.assertEquals(content(manual), content(rendered));
     }
 
     @Test
@@ -59,6 +58,6 @@ public class FreeMarkerExampleTest extends BaseIntegrationTest {
         assert200(rendered);
         HttpResponse manual = get("/templates/manual/freemarker/hello-bytes/NamE");
         assert200(manual);
-        Assertions.assertEquals(fullContent(manual), fullContent(rendered));
+        Assertions.assertEquals(content(manual), content(rendered));
     }
 }

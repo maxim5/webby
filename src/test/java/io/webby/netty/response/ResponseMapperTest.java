@@ -15,7 +15,7 @@ import java.util.ArrayList;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.function.Function;
 
-import static io.webby.AssertResponse.fullContent;
+import static io.webby.AssertResponse.streamContent;
 
 public class ResponseMapperTest {
     private final ResponseMapper mapper = Testing.testStartupNoHandlers().getInstance(ResponseMapper.class);
@@ -126,7 +126,7 @@ public class ResponseMapperTest {
         if (expected != null) {
             Assertions.assertNotNull(lookup, () -> describe(obj));
             HttpResponse response = lookup.apply(obj);
-            Assertions.assertEquals(expected, fullContent(response).toString(Testing.CHARSET));
+            Assertions.assertEquals(expected, streamContent(response).toString(Testing.CHARSET));
         } else {
             Assertions.assertNull(lookup, () -> describe(obj));
         }

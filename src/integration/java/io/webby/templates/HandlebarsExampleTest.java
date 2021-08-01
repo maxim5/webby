@@ -34,6 +34,6 @@ public class HandlebarsExampleTest extends BaseIntegrationTest {
         assert200(rendered);
         HttpResponse manual = get("/templates/manual/handlebars/hello");
         assert200(manual);
-        Assertions.assertEquals(fullContent(manual), fullContent(rendered));
+        Assertions.assertEquals(content(manual), content(rendered));
     }
 }

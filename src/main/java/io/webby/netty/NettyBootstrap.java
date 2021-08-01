@@ -9,6 +9,7 @@ import io.netty.channel.nio.NioEventLoopGroup;
 import io.netty.channel.socket.nio.NioServerSocketChannel;
 import io.netty.handler.codec.http.HttpObjectAggregator;
 import io.netty.handler.codec.http.HttpServerCodec;
+import io.netty.handler.stream.ChunkedWriteHandler;
 import io.webby.app.AppLifetime;
 import io.webby.app.AppMaintenance;
 import io.webby.util.AnyLog;
@@ -49,6 +50,7 @@ public class NettyBootstrap {
                             ChannelPipeline pipeline = ch.pipeline();
                             pipeline.addLast(new HttpServerCodec());
                             pipeline.addLast(new HttpObjectAggregator(Integer.MAX_VALUE));
+                            pipeline.addLast(new ChunkedWriteHandler());
                             pipeline.addLast(nettyChannelHandler.get());
                         }
                     })

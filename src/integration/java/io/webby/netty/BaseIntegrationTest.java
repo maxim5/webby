@@ -1,22 +1,24 @@
 package io.webby.netty;
 
 import com.google.inject.Injector;
-import io.netty.channel.local.LocalChannel;
-import io.netty.handler.codec.http.FullHttpRequest;
-import io.netty.handler.codec.http.HttpMethod;
-import io.netty.handler.codec.http.HttpResponse;
+import io.netty.channel.embedded.EmbeddedChannel;
+import io.netty.handler.codec.http.*;
+import io.netty.handler.stream.ChunkedWriteHandler;
+import io.webby.CompositeHttpResponse;
 import io.webby.Testing;
 import io.webby.app.AppSettings;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
+import java.util.ArrayDeque;
+import java.util.Queue;
 import java.util.function.Consumer;
 
 import static io.webby.AssertResponse.readable;
 import static io.webby.FakeRequests.request;
 
 public abstract class BaseIntegrationTest {
-    protected NettyChannelHandler handler;
+    protected EmbeddedChannel channel;
 
     protected void testStartup(@NotNull Class<?> clazz) {
         testStartup(clazz, __ -> {});
@@ -29,7 +31,8 @@ public abstract class BaseIntegrationTest {
             settings.setHandlerClassOnly(clazz);
             consumer.accept(settings);
         });
-        handler = injector.getInstance(NettyChannelHandler.class);
+        NettyChannelHandler handler = injector.getInstance(NettyChannelHandler.class);
+        channel = new EmbeddedChannel(new ChunkedWriteHandler(), handler);
     }
 
     @NotNull
@@ -50,7 +53,21 @@ public abstract class BaseIntegrationTest {
     @NotNull
     protected HttpResponse call(HttpMethod method, String uri, @Nullable Object content) {
         FullHttpRequest request = request(method, uri, content);
-        HttpResponse response = handler.withChannel(new LocalChannel()).handle(request);
+        channel.writeOneInbound(request);
+        Queue<HttpObject> outbound = readAllOutbound(channel);
+        HttpResponse response = outbound.size() == 1 ?
+                (HttpResponse) outbound.poll() :
+                CompositeHttpResponse.fromObjects(outbound);
         return Testing.READABLE ? readable(response) : response;
+    }
+
+    @NotNull
+    protected static Queue<HttpObject> readAllOutbound(@NotNull EmbeddedChannel channel) {
+        Queue<HttpObject> result = new ArrayDeque<>();
+        HttpObject object;
+        while ((object = channel.readOutbound()) != null) {
+            result.add(object);
+        }
+        return result;
     }
 }

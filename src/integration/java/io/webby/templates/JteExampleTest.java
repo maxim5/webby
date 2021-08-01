@@ -33,6 +33,6 @@ public class JteExampleTest extends BaseIntegrationTest {
         assert200(rendered);
         HttpResponse manual = get("/templates/manual/jte/hello");
         assert200(manual);
-        Assertions.assertEquals(fullContent(manual), fullContent(rendered));
+        Assertions.assertEquals(content(manual), content(rendered));
     }
 }
