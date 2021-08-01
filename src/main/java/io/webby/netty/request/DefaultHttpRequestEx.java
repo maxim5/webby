@@ -53,12 +53,23 @@ public class DefaultHttpRequestEx extends DefaultFullHttpRequest implements Muta
     }
 
     @Override
-    public @Nullable InetAddress remoteIPAddress() {
+    public @Nullable InetAddress remoteInetAddress() {
         SocketAddress remoteAddress = remoteAddress();
         if (remoteAddress instanceof InetSocketAddress inetSocketAddress) {
             return inetSocketAddress.getAddress();
         }
         return null;
+    }
+
+    @Override
+    public @Nullable String remoteIPAddress() {
+        // See a more complex schema: https://stackoverflow.com/a/61861140/712995
+        String forwarded = headers().get("X-Forwarded-For");
+        if (forwarded != null) {
+            return forwarded;
+        }
+        InetAddress inetAddress = remoteInetAddress();
+        return inetAddress != null ? inetAddress.getHostAddress() : null;
     }
 
     @Override

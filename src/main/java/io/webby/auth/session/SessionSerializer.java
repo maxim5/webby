@@ -17,7 +17,8 @@ public class SessionSerializer implements Serializer<Session> {
                writeLong64(instance.userId(), output) +
                writeLong64(instance.created().getEpochSecond(), output) +
                writeInt32(instance.created().getNano(), output) +
-               writeString(instance.userAgent(), output);
+               writeString(instance.userAgent(), output) +
+               writeNullableString(instance.ipAddress(), output);
     }
 
     @Override
@@ -27,6 +28,7 @@ public class SessionSerializer implements Serializer<Session> {
         long seconds = readLong64(input);
         int nanos = readInt32(input);
         String userAgent = readString(input);
-        return new Session(sessionId, userId, Instant.ofEpochSecond(seconds, nanos), userAgent);
+        String ipAddress = readNullableString(input);
+        return new Session(sessionId, userId, Instant.ofEpochSecond(seconds, nanos), userAgent, ipAddress);
     }
 }

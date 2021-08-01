@@ -16,7 +16,9 @@ import java.util.List;
 public interface HttpRequestEx extends FullHttpRequest {
     @NotNull SocketAddress remoteAddress();
 
-    @Nullable InetAddress remoteIPAddress();
+    @Nullable InetAddress remoteInetAddress();
+
+    @Nullable String remoteIPAddress();
 
     @NotNull Charset charset();
 

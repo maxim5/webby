@@ -4,11 +4,12 @@ import io.netty.handler.codec.http.HttpHeaderNames;
 import io.netty.handler.codec.http.HttpHeaders;
 import io.webby.netty.request.HttpRequestEx;
 import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 
 import java.time.Instant;
 import java.util.concurrent.TimeUnit;
 
-public record Session(long sessionId, long userId, @NotNull Instant created, @NotNull String userAgent) {
+public record Session(long sessionId, long userId, @NotNull Instant created, @NotNull String userAgent, @Nullable String ipAddress) {
     public static final long NO_USER_ID = -1;
 
     private static final long JUST_CREATED_MILLIS = TimeUnit.SECONDS.toMillis(60);
@@ -17,7 +18,8 @@ public record Session(long sessionId, long userId, @NotNull Instant created, @No
     public static Session fromRequest(long sessionId, @NotNull HttpRequestEx request) {
         HttpHeaders headers = request.headers();
         String userAgent = headers.get(HttpHeaderNames.USER_AGENT, "");
-        return new Session(sessionId, NO_USER_ID, Instant.now(), userAgent);
+        String ipAddress = request.remoteIPAddress();
+        return new Session(sessionId, NO_USER_ID, Instant.now(), userAgent, ipAddress);
     }
 
     public boolean hasUser() {
