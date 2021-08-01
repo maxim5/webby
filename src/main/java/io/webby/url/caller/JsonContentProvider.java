@@ -12,10 +12,11 @@ import java.io.InputStreamReader;
 import java.nio.charset.Charset;
 
 public class JsonContentProvider implements ContentProvider {
-    private final Gson gson = new Gson();
+    private final Gson gson;
     private final Class<?> klass;
 
-    public JsonContentProvider(@NotNull Class<?> klass) {
+    public JsonContentProvider(@NotNull Gson gson, @NotNull Class<?> klass) {
+        this.gson = gson;
         this.klass = klass;
     }
 

@@ -1,11 +1,15 @@
 package io.webby.url.caller;
 
+import com.google.gson.Gson;
+import com.google.inject.Inject;
 import io.webby.url.annotate.Marshal;
 import io.webby.url.impl.EndpointOptions;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
 public class ContentProviderFactory {
+    @Inject private Gson gson;
+
     @Nullable
     public ContentProvider getContentProvider(@NotNull EndpointOptions options, @NotNull Class<?> type) {
         return getContentProvider(options.in(), type);
@@ -15,7 +19,7 @@ public class ContentProviderFactory {
     public ContentProvider getContentProvider(@Nullable Marshal marshal, @NotNull Class<?> type) {
         if (marshal != null) {
             return switch (marshal) {
-                case JSON -> new JsonContentProvider(type);
+                case JSON -> new JsonContentProvider(gson, type);
                 case PROTOBUF_BINARY -> throw new UnsupportedOperationException();
                 case PROTOBUF_JSON -> throw new UnsupportedOperationException();
                 case AS_STRING -> new SimpleContentProvider();

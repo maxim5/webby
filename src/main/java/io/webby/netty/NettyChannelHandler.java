@@ -37,21 +37,11 @@ import java.util.logging.Level;
 public class NettyChannelHandler extends SimpleChannelInboundHandler<FullHttpRequest> {
     private static final FluentLogger log = FluentLogger.forEnclosingClass();
 
-    private final Interceptors interceptors;
-    private final HttpResponseFactory factory;
-    private final ResponseMapper mapper;
-    private final Router<RouteEndpoint> router;
-
-    @Inject
-    public NettyChannelHandler(@NotNull Interceptors interceptors,
-                               @NotNull HttpResponseFactory factory,
-                               @NotNull ResponseMapper mapper,
-                               @NotNull UrlRouter urlRouter) {
-        this.interceptors = interceptors;
-        this.factory = factory;
-        this.mapper = mapper;
-        this.router = urlRouter.getRouter();
-    }
+    @Inject private Interceptors interceptors;
+    @Inject private HttpResponseFactory factory;
+    @Inject private ResponseMapper mapper;
+    @Inject private Router<RouteEndpoint> router;
+    @Inject private Gson gson;
 
     @Override
     protected void channelRead0(@NotNull ChannelHandlerContext context, @NotNull FullHttpRequest request) {
@@ -183,12 +173,12 @@ public class NettyChannelHandler extends SimpleChannelInboundHandler<FullHttpReq
                 return responseFunction.apply(callResult);
             }
             if (callResult instanceof JsonElement element) {
-                return factory.newResponse(new Gson().toJson(element), HttpResponseStatus.OK, HttpHeaderValues.APPLICATION_JSON);
+                return factory.newResponse(gson.toJson(element), HttpResponseStatus.OK, HttpHeaderValues.APPLICATION_JSON);
             }
 
             return switch (options.out()) {
                 case JSON -> {
-                    String json = new Gson().toJson(callResult);
+                    String json = gson.toJson(callResult);
                     yield factory.newResponse(json, HttpResponseStatus.OK, HttpHeaderValues.APPLICATION_JSON);
                 }
                 case AS_STRING -> factory.newResponse(callResult.toString(), HttpResponseStatus.OK);
