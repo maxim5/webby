@@ -3,11 +3,11 @@ package io.webby.auth.session;
 import com.google.common.flogger.FluentLogger;
 import com.google.common.primitives.Longs;
 import com.google.inject.Inject;
-import io.netty.handler.codec.http.HttpRequest;
 import io.netty.handler.codec.http.cookie.Cookie;
 import io.webby.app.Settings;
 import io.webby.db.kv.KeyValueDb;
 import io.webby.db.kv.KeyValueFactory;
+import io.webby.db.model.LongIdGenerator;
 import io.webby.netty.request.HttpRequestEx;
 import io.webby.util.Rethrow;
 import org.jetbrains.annotations.NotNull;
@@ -26,14 +26,13 @@ import java.util.logging.Level;
 public class SessionManager {
     private static final FluentLogger log = FluentLogger.forEnclosingClass();
 
-    private final SecureRandom secureRandom;
     private final Cipher cipher;
     private final Cipher decipher;
+    private final LongIdGenerator generator;
     private final KeyValueDb<Long, Session> db;
 
     @Inject
     public SessionManager(@NotNull Settings settings, @NotNull KeyValueFactory factory) throws Exception {
-        secureRandom = SecureRandom.getInstance("SHA1PRNG");
         cipher = Cipher.getInstance("AES");
         decipher = Cipher.getInstance("AES");
 
@@ -41,6 +40,7 @@ public class SessionManager {
         cipher.init(Cipher.ENCRYPT_MODE, key);
         decipher.init(Cipher.DECRYPT_MODE, key);
 
+        generator = LongIdGenerator.securePositiveRandom(SecureRandom.getInstance("SHA1PRNG"));
         db = factory.getDb("sessions", Long.class, Session.class);
     }
 
@@ -69,9 +69,9 @@ public class SessionManager {
 
     @NotNull
     public Session createNewSession(@NotNull HttpRequestEx request) {
-        long randomLong = secureRandom.nextLong();
-        Session session = Session.fromRequest(randomLong, request);
-        db.set(session.sessionId(), session);
+        long sessionId = generator.nextId();
+        Session session = Session.fromRequest(sessionId, request);
+        db.set(sessionId, session);
         return session;
     }
 

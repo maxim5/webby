@@ -10,8 +10,7 @@ import java.time.Instant;
 import java.util.concurrent.TimeUnit;
 
 public record Session(long sessionId, long userId, @NotNull Instant created, @NotNull String userAgent, @Nullable String ipAddress) {
-    public static final long NO_USER_ID = -1;
-
+    private static final long NO_USER_ID = -1;
     private static final long JUST_CREATED_MILLIS = TimeUnit.SECONDS.toMillis(60);
     private static final long TIME_TO_REFRESH_MILLIS = TimeUnit.DAYS.toMillis(30);
 
