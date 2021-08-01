@@ -60,7 +60,7 @@ public class NettyChannelHandler extends SimpleChannelInboundHandler<FullHttpReq
 
         HttpResponse response;
         try {
-            response = withChannel(channel).handle(request);
+            response = new ChannelAwareHandler(channel).handle(request);
         } catch (Throwable throwable) {
             response = factory.newResponse500("Unexpected failure", throwable);
             log.at(Level.SEVERE).withCause(throwable).log("Unexpected failure: %s", throwable.getMessage());
@@ -83,11 +83,6 @@ public class NettyChannelHandler extends SimpleChannelInboundHandler<FullHttpReq
                 .writeAndFlush(factory.newResponse500("Unexpected failure", cause))
                 .addListener(ChannelFutureListener.CLOSE);
         log.at(Level.SEVERE).withCause(cause).log("Unexpected failure: %s", cause.getMessage());
-    }
-
-    @VisibleForTesting
-    @NotNull ChannelAwareHandler withChannel(@NotNull Channel channel) {
-        return new ChannelAwareHandler(channel);
     }
 
     @VisibleForTesting
