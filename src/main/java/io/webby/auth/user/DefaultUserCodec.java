@@ -1,15 +1,15 @@
 package io.webby.auth.user;
 
-import io.webby.db.serialize.Serializer;
+import io.webby.db.codec.Codec;
 import org.jetbrains.annotations.NotNull;
 
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
 
-import static io.webby.db.serialize.Serializers.*;
+import static io.webby.db.codec.Codecs.*;
 
-public class DefaultUserSerializer implements Serializer<DefaultUser> {
+public class DefaultUserCodec implements Codec<DefaultUser> {
     @Override
     public int writeTo(@NotNull OutputStream output, @NotNull DefaultUser instance) throws IOException {
         return writeLong64(instance.userId(), output) +

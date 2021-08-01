@@ -1,4 +1,4 @@
-package io.webby.db.serialize;
+package io.webby.db.codec;
 
 import com.google.common.primitives.Ints;
 import com.google.common.primitives.Longs;
@@ -11,7 +11,7 @@ import java.io.InputStream;
 import java.io.OutputStream;
 import java.nio.charset.StandardCharsets;
 
-public class Serializers {
+public class Codecs {
     public static int writeByte8(int value, @NotNull OutputStream output) throws IOException {
         output.write(value);
         return 1;

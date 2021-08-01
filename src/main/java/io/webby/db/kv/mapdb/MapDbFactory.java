@@ -5,7 +5,8 @@ import com.google.inject.Inject;
 import io.webby.app.Settings;
 import io.webby.common.InjectorHelper;
 import io.webby.db.kv.BaseKeyValueFactory;
-import io.webby.db.serialize.SerializeProvider;
+import io.webby.db.codec.Codec;
+import io.webby.db.codec.CodecProvider;
 import org.jetbrains.annotations.NotNull;
 import org.mapdb.*;
 import org.mapdb.serializer.GroupSerializerObjectArray;
@@ -17,7 +18,7 @@ import java.util.Date;
 import static io.webby.util.EasyCast.castAny;
 
 public class MapDbFactory extends BaseKeyValueFactory {
-    @Inject private SerializeProvider serializeProvider;
+    @Inject private CodecProvider codecProvider;
 
     private final DB db;
     private final MapDbCreator creator;
@@ -104,7 +105,7 @@ public class MapDbFactory extends BaseKeyValueFactory {
             return castAny(outOfBox);
         }
 
-        io.webby.db.serialize.Serializer<T> ownCustom = serializeProvider.getSerializer(klass);
+        Codec<T> ownCustom = codecProvider.getCodecFor(klass);
         if (ownCustom != null) {
             return new GroupSerializerObjectArray<>() {
                 @Override

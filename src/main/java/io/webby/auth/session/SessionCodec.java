@@ -1,6 +1,6 @@
 package io.webby.auth.session;
 
-import io.webby.db.serialize.Serializer;
+import io.webby.db.codec.Codec;
 import org.jetbrains.annotations.NotNull;
 
 import java.io.IOException;
@@ -8,9 +8,9 @@ import java.io.InputStream;
 import java.io.OutputStream;
 import java.time.Instant;
 
-import static io.webby.db.serialize.Serializers.*;
+import static io.webby.db.codec.Codecs.*;
 
-public class SessionSerializer implements Serializer<Session> {
+public class SessionCodec implements Codec<Session> {
     @Override
     public int writeTo(@NotNull OutputStream output, @NotNull Session instance) throws IOException {
         return writeLong64(instance.sessionId(), output) +
