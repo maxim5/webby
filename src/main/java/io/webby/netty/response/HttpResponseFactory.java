@@ -6,6 +6,7 @@ import com.google.inject.Inject;
 import io.netty.buffer.ByteBuf;
 import io.netty.buffer.Unpooled;
 import io.netty.handler.codec.http.*;
+import io.netty.handler.stream.ChunkedStream;
 import io.webby.app.Settings;
 import io.webby.netty.exceptions.*;
 import org.jetbrains.annotations.NotNull;
@@ -16,8 +17,6 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.util.function.Consumer;
 import java.util.logging.Level;
-
-import static io.webby.util.EasyIO.Close.closeRethrow;
 
 public class HttpResponseFactory {
     private static final FluentLogger log = FluentLogger.forEnclosingClass();
@@ -61,15 +60,11 @@ public class HttpResponseFactory {
     }
 
     @NotNull
-    public FullHttpResponse newResponse(@NotNull InputStream content, @NotNull HttpResponseStatus status) {
-        try {
-            ByteBuf byteBuf = Unpooled.wrappedBuffer(content.readAllBytes());
-            return newResponse(byteBuf, status);
-        } catch (IOException e) {
-            return newResponse500("Failed to read content bytes from the handler's input stream", e);
-        } finally {
-            closeRethrow(content);
-        }
+    public StreamingHttpResponse newResponse(@NotNull InputStream content, @NotNull HttpResponseStatus status) {
+        ChunkedStream stream = new ChunkedStream(content);
+        StreamingHttpResponse response = new StreamingHttpResponse(HttpVersion.HTTP_1_1, status, stream);
+        response.headers().set(HttpHeaderNames.TRANSFER_ENCODING, HttpHeaderValues.CHUNKED);
+        return response;
     }
 
     @NotNull

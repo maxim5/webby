@@ -2,6 +2,7 @@ package io.webby.hello;
 
 import io.webby.netty.BaseIntegrationTest;
 import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 
 import static io.webby.AssertResponse.*;
@@ -24,6 +25,7 @@ public class ReturnMiscIntegrationTest extends BaseIntegrationTest {
     }
 
     @Test
+    @Disabled("Streaming does not allow to change 200 to 500")
     public void get_return_stream_forced_failure() {
         assert500(get("/r/error/stream/read"));
         assert500(get("/r/error/stream/close"));

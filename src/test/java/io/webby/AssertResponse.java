@@ -2,13 +2,18 @@ package io.webby;
 
 import com.google.common.truth.Truth;
 import io.netty.buffer.ByteBuf;
+import io.netty.buffer.ByteBufAllocator;
 import io.netty.buffer.Unpooled;
 import io.netty.handler.codec.http.*;
+import io.webby.netty.response.StreamingHttpResponse;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import org.junit.jupiter.api.Assertions;
 
+import java.io.ByteArrayOutputStream;
+
 import static io.webby.FakeRequests.asByteBuf;
+import static io.webby.util.Rethrow.Suppliers.rethrow;
 
 public class AssertResponse {
     public static void assert200(HttpResponse response) {
@@ -88,10 +93,27 @@ public class AssertResponse {
         if (response instanceof FullHttpResponse full) {
             return full.content();
         }
+        if (response instanceof StreamingHttpResponse streaming) {
+            return rethrow(() -> Unpooled.wrappedBuffer(readAll(streaming))).get();
+        }
         if (response instanceof DefaultHttpResponse) {
             return Unpooled.buffer(0);
         }
         return Assertions.fail("Unrecognized response: " + response);
+    }
+
+    private static byte[] readAll(@NotNull StreamingHttpResponse streaming) throws Exception {
+        ByteArrayOutputStream outputStream = new ByteArrayOutputStream();
+        HttpChunkedInput chunkedInput = streaming.chunkedContent();
+        try {
+            while (!chunkedInput.isEndOfInput()) {
+                HttpContent content = chunkedInput.readChunk(ByteBufAllocator.DEFAULT);
+                content.content().readBytes(outputStream, content.content().readableBytes());
+            }
+        } finally {
+            chunkedInput.close();
+        }
+        return outputStream.toByteArray();
     }
 
     @NotNull public static HttpResponse readable(@NotNull HttpResponse response) {

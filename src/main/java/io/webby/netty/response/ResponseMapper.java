@@ -86,19 +86,16 @@ public class ResponseMapper {
         return castAny(value);
     }
 
-    @NotNull
-    private FullHttpResponse respond(ByteBuf byteBuf) {
+    private @NotNull FullHttpResponse respond(@NotNull ByteBuf byteBuf) {
         return factory.newResponse(byteBuf, HttpResponseStatus.OK);
     }
 
-    @NotNull
-    private FullHttpResponse respond(InputStream stream) {
-        return factory.newResponse(stream, HttpResponseStatus.OK);
+    private @NotNull FullHttpResponse respond(@NotNull CharSequence string) {
+        return factory.newResponse(string, HttpResponseStatus.OK);
     }
 
-    @NotNull
-    private FullHttpResponse respond(CharSequence string) {
-        return factory.newResponse(string, HttpResponseStatus.OK);
+    private @NotNull StreamingHttpResponse respond(@NotNull InputStream stream) {
+        return factory.newResponse(stream, HttpResponseStatus.OK);
     }
 
     private <B> void add(@NotNull Class<B> key, @NotNull Function<B, HttpResponse> value) {

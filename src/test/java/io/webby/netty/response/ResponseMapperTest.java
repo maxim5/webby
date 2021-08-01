@@ -6,6 +6,7 @@ import io.netty.handler.codec.http.HttpResponse;
 import io.routekit.util.CharBuffer;
 import io.webby.Testing;
 import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 
 import java.io.*;
@@ -83,6 +84,7 @@ public class ResponseMapperTest {
     }
 
     @Test
+    @Disabled("Stream close is not handled by ResponseMapper anymore")
     public void should_close_input_stream() {
         byte[] bytes = "foo".getBytes(Testing.CHARSET);
         AtomicBoolean closed = new AtomicBoolean(false);

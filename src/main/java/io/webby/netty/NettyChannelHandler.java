@@ -19,6 +19,7 @@ import io.webby.netty.intercept.Interceptors;
 import io.webby.netty.request.DefaultHttpRequestEx;
 import io.webby.netty.response.HttpResponseFactory;
 import io.webby.netty.response.ResponseMapper;
+import io.webby.netty.response.StreamingHttpResponse;
 import io.webby.url.annotate.Marshal;
 import io.webby.url.caller.Caller;
 import io.webby.url.convert.ConversionError;
@@ -63,7 +64,13 @@ public class NettyChannelHandler extends SimpleChannelInboundHandler<FullHttpReq
             response = factory.newResponse500("Unexpected failure", throwable);
             log.at(Level.SEVERE).withCause(throwable).log("Unexpected failure: %s", throwable.getMessage());
         }
-        context.writeAndFlush(response);
+
+        if (response instanceof StreamingHttpResponse streaming) {
+            context.write(streaming);
+            context.writeAndFlush(streaming.chunkedContent());
+        } else {
+            context.writeAndFlush(response);
+        }
 
         long millis = stopwatch.stop().elapsed(TimeUnit.MILLISECONDS);
         log.at(Level.INFO).log("%s %s: %s (%d ms)", request.method(), request.uri(), response.status(), millis);
