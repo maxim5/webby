@@ -1,6 +1,7 @@
 package io.webby.netty;
 
 import com.google.inject.Injector;
+import io.netty.channel.local.LocalChannel;
 import io.netty.handler.codec.http.FullHttpRequest;
 import io.netty.handler.codec.http.FullHttpResponse;
 import io.netty.handler.codec.http.HttpMethod;
@@ -49,7 +50,7 @@ public abstract class BaseIntegrationTest {
     @NotNull
     protected FullHttpResponse call(HttpMethod method, String uri, @Nullable Object content) {
         FullHttpRequest request = request(method, uri, content);
-        FullHttpResponse response = handler.handle(request);
+        FullHttpResponse response = handler.withChannel(new LocalChannel()).handle(request);
         return Testing.READABLE ? readable(response) : response;
     }
 }
