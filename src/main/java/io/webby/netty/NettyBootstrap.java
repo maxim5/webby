@@ -8,10 +8,12 @@ import io.netty.channel.*;
 import io.netty.channel.nio.NioEventLoopGroup;
 import io.netty.channel.socket.nio.NioServerSocketChannel;
 import io.netty.handler.codec.http.HttpObjectAggregator;
+import io.netty.handler.codec.http.HttpObjectDecoder;
 import io.netty.handler.codec.http.HttpServerCodec;
 import io.netty.handler.stream.ChunkedWriteHandler;
 import io.webby.app.AppLifetime;
 import io.webby.app.AppMaintenance;
+import io.webby.app.Settings;
 import io.webby.util.AnyLog;
 import io.webby.common.Lifetime;
 import org.jetbrains.annotations.NotNull;
@@ -21,8 +23,9 @@ import java.util.logging.Level;
 public class NettyBootstrap {
     private static final FluentLogger log = FluentLogger.forEnclosingClass();
 
-    @Inject private Provider<NettyChannelHandler> nettyChannelHandler;
+    @Inject private Settings settings;
     @Inject private AppMaintenance maintenance;
+    @Inject private Provider<NettyChannelHandler> nettyChannelHandler;
 
     private final Lifetime.Definition lifetime;
 
@@ -33,6 +36,11 @@ public class NettyBootstrap {
 
     public void runLocally(int port) throws InterruptedException {
         attachShutdownHook();
+
+        int maxContentLength = settings.getIntProperty("netty.content.max.length.bytes", 10 << 20);
+        int maxInitLineLength = settings.getIntProperty("netty.max.init.line.length", HttpObjectDecoder.DEFAULT_MAX_INITIAL_LINE_LENGTH);
+        int maxHeaderLength = settings.getIntProperty("netty.max.header.length", HttpObjectDecoder.DEFAULT_MAX_HEADER_SIZE);
+        int maxChunkLength = settings.getIntProperty("netty.max.chunk.length", HttpObjectDecoder.DEFAULT_MAX_CHUNK_SIZE);
 
         EventLoopGroup masterGroup = new NioEventLoopGroup();
         lifetime.onTerminate(masterGroup::shutdownGracefully);
@@ -48,8 +56,8 @@ public class NettyBootstrap {
                         @Override
                         protected void initChannel(Channel ch) {
                             ChannelPipeline pipeline = ch.pipeline();
-                            pipeline.addLast(new HttpServerCodec());
-                            pipeline.addLast(new HttpObjectAggregator(Integer.MAX_VALUE));
+                            pipeline.addLast(new HttpServerCodec(maxInitLineLength, maxHeaderLength, maxChunkLength));
+                            pipeline.addLast(new HttpObjectAggregator(maxContentLength));
                             pipeline.addLast(new ChunkedWriteHandler());
                             pipeline.addLast(nettyChannelHandler.get());
                         }

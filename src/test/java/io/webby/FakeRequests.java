@@ -53,7 +53,7 @@ public class FakeRequests {
 
     @NotNull
     public static ByteBuf asByteBuf(@Nullable String content) {
-        return readable(content != null ? Unpooled.copiedBuffer(content, Testing.CHARSET) : Unpooled.buffer(0));
+        return readable(content != null ? Unpooled.copiedBuffer(content, Testing.CHARSET) : Unpooled.EMPTY_BUFFER);
     }
 
     public static ByteBuf readable(ByteBuf buf) {

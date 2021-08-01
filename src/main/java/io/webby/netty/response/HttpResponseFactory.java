@@ -117,6 +117,8 @@ public class HttpResponseFactory {
     public FullHttpResponse newErrorResponse(@NotNull HttpResponseStatus status,
                                              @Nullable String debugError,
                                              @Nullable Throwable cause) {
+        // headers().set(CONNECTION, HttpHeaderValues.CLOSE);
+
         String name = "%d.html".formatted(status.code());
         try {
             ByteBuf clientError = staticServing.getByteBufOrNull(name);

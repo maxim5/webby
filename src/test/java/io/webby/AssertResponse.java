@@ -96,7 +96,7 @@ public class AssertResponse {
             return full.content();
         }
         if (response instanceof DefaultHttpResponse) {
-            return Unpooled.buffer(0);
+            return Unpooled.EMPTY_BUFFER;
         }
         return Assertions.fail("Unrecognized response: " + response);
     }

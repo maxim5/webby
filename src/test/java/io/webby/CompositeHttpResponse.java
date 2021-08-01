@@ -11,7 +11,7 @@ import java.util.Queue;
 import java.util.stream.Stream;
 
 public class CompositeHttpResponse extends DefaultHttpResponse implements ByteBufHolder {
-    private ByteBuf content = Unpooled.buffer(0);
+    private ByteBuf content = Unpooled.EMPTY_BUFFER;
 
     protected CompositeHttpResponse(HttpVersion version, HttpResponseStatus status, HttpHeaders headers) {
         super(version, status, headers);
