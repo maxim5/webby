@@ -4,6 +4,7 @@ import com.google.common.collect.Lists;
 import com.google.common.flogger.FluentLogger;
 import com.google.common.flogger.util.CallerFinder;
 import com.google.inject.Inject;
+import io.netty.channel.Channel;
 import io.netty.handler.codec.http.FullHttpRequest;
 import io.netty.handler.codec.http.HttpResponse;
 import io.webby.app.Settings;
@@ -49,10 +50,11 @@ public class Interceptors {
         log.at(Level.FINE).log("Interceptors stack: %s", stack);
     }
 
-    @NotNull
-    public DefaultHttpRequestEx createRequest(@NotNull FullHttpRequest request, @NotNull EndpointContext context) {
+    public @NotNull DefaultHttpRequestEx createRequest(@NotNull FullHttpRequest request,
+                                                       @NotNull Channel channel,
+                                                       @NotNull EndpointContext context) {
         Object[] attributes = new Object[attrBufferSize];  // empty, to be filled by interceptors
-        DefaultHttpRequestEx requestEx = new DefaultHttpRequestEx(request, context.constraints(), attributes);
+        DefaultHttpRequestEx requestEx = new DefaultHttpRequestEx(request, channel, context.constraints(), attributes);
         if (safeWrapperEnabled) {
             return new DefaultHttpRequestEx(requestEx) {
                 @Override

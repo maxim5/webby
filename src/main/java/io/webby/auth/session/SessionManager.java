@@ -8,6 +8,7 @@ import io.netty.handler.codec.http.cookie.Cookie;
 import io.webby.app.Settings;
 import io.webby.db.kv.KeyValueDb;
 import io.webby.db.kv.KeyValueFactory;
+import io.webby.netty.request.HttpRequestEx;
 import io.webby.util.Rethrow;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
@@ -44,7 +45,7 @@ public class SessionManager {
     }
 
     @NotNull
-    public Session getOrCreateSession(@NotNull HttpRequest request, @Nullable Cookie cookie) {
+    public Session getOrCreateSession(@NotNull HttpRequestEx request, @Nullable Cookie cookie) {
         Session session = getSessionOrNull(cookie);
         if (session == null) {
             return createNewSession(request);
@@ -67,7 +68,7 @@ public class SessionManager {
     }
 
     @NotNull
-    public Session createNewSession(@NotNull HttpRequest request) {
+    public Session createNewSession(@NotNull HttpRequestEx request) {
         long randomLong = secureRandom.nextLong();
         Session session = Session.fromRequest(randomLong, request);
         db.set(session.sessionId(), session);

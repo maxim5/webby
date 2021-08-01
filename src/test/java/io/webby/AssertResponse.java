@@ -122,9 +122,9 @@ public class AssertResponse {
         return outputStream.toByteArray();
     }
 
-    public static byte[] readAll(@NotNull Stream<HttpContent> byteBufStream) {
+    public static byte[] readAll(@NotNull Stream<HttpContent> stream) {
         ByteArrayOutputStream outputStream = new ByteArrayOutputStream();
-        byteBufStream.forEach(Consumers.rethrow(content ->
+        stream.forEach(Consumers.rethrow(content ->
                 content.content().readBytes(outputStream, content.content().readableBytes())
         ));
         return outputStream.toByteArray();

@@ -31,21 +31,21 @@ public class SessionManagerTest {
 
     @Test
     public void getOrCreateSession_null() {
-        Session session = manager.getOrCreateSession(get("/"), null);
+        Session session = manager.getOrCreateSession(getEx("/"), null);
         Assertions.assertTrue(session.shouldRefresh());
     }
 
     @Test
     public void getOrCreateSession_invalid_cookie() {
-        Session session = manager.getOrCreateSession(get("/"), new DefaultCookie("name", "foo"));
+        Session session = manager.getOrCreateSession(getEx("/"), new DefaultCookie("name", "foo"));
         Assertions.assertTrue(session.shouldRefresh());
     }
 
     @Test
     public void getOrCreateSession_valid_cookie() {
-        Session session = manager.createNewSession(get("/"));
+        Session session = manager.createNewSession(getEx("/"));
         String encoded = manager.encodeSessionForCookie(session);
-        Session returned = manager.getOrCreateSession(get("/"), new DefaultCookie("name", encoded));
+        Session returned = manager.getOrCreateSession(getEx("/"), new DefaultCookie("name", encoded));
         Assertions.assertEquals(session, returned);
     }
 

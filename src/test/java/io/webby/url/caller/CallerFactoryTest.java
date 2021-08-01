@@ -2,44 +2,39 @@ package io.webby.url.caller;
 
 import com.google.common.collect.Streams;
 import com.google.inject.Injector;
-import io.netty.handler.codec.http.*;
+import io.netty.handler.codec.http.DefaultFullHttpRequest;
+import io.netty.handler.codec.http.DefaultHttpRequest;
+import io.netty.handler.codec.http.FullHttpRequest;
+import io.netty.handler.codec.http.HttpRequest;
 import io.netty.util.AsciiString;
 import io.routekit.util.CharBuffer;
 import io.routekit.util.MutableCharBuffer;
 import io.webby.Testing;
-import io.webby.netty.request.DefaultHttpRequestEx;
 import io.webby.netty.request.HttpRequestEx;
+import io.webby.url.convert.ConversionError;
 import io.webby.url.handle.Handler;
 import io.webby.url.handle.IntHandler;
 import io.webby.url.handle.StringHandler;
 import io.webby.url.impl.Binding;
 import io.webby.url.impl.EndpointOptions;
-import io.webby.url.convert.ConversionError;
 import org.jetbrains.annotations.NotNull;
 import org.junit.jupiter.api.Assertions;
-import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
 import java.lang.reflect.Method;
 import java.util.Arrays;
-import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.function.IntFunction;
 import java.util.function.IntSupplier;
 import java.util.stream.Collectors;
 
+import static io.webby.FakeRequests.*;
+
 @SuppressWarnings("unused")
 public class CallerFactoryTest {
     private static final String URL = "/dummy/CallerFactoryTest";
-
-    private CallerFactory factory;
-
-    @BeforeEach
-    void setup() {
-        Injector injector = Testing.testStartupNoHandlers();
-        factory = injector.getInstance(CallerFactory.class);
-    }
+    private final CallerFactory factory = Testing.testStartupNoHandlers().getInstance(CallerFactory.class);
 
     @Test
     public void types() {
@@ -289,34 +284,14 @@ public class CallerFactoryTest {
         return asMap(list);
     }
 
-    private static <K, V> Map<K, V> asMap(Object ... items) {
-        return asMap(List.of(items));
-    }
-
-    @SuppressWarnings("unchecked")
-    private static <K, V> Map<K, V> asMap(List<?> items) {
-        Assertions.assertEquals(0, items.size() % 2);
-        LinkedHashMap<K, V> result = new LinkedHashMap<>();
-        for (int i = 0; i < items.size(); i += 2) {
-            result.put((K) items.get(i), (V) items.get(i + 1));
-        }
-        return result;
+    @NotNull
+    public static HttpRequestEx get() {
+        return getEx(URL);    // Do not care about QueryParams for now
     }
 
     @NotNull
-    private static HttpRequestEx get() {
-        return request(HttpMethod.GET);
-    }
-
-    @NotNull
-    private static HttpRequestEx post() {
-        return request(HttpMethod.POST);
-    }
-
-    @NotNull
-    private static HttpRequestEx request(HttpMethod method) {
-        // Do not care about QueryParams for now
-        return new DefaultHttpRequestEx(new DefaultFullHttpRequest(HttpVersion.HTTP_1_1, method, URL), Map.of(), new Object[0]);
+    public static HttpRequestEx post() {
+        return postEx(URL);   // Do not care about QueryParams for now
     }
 
     private interface StringFunction<T> {

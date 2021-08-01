@@ -8,10 +8,16 @@ import io.webby.auth.user.User;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
+import java.net.InetAddress;
+import java.net.SocketAddress;
 import java.nio.charset.Charset;
 import java.util.List;
 
 public interface HttpRequestEx extends FullHttpRequest {
+    @NotNull SocketAddress remoteAddress();
+
+    @Nullable InetAddress remoteIPAddress();
+
     @NotNull Charset charset();
 
     @NotNull String path();

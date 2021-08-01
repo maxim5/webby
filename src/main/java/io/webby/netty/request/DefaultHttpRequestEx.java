@@ -3,6 +3,7 @@ package io.webby.netty.request;
 import com.google.gson.Gson;
 import com.google.gson.JsonParseException;
 import io.netty.buffer.ByteBufInputStream;
+import io.netty.channel.Channel;
 import io.netty.handler.codec.http.*;
 import io.netty.handler.codec.http.cookie.Cookie;
 import io.webby.auth.CookieUtil;
@@ -14,6 +15,9 @@ import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
 import java.io.InputStreamReader;
+import java.net.InetAddress;
+import java.net.InetSocketAddress;
+import java.net.SocketAddress;
 import java.nio.charset.Charset;
 import java.util.List;
 import java.util.Map;
@@ -24,20 +28,37 @@ import static io.webby.util.EasyCast.castAny;
 
 public class DefaultHttpRequestEx extends DefaultFullHttpRequest implements MutableHttpRequestEx {
     private final AtomicReference<QueryParams> params = new AtomicReference<>(null);
+    private final Channel channel;
     private final Map<String, Constraint<?>> constraints;
     private final Object[] attributes;
 
     public DefaultHttpRequestEx(@NotNull FullHttpRequest request,
+                                @NotNull Channel channel,
                                 @NotNull Map<String, Constraint<?>> constraints,
                                 @NotNull Object[] attributes) {
         super(request.protocolVersion(), request.method(), request.uri(), request.content(),
               request.headers(), request.trailingHeaders());
+        this.channel = channel;
         this.constraints = constraints;
         this.attributes = attributes;
     }
 
     public DefaultHttpRequestEx(@NotNull DefaultHttpRequestEx request) {
-        this(request, request.constraints, request.attributes);
+        this(request, request.channel, request.constraints, request.attributes);
+    }
+
+    @Override
+    public @NotNull SocketAddress remoteAddress() {
+        return channel.remoteAddress();
+    }
+
+    @Override
+    public @Nullable InetAddress remoteIPAddress() {
+        SocketAddress remoteAddress = remoteAddress();
+        if (remoteAddress instanceof InetSocketAddress inetSocketAddress) {
+            return inetSocketAddress.getAddress();
+        }
+        return null;
     }
 
     @Override
