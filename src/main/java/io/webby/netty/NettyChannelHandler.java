@@ -77,8 +77,8 @@ public class NettyChannelHandler extends SimpleChannelInboundHandler<FullHttpReq
         log.at(Level.SEVERE).withCause(cause).log("Unexpected failure: %s", cause.getMessage());
     }
 
-    @NotNull
-    ChannelAwareHandler withChannel(@NotNull Channel channel) {
+    @VisibleForTesting
+    @NotNull ChannelAwareHandler withChannel(@NotNull Channel channel) {
         return new ChannelAwareHandler(channel);
     }
 
@@ -147,8 +147,7 @@ public class NettyChannelHandler extends SimpleChannelInboundHandler<FullHttpReq
         }
 
         @VisibleForTesting
-        @NotNull
-        CharBuffer extractPath(@NotNull FullHttpRequest request) {
+        @NotNull CharBuffer extractPath(@NotNull FullHttpRequest request) {
             CharBuffer uri = new CharBuffer(request.uri());
             // TODO: handle '#'
             // TODO: handle trailing slash (settings)
