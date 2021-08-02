@@ -1,6 +1,6 @@
 package io.webby.url.convert;
 
-import io.routekit.util.CharBuffer;
+import io.routekit.util.CharArray;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
@@ -28,7 +28,7 @@ public class StringConverter implements Converter<String> {
     }
 
     @Override
-    public String apply(@Nullable CharBuffer value) throws ConversionError {
+    public String apply(@Nullable CharArray value) throws ConversionError {
         validateString(null, value);
         return Objects.toString(value);
     }

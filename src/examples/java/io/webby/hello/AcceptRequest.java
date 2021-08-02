@@ -4,7 +4,7 @@ import io.netty.handler.codec.http.DefaultFullHttpRequest;
 import io.netty.handler.codec.http.DefaultHttpRequest;
 import io.netty.handler.codec.http.FullHttpRequest;
 import io.netty.handler.codec.http.HttpRequest;
-import io.routekit.util.CharBuffer;
+import io.routekit.util.CharArray;
 import io.webby.netty.request.DefaultHttpRequestEx;
 import io.webby.netty.request.HttpRequestEx;
 import io.webby.url.annotate.GET;
@@ -30,12 +30,12 @@ public class AcceptRequest {
     }
 
     @GET(url="/request/buffer/{buf}")
-    public String buffer(@NotNull FullHttpRequest request, CharBuffer buf) {
+    public String buffer(@NotNull FullHttpRequest request, CharArray buf) {
         return "Hello buffer <b>%s</b> from <i>%s</i>!".formatted(buf, request.uri());
     }
 
     @GET(url="/request/buffer/{buf}/{str}")
-    public String buffer(@NotNull DefaultFullHttpRequest request, CharBuffer buf1, CharBuffer buf2) {
+    public String buffer(@NotNull DefaultFullHttpRequest request, CharArray buf1, CharArray buf2) {
         return "Hello buffer <b>%s</b> and buffer <b>%s</b> from <i>%s</i>!".formatted(buf1, buf2, request.uri());
     }
 

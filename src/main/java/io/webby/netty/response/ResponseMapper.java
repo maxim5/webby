@@ -7,7 +7,7 @@ import io.netty.buffer.Unpooled;
 import io.netty.handler.codec.http.FullHttpResponse;
 import io.netty.handler.codec.http.HttpResponse;
 import io.netty.handler.codec.http.HttpResponseStatus;
-import io.routekit.util.CharBuffer;
+import io.routekit.util.CharArray;
 import io.webby.app.Settings;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
@@ -17,6 +17,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.Reader;
 import java.nio.ByteBuffer;
+import java.nio.CharBuffer;
 import java.nio.channels.Channels;
 import java.nio.channels.ReadableByteChannel;
 import java.util.HashMap;
@@ -43,12 +44,12 @@ public class ResponseMapper {
         add(ByteBuffer.class, buffer -> respond(Unpooled.wrappedBuffer(buffer)));
         add(ReadableByteChannel.class, byteChannel -> respond(Channels.newInputStream(byteChannel)));
 
-        add(char[].class, chars -> respond(new CharBuffer(chars)));
-        add(java.nio.CharBuffer.class, buf -> buf.hasArray() ? respond(asByteBuf(buf)) : respond(buf.toString()));
+        add(char[].class, chars -> respond(new CharArray(chars)));
+        add(CharBuffer.class, buf -> buf.hasArray() ? respond(asByteBuf(buf)) : respond(buf.toString()));
 
         add(CharSequence.class, this::respond);
         add(String.class, this::respond);
-        add(CharBuffer.class, this::respond);
+        add(CharArray.class, this::respond);
 
         add(InputStream.class, this::respond);
         add(Readable.class, readable -> respond(readToString(readable)));
@@ -107,7 +108,7 @@ public class ResponseMapper {
     }
 
     @NotNull
-    private ByteBuf asByteBuf(java.nio.CharBuffer buffer) {
+    private ByteBuf asByteBuf(CharBuffer buffer) {
         return Unpooled.copiedBuffer(
                 buffer.array(),
                 buffer.arrayOffset() + buffer.position(),

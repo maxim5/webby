@@ -1,7 +1,7 @@
 package io.webby.url.caller;
 
 import io.netty.handler.codec.http.FullHttpRequest;
-import io.routekit.util.CharBuffer;
+import io.routekit.util.CharArray;
 import io.webby.url.convert.IntConverter;
 import org.jetbrains.annotations.NotNull;
 
@@ -13,7 +13,7 @@ public record IntIntCaller(Object instance, Method method,
                            String name1, String name2,
                            CallOptions opts) implements Caller {
     @Override
-    public Object call(@NotNull FullHttpRequest request, @NotNull Map<String, CharBuffer> variables) throws Exception {
+    public Object call(@NotNull FullHttpRequest request, @NotNull Map<String, CharArray> variables) throws Exception {
         int intValue1 = validator1.validateInt(name1, variables.get(name1));
         int intValue2 = validator2.validateInt(name2, variables.get(name2));
 

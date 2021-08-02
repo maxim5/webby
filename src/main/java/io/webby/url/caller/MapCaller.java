@@ -2,7 +2,7 @@ package io.webby.url.caller;
 
 import com.google.mu.util.stream.BiStream;
 import io.netty.handler.codec.http.FullHttpRequest;
-import io.routekit.util.CharBuffer;
+import io.routekit.util.CharArray;
 import io.webby.url.convert.Constraint;
 import org.jetbrains.annotations.NotNull;
 
@@ -12,10 +12,10 @@ import java.util.Map;
 public record MapCaller(Object instance, Method method,
                         Map<String, Constraint<?>> constraints,
                         CallOptions opts) implements Caller {
-    private static final Constraint<CharBuffer> identity = value -> value;
+    private static final Constraint<CharArray> identity = value -> value;
 
     @Override
-    public Object call(@NotNull FullHttpRequest request, @NotNull Map<String, CharBuffer> variables) throws Exception {
+    public Object call(@NotNull FullHttpRequest request, @NotNull Map<String, CharArray> variables) throws Exception {
         Map<String, ?> converted = convert(variables);
         if (opts.wantsContent()) {
             Object content = opts.contentProvider.getContent(request);
@@ -28,7 +28,7 @@ public record MapCaller(Object instance, Method method,
     }
 
     @NotNull
-    private Map<String, ?> convert(@NotNull Map<String, CharBuffer> variables) {
+    private Map<String, ?> convert(@NotNull Map<String, CharArray> variables) {
         return BiStream.from(variables.entrySet())
                 .mapValues((key, value) -> constraints.getOrDefault(key, identity).applyWithName(key, value))
                 .toMap();

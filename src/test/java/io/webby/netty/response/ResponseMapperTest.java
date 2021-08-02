@@ -3,7 +3,7 @@ package io.webby.netty.response;
 import io.netty.buffer.ByteBuf;
 import io.netty.buffer.Unpooled;
 import io.netty.handler.codec.http.HttpResponse;
-import io.routekit.util.CharBuffer;
+import io.routekit.util.CharArray;
 import io.webby.Testing;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Disabled;
@@ -11,6 +11,7 @@ import org.junit.jupiter.api.Test;
 
 import java.io.*;
 import java.nio.ByteBuffer;
+import java.nio.CharBuffer;
 import java.util.ArrayList;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.function.Function;
@@ -44,10 +45,10 @@ public class ResponseMapperTest {
         char[] chars = "foo".toCharArray();
         assertLookupClass(chars, "foo");
 
-        java.nio.CharBuffer charBuffer = java.nio.CharBuffer.wrap(chars);
+        CharBuffer charBuffer = CharBuffer.wrap(chars);
         assertLookupClass(charBuffer, "foo");
 
-        java.nio.CharBuffer charBufferWithoutArray = java.nio.CharBuffer.wrap("foo");
+        CharBuffer charBufferWithoutArray = CharBuffer.wrap("foo");
         Assertions.assertFalse(charBufferWithoutArray.hasArray());
         assertLookupClass(charBufferWithoutArray, "foo");
     }
@@ -70,7 +71,7 @@ public class ResponseMapperTest {
         StringBuilder stringBuilder = new StringBuilder("foo");
         assertMapInstance(stringBuilder, "foo");
 
-        CharBuffer buffer = new CharBuffer("foo");
+        CharArray buffer = new CharArray("foo");
         assertMapInstance(buffer, "foo");
     }
 

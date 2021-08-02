@@ -5,7 +5,7 @@ import com.google.common.flogger.FluentLogger;
 import com.google.inject.Inject;
 import com.google.inject.Injector;
 import io.netty.handler.codec.http.HttpRequest;
-import io.routekit.util.CharBuffer;
+import io.routekit.util.CharArray;
 import io.webby.app.AppConfigException;
 import io.webby.url.HandlerConfigError;
 import io.webby.url.annotate.Json;
@@ -325,7 +325,7 @@ public class CallerFactory {
 
     @VisibleForTesting
     static boolean canPassBuffer(Class<?> type) {
-        return type.isAssignableFrom(CharBuffer.class) && !type.equals(Object.class);
+        return type.isAssignableFrom(CharArray.class) && !type.equals(Object.class);
     }
 
     @VisibleForTesting

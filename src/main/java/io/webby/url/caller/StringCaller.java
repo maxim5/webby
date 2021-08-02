@@ -1,7 +1,7 @@
 package io.webby.url.caller;
 
 import io.netty.handler.codec.http.FullHttpRequest;
-import io.routekit.util.CharBuffer;
+import io.routekit.util.CharArray;
 import io.webby.url.convert.StringConverter;
 import org.jetbrains.annotations.NotNull;
 
@@ -11,7 +11,7 @@ import java.util.Map;
 public record StringCaller(Object instance, Method method, StringConverter validator, String name,
                            RichCallOptions opts) implements Caller {
     @Override
-    public Object call(@NotNull FullHttpRequest request, @NotNull Map<String, CharBuffer> variables) throws Exception {
+    public Object call(@NotNull FullHttpRequest request, @NotNull Map<String, CharArray> variables) throws Exception {
         CharSequence value = (opts.wantsBuffer1) ? variables.get(name) : variables.get(name).toString();
         validator.validateString(name, value);
         if (opts.wantsContent()) {

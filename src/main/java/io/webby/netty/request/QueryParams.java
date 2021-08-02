@@ -3,7 +3,7 @@ package io.webby.netty.request;
 import com.google.common.collect.ImmutableMap;
 import com.google.mu.util.stream.BiStream;
 import io.netty.handler.codec.http.QueryStringDecoder;
-import io.routekit.util.CharBuffer;
+import io.routekit.util.CharArray;
 import io.webby.url.convert.Constraint;
 import io.webby.url.convert.ConversionError;
 import org.jetbrains.annotations.NotNull;
@@ -99,7 +99,7 @@ public class QueryParams {
         }
 
         Constraint<?> constraint = constraints.get(name);
-        return castAny(constraint.applyWithName(name, new CharBuffer(value)));
+        return castAny(constraint.applyWithName(name, new CharArray(value)));
     }
 
     public int getInt(@NotNull String name, int def) {

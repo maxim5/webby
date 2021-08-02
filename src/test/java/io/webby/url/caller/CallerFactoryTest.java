@@ -7,8 +7,8 @@ import io.netty.handler.codec.http.DefaultHttpRequest;
 import io.netty.handler.codec.http.FullHttpRequest;
 import io.netty.handler.codec.http.HttpRequest;
 import io.netty.util.AsciiString;
-import io.routekit.util.CharBuffer;
-import io.routekit.util.MutableCharBuffer;
+import io.routekit.util.CharArray;
+import io.routekit.util.MutableCharArray;
 import io.webby.Testing;
 import io.webby.netty.request.HttpRequestEx;
 import io.webby.url.convert.ConversionError;
@@ -48,8 +48,8 @@ public class CallerFactoryTest {
 
         Assertions.assertTrue(CallerFactory.isStringLike(String.class));
         Assertions.assertTrue(CallerFactory.isStringLike(CharSequence.class));
-        Assertions.assertTrue(CallerFactory.isStringLike(CharBuffer.class));
-        Assertions.assertTrue(CallerFactory.isStringLike(MutableCharBuffer.class));
+        Assertions.assertTrue(CallerFactory.isStringLike(CharArray.class));
+        Assertions.assertTrue(CallerFactory.isStringLike(MutableCharArray.class));
         Assertions.assertTrue(CallerFactory.isStringLike(AsciiString.class));
         Assertions.assertTrue(CallerFactory.isStringLike(StringBuilder.class));
         Assertions.assertFalse(CallerFactory.isStringLike(Object.class));
@@ -68,8 +68,8 @@ public class CallerFactoryTest {
         Assertions.assertFalse(CallerFactory.canPassContent(CharSequence.class));
 
         Assertions.assertTrue(CallerFactory.canPassBuffer(CharSequence.class));
-        Assertions.assertTrue(CallerFactory.canPassBuffer(CharBuffer.class));
-        Assertions.assertFalse(CallerFactory.canPassBuffer(MutableCharBuffer.class));  // routekit contains immutable
+        Assertions.assertTrue(CallerFactory.canPassBuffer(CharArray.class));
+        Assertions.assertFalse(CallerFactory.canPassBuffer(MutableCharArray.class));  // routekit contains immutable
         Assertions.assertFalse(CallerFactory.canPassBuffer(String.class));
         Assertions.assertFalse(CallerFactory.canPassBuffer(StringBuilder.class));
         Assertions.assertFalse(CallerFactory.canPassBuffer(Object.class));
@@ -276,10 +276,10 @@ public class CallerFactoryTest {
     }
 
     @SuppressWarnings("UnstableApiUsage")
-    private static Map<String, CharBuffer> vars(Object ... items) {
+    private static Map<String, CharArray> vars(Object ... items) {
         List<CharSequence> list = Streams.mapWithIndex(
                 Arrays.stream(items),
-                (item, i) -> (i % 2 == 0) ? item.toString() : new CharBuffer(item.toString())
+                (item, i) -> (i % 2 == 0) ? item.toString() : new CharArray(item.toString())
         ).collect(Collectors.toList());
         return asMap(list);
     }

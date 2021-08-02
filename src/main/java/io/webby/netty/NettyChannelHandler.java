@@ -13,7 +13,7 @@ import io.netty.channel.SimpleChannelInboundHandler;
 import io.netty.handler.codec.http.*;
 import io.routekit.Match;
 import io.routekit.Router;
-import io.routekit.util.CharBuffer;
+import io.routekit.util.CharArray;
 import io.webby.netty.exceptions.ServeException;
 import io.webby.netty.intercept.Interceptors;
 import io.webby.netty.request.DefaultHttpRequestEx;
@@ -86,7 +86,7 @@ public class NettyChannelHandler extends SimpleChannelInboundHandler<FullHttpReq
         @NotNull
         @VisibleForTesting
         HttpResponse handle(@NotNull FullHttpRequest request) {
-            CharBuffer path = extractPath(request);
+            CharArray path = extractPath(request);
             Match<RouteEndpoint> match = router.routeOrNull(path);
             if (match == null) {
                 log.at(Level.FINE).log("No associated endpoint for url: %s", path);
@@ -140,8 +140,8 @@ public class NettyChannelHandler extends SimpleChannelInboundHandler<FullHttpReq
         }
 
         @VisibleForTesting
-        @NotNull CharBuffer extractPath(@NotNull FullHttpRequest request) {
-            CharBuffer uri = new CharBuffer(request.uri());
+        @NotNull CharArray extractPath(@NotNull FullHttpRequest request) {
+            CharArray uri = new CharArray(request.uri());
             // TODO: handle '#'
             // TODO: handle trailing slash (settings)
             return uri.substringUntil(uri.indexOf('?', 0, uri.length()));
