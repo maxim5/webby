@@ -17,7 +17,7 @@ public class AcceptRequestIntegrationTest extends BaseIntegrationTest {
         assert200(get("/request/simple"), "Hello <b>/request/simple</b>!");
         assert200(get("/request/simple?"), "Hello <b>/request/simple?</b>!");
         assert200(get("/request/simple?key=value"), "Hello <b>/request/simple?key=value</b>!");
-        // assert200(get("/request/simple#"), "Hello <b>/request/simple#</b>!");
+        assert200(get("/request/simple#"), "Hello <b>/request/simple#</b>!");
     }
 
     @Test

@@ -142,9 +142,8 @@ public class NettyChannelHandler extends SimpleChannelInboundHandler<FullHttpReq
         @VisibleForTesting
         @NotNull CharArray extractPath(@NotNull FullHttpRequest request) {
             CharArray uri = new CharArray(request.uri());
-            // TODO: handle '#'
             // TODO: handle trailing slash (settings)
-            return uri.substringUntil(uri.indexOf('?', 0, uri.length()));
+            return uri.substringUntil(uri.indexOfAny('?', '#', 0, uri.length()));
         }
 
         @VisibleForTesting

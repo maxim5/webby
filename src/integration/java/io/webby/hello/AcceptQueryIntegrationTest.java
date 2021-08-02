@@ -17,8 +17,13 @@ public class AcceptQueryIntegrationTest extends BaseIntegrationTest {
         assert200(get("/request/query/simple"), "[/request/query/simple] []");
         assert200(get("/request/query/simple?"), "[/request/query/simple] []");
         assert200(get("/request/query/simple?key=value"), "[/request/query/simple] [key=value]");
-        // assert200(get("/request/query/simple#"), "");
-        // assert200(get("/request/query/simple?#"), "");
+        assert200(get("/request/query/simple?key="), "[/request/query/simple] [key=]");
+        assert200(get("/request/query/simple?=value"), "[/request/query/simple] [=value]");
+
+        assert200(get("/request/query/simple#"), "[/request/query/simple] []");
+        assert200(get("/request/query/simple?#"), "[/request/query/simple] [#]");
+        assert200(get("/request/query/simple?#ignore"), "[/request/query/simple] [#ignore]");
+        assert200(get("/request/query/simple?key=value#ignore"), "[/request/query/simple] [key=value#ignore]");
     }
 
     @Test
@@ -47,6 +52,13 @@ public class AcceptQueryIntegrationTest extends BaseIntegrationTest {
     public void get_param_simple_one_case_sensitive() {
         assert200(get("/request/query/param/key?Key=x"), "[null] <[]>");
         assert200(get("/request/query/param/key?KEY=x"), "[null] <[]>");
+    }
+
+    @Test
+    public void get_param_simple_one_with_hash() {
+        assert200(get("/request/query/param/key?key=#"), "[] <[]>");
+        assert200(get("/request/query/param/key?key=_#ignore"), "[_] <[_]>");
+        assert200(get("/request/query/param/key?key=&x=y#key=value"), "[] <[]>");
     }
 
     @Test
