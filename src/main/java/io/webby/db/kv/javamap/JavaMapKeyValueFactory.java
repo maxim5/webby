@@ -8,6 +8,7 @@ import org.jetbrains.annotations.Nullable;
 import java.io.IOException;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Set;
 
 public class JavaMapKeyValueFactory extends BaseKeyValueFactory {
     @Override
@@ -22,8 +23,8 @@ public class JavaMapKeyValueFactory extends BaseKeyValueFactory {
         private final Map<K, V> map = new HashMap<>();
 
         @Override
-        public void set(@NotNull K key, @NotNull V value) {
-            map.put(key, value);
+        public int size() {
+            return map.size();
         }
 
         @Override
@@ -32,13 +33,38 @@ public class JavaMapKeyValueFactory extends BaseKeyValueFactory {
         }
 
         @Override
+        public boolean containsValue(@NotNull V value) {
+            return map.containsValue(value);
+        }
+
+        @Override
+        public @NotNull Set<K> keySet() {
+            return map.keySet();
+        }
+
+        @Override
+        public void set(@NotNull K key, @NotNull V value) {
+            map.put(key, value);
+        }
+
+        @Override
+        public @Nullable V put(@NotNull K key, @NotNull V value) {
+            return map.put(key, value);
+        }
+
+        @Override
+        public void putAll(@NotNull Map<? extends K, ? extends V> map) {
+            this.map.putAll(map);
+        }
+
+        @Override
         public @Nullable V remove(@NotNull K key) {
             return map.remove(key);
         }
 
         @Override
-        public int size() {
-            return map.size();
+        public void clear() {
+            map.clear();
         }
 
         @Override
