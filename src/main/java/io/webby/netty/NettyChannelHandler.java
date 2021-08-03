@@ -14,6 +14,7 @@ import io.netty.handler.codec.http.*;
 import io.routekit.Match;
 import io.routekit.Router;
 import io.routekit.util.CharArray;
+import io.webby.app.Settings;
 import io.webby.netty.exceptions.ServeException;
 import io.webby.netty.intercept.Interceptors;
 import io.webby.netty.request.DefaultHttpRequestEx;
@@ -37,6 +38,7 @@ import java.util.logging.Level;
 public class NettyChannelHandler extends SimpleChannelInboundHandler<FullHttpRequest> {
     private static final FluentLogger log = FluentLogger.forEnclosingClass();
 
+    @Inject private Settings settings;
     @Inject private Interceptors interceptors;
     @Inject private HttpResponseFactory factory;
     @Inject private ResponseMapper mapper;
@@ -86,7 +88,7 @@ public class NettyChannelHandler extends SimpleChannelInboundHandler<FullHttpReq
         @NotNull
         @VisibleForTesting
         HttpResponse handle(@NotNull FullHttpRequest request) {
-            CharArray path = extractPath(request);
+            CharArray path = extractPath(request.uri());
             Match<RouteEndpoint> match = router.routeOrNull(path);
             if (match == null) {
                 log.at(Level.FINE).log("No associated endpoint for url: %s", path);
@@ -137,13 +139,6 @@ public class NettyChannelHandler extends SimpleChannelInboundHandler<FullHttpReq
                 log.at(Level.SEVERE).withCause(e).log("Failed to call method: %s", caller.method());
                 return factory.newResponse500("Failed to call method: %s".formatted(caller.method()), e);
             }
-        }
-
-        @VisibleForTesting
-        @NotNull CharArray extractPath(@NotNull FullHttpRequest request) {
-            CharArray uri = new CharArray(request.uri());
-            // TODO: handle trailing slash (settings)
-            return uri.substringUntil(uri.indexOfAny('?', '#', 0, uri.length()));
         }
 
         @VisibleForTesting
@@ -224,20 +219,30 @@ public class NettyChannelHandler extends SimpleChannelInboundHandler<FullHttpReq
                     // Strict-Transport-Security: max-age=1000; includeSubDomains; preload
             );
         }
+    }
 
-        @VisibleForTesting
-        @NotNull
-        @CanIgnoreReturnValue
-        static <T extends CharSequence, U> HttpResponse withHeaders(
-                @NotNull HttpResponse response,
-                @NotNull Iterable<Pair<T, U>> values,
-                boolean canOverwrite) {
-            return HttpResponseFactory.withHeaders(response, headers -> {
-                for (Pair<T, U> header : values) {
-                    if (canOverwrite || !headers.contains(header.getKey()))
-                        headers.set(header.getKey(), header.getValue());
-                }
-            });
+    @VisibleForTesting
+    @NotNull CharArray extractPath(@NotNull String uri) {
+        CharArray array = new CharArray(uri);
+        CharArray path = array.substringUntil(array.indexOfAny('?', '#', 0, array.length()));
+        if (settings.getBoolProperty("netty.url.trailing.slash.ignore")) {
+            return path.cutSuffix(new CharArray("/"));
         }
+        return path;
+    }
+
+    @VisibleForTesting
+    @NotNull
+    @CanIgnoreReturnValue
+    static <T extends CharSequence, U> HttpResponse withHeaders(
+            @NotNull HttpResponse response,
+            @NotNull Iterable<Pair<T, U>> values,
+            boolean canOverwrite) {
+        return HttpResponseFactory.withHeaders(response, headers -> {
+            for (Pair<T, U> header : values) {
+                if (canOverwrite || !headers.contains(header.getKey()))
+                    headers.set(header.getKey(), header.getValue());
+            }
+        });
     }
 }
