@@ -23,6 +23,8 @@ public class NettyChannelHandlerTest {
         Assertions.assertEquals("/foo/bar", handler.extractPath("/foo/bar").toString());
         Assertions.assertEquals("/foo/bar/", handler.extractPath("/foo/bar/").toString());
 
+        Assertions.assertEquals("", handler.extractPath("?").toString());
+        Assertions.assertEquals("", handler.extractPath("#").toString());
         Assertions.assertEquals("/", handler.extractPath("/?").toString());
         Assertions.assertEquals("/", handler.extractPath("/?key=value").toString());
 
@@ -42,6 +44,11 @@ public class NettyChannelHandlerTest {
         AppSettings appSettings = injector.getInstance(AppSettings.class);
         appSettings.setProperty("netty.url.trailing.slash.ignore", true);
 
+        Assertions.assertEquals("a", handler.extractPath("a").toString());
+        Assertions.assertEquals("foo", handler.extractPath("foo").toString());
+
+        Assertions.assertEquals("/", handler.extractPath("/").toString());
+        Assertions.assertEquals("/", handler.extractPath("//").toString());
         Assertions.assertEquals("/foo", handler.extractPath("/foo").toString());
         Assertions.assertEquals("/foo", handler.extractPath("/foo/").toString());
         Assertions.assertEquals("/foo/", handler.extractPath("/foo//").toString());

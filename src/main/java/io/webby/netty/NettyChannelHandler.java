@@ -14,6 +14,7 @@ import io.netty.handler.codec.http.*;
 import io.routekit.Match;
 import io.routekit.Router;
 import io.routekit.util.CharArray;
+import io.routekit.util.MutableCharArray;
 import io.webby.app.Settings;
 import io.webby.netty.exceptions.ServeException;
 import io.webby.netty.intercept.Interceptors;
@@ -223,10 +224,10 @@ public class NettyChannelHandler extends SimpleChannelInboundHandler<FullHttpReq
 
     @VisibleForTesting
     @NotNull CharArray extractPath(@NotNull String uri) {
-        CharArray array = new CharArray(uri);
-        CharArray path = array.substringUntil(array.indexOfAny('?', '#', 0, array.length()));
-        if (settings.getBoolProperty("netty.url.trailing.slash.ignore")) {
-            return path.cutSuffix(new CharArray("/"));
+        MutableCharArray path = new MutableCharArray(uri);
+        path.offsetEnd(path.length() - path.indexOfAny('?', '#', 0, path.length()));
+        if (settings.getBoolProperty("netty.url.trailing.slash.ignore") && path.length() > 1) {
+            path.offsetSuffix('/');
         }
         return path;
     }
