@@ -68,7 +68,7 @@ public class ReturnValue {
         return new StringReader(val);
     }
 
-    @GET(url="/r/json/map/{*var}")
+    @GET(url = "/r/json/map/{*var}")
     @Json
     public Object json_map(String var) {
         Map<String, Serializable> map = new LinkedHashMap<>();
@@ -77,7 +77,7 @@ public class ReturnValue {
         return map;
     }
 
-    @GET(url="/r/json/tree/{var}")
+    @GET(url = "/r/json/tree/{var}")
     public JsonElement json_tree(String var) {
         List<Character> characters = var.chars().boxed().map(i -> (char) i.intValue()).toList();
         return new Gson().toJsonTree(characters);
