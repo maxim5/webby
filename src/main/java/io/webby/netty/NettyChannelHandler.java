@@ -10,8 +10,13 @@ import com.google.errorprone.annotations.CanIgnoreReturnValue;
 import com.google.gson.Gson;
 import com.google.gson.JsonElement;
 import com.google.inject.Inject;
-import io.netty.channel.*;
+import io.netty.buffer.Unpooled;
+import io.netty.channel.Channel;
+import io.netty.channel.ChannelFutureListener;
+import io.netty.channel.ChannelHandlerContext;
+import io.netty.channel.SimpleChannelInboundHandler;
 import io.netty.handler.codec.http.*;
+import io.netty.util.concurrent.EventExecutor;
 import io.routekit.Match;
 import io.routekit.Router;
 import io.routekit.util.CharArray;
@@ -24,21 +29,28 @@ import io.webby.netty.response.*;
 import io.webby.url.annotate.Marshal;
 import io.webby.url.caller.Caller;
 import io.webby.url.convert.ConversionError;
-import io.webby.url.impl.*;
+import io.webby.url.impl.Endpoint;
+import io.webby.url.impl.EndpointOptions;
+import io.webby.url.impl.EndpointView;
+import io.webby.url.impl.RouteEndpoint;
 import io.webby.url.view.Renderer;
 import io.webby.util.Pair;
+import io.webby.util.Rethrow.Consumers;
+import io.webby.util.Rethrow.Guava;
+import io.webby.util.ThrowConsumer;
 import org.checkerframework.checker.nullness.qual.Nullable;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.VisibleForTesting;
 
+import java.io.OutputStream;
 import java.util.List;
-import java.util.concurrent.Executor;
 import java.util.concurrent.Future;
 import java.util.concurrent.TimeUnit;
+import java.util.function.Consumer;
 import java.util.function.Function;
 import java.util.logging.Level;
 
-import static io.webby.util.Rethrow.Guava.rethrow;
+import static io.webby.util.EasyCast.castAny;
 
 public class NettyChannelHandler extends SimpleChannelInboundHandler<FullHttpRequest> {
     private static final FluentLogger log = FluentLogger.forEnclosingClass();
@@ -57,7 +69,7 @@ public class NettyChannelHandler extends SimpleChannelInboundHandler<FullHttpReq
 
         HttpResponse response;
         try {
-            response = new ChannelAwareHandler(channel).handle(request);
+            response = new ChannelAwareHandler(channel, context).handle(request);
         } catch (Throwable throwable) {
             response = factory.newResponse500("Unexpected failure", throwable);
             log.at(Level.SEVERE).withCause(throwable).log("Unexpected failure: %s", throwable.getMessage());
@@ -87,12 +99,13 @@ public class NettyChannelHandler extends SimpleChannelInboundHandler<FullHttpReq
         log.at(Level.SEVERE).withCause(cause).log("Unexpected failure: %s", cause.getMessage());
     }
 
-    @VisibleForTesting
-    class ChannelAwareHandler {
+    private class ChannelAwareHandler {
         private final Channel channel;
+        private final ChannelHandlerContext context;
 
-        public ChannelAwareHandler(@NotNull Channel channel) {
+        public ChannelAwareHandler(@NotNull Channel channel, @NotNull ChannelHandlerContext context) {
             this.channel = channel;
+            this.context = context;
         }
 
         @NotNull
@@ -180,8 +193,15 @@ public class NettyChannelHandler extends SimpleChannelInboundHandler<FullHttpReq
                 if (future.isDone()) {
                     return convertToResponse(future.get(), options);
                 }
-                addCallback(future, options);
-                return new EmptyHttpResponse();
+                return addCallback(future, options);
+            }
+            if (callResult instanceof Consumer<?>) {
+                Consumer<OutputStream> consumer = castAny(callResult);
+                return addCallback(consumer, options);
+            }
+            if (callResult instanceof ThrowConsumer<?, ?> throwConsumer) {
+                Consumer<OutputStream> consumer = castAny(Consumers.rethrow(throwConsumer));
+                return addCallback(consumer, options);
             }
             if (callResult instanceof JsonElement element) {
                 return factory.newResponse(gson.toJson(element), HttpResponseStatus.OK, HttpHeaderValues.APPLICATION_JSON);
@@ -238,14 +258,14 @@ public class NettyChannelHandler extends SimpleChannelInboundHandler<FullHttpReq
         }
 
         @SuppressWarnings("UnstableApiUsage")
-        private void addCallback(@NotNull Future<?> future, @NotNull EndpointOptions options) {
+        private HttpResponse addCallback(@NotNull Future<?> future, @NotNull EndpointOptions options) {
             ListenableFuture<?> listenable = (future instanceof ListenableFuture<?> listenableFuture) ?
                     listenableFuture :
                     JdkFutureAdapters.listenInPoolThread(future, executor());
 
             ListenableFuture<HttpResponse> transform = Futures.transform(
                 listenable,
-                rethrow(result -> createResponse(result != null ? result : "", options)),
+                Guava.rethrow(result -> createResponse(result != null ? result : "", options)),
                 executor()
             );
 
@@ -259,10 +279,42 @@ public class NettyChannelHandler extends SimpleChannelInboundHandler<FullHttpReq
                     channel.writeAndFlush(factory.newResponse500("Handler future failed: %s".formatted(future), failure));
                 }
             }, executor());
+
+            return new EmptyHttpResponse();
         }
 
-        private @NotNull Executor executor() {
-            return channel.eventLoop();
+        private HttpResponse addCallback(@NotNull Consumer<OutputStream> consumer, @NotNull EndpointOptions options) {
+            Future<?> future = executor().submit(() -> {
+                channel.write(new DefaultHttpResponse(HttpVersion.HTTP_1_1, HttpResponseStatus.OK));
+                consumer.accept(new OutputStream() {
+                    @Override
+                    public void write(byte @NotNull [] bytes) {
+                        channel.write(new DefaultHttpContent(Unpooled.wrappedBuffer(bytes)));
+                    }
+                    @Override
+                    public void write(byte @NotNull [] bytes, int offset, int length) {
+                        channel.write(new DefaultHttpContent(Unpooled.wrappedBuffer(bytes, offset, length)));
+                    }
+                    @Override
+                    public void write(int b) {
+                        channel.write(new DefaultHttpContent(Unpooled.buffer(1).writeByte(b)));
+                    }
+                    @Override
+                    public void flush() {
+                        channel.flush();
+                    }
+                    @Override
+                    public void close() {
+                        channel.flush();
+                    }
+                });
+            });
+
+            return addCallback(future, options);
+        }
+
+        private @NotNull EventExecutor executor() {
+            return context.executor();
         }
     }
 
