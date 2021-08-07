@@ -89,7 +89,7 @@ public class Main {
 
 ## License
 
-[Apache 2.0](/maxim5/webby/blob/master/LICENSE)
+[Apache 2.0](/LICENSE)
 
 
 ## Credits
