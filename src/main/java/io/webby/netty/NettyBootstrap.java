@@ -65,7 +65,7 @@ public class NettyBootstrap {
                     .option(ChannelOption.SO_BACKLOG, 128)
                     .childOption(ChannelOption.SO_KEEPALIVE, true);
             ChannelFuture httpChannel = bootstrap.bind(port).sync();
-            log.at(Level.INFO).log("Server running at %d", port);
+            log.at(Level.INFO).log("Server running at %s://%s:%d/", "http", "localhost", port);
             httpChannel.channel().closeFuture().sync();
         } finally {
             lifetime.terminateIfAlive();    // normally a shutdown hook is called, so it shouldn't do anything

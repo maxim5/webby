@@ -63,6 +63,16 @@ public class NettyChannelHandler extends SimpleChannelInboundHandler<FullHttpReq
     @Inject private Gson gson;
 
     @Override
+    public void channelActive(@NotNull ChannelHandlerContext ctx) throws Exception {
+        super.channelActive(ctx);
+    }
+
+    @Override
+    public void channelInactive(@NotNull ChannelHandlerContext ctx) throws Exception {
+        super.channelInactive(ctx);
+    }
+
+    @Override
     protected void channelRead0(@NotNull ChannelHandlerContext context, @NotNull FullHttpRequest request) {
         Stopwatch stopwatch = Stopwatch.createStarted();
         Channel channel = context.channel();
@@ -234,26 +244,6 @@ public class NettyChannelHandler extends SimpleChannelInboundHandler<FullHttpReq
             };
         }
 
-        @VisibleForTesting
-        @NotNull Iterable<Pair<CharSequence, CharSequence>> getDefaultHeaders(@NotNull EndpointOptions options) {
-            CharSequence contentType = options.http().hasContentType() ?
-                    options.http().contentType() :
-                    (options.out() == Marshal.JSON) ?
-                            HttpHeaderValues.APPLICATION_JSON :
-                            HttpHeaderValues.TEXT_HTML;
-
-            return List.of(
-                    Pair.of(HttpHeaderNames.CONTENT_TYPE, contentType),
-                    Pair.of(HttpHeaderNames.X_FRAME_OPTIONS, "SAMEORIGIN"),  // iframe attack
-                    Pair.of("X-XSS-Protection", "1;mode=block"),  // XSS Filtering
-                    Pair.of(HttpHeaderNames.CONTENT_SECURITY_POLICY, "script-src 'self'"),  // Whitelisting Sources
-                    Pair.of("X-Content-Type-Options", "nosniff")  // MIME-sniffing attacks
-
-                    // Content-Security-Policy: upgrade-insecure-requests
-                    // Strict-Transport-Security: max-age=1000; includeSubDomains; preload
-            );
-        }
-
         @SuppressWarnings("UnstableApiUsage")
         private @NotNull HttpResponse addCallback(@NotNull Future<?> future, @NotNull EndpointOptions options) {
             ListenableFuture<?> listenable = (future instanceof ListenableFuture<?> listenableFuture) ?
@@ -324,6 +314,26 @@ public class NettyChannelHandler extends SimpleChannelInboundHandler<FullHttpReq
             path.offsetSuffix('/');
         }
         return path;
+    }
+
+    @VisibleForTesting
+    @NotNull Iterable<Pair<CharSequence, CharSequence>> getDefaultHeaders(@NotNull EndpointOptions options) {
+        CharSequence contentType = options.http().hasContentType() ?
+                options.http().contentType() :
+                (options.out() == Marshal.JSON) ?
+                        HttpHeaderValues.APPLICATION_JSON :
+                        HttpHeaderValues.TEXT_HTML;
+
+        return List.of(
+                Pair.of(HttpHeaderNames.CONTENT_TYPE, contentType),
+                Pair.of(HttpHeaderNames.X_FRAME_OPTIONS, "SAMEORIGIN"),  // iframe attack
+                Pair.of("X-XSS-Protection", "1;mode=block"),  // XSS Filtering
+                Pair.of(HttpHeaderNames.CONTENT_SECURITY_POLICY, "script-src 'self'"),  // Whitelisting Sources
+                Pair.of("X-Content-Type-Options", "nosniff")  // MIME-sniffing attacks
+
+                // Content-Security-Policy: upgrade-insecure-requests
+                // Strict-Transport-Security: max-age=1000; includeSubDomains; preload
+        );
     }
 
     @VisibleForTesting
