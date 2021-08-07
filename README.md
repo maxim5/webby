@@ -56,8 +56,10 @@ A developer has the freedom to apply the library in any way they want.
 
 ## How To Use
 
+Since Webby is in active development, the best way to add a Gradle dependency is via `gitRepository` directive.
+
+- `settings.gradle`
 ```groovy
-// settings.gradle
 sourceControl {
     gitRepository('https://github.com/maxim5/webby.git') {
         producesModule("io.webby:webby")
@@ -65,13 +67,10 @@ sourceControl {
 }
 ```
 
+- `build.gradle`
 ```groovy
-// build.gradle
 implementation ('io.webby:webby:0.1.0-SNAPSHOT')
 ```
-
-Webby is in active development, hence the best way to add a Gradle dependency is via `gitRepository` directive.
-
 
 To start the web server locally:
 
@@ -85,6 +84,8 @@ public class Main {
     }
 }
 ```
+
+... and Webby will do the rest.
 
 ## License
 
