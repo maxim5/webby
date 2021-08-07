@@ -16,6 +16,7 @@ import io.webby.app.Settings;
 import io.webby.netty.exceptions.ServeException;
 import io.webby.netty.intercept.Interceptors;
 import io.webby.netty.request.DefaultHttpRequestEx;
+import io.webby.netty.response.AsyncResponse;
 import io.webby.netty.response.HttpResponseFactory;
 import io.webby.netty.response.ResponseMapper;
 import io.webby.netty.response.StreamingHttpResponse;
@@ -56,10 +57,12 @@ public class NettyChannelHandler extends SimpleChannelInboundHandler<FullHttpReq
             log.at(Level.SEVERE).withCause(throwable).log("Unexpected failure: %s", throwable.getMessage());
         }
 
-        if (response instanceof StreamingHttpResponse streaming) {
-            channel.write(streaming).addListener(
-                    (ChannelFutureListener) future -> future.channel().writeAndFlush(streaming.chunkedContent())
-            );
+        if (response instanceof AsyncResponse) {
+            if (response instanceof StreamingHttpResponse streaming) {
+                channel.write(streaming).addListener(
+                        (ChannelFutureListener) future -> future.channel().writeAndFlush(streaming.chunkedContent())
+                );
+            }
         } else {
             channel.writeAndFlush(response);
         }

@@ -5,7 +5,7 @@ import io.netty.handler.codec.http.*;
 import io.netty.handler.stream.ChunkedInput;
 import org.jetbrains.annotations.NotNull;
 
-public class StreamingHttpResponse extends DefaultHttpResponse {
+public class StreamingHttpResponse extends DefaultHttpResponse implements AsyncResponse {
     private final ChunkedInput<ByteBuf> input;
 
     public StreamingHttpResponse(HttpVersion version, HttpResponseStatus status, ChunkedInput<ByteBuf> input) {
