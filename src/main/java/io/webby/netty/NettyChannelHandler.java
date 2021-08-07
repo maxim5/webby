@@ -6,10 +6,7 @@ import com.google.errorprone.annotations.CanIgnoreReturnValue;
 import com.google.gson.Gson;
 import com.google.gson.JsonElement;
 import com.google.inject.Inject;
-import io.netty.channel.Channel;
-import io.netty.channel.ChannelFutureListener;
-import io.netty.channel.ChannelHandlerContext;
-import io.netty.channel.SimpleChannelInboundHandler;
+import io.netty.channel.*;
 import io.netty.handler.codec.http.*;
 import io.routekit.Match;
 import io.routekit.Router;
@@ -60,8 +57,9 @@ public class NettyChannelHandler extends SimpleChannelInboundHandler<FullHttpReq
         }
 
         if (response instanceof StreamingHttpResponse streaming) {
-            channel.write(streaming);
-            channel.writeAndFlush(streaming.chunkedContent());
+            channel.write(streaming).addListener(
+                    (ChannelFutureListener) future -> future.channel().writeAndFlush(streaming.chunkedContent())
+            );
         } else {
             channel.writeAndFlush(response);
         }
