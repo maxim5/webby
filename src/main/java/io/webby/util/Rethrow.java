@@ -56,4 +56,18 @@ public interface Rethrow {
             };
         }
     }
+
+    interface Guava {
+        @SuppressWarnings("Guava")
+        @NotNull
+        static <T, R, E extends Throwable> com.google.common.base.Function<T, R> rethrow(@NotNull ThrowFunction<T, R, E> function) {
+            return value -> {
+                try {
+                    return function.apply(value);
+                } catch (Throwable e) {
+                    return Rethrow.rethrow(e);
+                }
+            };
+        }
+    }
 }

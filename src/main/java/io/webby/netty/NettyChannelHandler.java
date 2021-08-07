@@ -2,6 +2,10 @@ package io.webby.netty;
 
 import com.google.common.base.Stopwatch;
 import com.google.common.flogger.FluentLogger;
+import com.google.common.util.concurrent.FutureCallback;
+import com.google.common.util.concurrent.Futures;
+import com.google.common.util.concurrent.JdkFutureAdapters;
+import com.google.common.util.concurrent.ListenableFuture;
 import com.google.errorprone.annotations.CanIgnoreReturnValue;
 import com.google.gson.Gson;
 import com.google.gson.JsonElement;
@@ -16,23 +20,25 @@ import io.webby.app.Settings;
 import io.webby.netty.exceptions.ServeException;
 import io.webby.netty.intercept.Interceptors;
 import io.webby.netty.request.DefaultHttpRequestEx;
-import io.webby.netty.response.AsyncResponse;
-import io.webby.netty.response.HttpResponseFactory;
-import io.webby.netty.response.ResponseMapper;
-import io.webby.netty.response.StreamingHttpResponse;
+import io.webby.netty.response.*;
 import io.webby.url.annotate.Marshal;
 import io.webby.url.caller.Caller;
 import io.webby.url.convert.ConversionError;
 import io.webby.url.impl.*;
 import io.webby.url.view.Renderer;
 import io.webby.util.Pair;
+import org.checkerframework.checker.nullness.qual.Nullable;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.VisibleForTesting;
 
 import java.util.List;
+import java.util.concurrent.Executor;
+import java.util.concurrent.Future;
 import java.util.concurrent.TimeUnit;
 import java.util.function.Function;
 import java.util.logging.Level;
+
+import static io.webby.util.Rethrow.Guava.rethrow;
 
 public class NettyChannelHandler extends SimpleChannelInboundHandler<FullHttpRequest> {
     private static final FluentLogger log = FluentLogger.forEnclosingClass();
@@ -62,6 +68,8 @@ public class NettyChannelHandler extends SimpleChannelInboundHandler<FullHttpReq
                 channel.write(streaming).addListener(
                         (ChannelFutureListener) future -> future.channel().writeAndFlush(streaming.chunkedContent())
                 );
+            } else if (request instanceof EmptyHttpResponse) {
+                log.at(Level.FINE).log("Response to be handled async");
             }
         } else {
             channel.writeAndFlush(response);
@@ -168,6 +176,13 @@ public class NettyChannelHandler extends SimpleChannelInboundHandler<FullHttpReq
             if (responseFunction != null) {
                 return responseFunction.apply(callResult);
             }
+            if (callResult instanceof Future<?> future) {
+                if (future.isDone()) {
+                    return convertToResponse(future.get(), options);
+                }
+                addCallback(future, options);
+                return new EmptyHttpResponse();
+            }
             if (callResult instanceof JsonElement element) {
                 return factory.newResponse(gson.toJson(element), HttpResponseStatus.OK, HttpHeaderValues.APPLICATION_JSON);
             }
@@ -220,6 +235,34 @@ public class NettyChannelHandler extends SimpleChannelInboundHandler<FullHttpReq
                     // Content-Security-Policy: upgrade-insecure-requests
                     // Strict-Transport-Security: max-age=1000; includeSubDomains; preload
             );
+        }
+
+        @SuppressWarnings("UnstableApiUsage")
+        private void addCallback(@NotNull Future<?> future, @NotNull EndpointOptions options) {
+            ListenableFuture<?> listenable = (future instanceof ListenableFuture<?> listenableFuture) ?
+                    listenableFuture :
+                    JdkFutureAdapters.listenInPoolThread(future, executor());
+
+            ListenableFuture<HttpResponse> transform = Futures.transform(
+                listenable,
+                rethrow(result -> createResponse(result != null ? result : "", options)),
+                executor()
+            );
+
+            Futures.addCallback(transform, new FutureCallback<>() {
+                @Override
+                public void onSuccess(@Nullable HttpResponse result) {
+                    channel.writeAndFlush(result);
+                }
+                @Override
+                public void onFailure(@NotNull Throwable failure) {
+                    channel.writeAndFlush(factory.newResponse500("Handler future failed: %s".formatted(future), failure));
+                }
+            }, executor());
+        }
+
+        private @NotNull Executor executor() {
+            return channel.eventLoop();
         }
     }
 

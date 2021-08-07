@@ -9,6 +9,7 @@ import io.webby.Testing;
 import io.webby.app.AppSettings;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
+import org.junit.jupiter.api.Assertions;
 
 import java.util.ArrayDeque;
 import java.util.Queue;
@@ -20,11 +21,11 @@ import static io.webby.FakeRequests.request;
 public abstract class BaseIntegrationTest {
     protected EmbeddedChannel channel;
 
-    protected void testStartup(@NotNull Class<?> clazz) {
-        testStartup(clazz, __ -> {});
+    protected @NotNull Injector testStartup(@NotNull Class<?> clazz) {
+        return testStartup(clazz, __ -> {});
     }
 
-    protected void testStartup(@NotNull Class<?> clazz, @NotNull Consumer<AppSettings> consumer) {
+    protected @NotNull Injector testStartup(@NotNull Class<?> clazz, @NotNull Consumer<AppSettings> consumer) {
         Injector injector = Testing.testStartup(settings -> {
             settings.setWebPath("src/examples/resources/web");
             settings.setViewPath("src/examples/resources/web");
@@ -33,6 +34,7 @@ public abstract class BaseIntegrationTest {
         });
         NettyChannelHandler handler = injector.getInstance(NettyChannelHandler.class);
         channel = new EmbeddedChannel(new ChunkedWriteHandler(), handler);
+        return injector;
     }
 
     @NotNull
@@ -52,8 +54,12 @@ public abstract class BaseIntegrationTest {
 
     @NotNull
     protected HttpResponse call(HttpMethod method, String uri, @Nullable Object content) {
+        Assertions.assertNotNull(channel, "Channel is not initialized. Add @BeforeEach setup method calling testStartup()");
+
         FullHttpRequest request = request(method, uri, content);
         channel.writeOneInbound(request);
+        flushChannel();
+
         Queue<HttpObject> outbound = readAllOutbound(channel);
         HttpResponse response = outbound.size() == 1 ?
                 (HttpResponse) outbound.poll() :
@@ -61,9 +67,12 @@ public abstract class BaseIntegrationTest {
         return Testing.READABLE ? readable(response) : response;
     }
 
+    protected void flushChannel() {
+        channel.flushOutbound();
+    }
+
     @NotNull
     protected static Queue<HttpObject> readAllOutbound(@NotNull EmbeddedChannel channel) {
-        channel.flushOutbound();
         Queue<HttpObject> result = new ArrayDeque<>();
         HttpObject object;
         while ((object = channel.readOutbound()) != null) {
