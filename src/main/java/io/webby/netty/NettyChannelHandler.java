@@ -108,9 +108,8 @@ public class NettyChannelHandler extends SimpleChannelInboundHandler<FullHttpReq
             this.context = context;
         }
 
-        @NotNull
         @VisibleForTesting
-        HttpResponse handle(@NotNull FullHttpRequest request) {
+        @NotNull HttpResponse handle(@NotNull FullHttpRequest request) {
             CharArray path = extractPath(request.uri());
             Match<RouteEndpoint> match = router.routeOrNull(path);
             if (match == null) {
@@ -137,10 +136,9 @@ public class NettyChannelHandler extends SimpleChannelInboundHandler<FullHttpReq
             }
         }
 
-        @NotNull
-        private HttpResponse call(@NotNull FullHttpRequest request,
-                                  @NotNull Match<RouteEndpoint> match,
-                                  @NotNull Endpoint endpoint) {
+        private @NotNull HttpResponse call(@NotNull FullHttpRequest request,
+                                           @NotNull Match<RouteEndpoint> match,
+                                           @NotNull Endpoint endpoint) {
             Caller caller = endpoint.caller();
             try {
                 Object callResult = caller.call(request, match.variables());
@@ -237,8 +235,7 @@ public class NettyChannelHandler extends SimpleChannelInboundHandler<FullHttpReq
         }
 
         @VisibleForTesting
-        @NotNull
-        Iterable<Pair<CharSequence, CharSequence>> getDefaultHeaders(@NotNull EndpointOptions options) {
+        @NotNull Iterable<Pair<CharSequence, CharSequence>> getDefaultHeaders(@NotNull EndpointOptions options) {
             CharSequence contentType = options.http().hasContentType() ?
                     options.http().contentType() :
                     (options.out() == Marshal.JSON) ?
@@ -258,7 +255,7 @@ public class NettyChannelHandler extends SimpleChannelInboundHandler<FullHttpReq
         }
 
         @SuppressWarnings("UnstableApiUsage")
-        private HttpResponse addCallback(@NotNull Future<?> future, @NotNull EndpointOptions options) {
+        private @NotNull HttpResponse addCallback(@NotNull Future<?> future, @NotNull EndpointOptions options) {
             ListenableFuture<?> listenable = (future instanceof ListenableFuture<?> listenableFuture) ?
                     listenableFuture :
                     JdkFutureAdapters.listenInPoolThread(future, executor());
@@ -283,7 +280,8 @@ public class NettyChannelHandler extends SimpleChannelInboundHandler<FullHttpReq
             return new EmptyHttpResponse();
         }
 
-        private HttpResponse addCallback(@NotNull Consumer<OutputStream> consumer, @NotNull EndpointOptions options) {
+        private @NotNull HttpResponse addCallback(@NotNull Consumer<OutputStream> consumer, @NotNull EndpointOptions options) {
+            // TODO: use ChunkOutputStream
             Future<?> future = executor().submit(() -> {
                 channel.write(new DefaultHttpResponse(HttpVersion.HTTP_1_1, HttpResponseStatus.OK));
                 consumer.accept(new OutputStream() {
@@ -329,9 +327,8 @@ public class NettyChannelHandler extends SimpleChannelInboundHandler<FullHttpReq
     }
 
     @VisibleForTesting
-    @NotNull
     @CanIgnoreReturnValue
-    static <T extends CharSequence, U> HttpResponse withHeaders(
+    static <T extends CharSequence, U> @NotNull HttpResponse withHeaders(
             @NotNull HttpResponse response,
             @NotNull Iterable<Pair<T, U>> values,
             boolean canOverwrite) {

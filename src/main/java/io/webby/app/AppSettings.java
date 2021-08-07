@@ -91,7 +91,7 @@ public final class AppSettings implements Settings {
     }
 
     @Override
-    public byte[] securityKey() {
+    public byte @NotNull [] securityKey() {
         return securityKey;
     }
 

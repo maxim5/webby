@@ -21,7 +21,7 @@ public interface Settings {
 
     boolean isSafeMode();
 
-    byte[] securityKey();
+    byte @NotNull [] securityKey();
 
     @NotNull Path webPath();
 

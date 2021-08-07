@@ -35,7 +35,7 @@ public class DefaultHttpRequestEx extends DefaultFullHttpRequest implements Muta
     public DefaultHttpRequestEx(@NotNull FullHttpRequest request,
                                 @NotNull Channel channel,
                                 @NotNull Map<String, Constraint<?>> constraints,
-                                @NotNull Object[] attributes) {
+                                Object @NotNull [] attributes) {
         super(request.protocolVersion(), request.method(), request.uri(), request.content(),
               request.headers(), request.trailingHeaders());
         this.channel = channel;
