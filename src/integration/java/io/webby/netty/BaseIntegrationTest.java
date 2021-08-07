@@ -63,6 +63,7 @@ public abstract class BaseIntegrationTest {
 
     @NotNull
     protected static Queue<HttpObject> readAllOutbound(@NotNull EmbeddedChannel channel) {
+        channel.flushOutbound();
         Queue<HttpObject> result = new ArrayDeque<>();
         HttpObject object;
         while ((object = channel.readOutbound()) != null) {

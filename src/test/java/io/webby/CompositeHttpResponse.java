@@ -20,7 +20,7 @@ public class CompositeHttpResponse extends DefaultHttpResponse implements Conten
 
     public static @NotNull CompositeHttpResponse fromObjects(@NotNull Queue<HttpObject> objects) {
         if (objects.isEmpty()) {
-            Assertions.fail();
+            Assertions.fail("No objects provided: " + objects);
         }
 
         HttpResponse response = (HttpResponse) objects.poll();
