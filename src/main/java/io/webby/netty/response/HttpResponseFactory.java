@@ -6,12 +6,14 @@ import com.google.inject.Inject;
 import io.netty.buffer.ByteBuf;
 import io.netty.buffer.Unpooled;
 import io.netty.handler.codec.http.*;
+import io.netty.handler.stream.ChunkedFile;
 import io.netty.handler.stream.ChunkedStream;
 import io.webby.app.Settings;
 import io.webby.netty.exceptions.*;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
+import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.InputStream;
@@ -63,6 +65,14 @@ public class HttpResponseFactory {
     public StreamingHttpResponse newResponse(@NotNull InputStream content, @NotNull HttpResponseStatus status) {
         ChunkedStream stream = new ChunkedStream(content);
         StreamingHttpResponse response = new StreamingHttpResponse(HttpVersion.HTTP_1_1, status, stream);
+        response.headers().set(HttpHeaderNames.TRANSFER_ENCODING, HttpHeaderValues.CHUNKED);
+        return response;
+    }
+
+    @NotNull
+    public StreamingHttpResponse newResponse(@NotNull File content, @NotNull HttpResponseStatus status) throws IOException {
+        ChunkedFile chunkedFile = new ChunkedFile(content);
+        StreamingHttpResponse response = new StreamingHttpResponse(HttpVersion.HTTP_1_1, status, chunkedFile);
         response.headers().set(HttpHeaderNames.TRANSFER_ENCODING, HttpHeaderValues.CHUNKED);
         return response;
     }

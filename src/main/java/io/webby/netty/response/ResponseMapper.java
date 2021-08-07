@@ -12,10 +12,7 @@ import io.webby.app.Settings;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
-import java.io.Closeable;
-import java.io.IOException;
-import java.io.InputStream;
-import java.io.Reader;
+import java.io.*;
 import java.nio.ByteBuffer;
 import java.nio.CharBuffer;
 import java.nio.channels.Channels;
@@ -26,6 +23,7 @@ import java.util.function.Function;
 
 import static io.webby.util.EasyCast.castAny;
 import static io.webby.util.EasyIO.Close.closeRethrow;
+import static io.webby.util.Rethrow.Functions.rethrow;
 
 public class ResponseMapper {
     private final Map<Class<?>, Function<?, HttpResponse>> classMap = new HashMap<>();
@@ -54,6 +52,7 @@ public class ResponseMapper {
         add(InputStream.class, this::respond);
         add(Readable.class, readable -> respond(readToString(readable)));
         add(Reader.class, reader -> respond(readToString(reader)));
+        add(File.class, rethrow(this::respond));
     }
 
     @Nullable
@@ -97,6 +96,10 @@ public class ResponseMapper {
 
     private @NotNull StreamingHttpResponse respond(@NotNull InputStream stream) {
         return factory.newResponse(stream, HttpResponseStatus.OK);
+    }
+
+    private @NotNull StreamingHttpResponse respond(@NotNull File file) throws IOException {
+        return factory.newResponse(file, HttpResponseStatus.OK);
     }
 
     private <B> void add(@NotNull Class<B> key, @NotNull Function<B, HttpResponse> value) {
