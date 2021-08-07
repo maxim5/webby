@@ -12,6 +12,7 @@ import org.jetbrains.annotations.Nullable;
 import org.junit.jupiter.api.Assertions;
 
 import java.io.ByteArrayOutputStream;
+import java.nio.charset.Charset;
 import java.util.stream.Stream;
 
 import static io.webby.FakeRequests.asByteBuf;
@@ -85,7 +86,7 @@ public class AssertResponse {
     }
 
     public static void assertContentContains(HttpResponse response, String ... substrings) {
-        String content = content(response).toString();
+        String content = content(response).toString(Charset.defaultCharset());
         for (String string : substrings) {
             Truth.assertThat(content).contains(string);
         }

@@ -8,10 +8,7 @@ import io.webby.url.annotate.GET;
 import io.webby.url.annotate.Json;
 import io.webby.url.annotate.Serve;
 
-import java.io.ByteArrayInputStream;
-import java.io.Reader;
-import java.io.Serializable;
-import java.io.StringReader;
+import java.io.*;
 import java.nio.ByteBuffer;
 import java.nio.CharBuffer;
 import java.nio.channels.Channels;
@@ -66,6 +63,11 @@ public class ReturnValue {
     @GET(url = "/r/reader/{val}")
     public Reader reader(String val) {
         return new StringReader(val);
+    }
+
+    @GET(url = "/r/file/{path}")
+    public File file(String path) {
+        return new File(path);
     }
 
     @GET(url = "/r/json/map/{*var}")

@@ -33,6 +33,13 @@ public class ReturnValueIntegrationTest extends BaseIntegrationTest {
     }
 
     @Test
+    public void file_like() {
+        HttpResponse response = get("/r/file/README.md");
+        assert200(response);
+        assertContentContains(response, "<h4 align=\"center\">Web Server for Humans</h4>");
+    }
+
+    @Test
     public void json_map() {
         HttpResponse response = get("/r/json/map/bar");
         assert200(response, """
