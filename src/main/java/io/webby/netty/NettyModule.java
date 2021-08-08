@@ -19,6 +19,7 @@ public class NettyModule extends AbstractModule {
         bind(Interceptors.class).asEagerSingleton();
         bind(InterceptorScanner.class).asEagerSingleton();
 
-        bind(NettyChannelHandler.class);  // not a singleton!
+        bind(NettyDispatcher.class);      // not a singleton!
+        bind(NettyRequestHandler.class);  // not a singleton!
     }
 }

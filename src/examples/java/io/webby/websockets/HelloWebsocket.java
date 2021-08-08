@@ -8,10 +8,10 @@ import org.jetbrains.annotations.NotNull;
 @ServeWebsocket(url = "/ws/hello")
 public class HelloWebsocket {
     public void onText(@NotNull TextWebSocketFrame frame) {
-
+        System.out.println("Hello text " + frame);
     }
 
     public void onBinary(@NotNull BinaryWebSocketFrame frame) {
-
+        System.out.println("Hello bin " + frame);
     }
 }

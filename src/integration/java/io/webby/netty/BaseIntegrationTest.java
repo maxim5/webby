@@ -32,7 +32,7 @@ public abstract class BaseIntegrationTest {
             settings.setHandlerClassOnly(clazz);
             consumer.accept(settings);
         });
-        NettyChannelHandler handler = injector.getInstance(NettyChannelHandler.class);
+        NettyRequestHandler handler = injector.getInstance(NettyRequestHandler.class);
         channel = new EmbeddedChannel(new ChunkedWriteHandler(), handler);
         return injector;
     }

@@ -4,10 +4,18 @@ import com.google.common.collect.ArrayListMultimap;
 import com.google.common.collect.Iterables;
 import com.google.common.collect.Multimap;
 import com.google.common.flogger.FluentLogger;
+import com.google.inject.ConfigurationException;
 import com.google.inject.Inject;
+import com.google.inject.Injector;
+import com.google.mu.util.stream.BiCollectors;
 import com.google.mu.util.stream.BiStream;
 import io.netty.handler.codec.http.websocketx.WebSocketFrame;
+import io.routekit.ConstToken;
+import io.routekit.QueryParseException;
+import io.routekit.QueryParser;
+import io.routekit.Token;
 import io.webby.app.Settings;
+import io.webby.url.UrlConfigError;
 import io.webby.url.WebsocketAgentConfigError;
 import io.webby.url.annotate.ServeWebsocket;
 import org.jetbrains.annotations.NotNull;
@@ -28,11 +36,12 @@ public class WebsocketAgentBinder {
 
     @Inject private Settings settings;
     @Inject private WebsocketAgentScanner scanner;
+    @Inject private Injector injector;
 
-    public @NotNull List<AgentBinding> bind() {
+    public @NotNull Map<String, AgentEndpoint> bindAgents() {
         Set<? extends Class<?>> agentClasses = scanner.getAgentClassesFromClasspath();
         List<AgentBinding> bindings = getBindings(agentClasses);
-        return bindings;
+        return processBindings(bindings, settings.urlParser());
     }
 
     @VisibleForTesting
@@ -86,8 +95,37 @@ public class WebsocketAgentBinder {
                 return Iterables.getFirst(methods, null);
             }).toMap();
 
-            consumer.accept(new AgentBinding(url, messageClass, acceptors, acceptsFrame));
+            consumer.accept(new AgentBinding(url, klass, messageClass, acceptors, acceptsFrame));
         });
+    }
+
+    @VisibleForTesting
+    @NotNull Map<String, AgentEndpoint> processBindings(@NotNull Collection<AgentBinding> bindings,
+                                                        @NotNull QueryParser parser) {
+        return BiStream.from(bindings, binding -> {
+            String url = binding.url();
+            try {
+                List<Token> tokens = parser.parse(url);
+                boolean isValidUrl = tokens.size() == 1 && tokens.get(0) instanceof ConstToken;
+                failIf(!isValidUrl, "Websocket URL can't contain variables: %s".formatted(url));
+            } catch (QueryParseException e) {
+                throw new UrlConfigError("Invalid URL: %s".formatted(url), e);
+            }
+            return url;
+        }, binding -> {
+            try {
+                Object instance = injector.getInstance(binding.agentClass());
+                return new AgentEndpoint(instance, binding.acceptors(), binding.acceptsFrame());
+            } catch (ConfigurationException e) {
+                String message =
+                        "Websocket agent instance of %s can't be found or created (use @Inject to register a constructor)"
+                        .formatted(binding.agentClass());
+                throw new WebsocketAgentConfigError(message, e);
+            }
+        }).collect(BiCollectors.toMap((endpoint1, endpoint2) -> {
+            String message = "Websocket URL duplicated: %s and %s".formatted(endpoint1.instance(), endpoint2.instance());
+            throw new WebsocketAgentConfigError(message);
+        }));
     }
 
     @VisibleForTesting

@@ -52,7 +52,7 @@ import java.util.logging.Level;
 
 import static io.webby.util.EasyCast.castAny;
 
-public class NettyChannelHandler extends SimpleChannelInboundHandler<FullHttpRequest> {
+public class NettyRequestHandler extends SimpleChannelInboundHandler<FullHttpRequest> {
     private static final FluentLogger log = FluentLogger.forEnclosingClass();
 
     @Inject private Settings settings;
@@ -66,7 +66,7 @@ public class NettyChannelHandler extends SimpleChannelInboundHandler<FullHttpReq
     private Channel channel;
 
     @Override
-    public void handlerAdded(ChannelHandlerContext ctx) {
+    public void handlerAdded(@NotNull ChannelHandlerContext ctx) {
         // See https://stackoverflow.com/questions/46508433/concurrency-in-netty
         assert context == null && channel == null : "%s is not sharable: can't be added to multiple contexts".formatted(this);
         context = ctx;
@@ -74,13 +74,13 @@ public class NettyChannelHandler extends SimpleChannelInboundHandler<FullHttpReq
     }
 
     @Override
-    public void channelActive(@NotNull ChannelHandlerContext ctx) {
-        log.at(Level.FINER).log("Channel is active: %s", ctx);
+    public void channelActive(@NotNull ChannelHandlerContext context) {
+        log.at(Level.FINER).log("Channel is active: %s", context);
     }
 
     @Override
-    public void channelInactive(@NotNull ChannelHandlerContext ctx) {
-        log.at(Level.FINER).log("Channel is inactive: %s", ctx);
+    public void channelInactive(@NotNull ChannelHandlerContext context) {
+        log.at(Level.FINER).log("Channel is inactive: %s", context);
     }
 
     @Override
@@ -111,7 +111,7 @@ public class NettyChannelHandler extends SimpleChannelInboundHandler<FullHttpReq
     }
 
     @Override
-    public void exceptionCaught(ChannelHandlerContext context, Throwable cause) {
+    public void exceptionCaught(@NotNull ChannelHandlerContext context, @NotNull Throwable cause) {
         context.channel()
                 .writeAndFlush(factory.newResponse500("Unexpected failure", cause))
                 .addListener(ChannelFutureListener.CLOSE);
