@@ -16,9 +16,9 @@ public class UrlRouter implements Provider<Router<RouteEndpoint>> {
     private final Router<RouteEndpoint> router;
 
     @Inject
-    public UrlRouter(@NotNull UrlBinder binder) {
+    public UrlRouter(@NotNull HandlerBinder binder) {
         Stopwatch stopwatch = Stopwatch.createStarted();
-        this.router = binder.bindRouter();
+        this.router = binder.buildHandlerRouter();
         log.at(Level.INFO).log("URL router built in %d ms", stopwatch.stop().elapsed(TimeUnit.MILLISECONDS));
     }
 

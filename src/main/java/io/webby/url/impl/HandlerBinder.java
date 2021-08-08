@@ -35,7 +35,7 @@ import java.util.function.Consumer;
 import java.util.logging.Level;
 import java.util.stream.Collectors;
 
-public class UrlBinder {
+public class HandlerBinder {
     private static final FluentLogger log = FluentLogger.forEnclosingClass();
 
     @Inject private Settings settings;
@@ -47,8 +47,7 @@ public class UrlBinder {
 
     private final Map<Class<?>, EndpointContext> contextCache = new HashMap<>();
 
-    @NotNull
-    public Router<RouteEndpoint> bindRouter() throws AppConfigException {
+    public @NotNull Router<RouteEndpoint> buildHandlerRouter() throws AppConfigException {
         Set<? extends Class<?>> handlerClasses = scanner.getHandlerClassesFromClasspath();
         List<Binding> bindings = getBindings(handlerClasses);
         RouterSetup<RouteEndpoint> setup = getRouterSetup(bindings);
@@ -85,8 +84,7 @@ public class UrlBinder {
     }
 
     @VisibleForTesting
-    @NotNull
-    List<Binding> getBindings(@NotNull Iterable<? extends Class<?>> handlerClasses) {
+    @NotNull List<Binding> getBindings(@NotNull Iterable<? extends Class<?>> handlerClasses) {
         try {
             Stopwatch stopwatch = Stopwatch.createStarted();
             ArrayList<Binding> bindings = new ArrayList<>();
@@ -215,7 +213,7 @@ public class UrlBinder {
     }
 
     @VisibleForTesting
-    static Map<String, Constraint<?>> extractConstraints(Class<?> klass, Object instance) {
+    static @NotNull Map<String, Constraint<?>> extractConstraints(Class<?> klass, Object instance) {
         Map<String, Constraint<?>> map = new HashMap<>();
         for (Field field : klass.getDeclaredFields()) {
             if (!field.isAnnotationPresent(Param.class)) {
@@ -250,8 +248,7 @@ public class UrlBinder {
     }
 
     @VisibleForTesting
-    @NotNull
-    static Serve getServeAnnotation(@NotNull AnnotatedElement elem) {
+    static @NotNull Serve getServeAnnotation(@NotNull AnnotatedElement elem) {
         if (elem.isAnnotationPresent(Serve.class)) {
             Serve serve = elem.getAnnotation(Serve.class);
             HandlerConfigError.failIf(serve.render().length > 1, "@Serve can have only one render: %s".formatted(elem));
@@ -281,8 +278,7 @@ public class UrlBinder {
     }
 
     @VisibleForTesting
-    @NotNull
-    static Marshal getMarshalFromAnnotations(@NotNull AnnotatedElement elem, @NotNull Marshal def) {
+    static @NotNull Marshal getMarshalFromAnnotations(@NotNull AnnotatedElement elem, @NotNull Marshal def) {
         boolean isJson = elem.isAnnotationPresent(Json.class);
         boolean isProto = elem.isAnnotationPresent(Protobuf.class);
         boolean isView = elem.isAnnotationPresent(View.class);
@@ -293,8 +289,7 @@ public class UrlBinder {
     }
 
     @VisibleForTesting
-    @NotNull
-    static EndpointHttp getEndpointHttpFromAnnotation(@NotNull AnnotatedElement element) {
+    static @NotNull EndpointHttp getEndpointHttpFromAnnotation(@NotNull AnnotatedElement element) {
         if (element.isAnnotationPresent(Http.class)) {
             Http http = element.getAnnotation(Http.class);
             String contentType = http.contentType();
@@ -307,8 +302,7 @@ public class UrlBinder {
     }
 
     @VisibleForTesting
-    @Nullable
-    EndpointView<?> getEndpointViewFromAnnotation(@NotNull AnnotatedElement element, @NotNull Render render) {
+    @Nullable EndpointView<?> getEndpointViewFromAnnotation(@NotNull AnnotatedElement element, @NotNull Render render) {
         if (element.isAnnotationPresent(View.class)) {
             View view = element.getAnnotation(View.class);
             String templateName = view.template();
