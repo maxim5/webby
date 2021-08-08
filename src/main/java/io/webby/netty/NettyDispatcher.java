@@ -6,7 +6,6 @@ import com.google.inject.Provider;
 import io.netty.channel.ChannelHandlerContext;
 import io.netty.channel.ChannelInboundHandlerAdapter;
 import io.netty.channel.ChannelPipeline;
-import io.netty.handler.codec.http.FullHttpRequest;
 import io.netty.handler.codec.http.HttpRequest;
 import io.netty.handler.codec.http.websocketx.WebSocketFrame;
 import io.netty.handler.codec.http.websocketx.WebSocketServerProtocolHandler;
@@ -43,23 +42,20 @@ public class NettyDispatcher extends ChannelInboundHandlerAdapter {
                 pipeline.addLast(new WebSocketServerProtocolHandler(uri, null, true));
                 pipeline.addLast(new NettyWebsocketHandler(endpoint));
                 pipeline.remove(ChunkedWriteHandler.class);
-                pipeline.remove(NettyDispatcher.class);
             } else {
                 pipeline.addLast(nettyChannelHandler.get());
-                pipeline.remove(NettyDispatcher.class);
             }
 
-            if (request instanceof FullHttpRequest full) {
-                context.fireChannelRead(full.retain());
-            }
+            pipeline.remove(NettyDispatcher.class);
             return;
         }
 
         if (message instanceof WebSocketFrame frame) {
-            context.fireChannelRead(frame.retain());
+            log.at(Level.INFO).log("Unexpected websocket frame: %s\n", frame);
             return;
         }
 
         log.at(Level.WARNING).log("Unknown message received: %s", message);
+        context.fireChannelRead(message);
     }
 }

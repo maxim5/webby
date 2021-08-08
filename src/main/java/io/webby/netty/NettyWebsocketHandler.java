@@ -3,10 +3,10 @@ package io.webby.netty;
 import com.google.common.flogger.FluentLogger;
 import io.netty.channel.ChannelHandlerContext;
 import io.netty.channel.ChannelInboundHandlerAdapter;
-import io.netty.channel.SimpleChannelInboundHandler;
 import io.netty.handler.codec.http.websocketx.TextWebSocketFrame;
 import io.netty.handler.codec.http.websocketx.WebSocketFrame;
 import io.netty.handler.codec.http.websocketx.WebSocketServerProtocolHandler;
+import io.netty.util.ReferenceCountUtil;
 import io.webby.url.ws.AgentEndpoint;
 import org.jetbrains.annotations.NotNull;
 
@@ -35,8 +35,14 @@ public class NettyWebsocketHandler extends ChannelInboundHandlerAdapter {
     @Override
     public void channelRead(@NotNull ChannelHandlerContext context, @NotNull Object message) throws Exception {
         if (message instanceof WebSocketFrame frame) {
-            endpoint.process(frame);
-            context.channel().writeAndFlush(new TextWebSocketFrame("Ack"));
+            try {
+                endpoint.process(frame);
+                context.channel().writeAndFlush(new TextWebSocketFrame("Ack"));
+            } finally {
+                ReferenceCountUtil.release(frame);
+            }
+        } else {
+            context.fireChannelRead(message);
         }
     }
 }
