@@ -62,24 +62,35 @@ public class NettyChannelHandler extends SimpleChannelInboundHandler<FullHttpReq
     @Inject private Router<RouteEndpoint> router;
     @Inject private Gson gson;
 
+    private ChannelHandlerContext context;
+    private Channel channel;
+
     @Override
-    public void channelActive(@NotNull ChannelHandlerContext ctx) throws Exception {
-        super.channelActive(ctx);
+    public void handlerAdded(ChannelHandlerContext ctx) {
+        // See https://stackoverflow.com/questions/46508433/concurrency-in-netty
+        assert context == null && channel == null : "%s is not sharable: can't be added to multiple contexts".formatted(this);
+        context = ctx;
+        channel = ctx.channel();
     }
 
     @Override
-    public void channelInactive(@NotNull ChannelHandlerContext ctx) throws Exception {
-        super.channelInactive(ctx);
+    public void channelActive(@NotNull ChannelHandlerContext ctx) {
+        log.at(Level.FINER).log("Channel is active: %s", ctx);
+    }
+
+    @Override
+    public void channelInactive(@NotNull ChannelHandlerContext ctx) {
+        log.at(Level.FINER).log("Channel is inactive: %s", ctx);
     }
 
     @Override
     protected void channelRead0(@NotNull ChannelHandlerContext context, @NotNull FullHttpRequest request) {
+        assert this.context == context : "Context mismatch: %s != %s".formatted(this.context, context);
         Stopwatch stopwatch = Stopwatch.createStarted();
-        Channel channel = context.channel();
 
         HttpResponse response;
         try {
-            response = new ChannelAwareHandler(channel, context).handle(request);
+            response = handle(request);
         } catch (Throwable throwable) {
             response = factory.newResponse500("Unexpected failure", throwable);
             log.at(Level.SEVERE).withCause(throwable).log("Unexpected failure: %s", throwable.getMessage());
@@ -87,9 +98,7 @@ public class NettyChannelHandler extends SimpleChannelInboundHandler<FullHttpReq
 
         if (response instanceof AsyncResponse) {
             if (response instanceof StreamingHttpResponse streaming) {
-                channel.write(streaming).addListener(
-                        (ChannelFutureListener) future -> future.channel().writeAndFlush(streaming.chunkedContent())
-                );
+                channel.write(streaming).addListener(future -> channel.writeAndFlush(streaming.chunkedContent()));
             } else if (request instanceof EmptyHttpResponse) {
                 log.at(Level.FINE).log("Response to be handled async");
             }
@@ -109,201 +118,188 @@ public class NettyChannelHandler extends SimpleChannelInboundHandler<FullHttpReq
         log.at(Level.SEVERE).withCause(cause).log("Unexpected failure: %s", cause.getMessage());
     }
 
-    private class ChannelAwareHandler {
-        private final Channel channel;
-        private final ChannelHandlerContext context;
-
-        public ChannelAwareHandler(@NotNull Channel channel, @NotNull ChannelHandlerContext context) {
-            this.channel = channel;
-            this.context = context;
+    @VisibleForTesting
+    @NotNull HttpResponse handle(@NotNull FullHttpRequest request) {
+        CharArray path = extractPath(request.uri());
+        Match<RouteEndpoint> match = router.routeOrNull(path);
+        if (match == null) {
+            log.at(Level.FINE).log("No associated endpoint for url: %s", path);
+            return factory.newResponse404();
         }
 
-        @VisibleForTesting
-        @NotNull HttpResponse handle(@NotNull FullHttpRequest request) {
-            CharArray path = extractPath(request.uri());
-            Match<RouteEndpoint> match = router.routeOrNull(path);
-            if (match == null) {
-                log.at(Level.FINE).log("No associated endpoint for url: %s", path);
-                return factory.newResponse404();
-            }
+        Endpoint endpoint = match.handler().getAcceptedEndpointOrNull(request);
+        if (endpoint == null) {
+            log.at(Level.INFO).log("Endpoint does not accept the request %s for url: %s", request.method(), path);
+            return factory.newResponse404();
+        }
 
-            Endpoint endpoint = match.handler().getAcceptedEndpointOrNull(request);
-            if (endpoint == null) {
-                log.at(Level.INFO).log("Endpoint does not accept the request %s for url: %s", request.method(), path);
-                return factory.newResponse404();
+        if (endpoint.context().isRawRequest()) {
+            return call(request, match, endpoint);
+        } else {
+            DefaultHttpRequestEx requestEx = interceptors.createRequest(request, channel, endpoint.context());
+            HttpResponse intercepted = interceptors.enter(requestEx, endpoint);
+            if (intercepted != null) {
+                return intercepted;
             }
+            HttpResponse response = call(requestEx, match, endpoint);
+            return interceptors.exit(requestEx, response);
+        }
+    }
 
-            if (endpoint.context().isRawRequest()) {
-                return call(request, match, endpoint);
-            } else {
-                DefaultHttpRequestEx requestEx = interceptors.createRequest(request, channel, endpoint.context());
-                HttpResponse intercepted = interceptors.enter(requestEx, endpoint);
-                if (intercepted != null) {
-                    return intercepted;
+    private @NotNull HttpResponse call(@NotNull FullHttpRequest request,
+                                       @NotNull Match<RouteEndpoint> match,
+                                       @NotNull Endpoint endpoint) {
+        Caller caller = endpoint.caller();
+        try {
+            Object callResult = caller.call(request, match.variables());
+            if (callResult == null) {
+                if (endpoint.context().isVoid()) {
+                    log.at(Level.FINE).log("Request handler is void, transforming into empty string");
+                } else {
+                    log.at(Level.WARNING).log("Request handler returned null: %s", caller.method());
                 }
-                HttpResponse response = call(requestEx, match, endpoint);
-                return interceptors.exit(requestEx, response);
+                return createResponse("", endpoint.options());
             }
+            return createResponse(callResult, endpoint.options());
+        } catch (ConversionError e) {
+            log.at(Level.INFO).withCause(e).log("Request validation failed: %s", e.getMessage());
+            return factory.newResponse400(e);
+        } catch (ServeException e) {
+            return factory.handleServeException(e, "Request handler %s".formatted(caller.method()));
+        } catch (Throwable e) {
+            log.at(Level.SEVERE).withCause(e).log("Failed to call method: %s", caller.method());
+            return factory.newResponse500("Failed to call method: %s".formatted(caller.method()), e);
         }
+    }
 
-        private @NotNull HttpResponse call(@NotNull FullHttpRequest request,
-                                           @NotNull Match<RouteEndpoint> match,
-                                           @NotNull Endpoint endpoint) {
-            Caller caller = endpoint.caller();
-            try {
-                Object callResult = caller.call(request, match.variables());
-                if (callResult == null) {
-                    if (endpoint.context().isVoid()) {
-                        log.at(Level.FINE).log("Request handler is void, transforming into empty string");
-                    } else {
-                        log.at(Level.WARNING).log("Request handler returned null: %s", caller.method());
-                    }
-                    return createResponse("", endpoint.options());
-                }
-                return createResponse(callResult, endpoint.options());
-            } catch (ConversionError e) {
-                log.at(Level.INFO).withCause(e).log("Request validation failed: %s", e.getMessage());
-                return factory.newResponse400(e);
-            } catch (ServeException e) {
-                return factory.handleServeException(e, "Request handler %s".formatted(caller.method()));
-            } catch (Throwable e) {
-                log.at(Level.SEVERE).withCause(e).log("Failed to call method: %s", caller.method());
-                return factory.newResponse500("Failed to call method: %s".formatted(caller.method()), e);
-            }
-        }
+    @VisibleForTesting
+    @NotNull HttpResponse createResponse(@NotNull Object callResult, @NotNull EndpointOptions options) throws Exception {
+        HttpResponse response = convertToResponse(callResult, options);
+        withHeaders(response, getDefaultHeaders(options), false);
+        withHeaders(response, options.http().headers(), true);
+        return response;
+    }
 
-        @VisibleForTesting
-        @NotNull
-        HttpResponse createResponse(@NotNull Object callResult, @NotNull EndpointOptions options) throws Exception {
-            HttpResponse response = convertToResponse(callResult, options);
-            withHeaders(response, getDefaultHeaders(options), false);
-            withHeaders(response, options.http().headers(), true);
+    @VisibleForTesting
+    @NotNull HttpResponse convertToResponse(@NotNull Object callResult, @NotNull EndpointOptions options) throws Exception {
+        if (callResult instanceof HttpResponse response) {
             return response;
         }
 
-        @VisibleForTesting
-        @NotNull
-        HttpResponse convertToResponse(@NotNull Object callResult, @NotNull EndpointOptions options) throws Exception {
-            if (callResult instanceof HttpResponse response) {
-                return response;
-            }
-
-            EndpointView<?> view = options.view();
-            if (view != null) {
-                return renderResponse(view, callResult);
-            }
-
-            Function<Object, HttpResponse> responseFunction = mapper.mapInstance(callResult);
-            if (responseFunction != null) {
-                return responseFunction.apply(callResult);
-            }
-            if (callResult instanceof Future<?> future) {
-                if (future.isDone()) {
-                    return convertToResponse(future.get(), options);
-                }
-                return addCallback(future, options);
-            }
-            if (callResult instanceof Consumer<?>) {
-                Consumer<OutputStream> consumer = castAny(callResult);
-                return addCallback(consumer, options);
-            }
-            if (callResult instanceof ThrowConsumer<?, ?> throwConsumer) {
-                Consumer<OutputStream> consumer = castAny(Consumers.rethrow(throwConsumer));
-                return addCallback(consumer, options);
-            }
-            if (callResult instanceof JsonElement element) {
-                return factory.newResponse(gson.toJson(element), HttpResponseStatus.OK, HttpHeaderValues.APPLICATION_JSON);
-            }
-
-            return switch (options.out()) {
-                case JSON -> {
-                    String json = gson.toJson(callResult);
-                    yield factory.newResponse(json, HttpResponseStatus.OK, HttpHeaderValues.APPLICATION_JSON);
-                }
-                case AS_STRING -> factory.newResponse(callResult.toString(), HttpResponseStatus.OK);
-                case PROTOBUF_BINARY -> throw new UnsupportedOperationException();
-                case PROTOBUF_JSON -> throw new UnsupportedOperationException();
-            };
+        EndpointView<?> view = options.view();
+        if (view != null) {
+            return renderResponse(view, callResult);
         }
 
-        @VisibleForTesting
-        @NotNull
-        <T> FullHttpResponse renderResponse(@NotNull EndpointView<T> view, @NotNull Object callResult) throws Exception {
-            Renderer<T> renderer = view.renderer();
-            T template = view.template();
-            return switch (renderer.support()) {
-                case BYTE_ARRAY -> {
-                    byte[] bytes = renderer.renderToBytes(template, callResult);
-                    yield factory.newResponse(bytes, HttpResponseStatus.OK);
-                }
-                case STRING -> {
-                    String content = renderer.renderToString(template, callResult);
-                    yield factory.newResponse(content, HttpResponseStatus.OK);
-                }
-                case BYTE_STREAM -> throw new UnsupportedOperationException();
-            };
+        Function<Object, HttpResponse> responseFunction = mapper.mapInstance(callResult);
+        if (responseFunction != null) {
+            return responseFunction.apply(callResult);
         }
-
-        @SuppressWarnings("UnstableApiUsage")
-        private @NotNull HttpResponse addCallback(@NotNull Future<?> future, @NotNull EndpointOptions options) {
-            ListenableFuture<?> listenable = (future instanceof ListenableFuture<?> listenableFuture) ?
-                    listenableFuture :
-                    JdkFutureAdapters.listenInPoolThread(future, executor());
-
-            ListenableFuture<HttpResponse> transform = Futures.transform(
-                listenable,
-                Guava.rethrow(result -> createResponse(result != null ? result : "", options)),
-                executor()
-            );
-
-            Futures.addCallback(transform, new FutureCallback<>() {
-                @Override
-                public void onSuccess(@Nullable HttpResponse result) {
-                    channel.writeAndFlush(result);
-                }
-                @Override
-                public void onFailure(@NotNull Throwable failure) {
-                    channel.writeAndFlush(factory.newResponse500("Handler future failed: %s".formatted(future), failure));
-                }
-            }, executor());
-
-            return new EmptyHttpResponse();
-        }
-
-        private @NotNull HttpResponse addCallback(@NotNull Consumer<OutputStream> consumer, @NotNull EndpointOptions options) {
-            // TODO: use ChunkOutputStream
-            Future<?> future = executor().submit(() -> {
-                channel.write(new DefaultHttpResponse(HttpVersion.HTTP_1_1, HttpResponseStatus.OK));
-                consumer.accept(new OutputStream() {
-                    @Override
-                    public void write(byte @NotNull [] bytes) {
-                        channel.write(new DefaultHttpContent(Unpooled.wrappedBuffer(bytes)));
-                    }
-                    @Override
-                    public void write(byte @NotNull [] bytes, int offset, int length) {
-                        channel.write(new DefaultHttpContent(Unpooled.wrappedBuffer(bytes, offset, length)));
-                    }
-                    @Override
-                    public void write(int b) {
-                        channel.write(new DefaultHttpContent(Unpooled.buffer(1).writeByte(b)));
-                    }
-                    @Override
-                    public void flush() {
-                        channel.flush();
-                    }
-                    @Override
-                    public void close() {
-                        channel.flush();
-                    }
-                });
-            });
-
+        if (callResult instanceof Future<?> future) {
+            if (future.isDone()) {
+                return convertToResponse(future.get(), options);
+            }
             return addCallback(future, options);
         }
-
-        private @NotNull EventExecutor executor() {
-            return context.executor();
+        if (callResult instanceof Consumer<?>) {
+            Consumer<OutputStream> consumer = castAny(callResult);
+            return addCallback(consumer, options);
         }
+        if (callResult instanceof ThrowConsumer<?, ?> throwConsumer) {
+            Consumer<OutputStream> consumer = castAny(Consumers.rethrow(throwConsumer));
+            return addCallback(consumer, options);
+        }
+        if (callResult instanceof JsonElement element) {
+            return factory.newResponse(gson.toJson(element), HttpResponseStatus.OK, HttpHeaderValues.APPLICATION_JSON);
+        }
+
+        return switch (options.out()) {
+            case JSON -> {
+                String json = gson.toJson(callResult);
+                yield factory.newResponse(json, HttpResponseStatus.OK, HttpHeaderValues.APPLICATION_JSON);
+            }
+            case AS_STRING -> factory.newResponse(callResult.toString(), HttpResponseStatus.OK);
+            case PROTOBUF_BINARY -> throw new UnsupportedOperationException();
+            case PROTOBUF_JSON -> throw new UnsupportedOperationException();
+        };
+    }
+
+    @VisibleForTesting
+    <T> @NotNull FullHttpResponse renderResponse(@NotNull EndpointView<T> view, @NotNull Object callResult) throws Exception {
+        Renderer<T> renderer = view.renderer();
+        T template = view.template();
+        return switch (renderer.support()) {
+            case BYTE_ARRAY -> {
+                byte[] bytes = renderer.renderToBytes(template, callResult);
+                yield factory.newResponse(bytes, HttpResponseStatus.OK);
+            }
+            case STRING -> {
+                String content = renderer.renderToString(template, callResult);
+                yield factory.newResponse(content, HttpResponseStatus.OK);
+            }
+            case BYTE_STREAM -> throw new UnsupportedOperationException();
+        };
+    }
+
+    @SuppressWarnings("UnstableApiUsage")
+    private @NotNull HttpResponse addCallback(@NotNull Future<?> future, @NotNull EndpointOptions options) {
+        ListenableFuture<?> listenable = (future instanceof ListenableFuture<?> listenableFuture) ?
+                listenableFuture :
+                JdkFutureAdapters.listenInPoolThread(future, executor());
+
+        ListenableFuture<HttpResponse> transform = Futures.transform(
+            listenable,
+            Guava.rethrow(result -> createResponse(result != null ? result : "", options)),
+            executor()
+        );
+
+        Futures.addCallback(transform, new FutureCallback<>() {
+            @Override
+            public void onSuccess(@Nullable HttpResponse result) {
+                channel.writeAndFlush(result);
+            }
+            @Override
+            public void onFailure(@NotNull Throwable failure) {
+                channel.writeAndFlush(factory.newResponse500("Handler future failed: %s".formatted(future), failure));
+            }
+        }, executor());
+
+        return new EmptyHttpResponse();
+    }
+
+    private @NotNull HttpResponse addCallback(@NotNull Consumer<OutputStream> consumer, @NotNull EndpointOptions options) {
+        // TODO: use ChunkOutputStream
+        Future<?> future = executor().submit(() -> {
+            channel.write(new DefaultHttpResponse(HttpVersion.HTTP_1_1, HttpResponseStatus.OK));
+            consumer.accept(new OutputStream() {
+                @Override
+                public void write(byte @NotNull [] bytes) {
+                    channel.write(new DefaultHttpContent(Unpooled.wrappedBuffer(bytes)));
+                }
+                @Override
+                public void write(byte @NotNull [] bytes, int offset, int length) {
+                    channel.write(new DefaultHttpContent(Unpooled.wrappedBuffer(bytes, offset, length)));
+                }
+                @Override
+                public void write(int b) {
+                    channel.write(new DefaultHttpContent(Unpooled.buffer(1).writeByte(b)));
+                }
+                @Override
+                public void flush() {
+                    channel.flush();
+                }
+                @Override
+                public void close() {
+                    channel.flush();
+                }
+            });
+        });
+
+        return addCallback(future, options);
+    }
+
+    private @NotNull EventExecutor executor() {
+        return context.executor();
     }
 
     @VisibleForTesting
