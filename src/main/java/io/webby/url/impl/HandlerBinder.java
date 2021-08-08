@@ -1,6 +1,5 @@
 package io.webby.url.impl;
 
-import com.google.common.annotations.VisibleForTesting;
 import com.google.common.base.Stopwatch;
 import com.google.common.flogger.FluentLogger;
 import com.google.common.flogger.LazyArgs;
@@ -22,6 +21,7 @@ import io.webby.url.view.RendererFactory;
 import io.webby.util.Pair;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
+import org.jetbrains.annotations.VisibleForTesting;
 
 import java.io.IOException;
 import java.lang.annotation.Annotation;
