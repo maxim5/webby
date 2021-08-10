@@ -75,12 +75,12 @@ public class NettyRequestHandler extends SimpleChannelInboundHandler<FullHttpReq
 
     @Override
     public void channelActive(@NotNull ChannelHandlerContext context) {
-        log.at(Level.FINER).log("Channel is active: %s", context);
+        log.at(Level.FINER).log("Request Channel is active: %s", context);
     }
 
     @Override
     public void channelInactive(@NotNull ChannelHandlerContext context) {
-        log.at(Level.FINER).log("Channel is inactive: %s", context);
+        log.at(Level.FINER).log("Request Channel is inactive: %s", context);
     }
 
     @Override

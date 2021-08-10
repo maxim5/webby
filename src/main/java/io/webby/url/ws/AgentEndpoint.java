@@ -1,6 +1,7 @@
 package io.webby.url.ws;
 
 import com.google.common.flogger.FluentLogger;
+import io.netty.handler.codec.http.websocketx.WebSocketFrame;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
@@ -13,7 +14,7 @@ public record AgentEndpoint(@NotNull Object instance,
                             boolean acceptsFrame) {
     private static final FluentLogger log = FluentLogger.forEnclosingClass();
 
-    public @Nullable Object process(@NotNull Object message) throws Exception {
+    public @Nullable WebSocketFrame process(@NotNull WebSocketFrame message) throws Exception {
         Class<?> klass = message.getClass();
         Method method = acceptors.get(klass);
         if (method != null) {
@@ -21,7 +22,11 @@ public record AgentEndpoint(@NotNull Object instance,
             if (callResult == null && !isVoid(method)) {
                 log.at(Level.WARNING).log("Websocket agent returned null: %s", method);
             }
-            return callResult;
+            if (callResult instanceof WebSocketFrame frame) {
+                return frame;
+            } else {
+                log.at(Level.WARNING).log("Websocket agent returned unexpected object: %s", callResult);
+            }
         }
 
         log.at(Level.INFO).log("Websocket agent doesn't handle the message: %s", klass);

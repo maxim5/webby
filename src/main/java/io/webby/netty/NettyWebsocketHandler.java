@@ -30,10 +30,20 @@ public class NettyWebsocketHandler extends ChannelInboundHandlerAdapter {
     }
 
     @Override
+    public void channelActive(@NotNull ChannelHandlerContext context) {
+        log.at(Level.FINER).log("Websocket Channel is active: %s", context);
+    }
+
+    @Override
+    public void channelInactive(@NotNull ChannelHandlerContext context) {
+        log.at(Level.FINER).log("Websocket Channel is inactive: %s", context);
+    }
+
+    @Override
     public void channelRead(@NotNull ChannelHandlerContext context, @NotNull Object message) throws Exception {
         if (message instanceof WebSocketFrame frame) {
             try {
-                Object reply = endpoint.process(frame);
+                WebSocketFrame reply = endpoint.process(frame);
                 if (reply != null) {
                     context.channel().writeAndFlush(reply);
                 }
