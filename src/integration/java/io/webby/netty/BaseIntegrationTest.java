@@ -2,31 +2,30 @@ package io.webby.netty;
 
 import com.google.inject.Injector;
 import io.netty.channel.embedded.EmbeddedChannel;
-import io.netty.handler.codec.http.*;
+import io.netty.handler.codec.http.FullHttpRequest;
+import io.netty.handler.codec.http.HttpMethod;
+import io.netty.handler.codec.http.HttpObject;
+import io.netty.handler.codec.http.HttpResponse;
 import io.netty.handler.stream.ChunkedWriteHandler;
 import io.webby.CompositeHttpResponse;
 import io.webby.Testing;
 import io.webby.app.AppSettings;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
-import org.junit.jupiter.api.Assertions;
 
-import java.util.ArrayDeque;
 import java.util.Queue;
 import java.util.function.Consumer;
 
 import static io.webby.AssertResponse.readable;
 import static io.webby.FakeRequests.request;
 
-public abstract class BaseIntegrationTest {
-    protected EmbeddedChannel channel;
-
+public abstract class BaseIntegrationTest extends BaseChannelTest {
     protected @NotNull Injector testStartup(@NotNull Class<?> clazz) {
         return testStartup(clazz, __ -> {});
     }
 
     protected @NotNull Injector testStartup(@NotNull Class<?> clazz, @NotNull Consumer<AppSettings> consumer) {
-        Injector injector = Testing.testStartup(settings -> {
+        injector = Testing.testStartup(settings -> {
             settings.setWebPath("src/examples/resources/web");
             settings.setViewPath("src/examples/resources/web");
             settings.setHandlerClassOnly(clazz);
@@ -54,7 +53,7 @@ public abstract class BaseIntegrationTest {
 
     @NotNull
     protected HttpResponse call(HttpMethod method, String uri, @Nullable Object content) {
-        Assertions.assertNotNull(channel, "Channel is not initialized. Add @BeforeEach setup method calling testStartup()");
+        assertChannelInitialized();
 
         FullHttpRequest request = request(method, uri, content);
         channel.writeOneInbound(request);
@@ -65,19 +64,5 @@ public abstract class BaseIntegrationTest {
                 (HttpResponse) outbound.poll() :
                 CompositeHttpResponse.fromObjects(outbound);
         return Testing.READABLE ? readable(response) : response;
-    }
-
-    protected void flushChannel() {
-        channel.flushOutbound();
-    }
-
-    @NotNull
-    protected static Queue<HttpObject> readAllOutbound(@NotNull EmbeddedChannel channel) {
-        Queue<HttpObject> result = new ArrayDeque<>();
-        HttpObject object;
-        while ((object = channel.readOutbound()) != null) {
-            result.add(object);
-        }
-        return result;
     }
 }

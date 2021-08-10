@@ -9,6 +9,7 @@ import io.webby.url.ws.AgentEndpoint;
 import io.webby.url.ws.WebsocketAgentBinder;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
+import org.jetbrains.annotations.VisibleForTesting;
 
 import java.util.Map;
 import java.util.concurrent.TimeUnit;
@@ -36,5 +37,14 @@ public class UrlRouter implements Provider<Router<RouteEndpoint>> {
 
     public @Nullable AgentEndpoint routeWebSocket(@NotNull String url) {
         return websocketRouter.get(url);
+    }
+
+    @VisibleForTesting
+    public @Nullable AgentEndpoint findAgentEndpointByClass(@NotNull Class<?> klass) {
+        return websocketRouter.values()
+                .stream()
+                .filter(endpoint -> klass.isInstance(endpoint.instance()))
+                .findAny()
+                .orElse(null);
     }
 }
