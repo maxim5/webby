@@ -11,6 +11,7 @@ import io.netty.handler.codec.http.websocketx.WebSocketFrame;
 import io.netty.handler.codec.http.websocketx.WebSocketServerProtocolHandler;
 import io.netty.handler.codec.http.websocketx.extensions.compression.WebSocketServerCompressionHandler;
 import io.netty.handler.stream.ChunkedWriteHandler;
+import io.webby.common.InjectorHelper;
 import io.webby.url.impl.UrlRouter;
 import io.webby.url.ws.AgentEndpoint;
 
@@ -20,7 +21,8 @@ public class NettyDispatcher extends ChannelInboundHandlerAdapter {
     private static final FluentLogger log = FluentLogger.forEnclosingClass();
 
     @Inject private UrlRouter router;
-    @Inject private Provider<NettyRequestHandler> nettyChannelHandler;
+    @Inject private InjectorHelper helper;
+    @Inject private Provider<NettyRequestHandler> requestHandler;
 
     private ChannelPipeline pipeline;
 
@@ -41,11 +43,11 @@ public class NettyDispatcher extends ChannelInboundHandlerAdapter {
                 log.at(Level.FINER).log("Upgrading channel to Websocket: %s", uri);
                 pipeline.addLast(new WebSocketServerCompressionHandler());
                 pipeline.addLast(new WebSocketServerProtocolHandler(uri, null, true));
-                pipeline.addLast(new NettyWebsocketHandler(endpoint));
+                pipeline.addLast(helper.injectMembers(new NettyWebsocketHandler(endpoint)));
                 pipeline.remove(ChunkedWriteHandler.class);
             } else {
                 log.at(Level.FINER).log("Migrating channel to HttpRequest: %s", uri);
-                pipeline.addLast(nettyChannelHandler.get());
+                pipeline.addLast(requestHandler.get());
             }
 
             pipeline.remove(NettyDispatcher.class);

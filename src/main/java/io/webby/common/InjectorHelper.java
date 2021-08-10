@@ -24,20 +24,17 @@ public class InjectorHelper {
     @Inject private Settings settings;
     private final Map<Key<?>, Binding<?>> singletons = new ConcurrentHashMap<>();
 
-    @NotNull
-    public <T> T getOrDefault(@NotNull Class<T> klass, @NotNull Supplier<T> defaultSupplier) {
+    public <T> @NotNull T getOrDefault(@NotNull Class<T> klass, @NotNull Supplier<T> defaultSupplier) {
         return getOrDefault(injector, klass, defaultSupplier);
     }
 
-    @NotNull
-    public <T> T getOrDefault(@NotNull Class<T> klass, @NotNull Function<Settings, T> defaultSupplier) {
+    public <T> @NotNull T getOrDefault(@NotNull Class<T> klass, @NotNull Function<Settings, T> defaultSupplier) {
         return getOrDefault(injector, klass, () -> defaultSupplier.apply(settings));
     }
 
-    @NotNull
-    public static <T> T getOrDefault(@NotNull Injector injector,
-                                     @NotNull Class<T> klass,
-                                     @NotNull Supplier<T> defaultSupplier) {
+    public static <T> @NotNull T getOrDefault(@NotNull Injector injector,
+                                              @NotNull Class<T> klass,
+                                              @NotNull Supplier<T> defaultSupplier) {
         try {
             if (injector.findBindingsByType(TypeLiteral.get(klass)).size() > 0) {
                 Provider<T> provider = injector.getProvider(klass);
@@ -50,6 +47,11 @@ public class InjectorHelper {
 
         log.at(Level.FINE).log("Applying default %s supplier", klass);
         return defaultSupplier.get();
+    }
+
+    public <T> @NotNull T injectMembers(@NotNull T instance) {
+        injector.injectMembers(instance);
+        return instance;
     }
 
     // Replacement for injector.getInstance

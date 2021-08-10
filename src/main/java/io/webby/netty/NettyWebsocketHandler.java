@@ -1,11 +1,13 @@
 package io.webby.netty;
 
 import com.google.common.flogger.FluentLogger;
+import com.google.inject.Inject;
 import io.netty.channel.ChannelHandlerContext;
 import io.netty.channel.ChannelInboundHandlerAdapter;
 import io.netty.handler.codec.http.websocketx.WebSocketFrame;
 import io.netty.handler.codec.http.websocketx.WebSocketServerProtocolHandler;
 import io.netty.util.ReferenceCountUtil;
+import io.webby.netty.ws.FrameMapper;
 import io.webby.url.ws.AgentEndpoint;
 import org.jetbrains.annotations.NotNull;
 
@@ -15,6 +17,7 @@ public class NettyWebsocketHandler extends ChannelInboundHandlerAdapter {
     private static final FluentLogger log = FluentLogger.forEnclosingClass();
 
     private final AgentEndpoint endpoint;
+    @Inject private FrameMapper mapper;
 
     public NettyWebsocketHandler(@NotNull AgentEndpoint endpoint) {
         this.endpoint = endpoint;
@@ -43,15 +46,26 @@ public class NettyWebsocketHandler extends ChannelInboundHandlerAdapter {
     public void channelRead(@NotNull ChannelHandlerContext context, @NotNull Object message) throws Exception {
         if (message instanceof WebSocketFrame frame) {
             try {
-                WebSocketFrame reply = endpoint.process(frame);
-                if (reply != null) {
-                    context.channel().writeAndFlush(reply);
-                }
+                handle(frame, context);
             } finally {
                 ReferenceCountUtil.release(frame);
             }
         } else {
             context.fireChannelRead(message);
+        }
+    }
+
+    private void handle(@NotNull WebSocketFrame message, @NotNull ChannelHandlerContext context) throws Exception {
+        Object callResult = endpoint.process(message);
+        if (callResult == null) {
+            return;
+        }
+
+        WebSocketFrame frame = mapper.mapInstance(callResult);
+        if (frame != null) {
+            context.channel().writeAndFlush(frame);
+        } else {
+            log.at(Level.WARNING).log("Websocket agent returned unexpected object: %s", callResult);
         }
     }
 }

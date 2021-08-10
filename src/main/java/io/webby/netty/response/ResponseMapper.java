@@ -55,16 +55,15 @@ public class ResponseMapper {
         add(File.class, rethrow(this::respond));
     }
 
-    @Nullable
-    public Function<Object, HttpResponse> mapInstance(Object object) {
-        Class<?> klass = object.getClass();
+    public @Nullable Function<Object, HttpResponse> mapInstance(@NotNull Object instance) {
+        Class<?> klass = instance.getClass();
         Function<Object, HttpResponse> result = lookupClass(klass);
         if (result != null) {
             return result;
         }
 
         for (Map.Entry<Class<?>, Function<?, HttpResponse>> entry : interfaceMap.entrySet()) {
-            if (entry.getKey().isInstance(object)) {
+            if (entry.getKey().isInstance(instance)) {
                 return castAny(entry.getValue());
             }
         }
@@ -73,8 +72,7 @@ public class ResponseMapper {
     }
 
     // https://stackoverflow.com/questions/32229528/inheritance-aware-class-to-value-map-to-replace-series-of-instanceof
-    @Nullable
-    public <T extends U, U> Function<U, HttpResponse> lookupClass(Class<T> clazz) {
+    public <T extends U, U> @Nullable Function<U, HttpResponse> lookupClass(@Nullable Class<T> clazz) {
         if (clazz == null) {
             return null;
         }
@@ -110,8 +108,7 @@ public class ResponseMapper {
         }
     }
 
-    @NotNull
-    private ByteBuf asByteBuf(CharBuffer buffer) {
+    private @NotNull ByteBuf asByteBuf(CharBuffer buffer) {
         return Unpooled.copiedBuffer(
                 buffer.array(),
                 buffer.arrayOffset() + buffer.position(),
@@ -120,8 +117,7 @@ public class ResponseMapper {
         );
     }
 
-    @NotNull
-    private static String readToString(Readable readable) {
+    private static @NotNull String readToString(@NotNull Readable readable) {
         try {
             return CharStreams.toString(readable);
         } catch (IOException e) {

@@ -14,7 +14,7 @@ public record AgentEndpoint(@NotNull Object instance,
                             boolean acceptsFrame) {
     private static final FluentLogger log = FluentLogger.forEnclosingClass();
 
-    public @Nullable WebSocketFrame process(@NotNull WebSocketFrame message) throws Exception {
+    public @Nullable Object process(@NotNull WebSocketFrame message) throws Exception {
         Class<?> klass = message.getClass();
         Method method = acceptors.get(klass);
         if (method != null) {
@@ -22,13 +22,8 @@ public record AgentEndpoint(@NotNull Object instance,
             if (callResult == null && !isVoid(method)) {
                 log.at(Level.WARNING).log("Websocket agent returned null: %s", method);
             }
-            if (callResult instanceof WebSocketFrame frame) {
-                return frame;
-            } else {
-                log.at(Level.WARNING).log("Websocket agent returned unexpected object: %s", callResult);
-            }
+            return callResult;
         }
-
         log.at(Level.INFO).log("Websocket agent doesn't handle the message: %s", klass);
         return null;
     }
