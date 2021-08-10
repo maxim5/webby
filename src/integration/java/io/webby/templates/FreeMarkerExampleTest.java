@@ -1,12 +1,12 @@
 package io.webby.templates;
 
 import io.netty.handler.codec.http.HttpResponse;
-import io.webby.netty.BaseHttpIntegrationTest;
+import io.webby.testing.BaseHttpIntegrationTest;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
-import static io.webby.AssertResponse.*;
+import static io.webby.testing.AssertResponse.*;
 
 public class FreeMarkerExampleTest extends BaseHttpIntegrationTest {
     @BeforeEach

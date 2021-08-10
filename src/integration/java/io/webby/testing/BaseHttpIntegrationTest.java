@@ -1,4 +1,4 @@
-package io.webby.netty;
+package io.webby.testing;
 
 import com.google.inject.Injector;
 import io.netty.channel.embedded.EmbeddedChannel;
@@ -7,17 +7,16 @@ import io.netty.handler.codec.http.HttpMethod;
 import io.netty.handler.codec.http.HttpObject;
 import io.netty.handler.codec.http.HttpResponse;
 import io.netty.handler.stream.ChunkedWriteHandler;
-import io.webby.CompositeHttpResponse;
-import io.webby.Testing;
 import io.webby.app.AppSettings;
+import io.webby.netty.NettyHttpHandler;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.Queue;
 import java.util.function.Consumer;
 
-import static io.webby.AssertResponse.readable;
-import static io.webby.FakeRequests.request;
+import static io.webby.testing.AssertResponse.readable;
+import static io.webby.testing.FakeRequests.request;
 
 public abstract class BaseHttpIntegrationTest extends BaseChannelTest {
     protected @NotNull Injector testStartup(@NotNull Class<?> clazz) {

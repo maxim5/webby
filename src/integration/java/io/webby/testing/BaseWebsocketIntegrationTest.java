@@ -1,12 +1,12 @@
-package io.webby.netty;
+package io.webby.testing;
 
 import io.netty.buffer.Unpooled;
 import io.netty.channel.embedded.EmbeddedChannel;
 import io.netty.handler.codec.http.websocketx.BinaryWebSocketFrame;
 import io.netty.handler.codec.http.websocketx.TextWebSocketFrame;
 import io.netty.handler.codec.http.websocketx.WebSocketFrame;
-import io.webby.Testing;
 import io.webby.app.AppSettings;
+import io.webby.netty.NettyWebsocketHandler;
 import io.webby.url.impl.UrlRouter;
 import io.webby.url.ws.AgentEndpoint;
 import org.jetbrains.annotations.NotNull;
@@ -16,7 +16,6 @@ import java.util.Queue;
 import java.util.function.Consumer;
 
 import static io.webby.util.EasyCast.castAny;
-import static io.webby.netty.FakeFrames.bytes;
 
 public class BaseWebsocketIntegrationTest extends BaseChannelTest {
     protected <T> @NotNull T testStartup(@NotNull Class<T> klass) {
@@ -44,7 +43,7 @@ public class BaseWebsocketIntegrationTest extends BaseChannelTest {
     }
 
     protected Queue<WebSocketFrame> sendBinary(@NotNull String binaryText) {
-        return sendBinary(bytes(binaryText));
+        return sendBinary(FakeFrames.bytes(binaryText));
     }
 
     protected Queue<WebSocketFrame> sendBinary(byte @NotNull [] bytes) {

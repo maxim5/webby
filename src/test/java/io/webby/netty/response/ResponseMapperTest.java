@@ -4,7 +4,7 @@ import io.netty.buffer.ByteBuf;
 import io.netty.buffer.Unpooled;
 import io.netty.handler.codec.http.HttpResponse;
 import io.routekit.util.CharArray;
-import io.webby.Testing;
+import io.webby.testing.Testing;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
@@ -16,7 +16,7 @@ import java.util.ArrayList;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.function.Function;
 
-import static io.webby.AssertResponse.streamContent;
+import static io.webby.testing.AssertResponse.streamContent;
 
 public class ResponseMapperTest {
     private final ResponseMapper mapper = Testing.testStartupNoHandlers().getInstance(ResponseMapper.class);

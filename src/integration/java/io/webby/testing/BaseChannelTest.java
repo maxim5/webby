@@ -1,4 +1,4 @@
-package io.webby.netty;
+package io.webby.testing;
 
 import com.google.inject.Injector;
 import io.netty.channel.embedded.EmbeddedChannel;

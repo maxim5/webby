@@ -1,10 +1,10 @@
 package io.webby.hello;
 
-import io.webby.netty.BaseHttpIntegrationTest;
+import io.webby.testing.BaseHttpIntegrationTest;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
-import static io.webby.AssertResponse.*;
+import static io.webby.testing.AssertResponse.*;
 
 public class AcceptContentIntegrationTest extends BaseHttpIntegrationTest {
     @BeforeEach

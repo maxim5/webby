@@ -2,13 +2,13 @@ package io.webby.websockets;
 
 import com.google.common.truth.Truth;
 import io.netty.handler.codec.http.websocketx.WebSocketFrame;
-import io.webby.netty.BaseWebsocketIntegrationTest;
+import io.webby.testing.BaseWebsocketIntegrationTest;
 import org.junit.jupiter.api.Test;
 
 import java.util.Queue;
 
-import static io.webby.FakeRequests.asByteBuf;
-import static io.webby.netty.FakeFrames.assertFrames;
+import static io.webby.testing.FakeRequests.asByteBuf;
+import static io.webby.testing.FakeFrames.assertFrames;
 
 public class HelloWebsocketTest extends BaseWebsocketIntegrationTest {
     private final HelloWebsocket agent = testStartup(HelloWebsocket.class);

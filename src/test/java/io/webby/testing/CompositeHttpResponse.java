@@ -1,4 +1,4 @@
-package io.webby;
+package io.webby.testing;
 
 import io.netty.buffer.ByteBuf;
 import io.netty.buffer.ByteBufHolder;

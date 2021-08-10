@@ -1,4 +1,4 @@
-package io.webby;
+package io.webby.testing;
 
 import com.google.gson.Gson;
 import io.netty.buffer.ByteBuf;

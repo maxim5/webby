@@ -1,6 +1,7 @@
-package io.webby;
+package io.webby.testing;
 
 import com.google.inject.Injector;
+import io.webby.Webby;
 import io.webby.app.AppSettings;
 import io.webby.db.kv.StorageType;
 import org.apache.logging.log4j.Level;

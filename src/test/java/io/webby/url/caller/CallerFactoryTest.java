@@ -9,7 +9,7 @@ import io.netty.handler.codec.http.HttpRequest;
 import io.netty.util.AsciiString;
 import io.routekit.util.CharArray;
 import io.routekit.util.MutableCharArray;
-import io.webby.Testing;
+import io.webby.testing.Testing;
 import io.webby.netty.request.HttpRequestEx;
 import io.webby.url.convert.ConversionError;
 import io.webby.url.handle.Handler;
@@ -29,7 +29,7 @@ import java.util.function.IntFunction;
 import java.util.function.IntSupplier;
 import java.util.stream.Collectors;
 
-import static io.webby.FakeRequests.*;
+import static io.webby.testing.FakeRequests.*;
 
 @SuppressWarnings("unused")
 public class CallerFactoryTest {

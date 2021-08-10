@@ -1,4 +1,4 @@
-package io.webby;
+package io.webby.testing;
 
 import com.google.common.truth.Truth;
 import io.netty.buffer.ByteBuf;
@@ -15,7 +15,7 @@ import java.io.ByteArrayOutputStream;
 import java.nio.charset.Charset;
 import java.util.stream.Stream;
 
-import static io.webby.FakeRequests.asByteBuf;
+import static io.webby.testing.FakeRequests.asByteBuf;
 import static io.webby.util.Rethrow.*;
 
 public class AssertResponse {

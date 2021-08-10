@@ -1,7 +1,7 @@
 package io.webby.netty;
 
 import com.google.inject.Injector;
-import io.webby.Testing;
+import io.webby.testing.Testing;
 import io.webby.app.AppSettings;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;

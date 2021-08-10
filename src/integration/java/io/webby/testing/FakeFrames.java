@@ -1,11 +1,10 @@
-package io.webby.netty;
+package io.webby.testing;
 
 import com.google.common.truth.Truth;
 import io.netty.buffer.Unpooled;
 import io.netty.handler.codec.http.websocketx.BinaryWebSocketFrame;
 import io.netty.handler.codec.http.websocketx.TextWebSocketFrame;
 import io.netty.handler.codec.http.websocketx.WebSocketFrame;
-import io.webby.Testing;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.Arrays;
