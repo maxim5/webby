@@ -3,7 +3,6 @@ package io.webby.netty;
 import com.google.common.flogger.FluentLogger;
 import io.netty.channel.ChannelHandlerContext;
 import io.netty.channel.ChannelInboundHandlerAdapter;
-import io.netty.handler.codec.http.websocketx.TextWebSocketFrame;
 import io.netty.handler.codec.http.websocketx.WebSocketFrame;
 import io.netty.handler.codec.http.websocketx.WebSocketServerProtocolHandler;
 import io.netty.util.ReferenceCountUtil;
@@ -24,8 +23,6 @@ public class NettyWebsocketHandler extends ChannelInboundHandlerAdapter {
     @Override
     public void userEventTriggered(@NotNull ChannelHandlerContext context, @NotNull Object event) throws Exception {
         if (event instanceof WebSocketServerProtocolHandler.HandshakeComplete handshakeComplete) {
-            // TODO: clean-up pipeline here?
-            // context.pipeline().remove(HttpRequestHandler.class);
             log.at(Level.INFO).log("Netty websocket handler joined %s: %s", context, handshakeComplete.requestUri());
         } else {
             super.userEventTriggered(context, event);
@@ -36,8 +33,10 @@ public class NettyWebsocketHandler extends ChannelInboundHandlerAdapter {
     public void channelRead(@NotNull ChannelHandlerContext context, @NotNull Object message) throws Exception {
         if (message instanceof WebSocketFrame frame) {
             try {
-                endpoint.process(frame);
-                context.channel().writeAndFlush(new TextWebSocketFrame("Ack"));
+                Object reply = endpoint.process(frame);
+                if (reply != null) {
+                    context.channel().writeAndFlush(reply);
+                }
             } finally {
                 ReferenceCountUtil.release(frame);
             }

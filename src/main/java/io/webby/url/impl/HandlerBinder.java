@@ -312,7 +312,7 @@ public class HandlerBinder {
         return null;
     }
 
-    private static boolean isVoid(Method method) {
+    private static boolean isVoid(@NotNull Method method) {
         return method.getReturnType().equals(Void.TYPE);
     }
 }

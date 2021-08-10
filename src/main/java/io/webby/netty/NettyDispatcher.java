@@ -38,24 +38,25 @@ public class NettyDispatcher extends ChannelInboundHandlerAdapter {
             AgentEndpoint endpoint = router.routeWebSocket(uri);
 
             if (endpoint != null) {
+                log.at(Level.FINER).log("Upgrading channel to Websocket: %s", uri);
                 pipeline.addLast(new WebSocketServerCompressionHandler());
                 pipeline.addLast(new WebSocketServerProtocolHandler(uri, null, true));
                 pipeline.addLast(new NettyWebsocketHandler(endpoint));
                 pipeline.remove(ChunkedWriteHandler.class);
             } else {
+                log.at(Level.FINER).log("Migrating channel to HttpRequest: %s", uri);
                 pipeline.addLast(nettyChannelHandler.get());
             }
 
             pipeline.remove(NettyDispatcher.class);
-            return;
-        }
 
-        if (message instanceof WebSocketFrame frame) {
+            log.at(Level.FINER).log("New channel pipeline: %s", pipeline.names());
+        } else if (message instanceof WebSocketFrame frame) {
             log.at(Level.INFO).log("Unexpected websocket frame: %s\n", frame);
-            return;
+        } else {
+            log.at(Level.WARNING).log("Unknown message received: %s", message);
         }
 
-        log.at(Level.WARNING).log("Unknown message received: %s", message);
         context.fireChannelRead(message);
     }
 }
