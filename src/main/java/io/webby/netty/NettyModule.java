@@ -10,8 +10,6 @@ import io.webby.netty.response.StaticServing;
 public class NettyModule extends AbstractModule {
     @Override
     protected void configure() {
-        bind(NettyBootstrap.class).asEagerSingleton();
-
         bind(HttpResponseFactory.class).asEagerSingleton();
         bind(ResponseMapper.class).asEagerSingleton();
         bind(StaticServing.class).asEagerSingleton();
@@ -19,7 +17,8 @@ public class NettyModule extends AbstractModule {
         bind(Interceptors.class).asEagerSingleton();
         bind(InterceptorScanner.class).asEagerSingleton();
 
-        bind(NettyDispatcher.class);      // not a singleton!
-        bind(NettyRequestHandler.class);  // not a singleton!
+        bind(NettyBootstrap.class).asEagerSingleton();
+        bind(NettyDispatcher.class);   // not a singleton!
+        bind(NettyHttpHandler.class);  // not a singleton!
     }
 }

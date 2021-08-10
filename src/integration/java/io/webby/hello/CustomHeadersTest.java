@@ -2,7 +2,7 @@ package io.webby.hello;
 
 import com.google.common.io.ByteStreams;
 import io.netty.handler.codec.http.HttpResponse;
-import io.webby.netty.BaseIntegrationTest;
+import io.webby.netty.BaseHttpIntegrationTest;
 import org.jetbrains.annotations.NotNull;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
@@ -17,7 +17,7 @@ import java.util.zip.ZipInputStream;
 
 import static io.webby.AssertResponse.*;
 
-public class CustomHeadersTest extends BaseIntegrationTest {
+public class CustomHeadersTest extends BaseHttpIntegrationTest {
     @BeforeEach
     void setup() {
         testStartup(CustomHeaders.class);

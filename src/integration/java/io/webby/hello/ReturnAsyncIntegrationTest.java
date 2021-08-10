@@ -1,12 +1,12 @@
 package io.webby.hello;
 
-import io.webby.netty.BaseIntegrationTest;
+import io.webby.netty.BaseHttpIntegrationTest;
 import org.junit.jupiter.api.Test;
 
 import static io.webby.AssertResponse.assert200;
 import static io.webby.AssertResponse.assert500;
 
-public class ReturnAsyncIntegrationTest extends BaseIntegrationTest {
+public class ReturnAsyncIntegrationTest extends BaseHttpIntegrationTest {
     private final ReturnAsync instance = testStartup(ReturnAsync.class).getInstance(ReturnAsync.class);
 
     @Test

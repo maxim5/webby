@@ -19,7 +19,7 @@ import java.util.function.Consumer;
 import static io.webby.AssertResponse.readable;
 import static io.webby.FakeRequests.request;
 
-public abstract class BaseIntegrationTest extends BaseChannelTest {
+public abstract class BaseHttpIntegrationTest extends BaseChannelTest {
     protected @NotNull Injector testStartup(@NotNull Class<?> clazz) {
         return testStartup(clazz, __ -> {});
     }
@@ -31,7 +31,7 @@ public abstract class BaseIntegrationTest extends BaseChannelTest {
             settings.setHandlerClassOnly(clazz);
             consumer.accept(settings);
         });
-        NettyRequestHandler handler = injector.getInstance(NettyRequestHandler.class);
+        NettyHttpHandler handler = injector.getInstance(NettyHttpHandler.class);
         channel = new EmbeddedChannel(new ChunkedWriteHandler(), handler);
         return injector;
     }

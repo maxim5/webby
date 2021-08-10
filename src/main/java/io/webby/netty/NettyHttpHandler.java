@@ -52,7 +52,7 @@ import java.util.logging.Level;
 
 import static io.webby.util.EasyCast.castAny;
 
-public class NettyRequestHandler extends SimpleChannelInboundHandler<FullHttpRequest> {
+public class NettyHttpHandler extends SimpleChannelInboundHandler<FullHttpRequest> {
     private static final FluentLogger log = FluentLogger.forEnclosingClass();
 
     @Inject private Settings settings;

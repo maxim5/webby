@@ -6,9 +6,9 @@ import io.webby.app.AppSettings;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 
-public class NettyRequestHandlerTest {
+public class NettyHttpHandlerTest {
     private final Injector injector = Testing.testStartupNoHandlers();
-    private final NettyRequestHandler handler = injector.getInstance(NettyRequestHandler.class);
+    private final NettyHttpHandler handler = injector.getInstance(NettyHttpHandler.class);
 
     @Test
     public void extractPath() {

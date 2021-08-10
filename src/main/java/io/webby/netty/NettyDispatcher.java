@@ -22,7 +22,7 @@ public class NettyDispatcher extends ChannelInboundHandlerAdapter {
 
     @Inject private UrlRouter router;
     @Inject private InjectorHelper helper;
-    @Inject private Provider<NettyRequestHandler> requestHandler;
+    @Inject private Provider<NettyHttpHandler> httpHandler;
 
     private ChannelPipeline pipeline;
 
@@ -46,8 +46,8 @@ public class NettyDispatcher extends ChannelInboundHandlerAdapter {
                 pipeline.addLast(helper.injectMembers(new NettyWebsocketHandler(endpoint)));
                 pipeline.remove(ChunkedWriteHandler.class);
             } else {
-                log.at(Level.FINER).log("Migrating channel to HttpRequest: %s", uri);
-                pipeline.addLast(requestHandler.get());
+                log.at(Level.FINER).log("Migrating channel to HTTP: %s", uri);
+                pipeline.addLast(httpHandler.get());
             }
 
             pipeline.remove(NettyDispatcher.class);
