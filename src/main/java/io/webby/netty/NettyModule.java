@@ -6,6 +6,8 @@ import io.webby.netty.intercept.Interceptors;
 import io.webby.netty.response.HttpResponseFactory;
 import io.webby.netty.response.ResponseMapper;
 import io.webby.netty.response.StaticServing;
+import io.webby.url.ws.Sender;
+import io.webby.netty.ws.ChannelSender;
 
 public class NettyModule extends AbstractModule {
     @Override
@@ -13,6 +15,8 @@ public class NettyModule extends AbstractModule {
         bind(HttpResponseFactory.class).asEagerSingleton();
         bind(ResponseMapper.class).asEagerSingleton();
         bind(StaticServing.class).asEagerSingleton();
+
+        bind(Sender.class).to(ChannelSender.class);  // not a singleton!
 
         bind(Interceptors.class).asEagerSingleton();
         bind(InterceptorScanner.class).asEagerSingleton();

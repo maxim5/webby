@@ -22,6 +22,7 @@ import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.VisibleForTesting;
 
 import java.lang.reflect.AnnotatedElement;
+import java.lang.reflect.Field;
 import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;
 import java.util.*;
@@ -95,7 +96,13 @@ public class WebsocketAgentBinder {
                 return Iterables.getFirst(methods, null);
             }).toMap();
 
-            consumer.accept(new AgentBinding(url, klass, messageClass, acceptors, acceptsFrame));
+            Field senderField = Arrays.stream(klass.getDeclaredFields())
+                    .filter(WebsocketAgentBinder::isSenderField)
+                    .peek(field -> field.setAccessible(true))
+                    .findAny()
+                    .orElse(null);
+
+            consumer.accept(new AgentBinding(url, klass, messageClass, acceptors, senderField, acceptsFrame));
         });
     }
 
@@ -115,11 +122,16 @@ public class WebsocketAgentBinder {
         }, binding -> {
             try {
                 Object instance = injector.getInstance(binding.agentClass());
-                return new AgentEndpoint(instance, binding.acceptors(), binding.acceptsFrame());
+                Sender sender = binding.sender() != null ? (Sender) binding.sender().get(instance) : null;
+                return new AgentEndpoint(instance, binding.acceptors(), sender, binding.acceptsFrame());
             } catch (ConfigurationException e) {
                 String message =
                         "Websocket agent instance of %s can't be found or created (use @Inject to register a constructor)"
                         .formatted(binding.agentClass());
+                throw new WebsocketAgentConfigError(message, e);
+            } catch (IllegalAccessException e) {
+                String message = "Failed to access %s field of the Websocket agent %s"
+                        .formatted(binding.sender(), binding.agentClass());
                 throw new WebsocketAgentConfigError(message, e);
             }
         }).collect(BiCollectors.toMap((endpoint1, endpoint2) -> {
@@ -145,5 +157,9 @@ public class WebsocketAgentBinder {
 
     private static @NotNull Method[] filter(@NotNull Collection<Method> methods, @NotNull IntPredicate predicate) {
         return methods.stream().filter(method -> predicate.test(method.getModifiers())).toArray(Method[]::new);
+    }
+
+    private static boolean isSenderField(@NotNull Field field) {
+        return Sender.class.isAssignableFrom(field.getType());
     }
 }

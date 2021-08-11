@@ -11,6 +11,7 @@ import java.util.logging.Level;
 
 public record AgentEndpoint(@NotNull Object instance,
                             @NotNull Map<Class<?>, Method> acceptors,
+                            @Nullable Sender sender,
                             boolean acceptsFrame) {
     private static final FluentLogger log = FluentLogger.forEnclosingClass();
 
