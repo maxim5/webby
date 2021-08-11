@@ -1,6 +1,8 @@
 package io.webby.netty.ws;
 
 import io.netty.channel.Channel;
+import io.netty.channel.ChannelFuture;
+import io.netty.channel.ChannelOutboundInvoker;
 import io.netty.handler.codec.http.websocketx.WebSocketFrame;
 import io.webby.url.ws.AgentLifecycle;
 import io.webby.url.ws.Sender;
@@ -11,13 +13,6 @@ import java.util.concurrent.atomic.AtomicReference;
 public class ChannelSender implements AgentLifecycle, Sender {
     private final AtomicReference<State> state = new AtomicReference<>(State.NOT_INITIALIZED);
     private Channel channel;
-
-    @Override
-    public void accept(WebSocketFrame frame) {
-        assert state.get() == State.READY :
-            "Channel is not ready: %s. Reasons: Websocket handshake not completed or closed already".formatted(state.get());
-        channel.write(frame);
-    }
 
     @Override
     public void onChannelConnected(@NotNull Channel channel) {
@@ -35,6 +30,27 @@ public class ChannelSender implements AgentLifecycle, Sender {
     @Override
     public void onChannelRestored() {
         state.compareAndSet(State.CLOSED, State.READY);
+    }
+
+    @Override
+    public @NotNull ChannelFuture send(@NotNull WebSocketFrame frame) {
+        assert state.get() == State.READY :
+            "Channel is not ready: %s. Reasons: Websocket handshake not completed or closed already".formatted(state.get());
+        return channel.write(frame);
+    }
+
+    @Override
+    public @NotNull ChannelOutboundInvoker flush() {
+        assert state.get() == State.READY :
+            "Channel is not ready: %s. Reasons: Websocket handshake not completed or closed already".formatted(state.get());
+        return channel.flush();
+    }
+
+    @Override
+    public @NotNull ChannelFuture sendFlush(@NotNull WebSocketFrame frame) {
+        assert state.get() == State.READY :
+            "Channel is not ready: %s. Reasons: Websocket handshake not completed or closed already".formatted(state.get());
+        return channel.writeAndFlush(frame);
     }
 
     private enum State {
