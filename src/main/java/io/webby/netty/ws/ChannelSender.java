@@ -21,13 +21,15 @@ public class ChannelSender implements AgentLifecycle, Sender {
 
     @Override
     public void onChannelConnected(@NotNull Channel channel) {
-        assert state.compareAndSet(State.NOT_INITIALIZED, State.READY) : "Invalid state: %s".formatted(state.get());
         this.channel = channel;
+        boolean success = state.compareAndSet(State.NOT_INITIALIZED, State.READY);
+        assert success : "Invalid state: %s".formatted(state.get());
     }
 
     @Override
     public void onChannelClose() {
-        assert state.compareAndSet(State.READY, State.CLOSED) : "Invalid state: %s".formatted(state.get());
+        boolean success = state.compareAndSet(State.READY, State.CLOSED);
+        assert success : "Invalid state: %s".formatted(state.get());
     }
 
     @Override
