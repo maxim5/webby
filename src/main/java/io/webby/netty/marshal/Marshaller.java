@@ -12,7 +12,9 @@ public interface Marshaller {
     void writeChars(@NotNull Writer writer, @NotNull Object instance) throws IOException;
 
     default void writeBytes(@NotNull OutputStream output, @NotNull Object instance, @NotNull Charset charset) throws IOException {
-        writeChars(new OutputStreamWriter(output, charset), instance);
+        try (OutputStreamWriter writer = new OutputStreamWriter(output, charset)) {
+            writeChars(writer, instance);
+        }
     }
 
     default byte @NotNull [] writeBytes(@NotNull Object instance, @NotNull Charset charset) throws IOException {
@@ -28,7 +30,9 @@ public interface Marshaller {
     <T> @NotNull T readChars(@NotNull Reader reader, @NotNull Class<T> klass) throws IOException;
 
     default <T> @NotNull T readBytes(@NotNull InputStream input, @NotNull Class<T> klass, @NotNull Charset charset) throws IOException {
-        return readChars(new InputStreamReader(input, charset), klass);
+        try (InputStreamReader reader = new InputStreamReader(input, charset)) {
+            return readChars(reader, klass);
+        }
     }
 
     default <T> @NotNull T readBytes(byte @NotNull [] bytes, @NotNull Class<T> klass, @NotNull Charset charset) throws IOException {

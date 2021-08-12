@@ -7,8 +7,6 @@ import com.google.common.util.concurrent.Futures;
 import com.google.common.util.concurrent.JdkFutureAdapters;
 import com.google.common.util.concurrent.ListenableFuture;
 import com.google.errorprone.annotations.CanIgnoreReturnValue;
-import com.google.gson.Gson;
-import com.google.gson.JsonElement;
 import com.google.inject.Inject;
 import io.netty.buffer.Unpooled;
 import io.netty.channel.Channel;
@@ -24,6 +22,8 @@ import io.routekit.util.MutableCharArray;
 import io.webby.app.Settings;
 import io.webby.netty.exceptions.ServeException;
 import io.webby.netty.intercept.Interceptors;
+import io.webby.netty.marshal.Marshaller;
+import io.webby.netty.marshal.MarshallerFactory;
 import io.webby.netty.request.DefaultHttpRequestEx;
 import io.webby.netty.response.*;
 import io.webby.url.annotate.Marshal;
@@ -60,7 +60,7 @@ public class NettyHttpHandler extends SimpleChannelInboundHandler<FullHttpReques
     @Inject private HttpResponseFactory factory;
     @Inject private ResponseMapper mapper;
     @Inject private Router<RouteEndpoint> router;
-    @Inject private Gson gson;
+    @Inject private MarshallerFactory marshallerFactory;
 
     private ChannelHandlerContext context;
     private Channel channel;
@@ -209,19 +209,9 @@ public class NettyHttpHandler extends SimpleChannelInboundHandler<FullHttpReques
             Consumer<OutputStream> consumer = castAny(Consumers.rethrow(throwConsumer));
             return addCallback(consumer, options);
         }
-        if (callResult instanceof JsonElement element) {
-            return factory.newResponse(gson.toJson(element), HttpResponseStatus.OK, HttpHeaderValues.APPLICATION_JSON);
-        }
 
-        return switch (options.out()) {
-            case JSON -> {
-                String json = gson.toJson(callResult);
-                yield factory.newResponse(json, HttpResponseStatus.OK, HttpHeaderValues.APPLICATION_JSON);
-            }
-            case AS_STRING -> factory.newResponse(callResult.toString(), HttpResponseStatus.OK);
-            case PROTOBUF_BINARY -> throw new UnsupportedOperationException();
-            case PROTOBUF_JSON -> throw new UnsupportedOperationException();
-        };
+        Marshaller marshaller = marshallerFactory.getMarshaller(options.out());
+        return factory.newResponse(marshaller.writeByteBuf(callResult, settings.charset()), HttpResponseStatus.OK);
     }
 
     @VisibleForTesting
