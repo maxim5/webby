@@ -1,6 +1,7 @@
 package io.webby.testing;
 
 import com.google.inject.Injector;
+import com.google.inject.Module;
 import io.webby.Webby;
 import io.webby.app.AppSettings;
 import io.webby.db.kv.StorageType;
@@ -23,22 +24,22 @@ public class Testing {
     public static final Charset CHARSET = Charset.defaultCharset();
 
     @NotNull
-    public static Injector testStartupNoHandlers() {
-        return testStartup(settings -> settings.setInterceptorFilter((pkg, cls) -> false));
+    public static Injector testStartupNoHandlers(@NotNull Module... modules) {
+        return testStartup(settings -> settings.setInterceptorFilter((pkg, cls) -> false), modules);
     }
 
     @NotNull
-    public static Injector testStartup(@NotNull Class<?> clazz) {
-        return testStartup(settings -> settings.setHandlerClassOnly(clazz));
+    public static Injector testStartup(@NotNull Class<?> clazz, @NotNull Module... modules) {
+        return testStartup(settings -> settings.setHandlerClassOnly(clazz), modules);
     }
 
     @NotNull
-    public static Injector testStartup(@NotNull String packageName) {
-        return testStartup(settings -> settings.setHandlerPackageOnly(packageName));
+    public static Injector testStartup(@NotNull String packageName, @NotNull Module... modules) {
+        return testStartup(settings -> settings.setHandlerPackageOnly(packageName), modules);
     }
 
     @NotNull
-    public static Injector testStartup(@NotNull Consumer<AppSettings> consumer) {
+    public static Injector testStartup(@NotNull Consumer<AppSettings> consumer, @NotNull Module... modules) {
         AppSettings settings = new AppSettings();
         settings.setDevMode(true);
         settings.setSecurityKey("12345678901234567890123456789012");
@@ -47,15 +48,15 @@ public class Testing {
         settings.setHandlerFilter((pkg, cls) -> false);
         settings.setStorageType(StorageType.JAVA_MAP);
         consumer.accept(settings);
-        return testStartup(settings);
+        return testStartup(settings, modules);
     }
 
     @NotNull
-    public static Injector testStartup(@NotNull AppSettings settings) {
+    public static Injector testStartup(@NotNull AppSettings settings, @NotNull Module... modules) {
         Configurator.setAllLevels(LogManager.ROOT_LOGGER_NAME, VERBOSE ? Level.TRACE : Level.WARN);
 
         Locale.setDefault(Locale.US);  // any way to remove this?
 
-        return Webby.initGuice(settings);
+        return Webby.initGuice(settings, modules);
     }
 }

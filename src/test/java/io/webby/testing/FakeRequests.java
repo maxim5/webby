@@ -9,6 +9,7 @@ import io.netty.handler.codec.http.DefaultFullHttpRequest;
 import io.netty.handler.codec.http.FullHttpRequest;
 import io.netty.handler.codec.http.HttpMethod;
 import io.netty.handler.codec.http.HttpVersion;
+import io.webby.netty.marshal.JsonMarshaller;
 import io.webby.netty.request.DefaultHttpRequestEx;
 import io.webby.netty.request.HttpRequestEx;
 import org.jetbrains.annotations.NotNull;
@@ -28,7 +29,11 @@ public class FakeRequests {
         return request(HttpMethod.POST, uri, null);
     }
 
-    public static @NotNull FullHttpRequest request(HttpMethod method, String uri, @Nullable Object content) {
+    public static @NotNull FullHttpRequest post(@NotNull String uri, @NotNull Object content) {
+        return request(HttpMethod.POST, uri, content);
+    }
+
+    public static @NotNull FullHttpRequest request(@NotNull HttpMethod method, String uri, @Nullable Object content) {
         ByteBuf byteBuf = asByteBuf((content instanceof String str) ? str : toJson(content));
         return new DefaultFullHttpRequest(HttpVersion.HTTP_1_1, method, uri, byteBuf);
     }
@@ -43,7 +48,7 @@ public class FakeRequests {
 
     @NotNull
     public static HttpRequestEx requestEx(@NotNull FullHttpRequest request) {
-        return new DefaultHttpRequestEx(request, new EmbeddedChannel(), Map.of(), new Object[0]);
+        return new DefaultHttpRequestEx(request, new EmbeddedChannel(), new JsonMarshaller(), Map.of(), new Object[0]);
     }
 
     @Nullable

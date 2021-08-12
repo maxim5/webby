@@ -60,7 +60,7 @@ public class NettyHttpHandler extends SimpleChannelInboundHandler<FullHttpReques
     @Inject private HttpResponseFactory factory;
     @Inject private ResponseMapper mapper;
     @Inject private Router<RouteEndpoint> router;
-    @Inject private MarshallerFactory marshallerFactory;
+    @Inject private MarshallerFactory marshallers;
 
     private ChannelHandlerContext context;
     private Channel channel;
@@ -210,7 +210,7 @@ public class NettyHttpHandler extends SimpleChannelInboundHandler<FullHttpReques
             return addCallback(consumer, options);
         }
 
-        Marshaller marshaller = marshallerFactory.getMarshaller(options.out());
+        Marshaller marshaller = marshallers.getMarshaller(options.out());
         return factory.newResponse(marshaller.writeByteBuf(callResult, settings.charset()), HttpResponseStatus.OK);
     }
 

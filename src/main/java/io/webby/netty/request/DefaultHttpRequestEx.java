@@ -1,8 +1,5 @@
 package io.webby.netty.request;
 
-import com.google.gson.Gson;
-import com.google.gson.JsonParseException;
-import io.netty.buffer.ByteBufInputStream;
 import io.netty.channel.Channel;
 import io.netty.handler.codec.http.*;
 import io.netty.handler.codec.http.cookie.Cookie;
@@ -10,11 +7,12 @@ import io.webby.auth.CookieUtil;
 import io.webby.auth.session.Session;
 import io.webby.auth.user.User;
 import io.webby.netty.intercept.attr.Attributes;
+import io.webby.netty.marshal.Marshaller;
 import io.webby.url.convert.Constraint;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
-import java.io.InputStreamReader;
+import java.io.IOException;
 import java.net.InetAddress;
 import java.net.InetSocketAddress;
 import java.net.SocketAddress;
@@ -29,22 +27,25 @@ import static io.webby.util.EasyCast.castAny;
 public class DefaultHttpRequestEx extends DefaultFullHttpRequest implements MutableHttpRequestEx {
     private final AtomicReference<QueryParams> params = new AtomicReference<>(null);
     private final Channel channel;
+    private final Marshaller json;
     private final Map<String, Constraint<?>> constraints;
     private final Object[] attributes;
 
     public DefaultHttpRequestEx(@NotNull FullHttpRequest request,
                                 @NotNull Channel channel,
+                                @NotNull Marshaller json,
                                 @NotNull Map<String, Constraint<?>> constraints,
                                 Object @NotNull [] attributes) {
         super(request.protocolVersion(), request.method(), request.uri(), request.content(),
               request.headers(), request.trailingHeaders());
         this.channel = channel;
+        this.json = json;
         this.constraints = constraints;
         this.attributes = attributes;
     }
 
     public DefaultHttpRequestEx(@NotNull DefaultHttpRequestEx request) {
-        this(request, request.channel, request.constraints, request.attributes);
+        this(request, request.channel, request.json, request.constraints, request.attributes);
     }
 
     @Override
@@ -93,9 +94,12 @@ public class DefaultHttpRequestEx extends DefaultFullHttpRequest implements Muta
     }
 
     @Override
-    public <T> @NotNull T contentAsJson(@NotNull Class<T> klass) throws JsonParseException {
-        InputStreamReader contentReader = new InputStreamReader(new ByteBufInputStream(content()), charset());
-        return new Gson().fromJson(contentReader, klass);
+    public <T> @NotNull T contentAsJson(@NotNull Class<T> klass) throws IllegalArgumentException {
+        try {
+            return json.readByteBuf(content(), klass, charset());
+        } catch (IOException | RuntimeException e) {
+            throw new IllegalArgumentException("Failed to parse JSON content", e);
+        }
     }
 
     @Override
