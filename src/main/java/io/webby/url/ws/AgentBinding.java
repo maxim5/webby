@@ -4,13 +4,12 @@ import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
 import java.lang.reflect.Field;
-import java.lang.reflect.Method;
-import java.util.Map;
+import java.util.List;
 
 public record AgentBinding(@NotNull String url,
                            @NotNull Class<?> agentClass,
                            @NotNull Class<?> messageClass,
-                           @NotNull Map<Class<?>, Method> acceptors,
+                           @NotNull List<Acceptor> acceptors,
                            @Nullable Field sender,
                            boolean acceptsFrame) {
 }

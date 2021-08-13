@@ -1,30 +1,36 @@
 package io.webby.url.ws;
 
-import com.google.common.collect.ArrayListMultimap;
-import com.google.common.collect.Iterables;
-import com.google.common.collect.Multimap;
+import com.google.common.collect.*;
 import com.google.common.flogger.FluentLogger;
 import com.google.inject.ConfigurationException;
 import com.google.inject.Inject;
 import com.google.inject.Injector;
 import com.google.mu.util.stream.BiCollectors;
 import com.google.mu.util.stream.BiStream;
+import io.netty.buffer.ByteBuf;
+import io.netty.buffer.Unpooled;
 import io.netty.handler.codec.http.websocketx.WebSocketFrame;
 import io.routekit.ConstToken;
 import io.routekit.QueryParseException;
 import io.routekit.QueryParser;
 import io.routekit.Token;
 import io.webby.app.Settings;
+import io.webby.netty.marshal.Marshaller;
+import io.webby.netty.marshal.MarshallerFactory;
 import io.webby.url.UrlConfigError;
 import io.webby.url.WebsocketAgentConfigError;
+import io.webby.url.annotate.Marshal;
 import io.webby.url.annotate.ServeWebsocket;
+import io.webby.url.annotate.WsApi;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.VisibleForTesting;
 
+import java.lang.annotation.Annotation;
 import java.lang.reflect.AnnotatedElement;
 import java.lang.reflect.Field;
 import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;
+import java.nio.charset.Charset;
 import java.util.*;
 import java.util.function.Consumer;
 import java.util.function.IntPredicate;
@@ -34,9 +40,11 @@ import static io.webby.url.WebsocketAgentConfigError.failIf;
 
 public class WebsocketAgentBinder {
     private static final FluentLogger log = FluentLogger.forEnclosingClass();
+    private static final int MAX_ID_SIZE = 64;
 
     @Inject private Settings settings;
     @Inject private WebsocketAgentScanner scanner;
+    @Inject private MarshallerFactory marshallers;
     @Inject private Injector injector;
 
     public @NotNull Map<String, AgentEndpoint> bindAgents() {
@@ -54,6 +62,8 @@ public class WebsocketAgentBinder {
 
     @VisibleForTesting
     void bindAgents(@NotNull Iterable<? extends Class<?>> agentClasses, @NotNull Consumer<AgentBinding> consumer) {
+        String defaultApiVersion = "1";  // TODO: settings.getApiVersion();
+
         agentClasses.forEach(klass -> {
             log.at(Level.ALL).log("Processing %s", klass);
 
@@ -75,7 +85,7 @@ public class WebsocketAgentBinder {
                 }
             }
 
-            Map<Class<?>, Method> acceptors = BiStream.from(allAcceptors.asMap()).mapValues((key, methods) -> {
+            Map<Class<?>, Method> acceptMethodsByType = BiStream.from(allAcceptors.asMap()).mapValues((key, methods) -> {
                 assert !methods.isEmpty() : "Internal error: no methods for key %s".formatted(key);
 
                 if (methods.size() > 1) {
@@ -95,6 +105,22 @@ public class WebsocketAgentBinder {
                 }
                 return Iterables.getFirst(methods, null);
             }).toMap();
+
+            List<Acceptor> acceptors = acceptMethodsByType.entrySet().stream().map(entry -> {
+                Class<?> type = entry.getKey();
+                Method method = entry.getValue();
+
+                WsApi api = getApi(method, idFromName(method.getName()), defaultApiVersion);
+                String id = api.id();
+                String version = api.version();
+                failIf(!id.matches("^[^:/ ]+$"),
+                        "API id can't contain any of \":/ \" characters: %s".formatted(id));
+                failIf(id.length() > MAX_ID_SIZE,
+                        "API id can't be longer than %d: %s".formatted(MAX_ID_SIZE, id));
+
+                ByteBuf bufferId = Unpooled.copiedBuffer(id, settings.charset());
+                return new Acceptor(bufferId, version, type, method, acceptsFrame);
+            }).toList();
 
             Field senderField = Arrays.stream(klass.getDeclaredFields())
                     .filter(WebsocketAgentBinder::isSenderField)
@@ -123,7 +149,19 @@ public class WebsocketAgentBinder {
             try {
                 Object instance = injector.getInstance(binding.agentClass());
                 Sender sender = binding.sender() != null ? (Sender) binding.sender().get(instance) : null;
-                return new AgentEndpoint(instance, binding.acceptors(), sender, binding.acceptsFrame());
+
+                List<Acceptor> acceptors = binding.acceptors();
+                if (binding.acceptsFrame()) {
+                    ImmutableMap<Class<?>, Acceptor> acceptorsByClass = Maps.uniqueIndex(acceptors, Acceptor::type);
+                    return new ClassBasedAgentEndpoint(instance, acceptorsByClass, sender);
+                } else {
+                    Charset charset = settings.charset();
+                    ImmutableMap<ByteBuf, Acceptor> acceptorsById = Maps.uniqueIndex(acceptors, Acceptor::id);
+                    Marshaller marshaller = marshallers.getMarshaller(Marshal.JSON);
+                    FrameMetaReader metaReader = new SeparatorFrameMetaReader((byte) ' ', MAX_ID_SIZE);
+                    FrameConverter<Object> converter = new AcceptorsAwareFrameConverter(marshaller, metaReader, acceptorsById, charset);
+                    return new FrameConverterEndpoint(instance, converter, sender);
+                }
             } catch (ConfigurationException e) {
                 String message =
                         "Websocket agent instance of %s can't be found or created (use @Inject to register a constructor)"
@@ -157,6 +195,34 @@ public class WebsocketAgentBinder {
 
     private static @NotNull Method[] filter(@NotNull Collection<Method> methods, @NotNull IntPredicate predicate) {
         return methods.stream().filter(method -> predicate.test(method.getModifiers())).toArray(Method[]::new);
+    }
+
+    @VisibleForTesting
+    static WsApi getApi(@NotNull AnnotatedElement element, @NotNull String defaultId, @NotNull String defaultVersion) {
+        if (element.isAnnotationPresent(WsApi.class)) {
+            return element.getAnnotation(WsApi.class);
+        }
+        return new WsApi() {
+            @Override
+            public Class<? extends Annotation> annotationType() {
+                return WsApi.class;
+            }
+
+            @Override
+            public String id() {
+                return defaultId;
+            }
+
+            @Override
+            public String version() {
+                return defaultVersion;
+            }
+        };
+    }
+
+    @VisibleForTesting
+    static @NotNull String idFromName(@NotNull String name) {
+        return name;  // TODO: from name (drop on, lowercase)
     }
 
     private static boolean isSenderField(@NotNull Field field) {

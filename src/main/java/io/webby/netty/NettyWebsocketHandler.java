@@ -53,7 +53,7 @@ public class NettyWebsocketHandler extends ChannelInboundHandlerAdapter {
     }
 
     @Override
-    public void channelRead(@NotNull ChannelHandlerContext context, @NotNull Object message) throws Exception {
+    public void channelRead(@NotNull ChannelHandlerContext context, @NotNull Object message) {
         if (message instanceof WebSocketFrame frame) {
             try {
                 handle(frame, context);
@@ -65,9 +65,10 @@ public class NettyWebsocketHandler extends ChannelInboundHandlerAdapter {
         }
     }
 
-    private void handle(@NotNull WebSocketFrame message, @NotNull ChannelHandlerContext context) throws Exception {
+    private void handle(@NotNull WebSocketFrame message, @NotNull ChannelHandlerContext context) {
         Object callResult = endpoint.process(message);
         if (callResult == null) {
+            log.at(Level.INFO).log("Websocket agent %s doesn't handle the frame: %s", endpoint.instance(), message.getClass());
             return;
         }
 
