@@ -10,15 +10,22 @@ import io.webby.url.impl.RouteEndpoint;
 import io.webby.url.impl.HandlerBinder;
 import io.webby.url.impl.UrlRouter;
 import io.webby.url.view.RendererFactory;
+import io.webby.url.ws.WebsocketAgentBinder;
+import io.webby.url.ws.WebsocketAgentScanner;
 
 public class UrlModule extends AbstractModule {
     @Override
     protected void configure() {
         bind(CallerFactory.class).asEagerSingleton();
         bind(ContentProviderFactory.class).asEagerSingleton();
-        bind(HandlerScanner.class).asEagerSingleton();
         bind(RendererFactory.class).asEagerSingleton();
+
         bind(HandlerBinder.class).asEagerSingleton();
+        bind(HandlerScanner.class).asEagerSingleton();
+
+        bind(WebsocketAgentBinder.class).asEagerSingleton();
+        bind(WebsocketAgentScanner.class).asEagerSingleton();
+
         bind(UrlRouter.class).asEagerSingleton();
         bind(new TypeLiteral<Router<RouteEndpoint>>() {}).toProvider(UrlRouter.class);
     }
