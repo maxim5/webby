@@ -1,9 +1,9 @@
 package io.webby.url.ws;
 
-import com.google.common.primitives.Longs;
 import io.netty.buffer.ByteBuf;
 import io.netty.buffer.Unpooled;
 import io.netty.handler.codec.http.websocketx.BinaryWebSocketFrame;
+import io.netty.handler.codec.http.websocketx.TextWebSocketFrame;
 import io.netty.handler.codec.http.websocketx.WebSocketFrame;
 import io.webby.netty.marshal.BinaryMarshaller;
 import org.jetbrains.annotations.NotNull;
@@ -13,13 +13,14 @@ import java.util.Map;
 import java.util.Optional;
 
 public record AcceptorsAwareFrameConverter(@NotNull BinaryMarshaller marshaller,
-                                           @NotNull FrameMetaReader metaReader,
+                                           @NotNull FrameMetadata metadata,
                                            @NotNull Map<ByteBuf, Acceptor> acceptors,
+                                           @NotNull FrameType outFrameType,
                                            @NotNull Charset charset) implements FrameConverter<Object> {
     @Override
     public void toMessage(@NotNull WebSocketFrame frame, @NotNull Consumer<Object> success, @NotNull Runnable failure) {
-        ByteBuf content = Unpooled.wrappedBuffer(frame.content());
-        metaReader.readMeta(content, (acceptorId, requestId) ->
+        ByteBuf frameContent = Unpooled.wrappedBuffer(frame.content());
+        metadata.parse(frameContent, (acceptorId, requestId, content) ->
                 Optional.ofNullable(acceptorId)
                         .map(acceptors::get)
                         .ifPresentOrElse(acceptor -> {
@@ -37,10 +38,11 @@ public record AcceptorsAwareFrameConverter(@NotNull BinaryMarshaller marshaller,
     }
 
     @Override
-    public @NotNull WebSocketFrame toFrame(@NotNull Object message, long requestId) {
-        byte[] requestBytes = Longs.toByteArray(requestId);
-        byte[] payloadBytes = marshaller.writeBytes(message, charset);
-        ByteBuf byteBuf = Unpooled.wrappedBuffer(requestBytes, payloadBytes);
-        return new BinaryWebSocketFrame(byteBuf);
+    public @NotNull WebSocketFrame toFrame(long requestId, int code, @NotNull Object message) {
+        ByteBuf byteBuf = metadata.compose(requestId, code, marshaller.writeBytes(message, charset));
+        return switch (outFrameType) {
+            case TEXT -> new TextWebSocketFrame(byteBuf);
+            case BINARY -> new BinaryWebSocketFrame(byteBuf);
+        };
     }
 }

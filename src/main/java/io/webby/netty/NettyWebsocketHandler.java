@@ -65,18 +65,22 @@ public class NettyWebsocketHandler extends ChannelInboundHandlerAdapter {
         }
     }
 
-    private void handle(@NotNull WebSocketFrame message, @NotNull ChannelHandlerContext context) {
-        Object callResult = endpoint.process(message);
-        if (callResult == null) {
-            log.at(Level.INFO).log("Websocket agent %s doesn't handle the frame: %s", endpoint.instance(), message.getClass());
-            return;
-        }
+    private void handle(@NotNull WebSocketFrame frame, @NotNull ChannelHandlerContext context) {
+        endpoint.processIncoming(frame, (requestId, callResult) -> {
+            if (callResult == null) {
+                log.at(Level.INFO).log("Websocket agent %s doesn't handle the frame: %s", endpoint.instance(), frame.getClass());
+                return;
+            }
 
-        WebSocketFrame frame = mapper.mapInstance(callResult);
-        if (frame != null) {
-            context.channel().writeAndFlush(frame);
-        } else {
-            log.at(Level.WARNING).log("Websocket agent returned unexpected object: %s", callResult);
-        }
+            WebSocketFrame outgoing = endpoint.processOutgoing(requestId, callResult);
+            if (outgoing == null) {
+                outgoing = mapper.mapInstance(callResult);
+            }
+            if (outgoing != null) {
+                context.channel().writeAndFlush(outgoing);
+            } else {
+                log.at(Level.WARNING).log("Websocket agent returned unexpected object: %s", callResult);
+            }
+        });
     }
 }

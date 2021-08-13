@@ -158,8 +158,8 @@ public class WebsocketAgentBinder {
                     Charset charset = settings.charset();
                     ImmutableMap<ByteBuf, Acceptor> acceptorsById = Maps.uniqueIndex(acceptors, Acceptor::id);
                     Marshaller marshaller = marshallers.getMarshaller(Marshal.JSON);
-                    FrameMetaReader metaReader = new SeparatorFrameMetaReader((byte) ' ', MAX_ID_SIZE);
-                    FrameConverter<Object> converter = new AcceptorsAwareFrameConverter(marshaller, metaReader, acceptorsById, charset);
+                    FrameMetadata metaReader = new SeparatorFrameMetadata((byte) ' ', MAX_ID_SIZE);
+                    FrameConverter<Object> converter = new AcceptorsAwareFrameConverter(marshaller, metaReader, acceptorsById, FrameType.TEXT, charset);
                     return new FrameConverterEndpoint(instance, converter, sender);
                 }
             } catch (ConfigurationException e) {
