@@ -12,7 +12,6 @@ import io.webby.url.convert.Constraint;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
-import java.io.IOException;
 import java.net.InetAddress;
 import java.net.InetSocketAddress;
 import java.net.SocketAddress;
@@ -97,7 +96,7 @@ public class DefaultHttpRequestEx extends DefaultFullHttpRequest implements Muta
     public <T> @NotNull T contentAsJson(@NotNull Class<T> klass) throws IllegalArgumentException {
         try {
             return json.readByteBuf(content(), klass, charset());
-        } catch (IOException | RuntimeException e) {
+        } catch (RuntimeException e) {
             throw new IllegalArgumentException("Failed to parse JSON content", e);
         }
     }

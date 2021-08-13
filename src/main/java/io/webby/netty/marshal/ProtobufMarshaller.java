@@ -1,9 +1,9 @@
 package io.webby.netty.marshal;
 
+import com.google.protobuf.InvalidProtocolBufferException;
 import com.google.protobuf.Message;
 import com.google.protobuf.Parser;
 import com.google.protobuf.TextFormat;
-import io.webby.util.Rethrow;
 import org.jetbrains.annotations.NotNull;
 
 import java.io.*;
@@ -11,6 +11,7 @@ import java.net.UnknownServiceException;
 import java.nio.charset.Charset;
 
 import static io.webby.util.EasyCast.castAny;
+import static io.webby.util.Rethrow.rethrow;
 
 public class ProtobufMarshaller implements Marshaller {
     @Override
@@ -18,7 +19,7 @@ public class ProtobufMarshaller implements Marshaller {
         if (instance instanceof Message message) {
             writer.write(message.toString());
         }
-        throw new UnknownServiceException("Protobuf is not available for non-Message classes: %s".formatted(instance));
+        throw new UnsupportedOperationException("Protobuf is not available for non-Message classes: %s".formatted(instance));
     }
 
     @Override
@@ -30,11 +31,11 @@ public class ProtobufMarshaller implements Marshaller {
     }
 
     @Override
-    public byte @NotNull [] writeBytes(@NotNull Object instance, @NotNull Charset charset) throws IOException {
+    public byte @NotNull [] writeBytes(@NotNull Object instance, @NotNull Charset charset) {
         if (instance instanceof Message message) {
             return message.toByteArray();
         }
-        throw new UnknownServiceException("Protobuf is not available for non-Message classes: %s".formatted(instance));
+        throw new UnsupportedOperationException("Protobuf is not available for non-Message classes: %s".formatted(instance));
     }
 
     @Override
@@ -44,7 +45,7 @@ public class ProtobufMarshaller implements Marshaller {
             TextFormat.merge(reader, builder);
             return castAny(builder.build());
         }
-        throw new UnknownServiceException("Protobuf is not available for non-Message classes: %s".formatted(klass));
+        throw new UnsupportedOperationException("Protobuf is not available for non-Message classes: %s".formatted(klass));
     }
 
     @Override
@@ -56,18 +57,22 @@ public class ProtobufMarshaller implements Marshaller {
     }
 
     @Override
-    public <T> @NotNull T readBytes(byte @NotNull [] bytes, @NotNull Class<T> klass, @NotNull Charset charset) throws IOException {
+    public <T> @NotNull T readBytes(byte @NotNull [] bytes, @NotNull Class<T> klass, @NotNull Charset charset) {
         if (Message.class.isAssignableFrom(klass)) {
-            return getParser(klass).parseFrom(bytes);
+            try {
+                return getParser(klass).parseFrom(bytes);
+            } catch (InvalidProtocolBufferException e) {
+                return rethrow(e);
+            }
         }
-        throw new UnknownServiceException("Protobuf is not available for non-Message classes: %s".formatted(klass));
+        throw new UnsupportedOperationException("Protobuf is not available for non-Message classes: %s".formatted(klass));
     }
 
     private static <T> @NotNull Parser<T> getParser(@NotNull Class<T> klass) {
         try {
             return castAny(klass.getMethod("parser").invoke(null));
         } catch (Exception e) {
-            return Rethrow.rethrow(e);
+            return rethrow(e);
         }
     }
 
@@ -75,7 +80,7 @@ public class ProtobufMarshaller implements Marshaller {
         try {
             return castAny(klass.getMethod("getDefaultInstance").invoke(null));
         } catch (Exception e) {
-            return Rethrow.rethrow(e);
+            return rethrow(e);
         }
     }
 }
