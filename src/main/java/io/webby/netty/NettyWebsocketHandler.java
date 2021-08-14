@@ -57,6 +57,8 @@ public class NettyWebsocketHandler extends ChannelInboundHandlerAdapter {
         if (message instanceof WebSocketFrame frame) {
             try {
                 handle(frame, context);
+            } catch (Throwable throwable) {
+                log.at(Level.SEVERE).withCause(throwable).log("Unexpected failure: %s", throwable.getMessage());
             } finally {
                 ReferenceCountUtil.release(frame);
             }
