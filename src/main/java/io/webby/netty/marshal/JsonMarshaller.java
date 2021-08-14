@@ -8,7 +8,7 @@ import java.io.Reader;
 import java.io.Writer;
 
 public class JsonMarshaller implements Marshaller {
-    @Inject private Gson gson;
+    @Inject protected Gson gson;
 
     @Override
     public void writeChars(@NotNull Writer writer, @NotNull Object instance) {

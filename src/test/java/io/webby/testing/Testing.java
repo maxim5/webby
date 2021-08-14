@@ -1,10 +1,12 @@
 package io.webby.testing;
 
+import com.google.gson.Gson;
 import com.google.inject.Injector;
 import com.google.inject.Module;
 import io.webby.Webby;
 import io.webby.app.AppSettings;
 import io.webby.db.kv.StorageType;
+import io.webby.netty.marshal.JsonMarshaller;
 import org.apache.logging.log4j.Level;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.core.config.Configurator;
@@ -58,5 +60,13 @@ public class Testing {
         Locale.setDefault(Locale.US);  // any way to remove this?
 
         return Webby.initGuice(settings, modules);
+    }
+
+    public static class Internals {
+        public static final JsonMarshaller json = new JsonMarshaller() {
+            {
+                gson = new Gson();
+            }
+        };
     }
 }

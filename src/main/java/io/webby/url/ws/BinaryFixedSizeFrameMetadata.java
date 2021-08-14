@@ -2,6 +2,7 @@ package io.webby.url.ws;
 
 import io.netty.buffer.ByteBuf;
 import io.netty.buffer.Unpooled;
+import io.webby.netty.ws.Constants.RequestIds;
 import org.jetbrains.annotations.NotNull;
 
 public record BinaryFixedSizeFrameMetadata(int size) implements FrameMetadata {
@@ -12,7 +13,7 @@ public record BinaryFixedSizeFrameMetadata(int size) implements FrameMetadata {
             long requestId = content.readLong();
             consumer.accept(acceptorId, requestId, content);
         } else {
-            consumer.accept(null, -1, content);
+            consumer.accept(null, RequestIds.NO_ID, content);
         }
     }
 

@@ -9,7 +9,6 @@ import io.netty.handler.codec.http.DefaultFullHttpRequest;
 import io.netty.handler.codec.http.FullHttpRequest;
 import io.netty.handler.codec.http.HttpMethod;
 import io.netty.handler.codec.http.HttpVersion;
-import io.webby.netty.marshal.JsonMarshaller;
 import io.webby.netty.request.DefaultHttpRequestEx;
 import io.webby.netty.request.HttpRequestEx;
 import org.jetbrains.annotations.NotNull;
@@ -48,7 +47,7 @@ public class FakeRequests {
 
     @NotNull
     public static HttpRequestEx requestEx(@NotNull FullHttpRequest request) {
-        return new DefaultHttpRequestEx(request, new EmbeddedChannel(), new JsonMarshaller(), Map.of(), new Object[0]);
+        return new DefaultHttpRequestEx(request, new EmbeddedChannel(), Testing.Internals.json, Map.of(), new Object[0]);
     }
 
     @Nullable

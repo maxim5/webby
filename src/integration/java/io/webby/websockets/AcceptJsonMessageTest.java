@@ -3,6 +3,7 @@ package io.webby.websockets;
 import com.google.common.truth.Truth;
 import io.netty.handler.codec.http.websocketx.WebSocketFrame;
 import io.webby.testing.BaseWebsocketIntegrationTest;
+import io.webby.testing.Testing;
 import io.webby.testing.TestingModules;
 import io.webby.url.annotate.Marshal;
 import io.webby.url.ws.*;
@@ -143,6 +144,18 @@ public class AcceptJsonMessageTest extends BaseWebsocketIntegrationTest {
         Truth.assertThat(agent.getIncoming()).isEmpty();
     }
 
+    @Test
+    public void on_json_metadata() {
+        AcceptJsonMessage agent = prepareAgent(Marshal.JSON, FrameType.TEXT,
+                                               new JsonMetadata(Testing.Internals.json, Testing.CHARSET));
+        Queue<WebSocketFrame> frames = sendText("{'on': 'primitive', id: 123, data: \"{'ch': 'a'}\"}");
+        assertTextFrames(frames, """
+        {"id":123,"code":0,\
+        "data":"{\\"i\\":0,\\"l\\":0,\\"b\\":0,\\"s\\":0,\\"ch\\":\\"a\\",\\"f\\":0.0,\\"d\\":0.0,\\"bool\\":false}"}
+        """.trim());
+        Truth.assertThat(agent.getIncoming()).containsExactly(primitiveChar('a'));
+    }
+
     @NotNull
     private AcceptJsonMessage prepareAgent(@NotNull Marshal marshal,
                                            @NotNull FrameType frameType,
@@ -164,6 +177,13 @@ public class AcceptJsonMessageTest extends BaseWebsocketIntegrationTest {
     private static PrimitiveMessage primitiveLong(long l) {
         PrimitiveMessage message = new PrimitiveMessage();
         message.l = l;
+        return message;
+    }
+
+    @NotNull
+    private static PrimitiveMessage primitiveChar(char ch) {
+        PrimitiveMessage message = new PrimitiveMessage();
+        message.ch = ch;
         return message;
     }
 
