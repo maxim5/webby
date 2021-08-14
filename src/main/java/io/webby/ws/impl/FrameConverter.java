@@ -1,4 +1,4 @@
-package io.webby.url.ws;
+package io.webby.ws.impl;
 
 import io.netty.handler.codec.http.websocketx.WebSocketFrame;
 import org.jetbrains.annotations.NotNull;

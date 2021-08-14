@@ -1,4 +1,4 @@
-package io.webby.url.ws.lifecycle;
+package io.webby.ws.lifecycle;
 
 import io.netty.channel.Channel;
 import org.jetbrains.annotations.NotNull;

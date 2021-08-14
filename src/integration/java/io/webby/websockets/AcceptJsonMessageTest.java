@@ -7,7 +7,7 @@ import io.webby.testing.Testing;
 import io.webby.testing.TestingModules;
 import io.webby.url.annotate.FrameType;
 import io.webby.url.annotate.Marshal;
-import io.webby.url.ws.meta.*;
+import io.webby.ws.meta.*;
 import io.webby.websockets.ExampleMessages.PrimitiveMessage;
 import org.jetbrains.annotations.NotNull;
 import org.junit.jupiter.api.Test;

@@ -5,13 +5,11 @@ import com.google.inject.TypeLiteral;
 import io.routekit.Router;
 import io.webby.url.caller.CallerFactory;
 import io.webby.url.caller.ContentProviderFactory;
+import io.webby.url.impl.HandlerBinder;
 import io.webby.url.impl.HandlerScanner;
 import io.webby.url.impl.RouteEndpoint;
-import io.webby.url.impl.HandlerBinder;
 import io.webby.url.impl.UrlRouter;
 import io.webby.url.view.RendererFactory;
-import io.webby.url.ws.WebsocketAgentBinder;
-import io.webby.url.ws.WebsocketAgentScanner;
 
 public class UrlModule extends AbstractModule {
     @Override
@@ -22,9 +20,6 @@ public class UrlModule extends AbstractModule {
 
         bind(HandlerBinder.class).asEagerSingleton();
         bind(HandlerScanner.class).asEagerSingleton();
-
-        bind(WebsocketAgentBinder.class).asEagerSingleton();
-        bind(WebsocketAgentScanner.class).asEagerSingleton();
 
         bind(UrlRouter.class).asEagerSingleton();
         bind(new TypeLiteral<Router<RouteEndpoint>>() {}).toProvider(UrlRouter.class);

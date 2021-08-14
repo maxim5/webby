@@ -1,4 +1,4 @@
-package io.webby.url.ws;
+package io.webby.ws.impl;
 
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;

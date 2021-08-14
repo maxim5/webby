@@ -1,9 +1,10 @@
-package io.webby.url.ws;
+package io.webby.ws.impl;
 
 import io.netty.handler.codec.http.websocketx.WebSocketFrame;
 import io.webby.netty.ws.Constants.RequestIds;
-import io.webby.url.ws.lifecycle.AgentLifecycle;
-import io.webby.url.ws.lifecycle.AgentLifecycleFanOut;
+import io.webby.ws.Sender;
+import io.webby.ws.lifecycle.AgentLifecycle;
+import io.webby.ws.lifecycle.AgentLifecycleFanOut;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 

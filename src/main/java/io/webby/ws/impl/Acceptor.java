@@ -1,4 +1,4 @@
-package io.webby.url.ws;
+package io.webby.ws.impl;
 
 import com.google.common.flogger.FluentLogger;
 import io.netty.buffer.ByteBuf;

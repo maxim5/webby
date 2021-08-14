@@ -1,4 +1,4 @@
-package io.webby.url.ws;
+package io.webby.ws.impl;
 
 import io.webby.url.annotate.FrameType;
 import io.webby.url.annotate.Marshal;

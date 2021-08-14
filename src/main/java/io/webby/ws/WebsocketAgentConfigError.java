@@ -1,4 +1,4 @@
-package io.webby.url;
+package io.webby.ws;
 
 import io.webby.app.AppConfigException;
 

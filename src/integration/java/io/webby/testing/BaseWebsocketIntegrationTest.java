@@ -10,9 +10,9 @@ import io.netty.handler.codec.http.websocketx.WebSocketFrame;
 import io.netty.handler.codec.http.websocketx.WebSocketServerProtocolHandler.HandshakeComplete;
 import io.webby.app.AppSettings;
 import io.webby.netty.NettyWebsocketHandler;
-import io.webby.url.impl.UrlRouter;
-import io.webby.url.ws.AgentEndpoint;
 import io.webby.util.Rethrow;
+import io.webby.ws.impl.AgentEndpoint;
+import io.webby.ws.impl.WebsocketRouter;
 import org.jetbrains.annotations.NotNull;
 import org.junit.jupiter.api.Assertions;
 
@@ -36,7 +36,7 @@ public class BaseWebsocketIntegrationTest extends BaseChannelTest {
             consumer.accept(settings);
         }, modules);
 
-        AgentEndpoint endpoint = injector.getInstance(UrlRouter.class).findAgentEndpointByClass(klass);
+        AgentEndpoint endpoint = injector.getInstance(WebsocketRouter.class).findAgentEndpointByClass(klass);
         Assertions.assertNotNull(endpoint, "No Endpoint found for: %s".formatted(klass));
         NettyWebsocketHandler handler = new NettyWebsocketHandler(endpoint);
         injector.injectMembers(handler);

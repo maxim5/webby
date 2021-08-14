@@ -1,4 +1,4 @@
-package io.webby.url.ws.meta;
+package io.webby.ws.meta;
 
 import io.netty.buffer.ByteBuf;
 import org.jetbrains.annotations.NotNull;

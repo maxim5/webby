@@ -1,4 +1,4 @@
-package io.webby.url.ws;
+package io.webby.ws.impl;
 
 import com.google.inject.Inject;
 import io.webby.app.Settings;

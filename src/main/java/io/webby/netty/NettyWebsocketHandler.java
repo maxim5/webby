@@ -8,8 +8,8 @@ import io.netty.handler.codec.http.websocketx.WebSocketFrame;
 import io.netty.handler.codec.http.websocketx.WebSocketServerProtocolHandler;
 import io.netty.util.ReferenceCountUtil;
 import io.webby.netty.ws.FrameMapper;
-import io.webby.url.ws.AgentEndpoint;
-import io.webby.url.ws.lifecycle.AgentLifecycle;
+import io.webby.ws.impl.AgentEndpoint;
+import io.webby.ws.lifecycle.AgentLifecycle;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.logging.Level;

@@ -7,7 +7,7 @@ import io.webby.netty.marshal.MarshallerFactory;
 import io.webby.netty.response.HttpResponseFactory;
 import io.webby.netty.response.ResponseMapper;
 import io.webby.netty.response.StaticServing;
-import io.webby.url.ws.Sender;
+import io.webby.ws.Sender;
 import io.webby.netty.ws.ChannelSender;
 
 public class NettyModule extends AbstractModule {

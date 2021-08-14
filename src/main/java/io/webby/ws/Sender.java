@@ -1,4 +1,4 @@
-package io.webby.url.ws;
+package io.webby.ws;
 
 import com.google.errorprone.annotations.CanIgnoreReturnValue;
 import io.netty.channel.ChannelFuture;

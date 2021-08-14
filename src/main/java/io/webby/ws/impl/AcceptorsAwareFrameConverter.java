@@ -1,4 +1,4 @@
-package io.webby.url.ws;
+package io.webby.ws.impl;
 
 import io.netty.buffer.ByteBuf;
 import io.netty.buffer.Unpooled;
@@ -8,8 +8,8 @@ import io.netty.handler.codec.http.websocketx.TextWebSocketFrame;
 import io.netty.handler.codec.http.websocketx.WebSocketFrame;
 import io.webby.netty.marshal.BinaryMarshaller;
 import io.webby.url.annotate.FrameType;
-import io.webby.url.ws.lifecycle.AgentLifecycle;
-import io.webby.url.ws.meta.FrameMetadata;
+import io.webby.ws.lifecycle.AgentLifecycle;
+import io.webby.ws.meta.FrameMetadata;
 import org.jetbrains.annotations.NotNull;
 
 import java.nio.charset.Charset;

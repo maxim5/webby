@@ -12,16 +12,16 @@ import io.netty.handler.codec.http.websocketx.WebSocketServerProtocolHandler;
 import io.netty.handler.codec.http.websocketx.extensions.compression.WebSocketServerCompressionHandler;
 import io.netty.handler.stream.ChunkedWriteHandler;
 import io.webby.common.InjectorHelper;
-import io.webby.url.impl.UrlRouter;
-import io.webby.url.ws.AgentEndpoint;
+import io.webby.ws.impl.AgentEndpoint;
+import io.webby.ws.impl.WebsocketRouter;
 
 import java.util.logging.Level;
 
 public class NettyDispatcher extends ChannelInboundHandlerAdapter {
     private static final FluentLogger log = FluentLogger.forEnclosingClass();
 
-    @Inject private UrlRouter router;
     @Inject private InjectorHelper helper;
+    @Inject private WebsocketRouter websocketRouter;
     @Inject private Provider<NettyHttpHandler> httpHandler;
 
     private ChannelPipeline pipeline;
@@ -37,7 +37,7 @@ public class NettyDispatcher extends ChannelInboundHandlerAdapter {
 
         if (message instanceof HttpRequest request) {
             String uri = request.uri();
-            AgentEndpoint endpoint = router.routeWebSocket(uri);
+            AgentEndpoint endpoint = websocketRouter.route(uri);
 
             if (endpoint != null) {
                 log.at(Level.FINER).log("Upgrading channel to Websocket: %s", uri);
