@@ -2,13 +2,14 @@ package io.webby.url.ws;
 
 import io.netty.handler.codec.http.websocketx.WebSocketFrame;
 import io.webby.netty.ws.Constants.RequestIds;
+import io.webby.url.ws.lifecycle.AgentLifecycle;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
 public interface AgentEndpoint {
     @NotNull Object instance();
 
-    @Nullable Sender sender();
+    @NotNull AgentLifecycle lifecycle();
 
     void processIncoming(@NotNull WebSocketFrame frame, @NotNull Consumer consumer);
 

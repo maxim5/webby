@@ -2,12 +2,19 @@ package io.webby.url.ws;
 
 import io.netty.handler.codec.http.websocketx.WebSocketFrame;
 import io.webby.netty.ws.Constants.StatusCodes;
+import io.webby.url.ws.lifecycle.AgentLifecycle;
+import io.webby.url.ws.lifecycle.AgentLifecycleFanOut;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
 public record FrameConverterEndpoint(@NotNull Object instance,
                                      @NotNull FrameConverter<Object> converter,
                                      @Nullable Sender sender) implements AgentEndpoint {
+    @Override
+    public @NotNull AgentLifecycle lifecycle() {
+        return AgentLifecycleFanOut.of(instance, sender, converter);
+    }
+
     @Override
     public void processIncoming(@NotNull WebSocketFrame frame, @NotNull Consumer consumer) {
         converter.toMessage(frame, (acceptor, requestId, payload) -> {

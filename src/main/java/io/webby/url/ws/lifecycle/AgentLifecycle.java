@@ -1,4 +1,4 @@
-package io.webby.url.ws;
+package io.webby.url.ws.lifecycle;
 
 import io.netty.channel.Channel;
 import org.jetbrains.annotations.NotNull;
@@ -6,7 +6,7 @@ import org.jetbrains.annotations.NotNull;
 public interface AgentLifecycle {
     void onChannelConnected(@NotNull Channel channel);
 
-    void onChannelClose();
+    default void onChannelClose() {}
 
-    void onChannelRestored();
+    default void onChannelRestored() {}
 }

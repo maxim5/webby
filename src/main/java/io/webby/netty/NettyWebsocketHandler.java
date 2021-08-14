@@ -7,10 +7,9 @@ import io.netty.channel.ChannelInboundHandlerAdapter;
 import io.netty.handler.codec.http.websocketx.WebSocketFrame;
 import io.netty.handler.codec.http.websocketx.WebSocketServerProtocolHandler;
 import io.netty.util.ReferenceCountUtil;
-import io.webby.url.ws.AgentLifecycle;
-import io.webby.netty.ws.AgentLifecycleAdapter;
 import io.webby.netty.ws.FrameMapper;
 import io.webby.url.ws.AgentEndpoint;
+import io.webby.url.ws.lifecycle.AgentLifecycle;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.logging.Level;
@@ -25,9 +24,7 @@ public class NettyWebsocketHandler extends ChannelInboundHandlerAdapter {
 
     public NettyWebsocketHandler(@NotNull AgentEndpoint endpoint) {
         this.endpoint = endpoint;
-        this.lifecycle = endpoint.instance() instanceof AgentLifecycle lifecycle
-                ? lifecycle
-                : endpoint.sender() instanceof AgentLifecycle lifecycle ? lifecycle : new AgentLifecycleAdapter();
+        this.lifecycle = endpoint.lifecycle();
     }
 
     @Override

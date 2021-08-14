@@ -4,7 +4,7 @@ import io.netty.channel.Channel;
 import io.netty.channel.ChannelFuture;
 import io.netty.channel.ChannelOutboundInvoker;
 import io.netty.handler.codec.http.websocketx.WebSocketFrame;
-import io.webby.url.ws.AgentLifecycle;
+import io.webby.url.ws.lifecycle.AgentLifecycle;
 import io.webby.url.ws.Sender;
 import org.jetbrains.annotations.NotNull;
 
