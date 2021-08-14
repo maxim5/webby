@@ -37,10 +37,10 @@ import java.util.function.IntPredicate;
 import java.util.logging.Level;
 
 import static io.webby.url.WebsocketAgentConfigError.failIf;
+import static io.webby.url.ws.FrameMetadata.MAX_ID_SIZE;
 
 public class WebsocketAgentBinder {
     private static final FluentLogger log = FluentLogger.forEnclosingClass();
-    private static final int MAX_ID_SIZE = 64;
 
     @Inject private Settings settings;
     @Inject private WebsocketAgentScanner scanner;
@@ -113,10 +113,8 @@ public class WebsocketAgentBinder {
                 WsApi api = getApi(method, idFromName(method.getName()), defaultApiVersion);
                 String id = api.id();
                 String version = api.version();
-                failIf(!id.matches("^[^:/ ]+$"),
-                        "API id can't contain any of \":/ \" characters: %s".formatted(id));
-                failIf(id.length() > MAX_ID_SIZE,
-                        "API id can't be longer than %d: %s".formatted(MAX_ID_SIZE, id));
+                failIf(!id.matches("^[^:/ ]+$"), "API id can't contain any of \":/ \" characters: %s".formatted(id));
+                failIf(id.length() > MAX_ID_SIZE, "API id can't be longer than %d: %s".formatted(MAX_ID_SIZE, id));
 
                 ByteBuf bufferId = Unpooled.copiedBuffer(id, settings.charset());
                 return new Acceptor(bufferId, version, type, method, acceptsFrame);
@@ -163,11 +161,11 @@ public class WebsocketAgentBinder {
 
                     ImmutableMap<ByteBuf, Acceptor> acceptorsById = Maps.uniqueIndex(acceptors, Acceptor::id);
                     Marshaller marshaller = marshallers.getMarshaller(marshal);
-                    FrameMetadata metaReader = switch (frameType) {
-                        case TEXT -> new TextSeparatorFrameMetadata((byte) ' ', MAX_ID_SIZE);
-                        case BINARY -> new BinarySeparatorFrameMetadata((byte) ' ', MAX_ID_SIZE);
+                    FrameMetadata metadata = switch (frameType) {
+                        case TEXT -> new TextSeparatorFrameMetadata();
+                        case BINARY -> new BinarySeparatorFrameMetadata();
                     };
-                    FrameConverter<Object> converter = new AcceptorsAwareFrameConverter(marshaller, metaReader, acceptorsById, frameType, charset);
+                    FrameConverter<Object> converter = new AcceptorsAwareFrameConverter(marshaller, metadata, acceptorsById, frameType, charset);
                     return new FrameConverterEndpoint(instance, converter, sender);
                 }
             } catch (ConfigurationException e) {

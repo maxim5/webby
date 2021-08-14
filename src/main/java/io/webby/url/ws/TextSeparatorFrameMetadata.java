@@ -6,7 +6,12 @@ import io.webby.netty.ws.Constants.RequestIds;
 import org.jetbrains.annotations.NotNull;
 
 public record TextSeparatorFrameMetadata(byte separator, int maxAcceptorIdSize) implements FrameMetadata {
+    private static final byte DEFAULT_SEPARATOR = (byte) ' ';
     private static final int MAX_LONG_LENGTH = 20;  // 9223372036854775807
+
+    public TextSeparatorFrameMetadata() {
+        this(DEFAULT_SEPARATOR, MAX_ID_SIZE);
+    }
 
     @Override
     public void parse(@NotNull ByteBuf content, @NotNull Consumer consumer) {
