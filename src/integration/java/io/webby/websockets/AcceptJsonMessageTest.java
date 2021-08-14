@@ -36,16 +36,57 @@ public class AcceptJsonMessageTest extends BaseWebsocketIntegrationTest {
     }
 
     @Test
+    public void on_json_text_default_request_id() {
+        AcceptJsonMessage agent = prepareAgent(Marshal.JSON, FrameType.TEXT);
+        Queue<WebSocketFrame> frames = sendText("primitive foo {'bool': true}");
+        assertTextFrames(frames, """
+            -1 0 {"i":0,"l":0,"b":0,"s":0,"ch":"\\u0000","f":0.0,"d":0.0,"bool":true}
+        """.trim());
+        Truth.assertThat(agent.getIncoming()).containsExactly(primitiveBool(true));
+    }
+
+    @Test
     public void on_json_text_invalid_missing_request_id() {
         AcceptJsonMessage agent = prepareAgent(Marshal.JSON, FrameType.TEXT);
+
         assertTextFrames(sendText("primitive {'i': 10}"));
+        Truth.assertThat(agent.getIncoming()).isEmpty();
+
+        assertTextFrames(sendText("primitive{'i': 10}"));
+        Truth.assertThat(agent.getIncoming()).isEmpty();
+
+        assertTextFrames(sendText("primitive {}"));
         Truth.assertThat(agent.getIncoming()).isEmpty();
     }
 
     @Test
     public void on_json_text_invalid_only_json() {
         AcceptJsonMessage agent = prepareAgent(Marshal.JSON, FrameType.TEXT);
+
         assertTextFrames(sendText("{'i': 10}"));
+        Truth.assertThat(agent.getIncoming()).isEmpty();
+
+        assertTextFrames(sendText("{}"));
+        Truth.assertThat(agent.getIncoming()).isEmpty();
+    }
+
+    @Test
+    public void on_json_text_invalid_wrong_separation() {
+        AcceptJsonMessage agent = prepareAgent(Marshal.JSON, FrameType.TEXT);
+
+        assertTextFrames(sendText("primitive123{'i': 10}"));
+        Truth.assertThat(agent.getIncoming()).isEmpty();
+
+        assertTextFrames(sendText("primitive 123{'i': 10}"));
+        Truth.assertThat(agent.getIncoming()).isEmpty();
+
+        assertTextFrames(sendText("primitive123 {'i': 10}"));
+        Truth.assertThat(agent.getIncoming()).isEmpty();
+
+        assertTextFrames(sendText("primitive  123 {'i': 10}"));
+        Truth.assertThat(agent.getIncoming()).isEmpty();
+
+        assertTextFrames(sendText("primitive\n123\n{'i': 10}"));
         Truth.assertThat(agent.getIncoming()).isEmpty();
     }
 
@@ -92,6 +133,13 @@ public class AcceptJsonMessageTest extends BaseWebsocketIntegrationTest {
     private static PrimitiveMessage primitiveLong(long l) {
         PrimitiveMessage message = new PrimitiveMessage();
         message.l = l;
+        return message;
+    }
+
+    @NotNull
+    private static PrimitiveMessage primitiveBool(boolean bool) {
+        PrimitiveMessage message = new PrimitiveMessage();
+        message.bool = bool;
         return message;
     }
 }
