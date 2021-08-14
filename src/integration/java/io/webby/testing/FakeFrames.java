@@ -11,6 +11,8 @@ import org.jetbrains.annotations.Nullable;
 import java.util.Arrays;
 import java.util.List;
 
+import static io.webby.testing.FakeRequests.readable;
+
 public class FakeFrames {
     public static void assertFrames(@NotNull Iterable<WebSocketFrame> frames) {
         Truth.assertThat(frames).isEmpty();
@@ -33,6 +35,9 @@ public class FakeFrames {
     }
 
     public static void assertFrames(@NotNull Iterable<WebSocketFrame> frames, @NotNull List<? extends WebSocketFrame> expected) {
+        if (Testing.READABLE) {
+            expected = expected.stream().map(frame -> frame.replace(readable(frame.content()))).toList();
+        }
         Truth.assertThat(frames).containsExactlyElementsIn(expected);
     }
 

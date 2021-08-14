@@ -10,12 +10,12 @@ public record TextSeparatorFrameMetadata(byte separator, int maxAcceptorIdSize) 
 
     @Override
     public void parse(@NotNull ByteBuf content, @NotNull Consumer consumer) {
-        ByteBuf id = EasyByteBuf.readUntil(content, separator, maxAcceptorIdSize);
+        ByteBuf acceptorId = EasyByteBuf.readUntil(content, separator, maxAcceptorIdSize);
         ByteBuf requestId = EasyByteBuf.readUntil(content, separator, MAX_LONG_LENGTH);
-        if (id == null || requestId == null) {
+        if (acceptorId == null || requestId == null) {
             consumer.accept(null, RequestIds.NO_ID, content);
         } else {
-            consumer.accept(id, EasyByteBuf.parseLongSafely(requestId, RequestIds.NO_ID), content);
+            consumer.accept(acceptorId, EasyByteBuf.parseLongSafely(requestId, RequestIds.NO_ID), content);
         }
     }
 
