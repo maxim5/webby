@@ -1,38 +1,35 @@
-package io.webby.url.ws;
+package io.webby.url.ws.meta;
 
 import io.netty.buffer.ByteBuf;
 import io.netty.buffer.Unpooled;
 import io.webby.netty.ws.Constants.RequestIds;
 import org.jetbrains.annotations.NotNull;
 
-public record BinarySeparatorFrameMetadata(byte separator, int maxAcceptorIdSize) implements FrameMetadata {
+public record TextSeparatorFrameMetadata(byte separator, int maxAcceptorIdSize) implements FrameMetadata {
     private static final byte DEFAULT_SEPARATOR = (byte) ' ';
+    private static final int MAX_LONG_LENGTH = 20;  // 9223372036854775807
 
-    public BinarySeparatorFrameMetadata() {
+    public TextSeparatorFrameMetadata() {
         this(DEFAULT_SEPARATOR, MAX_ID_SIZE);
     }
 
     @Override
     public void parse(@NotNull ByteBuf content, @NotNull Consumer consumer) {
-        int size = content.readableBytes();
-        int index = content.indexOf(0, Math.min(maxAcceptorIdSize, size), separator);
-        if (index >= 0 && index + 10 <= size) {
-            ByteBuf id = content.readBytes(index);
-            content.readBytes(1);  // separator
-            long requestId = content.readLong();
-            content.readBytes(1);  // separator
-            consumer.accept(id, requestId, content);
-        } else {
+        ByteBuf acceptorId = EasyByteBuf.readUntil(content, separator, maxAcceptorIdSize);
+        ByteBuf requestId = EasyByteBuf.readUntil(content, separator, MAX_LONG_LENGTH);
+        if (acceptorId == null || requestId == null) {
             consumer.accept(null, RequestIds.NO_ID, content);
+        } else {
+            consumer.accept(acceptorId, EasyByteBuf.parseLongSafely(requestId, RequestIds.NO_ID), content);
         }
     }
 
     @Override
     public @NotNull ByteBuf compose(long requestId, int code, byte @NotNull [] content) {
         ByteBuf result = Unpooled.buffer(content.length + 11);
-        result.writeLong(requestId);
+        EasyByteBuf.writeLongString(requestId, result);
         result.writeByte(separator);
-        result.writeByte(code);
+        EasyByteBuf.writeIntString(code, result);
         result.writeByte(separator);
         result.writeBytes(content);
         return result;

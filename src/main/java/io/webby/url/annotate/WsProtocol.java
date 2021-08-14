@@ -1,7 +1,5 @@
 package io.webby.url.annotate;
 
-import io.webby.url.ws.FrameType;
-
 import java.lang.annotation.ElementType;
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;

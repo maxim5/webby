@@ -1,5 +1,6 @@
 package io.webby.url.ws;
 
+import io.webby.url.annotate.FrameType;
 import io.webby.url.annotate.Marshal;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;

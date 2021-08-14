@@ -20,10 +20,10 @@ import io.webby.netty.marshal.Marshaller;
 import io.webby.netty.marshal.MarshallerFactory;
 import io.webby.url.UrlConfigError;
 import io.webby.url.WebsocketAgentConfigError;
-import io.webby.url.annotate.Marshal;
-import io.webby.url.annotate.Ws;
-import io.webby.url.annotate.WsApi;
-import io.webby.url.annotate.WsProtocol;
+import io.webby.url.annotate.*;
+import io.webby.url.ws.meta.BinarySeparatorFrameMetadata;
+import io.webby.url.ws.meta.FrameMetadata;
+import io.webby.url.ws.meta.TextSeparatorFrameMetadata;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import org.jetbrains.annotations.VisibleForTesting;
@@ -38,11 +38,10 @@ import java.util.*;
 import java.util.function.Consumer;
 import java.util.function.Function;
 import java.util.function.IntPredicate;
-import java.util.function.Supplier;
 import java.util.logging.Level;
 
 import static io.webby.url.WebsocketAgentConfigError.failIf;
-import static io.webby.url.ws.FrameMetadata.MAX_ID_SIZE;
+import static io.webby.url.ws.meta.FrameMetadata.MAX_ID_SIZE;
 
 public class WebsocketAgentBinder {
     private static final FluentLogger log = FluentLogger.forEnclosingClass();

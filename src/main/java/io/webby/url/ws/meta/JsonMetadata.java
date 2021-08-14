@@ -1,4 +1,4 @@
-package io.webby.url.ws;
+package io.webby.url.ws.meta;
 
 import io.netty.buffer.ByteBuf;
 import io.netty.buffer.Unpooled;

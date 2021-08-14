@@ -6,6 +6,8 @@ import io.netty.handler.codec.http.websocketx.BinaryWebSocketFrame;
 import io.netty.handler.codec.http.websocketx.TextWebSocketFrame;
 import io.netty.handler.codec.http.websocketx.WebSocketFrame;
 import io.webby.netty.marshal.BinaryMarshaller;
+import io.webby.url.annotate.FrameType;
+import io.webby.url.ws.meta.FrameMetadata;
 import org.jetbrains.annotations.NotNull;
 
 import java.nio.charset.Charset;
