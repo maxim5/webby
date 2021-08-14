@@ -6,14 +6,11 @@ import io.netty.handler.codec.http.websocketx.BinaryWebSocketFrame;
 import io.netty.handler.codec.http.websocketx.TextWebSocketFrame;
 import io.netty.handler.codec.http.websocketx.WebSocketFrame;
 import org.jetbrains.annotations.NotNull;
-import org.jetbrains.annotations.Nullable;
 
 import java.util.Arrays;
 import java.util.List;
 
-import static io.webby.testing.FakeRequests.readable;
-
-public class FakeFrames {
+public class AssertFrame {
     public static void assertFrames(@NotNull Iterable<WebSocketFrame> frames) {
         Truth.assertThat(frames).isEmpty();
     }
@@ -31,21 +28,10 @@ public class FakeFrames {
     }
 
     public static void assertBinaryFrames(@NotNull Iterable<WebSocketFrame> frames, @NotNull String ... expected) {
-        assertFrames(frames, Arrays.stream(expected).map(s -> s.getBytes(Testing.CHARSET)).map(Unpooled::wrappedBuffer).map(BinaryWebSocketFrame::new).toList());
+        assertFrames(frames, Arrays.stream(expected).map(TestingBytes::asByteBuf).map(BinaryWebSocketFrame::new).toList());
     }
 
     public static void assertFrames(@NotNull Iterable<WebSocketFrame> frames, @NotNull List<? extends WebSocketFrame> expected) {
-        if (Testing.READABLE) {
-            expected = expected.stream().map(frame -> frame.replace(readable(frame.content()))).toList();
-        }
-        Truth.assertThat(frames).containsExactlyElementsIn(expected);
-    }
-
-    public static byte @NotNull [] bytes(@NotNull String str) {
-        return str.getBytes(Testing.CHARSET);
-    }
-
-    public static @NotNull String toBytesString(@Nullable WebSocketFrame frame) {
-        return frame != null ? Arrays.toString(frame.content().array()) : "<null>";
+        Truth.assertThat(frames).containsExactlyElementsIn(expected.stream().map(TestingBytes::replaceWithReadable).toList());
     }
 }

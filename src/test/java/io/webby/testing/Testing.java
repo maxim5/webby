@@ -11,19 +11,19 @@ import org.apache.logging.log4j.Level;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.core.config.Configurator;
 import org.jetbrains.annotations.NotNull;
+import org.junit.jupiter.api.Assertions;
 
-import java.nio.charset.Charset;
+import java.util.LinkedHashMap;
+import java.util.List;
 import java.util.Locale;
+import java.util.Map;
 import java.util.function.Consumer;
 
 public class Testing {
-    public static final boolean VERBOSE = false;
-    public static final boolean READABLE = true;
+    public static final boolean LOG_VERBOSE = false;
 
     public static final String DEFAULT_WEB_PATH = "src/test/resources";
     public static final String DEFAULT_VIEW_PATH = "src/test/resources";
-
-    public static final Charset CHARSET = Charset.defaultCharset();
 
     @NotNull
     public static Injector testStartupNoHandlers(@NotNull Module... modules) {
@@ -55,11 +55,25 @@ public class Testing {
 
     @NotNull
     public static Injector testStartup(@NotNull AppSettings settings, @NotNull Module... modules) {
-        Configurator.setAllLevels(LogManager.ROOT_LOGGER_NAME, VERBOSE ? Level.TRACE : Level.WARN);
+        Configurator.setAllLevels(LogManager.ROOT_LOGGER_NAME, LOG_VERBOSE ? Level.TRACE : Level.WARN);
 
         Locale.setDefault(Locale.US);  // any way to remove this?
 
         return Webby.initGuice(settings, modules);
+    }
+
+    public static <K, V> @NotNull Map<K, V> asMap(Object ... items) {
+        return asMap(List.of(items));
+    }
+
+    @SuppressWarnings("unchecked")
+    public static <K, V> @NotNull Map<K, V> asMap(@NotNull List<?> items) {
+        Assertions.assertEquals(0, items.size() % 2);
+        LinkedHashMap<K, V> result = new LinkedHashMap<>();
+        for (int i = 0; i < items.size(); i += 2) {
+            result.put((K) items.get(i), (V) items.get(i + 1));
+        }
+        return result;
     }
 
     public static class Internals {

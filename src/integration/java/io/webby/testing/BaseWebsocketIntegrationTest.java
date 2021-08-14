@@ -45,19 +45,19 @@ public class BaseWebsocketIntegrationTest extends BaseChannelTest {
         return castAny(endpoint.instance());
     }
 
-    protected Queue<WebSocketFrame> sendText(@NotNull String text) {
+    protected @NotNull Queue<WebSocketFrame> sendText(@NotNull String text) {
         return send(new TextWebSocketFrame(text));
     }
 
-    protected Queue<WebSocketFrame> sendBinary(@NotNull String binaryText) {
-        return sendBinary(FakeFrames.bytes(binaryText));
+    protected @NotNull Queue<WebSocketFrame> sendBinary(@NotNull String binaryText) {
+        return sendBinary(TestingBytes.asBytes(binaryText));
     }
 
-    protected Queue<WebSocketFrame> sendBinary(byte @NotNull [] bytes) {
+    protected @NotNull Queue<WebSocketFrame> sendBinary(byte @NotNull [] bytes) {
         return send(new BinaryWebSocketFrame(Unpooled.wrappedBuffer(bytes)));
     }
 
-    protected Queue<WebSocketFrame> send(@NotNull WebSocketFrame frame) {
+    protected @NotNull Queue<WebSocketFrame> send(@NotNull WebSocketFrame frame) {
         assertChannelInitialized();
         channel.writeOneInbound(frame);
         return readAllFramesUntilEmpty();

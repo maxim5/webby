@@ -5,6 +5,7 @@ import io.netty.buffer.Unpooled;
 import io.netty.handler.codec.http.HttpResponse;
 import io.routekit.util.CharArray;
 import io.webby.testing.Testing;
+import io.webby.testing.TestingBytes;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
@@ -23,7 +24,7 @@ public class ResponseMapperTest {
 
     @Test
     public void lookup_or_map_byte_buffer() {
-        byte[] bytes = "foo".getBytes(Testing.CHARSET);
+        byte[] bytes = "foo".getBytes(TestingBytes.CHARSET);
         assertLookupClass(bytes, "foo");
 
         ByteBuf byteBuf = Unpooled.wrappedBuffer(bytes);
@@ -55,7 +56,7 @@ public class ResponseMapperTest {
 
     @Test
     public void lookup_or_map_input_stream() {
-        byte[] bytes = "foo".getBytes(Testing.CHARSET);
+        byte[] bytes = "foo".getBytes(TestingBytes.CHARSET);
 
         ByteArrayInputStream byteArrayInputStream = new ByteArrayInputStream(bytes);
         assertLookupClass(byteArrayInputStream, "foo");
@@ -87,7 +88,7 @@ public class ResponseMapperTest {
     @Test
     @Disabled("Stream close is not handled by ResponseMapper anymore")
     public void should_close_input_stream() {
-        byte[] bytes = "foo".getBytes(Testing.CHARSET);
+        byte[] bytes = "foo".getBytes(TestingBytes.CHARSET);
         AtomicBoolean closed = new AtomicBoolean(false);
         InputStream stream = new ByteArrayInputStream(bytes) {
             @Override
@@ -127,7 +128,7 @@ public class ResponseMapperTest {
         if (expected != null) {
             Assertions.assertNotNull(lookup, () -> describe(obj));
             HttpResponse response = lookup.apply(obj);
-            Assertions.assertEquals(expected, streamContent(response).toString(Testing.CHARSET));
+            TestingBytes.assertByteBuf(streamContent(response), expected);
         } else {
             Assertions.assertNull(lookup, () -> describe(obj));
         }

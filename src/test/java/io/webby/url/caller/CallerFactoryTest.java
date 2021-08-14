@@ -9,8 +9,8 @@ import io.netty.handler.codec.http.HttpRequest;
 import io.netty.util.AsciiString;
 import io.routekit.util.CharArray;
 import io.routekit.util.MutableCharArray;
-import io.webby.testing.Testing;
 import io.webby.netty.request.HttpRequestEx;
+import io.webby.testing.Testing;
 import io.webby.url.convert.ConversionError;
 import io.webby.url.handle.Handler;
 import io.webby.url.handle.IntHandler;
@@ -27,9 +27,10 @@ import java.util.List;
 import java.util.Map;
 import java.util.function.IntFunction;
 import java.util.function.IntSupplier;
-import java.util.stream.Collectors;
 
-import static io.webby.testing.FakeRequests.*;
+import static io.webby.testing.FakeRequests.getEx;
+import static io.webby.testing.FakeRequests.postEx;
+import static io.webby.testing.Testing.asMap;
 
 @SuppressWarnings("unused")
 public class CallerFactoryTest {
@@ -280,7 +281,7 @@ public class CallerFactoryTest {
         List<CharSequence> list = Streams.mapWithIndex(
                 Arrays.stream(items),
                 (item, i) -> (i % 2 == 0) ? item.toString() : new CharArray(item.toString())
-        ).collect(Collectors.toList());
+        ).toList();
         return asMap(list);
     }
 

@@ -15,7 +15,7 @@ import java.io.ByteArrayOutputStream;
 import java.nio.charset.Charset;
 import java.util.stream.Stream;
 
-import static io.webby.testing.FakeRequests.asByteBuf;
+import static io.webby.testing.TestingBytes.asByteBuf;
 import static io.webby.util.Rethrow.*;
 
 public class AssertResponse {
@@ -55,9 +55,9 @@ public class AssertResponse {
         assertResponse(response, HttpVersion.HTTP_1_1, status, content, null);
     }
 
-    public static void assertResponse(HttpResponse response,
-                                      HttpVersion version,
-                                      HttpResponseStatus status,
+    public static void assertResponse(@Nullable HttpResponse response,
+                                      @NotNull HttpVersion version,
+                                      @NotNull HttpResponseStatus status,
                                       @Nullable String expectedContent,
                                       @Nullable HttpHeaders expectedHeaders) {
         Truth.assertThat(response).isNotNull();
@@ -92,7 +92,7 @@ public class AssertResponse {
         }
     }
 
-    @NotNull public static ByteBuf content(@NotNull HttpResponse response) {
+    public static @NotNull ByteBuf content(@NotNull HttpResponse response) {
         if (response instanceof ByteBufHolder full) {
             return full.content();
         }
@@ -102,7 +102,7 @@ public class AssertResponse {
         return Assertions.fail("Unrecognized response: " + response);
     }
 
-    @NotNull public static ByteBuf streamContent(@NotNull HttpResponse response) {
+    public static @NotNull ByteBuf streamContent(@NotNull HttpResponse response) {
         if (response instanceof StreamingHttpResponse streaming) {
             return Suppliers.rethrow(() -> Unpooled.wrappedBuffer(readAll(streaming))).get();
         }
@@ -129,12 +129,5 @@ public class AssertResponse {
                 content.content().readBytes(outputStream, content.content().readableBytes())
         ));
         return outputStream.toByteArray();
-    }
-
-    @NotNull public static HttpResponse readable(@NotNull HttpResponse response) {
-        if (response instanceof FullHttpResponse full) {
-            return full.replace(FakeRequests.readable(full.content()));
-        }
-        return response;
     }
 }
