@@ -6,7 +6,7 @@ import org.jetbrains.annotations.Nullable;
 
 import java.nio.charset.StandardCharsets;
 
-public class ByteBufUtil {
+public class EasyByteBuf {
     public static @Nullable ByteBuf readUntil(@NotNull ByteBuf content, byte value, int maxLength) {
         int start = content.readerIndex();
         int index = content.indexOf(start, start + Math.min(maxLength, content.readableBytes()), value);
@@ -20,7 +20,7 @@ public class ByteBufUtil {
 
     public static long parseLongSafely(@NotNull ByteBuf content, long defaultValue) {
         if (content.hasArray()) {
-            return parseLongSafely(content.array(), defaultValue);
+            return parseLongSafely(content.array(), content.readerIndex(), content.readableBytes(), defaultValue);
         } else {
             String s = content.toString(StandardCharsets.US_ASCII);
             try {
@@ -33,9 +33,14 @@ public class ByteBufUtil {
 
     // Does not support negative yet
     // Does not check the boundary
-    public static long parseLongSafely(byte @NotNull [] bytes, long defaultValue) {
+    public static long parseLongSafely(byte @NotNull [] bytes, int fromIndex, int length, long defaultValue) {
+        assert 0 <= fromIndex : "Invalid from index: %d".formatted(fromIndex);
+        assert length >= 0 : "Invalid length: %d".formatted(length);
+        assert fromIndex + length <= bytes.length : "Invalid to index: %d".formatted(fromIndex + length);
+
         long result = 0;
-        for (int b : bytes) {
+        for (int i = fromIndex, endIndex = fromIndex + length; i < endIndex; i++) {
+            int b = bytes[i];
             if (b < '0' || b > '9') {
                 return defaultValue;
             }
