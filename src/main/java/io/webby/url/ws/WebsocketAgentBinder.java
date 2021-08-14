@@ -35,6 +35,7 @@ import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;
 import java.nio.charset.Charset;
 import java.util.*;
+import java.util.function.BiConsumer;
 import java.util.function.Consumer;
 import java.util.function.Function;
 import java.util.function.IntPredicate;
@@ -55,7 +56,17 @@ public class WebsocketAgentBinder {
     public @NotNull Map<String, AgentEndpoint> bindAgents() {
         Set<? extends Class<?>> agentClasses = scanner.getAgentClassesFromClasspath();
         List<AgentBinding> bindings = getBindings(agentClasses);
-        return processBindings(bindings, settings.urlParser());
+        Map<String, AgentEndpoint> result = new HashMap<>();
+        processBindings(bindings, (url, endpoint) -> {
+            log.at(Level.INFO).log("Registering websocket-agent at %s -> %s", url, endpoint.instance());
+            AgentEndpoint existing = result.put(url, endpoint);
+            if (existing != null) {
+                throw new WebsocketAgentConfigError(
+                        "Websocket URL %s used by multiple agents: %s and %s"
+                        .formatted(url, endpoint.instance(), existing.instance()));
+            }
+        });
+        return result;
     }
 
     @VisibleForTesting
@@ -140,14 +151,12 @@ public class WebsocketAgentBinder {
         });
     }
 
-    // TODO: print bindings to the log
     @VisibleForTesting
-    @NotNull Map<String, AgentEndpoint> processBindings(@NotNull Collection<AgentBinding> bindings,
-                                                        @NotNull QueryParser parser) {
-        return BiStream.from(bindings, binding -> {
+    void processBindings(@NotNull Collection<AgentBinding> bindings, @NotNull BiConsumer<String, AgentEndpoint> consumer) {
+        BiStream.from(bindings, binding -> {
             String url = binding.url();
             try {
-                List<Token> tokens = parser.parse(url);
+                List<Token> tokens = settings.urlParser().parse(url);
                 boolean isValidUrl = tokens.size() == 1 && tokens.get(0) instanceof ConstToken;
                 failIf(!isValidUrl, "Websocket URL can't contain variables: %s".formatted(url));
             } catch (QueryParseException e) {
@@ -189,10 +198,7 @@ public class WebsocketAgentBinder {
                         .formatted(binding.sender(), binding.agentClass());
                 throw new WebsocketAgentConfigError(message, e);
             }
-        }).collect(BiCollectors.toMap((endpoint1, endpoint2) -> {
-            String message = "Websocket URL duplicated: %s and %s".formatted(endpoint1.instance(), endpoint2.instance());
-            throw new WebsocketAgentConfigError(message);
-        }));
+        }).forEach(consumer);
     }
 
     @VisibleForTesting
