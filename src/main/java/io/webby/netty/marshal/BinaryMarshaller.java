@@ -14,7 +14,7 @@ public interface BinaryMarshaller {
     void writeBytes(@NotNull OutputStream output, @NotNull Object instance, @NotNull Charset charset) throws IOException;
 
     default byte @NotNull [] writeBytes(@NotNull Object instance, @NotNull Charset charset) {
-        try (ByteArrayOutputStream output = new ByteArrayOutputStream()) {
+        try (ByteArrayOutputStream output = new ByteArrayOutputStream()) {  // TODO: default size
             writeBytes(output, instance, charset);
             return output.toByteArray();
         } catch (IOException impossible) {
