@@ -230,7 +230,10 @@ public class WebsocketAgentBinder {
 
     @VisibleForTesting
     static @NotNull String idFromName(@NotNull String name) {
-        return name;  // TODO: from name (drop on, lowercase)
+        if (name.startsWith("on") && name.length() > 2) {
+            return name.substring(2).toLowerCase();
+        }
+        return name;
     }
 
     private static boolean isSenderField(@NotNull Field field) {

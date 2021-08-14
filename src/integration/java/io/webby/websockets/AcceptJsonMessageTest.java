@@ -20,7 +20,7 @@ public class AcceptJsonMessageTest extends BaseWebsocketIntegrationTest {
             settings.setProperty("temp.ws.protocol", "TEXT");
         });
 
-        Queue<WebSocketFrame> frames = sendText("onPrimitive 777 {'i': 10}");
+        Queue<WebSocketFrame> frames = sendText("primitive 777 {'i': 10}");
 
         assertTextFrames(frames, """
         777 0 {"i":10,"l":0,"b":0,"s":0,"ch":"\\u0000","f":0.0,"d":0.0,"bool":false}
@@ -35,7 +35,7 @@ public class AcceptJsonMessageTest extends BaseWebsocketIntegrationTest {
             settings.setProperty("temp.ws.protocol", "BINARY");
         });
 
-        Queue<WebSocketFrame> frames = sendText("onPrimitive 12345678 {'i': 20}");
+        Queue<WebSocketFrame> frames = sendText("primitive 12345678 {'i': 20}");
 
         assertBinaryFrames(frames, """
         12345678 \u0000 {"i":20,"l":0,"b":0,"s":0,"ch":"\\u0000","f":0.0,"d":0.0,"bool":false}
