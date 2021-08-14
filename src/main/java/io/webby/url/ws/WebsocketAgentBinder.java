@@ -15,14 +15,17 @@ import io.routekit.QueryParseException;
 import io.routekit.QueryParser;
 import io.routekit.Token;
 import io.webby.app.Settings;
+import io.webby.common.InjectorHelper;
 import io.webby.netty.marshal.Marshaller;
 import io.webby.netty.marshal.MarshallerFactory;
 import io.webby.url.UrlConfigError;
 import io.webby.url.WebsocketAgentConfigError;
 import io.webby.url.annotate.Marshal;
-import io.webby.url.annotate.ServeWebsocket;
+import io.webby.url.annotate.Ws;
 import io.webby.url.annotate.WsApi;
+import io.webby.url.annotate.WsProtocol;
 import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 import org.jetbrains.annotations.VisibleForTesting;
 
 import java.lang.annotation.Annotation;
@@ -33,7 +36,9 @@ import java.lang.reflect.Modifier;
 import java.nio.charset.Charset;
 import java.util.*;
 import java.util.function.Consumer;
+import java.util.function.Function;
 import java.util.function.IntPredicate;
+import java.util.function.Supplier;
 import java.util.logging.Level;
 
 import static io.webby.url.WebsocketAgentConfigError.failIf;
@@ -46,6 +51,7 @@ public class WebsocketAgentBinder {
     @Inject private WebsocketAgentScanner scanner;
     @Inject private MarshallerFactory marshallers;
     @Inject private Injector injector;
+    @Inject private InjectorHelper helper;
 
     public @NotNull Map<String, AgentEndpoint> bindAgents() {
         Set<? extends Class<?>> agentClasses = scanner.getAgentClassesFromClasspath();
@@ -62,20 +68,25 @@ public class WebsocketAgentBinder {
 
     @VisibleForTesting
     void bindAgents(@NotNull Iterable<? extends Class<?>> agentClasses, @NotNull Consumer<AgentBinding> consumer) {
+        FrameType defaultFrameType = FrameType.valueOf(settings.getProperty("temp.ws.protocol", "TEXT"));
+        Marshal defaultMarshal = settings.defaultResponseContentMarshal();
         String defaultApiVersion = "1";  // TODO: settings.getApiVersion();
 
         agentClasses.forEach(klass -> {
             log.at(Level.ALL).log("Processing %s", klass);
 
-            ServeWebsocket serve = getServeAnnotation(klass);
-            if (serve.disabled()) {
+            Ws ws = getWebsocketAnnotation(klass);
+            String url = ws.url();
+            if (ws.disabled()) {
                 log.at(Level.CONFIG).log("Ignoring disabled websocket-agent class: %s", klass);
                 return;
             }
 
-            String url = serve.url();
-            Class<?> messageClass = serve.messages().length > 0 ? serve.messages()[0] : WebSocketFrame.class;
+            WsProtocol protocol = getProtocolAnnotation(klass);
+            Class<?> messageClass = protocol != null ? protocol.messages() : WebSocketFrame.class;
             boolean acceptsFrame = WebSocketFrame.class.isAssignableFrom(messageClass);
+            FrameType frameType = getIfPresent(protocol, WsProtocol::type, defaultFrameType);
+            Marshal marshal = getIfPresent(protocol, WsProtocol::marshal, defaultMarshal);
 
             Multimap<Class<?>, Method> allAcceptors = ArrayListMultimap.create(klass.getDeclaredMethods().length, 3);
             for (Method method : klass.getDeclaredMethods()) {
@@ -126,7 +137,7 @@ public class WebsocketAgentBinder {
                     .findAny()
                     .orElse(null);
 
-            consumer.accept(new AgentBinding(url, klass, messageClass, acceptors, senderField, acceptsFrame));
+            consumer.accept(new AgentBinding(url, klass, messageClass, frameType, marshal, acceptors, senderField, acceptsFrame));
         });
     }
 
@@ -154,18 +165,19 @@ public class WebsocketAgentBinder {
                     ImmutableMap<Class<?>, Acceptor> acceptorsByClass = Maps.uniqueIndex(acceptors, Acceptor::type);
                     return new ClassBasedAgentEndpoint(instance, acceptorsByClass, sender);
                 } else {
-                    // TODO: settings to annotations
-                    FrameType frameType = FrameType.valueOf(settings.getProperty("temp.ws.protocol", "TEXT"));
-                    Marshal marshal = settings.defaultResponseContentMarshal();
+                    FrameType frameType = binding.frameType();
+                    Marshal marshal = binding.marshal();
                     Charset charset = settings.charset();
 
                     ImmutableMap<ByteBuf, Acceptor> acceptorsById = Maps.uniqueIndex(acceptors, Acceptor::id);
                     Marshaller marshaller = marshallers.getMarshaller(marshal);
-                    FrameMetadata metadata = switch (frameType) {
-                        case TEXT -> new TextSeparatorFrameMetadata();
-                        case BINARY -> new BinarySeparatorFrameMetadata();
-                    };
-                    FrameConverter<Object> converter = new AcceptorsAwareFrameConverter(marshaller, metadata, acceptorsById, frameType, charset);
+                    FrameMetadata metadata = helper.getOrDefault(FrameMetadata.class, () ->
+                            switch (frameType) {
+                                case TEXT -> new TextSeparatorFrameMetadata();
+                                case BINARY -> new BinarySeparatorFrameMetadata();
+                            });
+                    FrameConverter<Object> converter =
+                            new AcceptorsAwareFrameConverter(marshaller, metadata, acceptorsById, frameType, charset);
                     return new FrameConverterEndpoint(instance, converter, sender);
                 }
             } catch (ConfigurationException e) {
@@ -185,13 +197,19 @@ public class WebsocketAgentBinder {
     }
 
     @VisibleForTesting
-    static @NotNull ServeWebsocket getServeAnnotation(@NotNull AnnotatedElement elem) {
-        if (elem.isAnnotationPresent(ServeWebsocket.class)) {
-            ServeWebsocket serve = elem.getAnnotation(ServeWebsocket.class);
-            failIf(serve.messages().length > 1, "@ServeWebsocket can't have several messages classes: %s".formatted(elem));
-            return serve;
+    static @NotNull Ws getWebsocketAnnotation(@NotNull AnnotatedElement elem) {
+        if (elem.isAnnotationPresent(Ws.class)) {
+            return elem.getAnnotation(Ws.class);
         }
         throw new UnsupportedOperationException();
+    }
+
+    @VisibleForTesting
+    static @Nullable WsProtocol getProtocolAnnotation(@NotNull AnnotatedElement elem) {
+        if (elem.isAnnotationPresent(WsProtocol.class)) {
+            return elem.getAnnotation(WsProtocol.class);
+        }
+        return null;
     }
 
     @VisibleForTesting
@@ -236,5 +254,14 @@ public class WebsocketAgentBinder {
 
     private static boolean isSenderField(@NotNull Field field) {
         return Sender.class.isAssignableFrom(field.getType());
+    }
+
+    private static <A, T> T getIfPresent(@Nullable A instance, @NotNull Function<A, T[]> array, @Nullable T def) {
+        return instance != null ? getIfPresent(array.apply(instance), def) : def;
+    }
+
+    private static <T> T getIfPresent(@NotNull T[] array, @Nullable T def) {
+        failIf(array.length > 1, "Multiple array values are not supported: %s".formatted(Arrays.toString(array)));
+        return array.length > 0 ? array[0] : def;
     }
 }

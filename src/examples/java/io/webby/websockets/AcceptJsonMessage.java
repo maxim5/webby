@@ -1,6 +1,7 @@
 package io.webby.websockets;
 
-import io.webby.url.annotate.ServeWebsocket;
+import io.webby.url.annotate.Ws;
+import io.webby.url.annotate.WsProtocol;
 import io.webby.websockets.ExampleMessages.PrimitiveMessage;
 import io.webby.websockets.ExampleMessages.SimpleMessage;
 import org.jetbrains.annotations.NotNull;
@@ -8,7 +9,8 @@ import org.jetbrains.annotations.NotNull;
 import java.util.ArrayList;
 import java.util.List;
 
-@ServeWebsocket(url = "/ws/accept/json", messages = SimpleMessage.class)
+@Ws(url = "/ws/accept/json")
+@WsProtocol(messages = SimpleMessage.class)
 public class AcceptJsonMessage {
     private final List<SimpleMessage> incoming = new ArrayList<>();
 

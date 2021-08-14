@@ -2,13 +2,13 @@ package io.webby.websockets;
 
 import com.google.inject.Inject;
 import io.netty.handler.codec.http.websocketx.TextWebSocketFrame;
-import io.webby.url.annotate.ServeWebsocket;
+import io.webby.url.annotate.Ws;
 import io.webby.url.ws.Sender;
 import org.jetbrains.annotations.NotNull;
 
 import static io.webby.url.ws.Sender.text;
 
-@ServeWebsocket(url = "/ws/sending")
+@Ws(url = "/ws/sending")
 public class SendingFrames {
     @Inject private Sender sender;
 

@@ -7,6 +7,10 @@ import org.jetbrains.annotations.NotNull;
 import java.util.concurrent.atomic.AtomicReference;
 
 public class TestingModules {
+    public static <T> @NotNull Module instance(@NotNull Class<? super T> klass, @NotNull T instance) {
+        return binder -> binder.bind(klass).toInstance(instance);
+    }
+
     public static <T> @NotNull Module provided(@NotNull Class<T> klass, @NotNull Provider<T> provider) {
         return binder -> binder.bind(klass).toProvider(provider);
     }

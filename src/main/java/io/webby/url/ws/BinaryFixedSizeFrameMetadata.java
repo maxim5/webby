@@ -4,7 +4,7 @@ import io.netty.buffer.ByteBuf;
 import io.netty.buffer.Unpooled;
 import org.jetbrains.annotations.NotNull;
 
-public record FixedSizeFrameMetadata(int size) implements FrameMetadata {
+public record BinaryFixedSizeFrameMetadata(int size) implements FrameMetadata {
     @Override
     public void parse(@NotNull ByteBuf content, @NotNull Consumer consumer) {
         if (content.readableBytes() >= size + 8) {

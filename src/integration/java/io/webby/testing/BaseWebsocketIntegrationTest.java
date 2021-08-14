@@ -1,5 +1,6 @@
 package io.webby.testing;
 
+import com.google.inject.Module;
 import io.netty.buffer.Unpooled;
 import io.netty.channel.embedded.EmbeddedChannel;
 import io.netty.handler.codec.http.DefaultHttpHeaders;
@@ -27,13 +28,13 @@ public class BaseWebsocketIntegrationTest extends BaseChannelTest {
         return testStartup(klass, __ -> {});
     }
 
-    protected <T> @NotNull T testStartup(@NotNull Class<T> klass, @NotNull Consumer<AppSettings> consumer) {
+    protected <T> @NotNull T testStartup(@NotNull Class<T> klass, @NotNull Consumer<AppSettings> consumer, @NotNull Module... modules) {
         injector = Testing.testStartup(settings -> {
             settings.setWebPath("src/examples/resources/web");
             settings.setViewPath("src/examples/resources/web");
             settings.setHandlerClassOnly(klass);
             consumer.accept(settings);
-        });
+        }, modules);
 
         AgentEndpoint endpoint = injector.getInstance(UrlRouter.class).findAgentEndpointByClass(klass);
         Assertions.assertNotNull(endpoint, "No Endpoint found for: %s".formatted(klass));
