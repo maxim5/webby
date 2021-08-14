@@ -2,20 +2,22 @@ package io.webby.url.ws;
 
 import io.netty.buffer.ByteBuf;
 import io.netty.buffer.Unpooled;
+import io.webby.netty.ws.Constants.RequestIds;
 import org.jetbrains.annotations.NotNull;
 
-public record SeparatorFrameMetadata(byte separator, int maxAcceptorIdSize) implements FrameMetadata {
+public record BinarySeparatorFrameMetadata(byte separator, int maxAcceptorIdSize) implements FrameMetadata {
     @Override
     public void parse(@NotNull ByteBuf content, @NotNull Consumer consumer) {
-        int index = content.indexOf(0, maxAcceptorIdSize, separator);
-        if (index >= 0 && index + 10 <= content.readableBytes()) {
+        int size = content.readableBytes();
+        int index = content.indexOf(0, Math.min(maxAcceptorIdSize, size), separator);
+        if (index >= 0 && index + 10 <= size) {
             ByteBuf id = content.readBytes(index);
             content.readBytes(1);  // separator
             long requestId = content.readLong();
             content.readBytes(1);  // separator
             consumer.accept(id, requestId, content);
         } else {
-            consumer.accept(null, -1, content);
+            consumer.accept(null, RequestIds.NO_ID, content);
         }
     }
 

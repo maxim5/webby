@@ -132,6 +132,7 @@ public class WebsocketAgentBinder {
         });
     }
 
+    // TODO: print bindings to the log
     @VisibleForTesting
     @NotNull Map<String, AgentEndpoint> processBindings(@NotNull Collection<AgentBinding> bindings,
                                                         @NotNull QueryParser parser) {
@@ -155,11 +156,18 @@ public class WebsocketAgentBinder {
                     ImmutableMap<Class<?>, Acceptor> acceptorsByClass = Maps.uniqueIndex(acceptors, Acceptor::type);
                     return new ClassBasedAgentEndpoint(instance, acceptorsByClass, sender);
                 } else {
+                    // TODO: settings to annotations
+                    FrameType frameType = FrameType.valueOf(settings.getProperty("temp.ws.protocol", "TEXT"));
+                    Marshal marshal = settings.defaultResponseContentMarshal();
                     Charset charset = settings.charset();
+
                     ImmutableMap<ByteBuf, Acceptor> acceptorsById = Maps.uniqueIndex(acceptors, Acceptor::id);
-                    Marshaller marshaller = marshallers.getMarshaller(Marshal.JSON);
-                    FrameMetadata metaReader = new SeparatorFrameMetadata((byte) ' ', MAX_ID_SIZE);
-                    FrameConverter<Object> converter = new AcceptorsAwareFrameConverter(marshaller, metaReader, acceptorsById, FrameType.TEXT, charset);
+                    Marshaller marshaller = marshallers.getMarshaller(marshal);
+                    FrameMetadata metaReader = switch (frameType) {
+                        case TEXT -> new TextSeparatorFrameMetadata((byte) ' ', MAX_ID_SIZE);
+                        case BINARY -> new BinarySeparatorFrameMetadata((byte) ' ', MAX_ID_SIZE);
+                    };
+                    FrameConverter<Object> converter = new AcceptorsAwareFrameConverter(marshaller, metaReader, acceptorsById, frameType, charset);
                     return new FrameConverterEndpoint(instance, converter, sender);
                 }
             } catch (ConfigurationException e) {

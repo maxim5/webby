@@ -15,7 +15,6 @@ import org.jetbrains.annotations.Nullable;
 import java.util.Queue;
 import java.util.function.Consumer;
 
-import static io.webby.testing.AssertResponse.readable;
 import static io.webby.testing.FakeRequests.request;
 
 public abstract class BaseHttpIntegrationTest extends BaseChannelTest {
@@ -59,9 +58,8 @@ public abstract class BaseHttpIntegrationTest extends BaseChannelTest {
         flushChannel();
 
         Queue<HttpObject> outbound = readAllOutbound(channel);
-        HttpResponse response = outbound.size() == 1 ?
+        return outbound.size() == 1 ?
                 (HttpResponse) outbound.poll() :
                 CompositeHttpResponse.fromObjects(outbound);
-        return Testing.READABLE ? readable(response) : response;
     }
 }
