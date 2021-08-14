@@ -3,6 +3,7 @@ package io.webby.netty.marshal;
 import io.netty.buffer.ByteBuf;
 import io.netty.buffer.ByteBufInputStream;
 import io.netty.buffer.Unpooled;
+import io.webby.common.SystemProperties;
 import org.jetbrains.annotations.NotNull;
 
 import java.io.*;
@@ -14,7 +15,7 @@ public interface BinaryMarshaller {
     void writeBytes(@NotNull OutputStream output, @NotNull Object instance, @NotNull Charset charset) throws IOException;
 
     default byte @NotNull [] writeBytes(@NotNull Object instance, @NotNull Charset charset) {
-        try (ByteArrayOutputStream output = new ByteArrayOutputStream()) {  // TODO: default size
+        try (ByteArrayOutputStream output = new ByteArrayOutputStream(SystemProperties.DEFAULT_SIZE_BYTES)) {
             writeBytes(output, instance, charset);
             return output.toByteArray();
         } catch (IOException impossible) {
