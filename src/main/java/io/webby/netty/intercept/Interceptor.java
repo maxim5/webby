@@ -1,7 +1,7 @@
 package io.webby.netty.intercept;
 
 import io.netty.handler.codec.http.HttpResponse;
-import io.webby.netty.exceptions.ServeException;
+import io.webby.netty.errors.ServeException;
 import io.webby.netty.request.MutableHttpRequestEx;
 import org.jetbrains.annotations.NotNull;
 

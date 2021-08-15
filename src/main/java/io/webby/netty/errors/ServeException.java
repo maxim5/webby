@@ -1,4 +1,4 @@
-package io.webby.netty.exceptions;
+package io.webby.netty.errors;
 
 public abstract class ServeException extends RuntimeException {
     public ServeException() {

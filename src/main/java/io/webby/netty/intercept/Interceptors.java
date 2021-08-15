@@ -8,7 +8,7 @@ import io.netty.channel.Channel;
 import io.netty.handler.codec.http.FullHttpRequest;
 import io.netty.handler.codec.http.HttpResponse;
 import io.webby.app.Settings;
-import io.webby.netty.exceptions.ServeException;
+import io.webby.netty.errors.ServeException;
 import io.webby.netty.intercept.attr.AttributesValidator;
 import io.webby.netty.marshal.Marshaller;
 import io.webby.netty.marshal.MarshallerFactory;

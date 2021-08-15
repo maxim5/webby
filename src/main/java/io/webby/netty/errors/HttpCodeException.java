@@ -1,4 +1,4 @@
-package io.webby.netty.exceptions;
+package io.webby.netty.errors;
 
 import io.netty.handler.codec.http.HttpResponseStatus;
 

@@ -1,4 +1,4 @@
-package io.webby.netty.exceptions;
+package io.webby.netty.errors;
 
 public class UnauthorizedException extends ServeException {
     public UnauthorizedException(String message) {

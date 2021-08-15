@@ -1,4 +1,4 @@
-package io.webby.netty.exceptions;
+package io.webby.netty.errors;
 
 public class ServiceUnavailableException extends ServeException {
     public ServiceUnavailableException(String message) {

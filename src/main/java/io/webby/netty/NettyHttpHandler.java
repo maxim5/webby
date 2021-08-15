@@ -20,7 +20,7 @@ import io.routekit.Router;
 import io.routekit.util.CharArray;
 import io.routekit.util.MutableCharArray;
 import io.webby.app.Settings;
-import io.webby.netty.exceptions.ServeException;
+import io.webby.netty.errors.ServeException;
 import io.webby.netty.intercept.Interceptors;
 import io.webby.netty.marshal.Marshaller;
 import io.webby.netty.marshal.MarshallerFactory;

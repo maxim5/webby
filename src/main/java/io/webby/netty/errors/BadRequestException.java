@@ -1,4 +1,4 @@
-package io.webby.netty.exceptions;
+package io.webby.netty.errors;
 
 public class BadRequestException extends ServeException {
     public BadRequestException(String message) {

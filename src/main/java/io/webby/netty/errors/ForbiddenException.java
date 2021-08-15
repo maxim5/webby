@@ -1,4 +1,4 @@
-package io.webby.netty.exceptions;
+package io.webby.netty.errors;
 
 public class ForbiddenException extends ServeException {
     public ForbiddenException(String message) {
