@@ -72,13 +72,13 @@ public class ResponseMapper {
     }
 
     // https://stackoverflow.com/questions/32229528/inheritance-aware-class-to-value-map-to-replace-series-of-instanceof
-    public <T extends U, U> @Nullable Function<U, HttpResponse> lookupClass(@Nullable Class<T> clazz) {
-        if (clazz == null) {
+    public <T extends U, U> @Nullable Function<U, HttpResponse> lookupClass(@Nullable Class<T> klass) {
+        if (klass == null) {
             return null;
         }
-        Function<?, HttpResponse> value = classMap.get(clazz);
+        Function<?, HttpResponse> value = classMap.get(klass);
         if (value == null) {
-            Class<?> superclass = clazz.getSuperclass();
+            Class<?> superclass = klass.getSuperclass();
             return castAny(lookupClass(superclass));
         }
         return castAny(value);
