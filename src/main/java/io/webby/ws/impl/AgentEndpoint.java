@@ -15,6 +15,8 @@ public interface AgentEndpoint {
 
     @Nullable WebSocketFrame processOutgoing(long requestId, @NotNull Object message);
 
+    @Nullable WebSocketFrame processError(long requestId, int code, @NotNull String message);
+
     interface Consumer {
         void accept(long requestId, @Nullable Object callResult);
 

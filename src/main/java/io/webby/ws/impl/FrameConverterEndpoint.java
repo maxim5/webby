@@ -28,4 +28,9 @@ public record FrameConverterEndpoint(@NotNull Object instance,
     public @NotNull WebSocketFrame processOutgoing(long requestId, @NotNull Object message) {
         return converter.toFrame(requestId, StatusCodes.OK, message);
     }
+
+    @Override
+    public @NotNull WebSocketFrame processError(long requestId, int code, @NotNull String message) {
+        return converter.toFrame(requestId, code, message);
+    }
 }

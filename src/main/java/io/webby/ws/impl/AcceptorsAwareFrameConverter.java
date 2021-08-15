@@ -6,6 +6,8 @@ import io.netty.handler.codec.http.websocketx.BinaryWebSocketFrame;
 import io.netty.handler.codec.http.websocketx.TextWebSocketFrame;
 import io.netty.handler.codec.http.websocketx.WebSocketFrame;
 import io.webby.netty.marshal.BinaryMarshaller;
+import io.webby.netty.ws.errors.BadFrameException;
+import io.webby.netty.ws.errors.ClientDeniedException;
 import io.webby.url.annotate.FrameType;
 import io.webby.ws.ClientFrameType;
 import io.webby.ws.ClientInfo;
@@ -52,11 +54,15 @@ public final class AcceptorsAwareFrameConverter implements FrameConverter<Object
     static @NotNull ConcreteFrameType resolveFrameType(@NotNull ClientFrameType clientType, @NotNull FrameType supportedType) {
         return switch (supportedType) {
             case TEXT_ONLY -> {
-                assert clientType == ClientFrameType.TEXT || clientType == ClientFrameType.ANY;
+                if (clientType != ClientFrameType.TEXT && clientType != ClientFrameType.ANY) {
+                    throw new ClientDeniedException("Unsupported type: client=%s supported=%s".formatted(clientType, supportedType));
+                }
                 yield ConcreteFrameType.TEXT;
             }
             case BINARY_ONLY -> {
-                assert clientType == ClientFrameType.BINARY || clientType == ClientFrameType.ANY;
+                if (clientType != ClientFrameType.BINARY && clientType != ClientFrameType.ANY) {
+                    throw new ClientDeniedException("Unsupported type: client=%s supported=%s".formatted(clientType, supportedType));
+                }
                 yield ConcreteFrameType.BINARY;
             }
             case FROM_CLIENT ->
@@ -73,13 +79,11 @@ public final class AcceptorsAwareFrameConverter implements FrameConverter<Object
     @Override
     public void toMessage(@NotNull WebSocketFrame frame, @NotNull Consumer<Object> success, @NotNull Runnable failure) {
         assert concreteFrameType != null : "Converter is not initialized";
-        switch (concreteFrameType) {
-            case TEXT -> {
-                assert frame instanceof TextWebSocketFrame;
-            }
-            case BINARY -> {
-                assert frame instanceof BinaryWebSocketFrame;
-            }
+        if (concreteFrameType == ConcreteFrameType.TEXT && !(frame instanceof TextWebSocketFrame)) {
+            throw new BadFrameException("Unsupported frame received: %s, expected text".formatted(frame.getClass()));
+        }
+        if (concreteFrameType == ConcreteFrameType.BINARY && !(frame instanceof BinaryWebSocketFrame)) {
+            throw new BadFrameException("Unsupported frame received: %s, expected binary".formatted(frame.getClass()));
         }
 
         ByteBuf frameContent = Unpooled.wrappedBuffer(frame.content());
@@ -103,6 +107,7 @@ public final class AcceptorsAwareFrameConverter implements FrameConverter<Object
     @Override
     public @NotNull WebSocketFrame toFrame(long requestId, int code, @NotNull Object message) {
         assert concreteFrameType != null : "Converter is not initialized";
+
         ByteBuf byteBuf = metadata.compose(requestId, code, marshaller.writeBytes(message, charset));
         return switch (concreteFrameType) {
             case TEXT -> new TextWebSocketFrame(byteBuf);

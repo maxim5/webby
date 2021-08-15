@@ -1,5 +1,6 @@
 package io.webby.ws.impl;
 
+import io.netty.handler.codec.http.websocketx.TextWebSocketFrame;
 import io.netty.handler.codec.http.websocketx.WebSocketFrame;
 import io.webby.netty.ws.Constants.RequestIds;
 import io.webby.ws.Sender;
@@ -31,5 +32,10 @@ public record ClassBasedAgentEndpoint(@NotNull Object instance,
     @Override
     public @Nullable WebSocketFrame processOutgoing(long requestId, @NotNull Object message) {
         return null;
+    }
+
+    @Override
+    public @NotNull WebSocketFrame processError(long requestId, int code, @NotNull String message) {
+        return new TextWebSocketFrame("%d: %s".formatted(code, message));
     }
 }

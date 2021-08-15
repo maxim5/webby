@@ -3,13 +3,11 @@ package io.webby.netty;
 import com.google.common.flogger.FluentLogger;
 import com.google.inject.Inject;
 import com.google.inject.Provider;
+import io.netty.channel.ChannelFutureListener;
 import io.netty.channel.ChannelHandlerContext;
 import io.netty.channel.ChannelInboundHandlerAdapter;
 import io.netty.channel.ChannelPipeline;
-import io.netty.handler.codec.http.HttpHeaderNames;
-import io.netty.handler.codec.http.HttpHeaders;
-import io.netty.handler.codec.http.HttpRequest;
-import io.netty.handler.codec.http.QueryStringDecoder;
+import io.netty.handler.codec.http.*;
 import io.netty.handler.codec.http.websocketx.WebSocketFrame;
 import io.netty.handler.codec.http.websocketx.WebSocketServerProtocolHandler;
 import io.netty.handler.codec.http.websocketx.extensions.compression.WebSocketServerCompressionHandler;
@@ -19,7 +17,10 @@ import io.webby.auth.session.SessionManager;
 import io.webby.auth.user.User;
 import io.webby.auth.user.UserManager;
 import io.webby.common.InjectorHelper;
+import io.webby.netty.errors.ServeException;
 import io.webby.netty.request.QueryParams;
+import io.webby.netty.response.HttpResponseFactory;
+import io.webby.netty.ws.errors.ClientDeniedException;
 import io.webby.util.Pair;
 import io.webby.ws.ClientFrameType;
 import io.webby.ws.ClientInfo;
@@ -43,6 +44,7 @@ public class NettyDispatcher extends ChannelInboundHandlerAdapter {
     @Inject private InjectorHelper helper;
     @Inject private WebsocketRouter websocketRouter;
     @Inject private Provider<NettyHttpHandler> httpHandler;
+    @Inject private HttpResponseFactory factory;
     @Inject private SessionManager sessionManager;
     @Inject private UserManager userManager;
 
@@ -87,8 +89,24 @@ public class NettyDispatcher extends ChannelInboundHandlerAdapter {
 
     @Override
     public void exceptionCaught(@NotNull ChannelHandlerContext context, @NotNull Throwable cause) {
-        // TODO: errors: access, auth, bad client info
-        log.at(Level.SEVERE).withCause(cause).log("Unexpected failure: %s", cause.getMessage());
+        HttpResponse response = null;
+
+        if (cause instanceof ClientDeniedException clientDeniedException) {
+            String replyError = clientDeniedException.getReplyError();
+            log.at(Level.WARNING).withCause(cause).log("Client denied: %s", replyError);
+            if (replyError != null) {
+                response = factory.newErrorResponse(HttpResponseStatus.BAD_REQUEST, replyError, cause);
+            }
+        } else if (cause instanceof ServeException serveException) {
+            response = factory.handleServeException(serveException, "Dispatcher");
+        } else {
+            log.at(Level.SEVERE).withCause(cause).log("Unexpected failure: %s", cause.getMessage());
+            response = factory.newResponse500("Unexpected failure", cause);
+        }
+
+        if (response != null) {
+            context.channel().writeAndFlush(response).addListener(ChannelFutureListener.CLOSE);
+        }
     }
 
     // TODO: strict mode
