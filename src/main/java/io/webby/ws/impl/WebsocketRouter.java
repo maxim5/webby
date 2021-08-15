@@ -23,9 +23,10 @@ public class WebsocketRouter {
         log.at(Level.INFO).log("URL router built in %d ms", stopwatch.stop().elapsed(TimeUnit.MILLISECONDS));
     }
 
-    // TODO: url params?
     public @Nullable AgentEndpoint route(@NotNull String url) {
-        return router.get(url);
+        int index = url.indexOf('?');
+        String path = (index >= 0) ? url.substring(0, index) : url;
+        return router.get(path);
     }
 
     @VisibleForTesting
