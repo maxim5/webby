@@ -55,14 +55,19 @@ public class SessionManager {
 
     @Nullable
     public Session getSessionOrNull(@Nullable Cookie cookie) {
-        if (cookie == null) {
+        return cookie == null ? null : getSessionOrNull(cookie.value());
+    }
+
+    @Nullable
+    public Session getSessionOrNull(@Nullable String cookieValue) {
+        if (cookieValue == null) {
             return null;
         }
         try {
-            long sessionId = decodeSessionId(cookie.value());
+            long sessionId = decodeSessionId(cookieValue);
             return db.get(sessionId);
         } catch (Throwable throwable) {
-            log.at(Level.WARNING).withCause(throwable).log("Failed to decode a cookie: %s".formatted(cookie));
+            log.at(Level.WARNING).withCause(throwable).log("Failed to decode a cookie: %s".formatted(cookieValue));
             return null;
         }
     }

@@ -8,6 +8,7 @@ import io.netty.handler.codec.http.websocketx.WebSocketFrame;
 import io.netty.handler.codec.http.websocketx.WebSocketServerProtocolHandler;
 import io.netty.util.ReferenceCountUtil;
 import io.webby.netty.ws.FrameMapper;
+import io.webby.ws.ClientInfo;
 import io.webby.ws.impl.AgentEndpoint;
 import io.webby.ws.lifecycle.AgentLifecycle;
 import org.jetbrains.annotations.NotNull;
@@ -18,13 +19,16 @@ public class NettyWebsocketHandler extends ChannelInboundHandlerAdapter {
     private static final FluentLogger log = FluentLogger.forEnclosingClass();
 
     private final AgentEndpoint endpoint;
+    private final ClientInfo clientInfo;
     private final AgentLifecycle lifecycle;
 
     @Inject private FrameMapper mapper;
 
-    public NettyWebsocketHandler(@NotNull AgentEndpoint endpoint) {
+    public NettyWebsocketHandler(@NotNull AgentEndpoint endpoint, @NotNull ClientInfo clientInfo) {
         this.endpoint = endpoint;
+        this.clientInfo = clientInfo;
         this.lifecycle = endpoint.lifecycle();
+        this.lifecycle.onConnectionAttempt(clientInfo);
     }
 
     @Override
@@ -62,6 +66,12 @@ public class NettyWebsocketHandler extends ChannelInboundHandlerAdapter {
         } else {
             context.fireChannelRead(message);
         }
+    }
+
+    @Override
+    public void exceptionCaught(ChannelHandlerContext ctx, Throwable cause) {
+        // TODO: errors: not found, bad request
+        log.at(Level.SEVERE).withCause(cause).log("Unexpected failure: %s", cause.getMessage());
     }
 
     private void handle(@NotNull WebSocketFrame frame, @NotNull ChannelHandlerContext context) {

@@ -77,7 +77,7 @@ public class WebsocketAgentBinder {
 
     @VisibleForTesting
     void bindAgents(@NotNull Iterable<? extends Class<?>> agentClasses, @NotNull Consumer<AgentBinding> consumer) {
-        FrameType defaultFrameType = FrameType.valueOf(settings.getProperty("temp.ws.protocol", "TEXT"));
+        FrameType defaultFrameType = FrameType.valueOf(settings.getProperty("temp.ws.protocol", "FROM_CLIENT"));
         Marshal defaultMarshal = settings.defaultResponseContentMarshal();
         String defaultApiVersion = "1";  // TODO: settings.getApiVersion();
 
@@ -172,19 +172,15 @@ public class WebsocketAgentBinder {
                     ImmutableMap<Class<?>, Acceptor> acceptorsByClass = Maps.uniqueIndex(acceptors, Acceptor::type);
                     return new ClassBasedAgentEndpoint(instance, acceptorsByClass, sender);
                 } else {
-                    FrameType frameType = binding.frameType();
+                    FrameType supportedType = binding.frameType();
                     Marshal marshal = binding.marshal();
                     Charset charset = settings.charset();
 
                     ImmutableMap<ByteBuf, Acceptor> acceptorsById = Maps.uniqueIndex(acceptors, Acceptor::id);
                     Marshaller marshaller = marshallers.getMarshaller(marshal);
-                    FrameMetadata metadata = helper.getOrDefault(FrameMetadata.class, () ->
-                            switch (frameType) {
-                                case TEXT -> new TextSeparatorFrameMetadata();
-                                case BINARY -> new BinarySeparatorFrameMetadata();
-                            });
+                    FrameMetadata metadata = helper.getOrDefault(FrameMetadata.class, TextSeparatorFrameMetadata::new);
                     FrameConverter<Object> converter =
-                            new AcceptorsAwareFrameConverter(marshaller, metadata, acceptorsById, frameType, charset);
+                            new AcceptorsAwareFrameConverter(marshaller, metadata, acceptorsById, supportedType, charset);
                     return new FrameConverterEndpoint(instance, converter, sender);
                 }
             } catch (ConfigurationException e) {

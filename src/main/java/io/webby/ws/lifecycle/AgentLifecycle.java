@@ -1,10 +1,13 @@
 package io.webby.ws.lifecycle;
 
 import io.netty.channel.Channel;
+import io.webby.ws.ClientInfo;
 import org.jetbrains.annotations.NotNull;
 
 public interface AgentLifecycle {
-    void onChannelConnected(@NotNull Channel channel);
+    default void onConnectionAttempt(@NotNull ClientInfo clientInfo) {}
+
+    default void onChannelConnected(@NotNull Channel channel) {}
 
     default void onChannelClose() {}
 

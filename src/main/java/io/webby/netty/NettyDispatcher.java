@@ -6,33 +6,55 @@ import com.google.inject.Provider;
 import io.netty.channel.ChannelHandlerContext;
 import io.netty.channel.ChannelInboundHandlerAdapter;
 import io.netty.channel.ChannelPipeline;
+import io.netty.handler.codec.http.HttpHeaderNames;
+import io.netty.handler.codec.http.HttpHeaders;
 import io.netty.handler.codec.http.HttpRequest;
+import io.netty.handler.codec.http.QueryStringDecoder;
 import io.netty.handler.codec.http.websocketx.WebSocketFrame;
 import io.netty.handler.codec.http.websocketx.WebSocketServerProtocolHandler;
 import io.netty.handler.codec.http.websocketx.extensions.compression.WebSocketServerCompressionHandler;
 import io.netty.handler.stream.ChunkedWriteHandler;
+import io.webby.auth.session.Session;
+import io.webby.auth.session.SessionManager;
+import io.webby.auth.user.User;
+import io.webby.auth.user.UserManager;
 import io.webby.common.InjectorHelper;
+import io.webby.netty.request.QueryParams;
+import io.webby.util.Pair;
+import io.webby.ws.ClientFrameType;
+import io.webby.ws.ClientInfo;
 import io.webby.ws.impl.AgentEndpoint;
 import io.webby.ws.impl.WebsocketRouter;
+import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
+import org.jetbrains.annotations.VisibleForTesting;
 
+import java.util.Arrays;
+import java.util.Map;
+import java.util.Optional;
 import java.util.logging.Level;
+import java.util.stream.Collectors;
 
 public class NettyDispatcher extends ChannelInboundHandlerAdapter {
     private static final FluentLogger log = FluentLogger.forEnclosingClass();
 
+    public static final String PROTOCOL = "io.webby";
+
     @Inject private InjectorHelper helper;
     @Inject private WebsocketRouter websocketRouter;
     @Inject private Provider<NettyHttpHandler> httpHandler;
+    @Inject private SessionManager sessionManager;
+    @Inject private UserManager userManager;
 
     private ChannelPipeline pipeline;
 
     @Override
-    public void handlerAdded(ChannelHandlerContext context) {
+    public void handlerAdded(@NotNull ChannelHandlerContext context) {
         pipeline = context.pipeline();
     }
 
     @Override
-    public void channelRead(ChannelHandlerContext context, Object message) {
+    public void channelRead(@NotNull ChannelHandlerContext context, @NotNull Object message) {
         log.at(Level.FINER).log("Dispatching %s\n", message);
 
         if (message instanceof HttpRequest request) {
@@ -41,9 +63,10 @@ public class NettyDispatcher extends ChannelInboundHandlerAdapter {
 
             if (endpoint != null) {
                 log.at(Level.FINER).log("Upgrading channel to Websocket: %s", uri);
+                ClientInfo clientInfo = getClientInfo(request);
                 pipeline.addLast(new WebSocketServerCompressionHandler());
-                pipeline.addLast(new WebSocketServerProtocolHandler(uri, null, true));
-                pipeline.addLast(helper.injectMembers(new NettyWebsocketHandler(endpoint)));
+                pipeline.addLast(new WebSocketServerProtocolHandler(uri, PROTOCOL, true));
+                pipeline.addLast(helper.injectMembers(new NettyWebsocketHandler(endpoint, clientInfo)));
                 pipeline.remove(ChunkedWriteHandler.class);
             } else {
                 log.at(Level.FINER).log("Migrating channel to HTTP: %s", uri);
@@ -60,5 +83,51 @@ public class NettyDispatcher extends ChannelInboundHandlerAdapter {
         }
 
         context.fireChannelRead(message);
+    }
+
+    @Override
+    public void exceptionCaught(@NotNull ChannelHandlerContext context, @NotNull Throwable cause) {
+        // TODO: errors: access, auth, bad client info
+        log.at(Level.SEVERE).withCause(cause).log("Unexpected failure: %s", cause.getMessage());
+    }
+
+    // TODO: strict mode
+    @VisibleForTesting
+    @NotNull ClientInfo getClientInfo(@NotNull HttpRequest request) {
+        QueryParams queryParams = QueryParams.fromDecoder(new QueryStringDecoder(request.uri()), Map.of());
+
+        HttpHeaders headers = request.headers();
+        String protocol = headers.get(HttpHeaderNames.SEC_WEBSOCKET_PROTOCOL);
+        Map<String, String> protoParams = parseProtocol(protocol);
+
+        String version = protoParams.getOrDefault("version", queryParams.getOrNull("v"));
+        String type = protoParams.getOrDefault("type", queryParams.getOrNull("t"));
+        String sessionId = protoParams.get("session");
+
+        ClientFrameType preferredType = type == null ? null : switch (type) {
+            case "text" -> ClientFrameType.TEXT;
+            case "binary" -> ClientFrameType.BINARY;
+            case "both" -> ClientFrameType.BOTH;
+            case "any" -> ClientFrameType.ANY;
+            default -> null;  // throw?
+        };
+        Session session = sessionManager.getSessionOrNull(sessionId);  // throw?
+        User user = session != null ? userManager.findById(session.userId()) : null;  // throw?
+
+        return new ClientInfo(Optional.ofNullable(version),
+                              Optional.ofNullable(preferredType),
+                              Optional.ofNullable(session),
+                              Optional.ofNullable(user));
+    }
+
+    @VisibleForTesting
+    static @NotNull Map<String, String> parseProtocol(@Nullable String protocol) {
+        if (protocol == null) {
+            return Map.of();
+        }
+        return Arrays.stream(protocol.split(","))
+                .filter(value -> value.indexOf('|') >= 0)
+                .map(value -> Pair.of(value.trim().split("\\|", 2)))
+                .collect(Collectors.toMap(Pair::getKey, Pair::getValue));
     }
 }

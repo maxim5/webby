@@ -1,6 +1,7 @@
 package io.webby.ws.lifecycle;
 
 import io.netty.channel.Channel;
+import io.webby.ws.ClientInfo;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
@@ -13,6 +14,11 @@ public class AgentLifecycleFanOut implements AgentLifecycle {
 
     public AgentLifecycleFanOut(@NotNull List<AgentLifecycle> delegates) {
         this.delegates = delegates;
+    }
+
+    @Override
+    public void onConnectionAttempt(@NotNull ClientInfo clientInfo) {
+        delegates.forEach(delegate -> delegate.onConnectionAttempt(clientInfo));
     }
 
     @Override

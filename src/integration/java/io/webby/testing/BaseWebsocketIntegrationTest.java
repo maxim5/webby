@@ -11,6 +11,7 @@ import io.netty.handler.codec.http.websocketx.WebSocketServerProtocolHandler.Han
 import io.webby.app.AppSettings;
 import io.webby.netty.NettyWebsocketHandler;
 import io.webby.util.Rethrow;
+import io.webby.ws.ClientInfo;
 import io.webby.ws.impl.AgentEndpoint;
 import io.webby.ws.impl.WebsocketRouter;
 import org.jetbrains.annotations.NotNull;
@@ -18,6 +19,7 @@ import org.junit.jupiter.api.Assertions;
 
 import java.lang.reflect.Constructor;
 import java.util.ArrayDeque;
+import java.util.Optional;
 import java.util.Queue;
 import java.util.function.Consumer;
 
@@ -38,7 +40,7 @@ public class BaseWebsocketIntegrationTest extends BaseChannelTest {
 
         AgentEndpoint endpoint = injector.getInstance(WebsocketRouter.class).findAgentEndpointByClass(klass);
         Assertions.assertNotNull(endpoint, "No Endpoint found for: %s".formatted(klass));
-        NettyWebsocketHandler handler = new NettyWebsocketHandler(endpoint);
+        NettyWebsocketHandler handler = new NettyWebsocketHandler(endpoint, new ClientInfo(Optional.empty(), Optional.empty(), Optional.empty(), Optional.empty()));
         injector.injectMembers(handler);
         channel = new EmbeddedChannel(handler);
         channel.pipeline().fireUserEventTriggered(createHandshakeCompleteEvent());
