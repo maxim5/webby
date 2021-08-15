@@ -1,17 +1,14 @@
 package io.webby.hello;
 
 import io.webby.testing.BaseHttpIntegrationTest;
-import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 
-import static io.webby.testing.AssertResponse.*;
+import static io.webby.testing.AssertResponse.assert200;
+import static io.webby.testing.AssertResponse.assert500;
 
 public class ReturnMiscIntegrationTest extends BaseHttpIntegrationTest {
-    @BeforeEach
-    void setup() {
-        testStartup(ReturnMisc.class);
-    }
+    protected final ReturnMisc handler = testSetup(ReturnMisc.class).initHandler();
 
     @Test
     public void get_misc() {

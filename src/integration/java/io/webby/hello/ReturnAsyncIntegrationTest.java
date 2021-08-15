@@ -7,7 +7,7 @@ import static io.webby.testing.AssertResponse.assert200;
 import static io.webby.testing.AssertResponse.assert500;
 
 public class ReturnAsyncIntegrationTest extends BaseHttpIntegrationTest {
-    private final ReturnAsync instance = testStartup(ReturnAsync.class).getInstance(ReturnAsync.class);
+    private final ReturnAsync handler = testSetup(ReturnAsync.class).initHandler();
 
     @Test
     public void futures() {
@@ -49,7 +49,7 @@ public class ReturnAsyncIntegrationTest extends BaseHttpIntegrationTest {
     protected void flushChannel() {
         do {
             Thread.yield();
-        } while (!instance.executor.getQueue().isEmpty());
+        } while (!handler.executor.getQueue().isEmpty());
         // Thread.sleep(50);
         super.flushChannel();
     }

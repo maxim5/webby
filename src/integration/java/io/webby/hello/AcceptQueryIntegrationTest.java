@@ -1,16 +1,12 @@
 package io.webby.hello;
 
 import io.webby.testing.BaseHttpIntegrationTest;
-import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
-import static io.webby.testing.AssertResponse.*;
+import static io.webby.testing.AssertResponse.assert200;
 
 public class AcceptQueryIntegrationTest extends BaseHttpIntegrationTest {
-    @BeforeEach
-    void setup() {
-        testStartup(AcceptQuery.class);
-    }
+    protected final AcceptQuery handler = testSetup(AcceptQuery.class).initHandler();
 
     @Test
     public void get_simple() {

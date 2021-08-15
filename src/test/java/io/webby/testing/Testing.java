@@ -25,23 +25,19 @@ public class Testing {
     public static final String DEFAULT_WEB_PATH = "src/test/resources";
     public static final String DEFAULT_VIEW_PATH = "src/test/resources";
 
-    @NotNull
-    public static Injector testStartupNoHandlers(@NotNull Module... modules) {
+    public static @NotNull Injector testStartupNoHandlers(@NotNull Module... modules) {
         return testStartup(settings -> settings.setInterceptorFilter((pkg, cls) -> false), modules);
     }
 
-    @NotNull
-    public static Injector testStartup(@NotNull Class<?> clazz, @NotNull Module... modules) {
-        return testStartup(settings -> settings.setHandlerClassOnly(clazz), modules);
+    public static @NotNull Injector testStartup(@NotNull Class<?> klass, @NotNull Module... modules) {
+        return testStartup(settings -> settings.setHandlerClassOnly(klass), modules);
     }
 
-    @NotNull
-    public static Injector testStartup(@NotNull String packageName, @NotNull Module... modules) {
+    public static @NotNull Injector testStartup(@NotNull String packageName, @NotNull Module... modules) {
         return testStartup(settings -> settings.setHandlerPackageOnly(packageName), modules);
     }
 
-    @NotNull
-    public static Injector testStartup(@NotNull Consumer<AppSettings> consumer, @NotNull Module... modules) {
+    public static @NotNull Injector testStartup(@NotNull Consumer<AppSettings> consumer, @NotNull Module... modules) {
         AppSettings settings = new AppSettings();
         settings.setDevMode(true);
         settings.setSecurityKey("12345678901234567890123456789012");
@@ -53,8 +49,7 @@ public class Testing {
         return testStartup(settings, modules);
     }
 
-    @NotNull
-    public static Injector testStartup(@NotNull AppSettings settings, @NotNull Module... modules) {
+    public static @NotNull Injector testStartup(@NotNull AppSettings settings, @NotNull Module... modules) {
         Configurator.setAllLevels(LogManager.ROOT_LOGGER_NAME, LOG_VERBOSE ? Level.TRACE : Level.WARN);
 
         Locale.setDefault(Locale.US);  // any way to remove this?

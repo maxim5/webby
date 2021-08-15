@@ -3,16 +3,12 @@ package io.webby.templates;
 import io.netty.handler.codec.http.HttpResponse;
 import io.webby.testing.BaseHttpIntegrationTest;
 import org.junit.jupiter.api.Assertions;
-import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
 import static io.webby.testing.AssertResponse.*;
 
 public class HandlebarsExampleTest extends BaseHttpIntegrationTest {
-    @BeforeEach
-    void setup() {
-        testStartup(HandlebarsExample.class);
-    }
+    protected final HandlebarsExample handler = testSetup(HandlebarsExample.class).initHandler();
 
     @Test
     public void get_hello() {

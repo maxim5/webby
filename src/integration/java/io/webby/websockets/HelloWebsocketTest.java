@@ -11,7 +11,7 @@ import java.util.Queue;
 import static io.webby.testing.TestingBytes.asByteBuf;
 
 public class HelloWebsocketTest extends BaseWebsocketIntegrationTest {
-    private final HelloWebsocket agent = testStartup(HelloWebsocket.class);
+    private final HelloWebsocket agent = testSetup(HelloWebsocket.class).initAgent();
 
     @Test
     public void text_simple() {

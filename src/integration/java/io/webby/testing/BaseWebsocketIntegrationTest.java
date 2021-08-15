@@ -1,5 +1,6 @@
 package io.webby.testing;
 
+import com.google.inject.Injector;
 import com.google.inject.Module;
 import io.netty.buffer.Unpooled;
 import io.netty.channel.embedded.EmbeddedChannel;
@@ -26,25 +27,40 @@ import java.util.function.Consumer;
 import static io.webby.util.EasyCast.castAny;
 
 public class BaseWebsocketIntegrationTest extends BaseChannelTest {
-    protected <T> @NotNull T testStartup(@NotNull Class<T> klass) {
-        return testStartup(klass, __ -> {});
+    protected <T> @NotNull WebsocketSetup<T> testSetup(@NotNull Class<T> klass) {
+        return testSetup(klass, settings -> {});
     }
 
-    protected <T> @NotNull T testStartup(@NotNull Class<T> klass, @NotNull Consumer<AppSettings> consumer, @NotNull Module... modules) {
-        injector = Testing.testStartup(settings -> {
-            settings.setWebPath("src/examples/resources/web");
-            settings.setViewPath("src/examples/resources/web");
-            settings.setHandlerClassOnly(klass);
-            consumer.accept(settings);
-        }, modules);
+    protected <T> @NotNull WebsocketSetup<T> testSetup(@NotNull Class<T> klass,
+                                                       @NotNull Consumer<AppSettings> consumer,
+                                                       @NotNull Module... modules) {
+        Injector injector = Testing.testStartup(
+                DEFAULT_SETTINGS
+                        .andThen(settings -> settings.setHandlerClassOnly(klass))
+                        .andThen(consumer),
+                modules
+        );
+        return new WebsocketSetup<>(injector, klass);
+    }
 
-        AgentEndpoint endpoint = injector.getInstance(WebsocketRouter.class).findAgentEndpointByClass(klass);
-        Assertions.assertNotNull(endpoint, "No Endpoint found for: %s".formatted(klass));
-        NettyWebsocketHandler handler = new NettyWebsocketHandler(endpoint, new ClientInfo(Optional.empty(), Optional.empty(), Optional.empty(), Optional.empty()));
-        injector.injectMembers(handler);
-        channel = new EmbeddedChannel(handler);
-        channel.pipeline().fireUserEventTriggered(createHandshakeCompleteEvent());
-        return castAny(endpoint.instance());
+    protected class WebsocketSetup<T> extends SingleTargetSetup<T> {
+        public WebsocketSetup(@NotNull Injector injector, @NotNull Class<T> klass) {
+            super(injector, klass);
+        }
+
+        public @NotNull T initAgent() {
+            return initAgent(new ClientInfo(Optional.empty(), Optional.empty(), Optional.empty(), Optional.empty()));
+        }
+
+        public @NotNull T initAgent(@NotNull ClientInfo clientInfo) {
+            AgentEndpoint endpoint = injector.getInstance(WebsocketRouter.class).findAgentEndpointByClass(klass);
+            Assertions.assertNotNull(endpoint, "No Endpoint found for: %s".formatted(klass));
+            NettyWebsocketHandler handler = new NettyWebsocketHandler(endpoint, clientInfo);
+            injector.injectMembers(handler);
+            channel = new EmbeddedChannel(handler);
+            channel.pipeline().fireUserEventTriggered(createHandshakeCompleteEvent());
+            return castAny(endpoint.instance());
+        }
     }
 
     protected @NotNull Queue<WebSocketFrame> sendText(@NotNull String text) {

@@ -8,7 +8,7 @@ import org.junit.jupiter.api.Test;
 import java.util.Queue;
 
 public class SendingFramesTest extends BaseWebsocketIntegrationTest {
-    private final SendingFrames agent = testStartup(SendingFrames.class);
+    private final SendingFrames agent = testSetup(SendingFrames.class).initAgent();
 
     @Test
     public void text_simple() {

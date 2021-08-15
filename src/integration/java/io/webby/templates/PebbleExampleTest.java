@@ -11,9 +11,9 @@ import static io.webby.testing.AssertResponse.*;
 public class PebbleExampleTest extends BaseHttpIntegrationTest {
     @BeforeEach
     void setup() {
-        testStartup(PebbleExample.class, settings -> {
-            settings.setViewPath("src/examples/resources/web/pebble");
-        });
+        testSetup(PebbleExample.class, settings ->
+            settings.setViewPath("src/examples/resources/web/pebble")
+        );
     }
 
     @Test

@@ -11,7 +11,7 @@ import static io.webby.testing.AssertResponse.*;
 public class JteExampleTest extends BaseHttpIntegrationTest {
     @BeforeEach
     void setup() {
-        testStartup(JteExample.class, settings -> {
+        testSetup(JteExample.class, settings -> {
             settings.setViewPath("src/examples/resources/web/jte");
             settings.setProperty("jte.class.directory", JteExample.CLASS_DIR);
         });

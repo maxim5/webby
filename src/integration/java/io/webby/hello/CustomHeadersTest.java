@@ -5,7 +5,6 @@ import io.netty.handler.codec.http.HttpResponse;
 import io.webby.testing.BaseHttpIntegrationTest;
 import org.jetbrains.annotations.NotNull;
 import org.junit.jupiter.api.Assertions;
-import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
 import java.io.ByteArrayInputStream;
@@ -15,13 +14,11 @@ import java.util.Map;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipInputStream;
 
-import static io.webby.testing.AssertResponse.*;
+import static io.webby.testing.AssertResponse.assert200;
+import static io.webby.testing.AssertResponse.content;
 
 public class CustomHeadersTest extends BaseHttpIntegrationTest {
-    @BeforeEach
-    void setup() {
-        testStartup(CustomHeaders.class);
-    }
+    protected final CustomHeaders handler = testSetup(CustomHeaders.class).initHandler();
 
     @Test
     public void get_plain_text() throws Exception {

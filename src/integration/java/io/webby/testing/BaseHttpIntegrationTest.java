@@ -1,6 +1,7 @@
 package io.webby.testing;
 
 import com.google.inject.Injector;
+import com.google.inject.Module;
 import io.netty.channel.embedded.EmbeddedChannel;
 import io.netty.handler.codec.http.FullHttpRequest;
 import io.netty.handler.codec.http.HttpMethod;
@@ -18,20 +19,32 @@ import java.util.function.Consumer;
 import static io.webby.testing.FakeRequests.request;
 
 public abstract class BaseHttpIntegrationTest extends BaseChannelTest {
-    protected @NotNull Injector testStartup(@NotNull Class<?> clazz) {
-        return testStartup(clazz, __ -> {});
+    protected <T> @NotNull HttpSetup<T> testSetup(@NotNull Class<T> klass) {
+        return testSetup(klass, settings -> {});
     }
 
-    protected @NotNull Injector testStartup(@NotNull Class<?> clazz, @NotNull Consumer<AppSettings> consumer) {
-        injector = Testing.testStartup(settings -> {
-            settings.setWebPath("src/examples/resources/web");
-            settings.setViewPath("src/examples/resources/web");
-            settings.setHandlerClassOnly(clazz);
-            consumer.accept(settings);
-        });
-        NettyHttpHandler handler = injector.getInstance(NettyHttpHandler.class);
-        channel = new EmbeddedChannel(new ChunkedWriteHandler(), handler);
-        return injector;
+    protected <T> @NotNull HttpSetup<T> testSetup(@NotNull Class<T> klass,
+                                                  @NotNull Consumer<AppSettings> consumer,
+                                                  @NotNull Module... modules) {
+        Injector injector = Testing.testStartup(
+                DEFAULT_SETTINGS
+                        .andThen(settings -> settings.setHandlerClassOnly(klass))
+                        .andThen(consumer),
+                modules
+        );
+        return new HttpSetup<>(injector, klass);
+    }
+
+    protected class HttpSetup<T> extends SingleTargetSetup<T> {
+        public HttpSetup(@NotNull Injector injector, @NotNull Class<T> klass) {
+            super(injector, klass);
+            NettyHttpHandler handler = injector.getInstance(NettyHttpHandler.class);
+            channel = new EmbeddedChannel(new ChunkedWriteHandler(), handler);
+        }
+
+        public @NotNull T initHandler() {
+            return injector.getInstance(klass);
+        }
     }
 
     @NotNull
