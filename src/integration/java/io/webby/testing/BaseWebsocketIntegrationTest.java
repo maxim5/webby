@@ -23,7 +23,6 @@ import org.junit.jupiter.api.Assertions;
 
 import java.lang.reflect.Constructor;
 import java.util.ArrayDeque;
-import java.util.Optional;
 import java.util.Queue;
 import java.util.function.Consumer;
 
@@ -52,7 +51,7 @@ public class BaseWebsocketIntegrationTest extends BaseChannelTest {
         }
 
         public @NotNull T initAgent() {
-            return initAgent(new ClientInfo(Optional.empty(), Optional.empty(), Optional.empty(), Optional.empty()));
+            return initAgent(FakeClients.DEFAULT);
         }
 
         public @NotNull T initAgent(@NotNull ClientInfo clientInfo) {
@@ -68,13 +67,14 @@ public class BaseWebsocketIntegrationTest extends BaseChannelTest {
 
     protected <T> @NotNull T setupAgent(@NotNull Class<T> klass,
                                         @NotNull Marshal marshal,
-                                        @NotNull FrameType type,
-                                        @NotNull FrameMetadata metadata) {
+                                        @NotNull FrameType frameType,
+                                        @NotNull FrameMetadata metadata,
+                                        @NotNull ClientInfo clientInfo) {
         WebsocketSetup<T> setup = testSetup(klass, settings -> {
             settings.setDefaultFrameContentMarshal(marshal);
-            settings.setDefaultFrameType(type);
+            settings.setDefaultFrameType(frameType);
         }, TestingModules.instance(FrameMetadata.class, metadata));
-        return setup.initAgent();
+        return setup.initAgent(clientInfo);
     }
 
     protected @NotNull Queue<WebSocketFrame> sendText(@NotNull String text) {

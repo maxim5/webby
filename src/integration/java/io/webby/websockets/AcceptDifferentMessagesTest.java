@@ -1,13 +1,13 @@
 package io.webby.websockets;
 
-import com.google.common.truth.Truth;
 import io.netty.handler.codec.http.websocketx.WebSocketFrame;
-import io.webby.testing.AssertFrame;
 import io.webby.testing.BaseWebsocketIntegrationTest;
+import io.webby.testing.FakeClients;
 import io.webby.url.annotate.FrameType;
 import io.webby.url.annotate.Marshal;
 import io.webby.websockets.ExampleMessages.PrimitiveMessage;
 import io.webby.websockets.ExampleMessages.StringMessage;
+import io.webby.ws.ClientFrameType;
 import io.webby.ws.meta.FrameMetadata;
 import io.webby.ws.meta.TextSeparatorFrameMetadata;
 import org.jetbrains.annotations.NotNull;
@@ -16,19 +16,49 @@ import org.junit.jupiter.api.Test;
 
 import java.util.Queue;
 
+import static com.google.common.truth.Truth.assertThat;
+import static io.webby.testing.AssertFrame.*;
+
 public class AcceptDifferentMessagesTest extends BaseWebsocketIntegrationTest {
     protected @NotNull AcceptDifferentMessages setupJson(@NotNull FrameType type, @NotNull FrameMetadata metadata) {
-        return setupAgent(AcceptDifferentMessages.class, Marshal.JSON, type, metadata);
+        return setupAgent(AcceptDifferentMessages.class, Marshal.JSON, type, metadata, FakeClients.DEFAULT);
+    }
+
+    protected @NotNull AcceptDifferentMessages setupJson(@NotNull FrameType serverType,
+                                                         @NotNull FrameMetadata metadata,
+                                                         @NotNull ClientFrameType clientType) {
+        return setupAgent(AcceptDifferentMessages.class, Marshal.JSON, serverType, metadata, FakeClients.client(clientType));
     }
 
     @Test
     public void on_json_text_primitive() {
         AcceptDifferentMessages agent = setupJson(FrameType.TEXT_ONLY, new TextSeparatorFrameMetadata());
         Queue<WebSocketFrame> frames = sendText("primitive 1 {'ch': 'a', 'bool': true}");
-        AssertFrame.assertTextFrames(frames, """
+        assertTextFrames(frames, """
             1 0 {"s":"a-true"}
         """.trim());
-        Truth.assertThat(agent.getIncoming()).containsExactly(new PrimitiveMessage().withChar('a').withBool(true));
+        assertThat(agent.getIncoming()).containsExactly(new PrimitiveMessage().withChar('a').withBool(true));
+    }
+
+    @Test
+    public void on_json_from_client_text_primitive() {
+        AcceptDifferentMessages agent = setupJson(FrameType.FROM_CLIENT, new TextSeparatorFrameMetadata());
+        Queue<WebSocketFrame> frames = sendText("primitive 1 {'ch': 'a', 'bool': true}");
+        assertTextFrames(frames, """
+            1 0 {"s":"a-true"}
+        """.trim());
+        assertThat(agent.getIncoming()).containsExactly(new PrimitiveMessage().withChar('a').withBool(true));
+    }
+
+    @Test
+    public void on_json_from_client_binary_primitive() {
+        AcceptDifferentMessages agent = setupJson(FrameType.FROM_CLIENT, new TextSeparatorFrameMetadata());
+        Queue<WebSocketFrame> frames = sendBinary("primitive 1 {'ch': 'a', 'bool': true}");
+        // Currently, can't figure out the request type, hence TEXT response for now
+        assertTextFrames(frames, """
+            1 0 {"s":"a-true"}
+        """.trim());
+        assertThat(agent.getIncoming()).containsExactly(new PrimitiveMessage().withChar('a').withBool(true));
     }
 
     @Test
@@ -36,17 +66,184 @@ public class AcceptDifferentMessagesTest extends BaseWebsocketIntegrationTest {
         AcceptDifferentMessages agent = setupJson(FrameType.TEXT_ONLY, new TextSeparatorFrameMetadata());
         Queue<WebSocketFrame> frames = sendText("str 111111111 {'s': 'aaa'}");
         Assertions.assertEquals(96352, new StringMessage("aaa").hashCode());
-        AssertFrame.assertTextFrames(frames, """
+        assertTextFrames(frames, """
             111111111 0 {"i":96352,"l":0,"b":0,"s":0,"ch":"\\u0000","f":0.0,"d":0.0,"bool":false}
         """.trim());
-        Truth.assertThat(agent.getIncoming()).containsExactly(new StringMessage("aaa"));
+        assertThat(agent.getIncoming()).containsExactly(new StringMessage("aaa"));
+    }
+
+    @Test
+    public void on_json_binary_string_not_null() {
+        AcceptDifferentMessages agent = setupJson(FrameType.BINARY_ONLY, new TextSeparatorFrameMetadata());
+        Queue<WebSocketFrame> frames = sendBinary("str 111111111 {'s': 'aaa'}");
+        Assertions.assertEquals(96352, new StringMessage("aaa").hashCode());
+        assertBinaryFrames(frames, """
+            111111111 0 {"i":96352,"l":0,"b":0,"s":0,"ch":"\\u0000","f":0.0,"d":0.0,"bool":false}
+        """.trim());
+        assertThat(agent.getIncoming()).containsExactly(new StringMessage("aaa"));
     }
 
     @Test
     public void on_json_text_string_null() {
         AcceptDifferentMessages agent = setupJson(FrameType.TEXT_ONLY, new TextSeparatorFrameMetadata());
         Queue<WebSocketFrame> frames = sendText("str 111111111 {'s': null}");
-        AssertFrame.assertTextFrames(frames);
-        Truth.assertThat(agent.getIncoming()).containsExactly(new StringMessage(null));
+        assertTextFrames(frames);
+        assertThat(agent.getIncoming()).containsExactly(new StringMessage(null));
+    }
+
+    @Test
+    public void on_json_binary_string_null() {
+        AcceptDifferentMessages agent = setupJson(FrameType.BINARY_ONLY, new TextSeparatorFrameMetadata());
+        Queue<WebSocketFrame> frames = sendBinary("str 111111111 {'s': null}");
+        assertBinaryFrames(frames);
+        assertThat(agent.getIncoming()).containsExactly(new StringMessage(null));
+    }
+
+    @Test
+    public void compatibility_server_text_only_client_text() {
+        AcceptDifferentMessages agent = setupJson(FrameType.TEXT_ONLY, new TextSeparatorFrameMetadata(), ClientFrameType.TEXT);
+
+        Queue<WebSocketFrame> frames = sendText("primitive 777 {'ch': 'a', 'bool': true}");
+        assertTextFrames(frames, """
+            777 0 {"s":"a-true"}
+        """.trim());
+        assertThat(agent.getIncoming()).containsExactly(new PrimitiveMessage().withChar('a').withBool(true));
+
+        assertBadFrame(sendBinary("primitive 777 {'ch': 'a', 'bool': true}"));
+    }
+
+    @Test
+    public void compatibility_server_text_only_client_both() {
+        assertClientDenied(() -> setupJson(FrameType.TEXT_ONLY, new TextSeparatorFrameMetadata(), ClientFrameType.BOTH));
+    }
+
+    @Test
+    public void compatibility_server_text_only_client_binary() {
+        assertClientDenied(() -> setupJson(FrameType.TEXT_ONLY, new TextSeparatorFrameMetadata(), ClientFrameType.BINARY));
+    }
+
+    @Test
+    public void compatibility_server_text_only_client_any() {
+        AcceptDifferentMessages agent = setupJson(FrameType.TEXT_ONLY, new TextSeparatorFrameMetadata(), ClientFrameType.ANY);
+
+        Queue<WebSocketFrame> frames = sendText("primitive 777 {'ch': 'a', 'bool': false}");
+        assertTextFrames(frames, """
+            777 0 {"s":"a-false"}
+        """.trim());
+        assertThat(agent.getIncoming()).containsExactly(new PrimitiveMessage().withChar('a').withBool(false));
+
+        assertBadFrame(sendBinary("primitive 777 {'ch': 'a', 'bool': true}"));
+    }
+
+    @Test
+    public void compatibility_server_binary_only_client_binary() {
+        AcceptDifferentMessages agent = setupJson(FrameType.BINARY_ONLY, new TextSeparatorFrameMetadata(), ClientFrameType.BINARY);
+
+        Queue<WebSocketFrame> frames = sendBinary("primitive 777 {'ch': 'b', 'bool': true}");
+        assertBinaryFrames(frames, """
+            777 0 {"s":"b-true"}
+        """.trim());
+        assertThat(agent.getIncoming()).containsExactly(new PrimitiveMessage().withChar('b').withBool(true));
+
+        assertBadFrame(sendText("primitive 777 {'ch': 'a', 'bool': true}"));
+    }
+
+    @Test
+    public void compatibility_server_binary_only_client_both() {
+        assertClientDenied(() -> setupJson(FrameType.BINARY_ONLY, new TextSeparatorFrameMetadata(), ClientFrameType.BOTH));
+    }
+
+    @Test
+    public void compatibility_server_binary_only_client_text() {
+        assertClientDenied(() -> setupJson(FrameType.BINARY_ONLY, new TextSeparatorFrameMetadata(), ClientFrameType.TEXT));
+    }
+
+    @Test
+    public void compatibility_server_binary_only_client_any() {
+        AcceptDifferentMessages agent = setupJson(FrameType.BINARY_ONLY, new TextSeparatorFrameMetadata(), ClientFrameType.ANY);
+
+        Queue<WebSocketFrame> frames = sendBinary("primitive 777 {'ch': 'b', 'bool': false}");
+        assertBinaryFrames(frames, """
+            777 0 {"s":"b-false"}
+        """.trim());
+        assertThat(agent.getIncoming()).containsExactly(new PrimitiveMessage().withChar('b').withBool(false));
+
+        assertBadFrame(sendText("primitive 777 {'ch': 'a', 'bool': true}"));
+    }
+
+    @Test
+    public void compatibility_server_both_only_client_binary() {
+        AcceptDifferentMessages agent = setupJson(FrameType.BOTH, new TextSeparatorFrameMetadata(), ClientFrameType.BINARY);
+
+        Queue<WebSocketFrame> frames1 = sendText("primitive 777 {'ch': 'c', 'bool': true}");
+        assertTextFrames(frames1, """
+            777 0 {"s":"c-true"}
+        """.trim());
+        assertThat(agent.getIncoming()).containsExactly(new PrimitiveMessage().withChar('c').withBool(true));
+        agent.getIncoming().clear();
+
+        Queue<WebSocketFrame> frames2 = sendBinary("primitive 777 {'ch': 'c', 'bool': true}");
+        // Currently, can't figure out the request type, hence TEXT response for now
+        assertTextFrames(frames2, """
+            777 0 {"s":"c-true"}
+        """.trim());
+        assertThat(agent.getIncoming()).containsExactly(new PrimitiveMessage().withChar('c').withBool(true));
+    }
+
+    @Test
+    public void compatibility_server_both_only_client_both() {
+        AcceptDifferentMessages agent = setupJson(FrameType.BOTH, new TextSeparatorFrameMetadata(), ClientFrameType.BOTH);
+
+        Queue<WebSocketFrame> frames1 = sendText("primitive 777 {'ch': 'c', 'bool': false}");
+        assertTextFrames(frames1, """
+            777 0 {"s":"c-false"}
+        """.trim());
+        assertThat(agent.getIncoming()).containsExactly(new PrimitiveMessage().withChar('c').withBool(false));
+        agent.getIncoming().clear();
+
+        Queue<WebSocketFrame> frames2 = sendBinary("primitive 777 {'ch': 'c', 'bool': false}");
+        // Currently, can't figure out the request type, hence TEXT response for now
+        assertTextFrames(frames2, """
+            777 0 {"s":"c-false"}
+        """.trim());
+        assertThat(agent.getIncoming()).containsExactly(new PrimitiveMessage().withChar('c').withBool(false));
+    }
+
+    @Test
+    public void compatibility_server_both_only_client_text() {
+        AcceptDifferentMessages agent = setupJson(FrameType.BOTH, new TextSeparatorFrameMetadata(), ClientFrameType.BOTH);
+
+        Queue<WebSocketFrame> frames1 = sendText("primitive 777 {'ch': 'd', 'bool': false}");
+        assertTextFrames(frames1, """
+            777 0 {"s":"d-false"}
+        """.trim());
+        assertThat(agent.getIncoming()).containsExactly(new PrimitiveMessage().withChar('d').withBool(false));
+        agent.getIncoming().clear();
+
+        Queue<WebSocketFrame> frames2 = sendBinary("primitive 777 {'ch': 'd', 'bool': false}");
+        // Currently, can't figure out the request type, hence TEXT response for now
+        assertTextFrames(frames2, """
+            777 0 {"s":"d-false"}
+        """.trim());
+        assertThat(agent.getIncoming()).containsExactly(new PrimitiveMessage().withChar('d').withBool(false));
+    }
+
+    @Test
+    public void compatibility_server_both_only_client_any() {
+        AcceptDifferentMessages agent = setupJson(FrameType.BOTH, new TextSeparatorFrameMetadata(), ClientFrameType.ANY);
+
+        Queue<WebSocketFrame> frames1 = sendText("primitive 777 {'ch': 'd', 'bool': true}");
+        assertTextFrames(frames1, """
+            777 0 {"s":"d-true"}
+        """.trim());
+        assertThat(agent.getIncoming()).containsExactly(new PrimitiveMessage().withChar('d').withBool(true));
+        agent.getIncoming().clear();
+
+        Queue<WebSocketFrame> frames2 = sendBinary("primitive 777 {'ch': 'd', 'bool': true}");
+        // Currently, can't figure out the request type, hence TEXT response for now
+        assertTextFrames(frames2, """
+            777 0 {"s":"d-true"}
+        """.trim());
+        assertThat(agent.getIncoming()).containsExactly(new PrimitiveMessage().withChar('d').withBool(true));
     }
 }

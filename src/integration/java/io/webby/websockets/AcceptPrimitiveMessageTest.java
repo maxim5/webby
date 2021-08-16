@@ -2,10 +2,7 @@ package io.webby.websockets;
 
 import com.google.common.truth.Truth;
 import io.netty.handler.codec.http.websocketx.WebSocketFrame;
-import io.webby.testing.AssertFrame;
-import io.webby.testing.BaseWebsocketIntegrationTest;
-import io.webby.testing.Testing;
-import io.webby.testing.TestingBytes;
+import io.webby.testing.*;
 import io.webby.url.annotate.FrameType;
 import io.webby.url.annotate.Marshal;
 import io.webby.ws.meta.*;
@@ -18,7 +15,7 @@ import static io.webby.websockets.ExampleMessages.PrimitiveMessage.*;
 
 public class AcceptPrimitiveMessageTest extends BaseWebsocketIntegrationTest {
     protected @NotNull AcceptPrimitiveMessage setupJson(@NotNull FrameType type, @NotNull FrameMetadata metadata) {
-        return setupAgent(AcceptPrimitiveMessage.class, Marshal.JSON, type, metadata);
+        return setupAgent(AcceptPrimitiveMessage.class, Marshal.JSON, type, metadata, FakeClients.DEFAULT);
     }
     
     @Test
