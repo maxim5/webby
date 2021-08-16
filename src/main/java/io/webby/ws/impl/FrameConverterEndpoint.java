@@ -19,7 +19,8 @@ public record FrameConverterEndpoint(@NotNull Object instance,
     @Override
     public void processIncoming(@NotNull WebSocketFrame frame, @NotNull Consumer consumer) {
         converter.toMessage(frame, (acceptor, requestId, payload) -> {
-            Object callResult = acceptor.call(instance, payload);
+            boolean forceRenderAsString = converter().peekFrameType(requestId) == Boolean.TRUE;
+            Object callResult = acceptor.call(instance, payload, forceRenderAsString);
             consumer.accept(requestId, callResult);
         }, consumer::fail);
     }

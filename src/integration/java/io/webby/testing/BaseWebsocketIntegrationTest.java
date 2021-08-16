@@ -1,5 +1,6 @@
 package io.webby.testing;
 
+import com.google.errorprone.annotations.CanIgnoreReturnValue;
 import com.google.inject.Injector;
 import com.google.inject.Module;
 import io.netty.buffer.Unpooled;
@@ -65,6 +66,7 @@ public class BaseWebsocketIntegrationTest extends BaseChannelTest {
         }
     }
 
+    @CanIgnoreReturnValue
     protected <T> @NotNull T setupAgent(@NotNull Class<T> klass,
                                         @NotNull Marshal marshal,
                                         @NotNull FrameType frameType,

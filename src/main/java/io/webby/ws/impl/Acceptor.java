@@ -17,14 +17,14 @@ public record Acceptor(@NotNull ByteBuf id, @NotNull String version,
                        @Nullable EndpointView<?> view, boolean acceptsFrame) {
     private static final FluentLogger log = FluentLogger.forEnclosingClass();
 
-    public @Nullable Object call(@NotNull Object instance, @NotNull Object param) {
+    public @Nullable Object call(@NotNull Object instance, @NotNull Object param, boolean forceRenderAsString) {
         try {
             Object callResult = method.invoke(instance, param);
             if (callResult == null && !isVoid(method)) {
                 log.at(Level.WARNING).log("Websocket agent returned null: %s", method);
             }
             if (view != null && callResult != null) {
-                return render(view, callResult);
+                return render(view, callResult, forceRenderAsString);
             }
             return callResult;
         } catch (Exception e) {
@@ -32,12 +32,17 @@ public record Acceptor(@NotNull ByteBuf id, @NotNull String version,
         }
     }
 
-    private static <T> @NotNull Object render(@NotNull EndpointView<T> view, @NotNull Object callResult) throws Exception {
+    private static <T> @NotNull Object render(@NotNull EndpointView<T> view,
+                                              @NotNull Object callResult,
+                                              boolean forceRenderAsString) throws Exception {
         Renderer<T> renderer = view.renderer();
         T template = view.template();
+        if (forceRenderAsString) {
+            return renderer.renderToString(template, callResult);
+        }
         return switch (renderer.support()) {
             case BYTE_ARRAY, BYTE_STREAM -> renderer.renderToBytes(template, callResult);
-            case STRING -> renderer.renderToString(template, callResult);
+            case STRING -> renderer.renderToString(template, callResult);  // bytes are preferred, but not supported
         };
     }
 

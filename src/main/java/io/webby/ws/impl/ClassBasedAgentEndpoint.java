@@ -23,7 +23,8 @@ public record ClassBasedAgentEndpoint(@NotNull Object instance,
         Class<?> klass = frame.getClass();
         Acceptor acceptor = acceptors.get(klass);
         if (acceptor != null) {
-            consumer.accept(RequestIds.NO_ID, acceptor.call(instance, frame));
+            boolean forceRenderAsString = frame instanceof TextWebSocketFrame;
+            consumer.accept(RequestIds.NO_ID, acceptor.call(instance, frame, forceRenderAsString));
         } else {
             consumer.fail();
         }

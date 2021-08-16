@@ -105,6 +105,11 @@ public final class AcceptorsAwareFrameConverter implements FrameConverter<Object
     }
 
     @Override
+    public Boolean peekFrameType(long requestId) {
+        return concreteFrameType != ConcreteFrameType.BINARY;
+    }
+
+    @Override
     public @NotNull WebSocketFrame toFrame(long requestId, int code, @NotNull Object message) {
         assert concreteFrameType != null : "Converter is not initialized";
 
