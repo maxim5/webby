@@ -73,7 +73,7 @@ public final class AcceptorsAwareFrameConverter implements FrameConverter<Object
                     case ANY -> ConcreteFrameType.BOTH;
                     case BOTH -> ConcreteFrameType.BOTH;
                 };
-            case BOTH -> ConcreteFrameType.BOTH;
+            case ALLOW_BOTH -> ConcreteFrameType.BOTH;
         };
     }
 
