@@ -11,7 +11,7 @@ import java.util.List;
 
 @Serve(url = "/ws/accept/json", websocket = true)
 @WebsocketProtocol(messages = SimpleMessage.class)
-public class AcceptJsonMessage {
+public class AcceptPrimitiveMessage {
     private final List<SimpleMessage> incoming = new ArrayList<>();
 
     public PrimitiveMessage onPrimitive(@NotNull PrimitiveMessage message) {
