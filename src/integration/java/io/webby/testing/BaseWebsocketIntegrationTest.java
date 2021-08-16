@@ -11,10 +11,13 @@ import io.netty.handler.codec.http.websocketx.WebSocketFrame;
 import io.netty.handler.codec.http.websocketx.WebSocketServerProtocolHandler.HandshakeComplete;
 import io.webby.app.AppSettings;
 import io.webby.netty.NettyWebsocketHandler;
+import io.webby.url.annotate.FrameType;
+import io.webby.url.annotate.Marshal;
 import io.webby.util.Rethrow;
 import io.webby.ws.ClientInfo;
 import io.webby.ws.impl.AgentEndpoint;
 import io.webby.ws.impl.WebsocketRouter;
+import io.webby.ws.meta.FrameMetadata;
 import org.jetbrains.annotations.NotNull;
 import org.junit.jupiter.api.Assertions;
 
@@ -61,6 +64,17 @@ public class BaseWebsocketIntegrationTest extends BaseChannelTest {
             channel.pipeline().fireUserEventTriggered(createHandshakeCompleteEvent());
             return castAny(endpoint.instance());
         }
+    }
+
+    protected <T> @NotNull T setupAgent(@NotNull Class<T> klass,
+                                        @NotNull Marshal marshal,
+                                        @NotNull FrameType type,
+                                        @NotNull FrameMetadata metadata) {
+        WebsocketSetup<T> setup = testSetup(klass, settings -> {
+            settings.setDefaultFrameContentMarshal(marshal);
+            settings.setDefaultFrameType(type);
+        }, TestingModules.instance(FrameMetadata.class, metadata));
+        return setup.initAgent();
     }
 
     protected @NotNull Queue<WebSocketFrame> sendText(@NotNull String text) {

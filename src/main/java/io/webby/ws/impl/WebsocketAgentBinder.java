@@ -137,6 +137,7 @@ public class WebsocketAgentBinder {
             List<Acceptor> acceptors = acceptMethodsByType.entrySet().stream().map(entry -> {
                 Class<?> type = entry.getKey();
                 Method method = entry.getValue();
+                method.setAccessible(true);
 
                 Api api = getApi(method, idFromName(method.getName()), defaultApiVersion);
                 String id = api.id();

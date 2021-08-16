@@ -9,12 +9,12 @@ import org.jetbrains.annotations.NotNull;
 import java.util.ArrayList;
 import java.util.List;
 
-@Serve(url = "/ws/accept/json", websocket = true)
+@Serve(url = "/ws/accept/primitive", websocket = true)
 @WebsocketProtocol(messages = SimpleMessage.class)
 public class AcceptPrimitiveMessage {
     private final List<SimpleMessage> incoming = new ArrayList<>();
 
-    public PrimitiveMessage onPrimitive(@NotNull PrimitiveMessage message) {
+    public @NotNull PrimitiveMessage onPrimitive(@NotNull PrimitiveMessage message) {
         incoming.add(message);
         return message;
     }

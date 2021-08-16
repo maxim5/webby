@@ -1,6 +1,7 @@
 package io.webby.websockets;
 
 import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 
 import java.util.Objects;
 
@@ -56,6 +57,34 @@ class ExampleMessages {
         @Override
         public int hashCode() {
             return Objects.hash(i, l, b, s, ch, f, d, bool);
+        }
+    }
+
+    public static class StringMessage implements SimpleMessage {
+        String s;
+
+        public StringMessage(@Nullable String s) {
+            this.s = s;
+        }
+
+        public @NotNull StringMessage with(@Nullable String s) {
+            this.s = s;
+            return this;
+        }
+
+        @Override
+        public String toString() {
+            return "StringMessage{s='%s'}".formatted(s);
+        }
+
+        @Override
+        public boolean equals(Object o) {
+            return o instanceof StringMessage that && Objects.equals(s, that.s);
+        }
+
+        @Override
+        public int hashCode() {
+            return Objects.hash(s);
         }
     }
 }
