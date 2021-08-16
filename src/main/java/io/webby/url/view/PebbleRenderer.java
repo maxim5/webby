@@ -64,7 +64,7 @@ public class PebbleRenderer implements Renderer<PebbleTemplate> {
     }
 
     @Override
-    public byte[] renderToBytes(@NotNull PebbleTemplate template, @NotNull Object model) throws Exception {
+    public byte @NotNull [] renderToBytes(@NotNull PebbleTemplate template, @NotNull Object model) throws Exception {
         return EasyRender.writeToBytes(writer -> template.evaluate(writer, castMapOrFail(model, this::incompatibleError)));
     }
 

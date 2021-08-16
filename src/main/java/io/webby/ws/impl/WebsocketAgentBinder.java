@@ -18,6 +18,9 @@ import io.webby.netty.marshal.Marshaller;
 import io.webby.netty.marshal.MarshallerFactory;
 import io.webby.url.UrlConfigError;
 import io.webby.url.annotate.*;
+import io.webby.url.impl.EndpointView;
+import io.webby.url.view.Renderer;
+import io.webby.url.view.RendererFactory;
 import io.webby.ws.Sender;
 import io.webby.ws.WebsocketAgentConfigError;
 import io.webby.ws.meta.FrameMetadata;
@@ -47,6 +50,7 @@ public class WebsocketAgentBinder {
 
     @Inject private Settings settings;
     @Inject private WebsocketAgentScanner scanner;
+    @Inject private RendererFactory rendererFactory;
     @Inject private MarshallerFactory marshallers;
     @Inject private Injector injector;
     @Inject private InjectorHelper helper;
@@ -79,6 +83,7 @@ public class WebsocketAgentBinder {
         FrameType defaultFrameType = settings.defaultFrameType();
         Marshal defaultMarshal = settings.defaultFrameContentMarshal();
         String defaultApiVersion = settings.defaultApiVersion();
+        Render defaultRender = settings.defaultRender();
 
         agentClasses.forEach(klass -> {
             log.at(Level.ALL).log("Processing %s", klass);
@@ -91,7 +96,8 @@ public class WebsocketAgentBinder {
                 log.at(Level.CONFIG).log("Ignoring disabled websocket-agent class: %s", klass);
                 return;
             }
-            String url = serve.url();
+            String classUrl = serve.url();
+            Render classRender = serve.render().length > 0 ? serve.render()[0] : defaultRender;
 
             WebsocketProtocol protocol = getProtocolAnnotation(klass);
             Class<?> messageClass = protocol != null ? protocol.messages() : WebSocketFrame.class;
@@ -139,8 +145,10 @@ public class WebsocketAgentBinder {
                 failIf(id.length() > MAX_ID_SIZE, "API id can't be longer than %d: %s".formatted(MAX_ID_SIZE, id));
                 failIf(!version.matches("^[0-9a-z_.-]+$"), "API version contains illegal chars: %s".formatted(version));
 
+                EndpointView<?> view = getEndpointViewFromAnnotation(method, classRender);
+
                 ByteBuf bufferId = Unpooled.copiedBuffer(id, settings.charset());
-                return new Acceptor(bufferId, version, type, method, acceptsFrame);
+                return new Acceptor(bufferId, version, type, method, view, acceptsFrame);
             }).toList();
 
             Field senderField = Arrays.stream(klass.getDeclaredFields())
@@ -149,7 +157,8 @@ public class WebsocketAgentBinder {
                     .findAny()
                     .orElse(null);
 
-            consumer.accept(new AgentBinding(url, klass, messageClass, frameType, marshal, acceptors, senderField, acceptsFrame));
+            consumer.accept(new AgentBinding(classUrl, klass, messageClass, frameType, marshal,
+                                             acceptors, senderField, acceptsFrame));
         });
     }
 
@@ -205,9 +214,11 @@ public class WebsocketAgentBinder {
     @VisibleForTesting
     static @NotNull Serve getWebsocketAnnotation(@NotNull AnnotatedElement elem) {
         if (elem.isAnnotationPresent(Serve.class)) {
-            return elem.getAnnotation(Serve.class);
+            Serve serve = elem.getAnnotation(Serve.class);
+            failIf(serve.render().length > 1, "@Serve can have only one render: %s".formatted(elem));
+            return serve;
         }
-        throw new UnsupportedOperationException();
+        throw new UnsupportedOperationException("Internal error: %s does not have @Serve annotation".formatted(elem));
     }
 
     @VisibleForTesting
@@ -259,6 +270,17 @@ public class WebsocketAgentBinder {
             name = name.substring(0, MAX_ID_SIZE);
         }
         return name;
+    }
+
+    @VisibleForTesting
+    @Nullable EndpointView<?> getEndpointViewFromAnnotation(@NotNull AnnotatedElement element, @NotNull Render render) {
+        if (element.isAnnotationPresent(View.class)) {
+            View view = element.getAnnotation(View.class);
+            String templateName = view.template();
+            Renderer<?> renderer = rendererFactory.getRenderer(render, templateName);
+            return EndpointView.of(renderer, templateName);
+        }
+        return null;
     }
 
     private static boolean isSenderField(@NotNull Field field) {

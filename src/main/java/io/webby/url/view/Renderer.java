@@ -7,20 +7,15 @@ import org.jetbrains.annotations.NotNull;
 import java.io.OutputStream;
 
 public interface Renderer<T> {
-    @NotNull
-    HotReloadSupport hotReload();
+    @NotNull HotReloadSupport hotReload();
 
-    @NotNull
-    T compileTemplate(@NotNull String name) throws HandlerConfigError;
+    @NotNull T compileTemplate(@NotNull String name) throws HandlerConfigError;
 
-    @NotNull
-    RenderSupport support();
+    @NotNull RenderSupport support();
 
-    @NotNull
-    String renderToString(@NotNull T template, @NotNull Object model) throws Exception;
+    @NotNull String renderToString(@NotNull T template, @NotNull Object model) throws Exception;
 
-    byte[] renderToBytes(@NotNull T template, @NotNull Object model) throws Exception;
+    byte @NotNull [] renderToBytes(@NotNull T template, @NotNull Object model) throws Exception;
 
-    @NotNull
-    ThrowConsumer<OutputStream, Exception> renderToByteStream(@NotNull T template, @NotNull Object model);
+    @NotNull ThrowConsumer<OutputStream, Exception> renderToByteStream(@NotNull T template, @NotNull Object model);
 }
