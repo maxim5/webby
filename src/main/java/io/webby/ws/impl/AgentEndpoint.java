@@ -1,7 +1,9 @@
 package io.webby.ws.impl;
 
 import io.netty.handler.codec.http.websocketx.WebSocketFrame;
-import io.webby.netty.ws.Constants.RequestIds;
+import io.webby.ws.BaseRequestContext;
+import io.webby.ws.ClientInfo;
+import io.webby.ws.RequestContext;
 import io.webby.ws.lifecycle.AgentLifecycle;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
@@ -11,17 +13,13 @@ public interface AgentEndpoint {
 
     @NotNull AgentLifecycle lifecycle();
 
-    void processIncoming(@NotNull WebSocketFrame frame, @NotNull Consumer consumer);
+    void processIncoming(@NotNull WebSocketFrame frame, @NotNull ClientInfo client, @NotNull CallResultConsumer consumer);
 
-    @Nullable WebSocketFrame processOutgoing(long requestId, @NotNull Object message);
+    @Nullable WebSocketFrame processOutgoing(@NotNull RequestContext context, @NotNull Object message);
 
-    @Nullable WebSocketFrame processError(long requestId, int code, @NotNull String message);
+    @Nullable WebSocketFrame processError(@NotNull BaseRequestContext context, int code, @NotNull String message);
 
-    interface Consumer {
-        void accept(long requestId, @Nullable Object callResult);
-
-        default void fail() {
-            accept(RequestIds.NO_ID, null);
-        }
+    interface CallResultConsumer {
+        void accept(@NotNull RequestContext context, @Nullable Object callResult);
     }
 }

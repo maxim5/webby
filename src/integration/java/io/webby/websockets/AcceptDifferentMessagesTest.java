@@ -54,8 +54,7 @@ public class AcceptDifferentMessagesTest extends BaseWebsocketIntegrationTest {
     public void on_json_from_client_binary_primitive() {
         AcceptDifferentMessages agent = setupJson(FrameType.FROM_CLIENT, new TextSeparatorFrameMetadata());
         Queue<WebSocketFrame> frames = sendBinary("primitive 1 {'ch': 'a', 'bool': true}");
-        // Currently, can't figure out the request type, hence TEXT response for now
-        assertTextFrames(frames, """
+        assertBinaryFrames(frames, """
             1 0 {"s":"a-true"}
         """.trim());
         assertThat(agent.getIncoming()).containsExactly(new PrimitiveMessage().withChar('a').withBool(true));
@@ -183,8 +182,7 @@ public class AcceptDifferentMessagesTest extends BaseWebsocketIntegrationTest {
         agent.getIncoming().clear();
 
         Queue<WebSocketFrame> frames2 = sendBinary("primitive 777 {'ch': 'c', 'bool': true}");
-        // Currently, can't figure out the request type, hence TEXT response for now
-        assertTextFrames(frames2, """
+        assertBinaryFrames(frames2, """
             777 0 {"s":"c-true"}
         """.trim());
         assertThat(agent.getIncoming()).containsExactly(new PrimitiveMessage().withChar('c').withBool(true));
@@ -202,8 +200,7 @@ public class AcceptDifferentMessagesTest extends BaseWebsocketIntegrationTest {
         agent.getIncoming().clear();
 
         Queue<WebSocketFrame> frames2 = sendBinary("primitive 777 {'ch': 'c', 'bool': false}");
-        // Currently, can't figure out the request type, hence TEXT response for now
-        assertTextFrames(frames2, """
+        assertBinaryFrames(frames2, """
             777 0 {"s":"c-false"}
         """.trim());
         assertThat(agent.getIncoming()).containsExactly(new PrimitiveMessage().withChar('c').withBool(false));
@@ -221,8 +218,7 @@ public class AcceptDifferentMessagesTest extends BaseWebsocketIntegrationTest {
         agent.getIncoming().clear();
 
         Queue<WebSocketFrame> frames2 = sendBinary("primitive 777 {'ch': 'd', 'bool': false}");
-        // Currently, can't figure out the request type, hence TEXT response for now
-        assertTextFrames(frames2, """
+        assertBinaryFrames(frames2, """
             777 0 {"s":"d-false"}
         """.trim());
         assertThat(agent.getIncoming()).containsExactly(new PrimitiveMessage().withChar('d').withBool(false));
@@ -240,8 +236,7 @@ public class AcceptDifferentMessagesTest extends BaseWebsocketIntegrationTest {
         agent.getIncoming().clear();
 
         Queue<WebSocketFrame> frames2 = sendBinary("primitive 777 {'ch': 'd', 'bool': true}");
-        // Currently, can't figure out the request type, hence TEXT response for now
-        assertTextFrames(frames2, """
+        assertBinaryFrames(frames2, """
             777 0 {"s":"d-true"}
         """.trim());
         assertThat(agent.getIncoming()).containsExactly(new PrimitiveMessage().withChar('d').withBool(true));

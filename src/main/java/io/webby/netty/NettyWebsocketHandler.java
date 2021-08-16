@@ -7,10 +7,10 @@ import io.netty.channel.ChannelInboundHandlerAdapter;
 import io.netty.handler.codec.http.websocketx.WebSocketFrame;
 import io.netty.handler.codec.http.websocketx.WebSocketServerProtocolHandler;
 import io.netty.util.ReferenceCountUtil;
-import io.webby.netty.ws.Constants.RequestIds;
 import io.webby.netty.ws.FrameMapper;
 import io.webby.netty.ws.errors.WebsocketError;
 import io.webby.ws.ClientInfo;
+import io.webby.ws.ErrorRequestContext;
 import io.webby.ws.impl.AgentEndpoint;
 import io.webby.ws.lifecycle.AgentLifecycle;
 import org.jetbrains.annotations.NotNull;
@@ -78,7 +78,7 @@ public class NettyWebsocketHandler extends ChannelInboundHandlerAdapter {
             String replyError = websocketError.getReplyError();
             log.at(Level.WARNING).withCause(cause).log("Websocket error: %s", replyError);
             if (replyError != null) {
-                errorFrame = endpoint.processError(RequestIds.NO_ID, websocketError.getCode(), replyError);
+                errorFrame = endpoint.processError(ErrorRequestContext.DEFAULT, websocketError.getCode(), replyError);
             }
         } else {
             log.at(Level.SEVERE).withCause(cause).log("Unexpected failure: %s", cause.getMessage());
@@ -90,15 +90,15 @@ public class NettyWebsocketHandler extends ChannelInboundHandlerAdapter {
     }
 
     private void handle(@NotNull WebSocketFrame frame, @NotNull ChannelHandlerContext context) {
-        endpoint.processIncoming(frame, (requestId, callResult) -> {
+        endpoint.processIncoming(frame, clientInfo, (requestContext, callResult) -> {
             if (callResult == null) {
-                log.at(Level.INFO).log("Websocket agent %s doesn't handle the frame: %s", endpoint.instance(), frame.getClass());
+                log.at(Level.WARNING).log("Websocket agent returned null");
                 return;
             }
 
             WebSocketFrame outgoing = null;
             try {
-                outgoing = endpoint.processOutgoing(requestId, callResult);
+                outgoing = endpoint.processOutgoing(requestContext, callResult);
                 if (outgoing == null) {
                     outgoing = mapper.mapInstance(callResult);
                     if (outgoing == null) {
@@ -109,7 +109,7 @@ public class NettyWebsocketHandler extends ChannelInboundHandlerAdapter {
                 String replyError = e.getReplyError();
                 log.at(Level.WARNING).withCause(e).log("Websocket error: %s", replyError);
                 if (replyError != null) {
-                    outgoing = endpoint.processError(requestId, e.getCode(), replyError);
+                    outgoing = endpoint.processError(requestContext, e.getCode(), replyError);
                 }
             }
 

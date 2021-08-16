@@ -9,8 +9,10 @@ import io.webby.netty.marshal.BinaryMarshaller;
 import io.webby.netty.ws.errors.BadFrameException;
 import io.webby.netty.ws.errors.ClientDeniedException;
 import io.webby.url.annotate.FrameType;
+import io.webby.ws.BaseRequestContext;
 import io.webby.ws.ClientFrameType;
 import io.webby.ws.ClientInfo;
+import io.webby.ws.RequestContext;
 import io.webby.ws.lifecycle.AgentLifecycle;
 import io.webby.ws.meta.FrameMetadata;
 import org.jetbrains.annotations.NotNull;
@@ -18,7 +20,6 @@ import org.jetbrains.annotations.VisibleForTesting;
 
 import java.nio.charset.Charset;
 import java.util.Map;
-import java.util.Optional;
 
 public final class AcceptorsAwareFrameConverter implements FrameConverter<Object>, AgentLifecycle {
     private final @NotNull BinaryMarshaller marshaller;
@@ -77,7 +78,7 @@ public final class AcceptorsAwareFrameConverter implements FrameConverter<Object
     }
 
     @Override
-    public void toMessage(@NotNull WebSocketFrame frame, @NotNull Consumer<Object> success, @NotNull Runnable failure) {
+    public void toMessage(@NotNull WebSocketFrame frame, @NotNull ParsedFrameConsumer<Object> success) {
         assert concreteFrameType != null : "Converter is not initialized";
         if (concreteFrameType == ConcreteFrameType.TEXT && !(frame instanceof TextWebSocketFrame)) {
             throw new BadFrameException("Unsupported frame received: %s, expected text".formatted(frame.getClass()));
@@ -87,37 +88,43 @@ public final class AcceptorsAwareFrameConverter implements FrameConverter<Object
         }
 
         ByteBuf frameContent = Unpooled.wrappedBuffer(frame.content());
-        metadata.parse(frameContent, (acceptorId, requestId, content) ->
-                Optional.ofNullable(acceptorId)
-                        .map(acceptors::get)
-                        .ifPresentOrElse(acceptor -> {
-                            if (acceptor.acceptsFrame()) {
-                                if (acceptor.type().isAssignableFrom(frame.getClass())) {
-                                    success.accept(acceptor, requestId, frame);
-                                } else {
-                                    failure.run();
-                                }
-                            } else {
-                                Object payload = marshaller.readByteBuf(content, acceptor.type(), charset);
-                                success.accept(acceptor, requestId, payload);
-                            }
-                        }, failure));
+        metadata.parse(frameContent, (acceptorId, requestId, content) -> {
+            if (acceptorId == null) {
+                throw new BadFrameException("Failed to parse acceptor id");
+            }
+            Acceptor acceptor = acceptors.get(acceptorId);
+            if (acceptor == null) {
+                throw new BadFrameException("Acceptor not found: %s".formatted(acceptorId));    // not readable!
+            }
+
+            RequestContext context = new RequestContext(requestId, frame, clientInfo);
+            if (acceptor.acceptsFrame()) {
+                if (acceptor.type().isAssignableFrom(frame.getClass())) {
+                    success.accept(acceptor, context, frame);
+                } else {
+                    throw new BadFrameException("Acceptor doesn't expect %s".formatted(frame.getClass()));
+                }
+            } else {
+                Object payload = marshaller.readByteBuf(content, acceptor.type(), charset);
+                success.accept(acceptor, context, payload);
+            }
+        });
     }
 
     @Override
-    public Boolean peekFrameType(long requestId) {
-        return concreteFrameType != ConcreteFrameType.BINARY;
+    public Boolean peekFrameType(@NotNull BaseRequestContext context) {
+        return concreteFrameType == ConcreteFrameType.TEXT || (concreteFrameType == ConcreteFrameType.BOTH && context.isTextRequest());
     }
 
     @Override
-    public @NotNull WebSocketFrame toFrame(long requestId, int code, @NotNull Object message) {
+    public @NotNull WebSocketFrame toFrame(@NotNull BaseRequestContext context, int code, @NotNull Object message) {
         assert concreteFrameType != null : "Converter is not initialized";
 
-        ByteBuf byteBuf = metadata.compose(requestId, code, marshaller.writeBytes(message, charset));
+        ByteBuf byteBuf = metadata.compose(context.requestId(), code, marshaller.writeBytes(message, charset));
         return switch (concreteFrameType) {
             case TEXT -> new TextWebSocketFrame(byteBuf);
             case BINARY -> new BinaryWebSocketFrame(byteBuf);
-            case BOTH -> new TextWebSocketFrame(byteBuf);  // TODO: take from request (thread-local map?)
+            case BOTH -> context.isTextRequest() ? new TextWebSocketFrame(byteBuf) : new BinaryWebSocketFrame(byteBuf);
         };
     }
 

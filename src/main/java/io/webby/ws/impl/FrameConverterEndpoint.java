@@ -2,6 +2,9 @@ package io.webby.ws.impl;
 
 import io.netty.handler.codec.http.websocketx.WebSocketFrame;
 import io.webby.netty.ws.Constants.StatusCodes;
+import io.webby.ws.BaseRequestContext;
+import io.webby.ws.ClientInfo;
+import io.webby.ws.RequestContext;
 import io.webby.ws.Sender;
 import io.webby.ws.lifecycle.AgentLifecycle;
 import io.webby.ws.lifecycle.AgentLifecycleFanOut;
@@ -17,21 +20,21 @@ public record FrameConverterEndpoint(@NotNull Object instance,
     }
 
     @Override
-    public void processIncoming(@NotNull WebSocketFrame frame, @NotNull Consumer consumer) {
-        converter.toMessage(frame, (acceptor, requestId, payload) -> {
-            boolean forceRenderAsString = converter().peekFrameType(requestId) == Boolean.TRUE;
+    public void processIncoming(@NotNull WebSocketFrame frame, @NotNull ClientInfo client, @NotNull CallResultConsumer consumer) {
+        converter.toMessage(frame, (acceptor, requestContext, payload) -> {
+            boolean forceRenderAsString = converter().peekFrameType(requestContext) == Boolean.TRUE;
             Object callResult = acceptor.call(instance, payload, forceRenderAsString);
-            consumer.accept(requestId, callResult);
-        }, consumer::fail);
+            consumer.accept(requestContext, callResult);
+        });
     }
 
     @Override
-    public @NotNull WebSocketFrame processOutgoing(long requestId, @NotNull Object message) {
-        return converter.toFrame(requestId, StatusCodes.OK, message);
+    public @NotNull WebSocketFrame processOutgoing(@NotNull RequestContext context, @NotNull Object message) {
+        return converter.toFrame(context, StatusCodes.OK, message);
     }
 
     @Override
-    public @NotNull WebSocketFrame processError(long requestId, int code, @NotNull String message) {
-        return converter.toFrame(requestId, code, message);
+    public @NotNull WebSocketFrame processError(@NotNull BaseRequestContext context, int code, @NotNull String message) {
+        return converter.toFrame(context, code, message);
     }
 }
