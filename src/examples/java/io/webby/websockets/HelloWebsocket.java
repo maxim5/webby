@@ -3,7 +3,7 @@ package io.webby.websockets;
 import com.google.common.flogger.FluentLogger;
 import io.netty.handler.codec.http.websocketx.BinaryWebSocketFrame;
 import io.netty.handler.codec.http.websocketx.TextWebSocketFrame;
-import io.webby.url.annotate.Ws;
+import io.webby.url.annotate.Serve;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.ArrayList;
@@ -11,7 +11,7 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.logging.Level;
 
-@Ws(url = "/ws/hello")
+@Serve(url = "/ws/hello", websocket = true)
 public class HelloWebsocket {
     private static final FluentLogger log = FluentLogger.forEnclosingClass();
 

@@ -83,18 +83,21 @@ public class WebsocketAgentBinder {
         agentClasses.forEach(klass -> {
             log.at(Level.ALL).log("Processing %s", klass);
 
-            Ws ws = getWebsocketAnnotation(klass);
-            String url = ws.url();
-            if (ws.disabled()) {
+            Serve serve = getWebsocketAnnotation(klass);
+            if (!serve.websocket()) {
+                return;
+            }
+            if (serve.disabled()) {
                 log.at(Level.CONFIG).log("Ignoring disabled websocket-agent class: %s", klass);
                 return;
             }
+            String url = serve.url();
 
-            WsProtocol protocol = getProtocolAnnotation(klass);
+            WebsocketProtocol protocol = getProtocolAnnotation(klass);
             Class<?> messageClass = protocol != null ? protocol.messages() : WebSocketFrame.class;
             boolean acceptsFrame = WebSocketFrame.class.isAssignableFrom(messageClass);
-            FrameType frameType = getIfPresent(protocol, WsProtocol::type, defaultFrameType);
-            Marshal marshal = getIfPresent(protocol, WsProtocol::marshal, defaultMarshal);
+            FrameType frameType = getIfPresent(protocol, WebsocketProtocol::type, defaultFrameType);
+            Marshal marshal = getIfPresent(protocol, WebsocketProtocol::marshal, defaultMarshal);
 
             Multimap<Class<?>, Method> allAcceptors = ArrayListMultimap.create(klass.getDeclaredMethods().length, 3);
             for (Method method : klass.getDeclaredMethods()) {
@@ -200,17 +203,17 @@ public class WebsocketAgentBinder {
     }
 
     @VisibleForTesting
-    static @NotNull Ws getWebsocketAnnotation(@NotNull AnnotatedElement elem) {
-        if (elem.isAnnotationPresent(Ws.class)) {
-            return elem.getAnnotation(Ws.class);
+    static @NotNull Serve getWebsocketAnnotation(@NotNull AnnotatedElement elem) {
+        if (elem.isAnnotationPresent(Serve.class)) {
+            return elem.getAnnotation(Serve.class);
         }
         throw new UnsupportedOperationException();
     }
 
     @VisibleForTesting
-    static @Nullable WsProtocol getProtocolAnnotation(@NotNull AnnotatedElement elem) {
-        if (elem.isAnnotationPresent(WsProtocol.class)) {
-            return elem.getAnnotation(WsProtocol.class);
+    static @Nullable WebsocketProtocol getProtocolAnnotation(@NotNull AnnotatedElement elem) {
+        if (elem.isAnnotationPresent(WebsocketProtocol.class)) {
+            return elem.getAnnotation(WebsocketProtocol.class);
         }
         return null;
     }

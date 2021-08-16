@@ -109,6 +109,9 @@ public class HandlerBinder {
             log.at(Level.ALL).log("Processing %s", klass);
 
             Serve serve = getServeAnnotation(klass);
+            if (serve.websocket()) {
+                return;
+            }
             if (serve.disabled()) {
                 log.at(Level.CONFIG).log("Ignoring disabled handler class: %s", klass);
                 return;
@@ -263,6 +266,11 @@ public class HandlerBinder {
             @Override
             public String url() {
                 return "";
+            }
+
+            @Override
+            public boolean websocket() {
+                return false;
             }
 
             @Override
