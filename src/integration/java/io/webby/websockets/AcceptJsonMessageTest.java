@@ -15,8 +15,8 @@ import java.util.Queue;
 public class AcceptJsonMessageTest extends BaseWebsocketIntegrationTest {
     AcceptJsonMessage setupAgent(@NotNull Marshal marshal, @NotNull FrameType type, @NotNull FrameMetadata metadata) {
         WebsocketSetup<AcceptJsonMessage> setup = testSetup(AcceptJsonMessage.class, settings -> {
-            settings.setDefaultResponseContentMarshal(marshal);
-            settings.setProperty("temp.ws.protocol", type.toString());
+            settings.setDefaultFrameContentMarshal(marshal);
+            settings.setDefaultFrameType(type);
         }, TestingModules.instance(FrameMetadata.class, metadata));
         return setup.initAgent();
     }

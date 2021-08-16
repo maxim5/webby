@@ -17,10 +17,9 @@ import io.webby.common.InjectorHelper;
 import io.webby.netty.marshal.Marshaller;
 import io.webby.netty.marshal.MarshallerFactory;
 import io.webby.url.UrlConfigError;
-import io.webby.ws.WebsocketAgentConfigError;
 import io.webby.url.annotate.*;
 import io.webby.ws.Sender;
-import io.webby.ws.meta.BinarySeparatorFrameMetadata;
+import io.webby.ws.WebsocketAgentConfigError;
 import io.webby.ws.meta.FrameMetadata;
 import io.webby.ws.meta.TextSeparatorFrameMetadata;
 import org.jetbrains.annotations.NotNull;
@@ -77,9 +76,9 @@ public class WebsocketAgentBinder {
 
     @VisibleForTesting
     void bindAgents(@NotNull Iterable<? extends Class<?>> agentClasses, @NotNull Consumer<AgentBinding> consumer) {
-        FrameType defaultFrameType = FrameType.valueOf(settings.getProperty("temp.ws.protocol", "FROM_CLIENT"));
-        Marshal defaultMarshal = settings.defaultResponseContentMarshal();
-        String defaultApiVersion = "1";  // TODO: settings.getApiVersion();
+        FrameType defaultFrameType = settings.defaultFrameType();
+        Marshal defaultMarshal = settings.defaultFrameContentMarshal();
+        String defaultApiVersion = settings.defaultApiVersion();
 
         agentClasses.forEach(klass -> {
             log.at(Level.ALL).log("Processing %s", klass);

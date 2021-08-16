@@ -10,5 +10,5 @@ import java.lang.annotation.Target;
 public @interface WsApi {
     String id();
 
-    String version() default "1.0";
+    String version();
 }
