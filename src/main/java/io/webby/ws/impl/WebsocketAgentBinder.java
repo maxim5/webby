@@ -129,11 +129,12 @@ public class WebsocketAgentBinder {
                 Class<?> type = entry.getKey();
                 Method method = entry.getValue();
 
-                WsApi api = getApi(method, idFromName(method.getName()), defaultApiVersion);
+                Api api = getApi(method, idFromName(method.getName()), defaultApiVersion);
                 String id = api.id();
                 String version = api.version();
-                failIf(!id.matches("^[^:/ ]+$"), "API id can't contain any of \":/ \" characters: %s".formatted(id));
+                failIf(!id.matches("^[a-zA-Z0-9_.-]+$"), "API id contains illegal chars: %s".formatted(id));
                 failIf(id.length() > MAX_ID_SIZE, "API id can't be longer than %d: %s".formatted(MAX_ID_SIZE, id));
+                failIf(!version.matches("^[0-9a-z_.-]+$"), "API version contains illegal chars: %s".formatted(version));
 
                 ByteBuf bufferId = Unpooled.copiedBuffer(id, settings.charset());
                 return new Acceptor(bufferId, version, type, method, acceptsFrame);
@@ -191,6 +192,9 @@ public class WebsocketAgentBinder {
                 String message = "Failed to access %s field of the Websocket agent %s"
                         .formatted(binding.sender(), binding.agentClass());
                 throw new WebsocketAgentConfigError(message, e);
+            } catch (IllegalArgumentException e) {
+                String message = "API identifier is not unique in the Websocket agent %s".formatted(binding.agentClass());
+                throw new WebsocketAgentConfigError(message, e);
             }
         }).forEach(consumer);
     }
@@ -221,14 +225,14 @@ public class WebsocketAgentBinder {
     }
 
     @VisibleForTesting
-    static WsApi getApi(@NotNull AnnotatedElement element, @NotNull String defaultId, @NotNull String defaultVersion) {
-        if (element.isAnnotationPresent(WsApi.class)) {
-            return element.getAnnotation(WsApi.class);
+    static Api getApi(@NotNull AnnotatedElement element, @NotNull String defaultId, @NotNull String defaultVersion) {
+        if (element.isAnnotationPresent(Api.class)) {
+            return element.getAnnotation(Api.class);
         }
-        return new WsApi() {
+        return new Api() {
             @Override
             public Class<? extends Annotation> annotationType() {
-                return WsApi.class;
+                return Api.class;
             }
 
             @Override
@@ -246,7 +250,10 @@ public class WebsocketAgentBinder {
     @VisibleForTesting
     static @NotNull String idFromName(@NotNull String name) {
         if (name.startsWith("on") && name.length() > 2) {
-            return name.substring(2).toLowerCase();
+            name = name.substring(2).toLowerCase();
+        }
+        if (name.length() > MAX_ID_SIZE) {
+            name = name.substring(0, MAX_ID_SIZE);
         }
         return name;
     }
