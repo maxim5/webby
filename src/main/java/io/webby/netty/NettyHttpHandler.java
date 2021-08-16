@@ -188,7 +188,7 @@ public class NettyHttpHandler extends SimpleChannelInboundHandler<FullHttpReques
 
         EndpointView<?> view = options.view();
         if (view != null) {
-            return renderResponse(view, callResult);
+            return renderResponse(view, callResult, options);
         }
 
         Function<Object, HttpResponse> responseFunction = mapper.mapInstance(callResult);
@@ -215,7 +215,9 @@ public class NettyHttpHandler extends SimpleChannelInboundHandler<FullHttpReques
     }
 
     @VisibleForTesting
-    <T> @NotNull FullHttpResponse renderResponse(@NotNull EndpointView<T> view, @NotNull Object callResult) throws Exception {
+    <T> @NotNull HttpResponse renderResponse(@NotNull EndpointView<T> view,
+                                             @NotNull Object callResult,
+                                             @NotNull EndpointOptions options) throws Exception {
         Renderer<T> renderer = view.renderer();
         T template = view.template();
         return switch (renderer.support()) {
@@ -227,7 +229,11 @@ public class NettyHttpHandler extends SimpleChannelInboundHandler<FullHttpReques
                 String content = renderer.renderToString(template, callResult);
                 yield factory.newResponse(content, HttpResponseStatus.OK);
             }
-            case BYTE_STREAM -> throw new UnsupportedOperationException();
+            case BYTE_STREAM -> {
+                ThrowConsumer<OutputStream, Exception> throwConsumer = renderer.renderToByteStream(template, callResult);
+                Consumer<OutputStream> consumer = castAny(Consumers.rethrow(throwConsumer));
+                yield addCallback(consumer, options);
+            }
         };
     }
 

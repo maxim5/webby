@@ -11,6 +11,7 @@ public interface Renderer<T> {
 
     @NotNull T compileTemplate(@NotNull String name) throws HandlerConfigError;
 
+    // Returns the most efficient method supported by this renderer.
     @NotNull RenderSupport support();
 
     @NotNull String renderToString(@NotNull T template, @NotNull Object model) throws Exception;
