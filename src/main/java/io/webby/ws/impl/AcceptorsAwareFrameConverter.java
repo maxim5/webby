@@ -46,7 +46,6 @@ public final class AcceptorsAwareFrameConverter implements FrameConverter<Object
     @Override
     public void onBeforeHandshake(@NotNull ClientInfo clientInfo) {
         this.clientInfo = clientInfo;
-
         ClientFrameType clientType = clientInfo.preferredType().orElse(ClientFrameType.ANY);
         concreteFrameType = resolveFrameType(clientType, supportedType);
     }
@@ -70,7 +69,7 @@ public final class AcceptorsAwareFrameConverter implements FrameConverter<Object
                 switch (clientType) {
                     case TEXT -> ConcreteFrameType.TEXT;
                     case BINARY -> ConcreteFrameType.BINARY;
-                    case ANY -> ConcreteFrameType.BOTH;
+                    case ANY -> ConcreteFrameType.BOTH;  // here it should collapse to TEXT and inform the client.
                     case BOTH -> ConcreteFrameType.BOTH;
                 };
             case ALLOW_BOTH -> ConcreteFrameType.BOTH;
