@@ -8,7 +8,6 @@ import org.mapdb.HTreeMap;
 
 import java.util.Map;
 import java.util.Set;
-import java.util.function.Supplier;
 
 public class MapDbImpl<K, V> implements KeyValueDb<K, V> {
     private final DB db;
@@ -42,11 +41,6 @@ public class MapDbImpl<K, V> implements KeyValueDb<K, V> {
     @Override
     public @NotNull V getOrDefault(@NotNull K key, @NotNull V def) {
         return map.getOrDefault(key, def);
-    }
-
-    @Override
-    public @NotNull V getOrCompute(@NotNull K key, @NotNull Supplier<V> supplier) {
-        return map.compute(key, (k, v) -> supplier.get());
     }
 
     @Override

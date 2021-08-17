@@ -7,7 +7,6 @@ import org.jetbrains.annotations.Nullable;
 
 import java.util.Map;
 import java.util.Set;
-import java.util.function.Supplier;
 
 public class ChronicleDb<K, V> implements KeyValueDb<K, V> {
     private final ChronicleMap<K, V> map;
@@ -39,11 +38,6 @@ public class ChronicleDb<K, V> implements KeyValueDb<K, V> {
     @Override
     public @NotNull V getOrDefault(@NotNull K key, @NotNull V def) {
         return map.getOrDefault(key, def);
-    }
-
-    @Override
-    public @NotNull V getOrCompute(@NotNull K key, @NotNull Supplier<V> supplier) {
-        return map.compute(key, (k, v) -> supplier.get());
     }
 
     @Override
