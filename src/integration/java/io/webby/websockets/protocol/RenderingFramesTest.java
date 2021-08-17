@@ -1,4 +1,4 @@
-package io.webby.websockets;
+package io.webby.websockets.protocol;
 
 import io.netty.handler.codec.http.websocketx.WebSocketFrame;
 import io.webby.testing.AssertFrame;

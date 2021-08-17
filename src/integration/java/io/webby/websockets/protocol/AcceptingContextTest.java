@@ -1,4 +1,4 @@
-package io.webby.websockets;
+package io.webby.websockets.protocol;
 
 import io.netty.handler.codec.http.websocketx.WebSocketFrame;
 import io.webby.testing.AssertFrame;
@@ -15,9 +15,9 @@ import org.junit.jupiter.api.Test;
 
 import java.util.Queue;
 
-public class AcceptRequestContextTest extends BaseWebsocketIntegrationTest {
+public class AcceptingContextTest extends BaseWebsocketIntegrationTest {
     protected void setupJson(@NotNull FrameType type, @NotNull FrameMetadata metadata, @NotNull ClientInfo clientInfo) {
-        setupAgent(AcceptRequestContext.class, Marshal.JSON, type, metadata, clientInfo);
+        setupAgent(AcceptingContext.class, Marshal.JSON, type, metadata, clientInfo);
     }
 
     @Test

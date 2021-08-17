@@ -1,9 +1,10 @@
-package io.webby.websockets;
+package io.webby.websockets.lowlevel;
 
 import com.google.common.truth.Truth;
 import io.netty.handler.codec.http.websocketx.WebSocketFrame;
 import io.webby.testing.AssertFrame;
 import io.webby.testing.BaseWebsocketIntegrationTest;
+import io.webby.websockets.lowlevel.HelloWebsocket;
 import org.junit.jupiter.api.Test;
 
 import java.util.Queue;

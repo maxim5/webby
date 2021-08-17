@@ -1,11 +1,11 @@
-package io.webby.websockets;
+package io.webby.websockets.protocol;
 
 import io.webby.url.annotate.Api;
 import io.webby.url.annotate.Serve;
 import io.webby.url.annotate.WebsocketProtocol;
-import io.webby.websockets.ExampleMessages.PrimitiveMessage;
-import io.webby.websockets.ExampleMessages.SimpleMessage;
-import io.webby.websockets.ExampleMessages.StringMessage;
+import io.webby.websockets.protocol.ExampleMessages.PrimitiveMessage;
+import io.webby.websockets.protocol.ExampleMessages.SimpleMessage;
+import io.webby.websockets.protocol.ExampleMessages.StringMessage;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
@@ -14,7 +14,7 @@ import java.util.List;
 
 @Serve(url = "/ws/accept/messages", websocket = true)
 @WebsocketProtocol(messages = SimpleMessage.class)
-public class AcceptDifferentMessages {
+public class AcceptingDifferent {
     private final List<SimpleMessage> incoming = new ArrayList<>();
 
     @Api(id="primitive", version = "1.0")

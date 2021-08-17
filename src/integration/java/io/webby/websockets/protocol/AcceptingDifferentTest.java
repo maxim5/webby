@@ -1,12 +1,12 @@
-package io.webby.websockets;
+package io.webby.websockets.protocol;
 
 import io.netty.handler.codec.http.websocketx.WebSocketFrame;
 import io.webby.testing.BaseWebsocketIntegrationTest;
 import io.webby.testing.FakeClients;
 import io.webby.url.annotate.FrameType;
 import io.webby.url.annotate.Marshal;
-import io.webby.websockets.ExampleMessages.PrimitiveMessage;
-import io.webby.websockets.ExampleMessages.StringMessage;
+import io.webby.websockets.protocol.ExampleMessages.PrimitiveMessage;
+import io.webby.websockets.protocol.ExampleMessages.StringMessage;
 import io.webby.ws.ClientFrameType;
 import io.webby.ws.meta.FrameMetadata;
 import io.webby.ws.meta.TextSeparatorFrameMetadata;
@@ -19,22 +19,22 @@ import java.util.Queue;
 import static com.google.common.truth.Truth.assertThat;
 import static io.webby.testing.AssertFrame.*;
 
-public class AcceptDifferentMessagesTest extends BaseWebsocketIntegrationTest {
+public class AcceptingDifferentTest extends BaseWebsocketIntegrationTest {
     private static final TextSeparatorFrameMetadata TEXT_SEPARATOR_META = new TextSeparatorFrameMetadata();
 
-    protected @NotNull AcceptDifferentMessages setupJson(@NotNull FrameType type, @NotNull FrameMetadata metadata) {
-        return setupAgent(AcceptDifferentMessages.class, Marshal.JSON, type, metadata, FakeClients.DEFAULT);
+    protected @NotNull AcceptingDifferent setupJson(@NotNull FrameType type, @NotNull FrameMetadata metadata) {
+        return setupAgent(AcceptingDifferent.class, Marshal.JSON, type, metadata, FakeClients.DEFAULT);
     }
 
-    protected @NotNull AcceptDifferentMessages setupJson(@NotNull FrameType serverType,
-                                                         @NotNull FrameMetadata metadata,
-                                                         @NotNull ClientFrameType clientType) {
-        return setupAgent(AcceptDifferentMessages.class, Marshal.JSON, serverType, metadata, FakeClients.client(clientType));
+    protected @NotNull AcceptingDifferent setupJson(@NotNull FrameType serverType,
+                                                    @NotNull FrameMetadata metadata,
+                                                    @NotNull ClientFrameType clientType) {
+        return setupAgent(AcceptingDifferent.class, Marshal.JSON, serverType, metadata, FakeClients.client(clientType));
     }
 
     @Test
     public void on_json_text_primitive() {
-        AcceptDifferentMessages agent = setupJson(FrameType.TEXT_ONLY, TEXT_SEPARATOR_META);
+        AcceptingDifferent agent = setupJson(FrameType.TEXT_ONLY, TEXT_SEPARATOR_META);
         Queue<WebSocketFrame> frames = sendText("primitive 1 {'ch': 'a', 'bool': true}");
         assertTextFrames(frames, """
             1 0 {"s":"a-true"}
@@ -44,7 +44,7 @@ public class AcceptDifferentMessagesTest extends BaseWebsocketIntegrationTest {
 
     @Test
     public void on_json_from_client_text_primitive() {
-        AcceptDifferentMessages agent = setupJson(FrameType.FROM_CLIENT, TEXT_SEPARATOR_META);
+        AcceptingDifferent agent = setupJson(FrameType.FROM_CLIENT, TEXT_SEPARATOR_META);
         Queue<WebSocketFrame> frames = sendText("primitive 1 {'ch': 'a', 'bool': true}");
         assertTextFrames(frames, """
             1 0 {"s":"a-true"}
@@ -54,7 +54,7 @@ public class AcceptDifferentMessagesTest extends BaseWebsocketIntegrationTest {
 
     @Test
     public void on_json_from_client_binary_primitive() {
-        AcceptDifferentMessages agent = setupJson(FrameType.FROM_CLIENT, TEXT_SEPARATOR_META);
+        AcceptingDifferent agent = setupJson(FrameType.FROM_CLIENT, TEXT_SEPARATOR_META);
         Queue<WebSocketFrame> frames = sendBinary("primitive 1 {'ch': 'a', 'bool': true}");
         assertBinaryFrames(frames, """
             1 0 {"s":"a-true"}
@@ -64,7 +64,7 @@ public class AcceptDifferentMessagesTest extends BaseWebsocketIntegrationTest {
 
     @Test
     public void on_json_text_string_not_null() {
-        AcceptDifferentMessages agent = setupJson(FrameType.TEXT_ONLY, TEXT_SEPARATOR_META);
+        AcceptingDifferent agent = setupJson(FrameType.TEXT_ONLY, TEXT_SEPARATOR_META);
         Queue<WebSocketFrame> frames = sendText("str 111111111 {'s': 'aaa'}");
         Assertions.assertEquals(96352, new StringMessage("aaa").hashCode());
         assertTextFrames(frames, """
@@ -75,7 +75,7 @@ public class AcceptDifferentMessagesTest extends BaseWebsocketIntegrationTest {
 
     @Test
     public void on_json_binary_string_not_null() {
-        AcceptDifferentMessages agent = setupJson(FrameType.BINARY_ONLY, TEXT_SEPARATOR_META);
+        AcceptingDifferent agent = setupJson(FrameType.BINARY_ONLY, TEXT_SEPARATOR_META);
         Queue<WebSocketFrame> frames = sendBinary("str 111111111 {'s': 'aaa'}");
         Assertions.assertEquals(96352, new StringMessage("aaa").hashCode());
         assertBinaryFrames(frames, """
@@ -86,7 +86,7 @@ public class AcceptDifferentMessagesTest extends BaseWebsocketIntegrationTest {
 
     @Test
     public void on_json_text_string_null() {
-        AcceptDifferentMessages agent = setupJson(FrameType.TEXT_ONLY, TEXT_SEPARATOR_META);
+        AcceptingDifferent agent = setupJson(FrameType.TEXT_ONLY, TEXT_SEPARATOR_META);
         Queue<WebSocketFrame> frames = sendText("str 111111111 {'s': null}");
         assertTextFrames(frames);
         assertThat(agent.getIncoming()).containsExactly(new StringMessage(null));
@@ -94,7 +94,7 @@ public class AcceptDifferentMessagesTest extends BaseWebsocketIntegrationTest {
 
     @Test
     public void on_json_binary_string_null() {
-        AcceptDifferentMessages agent = setupJson(FrameType.BINARY_ONLY, TEXT_SEPARATOR_META);
+        AcceptingDifferent agent = setupJson(FrameType.BINARY_ONLY, TEXT_SEPARATOR_META);
         Queue<WebSocketFrame> frames = sendBinary("str 111111111 {'s': null}");
         assertBinaryFrames(frames);
         assertThat(agent.getIncoming()).containsExactly(new StringMessage(null));
@@ -102,7 +102,7 @@ public class AcceptDifferentMessagesTest extends BaseWebsocketIntegrationTest {
 
     @Test
     public void compatibility_server_text_only_client_text() {
-        AcceptDifferentMessages agent = setupJson(FrameType.TEXT_ONLY, TEXT_SEPARATOR_META, ClientFrameType.TEXT);
+        AcceptingDifferent agent = setupJson(FrameType.TEXT_ONLY, TEXT_SEPARATOR_META, ClientFrameType.TEXT);
 
         Queue<WebSocketFrame> frames = sendText("primitive 777 {'ch': 'a', 'bool': true}");
         assertTextFrames(frames, """
@@ -125,7 +125,7 @@ public class AcceptDifferentMessagesTest extends BaseWebsocketIntegrationTest {
 
     @Test
     public void compatibility_server_text_only_client_any() {
-        AcceptDifferentMessages agent = setupJson(FrameType.TEXT_ONLY, TEXT_SEPARATOR_META, ClientFrameType.ANY);
+        AcceptingDifferent agent = setupJson(FrameType.TEXT_ONLY, TEXT_SEPARATOR_META, ClientFrameType.ANY);
 
         Queue<WebSocketFrame> frames = sendText("primitive 777 {'ch': 'a', 'bool': false}");
         assertTextFrames(frames, """
@@ -138,7 +138,7 @@ public class AcceptDifferentMessagesTest extends BaseWebsocketIntegrationTest {
 
     @Test
     public void compatibility_server_binary_only_client_binary() {
-        AcceptDifferentMessages agent = setupJson(FrameType.BINARY_ONLY, TEXT_SEPARATOR_META, ClientFrameType.BINARY);
+        AcceptingDifferent agent = setupJson(FrameType.BINARY_ONLY, TEXT_SEPARATOR_META, ClientFrameType.BINARY);
 
         Queue<WebSocketFrame> frames = sendBinary("primitive 777 {'ch': 'b', 'bool': true}");
         assertBinaryFrames(frames, """
@@ -161,7 +161,7 @@ public class AcceptDifferentMessagesTest extends BaseWebsocketIntegrationTest {
 
     @Test
     public void compatibility_server_binary_only_client_any() {
-        AcceptDifferentMessages agent = setupJson(FrameType.BINARY_ONLY, TEXT_SEPARATOR_META, ClientFrameType.ANY);
+        AcceptingDifferent agent = setupJson(FrameType.BINARY_ONLY, TEXT_SEPARATOR_META, ClientFrameType.ANY);
 
         Queue<WebSocketFrame> frames = sendBinary("primitive 777 {'ch': 'b', 'bool': false}");
         assertBinaryFrames(frames, """
@@ -174,7 +174,7 @@ public class AcceptDifferentMessagesTest extends BaseWebsocketIntegrationTest {
 
     @Test
     public void compatibility_server_both_only_client_binary() {
-        AcceptDifferentMessages agent = setupJson(FrameType.ALLOW_BOTH, TEXT_SEPARATOR_META, ClientFrameType.BINARY);
+        AcceptingDifferent agent = setupJson(FrameType.ALLOW_BOTH, TEXT_SEPARATOR_META, ClientFrameType.BINARY);
 
         Queue<WebSocketFrame> frames1 = sendText("primitive 777 {'ch': 'c', 'bool': true}");
         assertTextFrames(frames1, """
@@ -192,7 +192,7 @@ public class AcceptDifferentMessagesTest extends BaseWebsocketIntegrationTest {
 
     @Test
     public void compatibility_server_both_only_client_both() {
-        AcceptDifferentMessages agent = setupJson(FrameType.ALLOW_BOTH, TEXT_SEPARATOR_META, ClientFrameType.BOTH);
+        AcceptingDifferent agent = setupJson(FrameType.ALLOW_BOTH, TEXT_SEPARATOR_META, ClientFrameType.BOTH);
 
         Queue<WebSocketFrame> frames1 = sendText("primitive 777 {'ch': 'c', 'bool': false}");
         assertTextFrames(frames1, """
@@ -210,7 +210,7 @@ public class AcceptDifferentMessagesTest extends BaseWebsocketIntegrationTest {
 
     @Test
     public void compatibility_server_both_only_client_text() {
-        AcceptDifferentMessages agent = setupJson(FrameType.ALLOW_BOTH, TEXT_SEPARATOR_META, ClientFrameType.BOTH);
+        AcceptingDifferent agent = setupJson(FrameType.ALLOW_BOTH, TEXT_SEPARATOR_META, ClientFrameType.BOTH);
 
         Queue<WebSocketFrame> frames1 = sendText("primitive 777 {'ch': 'd', 'bool': false}");
         assertTextFrames(frames1, """
@@ -228,7 +228,7 @@ public class AcceptDifferentMessagesTest extends BaseWebsocketIntegrationTest {
 
     @Test
     public void compatibility_server_both_only_client_any() {
-        AcceptDifferentMessages agent = setupJson(FrameType.ALLOW_BOTH, TEXT_SEPARATOR_META, ClientFrameType.ANY);
+        AcceptingDifferent agent = setupJson(FrameType.ALLOW_BOTH, TEXT_SEPARATOR_META, ClientFrameType.ANY);
 
         Queue<WebSocketFrame> frames1 = sendText("primitive 777 {'ch': 'd', 'bool': true}");
         assertTextFrames(frames1, """

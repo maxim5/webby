@@ -1,4 +1,4 @@
-package io.webby.websockets;
+package io.webby.websockets.lowlevel;
 
 import com.google.common.flogger.FluentLogger;
 import io.netty.handler.codec.http.websocketx.BinaryWebSocketFrame;

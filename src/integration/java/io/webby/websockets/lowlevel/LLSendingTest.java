@@ -1,4 +1,4 @@
-package io.webby.websockets;
+package io.webby.websockets.lowlevel;
 
 import io.netty.handler.codec.http.websocketx.WebSocketFrame;
 import io.webby.testing.AssertFrame;
@@ -7,8 +7,8 @@ import org.junit.jupiter.api.Test;
 
 import java.util.Queue;
 
-public class SendingFramesTest extends BaseWebsocketIntegrationTest {
-    private final SendingFrames agent = testSetup(SendingFrames.class).initAgent();
+public class LLSendingTest extends BaseWebsocketIntegrationTest {
+    private final LLSending agent = testSetup(LLSending.class).initAgent();
 
     @Test
     public void text_simple() {

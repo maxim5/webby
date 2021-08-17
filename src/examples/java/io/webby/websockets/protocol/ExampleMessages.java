@@ -1,4 +1,4 @@
-package io.webby.websockets;
+package io.webby.websockets.protocol;
 
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;

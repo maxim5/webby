@@ -1,9 +1,9 @@
-package io.webby.websockets;
+package io.webby.websockets.protocol;
 
 import io.webby.url.annotate.Serve;
 import io.webby.url.annotate.WebsocketProtocol;
-import io.webby.websockets.ExampleMessages.PrimitiveMessage;
-import io.webby.websockets.ExampleMessages.SimpleMessage;
+import io.webby.websockets.protocol.ExampleMessages.PrimitiveMessage;
+import io.webby.websockets.protocol.ExampleMessages.SimpleMessage;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.ArrayList;
@@ -11,7 +11,7 @@ import java.util.List;
 
 @Serve(url = "/ws/accept/primitive", websocket = true)
 @WebsocketProtocol(messages = SimpleMessage.class)
-public class AcceptPrimitiveMessage {
+public class AcceptingPrimitive {
     private final List<SimpleMessage> incoming = new ArrayList<>();
 
     public @NotNull PrimitiveMessage onPrimitive(@NotNull PrimitiveMessage message) {

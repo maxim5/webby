@@ -1,4 +1,4 @@
-package io.webby.websockets;
+package io.webby.websockets.lowlevel;
 
 import com.google.inject.Inject;
 import io.netty.handler.codec.http.websocketx.TextWebSocketFrame;
@@ -9,7 +9,7 @@ import org.jetbrains.annotations.NotNull;
 import static io.webby.ws.Sender.text;
 
 @Serve(url = "/ws/sending", websocket = true)
-public class SendingFrames {
+public class LLSending {
     @Inject private Sender sender;
 
     public void onText(@NotNull TextWebSocketFrame frame) {
