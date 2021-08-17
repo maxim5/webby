@@ -1,4 +1,4 @@
-package io.webby.ws.impl;
+package io.webby.ws.convert;
 
 import io.netty.buffer.ByteBuf;
 import io.netty.buffer.Unpooled;
@@ -13,6 +13,7 @@ import io.webby.ws.BaseRequestContext;
 import io.webby.ws.ClientFrameType;
 import io.webby.ws.ClientInfo;
 import io.webby.ws.RequestContext;
+import io.webby.ws.impl.Acceptor;
 import io.webby.ws.lifecycle.AgentLifecycle;
 import io.webby.ws.meta.FrameMetadata;
 import org.jetbrains.annotations.NotNull;

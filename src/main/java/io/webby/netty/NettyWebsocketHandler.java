@@ -92,7 +92,6 @@ public class NettyWebsocketHandler extends ChannelInboundHandlerAdapter {
     private void handle(@NotNull WebSocketFrame frame, @NotNull ChannelHandlerContext context) {
         endpoint.processIncoming(frame, clientInfo, (callResult, requestContext) -> {
             if (callResult == null) {
-                log.at(Level.WARNING).log("Websocket agent returned null");
                 return;
             }
 

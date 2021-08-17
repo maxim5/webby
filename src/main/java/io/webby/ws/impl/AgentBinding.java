@@ -14,6 +14,6 @@ public record AgentBinding(@NotNull String url,
                            @NotNull FrameType frameType,
                            @NotNull Marshal marshal,
                            @NotNull List<Acceptor> acceptors,
-                           @Nullable Field sender,
+                           @Nullable Field senderField,
                            boolean acceptsFrame) {
 }

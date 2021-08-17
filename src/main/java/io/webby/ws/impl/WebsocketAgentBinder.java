@@ -21,9 +21,13 @@ import io.webby.url.annotate.*;
 import io.webby.url.impl.EndpointView;
 import io.webby.url.view.Renderer;
 import io.webby.url.view.RendererFactory;
+import io.webby.ws.MessageSender;
 import io.webby.ws.RequestContext;
 import io.webby.ws.Sender;
 import io.webby.ws.WebsocketAgentConfigError;
+import io.webby.ws.convert.AcceptorsAwareFrameConverter;
+import io.webby.ws.convert.FrameConverter;
+import io.webby.ws.convert.OutFrameConverterListener;
 import io.webby.ws.meta.FrameMetadata;
 import io.webby.ws.meta.TextSeparatorFrameMetadata;
 import org.jetbrains.annotations.NotNull;
@@ -43,6 +47,7 @@ import java.util.function.Function;
 import java.util.function.IntPredicate;
 import java.util.logging.Level;
 
+import static io.webby.util.EasyCast.castAny;
 import static io.webby.ws.WebsocketAgentConfigError.failIf;
 import static io.webby.ws.meta.FrameMetadata.MAX_ID_SIZE;
 
@@ -160,6 +165,11 @@ public class WebsocketAgentBinder {
                     .peek(field -> field.setAccessible(true))
                     .findAny()
                     .orElse(null);
+            if (acceptsFrame && senderField != null && MessageSender.class.isAssignableFrom(senderField.getType())) {
+                throw new WebsocketAgentConfigError(
+                    "Agents not defining the message type can't use MessageSender (replace with Sender): %s"
+                    .formatted(senderField.getName()));
+            }
 
             consumer.accept(new AgentBinding(classUrl, klass, messageClass, frameType, marshal,
                                              acceptors, senderField, acceptsFrame));
@@ -181,7 +191,7 @@ public class WebsocketAgentBinder {
         }, binding -> {
             try {
                 Object instance = injector.getInstance(binding.agentClass());
-                Sender sender = binding.sender() != null ? (Sender) binding.sender().get(instance) : null;
+                Sender sender = binding.senderField() != null ? (Sender) binding.senderField().get(instance) : null;
 
                 List<Acceptor> acceptors = binding.acceptors();
                 if (binding.acceptsFrame()) {
@@ -197,6 +207,11 @@ public class WebsocketAgentBinder {
                     FrameMetadata metadata = helper.getOrDefault(FrameMetadata.class, TextSeparatorFrameMetadata::new);
                     FrameConverter<Object> converter =
                             new AcceptorsAwareFrameConverter(marshaller, metadata, acceptorsById, supportedType, charset);
+
+                    if (sender instanceof OutFrameConverterListener<?> listener) {
+                        listener.onConverter(castAny(converter));
+                    }
+
                     return new FrameConverterEndpoint(instance, converter, sender);
                 }
             } catch (ConfigurationException e) {
@@ -206,7 +221,7 @@ public class WebsocketAgentBinder {
                 throw new WebsocketAgentConfigError(message, e);
             } catch (IllegalAccessException e) {
                 String message = "Failed to access %s field of the Websocket agent %s"
-                        .formatted(binding.sender(), binding.agentClass());
+                        .formatted(binding.senderField(), binding.agentClass());
                 throw new WebsocketAgentConfigError(message, e);
             } catch (IllegalArgumentException e) {
                 String message = "API identifier is not unique in the Websocket agent %s".formatted(binding.agentClass());

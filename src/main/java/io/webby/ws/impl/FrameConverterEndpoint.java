@@ -6,6 +6,7 @@ import io.webby.ws.BaseRequestContext;
 import io.webby.ws.ClientInfo;
 import io.webby.ws.RequestContext;
 import io.webby.ws.Sender;
+import io.webby.ws.convert.FrameConverter;
 import io.webby.ws.lifecycle.AgentLifecycle;
 import io.webby.ws.lifecycle.AgentLifecycleFanOut;
 import org.jetbrains.annotations.NotNull;
