@@ -44,7 +44,7 @@ public final class AcceptorsAwareFrameConverter implements FrameConverter<Object
     }
 
     @Override
-    public void onConnectionAttempt(@NotNull ClientInfo clientInfo) {
+    public void onBeforeHandshake(@NotNull ClientInfo clientInfo) {
         this.clientInfo = clientInfo;
 
         ClientFrameType clientType = clientInfo.preferredType().orElse(ClientFrameType.ANY);

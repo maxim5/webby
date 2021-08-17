@@ -30,7 +30,7 @@ public class NettyWebsocketHandler extends ChannelInboundHandlerAdapter {
         this.endpoint = endpoint;
         this.clientInfo = clientInfo;
         this.lifecycle = endpoint.lifecycle();
-        this.lifecycle.onConnectionAttempt(clientInfo);
+        this.lifecycle.onBeforeHandshake(clientInfo);
     }
 
     @Override

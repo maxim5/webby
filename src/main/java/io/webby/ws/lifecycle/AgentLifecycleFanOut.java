@@ -17,8 +17,8 @@ public class AgentLifecycleFanOut implements AgentLifecycle {
     }
 
     @Override
-    public void onConnectionAttempt(@NotNull ClientInfo clientInfo) {
-        delegates.forEach(delegate -> delegate.onConnectionAttempt(clientInfo));
+    public void onBeforeHandshake(@NotNull ClientInfo clientInfo) {
+        delegates.forEach(delegate -> delegate.onBeforeHandshake(clientInfo));
     }
 
     @Override

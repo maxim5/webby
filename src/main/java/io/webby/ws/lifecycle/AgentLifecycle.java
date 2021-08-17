@@ -5,7 +5,7 @@ import io.webby.ws.ClientInfo;
 import org.jetbrains.annotations.NotNull;
 
 public interface AgentLifecycle {
-    default void onConnectionAttempt(@NotNull ClientInfo clientInfo) {}
+    default void onBeforeHandshake(@NotNull ClientInfo clientInfo) {}
 
     default void onChannelConnected(@NotNull Channel channel) {}
 
