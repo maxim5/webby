@@ -35,21 +35,21 @@ public class ChannelSender implements AgentLifecycle, Sender {
     @Override
     public @NotNull ChannelFuture send(@NotNull WebSocketFrame frame) {
         assert state.get() == State.READY :
-            "Channel is not ready: %s. Reasons: Websocket handshake not completed or closed already".formatted(state.get());
+            "Channel is not ready: %s. Reasons: Websocket handshake not completed or closed already".formatted(state);
         return channel.write(frame);
     }
 
     @Override
     public @NotNull ChannelOutboundInvoker flush() {
         assert state.get() == State.READY :
-            "Channel is not ready: %s. Reasons: Websocket handshake not completed or closed already".formatted(state.get());
+            "Channel is not ready: %s. Reasons: Websocket handshake not completed or closed already".formatted(state);
         return channel.flush();
     }
 
     @Override
     public @NotNull ChannelFuture sendFlush(@NotNull WebSocketFrame frame) {
         assert state.get() == State.READY :
-            "Channel is not ready: %s. Reasons: Websocket handshake not completed or closed already".formatted(state.get());
+            "Channel is not ready: %s. Reasons: Websocket handshake not completed or closed already".formatted(state);
         return channel.writeAndFlush(frame);
     }
 
