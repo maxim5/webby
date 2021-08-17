@@ -9,11 +9,11 @@ import org.jetbrains.annotations.NotNull;
 
 import static io.webby.ws.Sender.text;
 
-@Serve(url = "/ws/no_protocol", websocket = true)
+@Serve(url = "/ws/ll/accept/context", websocket = true)
 public class LLAcceptingContext {
     @Inject private Sender sender;
 
-    public void onTextCtx(@NotNull TextWebSocketFrame frame, @NotNull RequestContext context) {
+    public void onTextWithContext(@NotNull TextWebSocketFrame frame, @NotNull RequestContext context) {
         sender.sendFlush(text("Ack %s %s".formatted(frame.text(), context.clientInfo().versionOrNull())));
     }
 }

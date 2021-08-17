@@ -8,7 +8,7 @@ import org.jetbrains.annotations.NotNull;
 
 import static io.webby.ws.Sender.text;
 
-@Serve(url = "/ws/sending", websocket = true)
+@Serve(url = "/ws/ll/send", websocket = true)
 public class LLSending {
     @Inject private Sender sender;
 
