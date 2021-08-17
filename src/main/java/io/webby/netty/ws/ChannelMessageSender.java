@@ -7,16 +7,16 @@ import io.webby.ws.MessageSender;
 import io.webby.ws.convert.OutFrameConverter;
 import org.jetbrains.annotations.NotNull;
 
-public class ChannelMessageSender extends ChannelSender implements MessageSender<Object> {
-    private OutFrameConverter<Object> converter;
+public class ChannelMessageSender<M> extends ChannelSender implements MessageSender<M> {
+    private OutFrameConverter<M> converter;
 
     @Override
-    public void onConverter(@NotNull OutFrameConverter<Object> converter) {
+    public void onConverter(@NotNull OutFrameConverter<M> converter) {
         this.converter = converter;
     }
 
     @Override
-    public @NotNull ChannelFuture sendMessage(int code, @NotNull Object message, @NotNull BaseRequestContext context) {
+    public @NotNull ChannelFuture sendMessage(int code, @NotNull M message, @NotNull BaseRequestContext context) {
         assert converter != null :
             "Message converter is not initialized. Possible reasons: Agent is missing @WebsocketProtocol annotation";
         WebSocketFrame frame = converter.toFrame(context, code, message);
@@ -24,7 +24,7 @@ public class ChannelMessageSender extends ChannelSender implements MessageSender
     }
 
     @Override
-    public @NotNull ChannelFuture sendFlushMessage(int code, @NotNull Object message, @NotNull BaseRequestContext context) {
+    public @NotNull ChannelFuture sendFlushMessage(int code, @NotNull M message, @NotNull BaseRequestContext context) {
         assert converter != null :
             "Message converter is not initialized. Possible reasons: Agent is missing @WebsocketProtocol annotation";
         WebSocketFrame frame = converter.toFrame(context, code, message);

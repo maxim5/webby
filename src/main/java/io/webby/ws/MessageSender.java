@@ -1,11 +1,14 @@
 package io.webby.ws;
 
 import com.google.errorprone.annotations.CanIgnoreReturnValue;
+import com.google.inject.ImplementedBy;
 import io.netty.channel.ChannelFuture;
+import io.webby.netty.ws.ChannelMessageSender;
 import io.webby.netty.ws.Constants;
 import io.webby.ws.convert.OutFrameConverterListener;
 import org.jetbrains.annotations.NotNull;
 
+@ImplementedBy(ChannelMessageSender.class)
 public interface MessageSender<M> extends Sender, OutFrameConverterListener<M> {
     @CanIgnoreReturnValue
     default @NotNull ChannelFuture sendMessage(@NotNull M message) {

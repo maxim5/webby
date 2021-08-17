@@ -16,6 +16,8 @@ import io.webby.app.Settings;
 import io.webby.common.InjectorHelper;
 import io.webby.netty.marshal.Marshaller;
 import io.webby.netty.marshal.MarshallerFactory;
+import io.webby.netty.ws.ChannelMessageSender;
+import io.webby.netty.ws.ChannelSender;
 import io.webby.url.UrlConfigError;
 import io.webby.url.annotate.*;
 import io.webby.url.impl.EndpointView;
@@ -165,7 +167,7 @@ public class WebsocketAgentBinder {
                     .peek(field -> field.setAccessible(true))
                     .findAny()
                     .orElse(null);
-            if (acceptsFrame && senderField != null && MessageSender.class.isAssignableFrom(senderField.getType())) {
+            if (acceptsFrame && senderField != null && isMessageSenderField(senderField)) {
                 throw new WebsocketAgentConfigError(
                     "Agents not defining the message type can't use MessageSender (replace with Sender): %s"
                     .formatted(senderField.getName()));
@@ -191,7 +193,7 @@ public class WebsocketAgentBinder {
         }, binding -> {
             try {
                 Object instance = injector.getInstance(binding.agentClass());
-                Sender sender = binding.senderField() != null ? (Sender) binding.senderField().get(instance) : null;
+                Sender sender = injectSenderIfNecessary(binding.senderField(), instance);
 
                 List<Acceptor> acceptors = binding.acceptors();
                 if (binding.acceptsFrame()) {
@@ -318,6 +320,10 @@ public class WebsocketAgentBinder {
         return Sender.class.isAssignableFrom(field.getType());
     }
 
+    private static boolean isMessageSenderField(@NotNull Field senderField) {
+        return MessageSender.class.isAssignableFrom(senderField.getType());
+    }
+
     private static <A, T> T getIfPresent(@Nullable A instance, @NotNull Function<A, T[]> array, @Nullable T def) {
         return instance != null ? getIfPresent(array.apply(instance), def) : def;
     }
@@ -325,5 +331,23 @@ public class WebsocketAgentBinder {
     private static <T> T getIfPresent(@NotNull T[] array, @Nullable T def) {
         failIf(array.length > 1, "Multiple array values are not supported: %s".formatted(Arrays.toString(array)));
         return array.length > 0 ? array[0] : def;
+    }
+
+    // The idea of @ImplementedBy from https://stackoverflow.com/questions/4238919/inject-generic-implementation-using-guice
+    // works great, but this direct injector feels like a workaround just in case.
+    //
+    // Maybe make it less hacky via https://github.com/google/guice/wiki/CustomInjections
+    private static @Nullable Sender injectSenderIfNecessary(@Nullable Field senderField, @NotNull Object instance)
+            throws IllegalAccessException {
+        if (senderField == null) {
+            return null;
+        }
+        Object senderFieldValue = senderField.get(instance);
+        if (senderFieldValue == null) {
+            Sender sender = isMessageSenderField(senderField) ? new ChannelMessageSender<>() : new ChannelSender();
+            senderField.set(instance, sender);
+            return sender;
+        }
+        return (Sender) senderFieldValue;
     }
 }
