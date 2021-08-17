@@ -4,8 +4,8 @@ import com.google.inject.Inject;
 import io.webby.url.annotate.Serve;
 import io.webby.url.annotate.WebsocketProtocol;
 import io.webby.websockets.protocol.ExampleMessages.StringMessage;
-import io.webby.ws.MessageSender;
-import io.webby.ws.RequestContext;
+import io.webby.netty.ws.sender.MessageSender;
+import io.webby.ws.context.RequestContext;
 import org.jetbrains.annotations.NotNull;
 
 import static io.webby.websockets.protocol.ExampleMessages.PrimitiveMessage;

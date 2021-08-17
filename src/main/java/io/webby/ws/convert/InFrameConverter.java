@@ -1,7 +1,7 @@
 package io.webby.ws.convert;
 
 import io.netty.handler.codec.http.websocketx.WebSocketFrame;
-import io.webby.ws.RequestContext;
+import io.webby.ws.context.RequestContext;
 import io.webby.ws.impl.Acceptor;
 import org.jetbrains.annotations.NotNull;
 

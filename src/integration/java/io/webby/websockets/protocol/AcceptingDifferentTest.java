@@ -7,7 +7,7 @@ import io.webby.url.annotate.FrameType;
 import io.webby.url.annotate.Marshal;
 import io.webby.websockets.protocol.ExampleMessages.PrimitiveMessage;
 import io.webby.websockets.protocol.ExampleMessages.StringMessage;
-import io.webby.ws.ClientFrameType;
+import io.webby.ws.context.ClientFrameType;
 import io.webby.ws.meta.FrameMetadata;
 import io.webby.ws.meta.TextSeparatorFrameMetadata;
 import org.jetbrains.annotations.NotNull;

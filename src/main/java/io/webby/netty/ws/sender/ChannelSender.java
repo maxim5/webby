@@ -1,11 +1,10 @@
-package io.webby.netty.ws;
+package io.webby.netty.ws.sender;
 
 import io.netty.channel.Channel;
 import io.netty.channel.ChannelFuture;
 import io.netty.channel.ChannelOutboundInvoker;
 import io.netty.handler.codec.http.websocketx.WebSocketFrame;
 import io.webby.ws.lifecycle.AgentLifecycle;
-import io.webby.ws.Sender;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.concurrent.atomic.AtomicReference;

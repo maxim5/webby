@@ -1,4 +1,4 @@
-package io.webby.ws;
+package io.webby.ws.context;
 
 import io.webby.auth.session.Session;
 import io.webby.auth.user.User;

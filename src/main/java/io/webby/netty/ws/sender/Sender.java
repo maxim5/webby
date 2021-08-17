@@ -1,4 +1,4 @@
-package io.webby.ws;
+package io.webby.netty.ws.sender;
 
 import com.google.errorprone.annotations.CanIgnoreReturnValue;
 import io.netty.buffer.Unpooled;

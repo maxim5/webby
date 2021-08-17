@@ -1,4 +1,4 @@
-package io.webby.ws;
+package io.webby.ws.context;
 
 import io.netty.handler.codec.http.websocketx.BinaryWebSocketFrame;
 import io.netty.handler.codec.http.websocketx.TextWebSocketFrame;

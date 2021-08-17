@@ -4,7 +4,7 @@ import com.google.common.flogger.FluentLogger;
 import io.netty.buffer.ByteBuf;
 import io.webby.url.impl.EndpointView;
 import io.webby.url.view.Renderer;
-import io.webby.ws.RequestContext;
+import io.webby.ws.context.RequestContext;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 

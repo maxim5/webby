@@ -1,9 +1,8 @@
-package io.webby.netty.ws;
+package io.webby.netty.ws.sender;
 
 import io.netty.channel.ChannelFuture;
 import io.netty.handler.codec.http.websocketx.WebSocketFrame;
-import io.webby.ws.BaseRequestContext;
-import io.webby.ws.MessageSender;
+import io.webby.ws.context.BaseRequestContext;
 import io.webby.ws.convert.OutFrameConverter;
 import org.jetbrains.annotations.NotNull;
 

@@ -1,7 +1,7 @@
 package io.webby.testing;
 
-import io.webby.ws.ClientFrameType;
-import io.webby.ws.ClientInfo;
+import io.webby.ws.context.ClientFrameType;
+import io.webby.ws.context.ClientInfo;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 

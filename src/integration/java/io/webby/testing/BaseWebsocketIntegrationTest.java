@@ -15,7 +15,7 @@ import io.webby.netty.NettyWebsocketHandler;
 import io.webby.url.annotate.FrameType;
 import io.webby.url.annotate.Marshal;
 import io.webby.util.Rethrow;
-import io.webby.ws.ClientInfo;
+import io.webby.ws.context.ClientInfo;
 import io.webby.ws.impl.AgentEndpoint;
 import io.webby.ws.impl.WebsocketRouter;
 import io.webby.ws.meta.FrameMetadata;

@@ -3,11 +3,11 @@ package io.webby.websockets.lowlevel;
 import com.google.inject.Inject;
 import io.netty.handler.codec.http.websocketx.TextWebSocketFrame;
 import io.webby.url.annotate.Serve;
-import io.webby.ws.RequestContext;
-import io.webby.ws.Sender;
+import io.webby.ws.context.RequestContext;
+import io.webby.netty.ws.sender.Sender;
 import org.jetbrains.annotations.NotNull;
 
-import static io.webby.ws.Sender.text;
+import static io.webby.netty.ws.sender.Sender.text;
 
 @Serve(url = "/ws/ll/accept/context", websocket = true)
 public class LLAcceptingContext {

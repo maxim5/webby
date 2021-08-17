@@ -1,7 +1,7 @@
 package io.webby.ws.lifecycle;
 
 import io.netty.channel.Channel;
-import io.webby.ws.ClientInfo;
+import io.webby.ws.context.ClientInfo;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 

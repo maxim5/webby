@@ -1,10 +1,11 @@
-package io.webby.ws;
+package io.webby.netty.ws.sender;
 
 import com.google.errorprone.annotations.CanIgnoreReturnValue;
 import com.google.inject.ImplementedBy;
 import io.netty.channel.ChannelFuture;
-import io.webby.netty.ws.ChannelMessageSender;
 import io.webby.netty.ws.Constants;
+import io.webby.ws.context.BaseRequestContext;
+import io.webby.ws.context.EmptyContext;
 import io.webby.ws.convert.OutFrameConverterListener;
 import org.jetbrains.annotations.NotNull;
 

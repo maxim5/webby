@@ -4,7 +4,7 @@ import io.webby.url.annotate.Serve;
 import io.webby.url.annotate.WebsocketProtocol;
 import io.webby.websockets.protocol.ExampleMessages.SimpleMessage;
 import io.webby.websockets.protocol.ExampleMessages.StringMessage;
-import io.webby.ws.RequestContext;
+import io.webby.ws.context.RequestContext;
 import org.jetbrains.annotations.NotNull;
 
 @Serve(url = "/ws/accept/context", websocket = true)

@@ -1,4 +1,4 @@
-package io.webby.ws;
+package io.webby.ws.context;
 
 public enum ClientFrameType {
     TEXT,

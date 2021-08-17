@@ -2,10 +2,10 @@ package io.webby.ws.impl;
 
 import io.netty.handler.codec.http.websocketx.WebSocketFrame;
 import io.webby.netty.ws.Constants.StatusCodes;
-import io.webby.ws.BaseRequestContext;
-import io.webby.ws.ClientInfo;
-import io.webby.ws.RequestContext;
-import io.webby.ws.Sender;
+import io.webby.ws.context.BaseRequestContext;
+import io.webby.ws.context.ClientInfo;
+import io.webby.ws.context.RequestContext;
+import io.webby.netty.ws.sender.Sender;
 import io.webby.ws.convert.FrameConverter;
 import io.webby.ws.lifecycle.AgentLifecycle;
 import io.webby.ws.lifecycle.AgentLifecycleFanOut;

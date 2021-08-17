@@ -1,4 +1,4 @@
-package io.webby.ws;
+package io.webby.ws.context;
 
 import io.webby.netty.ws.Constants;
 

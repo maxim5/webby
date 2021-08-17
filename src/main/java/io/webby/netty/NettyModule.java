@@ -7,8 +7,8 @@ import io.webby.netty.marshal.MarshallerFactory;
 import io.webby.netty.response.HttpResponseFactory;
 import io.webby.netty.response.ResponseMapper;
 import io.webby.netty.response.StaticServing;
-import io.webby.netty.ws.ChannelSender;
-import io.webby.ws.Sender;
+import io.webby.netty.ws.sender.ChannelSender;
+import io.webby.netty.ws.sender.Sender;
 
 public class NettyModule extends AbstractModule {
     @Override

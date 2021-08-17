@@ -6,7 +6,7 @@ import io.webby.testing.BaseWebsocketIntegrationTest;
 import io.webby.testing.FakeClients;
 import io.webby.url.annotate.FrameType;
 import io.webby.url.annotate.Marshal;
-import io.webby.ws.ClientInfo;
+import io.webby.ws.context.ClientInfo;
 import io.webby.ws.meta.FrameMetadata;
 import io.webby.ws.meta.TextSeparatorFrameMetadata;
 import org.jetbrains.annotations.NotNull;
