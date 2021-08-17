@@ -14,7 +14,7 @@ public record TextSeparatorFrameMetadata(byte separator, int maxAcceptorIdSize) 
     }
 
     @Override
-    public void parse(@NotNull ByteBuf content, @NotNull Consumer consumer) {
+    public void parse(@NotNull ByteBuf content, @NotNull MetadataConsumer consumer) {
         ByteBuf acceptorId = EasyByteBuf.readUntil(content, separator, maxAcceptorIdSize);
         ByteBuf requestId = EasyByteBuf.readUntil(content, separator, MAX_LONG_LENGTH);
         if (acceptorId == null || requestId == null) {

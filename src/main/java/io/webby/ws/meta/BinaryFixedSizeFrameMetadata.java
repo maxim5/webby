@@ -7,7 +7,7 @@ import org.jetbrains.annotations.NotNull;
 
 public record BinaryFixedSizeFrameMetadata(int size) implements FrameMetadata {
     @Override
-    public void parse(@NotNull ByteBuf content, @NotNull Consumer consumer) {
+    public void parse(@NotNull ByteBuf content, @NotNull MetadataConsumer consumer) {
         if (content.readableBytes() >= size + 8) {
             ByteBuf acceptorId = content.readBytes(size);
             long requestId = content.readLong();

@@ -24,17 +24,17 @@ public record FrameConverterEndpoint(@NotNull Object instance,
         converter.toMessage(frame, (acceptor, requestContext, payload) -> {
             boolean forceRenderAsString = converter().peekFrameType(requestContext) == Boolean.TRUE;
             Object callResult = acceptor.call(instance, payload, forceRenderAsString);
-            consumer.accept(requestContext, callResult);
+            consumer.accept(callResult, requestContext);
         });
     }
 
     @Override
-    public @NotNull WebSocketFrame processOutgoing(@NotNull RequestContext context, @NotNull Object message) {
+    public @NotNull WebSocketFrame processOutgoing(@NotNull Object message, @NotNull RequestContext context) {
         return converter.toFrame(context, StatusCodes.OK, message);
     }
 
     @Override
-    public @NotNull WebSocketFrame processError(@NotNull BaseRequestContext context, int code, @NotNull String message) {
+    public @NotNull WebSocketFrame processError(int code, @NotNull String message, @NotNull BaseRequestContext context) {
         return converter.toFrame(context, code, message);
     }
 }

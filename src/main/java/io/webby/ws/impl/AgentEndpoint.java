@@ -15,11 +15,11 @@ public interface AgentEndpoint {
 
     void processIncoming(@NotNull WebSocketFrame frame, @NotNull ClientInfo client, @NotNull CallResultConsumer consumer);
 
-    @Nullable WebSocketFrame processOutgoing(@NotNull RequestContext context, @NotNull Object message);
+    @Nullable WebSocketFrame processOutgoing(@NotNull Object message, @NotNull RequestContext context);
 
-    @Nullable WebSocketFrame processError(@NotNull BaseRequestContext context, int code, @NotNull String message);
+    @Nullable WebSocketFrame processError(int code, @NotNull String message, @NotNull BaseRequestContext context);
 
     interface CallResultConsumer {
-        void accept(@NotNull RequestContext context, @Nullable Object callResult);
+        void accept(@Nullable Object callResult, @NotNull RequestContext context);
     }
 }

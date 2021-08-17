@@ -12,7 +12,7 @@ import java.util.Map;
 
 public record JsonMetadata(@NotNull JsonMarshaller json, @NotNull Charset charset) implements FrameMetadata {
     @Override
-    public void parse(@NotNull ByteBuf content, @NotNull Consumer consumer) {
+    public void parse(@NotNull ByteBuf content, @NotNull MetadataConsumer consumer) {
         Map<?, ?> map = json.readByteBuf(content, Map.class, charset);
         Object on = map.get("on");
         Object id = map.get("id");

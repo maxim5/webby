@@ -78,7 +78,7 @@ public class NettyWebsocketHandler extends ChannelInboundHandlerAdapter {
             String replyError = websocketError.getReplyError();
             log.at(Level.WARNING).withCause(cause).log("Websocket error: %s", replyError);
             if (replyError != null) {
-                errorFrame = endpoint.processError(ErrorRequestContext.DEFAULT, websocketError.getCode(), replyError);
+                errorFrame = endpoint.processError(websocketError.getCode(), replyError, ErrorRequestContext.DEFAULT);
             }
         } else {
             log.at(Level.SEVERE).withCause(cause).log("Unexpected failure: %s", cause.getMessage());
@@ -90,7 +90,7 @@ public class NettyWebsocketHandler extends ChannelInboundHandlerAdapter {
     }
 
     private void handle(@NotNull WebSocketFrame frame, @NotNull ChannelHandlerContext context) {
-        endpoint.processIncoming(frame, clientInfo, (requestContext, callResult) -> {
+        endpoint.processIncoming(frame, clientInfo, (callResult, requestContext) -> {
             if (callResult == null) {
                 log.at(Level.WARNING).log("Websocket agent returned null");
                 return;
@@ -98,7 +98,7 @@ public class NettyWebsocketHandler extends ChannelInboundHandlerAdapter {
 
             WebSocketFrame outgoing = null;
             try {
-                outgoing = endpoint.processOutgoing(requestContext, callResult);
+                outgoing = endpoint.processOutgoing(callResult, requestContext);
                 if (outgoing == null) {
                     outgoing = mapper.mapInstance(callResult);
                     if (outgoing == null) {
@@ -109,7 +109,7 @@ public class NettyWebsocketHandler extends ChannelInboundHandlerAdapter {
                 String replyError = e.getReplyError();
                 log.at(Level.WARNING).withCause(e).log("Websocket error: %s", replyError);
                 if (replyError != null) {
-                    outgoing = endpoint.processError(requestContext, e.getCode(), replyError);
+                    outgoing = endpoint.processError(e.getCode(), replyError, requestContext);
                 }
             }
 

@@ -13,7 +13,7 @@ public record BinarySeparatorFrameMetadata(byte separator, int maxAcceptorIdSize
     }
 
     @Override
-    public void parse(@NotNull ByteBuf content, @NotNull Consumer consumer) {
+    public void parse(@NotNull ByteBuf content, @NotNull MetadataConsumer consumer) {
         int size = content.readableBytes();
         int index = content.indexOf(0, Math.min(maxAcceptorIdSize, size), separator);
         if (index >= 0 && index + 10 <= size) {

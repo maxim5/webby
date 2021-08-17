@@ -30,19 +30,19 @@ public record ClassBasedAgentEndpoint(@NotNull Object instance,
             RequestContext context = new RequestContext(RequestIds.NO_ID, frame, client);
             boolean forceRenderAsString = frame instanceof TextWebSocketFrame;
             Object callResult = acceptor.call(instance, frame, forceRenderAsString);
-            consumer.accept(context, callResult);
+            consumer.accept(callResult, context);
         } else {
             throw new BadFrameException("Agent %s doesn't handle the frame: %s".formatted(instance, klass));
         }
     }
 
     @Override
-    public @Nullable WebSocketFrame processOutgoing(@NotNull RequestContext context, @NotNull Object message) {
+    public @Nullable WebSocketFrame processOutgoing(@NotNull Object message, @NotNull RequestContext context) {
         return null;
     }
 
     @Override
-    public @NotNull WebSocketFrame processError(@NotNull BaseRequestContext context, int code, @NotNull String message) {
+    public @NotNull WebSocketFrame processError(int code, @NotNull String message, @NotNull BaseRequestContext context) {
         return new TextWebSocketFrame("%d: %s".formatted(code, message));
     }
 }

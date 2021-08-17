@@ -7,11 +7,11 @@ import org.jetbrains.annotations.Nullable;
 public interface FrameMetadata {
     int MAX_ID_SIZE = 64;
 
-    void parse(@NotNull ByteBuf frameContent, @NotNull Consumer consumer);
+    void parse(@NotNull ByteBuf frameContent, @NotNull MetadataConsumer consumer);
 
     @NotNull ByteBuf compose(long requestId, int code, byte @NotNull [] content);
 
-    interface Consumer {
+    interface MetadataConsumer {
         void accept(@Nullable ByteBuf acceptorId, long requestId, @NotNull ByteBuf content);
     }
 }
