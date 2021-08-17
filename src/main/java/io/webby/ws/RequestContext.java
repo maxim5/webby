@@ -12,19 +12,19 @@ public record RequestContext(long requestId,
                              @NotNull WebSocketFrame requestFrame,
                              @NotNull ClientInfo clientInfo) implements BaseRequestContext {
     public @Nullable Session sessionOrNull() {
-        return clientInfo.session().orElse(null);
+        return clientInfo.sessionOrNull();
     }
 
     public @NotNull Session sessionOrDie() {
-        return clientInfo.session().orElseThrow();
+        return clientInfo.sessionOrDie();
     }
 
     public @Nullable User userOrNull() {
-        return clientInfo.user().orElse(null);
+        return clientInfo.userOrNull();
     }
 
     public @NotNull User userOrDie() {
-        return clientInfo.user().orElseThrow();
+        return clientInfo.userOrDie();
     }
 
     @Override
