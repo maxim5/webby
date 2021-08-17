@@ -60,12 +60,11 @@ public class WebsocketAgentBinder {
         List<AgentBinding> bindings = getBindings(agentClasses);
         Map<String, AgentEndpoint> result = new HashMap<>();
         processBindings(bindings, (url, endpoint) -> {
-            log.at(Level.INFO).log("Registering websocket-agent at %s -> %s", url, endpoint.instance());
+            log.at(Level.INFO).log("Registering websocket-agent at %s -> %s", url, endpoint.agent());
             AgentEndpoint existing = result.put(url, endpoint);
             if (existing != null) {
                 throw new WebsocketAgentConfigError(
-                        "Websocket URL %s used by multiple agents: %s and %s"
-                        .formatted(url, endpoint.instance(), existing.instance()));
+                    "Websocket URL %s used by multiple agents: %s and %s".formatted(url, endpoint.agent(), existing.agent()));
             }
         });
         return result;

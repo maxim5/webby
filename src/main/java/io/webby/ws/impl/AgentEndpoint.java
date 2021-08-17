@@ -9,7 +9,7 @@ import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
 public interface AgentEndpoint {
-    @NotNull Object instance();
+    @NotNull Object agent();
 
     @NotNull AgentLifecycle lifecycle();
 

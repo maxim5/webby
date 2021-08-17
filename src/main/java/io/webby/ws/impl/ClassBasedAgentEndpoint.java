@@ -15,12 +15,12 @@ import org.jetbrains.annotations.Nullable;
 
 import java.util.Map;
 
-public record ClassBasedAgentEndpoint(@NotNull Object instance,
+public record ClassBasedAgentEndpoint(@NotNull Object agent,
                                       @NotNull Map<Class<?>, Acceptor> acceptors,
                                       @Nullable Sender sender) implements AgentEndpoint {
     @Override
     public @NotNull AgentLifecycle lifecycle() {
-        return AgentLifecycleFanOut.of(instance, sender);
+        return AgentLifecycleFanOut.of(agent, sender);
     }
 
     public void processIncoming(@NotNull WebSocketFrame frame, @NotNull ClientInfo client, @NotNull CallResultConsumer consumer) {
@@ -29,10 +29,10 @@ public record ClassBasedAgentEndpoint(@NotNull Object instance,
         if (acceptor != null) {
             RequestContext context = new RequestContext(RequestIds.NO_ID, frame, client);
             boolean forceRenderAsString = frame instanceof TextWebSocketFrame;
-            Object callResult = acceptor.call(instance, frame, forceRenderAsString);
+            Object callResult = acceptor.call(agent, frame, forceRenderAsString);
             consumer.accept(callResult, context);
         } else {
-            throw new BadFrameException("Agent %s doesn't handle the frame: %s".formatted(instance, klass));
+            throw new BadFrameException("Agent %s doesn't handle the frame: %s".formatted(agent, klass));
         }
     }
 

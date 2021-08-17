@@ -62,7 +62,7 @@ public class BaseWebsocketIntegrationTest extends BaseChannelTest {
             injector.injectMembers(handler);
             channel = new EmbeddedChannel(handler);
             channel.pipeline().fireUserEventTriggered(createHandshakeCompleteEvent());
-            return castAny(endpoint.instance());
+            return castAny(endpoint.agent());
         }
     }
 

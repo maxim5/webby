@@ -33,7 +33,7 @@ public class WebsocketRouter {
     public @Nullable AgentEndpoint findAgentEndpointByClass(@NotNull Class<?> klass) {
         return router.values()
                 .stream()
-                .filter(endpoint -> klass.isInstance(endpoint.instance()))
+                .filter(endpoint -> klass.isInstance(endpoint.agent()))
                 .findAny()
                 .orElse(null);
     }
