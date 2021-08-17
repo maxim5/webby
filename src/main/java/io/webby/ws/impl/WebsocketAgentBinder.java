@@ -21,6 +21,7 @@ import io.webby.url.annotate.*;
 import io.webby.url.impl.EndpointView;
 import io.webby.url.view.Renderer;
 import io.webby.url.view.RendererFactory;
+import io.webby.ws.RequestContext;
 import io.webby.ws.Sender;
 import io.webby.ws.WebsocketAgentConfigError;
 import io.webby.ws.meta.FrameMetadata;
@@ -106,7 +107,7 @@ public class WebsocketAgentBinder {
 
             Multimap<Class<?>, Method> allAcceptors = ArrayListMultimap.create(klass.getDeclaredMethods().length, 3);
             for (Method method : klass.getDeclaredMethods()) {
-                if (isMessageAcceptor(method, messageClass)) {
+                if (isMessageAcceptor(method, messageClass) || isMessageContextAcceptor(method, messageClass)) {
                     Class<?> messageType = method.getParameterTypes()[0];
                     allAcceptors.put(messageType, method);
                 }
@@ -136,6 +137,9 @@ public class WebsocketAgentBinder {
             List<Acceptor> acceptors = acceptMethodsByType.entrySet().stream().map(entry -> {
                 Class<?> type = entry.getKey();
                 Method method = entry.getValue();
+
+                boolean wantsContext = isMessageContextAcceptor(method, messageClass);
+                boolean isVoid = isVoid(method);
                 method.setAccessible(true);
 
                 Api api = getApi(method, idFromName(method.getName()), defaultApiVersion);
@@ -148,7 +152,7 @@ public class WebsocketAgentBinder {
                 EndpointView<?> view = getEndpointViewFromAnnotation(method, classRender);
 
                 ByteBuf bufferId = Unpooled.copiedBuffer(id, settings.charset());
-                return new Acceptor(bufferId, version, type, method, view, acceptsFrame);
+                return new Acceptor(bufferId, version, type, method, view, acceptsFrame, wantsContext, isVoid);
             }).toList();
 
             Field senderField = Arrays.stream(klass.getDeclaredFields())
@@ -234,6 +238,14 @@ public class WebsocketAgentBinder {
         return method.getParameterCount() == 1 && messageClass.isAssignableFrom(method.getParameterTypes()[0]);
     }
 
+    @VisibleForTesting
+    static boolean isMessageContextAcceptor(@NotNull Method method, @NotNull Class<?> messageClass) {
+        Class<?>[] parameterTypes = method.getParameterTypes();
+        return parameterTypes.length == 2 &&
+                messageClass.isAssignableFrom(parameterTypes[0]) &&
+                RequestContext.class.isAssignableFrom(parameterTypes[1]);
+    }
+
     private static @NotNull Method[] filter(@NotNull Collection<Method> methods, @NotNull IntPredicate predicate) {
         return methods.stream().filter(method -> predicate.test(method.getModifiers())).toArray(Method[]::new);
     }
@@ -281,6 +293,10 @@ public class WebsocketAgentBinder {
             return EndpointView.of(renderer, templateName);
         }
         return null;
+    }
+
+    private static boolean isVoid(@NotNull Method method) {
+        return method.getReturnType().equals(Void.TYPE);
     }
 
     private static boolean isSenderField(@NotNull Field field) {

@@ -23,7 +23,7 @@ public record FrameConverterEndpoint(@NotNull Object agent,
     public void processIncoming(@NotNull WebSocketFrame frame, @NotNull ClientInfo client, @NotNull CallResultConsumer consumer) {
         converter.toMessage(frame, (acceptor, requestContext, payload) -> {
             boolean forceRenderAsString = converter().peekFrameType(requestContext) == Boolean.TRUE;
-            Object callResult = acceptor.call(agent, payload, forceRenderAsString);
+            Object callResult = acceptor.call(agent, payload, requestContext, forceRenderAsString);
             consumer.accept(callResult, requestContext);
         });
     }

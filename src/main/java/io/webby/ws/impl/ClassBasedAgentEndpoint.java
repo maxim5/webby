@@ -29,7 +29,7 @@ public record ClassBasedAgentEndpoint(@NotNull Object agent,
         if (acceptor != null) {
             RequestContext context = new RequestContext(RequestIds.NO_ID, frame, client);
             boolean forceRenderAsString = frame instanceof TextWebSocketFrame;
-            Object callResult = acceptor.call(agent, frame, forceRenderAsString);
+            Object callResult = acceptor.call(agent, frame, context, forceRenderAsString);
             consumer.accept(callResult, context);
         } else {
             throw new BadFrameException("Agent %s doesn't handle the frame: %s".formatted(agent, klass));
