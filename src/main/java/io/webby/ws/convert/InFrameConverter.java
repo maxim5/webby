@@ -9,6 +9,6 @@ public interface InFrameConverter<M> {
     void toMessage(@NotNull WebSocketFrame frame, @NotNull ParsedFrameConsumer<M> success);
 
     interface ParsedFrameConsumer<M> {
-        void accept(@NotNull Acceptor acceptor, @NotNull RequestContext context, @NotNull M payload);
+        void accept(@NotNull Acceptor acceptor, @NotNull M payload, @NotNull RequestContext context);
     }
 }

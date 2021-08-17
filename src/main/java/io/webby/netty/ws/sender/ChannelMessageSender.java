@@ -18,7 +18,7 @@ public class ChannelMessageSender<M> extends ChannelSender implements MessageSen
     public @NotNull ChannelFuture sendMessage(int code, @NotNull M message, @NotNull BaseRequestContext context) {
         assert converter != null :
             "Message converter is not initialized. Possible reasons: Agent is missing @WebsocketProtocol annotation";
-        WebSocketFrame frame = converter.toFrame(context, code, message);
+        WebSocketFrame frame = converter.toFrame(code, message, context);
         return send(frame);
     }
 
@@ -26,7 +26,7 @@ public class ChannelMessageSender<M> extends ChannelSender implements MessageSen
     public @NotNull ChannelFuture sendFlushMessage(int code, @NotNull M message, @NotNull BaseRequestContext context) {
         assert converter != null :
             "Message converter is not initialized. Possible reasons: Agent is missing @WebsocketProtocol annotation";
-        WebSocketFrame frame = converter.toFrame(context, code, message);
+        WebSocketFrame frame = converter.toFrame(code, message, context);
         return sendFlush(frame);
     }
 }

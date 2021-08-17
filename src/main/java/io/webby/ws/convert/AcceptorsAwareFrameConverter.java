@@ -100,13 +100,13 @@ public final class AcceptorsAwareFrameConverter implements FrameConverter<Object
             RequestContext context = new RequestContext(requestId, frame, clientInfo);
             if (acceptor.acceptsFrame()) {
                 if (acceptor.type().isAssignableFrom(frame.getClass())) {
-                    success.accept(acceptor, context, frame);
+                    success.accept(acceptor, frame, context);
                 } else {
                     throw new BadFrameException("Acceptor doesn't expect %s".formatted(frame.getClass()));
                 }
             } else {
                 Object payload = marshaller.readByteBuf(content, acceptor.type(), charset);
-                success.accept(acceptor, context, payload);
+                success.accept(acceptor, payload, context);
             }
         });
     }
@@ -117,7 +117,7 @@ public final class AcceptorsAwareFrameConverter implements FrameConverter<Object
     }
 
     @Override
-    public @NotNull WebSocketFrame toFrame(@NotNull BaseRequestContext context, int code, @NotNull Object message) {
+    public @NotNull WebSocketFrame toFrame(int code, @NotNull Object message, @NotNull BaseRequestContext context) {
         assert concreteFrameType != null : "Converter is not initialized";
 
         ByteBuf byteBuf = metadata.compose(context.requestId(), code, marshaller.writeBytes(message, charset));

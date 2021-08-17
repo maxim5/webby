@@ -22,7 +22,7 @@ public record FrameConverterEndpoint(@NotNull Object agent,
 
     @Override
     public void processIncoming(@NotNull WebSocketFrame frame, @NotNull ClientInfo client, @NotNull CallResultConsumer consumer) {
-        converter.toMessage(frame, (acceptor, requestContext, payload) -> {
+        converter.toMessage(frame, (acceptor, payload, requestContext) -> {
             boolean forceRenderAsString = converter().peekFrameType(requestContext) == Boolean.TRUE;
             Object callResult = acceptor.call(agent, payload, requestContext, forceRenderAsString);
             consumer.accept(callResult, requestContext);
@@ -31,11 +31,11 @@ public record FrameConverterEndpoint(@NotNull Object agent,
 
     @Override
     public @NotNull WebSocketFrame processOutgoing(@NotNull Object message, @NotNull RequestContext context) {
-        return converter.toFrame(context, StatusCodes.OK, message);
+        return converter.toFrame(StatusCodes.OK, message, context);
     }
 
     @Override
     public @NotNull WebSocketFrame processError(int code, @NotNull String message, @NotNull BaseRequestContext context) {
-        return converter.toFrame(context, code, message);
+        return converter.toFrame(code, message, context);
     }
 }

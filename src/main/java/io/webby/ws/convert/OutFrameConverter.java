@@ -9,5 +9,5 @@ public interface OutFrameConverter<M> {
     // true -> text, false -> binary, null -> unknown
     @Nullable Boolean peekFrameType(@NotNull BaseRequestContext context);
 
-    @NotNull WebSocketFrame toFrame(@NotNull BaseRequestContext context, int code, @NotNull M message);
+    @NotNull WebSocketFrame toFrame(int code, @NotNull M message, @NotNull BaseRequestContext context);
 }
