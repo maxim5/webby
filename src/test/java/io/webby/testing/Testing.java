@@ -72,10 +72,6 @@ public class Testing {
     }
 
     public static class Internals {
-        public static final JsonMarshaller json = new JsonMarshaller() {
-            {
-                gson = new Gson();
-            }
-        };
+        public static final JsonMarshaller json = new JsonMarshaller(new Gson(), TestingBytes.CHARSET);
     }
 }

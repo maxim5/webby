@@ -41,7 +41,6 @@ import java.lang.reflect.AnnotatedElement;
 import java.lang.reflect.Field;
 import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;
-import java.nio.charset.Charset;
 import java.util.*;
 import java.util.function.BiConsumer;
 import java.util.function.Consumer;
@@ -207,13 +206,12 @@ public class WebsocketAgentBinder {
                     FrameType supportedType = binding.frameType();
                     Class<? extends FrameMetadata> metaClass = binding.metaClass();
                     Marshal marshal = binding.marshal();
-                    Charset charset = settings.charset();
 
                     ImmutableMap<ByteBuf, Acceptor> acceptorsById = Maps.uniqueIndex(acceptors, Acceptor::id);
                     Marshaller marshaller = marshallers.getMarshaller(marshal);
                     FrameMetadata metadata = getFrameMetadata(metaClass, acceptorsById.keySet());
                     FrameConverter<Object> converter =
-                            new AcceptorsAwareFrameConverter(marshaller, metadata, acceptorsById, supportedType, charset);
+                            new AcceptorsAwareFrameConverter(marshaller, metadata, acceptorsById, supportedType);
 
                     if (sender instanceof OutFrameConverterListener<?> listener) {
                         listener.onConverter(castAny(converter));

@@ -6,9 +6,19 @@ import org.jetbrains.annotations.NotNull;
 
 import java.io.Reader;
 import java.io.Writer;
+import java.nio.charset.Charset;
 
-public class JsonMarshaller implements Marshaller {
-    @Inject protected Gson gson;
+public record JsonMarshaller(@NotNull Gson gson, @NotNull Charset charset) implements Marshaller {
+    @Inject
+    public JsonMarshaller(@NotNull Gson gson, @NotNull Charset charset) {
+        this.gson = gson;
+        this.charset = charset;
+    }
+
+    @Override
+    public @NotNull Marshaller withCustomCharset(@NotNull Charset charset) {
+        return charset == this.charset ? this : new JsonMarshaller(gson, charset);
+    }
 
     @Override
     public void writeChars(@NotNull Writer writer, @NotNull Object instance) {

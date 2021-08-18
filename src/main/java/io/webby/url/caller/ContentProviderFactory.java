@@ -20,7 +20,7 @@ public class ContentProviderFactory {
     public ContentProvider getContentProvider(@Nullable Marshal marshal, @NotNull Class<?> klass) {
         if (marshal != null) {
             Marshaller marshaller = factory.getMarshaller(marshal);
-            return (byteBuf, charset) -> marshaller.readByteBuf(byteBuf, klass, charset);
+            return (byteBuf, charset) -> marshaller.withCustomCharset(charset).readByteBuf(byteBuf, klass);
         }
         return null;
     }

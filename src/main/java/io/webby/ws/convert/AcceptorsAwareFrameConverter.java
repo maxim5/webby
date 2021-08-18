@@ -19,7 +19,6 @@ import io.webby.ws.meta.FrameMetadata;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.VisibleForTesting;
 
-import java.nio.charset.Charset;
 import java.util.Map;
 
 public final class AcceptorsAwareFrameConverter implements FrameConverter<Object>, AgentLifecycle {
@@ -27,7 +26,6 @@ public final class AcceptorsAwareFrameConverter implements FrameConverter<Object
     private final @NotNull FrameMetadata metadata;
     private final @NotNull Map<ByteBuf, Acceptor> acceptors;
     private final @NotNull FrameType supportedType;
-    private final @NotNull Charset charset;
 
     private ClientInfo clientInfo;
     private ConcreteFrameType concreteFrameType = null;
@@ -35,13 +33,11 @@ public final class AcceptorsAwareFrameConverter implements FrameConverter<Object
     public AcceptorsAwareFrameConverter(@NotNull BinaryMarshaller marshaller,
                                         @NotNull FrameMetadata metadata,
                                         @NotNull Map<ByteBuf, Acceptor> acceptors,
-                                        @NotNull FrameType supportedType,
-                                        @NotNull Charset charset) {
+                                        @NotNull FrameType supportedType) {
         this.marshaller = marshaller;
         this.metadata = metadata;
         this.acceptors = acceptors;
         this.supportedType = supportedType;
-        this.charset = charset;
     }
 
     @Override
@@ -105,7 +101,7 @@ public final class AcceptorsAwareFrameConverter implements FrameConverter<Object
                     throw new BadFrameException("Acceptor doesn't expect %s".formatted(frame.getClass()));
                 }
             } else {
-                Object payload = marshaller.readByteBuf(content, acceptor.type(), charset);
+                Object payload = marshaller.readByteBuf(content, acceptor.type());
                 success.accept(acceptor, payload, context);
             }
         });
@@ -120,7 +116,7 @@ public final class AcceptorsAwareFrameConverter implements FrameConverter<Object
     public @NotNull WebSocketFrame toFrame(int code, @NotNull Object message, @NotNull BaseRequestContext context) {
         assert concreteFrameType != null : "Converter is not initialized";
 
-        ByteBuf byteBuf = metadata.compose(context.requestId(), code, marshaller.writeBytes(message, charset));
+        ByteBuf byteBuf = metadata.compose(context.requestId(), code, marshaller.writeBytes(message));
         return switch (concreteFrameType) {
             case TEXT -> new TextWebSocketFrame(byteBuf);
             case BINARY -> new BinaryWebSocketFrame(byteBuf);

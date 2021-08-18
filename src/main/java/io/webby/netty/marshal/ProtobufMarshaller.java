@@ -1,5 +1,6 @@
 package io.webby.netty.marshal;
 
+import com.google.inject.Inject;
 import com.google.protobuf.InvalidProtocolBufferException;
 import com.google.protobuf.Message;
 import com.google.protobuf.Parser;
@@ -13,7 +14,17 @@ import java.nio.charset.Charset;
 import static io.webby.util.EasyCast.castAny;
 import static io.webby.util.Rethrow.rethrow;
 
-public class ProtobufMarshaller implements Marshaller {
+public record ProtobufMarshaller(@NotNull Charset charset) implements Marshaller {
+    @Inject
+    public ProtobufMarshaller(@NotNull Charset charset) {
+        this.charset = charset;
+    }
+
+    @Override
+    public @NotNull Marshaller withCustomCharset(@NotNull Charset charset) {
+        return charset == this.charset ? this : new ProtobufMarshaller(charset);
+    }
+
     @Override
     public void writeChars(@NotNull Writer writer, @NotNull Object instance) throws IOException {
         if (instance instanceof Message message) {
@@ -23,7 +34,7 @@ public class ProtobufMarshaller implements Marshaller {
     }
 
     @Override
-    public void writeBytes(@NotNull OutputStream output, @NotNull Object instance, @NotNull Charset charset) throws IOException {
+    public void writeBytes(@NotNull OutputStream output, @NotNull Object instance) throws IOException {
         if (instance instanceof Message message) {
             message.writeTo(output);
         }
@@ -31,7 +42,7 @@ public class ProtobufMarshaller implements Marshaller {
     }
 
     @Override
-    public byte @NotNull [] writeBytes(@NotNull Object instance, @NotNull Charset charset) {
+    public byte @NotNull [] writeBytes(@NotNull Object instance) {
         if (instance instanceof Message message) {
             return message.toByteArray();
         }
@@ -49,7 +60,7 @@ public class ProtobufMarshaller implements Marshaller {
     }
 
     @Override
-    public <T> @NotNull T readBytes(@NotNull InputStream input, @NotNull Class<T> klass, @NotNull Charset charset) throws IOException {
+    public <T> @NotNull T readBytes(@NotNull InputStream input, @NotNull Class<T> klass) throws IOException {
         if (Message.class.isAssignableFrom(klass)) {
             return getParser(klass).parseFrom(input);
         }
@@ -57,7 +68,7 @@ public class ProtobufMarshaller implements Marshaller {
     }
 
     @Override
-    public <T> @NotNull T readBytes(byte @NotNull [] bytes, @NotNull Class<T> klass, @NotNull Charset charset) {
+    public <T> @NotNull T readBytes(byte @NotNull [] bytes, @NotNull Class<T> klass) {
         if (Message.class.isAssignableFrom(klass)) {
             try {
                 return getParser(klass).parseFrom(bytes);

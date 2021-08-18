@@ -211,7 +211,7 @@ public class NettyHttpHandler extends SimpleChannelInboundHandler<FullHttpReques
         }
 
         Marshaller marshaller = marshallers.getMarshaller(options.out());
-        return factory.newResponse(marshaller.writeByteBuf(callResult, settings.charset()), HttpResponseStatus.OK);
+        return factory.newResponse(marshaller.writeByteBuf(callResult), HttpResponseStatus.OK);
     }
 
     @VisibleForTesting
