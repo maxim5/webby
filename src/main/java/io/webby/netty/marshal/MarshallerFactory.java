@@ -17,8 +17,10 @@ public class MarshallerFactory implements Provider<Json> {
             jsonMarshallerClass = GsonMarshaller.class;
         } else if (EasyClasspath.isInClassPath("com.fasterxml.jackson.databind.ObjectMapper")) {
             jsonMarshallerClass = JacksonMarshaller.class;
+        } else if (EasyClasspath.isInClassPath("com.alibaba.fastjson.JSON")) {
+            jsonMarshallerClass = FastJsonMarshaller.class;
         } else {
-            throw new AppConfigException("No JSON library found in classpath. Scanned: Gson, Jackson");
+            throw new AppConfigException("No JSON library found in classpath. Scanned: Gson, Jackson, Fastjson");
         }
     }
 
