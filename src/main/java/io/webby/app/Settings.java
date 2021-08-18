@@ -62,6 +62,8 @@ public interface Settings {
 
     long getLongProperty(@NotNull String key, long def);
 
+    byte getByteProperty(@NotNull String key, int def);
+
     boolean getBoolProperty(@NotNull String key);
 
     boolean getBoolProperty(@NotNull String key, boolean def);

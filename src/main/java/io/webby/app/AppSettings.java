@@ -351,6 +351,11 @@ public final class AppSettings implements Settings {
     }
 
     @Override
+    public byte getByteProperty(@NotNull String key, int def) {
+        return (byte) getIntProperty(key, def);
+    }
+
+    @Override
     public boolean getBoolProperty(@NotNull String key) {
         return getBoolProperty(key, false);
     }

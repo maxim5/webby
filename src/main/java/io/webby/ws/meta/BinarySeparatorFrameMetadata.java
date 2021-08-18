@@ -6,7 +6,7 @@ import io.webby.netty.ws.Constants.RequestIds;
 import org.jetbrains.annotations.NotNull;
 
 public record BinarySeparatorFrameMetadata(byte separator, int maxAcceptorIdSize) implements FrameMetadata {
-    private static final byte DEFAULT_SEPARATOR = (byte) ' ';
+    public static final byte DEFAULT_SEPARATOR = (byte) ' ';
 
     public BinarySeparatorFrameMetadata() {
         this(DEFAULT_SEPARATOR, MAX_ID_SIZE);

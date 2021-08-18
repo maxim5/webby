@@ -24,20 +24,20 @@ public class InjectorHelper {
     @Inject private Settings settings;
     private final Map<Key<?>, Binding<?>> singletons = new ConcurrentHashMap<>();
 
-    public <T> @NotNull T getOrDefault(@NotNull Class<T> klass, @NotNull Supplier<T> defaultSupplier) {
+    public <T> @NotNull T getOrDefault(@NotNull Class<? extends T> klass, @NotNull Supplier<? extends T> defaultSupplier) {
         return getOrDefault(injector, klass, defaultSupplier);
     }
 
-    public <T> @NotNull T getOrDefault(@NotNull Class<T> klass, @NotNull Function<Settings, T> defaultSupplier) {
+    public <T> @NotNull T getOrDefault(@NotNull Class<? extends T> klass, @NotNull Function<Settings, ? extends T> defaultSupplier) {
         return getOrDefault(injector, klass, () -> defaultSupplier.apply(settings));
     }
 
     public static <T> @NotNull T getOrDefault(@NotNull Injector injector,
-                                              @NotNull Class<T> klass,
-                                              @NotNull Supplier<T> defaultSupplier) {
+                                              @NotNull Class<? extends T> klass,
+                                              @NotNull Supplier<? extends T> defaultSupplier) {
         try {
             if (injector.findBindingsByType(TypeLiteral.get(klass)).size() > 0) {
-                Provider<T> provider = injector.getProvider(klass);
+                Provider<? extends T> provider = injector.getProvider(klass);
                 log.at(Level.FINE).log("Found explicit %s Guice provider: %s", klass, provider);
                 return provider.get();
             }

@@ -1,5 +1,7 @@
 package io.webby.url.annotate;
 
+import io.webby.ws.meta.FrameMetadata;
+
 import java.lang.annotation.ElementType;
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
@@ -11,6 +13,8 @@ public @interface WebsocketProtocol {
     Class<?> messages();
 
     FrameType[] type() default {};
+
+    Class<? extends FrameMetadata> meta() default FrameMetadata.class;
 
     Marshal[] marshal() default {};
 }

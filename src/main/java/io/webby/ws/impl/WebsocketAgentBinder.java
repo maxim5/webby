@@ -14,24 +14,24 @@ import io.routekit.QueryParseException;
 import io.routekit.Token;
 import io.webby.app.Settings;
 import io.webby.common.InjectorHelper;
+import io.webby.netty.marshal.JsonMarshaller;
 import io.webby.netty.marshal.Marshaller;
 import io.webby.netty.marshal.MarshallerFactory;
 import io.webby.netty.ws.sender.ChannelMessageSender;
 import io.webby.netty.ws.sender.ChannelSender;
+import io.webby.netty.ws.sender.MessageSender;
+import io.webby.netty.ws.sender.Sender;
 import io.webby.url.UrlConfigError;
 import io.webby.url.annotate.*;
 import io.webby.url.impl.EndpointView;
 import io.webby.url.view.Renderer;
 import io.webby.url.view.RendererFactory;
-import io.webby.netty.ws.sender.MessageSender;
-import io.webby.ws.context.RequestContext;
-import io.webby.netty.ws.sender.Sender;
 import io.webby.ws.WebsocketAgentConfigError;
+import io.webby.ws.context.RequestContext;
 import io.webby.ws.convert.AcceptorsAwareFrameConverter;
 import io.webby.ws.convert.FrameConverter;
 import io.webby.ws.convert.OutFrameConverterListener;
-import io.webby.ws.meta.FrameMetadata;
-import io.webby.ws.meta.TextSeparatorFrameMetadata;
+import io.webby.ws.meta.*;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import org.jetbrains.annotations.VisibleForTesting;
@@ -61,7 +61,6 @@ public class WebsocketAgentBinder {
     @Inject private RendererFactory rendererFactory;
     @Inject private MarshallerFactory marshallers;
     @Inject private Injector injector;
-    @Inject private InjectorHelper helper;
 
     public @NotNull Map<String, AgentEndpoint> bindAgents() {
         Set<? extends Class<?>> agentClasses = scanner.getAgentClassesFromClasspath();
@@ -110,6 +109,7 @@ public class WebsocketAgentBinder {
             Class<?> messageClass = protocol != null ? protocol.messages() : WebSocketFrame.class;
             boolean acceptsFrame = WebSocketFrame.class.isAssignableFrom(messageClass);
             FrameType frameType = getIfPresent(protocol, WebsocketProtocol::type, defaultFrameType);
+            Class<? extends FrameMetadata> metaClass = protocol != null ? protocol.meta() : FrameMetadata.class;
             Marshal marshal = getIfPresent(protocol, WebsocketProtocol::marshal, defaultMarshal);
 
             Multimap<Class<?>, Method> allAcceptors = ArrayListMultimap.create(klass.getDeclaredMethods().length, 3);
@@ -118,6 +118,10 @@ public class WebsocketAgentBinder {
                     Class<?> messageType = method.getParameterTypes()[0];
                     allAcceptors.put(messageType, method);
                 }
+            }
+            if (allAcceptors.isEmpty()) {
+                log.at(Level.INFO).log("Ignoring empty websocket-agent class: %s", klass);
+                return;
             }
 
             Map<Class<?>, Method> acceptMethodsByType = BiStream.from(allAcceptors.asMap()).mapValues((key, methods) -> {
@@ -173,7 +177,7 @@ public class WebsocketAgentBinder {
                     .formatted(senderField.getName()));
             }
 
-            consumer.accept(new AgentBinding(classUrl, klass, messageClass, frameType, marshal,
+            consumer.accept(new AgentBinding(classUrl, klass, messageClass, frameType, metaClass, marshal,
                                              acceptors, senderField, acceptsFrame));
         });
     }
@@ -201,12 +205,13 @@ public class WebsocketAgentBinder {
                     return new ClassBasedAgentEndpoint(instance, acceptorsByClass, sender);
                 } else {
                     FrameType supportedType = binding.frameType();
+                    Class<? extends FrameMetadata> metaClass = binding.metaClass();
                     Marshal marshal = binding.marshal();
                     Charset charset = settings.charset();
 
                     ImmutableMap<ByteBuf, Acceptor> acceptorsById = Maps.uniqueIndex(acceptors, Acceptor::id);
                     Marshaller marshaller = marshallers.getMarshaller(marshal);
-                    FrameMetadata metadata = helper.getOrDefault(FrameMetadata.class, TextSeparatorFrameMetadata::new);
+                    FrameMetadata metadata = getFrameMetadata(metaClass, acceptorsById.keySet());
                     FrameConverter<Object> converter =
                             new AcceptorsAwareFrameConverter(marshaller, metadata, acceptorsById, supportedType, charset);
 
@@ -230,6 +235,36 @@ public class WebsocketAgentBinder {
                 throw new WebsocketAgentConfigError(message, e);
             }
         }).forEach(consumer);
+    }
+
+    private @NotNull FrameMetadata getFrameMetadata(@NotNull Class<? extends FrameMetadata> metaClass,
+                                                    @NotNull Set<ByteBuf> acceptorIds) {
+        assert !acceptorIds.isEmpty() : "Internal error: acceptor ids must be not empty";
+        int minIdLength = acceptorIds.stream().mapToInt(ByteBuf::readableBytes).min().orElseThrow();
+        int maxIdLength = acceptorIds.stream().mapToInt(ByteBuf::readableBytes).max().orElseThrow();
+
+        if (metaClass == TextSeparatorFrameMetadata.class) {
+            return new TextSeparatorFrameMetadata(
+                settings.getByteProperty("ws.metadata.text.separator", TextSeparatorFrameMetadata.DEFAULT_SEPARATOR),
+                maxIdLength
+            );
+        }
+        if (metaClass == BinarySeparatorFrameMetadata.class) {
+            return new BinarySeparatorFrameMetadata(
+                settings.getByteProperty("ws.metadata.binary.separator", BinarySeparatorFrameMetadata.DEFAULT_SEPARATOR),
+                maxIdLength
+            );
+        }
+        if (metaClass == BinaryFixedSizeFrameMetadata.class) {
+            failIf(minIdLength != maxIdLength,
+                   "%s requires all API ids to have the same length: %s".formatted(metaClass, acceptorIds));
+            return new BinaryFixedSizeFrameMetadata(maxIdLength);
+        }
+        if (metaClass == JsonMetadata.class) {
+            return new JsonMetadata((JsonMarshaller) marshallers.getMarshaller(Marshal.JSON), settings.charset());
+        }
+
+        return InjectorHelper.getOrDefault(injector, metaClass, TextSeparatorFrameMetadata::new);
     }
 
     @VisibleForTesting
