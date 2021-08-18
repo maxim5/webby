@@ -14,7 +14,6 @@ import io.routekit.QueryParseException;
 import io.routekit.Token;
 import io.webby.app.Settings;
 import io.webby.common.InjectorHelper;
-import io.webby.netty.marshal.JsonMarshaller;
 import io.webby.netty.marshal.Marshaller;
 import io.webby.netty.marshal.MarshallerFactory;
 import io.webby.netty.ws.sender.ChannelMessageSender;
@@ -259,7 +258,7 @@ public class WebsocketAgentBinder {
             return new BinaryFixedSizeFrameMetadata(maxIdLength);
         }
         if (metaClass == JsonMetadata.class) {
-            return new JsonMetadata((JsonMarshaller) marshallers.getMarshaller(Marshal.JSON), settings.charset());
+            return new JsonMetadata(marshallers.getJson(), settings.charset());
         }
 
         return InjectorHelper.getOrDefault(injector, metaClass, TextSeparatorFrameMetadata::new);

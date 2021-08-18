@@ -7,7 +7,7 @@ import io.webby.auth.CookieUtil;
 import io.webby.auth.session.Session;
 import io.webby.auth.user.User;
 import io.webby.netty.intercept.attr.Attributes;
-import io.webby.netty.marshal.Marshaller;
+import io.webby.netty.marshal.Json;
 import io.webby.url.convert.Constraint;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
@@ -26,13 +26,13 @@ import static io.webby.util.EasyCast.castAny;
 public class DefaultHttpRequestEx extends DefaultFullHttpRequest implements MutableHttpRequestEx {
     private final AtomicReference<QueryParams> params = new AtomicReference<>(null);
     private final Channel channel;
-    private final Marshaller json;
+    private final Json json;
     private final Map<String, Constraint<?>> constraints;
     private final Object[] attributes;
 
     public DefaultHttpRequestEx(@NotNull FullHttpRequest request,
                                 @NotNull Channel channel,
-                                @NotNull Marshaller json,
+                                @NotNull Json json,
                                 @NotNull Map<String, Constraint<?>> constraints,
                                 Object @NotNull [] attributes) {
         super(request.protocolVersion(), request.method(), request.uri(), request.content(),

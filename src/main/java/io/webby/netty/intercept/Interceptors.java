@@ -10,11 +10,9 @@ import io.netty.handler.codec.http.HttpResponse;
 import io.webby.app.Settings;
 import io.webby.netty.errors.ServeException;
 import io.webby.netty.intercept.attr.AttributesValidator;
-import io.webby.netty.marshal.Marshaller;
-import io.webby.netty.marshal.MarshallerFactory;
+import io.webby.netty.marshal.Json;
 import io.webby.netty.request.DefaultHttpRequestEx;
 import io.webby.netty.response.HttpResponseFactory;
-import io.webby.url.annotate.Marshal;
 import io.webby.url.impl.Endpoint;
 import io.webby.url.impl.EndpointContext;
 import org.jetbrains.annotations.NotNull;
@@ -34,12 +32,12 @@ public class Interceptors {
     private final int attrBufferSize;
     private final boolean safeWrapperEnabled;
     private final Map<Integer, Interceptor> unsafeOwners;
-    private final Marshaller json;
 
     @Inject private HttpResponseFactory factory;
+    @Inject private Json json;
 
     @Inject
-    public Interceptors(@NotNull InterceptorScanner scanner, @NotNull Settings settings, @NotNull MarshallerFactory marshallers) {
+    public Interceptors(@NotNull InterceptorScanner scanner, @NotNull Settings settings) {
         List<InterceptItem> items = scanner.getInterceptorsFromClasspath();
         int maxPosition = AttributesValidator.validateAttributeOwners(items).maxPosition();
 
@@ -50,8 +48,6 @@ public class Interceptors {
                 .filter(InterceptItem::canBeDisabled)
                 .collect(Collectors.toMap(InterceptItem::position, InterceptItem::instance));
         safeWrapperEnabled = settings.isSafeMode() && !unsafeOwners.isEmpty();
-
-        json = marshallers.getMarshaller(Marshal.JSON);
 
         log.at(Level.FINE).log("Interceptors stack: %s", stack);
     }

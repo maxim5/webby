@@ -6,7 +6,8 @@ import com.google.inject.Module;
 import io.webby.Webby;
 import io.webby.app.AppSettings;
 import io.webby.db.kv.StorageType;
-import io.webby.netty.marshal.JsonMarshaller;
+import io.webby.netty.marshal.GsonMarshaller;
+import io.webby.netty.marshal.Json;
 import org.apache.logging.log4j.Level;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.core.config.Configurator;
@@ -72,6 +73,6 @@ public class Testing {
     }
 
     public static class Internals {
-        public static final JsonMarshaller json = new JsonMarshaller(new Gson(), TestingBytes.CHARSET);
+        public static final Json json = new GsonMarshaller(new Gson(), TestingBytes.CHARSET);
     }
 }

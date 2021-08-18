@@ -2,7 +2,7 @@ package io.webby.ws.meta;
 
 import io.netty.buffer.ByteBuf;
 import io.netty.buffer.Unpooled;
-import io.webby.netty.marshal.JsonMarshaller;
+import io.webby.netty.marshal.Json;
 import io.webby.netty.ws.Constants.RequestIds;
 import org.jetbrains.annotations.NotNull;
 
@@ -10,7 +10,7 @@ import java.nio.charset.Charset;
 import java.util.LinkedHashMap;
 import java.util.Map;
 
-public record JsonMetadata(@NotNull JsonMarshaller json, @NotNull Charset charset) implements FrameMetadata {
+public record JsonMetadata(@NotNull Json json, @NotNull Charset charset) implements FrameMetadata {
     @Override
     public void parse(@NotNull ByteBuf content, @NotNull MetadataConsumer consumer) {
         Map<?, ?> map = json.readByteBuf(content, Map.class);

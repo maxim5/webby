@@ -1,6 +1,5 @@
 package io.webby.testing;
 
-import com.google.gson.Gson;
 import io.netty.buffer.ByteBuf;
 import io.netty.channel.embedded.EmbeddedChannel;
 import io.netty.handler.codec.http.DefaultFullHttpRequest;
@@ -45,6 +44,6 @@ public class FakeRequests {
     }
 
     public static @Nullable String toJson(@Nullable Object obj) {
-        return new Gson().toJson(obj);
+        return obj != null ? Testing.Internals.json.writeString(obj) : null;
     }
 }

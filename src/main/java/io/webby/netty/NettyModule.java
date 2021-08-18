@@ -3,6 +3,7 @@ package io.webby.netty;
 import com.google.inject.AbstractModule;
 import io.webby.netty.intercept.InterceptorScanner;
 import io.webby.netty.intercept.Interceptors;
+import io.webby.netty.marshal.Json;
 import io.webby.netty.marshal.MarshallerFactory;
 import io.webby.netty.response.HttpResponseFactory;
 import io.webby.netty.response.ResponseMapper;
@@ -25,6 +26,7 @@ public class NettyModule extends AbstractModule {
         bind(InterceptorScanner.class).asEagerSingleton();
 
         bind(MarshallerFactory.class).asEagerSingleton();
+        bind(Json.class).toProvider(MarshallerFactory.class).asEagerSingleton();
 
         bind(NettyBootstrap.class).asEagerSingleton();
         bind(NettyDispatcher.class);   // not a singleton!
