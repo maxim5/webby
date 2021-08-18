@@ -5,7 +5,6 @@ import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
 import java.lang.reflect.Method;
-import java.util.Arrays;
 import java.util.logging.Level;
 import java.util.logging.LogManager;
 
@@ -75,9 +74,8 @@ public final class AnyLog {
         }
     }
 
-    @Nullable
-    private static Object callStatic(@NotNull String className, @NotNull String methodName, Object ... args) {
-        Method method = findMethod(className, methodName);
+    private static @Nullable Object callStatic(@NotNull String className, @NotNull String methodName, Object ... args) {
+        Method method = EasyClasspath.findMethod(className, methodName);
         if (method != null) {
             try {
                 method.setAccessible(true);
@@ -91,28 +89,5 @@ public final class AnyLog {
             }
         }
         return null;
-    }
-
-    @Nullable
-    private static Method findMethod(@NotNull String className, @NotNull String methodName) {
-        return findMethod(classForNameOrNull(className), methodName);
-    }
-
-    @Nullable
-    private static Class<?> classForNameOrNull(@NotNull String name) {
-        try {
-            return Class.forName(name);
-        } catch (ClassNotFoundException ignore) {
-            return null;
-        }
-    }
-
-    @Nullable
-    private static Method findMethod(@Nullable Class<?> klass, @NotNull String name) {
-        return klass == null ? null :
-                Arrays.stream(klass.getDeclaredMethods())
-                        .filter(method -> method.getName().equals(name))
-                        .findAny()
-                        .orElse(null);
     }
 }
