@@ -2,13 +2,19 @@ package io.webby.testing;
 
 import com.google.inject.Module;
 import com.google.inject.Provider;
+import com.google.inject.util.Modules;
 import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 
 import java.util.concurrent.atomic.AtomicReference;
 
 public class TestingModules {
     public static <T> @NotNull Module instance(@NotNull Class<? super T> klass, @NotNull T instance) {
         return binder -> binder.bind(klass).toInstance(instance);
+    }
+
+    public static <T> @NotNull Module mayBeInstance(@NotNull Class<? super T> klass, @Nullable T instance) {
+        return instance != null ? instance(klass, instance) : Modules.EMPTY_MODULE;
     }
 
     public static <T> @NotNull Module provided(@NotNull Class<T> klass, @NotNull Provider<T> provider) {

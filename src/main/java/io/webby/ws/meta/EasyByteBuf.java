@@ -22,9 +22,8 @@ public class EasyByteBuf {
         if (content.hasArray()) {
             return parseLongSafely(content.array(), content.readerIndex(), content.readableBytes(), defaultValue);
         } else {
-            String s = content.toString(StandardCharsets.US_ASCII);
             try {
-                return Long.parseLong(s);
+                return Long.parseLong(content.toString(StandardCharsets.US_ASCII));
             } catch (NumberFormatException e) {
                 return defaultValue;
             }
