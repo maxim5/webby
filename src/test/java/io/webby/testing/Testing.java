@@ -1,12 +1,10 @@
 package io.webby.testing;
 
-import com.google.gson.Gson;
 import com.google.inject.Injector;
 import com.google.inject.Module;
 import io.webby.Webby;
 import io.webby.app.AppSettings;
 import io.webby.db.kv.StorageType;
-import io.webby.netty.marshal.GsonMarshaller;
 import io.webby.netty.marshal.Json;
 import org.apache.logging.log4j.Level;
 import org.apache.logging.log4j.LogManager;
