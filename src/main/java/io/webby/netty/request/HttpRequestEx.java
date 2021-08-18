@@ -1,6 +1,5 @@
 package io.webby.netty.request;
 
-import com.google.gson.JsonParseException;
 import io.netty.handler.codec.http.FullHttpRequest;
 import io.netty.handler.codec.http.cookie.Cookie;
 import io.webby.auth.session.Session;
@@ -28,7 +27,7 @@ public interface HttpRequestEx extends FullHttpRequest {
 
     @NotNull QueryParams params();
 
-    <T> @NotNull T contentAsJson(@NotNull Class<T> klass) throws JsonParseException;
+    <T> @NotNull T contentAsJson(@NotNull Class<T> klass) throws IllegalArgumentException;
 
     @Nullable Object attr(int position);
 

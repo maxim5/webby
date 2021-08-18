@@ -1,19 +1,15 @@
 package io.webby.hello;
 
-import io.netty.handler.codec.http.HttpResponse;
 import io.netty.handler.codec.http.HttpHeaderNames;
 import io.netty.handler.codec.http.HttpHeaderValues;
-import io.webby.netty.BaseIntegrationTest;
-import org.junit.jupiter.api.BeforeEach;
+import io.netty.handler.codec.http.HttpResponse;
+import io.webby.testing.BaseHttpIntegrationTest;
 import org.junit.jupiter.api.Test;
 
-import static io.webby.AssertResponse.*;
+import static io.webby.testing.AssertResponse.*;
 
-public class ReturnValueIntegrationTest extends BaseIntegrationTest {
-    @BeforeEach
-    void setup() {
-        testStartup(ReturnValue.class);
-    }
+public class ReturnValueIntegrationTest extends BaseHttpIntegrationTest {
+    protected final ReturnValue handler = testSetup(ReturnValue.class).initHandler();
 
     @Test
     public void byte_array_like() {

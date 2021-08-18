@@ -10,12 +10,14 @@ import io.webby.app.AppConfigException;
 import io.webby.url.HandlerConfigError;
 import io.webby.url.annotate.Json;
 import io.webby.url.annotate.Protobuf;
-import io.webby.url.UrlConfigError;
+import io.webby.url.convert.Constraint;
+import io.webby.url.convert.Converter;
+import io.webby.url.convert.IntConverter;
+import io.webby.url.convert.StringConverter;
 import io.webby.url.handle.Handler;
 import io.webby.url.handle.IntHandler;
 import io.webby.url.handle.StringHandler;
 import io.webby.url.impl.Binding;
-import io.webby.url.convert.*;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import org.jetbrains.annotations.VisibleForTesting;
@@ -256,7 +258,7 @@ public class CallerFactory {
 
             if (!varz.isEmpty()) {
                 String var = varz.poll();
-                Constraint<?> constraint = constraints.computeIfAbsent(var, (k) -> DEFAULT_CONVERTERS.get(type));
+                Constraint<?> constraint = constraints.getOrDefault(var, DEFAULT_CONVERTERS.get(type));
                 argMapping.add(((request, varsMap) -> constraint.applyWithName(var, varsMap.get(var))));
                 continue;
             }

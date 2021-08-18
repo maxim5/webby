@@ -1,7 +1,7 @@
 package io.webby.app;
 
-import io.webby.netty.exceptions.ServeException;
-import io.webby.netty.exceptions.ServiceUnavailableException;
+import io.webby.netty.errors.ServeException;
+import io.webby.netty.errors.ServiceUnavailableException;
 import io.webby.netty.intercept.Interceptor;
 import io.webby.netty.request.MutableHttpRequestEx;
 import org.jetbrains.annotations.NotNull;

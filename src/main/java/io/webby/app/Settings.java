@@ -2,6 +2,7 @@ package io.webby.app;
 
 import io.routekit.QueryParser;
 import io.webby.db.kv.StorageType;
+import io.webby.url.annotate.FrameType;
 import io.webby.url.annotate.Marshal;
 import io.webby.url.annotate.Render;
 import org.jetbrains.annotations.NotNull;
@@ -37,11 +38,17 @@ public interface Settings {
 
     @NotNull QueryParser urlParser();
 
+    @NotNull String defaultApiVersion();
+
     @NotNull Marshal defaultRequestContentMarshal();
 
     @NotNull Marshal defaultResponseContentMarshal();
 
+    @NotNull Marshal defaultFrameContentMarshal();
+
     @NotNull Render defaultRender();
+
+    @NotNull FrameType defaultFrameType();
 
     @NotNull StorageType storageType();
 
@@ -54,6 +61,8 @@ public interface Settings {
     int getIntProperty(@NotNull String key, int def);
 
     long getLongProperty(@NotNull String key, long def);
+
+    byte getByteProperty(@NotNull String key, int def);
 
     boolean getBoolProperty(@NotNull String key);
 

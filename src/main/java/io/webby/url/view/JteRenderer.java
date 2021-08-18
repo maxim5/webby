@@ -72,7 +72,7 @@ public class JteRenderer implements Renderer<String> {
     }
 
     @Override
-    public byte[] renderToBytes(@NotNull String template, @NotNull Object model) throws IOException {
+    public byte @NotNull [] renderToBytes(@NotNull String template, @NotNull Object model) throws IOException {
         Utf8ByteOutput output = new Utf8ByteOutput();
         templateEngine.render(template, model, output);
         return EasyRender.outputToBytes(output::writeTo, output.getContentLength());

@@ -1,18 +1,15 @@
 package io.webby.templates;
 
 import io.netty.handler.codec.http.HttpResponse;
-import io.webby.netty.BaseIntegrationTest;
+import io.webby.testing.BaseHttpIntegrationTest;
 import org.junit.jupiter.api.Assertions;
-import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
-import static io.webby.AssertResponse.*;
+import static io.webby.testing.AssertResponse.assert200;
+import static io.webby.testing.AssertResponse.content;
 
-public class RockerExampleTest extends BaseIntegrationTest {
-    @BeforeEach
-    void setup() {
-        testStartup(RockerExample.class);
-    }
+public class RockerExampleTest extends BaseHttpIntegrationTest {
+    protected final RockerExample handler = testSetup(RockerExample.class).initHandler();
 
     @Test
     public void get_bound_template() {

@@ -11,6 +11,11 @@ public record Pair<T, U>(T first, U second) implements Map.Entry<T, U> {
         return new Pair<>(entry.getKey(), entry.getValue());
     }
 
+    public static <T> Pair<T, T> of(T[] array) {
+        assert array.length == 2 : "Invalid array to create a pair from: %d".formatted(array.length);
+        return new Pair<>(array[0], array[1]);
+    }
+
     public Pair<U, T> swap() {
         return of(second, first);
     }

@@ -1,19 +1,19 @@
 package io.webby.templates;
 
 import io.netty.handler.codec.http.HttpResponse;
-import io.webby.netty.BaseIntegrationTest;
+import io.webby.testing.BaseHttpIntegrationTest;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
-import static io.webby.AssertResponse.*;
+import static io.webby.testing.AssertResponse.*;
 
-public class PebbleExampleTest extends BaseIntegrationTest {
+public class PebbleExampleTest extends BaseHttpIntegrationTest {
     @BeforeEach
     void setup() {
-        testStartup(PebbleExample.class, settings -> {
-            settings.setViewPath("src/examples/resources/web/pebble");
-        });
+        testSetup(PebbleExample.class, settings ->
+            settings.setViewPath("src/examples/resources/web/pebble")
+        );
     }
 
     @Test

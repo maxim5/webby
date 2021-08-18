@@ -1,16 +1,12 @@
 package io.webby.hello;
 
-import io.webby.netty.BaseIntegrationTest;
-import org.junit.jupiter.api.BeforeEach;
+import io.webby.testing.BaseHttpIntegrationTest;
 import org.junit.jupiter.api.Test;
 
-import static io.webby.AssertResponse.*;
+import static io.webby.testing.AssertResponse.*;
 
-public class HelloWorldIntegrationTest extends BaseIntegrationTest {
-    @BeforeEach
-    void setup() {
-        testStartup(HelloWorld.class);
-    }
+public class HelloWorldIntegrationTest extends BaseHttpIntegrationTest {
+    protected final HelloWorld handler = testSetup(HelloWorld.class).initHandler();
 
     @Test
     public void get_hello() {

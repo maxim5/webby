@@ -5,6 +5,7 @@ import io.routekit.QueryParser;
 import io.routekit.SimpleQueryParser;
 import io.webby.common.Packages;
 import io.webby.db.kv.StorageType;
+import io.webby.url.annotate.FrameType;
 import io.webby.url.annotate.Marshal;
 import io.webby.url.annotate.Render;
 import org.jetbrains.annotations.NotNull;
@@ -40,9 +41,12 @@ public final class AppSettings implements Settings {
 
     private QueryParser urlParser = SimpleQueryParser.DEFAULT;
 
+    private String defaultApiVersion = "1.0";
     private Marshal defaultRequestContentMarshal = Marshal.JSON;
     private Marshal defaultResponseContentMarshal = Marshal.AS_STRING;
+    private Marshal defaultFrameContentMarshal = Marshal.JSON;
     private Render defaultRender = Render.JTE;
+    private FrameType defaultFrameType = FrameType.FROM_CLIENT;
 
     private StorageType storageType = StorageType.MAP_DB;
 
@@ -221,6 +225,15 @@ public final class AppSettings implements Settings {
     }
 
     @Override
+    public @NotNull String defaultApiVersion() {
+        return defaultApiVersion;
+    }
+
+    public void setDefaultApiVersion(@NotNull String defaultApiVersion) {
+        this.defaultApiVersion = defaultApiVersion;
+    }
+
+    @Override
     public @NotNull Marshal defaultRequestContentMarshal() {
         return defaultRequestContentMarshal;
     }
@@ -239,12 +252,30 @@ public final class AppSettings implements Settings {
     }
 
     @Override
+    public @NotNull Marshal defaultFrameContentMarshal() {
+        return defaultFrameContentMarshal;
+    }
+
+    public void setDefaultFrameContentMarshal(@NotNull Marshal marshal) {
+        this.defaultFrameContentMarshal = marshal;
+    }
+
+    @Override
     public @NotNull Render defaultRender() {
         return defaultRender;
     }
 
     public void setDefaultRender(@NotNull Render defaultRender) {
         this.defaultRender = defaultRender;
+    }
+
+    @Override
+    public @NotNull FrameType defaultFrameType() {
+        return defaultFrameType;
+    }
+
+    public void setDefaultFrameType(@NotNull FrameType frameType) {
+        this.defaultFrameType = frameType;
     }
 
     @Override
@@ -317,6 +348,11 @@ public final class AppSettings implements Settings {
         } catch (NumberFormatException ignore) {
             return def;
         }
+    }
+
+    @Override
+    public byte getByteProperty(@NotNull String key, int def) {
+        return (byte) getIntProperty(key, def);
     }
 
     @Override

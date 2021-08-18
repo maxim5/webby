@@ -80,6 +80,7 @@ public class ReturnValue {
     }
 
     @GET(url = "/r/json/tree/{var}")
+    @Json
     public JsonElement json_tree(String var) {
         List<Character> characters = var.chars().boxed().map(i -> (char) i.intValue()).toList();
         return new Gson().toJsonTree(characters);

@@ -1,16 +1,12 @@
 package io.webby.hello;
 
-import io.webby.netty.BaseIntegrationTest;
-import org.junit.jupiter.api.BeforeEach;
+import io.webby.testing.BaseHttpIntegrationTest;
 import org.junit.jupiter.api.Test;
 
-import static io.webby.AssertResponse.*;
+import static io.webby.testing.AssertResponse.*;
 
-public class AcceptContentIntegrationTest extends BaseIntegrationTest {
-    @BeforeEach
-    void setup() {
-        testStartup(AcceptContent.class);
-    }
+public class AcceptContentIntegrationTest extends BaseHttpIntegrationTest {
+    protected final AcceptContent handler = testSetup(AcceptContent.class).initHandler();
 
     @Test
     public void post_no_content() {

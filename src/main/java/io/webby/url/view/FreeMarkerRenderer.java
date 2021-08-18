@@ -68,7 +68,7 @@ public class FreeMarkerRenderer implements Renderer<Template> {
     }
 
     @Override
-    public byte[] renderToBytes(@NotNull Template template, @NotNull Object model) throws Exception {
+    public byte @NotNull [] renderToBytes(@NotNull Template template, @NotNull Object model) throws Exception {
         return EasyRender.writeToBytes(writer -> template.process(model, writer));
     }
 

@@ -9,8 +9,8 @@ import io.netty.handler.codec.http.HttpRequest;
 import io.netty.util.AsciiString;
 import io.routekit.util.CharArray;
 import io.routekit.util.MutableCharArray;
-import io.webby.Testing;
 import io.webby.netty.request.HttpRequestEx;
+import io.webby.testing.Testing;
 import io.webby.url.convert.ConversionError;
 import io.webby.url.handle.Handler;
 import io.webby.url.handle.IntHandler;
@@ -27,9 +27,10 @@ import java.util.List;
 import java.util.Map;
 import java.util.function.IntFunction;
 import java.util.function.IntSupplier;
-import java.util.stream.Collectors;
 
-import static io.webby.FakeRequests.*;
+import static io.webby.testing.FakeRequests.getEx;
+import static io.webby.testing.FakeRequests.postEx;
+import static io.webby.testing.Testing.asMap;
 
 @SuppressWarnings("unused")
 public class CallerFactoryTest {
@@ -78,7 +79,7 @@ public class CallerFactoryTest {
     @Test
     public void native_handler() throws Exception {
         Handler<String> instance = (request, variables) -> "%s:%s".formatted(request.method(), variables.keySet());
-        Caller caller = factory.create(instance, binding(instance), asMap(), List.of("foo", "bar"));
+        Caller caller = factory.create(instance, binding(instance), Map.of(), List.of("foo", "bar"));
 
         Assertions.assertTrue(caller instanceof NativeCaller);
         Assertions.assertEquals("GET:[foo]", caller.call(get(), vars("foo", 1)));
@@ -89,7 +90,7 @@ public class CallerFactoryTest {
     @Test
     public void native_int_handler() throws Exception {
         IntHandler<String> instance = (request, val) -> "%s:%d".formatted(request.method(), val);
-        Caller caller = factory.create(instance, binding(instance), asMap(), List.of("foo"));
+        Caller caller = factory.create(instance, binding(instance), Map.of(), List.of("foo"));
 
         Assertions.assertTrue(caller instanceof NativeIntCaller);
         Assertions.assertEquals("GET:1", caller.call(get(), vars("foo", 1)));
@@ -101,7 +102,7 @@ public class CallerFactoryTest {
     @Test
     public void native_string_handler() throws Exception {
         StringHandler<String> instance = (request, val) -> "%s:%s".formatted(request.method(), val);
-        Caller caller = factory.create(instance, binding(instance), asMap(), List.of("foo"));
+        Caller caller = factory.create(instance, binding(instance), Map.of(), List.of("foo"));
 
         Assertions.assertTrue(caller instanceof NativeStringCaller);
         Assertions.assertEquals("GET:1", caller.call(get(), vars("foo", "1")));
@@ -112,7 +113,7 @@ public class CallerFactoryTest {
     @Test
     public void zero_vars_optimized() throws Exception {
         IntSupplier instance = () -> 42;
-        Caller caller = factory.create(instance, binding(instance), asMap(), List.of());
+        Caller caller = factory.create(instance, binding(instance), Map.of(), List.of());
 
         Assertions.assertEquals(42, caller.call(get(), vars()));
         Assertions.assertEquals(42, caller.call(post(), vars()));
@@ -124,7 +125,7 @@ public class CallerFactoryTest {
             String apply(HttpRequest request);
         }
         RequestFunction instance = (request) -> request.method().toString();
-        Caller caller = factory.create(instance, binding(instance, "POST"), asMap(), List.of());
+        Caller caller = factory.create(instance, binding(instance, "POST"), Map.of(), List.of());
 
         Assertions.assertEquals("POST", caller.call(post(), vars()));
         // Note: does not fail: RouteEndpoint is responsible for cutting off wrong requests.
@@ -134,7 +135,7 @@ public class CallerFactoryTest {
     @Test
     public void one_var_optimized_int() throws Exception {
         IntFunction<String> instance = String::valueOf;
-        Caller caller = factory.create(instance, binding(instance), asMap(), List.of("i"));
+        Caller caller = factory.create(instance, binding(instance), Map.of(), List.of("i"));
 
         Assertions.assertEquals("10", caller.call(get(), vars("i", 10)));
         Assertions.assertEquals("10", caller.call(post(), vars("i", 10)));
@@ -147,7 +148,7 @@ public class CallerFactoryTest {
             String apply(HttpRequest request, int i);
         }
         IntRequestFunction instance = (request, i) -> "%s:%s".formatted(request.method(), i);
-        Caller caller = factory.create(instance, binding(instance), asMap(), List.of("i"));
+        Caller caller = factory.create(instance, binding(instance), Map.of(), List.of("i"));
 
         Assertions.assertEquals("GET:10", caller.call(get(), vars("i", 10)));
         Assertions.assertEquals("GET:0", caller.call(get(), vars("i", 0)));
@@ -159,7 +160,7 @@ public class CallerFactoryTest {
     @Test
     public void one_var_optimized_string() throws Exception {
         StringFunction<String> instance = String::toUpperCase;
-        Caller caller = factory.create(instance, binding(instance), asMap(), List.of("str"));
+        Caller caller = factory.create(instance, binding(instance), Map.of(), List.of("str"));
 
         Assertions.assertEquals("FOO", caller.call(get(), vars("str", "foo")));
         Assertions.assertEquals("BAR", caller.call(post(), vars("str", "bar")));
@@ -171,7 +172,7 @@ public class CallerFactoryTest {
             String apply(Injector injector);
         }
         InjectedFunction instance = (injector) -> "%s".formatted(injector.getClass().getName());
-        Caller caller = factory.create(instance, binding(instance), asMap(), List.of());
+        Caller caller = factory.create(instance, binding(instance), Map.of(), List.of());
 
         Assertions.assertEquals("com.google.inject.internal.InjectorImpl", caller.call(get(), vars()));
     }
@@ -182,7 +183,7 @@ public class CallerFactoryTest {
             String apply(Injector injector, int i);
         }
         IntInjectedFunction instance = (injector, i) -> "%s:%d".formatted(injector.getClass().getName(), i);
-        Caller caller = factory.create(instance, binding(instance), asMap(), List.of("i"));
+        Caller caller = factory.create(instance, binding(instance), Map.of(), List.of("i"));
 
         Assertions.assertEquals("com.google.inject.internal.InjectorImpl:10", caller.call(get(), vars("i", 10)));
     }
@@ -193,7 +194,7 @@ public class CallerFactoryTest {
             String apply(HttpRequest request, int x, long y, byte z, String s);
         }
         GenericFunction instance = (request, x, y, z, s) -> "%s:%d:%d:%d:%s".formatted(request.method(), x, y, z, s);
-        Caller caller = factory.create(instance, binding(instance), asMap(), List.of("x", "y", "z", "s"));
+        Caller caller = factory.create(instance, binding(instance), Map.of(), List.of("x", "y", "z", "s"));
 
         Assertions.assertEquals(
                 "GET:1:2:3:foobar",
@@ -220,7 +221,7 @@ public class CallerFactoryTest {
             String apply(Integer x, Long y, Byte z);
         }
         GenericFunction instance = "%d:%d:%d"::formatted;
-        Caller caller = factory.create(instance, binding(instance), asMap(), List.of("x", "y", "z"));
+        Caller caller = factory.create(instance, binding(instance), Map.of(), List.of("x", "y", "z"));
 
         Assertions.assertEquals("1:2:3",caller.call(get(), vars("x", 1, "y", 2, "z", 3)));
         Assertions.assertEquals("0:9223372036854775807:127", caller.call(get(), vars("x", 0, "y", Long.MAX_VALUE, "z", 127)));
@@ -238,7 +239,7 @@ public class CallerFactoryTest {
             String apply(short x, float y, Double z, boolean b);
         }
         GenericFunction instance = "%d:%.2f:%.2f:%s"::formatted;
-        Caller caller = factory.create(instance, binding(instance), asMap(), List.of("x", "y", "z", "b"));
+        Caller caller = factory.create(instance, binding(instance), Map.of(), List.of("x", "y", "z", "b"));
 
         Assertions.assertEquals("1:2.00:3.00:false", caller.call(get(), vars("x", 1, "y", 2.0, "z", 3.0, "b", false)));
         Assertions.assertThrows(ConversionError.class, () -> caller.call(get(), vars("x", 1_000_000, "y", 0, "z", 0, "b", true)));
@@ -250,7 +251,7 @@ public class CallerFactoryTest {
             String apply(char ch1, Character ch2);
         }
         GenericFunction instance = "%s:%s"::formatted;
-        Caller caller = factory.create(instance, binding(instance), asMap(), List.of("x", "y"));
+        Caller caller = factory.create(instance, binding(instance), Map.of(), List.of("x", "y"));
 
         Assertions.assertEquals("A:B", caller.call(get(), vars("x", 65, "y", 66)));
         Assertions.assertEquals("\u90AB:\u0000", caller.call(get(), vars("x", 0x90AB, "y", 0)));
@@ -280,7 +281,7 @@ public class CallerFactoryTest {
         List<CharSequence> list = Streams.mapWithIndex(
                 Arrays.stream(items),
                 (item, i) -> (i % 2 == 0) ? item.toString() : new CharArray(item.toString())
-        ).collect(Collectors.toList());
+        ).toList();
         return asMap(list);
     }
 

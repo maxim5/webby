@@ -1,11 +1,11 @@
 package io.webby.auth.session;
 
 import io.netty.handler.codec.http.cookie.DefaultCookie;
-import io.webby.Testing;
+import io.webby.testing.Testing;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 
-import static io.webby.FakeRequests.*;
+import static io.webby.testing.FakeRequests.*;
 
 public class SessionManagerTest {
     private final SessionManager manager = Testing.testStartupNoHandlers().getInstance(SessionManager.class);

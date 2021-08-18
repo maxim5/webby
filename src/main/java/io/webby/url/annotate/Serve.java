@@ -10,6 +10,8 @@ import java.lang.annotation.Target;
 public @interface Serve {
     String url() default "";
 
+    boolean websocket() default false;
+
     // Note: can not have more than 1 render
     Render[] render() default {};
 

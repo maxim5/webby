@@ -1,17 +1,17 @@
 package io.webby.templates;
 
 import io.netty.handler.codec.http.HttpResponse;
-import io.webby.netty.BaseIntegrationTest;
+import io.webby.testing.BaseHttpIntegrationTest;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
-import static io.webby.AssertResponse.*;
+import static io.webby.testing.AssertResponse.*;
 
-public class JteExampleTest extends BaseIntegrationTest {
+public class JteExampleTest extends BaseHttpIntegrationTest {
     @BeforeEach
     void setup() {
-        testStartup(JteExample.class, settings -> {
+        testSetup(JteExample.class, settings -> {
             settings.setViewPath("src/examples/resources/web/jte");
             settings.setProperty("jte.class.directory", JteExample.CLASS_DIR);
         });

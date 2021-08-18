@@ -1,13 +1,13 @@
 package io.webby.hello;
 
-import io.webby.netty.BaseIntegrationTest;
+import io.webby.testing.BaseHttpIntegrationTest;
 import org.junit.jupiter.api.Test;
 
-import static io.webby.AssertResponse.assert200;
-import static io.webby.AssertResponse.assert500;
+import static io.webby.testing.AssertResponse.assert200;
+import static io.webby.testing.AssertResponse.assert500;
 
-public class ReturnAsyncIntegrationTest extends BaseIntegrationTest {
-    private final ReturnAsync instance = testStartup(ReturnAsync.class).getInstance(ReturnAsync.class);
+public class ReturnAsyncIntegrationTest extends BaseHttpIntegrationTest {
+    private final ReturnAsync handler = testSetup(ReturnAsync.class).initHandler();
 
     @Test
     public void futures() {
@@ -49,7 +49,7 @@ public class ReturnAsyncIntegrationTest extends BaseIntegrationTest {
     protected void flushChannel() {
         do {
             Thread.yield();
-        } while (!instance.executor.getQueue().isEmpty());
+        } while (!handler.executor.getQueue().isEmpty());
         // Thread.sleep(50);
         super.flushChannel();
     }

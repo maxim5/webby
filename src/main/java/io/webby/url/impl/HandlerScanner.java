@@ -1,11 +1,11 @@
 package io.webby.url.impl;
 
-import com.google.common.annotations.VisibleForTesting;
 import com.google.inject.Inject;
 import io.webby.app.Settings;
 import io.webby.common.ClasspathScanner;
 import io.webby.url.annotate.*;
 import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.VisibleForTesting;
 
 import java.lang.annotation.Annotation;
 import java.lang.reflect.AnnotatedElement;

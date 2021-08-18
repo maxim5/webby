@@ -43,7 +43,7 @@ public record HotReloadRenderer<T>(@NotNull Renderer<T> delegate, @NotNull Strin
     }
 
     @Override
-    public byte[] renderToBytes(@NotNull T template, @NotNull Object model) throws Exception {
+    public byte @NotNull [] renderToBytes(@NotNull T template, @NotNull Object model) throws Exception {
         return delegate.renderToBytes(reloadTemplate(), model);
     }
 

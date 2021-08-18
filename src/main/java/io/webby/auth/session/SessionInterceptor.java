@@ -7,7 +7,7 @@ import io.netty.handler.codec.http.HttpResponse;
 import io.netty.handler.codec.http.cookie.Cookie;
 import io.netty.handler.codec.http.cookie.DefaultCookie;
 import io.webby.auth.CookieUtil;
-import io.webby.netty.exceptions.ServeException;
+import io.webby.netty.errors.ServeException;
 import io.webby.netty.intercept.Interceptor;
 import io.webby.netty.intercept.attr.AttributeOwner;
 import io.webby.netty.intercept.attr.Attributes;

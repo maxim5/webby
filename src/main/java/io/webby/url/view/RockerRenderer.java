@@ -43,7 +43,7 @@ public class RockerRenderer implements Renderer<BindableRockerModel> {
     }
 
     @Override
-    public byte[] renderToBytes(@NotNull BindableRockerModel template, @NotNull Object model) {
+    public byte @NotNull [] renderToBytes(@NotNull BindableRockerModel template, @NotNull Object model) {
         return bindIfNecessary(template, model)
                 .render(ArrayOfByteArraysOutput::new)
                 .toByteArray();

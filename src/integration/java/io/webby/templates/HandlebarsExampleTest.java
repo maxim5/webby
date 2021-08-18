@@ -1,18 +1,14 @@
 package io.webby.templates;
 
 import io.netty.handler.codec.http.HttpResponse;
-import io.webby.netty.BaseIntegrationTest;
+import io.webby.testing.BaseHttpIntegrationTest;
 import org.junit.jupiter.api.Assertions;
-import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
-import static io.webby.AssertResponse.*;
+import static io.webby.testing.AssertResponse.*;
 
-public class HandlebarsExampleTest extends BaseIntegrationTest {
-    @BeforeEach
-    void setup() {
-        testStartup(HandlebarsExample.class);
-    }
+public class HandlebarsExampleTest extends BaseHttpIntegrationTest {
+    protected final HandlebarsExample handler = testSetup(HandlebarsExample.class).initHandler();
 
     @Test
     public void get_hello() {

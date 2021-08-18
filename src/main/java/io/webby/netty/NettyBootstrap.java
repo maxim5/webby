@@ -14,8 +14,8 @@ import io.netty.handler.stream.ChunkedWriteHandler;
 import io.webby.app.AppLifetime;
 import io.webby.app.AppMaintenance;
 import io.webby.app.Settings;
-import io.webby.util.AnyLog;
 import io.webby.common.Lifetime;
+import io.webby.util.AnyLog;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.logging.Level;
@@ -25,7 +25,7 @@ public class NettyBootstrap {
 
     @Inject private Settings settings;
     @Inject private AppMaintenance maintenance;
-    @Inject private Provider<NettyChannelHandler> nettyChannelHandler;
+    @Inject private Provider<NettyDispatcher> nettyDispatcher;
 
     private final Lifetime.Definition lifetime;
 
@@ -59,7 +59,7 @@ public class NettyBootstrap {
                             pipeline.addLast(new HttpServerCodec(maxInitLineLength, maxHeaderLength, maxChunkLength));
                             pipeline.addLast(new HttpObjectAggregator(maxContentLength));
                             pipeline.addLast(new ChunkedWriteHandler());
-                            pipeline.addLast(nettyChannelHandler.get());
+                            pipeline.addLast(nettyDispatcher.get());
                         }
                     })
                     .option(ChannelOption.SO_BACKLOG, 128)

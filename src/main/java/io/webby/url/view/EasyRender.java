@@ -1,5 +1,6 @@
 package io.webby.url.view;
 
+import io.webby.common.SystemProperties;
 import io.webby.util.EasyCast;
 import io.webby.util.ThrowConsumer;
 import org.jetbrains.annotations.NotNull;
@@ -11,12 +12,9 @@ import java.util.function.Function;
 import static io.webby.util.EasyIO.Close.closeQuietly;
 
 public class EasyRender {
-    private static final int DEFAULT_SIZE_BYTES = 1024;
-    private static final int DEFAULT_SIZE_CHARS = 1024;
-
     @NotNull
     public static <E extends Throwable> String writeToString(ThrowConsumer<Writer, E> consumer) throws E {
-        return writeToString(consumer, DEFAULT_SIZE_CHARS);
+        return writeToString(consumer, SystemProperties.DEFAULT_SIZE_CHARS);
     }
 
     @NotNull
@@ -27,7 +25,7 @@ public class EasyRender {
     }
 
     public static <E extends Throwable> byte[] writeToBytes(ThrowConsumer<Writer, E> consumer) throws E {
-        return writeToBytes(consumer, DEFAULT_SIZE_BYTES);
+        return writeToBytes(consumer, SystemProperties.DEFAULT_SIZE_BYTES);
     }
 
     public static <E extends Throwable> byte[] writeToBytes(ThrowConsumer<Writer, E> consumer, int size) throws E {
@@ -39,7 +37,7 @@ public class EasyRender {
     }
 
     public static <E extends Throwable> byte[] outputToBytes(ThrowConsumer<OutputStream, E> consumer) throws E {
-        return outputToBytes(consumer, DEFAULT_SIZE_BYTES);
+        return outputToBytes(consumer, SystemProperties.DEFAULT_SIZE_CHARS);
     }
 
     public static <E extends Throwable> byte[] outputToBytes(ThrowConsumer<OutputStream, E> consumer, int size) throws E {
