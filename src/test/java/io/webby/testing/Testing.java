@@ -41,6 +41,7 @@ public class Testing {
     public static @NotNull Injector testStartup(@NotNull Consumer<AppSettings> consumer, @NotNull Module... modules) {
         AppSettings settings = new AppSettings();
         settings.setDevMode(true);
+        settings.setCharset(TestingBytes.CHARSET);
         settings.setSecurityKey("12345678901234567890123456789012");
         settings.setWebPath(DEFAULT_WEB_PATH);
         settings.setViewPath(DEFAULT_VIEW_PATH);
@@ -55,7 +56,7 @@ public class Testing {
 
         Locale.setDefault(Locale.US);  // any way to remove this?
 
-        return Webby.initGuice(settings, modules);
+        return Internals.injector = Webby.initGuice(settings, modules);
     }
 
     public static <K, V> @NotNull Map<K, V> asMap(Object ... items) {
@@ -73,6 +74,16 @@ public class Testing {
     }
 
     public static class Internals {
-        public static final Json json = new GsonMarshaller(new Gson(), TestingBytes.CHARSET);
+        private static Injector injector;
+
+        public static <T> @NotNull T getInstance(@NotNull Class<T> type) {
+            return injector.getInstance(type);
+        }
+
+        public static @NotNull Json json() {
+            // An alternative that always works:
+            // new GsonMarshaller(new Gson(), TestingBytes.CHARSET)
+            return getInstance(Json.class);
+        }
     }
 }

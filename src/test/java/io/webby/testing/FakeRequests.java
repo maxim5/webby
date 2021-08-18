@@ -40,10 +40,10 @@ public class FakeRequests {
     }
 
     public static @NotNull HttpRequestEx requestEx(@NotNull FullHttpRequest request) {
-        return new DefaultHttpRequestEx(request, new EmbeddedChannel(), Testing.Internals.json, Map.of(), new Object[0]);
+        return new DefaultHttpRequestEx(request, new EmbeddedChannel(), Testing.Internals.json(), Map.of(), new Object[0]);
     }
 
     public static @Nullable String toJson(@Nullable Object obj) {
-        return obj != null ? Testing.Internals.json.writeString(obj) : null;
+        return obj != null ? Testing.Internals.json().writeString(obj) : null;
     }
 }
