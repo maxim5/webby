@@ -20,7 +20,8 @@ public class MarshallerFactory implements Provider<Json> {
         "google:gson", Pair.of("com.google.gson.Gson", GsonMarshaller.class),
         "fasterxml:jackson-databind", Pair.of("com.fasterxml.jackson.databind.ObjectMapper", JacksonMarshaller.class),
         "alibaba:fastjson", Pair.of("com.alibaba.fastjson.JSON", FastJsonMarshaller.class),
-        "squareup:moshi", Pair.of("com.squareup.moshi.Moshi", MoshiMarshaller.class)
+        "squareup:moshi", Pair.of("com.squareup.moshi.Moshi", MoshiMarshaller.class),
+        "dslplatform:dsl-json", Pair.of("com.dslplatform.json.DslJson", DslJsonMarshaller.class)
     );
 
     private final Class<? extends Json> jsonMarshallerClass;
