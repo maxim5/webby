@@ -19,7 +19,8 @@ public class MarshallerFactory implements Provider<Json> {
     private static final ImmutableMap<String, Pair<String, Class<? extends Json>>> SUPPORTED_JSON = ImmutableMap.of(
         "google:gson", Pair.of("com.google.gson.Gson", GsonMarshaller.class),
         "fasterxml:jackson-databind", Pair.of("com.fasterxml.jackson.databind.ObjectMapper", JacksonMarshaller.class),
-        "alibaba:fastjson", Pair.of("com.alibaba.fastjson.JSON", FastJsonMarshaller.class)
+        "alibaba:fastjson", Pair.of("com.alibaba.fastjson.JSON", FastJsonMarshaller.class),
+        "squareup:moshi", Pair.of("com.squareup.moshi.Moshi", MoshiMarshaller.class)
     );
 
     private final Class<? extends Json> jsonMarshallerClass;

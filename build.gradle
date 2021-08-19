@@ -23,6 +23,7 @@ dependencies {
     compileOnly 'com.alibaba:fastjson:1.2.76'
     compileOnly 'com.fasterxml.jackson.core:jackson-databind:2.12.4'
     compileOnly 'com.google.code.gson:gson:2.8.7'
+    compileOnly 'com.squareup.moshi:moshi:1.12.0'
     compileOnly 'com.google.protobuf:protobuf-java:3.17.2'
     implementation 'org.jetbrains:annotations:20.1.0'
 
