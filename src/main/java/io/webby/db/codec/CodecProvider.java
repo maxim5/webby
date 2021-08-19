@@ -14,11 +14,10 @@ import static io.webby.util.EasyCast.castAny;
 
 // Scan for codecs
 public class CodecProvider {
-    private final Map<Class<?>, Codec<?>> map =
-            ImmutableMap.<Class<?>, Codec<?>>builder()
-                    .put(Session.class, new SessionCodec())
-                    .put(DefaultUser.class, new DefaultUserCodec())
-            .build();
+    private final Map<Class<?>, Codec<?>> map = ImmutableMap.of(
+           Session.class, new SessionCodec(),
+           DefaultUser.class, new DefaultUserCodec()
+    );
 
     @Nullable
     public <T> Codec<T> getCodecFor(@NotNull Class<T> klass) {

@@ -1,5 +1,6 @@
 package io.webby.hello;
 
+import com.google.common.collect.ImmutableMap;
 import com.google.gson.Gson;
 import com.google.gson.JsonElement;
 import io.netty.buffer.ByteBuf;
@@ -8,15 +9,16 @@ import io.webby.url.annotate.GET;
 import io.webby.url.annotate.Json;
 import io.webby.url.annotate.Serve;
 
-import java.io.*;
+import java.io.ByteArrayInputStream;
+import java.io.File;
+import java.io.Reader;
+import java.io.StringReader;
 import java.nio.ByteBuffer;
 import java.nio.CharBuffer;
 import java.nio.channels.Channels;
 import java.nio.channels.ReadableByteChannel;
 import java.nio.charset.Charset;
-import java.util.LinkedHashMap;
 import java.util.List;
-import java.util.Map;
 
 @Serve
 public class ReturnValue {
@@ -73,10 +75,10 @@ public class ReturnValue {
     @GET(url = "/r/json/map/{*var}")
     @Json
     public Object json_map(String var) {
-        Map<String, Serializable> map = new LinkedHashMap<>();
-        map.put("foo", 1);
-        map.put("var", var.split("/"));
-        return map;
+        return ImmutableMap.of(
+            "foo", 1,
+            "var", var.split("/")
+        );
     }
 
     @GET(url = "/r/json/tree/{var}")

@@ -1,5 +1,6 @@
 package io.webby.ws.meta;
 
+import com.google.common.collect.ImmutableMap;
 import io.netty.buffer.ByteBuf;
 import io.netty.buffer.Unpooled;
 import io.webby.netty.marshal.Json;
@@ -7,7 +8,6 @@ import io.webby.netty.ws.Constants.RequestIds;
 import org.jetbrains.annotations.NotNull;
 
 import java.nio.charset.Charset;
-import java.util.LinkedHashMap;
 import java.util.Map;
 
 public record JsonMetadata(@NotNull Json json, @NotNull Charset charset) implements FrameMetadata {
@@ -26,10 +26,11 @@ public record JsonMetadata(@NotNull Json json, @NotNull Charset charset) impleme
 
     @Override
     public @NotNull ByteBuf compose(long requestId, int code, byte @NotNull [] content) {
-        LinkedHashMap<String, Object> map = new LinkedHashMap<>(3);
-        map.put("id", requestId);
-        map.put("code", code);
-        map.put("data", new String(content, charset));
+        Map<String, Object> map = ImmutableMap.of(
+            "id", requestId,
+            "code", code,
+            "data", new String(content, charset)
+        );
         return json.writeByteBuf(map);
     }
 }
