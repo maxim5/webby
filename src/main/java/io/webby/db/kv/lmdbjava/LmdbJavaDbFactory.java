@@ -36,7 +36,7 @@ public class LmdbJavaDbFactory extends BaseKeyValueFactory {
         assert valueCodec != null : "No codec found the value class: %s".formatted(value);
 
         Dbi<ByteBuffer> db = env.openDbi(name, MDB_CREATE);
-        return new LmdbJavaDbImpl<>(env, db, keyCodec, valueCodec);
+        return new LmdbJavaDb<>(env, db, keyCodec, valueCodec);
     }
 
     @Override

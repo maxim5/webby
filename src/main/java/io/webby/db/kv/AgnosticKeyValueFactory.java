@@ -4,7 +4,7 @@ import com.google.inject.Inject;
 import io.webby.app.Settings;
 import io.webby.common.InjectorHelper;
 import io.webby.db.kv.chronicle.ChronicleFactory;
-import io.webby.db.kv.javamap.JavaMapKeyValueFactory;
+import io.webby.db.kv.javamap.JavaMapDbFactory;
 import io.webby.db.kv.lmdbjava.LmdbJavaDbFactory;
 import io.webby.db.kv.mapdb.MapDbFactory;
 import org.jetbrains.annotations.NotNull;
@@ -15,7 +15,7 @@ public class AgnosticKeyValueFactory implements KeyValueFactory {
     @Inject
     public AgnosticKeyValueFactory(@NotNull Settings settings, @NotNull InjectorHelper helper) {
         delegate = switch (settings.storageType()) {
-            case JAVA_MAP -> helper.lazySingleton(JavaMapKeyValueFactory.class);
+            case JAVA_MAP -> helper.lazySingleton(JavaMapDbFactory.class);
             case MAP_DB -> helper.lazySingleton(MapDbFactory.class);
             case CHRONICLE_MAP -> helper.lazySingleton(ChronicleFactory.class);
             case LMDB_JAVA -> helper.lazySingleton(LmdbJavaDbFactory.class);

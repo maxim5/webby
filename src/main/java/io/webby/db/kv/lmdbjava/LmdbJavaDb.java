@@ -14,14 +14,14 @@ import java.nio.ByteBuffer;
 import java.util.HashSet;
 import java.util.Set;
 
-public class LmdbJavaDbImpl<K, V> implements KeyValueDb<K, V> {
+public class LmdbJavaDb<K, V> implements KeyValueDb<K, V> {
     private final Env<ByteBuffer> env;
     private final Dbi<ByteBuffer> db;
     private final Codec<K> keyCodec;
     private final Codec<V> valueCodec;
 
-    public LmdbJavaDbImpl(@NotNull Env<ByteBuffer> env, @NotNull Dbi<ByteBuffer> db,
-                          @NotNull Codec<K> keyCodec, @NotNull Codec<V> valueCodec) {
+    public LmdbJavaDb(@NotNull Env<ByteBuffer> env, @NotNull Dbi<ByteBuffer> db,
+                      @NotNull Codec<K> keyCodec, @NotNull Codec<V> valueCodec) {
         this.env = env;
         this.db = db;
         this.keyCodec = keyCodec;
