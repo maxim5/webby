@@ -90,6 +90,8 @@ public class KeyValueDbIntegrationTest {
         Injector injector = Testing.testStartup(appSettings -> {
             appSettings.setStorageType(storageType);
             appSettings.setStoragePath(tempDir);
+            appSettings.setProperty("db.lmdbjava.max.map.size.bytes", 64 << 10);
+
             log.at(Level.INFO).log("[Test] Temp storage path: %s", tempDir);
         });
         return injector.getInstance(KeyValueFactory.class);

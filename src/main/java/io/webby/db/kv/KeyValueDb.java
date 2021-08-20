@@ -88,11 +88,21 @@ public interface KeyValueDb<K, V> extends Closeable {
         return true;
     }
 
-    @Nullable V remove(@NotNull K key);
+    void delete(@NotNull K key);
+
+    default @Nullable V remove(@NotNull K key) {
+        V existing = get(key);
+        delete(key);
+        return existing;
+    }
 
     void clear();
 
     void flush();
+
+    default void forceFlush() {
+        flush();
+    }
 
     void close();
 }

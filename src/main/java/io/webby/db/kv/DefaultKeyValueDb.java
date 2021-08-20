@@ -79,6 +79,11 @@ public abstract class DefaultKeyValueDb<K, V, M extends Map<K, V>> implements Ke
     }
 
     @Override
+    public void delete(@NotNull K key) {
+        map.remove(key);
+    }
+
+    @Override
     public @Nullable V remove(@NotNull K key) {
         return map.remove(key);
     }

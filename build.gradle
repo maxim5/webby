@@ -46,6 +46,7 @@ dependencies {
 
     // Key-Values
     compileOnly 'net.openhft:chronicle-map:3.21ea81'
+    compileOnly 'org.lmdbjava:lmdbjava:0.8.1'
     compileOnly 'org.mapdb:mapdb:3.0.8'
 
     // JUnit

@@ -3,5 +3,6 @@ package io.webby.db.kv;
 public enum StorageType {
     JAVA_MAP,
     MAP_DB,
-    CHRONICLE_MAP
+    CHRONICLE_MAP,
+    LMDB_JAVA
 }
