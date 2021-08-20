@@ -91,6 +91,7 @@ public class KeyValueDbIntegrationTest {
             appSettings.setStorageType(storageType);
             appSettings.setStoragePath(tempDir);
             appSettings.setProperty("db.lmdbjava.max.map.size.bytes", 64 << 10);
+            appSettings.setProperty("db.lmdbjni.max.map.size.bytes", 64 << 10);
 
             log.at(Level.INFO).log("[Test] Temp storage path: %s", tempDir);
         });

@@ -4,5 +4,6 @@ public enum StorageType {
     JAVA_MAP,
     MAP_DB,
     CHRONICLE_MAP,
-    LMDB_JAVA
+    LMDB_JAVA,
+    LMDB_JNI
 }
