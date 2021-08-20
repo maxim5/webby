@@ -5,7 +5,9 @@ import io.webby.app.AppConfigException;
 import io.webby.app.Settings;
 import io.webby.db.kv.BaseKeyValueFactory;
 import io.webby.db.kv.KeyValueDb;
+import net.openhft.chronicle.hash.serialization.SizeMarshaller;
 import net.openhft.chronicle.map.ChronicleMap;
+import net.openhft.chronicle.map.ChronicleMapBuilder;
 import org.jetbrains.annotations.NotNull;
 
 import java.io.File;
@@ -31,16 +33,28 @@ public class ChronicleFactory extends BaseKeyValueFactory {
             AppConfigException.failIf(!filename.contains("%s"), "The pattern must contain '%%s': %s".formatted(filename));
             File destination = storagePath.resolve(filename.formatted(name)).toFile();
 
-            ChronicleMap<K, V> map = ChronicleMap.of(key, value)
-                    // .averageKeySize(8).averageValueSize(8)
+            ChronicleMapBuilder<K, V> builder = ChronicleMap.of(key, value)
                     .entries(defaultSize)
                     .name(name)
                     .putReturnsNull(putReturnsNull)
                     .removeReturnsNull(removeReturnsNull)
-                    .replication((byte) replicationId)
-                    .skipCloseOnExitHook(skipExitHook)
-                    .createPersistedTo(destination);
+                    .skipCloseOnExitHook(skipExitHook);
+            // TODO: temp stub for Long keys/values
+            if (key == Long.class) {
+                builder.keySizeMarshaller(SizeMarshaller.constant(8));
+            } else {
+                builder.averageKeySize(8);
+            }
+            if (value == Long.class) {
+                builder.valueSizeMarshaller(SizeMarshaller.constant(8));
+            } else {
+                builder.averageValueSize(8);
+            }
+            if (replicationId > 0) {
+                builder.replication((byte) replicationId);
+            }
 
+            ChronicleMap<K, V> map = builder.createPersistedTo(destination);
             return new ChronicleDb<>(map);
         }));
     }

@@ -20,10 +20,6 @@ public class KeyValueDbIntegrationTest {
     @ParameterizedTest
     @EnumSource(StorageType.class)
     public void simple_operations(StorageType storageType) throws Exception {
-        if (storageType == StorageType.CHRONICLE_MAP) {
-            return;
-        }
-
         Path tempDir = createTempDirectory(storageType);
         KeyValueFactory dbFactory = setup(storageType, tempDir);
         KeyValueDb<Long, String> db = dbFactory.getDb("foo", Long.class, String.class);
