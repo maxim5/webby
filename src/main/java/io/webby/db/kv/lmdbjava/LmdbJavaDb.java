@@ -87,15 +87,9 @@ public class LmdbJavaDb<K, V> implements KeyValueDb<K, V> {
 
     @Override
     public void clear() {
-        // https://github.com/lmdbjava/lmdbjava/issues/178
-        /*
         try (Txn<ByteBuffer> txn = env.txnWrite()) {
             db.drop(txn, false);
-        }
-        forceFlush();
-        */
-        for (K key : keySet()) {
-            delete(key);
+            txn.commit();
         }
     }
 

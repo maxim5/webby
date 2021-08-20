@@ -6,7 +6,6 @@ import io.webby.common.InjectorHelper;
 import io.webby.db.codec.Codec;
 import io.webby.db.codec.CodecProvider;
 import io.webby.db.kv.BaseKeyValueFactory;
-import io.webby.db.kv.KeyValueDb;
 import org.jetbrains.annotations.NotNull;
 import org.lmdbjava.Dbi;
 import org.lmdbjava.Env;
@@ -28,7 +27,7 @@ public class LmdbJavaDbFactory extends BaseKeyValueFactory {
     }
 
     @Override
-    public @NotNull <K, V> KeyValueDb<K, V> getDb(@NotNull String name, @NotNull Class<K> key, @NotNull Class<V> value) {
+    public @NotNull <K, V> LmdbJavaDb<K, V> getDb(@NotNull String name, @NotNull Class<K> key, @NotNull Class<V> value) {
         Codec<K> keyCodec = codecProvider.getCodecFor(key);
         assert keyCodec != null : "No codec found the key class: %s".formatted(key);
 
