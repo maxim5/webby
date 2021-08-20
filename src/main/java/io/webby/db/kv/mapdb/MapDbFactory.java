@@ -18,10 +18,10 @@ import java.util.Date;
 import static io.webby.util.EasyCast.castAny;
 
 public class MapDbFactory extends BaseKeyValueFactory {
-    @Inject private CodecProvider codecProvider;
-
     private final DB db;
     private final MapDbCreator creator;
+
+    @Inject private CodecProvider codecProvider;
 
     @Inject
     public MapDbFactory(@NotNull InjectorHelper helper) {
