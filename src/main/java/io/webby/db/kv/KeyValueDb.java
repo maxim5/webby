@@ -5,10 +5,11 @@ import org.jetbrains.annotations.Nullable;
 
 import java.io.Closeable;
 import java.util.Map;
+import java.util.Objects;
 import java.util.Set;
 import java.util.function.Supplier;
 
-// More Map methods: replace, compute
+// More Map methods: compute
 public interface KeyValueDb<K, V> extends Closeable {
     int size();
 
@@ -60,10 +61,31 @@ public interface KeyValueDb<K, V> extends Closeable {
         return existing;
     }
 
+    default @Nullable V putIfPresent(@NotNull K key, @NotNull V value) {
+        return replace(key, value);
+    }
+
     default void putAll(@NotNull Map<? extends K, ? extends V> map) {
         for (Map.Entry<? extends K, ? extends V> entry : map.entrySet()) {
             set(entry.getKey(), entry.getValue());
         }
+    }
+
+    default @Nullable V replace(@NotNull K key, @NotNull V value) {
+        V curValue;
+        if (((curValue = get(key)) != null) || containsKey(key)) {
+            curValue = put(key, value);
+        }
+        return curValue;
+    }
+
+    default boolean replace(@NotNull K key, @Nullable V oldValue, @NotNull V newValue) {
+        Object curValue = get(key);
+        if (!Objects.equals(curValue, oldValue) || (curValue == null && !containsKey(key))) {
+            return false;
+        }
+        put(key, newValue);
+        return true;
     }
 
     @Nullable V remove(@NotNull K key);

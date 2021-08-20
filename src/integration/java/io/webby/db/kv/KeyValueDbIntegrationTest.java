@@ -43,7 +43,7 @@ public class KeyValueDbIntegrationTest {
         assertEqualsTo(db, Map.of(1L, "foo", 2L, "baz", 3L, "foobar"));
         assertNotContainsAnyOf(db, Map.of(0L, "bar"));
 
-        db.putIfAbsent(3L, "foo");
+        Assertions.assertEquals("foobar", db.putIfAbsent(3L, "foo"));
         assertEqualsTo(db, Map.of(1L, "foo", 2L, "baz", 3L, "foobar"));
         assertNotContainsAnyOf(db, Map.of(0L, "bar"));
 
