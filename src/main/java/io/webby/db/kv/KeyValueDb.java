@@ -37,7 +37,7 @@ public interface KeyValueDb<K, V> extends Closeable {
     }
 
     default boolean containsKey(@NotNull K key) {
-        return get(key) == null;
+        return get(key) != null;
     }
 
     boolean containsValue(@NotNull V value);
