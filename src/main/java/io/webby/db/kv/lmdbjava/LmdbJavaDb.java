@@ -1,5 +1,6 @@
 package io.webby.db.kv.lmdbjava;
 
+import com.google.common.collect.Streams;
 import io.netty.buffer.Unpooled;
 import io.webby.db.codec.Codec;
 import io.webby.db.kv.KeyValueDb;
@@ -11,8 +12,9 @@ import org.lmdbjava.Env;
 import org.lmdbjava.Txn;
 
 import java.nio.ByteBuffer;
-import java.util.HashSet;
-import java.util.Set;
+import java.util.*;
+import java.util.function.Function;
+import java.util.stream.Collectors;
 
 public class LmdbJavaDb<K, V> implements KeyValueDb<K, V> {
     private final Env<ByteBuffer> env;
@@ -50,27 +52,39 @@ public class LmdbJavaDb<K, V> implements KeyValueDb<K, V> {
     @Override
     public boolean containsValue(@NotNull V value) {
         ByteBuffer buffer = fromValue(value);
-        try (Txn<ByteBuffer> txn = env.txnRead()) {
-            try (CursorIterable<ByteBuffer> iterable = db.iterate(txn)) {
-                for (CursorIterable.KeyVal<ByteBuffer> entry : iterable) {
-                    if (entry.val().equals(buffer)) {
-                        return true;
-                    }
-                }
-                return false;
-            }
-        }
+        return iterate(iterable -> Streams.stream(iterable)
+                .map(CursorIterable.KeyVal::val)
+                .anyMatch(val -> val.equals(buffer)));
     }
 
     @Override
     public @NotNull Set<K> keySet() {
+        return iterate(iterable -> Streams.stream(iterable)
+                .map(CursorIterable.KeyVal::key)
+                .map(this::asKey)
+                .collect(Collectors.toSet()));
+    }
+
+    @Override
+    public @NotNull Collection<V> values() {
+        return iterate(iterable -> Streams.stream(iterable).map(CursorIterable.KeyVal::val).map(this::asValue).toList());
+    }
+
+    @Override
+    public @NotNull Set<Map.Entry<K, V>> entrySet() {
+        return iterate(iterable -> {
+            Set<Map.Entry<K, V>> result = new HashSet<>();
+            for (CursorIterable.KeyVal<ByteBuffer> entry : iterable) {
+                result.add(new AbstractMap.SimpleEntry<>(asKey(entry.key()), asValue(entry.val())));
+            }
+            return result;
+        });
+    }
+
+    private <T> @NotNull T iterate(@NotNull Function<CursorIterable<ByteBuffer>, T> converter) {
         try (Txn<ByteBuffer> txn = env.txnRead()) {
             try (CursorIterable<ByteBuffer> iterable = db.iterate(txn)) {
-                Set<K> keys = new HashSet<>();
-                for (CursorIterable.KeyVal<ByteBuffer> entry : iterable) {
-                    keys.add(asKey(entry.key()));
-                }
-                return keys;
+                return converter.apply(iterable);
             }
         }
     }

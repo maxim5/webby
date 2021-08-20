@@ -1,6 +1,7 @@
 package io.webby.db.kv;
 
 import com.google.common.flogger.FluentLogger;
+import com.google.common.truth.Truth;
 import com.google.inject.Injector;
 import io.webby.testing.Testing;
 import org.jetbrains.annotations.NotNull;
@@ -63,7 +64,9 @@ public class KeyValueDbIntegrationTest {
         Assertions.assertEquals(map.size(), db.size());
         Assertions.assertEquals(map.isEmpty(), db.isEmpty());
         Assertions.assertEquals(!map.isEmpty(), db.isNotEmpty());
-        Assertions.assertEquals(map.keySet(), db.keySet());
+        Truth.assertThat(db.keySet()).containsExactlyElementsIn(map.keySet());
+        Truth.assertThat(db.values()).containsExactlyElementsIn(map.values());
+        Truth.assertThat(db.entrySet()).containsExactlyElementsIn(map.entrySet());
 
         for (Map.Entry<K, V> entry : map.entrySet()) {
             K key = entry.getKey();

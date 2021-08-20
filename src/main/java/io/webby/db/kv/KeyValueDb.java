@@ -4,6 +4,7 @@ import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
 import java.io.Closeable;
+import java.util.Collection;
 import java.util.Map;
 import java.util.Objects;
 import java.util.Set;
@@ -44,6 +45,10 @@ public interface KeyValueDb<K, V> extends Closeable {
     boolean containsValue(@NotNull V value);
 
     @NotNull Set<K> keySet();
+
+    @NotNull Collection<V> values();
+
+    @NotNull Set<Map.Entry<K, V>> entrySet();
 
     void set(@NotNull K key, @NotNull V value);
 

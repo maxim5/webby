@@ -3,6 +3,7 @@ package io.webby.db.kv;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
+import java.util.Collection;
 import java.util.Map;
 import java.util.Set;
 
@@ -46,6 +47,16 @@ public abstract class DefaultKeyValueDb<K, V, M extends Map<K, V>> implements Ke
     @Override
     public @NotNull Set<K> keySet() {
         return map.keySet();
+    }
+
+    @Override
+    public @NotNull Collection<V> values() {
+        return map.values();
+    }
+
+    @Override
+    public @NotNull Set<Map.Entry<K, V>> entrySet() {
+        return map.entrySet();
     }
 
     @Override
