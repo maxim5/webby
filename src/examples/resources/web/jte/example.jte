@@ -1,4 +1,4 @@
-@import io.webby.templates.JteExample.Page
+@import io.webby.examples.templates.JteExample.Page
 
 @param Page page
 
