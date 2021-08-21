@@ -22,6 +22,8 @@ import java.io.File;
 import java.io.IOException;
 import java.nio.file.Path;
 import java.util.Objects;
+import java.util.function.Consumer;
+import java.util.function.LongConsumer;
 import java.util.logging.Level;
 
 import static io.webby.util.Rethrow.Suppliers.rethrow;
@@ -56,51 +58,38 @@ public class ChronicleFactory extends BaseKeyValueFactory {
                 builder.replication((byte) replicationId);
             }
 
-            {
-                Codec<K> keyCodec = provider.getCodecFor(key);
-                SerializationBuilder<K> keySerialization = new SerializationBuilder<>(key);
-                CodecSize keySize = bestSize(keySerialization, keyCodec);
-                switch (keySize.estimate()) {
-                    case FIXED -> {
-                        builder.keySizeMarshaller(SizeMarshaller.constant(keySize.numBytes()));
-                        if (!keySerialization.sizeIsStaticallyKnown) {
-                            builder.keyMarshaller(new BytesReaderWriter<>(Objects.requireNonNull(keyCodec)));
-                        }
-                    }
-                    case AVERAGE, MIN -> {
-                        assert !keySerialization.sizeIsStaticallyKnown;
-                        builder.averageKeySize(keySize.numBytes());
-                        if (isDefaultReader(keySerialization.reader())) {
-                            builder.keyMarshaller(new BytesReaderWriter<>(Objects.requireNonNull(keyCodec)));
-                        }
-                    }
-                }
-            }
-
-            {
-                Codec<V> valueCodec = provider.getCodecFor(value);
-                SerializationBuilder<V> valueSerialization = new SerializationBuilder<>(value);
-                CodecSize valueSize = bestSize(valueSerialization, valueCodec);
-                switch (valueSize.estimate()) {
-                    case FIXED -> {
-                        builder.valueSizeMarshaller(SizeMarshaller.constant(valueSize.numBytes()));
-                        if (!valueSerialization.sizeIsStaticallyKnown) {
-                            builder.valueMarshaller(new BytesReaderWriter<>(Objects.requireNonNull(valueCodec)));
-                        }
-                    }
-                    case AVERAGE, MIN -> {
-                        assert !valueSerialization.sizeIsStaticallyKnown;
-                        builder.averageValueSize(valueSize.numBytes());
-                        if (isDefaultReader(valueSerialization.reader())) {
-                            builder.valueMarshaller(new BytesReaderWriter<>(Objects.requireNonNull(valueCodec)));
-                        }
-                    }
-                }
-            }
+            pickSerialization(key, builder::keySizeMarshaller, builder::averageKeySize, builder::keyMarshaller);
+            pickSerialization(value, builder::valueSizeMarshaller, builder::averageValueSize, builder::valueMarshaller);
 
             ChronicleMap<K, V> map = builder.createPersistedTo(destination);
             return new ChronicleDb<>(map);
         }));
+    }
+
+    private <T> void pickSerialization(@NotNull Class<T> klass,
+                                       @NotNull Consumer<SizeMarshaller> onSize,
+                                       @NotNull LongConsumer onAverageValueSize,
+                                       @NotNull Consumer<BytesReaderWriter<T>> onMarshaller) {
+        Codec<T> codec = provider.getCodecFor(klass);
+        SerializationBuilder<T> serialization = new SerializationBuilder<>(klass);
+        CodecSize codecSize = bestSize(serialization, codec);
+        switch (codecSize.estimate()) {
+            case FIXED -> {
+                onSize.accept(SizeMarshaller.constant(codecSize.numBytes()));
+                if (!serialization.sizeIsStaticallyKnown) {
+                    assert codec != null : "Internal error: %s".formatted(klass);
+                    onMarshaller.accept(new BytesReaderWriter<>(codec));
+                }
+            }
+            case AVERAGE, MIN -> {
+                assert !serialization.sizeIsStaticallyKnown : "Internal error: %s".formatted(klass);
+                onAverageValueSize.accept(codecSize.numBytes());
+                if (isDefaultReader(serialization.reader())) {
+                    assert codec != null : "Internal error: %s".formatted(klass);
+                    onMarshaller.accept(new BytesReaderWriter<>(codec));
+                }
+            }
+        }
     }
 
     private static <T> @NotNull CodecSize bestSize(@NotNull SerializationBuilder<T> builder, @Nullable Codec<T> codec) {
