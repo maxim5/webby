@@ -3,6 +3,7 @@ package io.webby.netty.response;
 import io.netty.handler.codec.DecoderResult;
 import io.netty.handler.codec.http.*;
 
+@SuppressWarnings("deprecation")
 public class EmptyHttpResponse implements AsyncResponse, HttpResponse {
     @Override
     public HttpResponseStatus getStatus() {

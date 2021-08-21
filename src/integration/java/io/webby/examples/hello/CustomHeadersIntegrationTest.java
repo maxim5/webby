@@ -16,7 +16,7 @@ import java.util.zip.ZipInputStream;
 
 import static io.webby.testing.AssertResponse.*;
 
-public class CustomHeadersTest extends BaseHttpIntegrationTest {
+public class CustomHeadersIntegrationTest extends BaseHttpIntegrationTest {
     protected final CustomHeaders handler = testSetup(CustomHeaders.class).initHandler();
 
     @Test

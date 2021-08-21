@@ -1,6 +1,7 @@
 package io.webby.examples.hello;
 
 import io.webby.testing.BaseHttpIntegrationTest;
+import io.webby.testing.Testing;
 import org.junit.jupiter.api.Test;
 
 import static io.webby.testing.AssertResponse.assert200;
@@ -50,7 +51,7 @@ public class ReturnAsyncIntegrationTest extends BaseHttpIntegrationTest {
         do {
             Thread.yield();
         } while (!handler.executor.getQueue().isEmpty());
-        // Thread.sleep(50);
+        Testing.waitFor(50);
         super.flushChannel();
     }
 }

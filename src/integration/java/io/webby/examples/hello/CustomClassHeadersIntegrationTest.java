@@ -6,7 +6,7 @@ import org.junit.jupiter.api.Test;
 
 import static io.webby.testing.AssertResponse.*;
 
-public class CustomClassHeadersTest extends BaseHttpIntegrationTest {
+public class CustomClassHeadersIntegrationTest extends BaseHttpIntegrationTest {
     protected final CustomClassHeaders handler = testSetup(CustomClassHeaders.class).initHandler();
 
     @Test
