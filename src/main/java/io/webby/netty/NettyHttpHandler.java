@@ -43,6 +43,7 @@ import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.VisibleForTesting;
 
 import java.io.OutputStream;
+import java.lang.reflect.InvocationTargetException;
 import java.util.List;
 import java.util.concurrent.Future;
 import java.util.concurrent.TimeUnit;
@@ -161,15 +162,25 @@ public class NettyHttpHandler extends SimpleChannelInboundHandler<FullHttpReques
                 return createResponse("", endpoint.options());
             }
             return createResponse(callResult, endpoint.options());
-        } catch (ConversionError e) {
-            log.at(Level.INFO).withCause(e).log("Request validation failed: %s", e.getMessage());
-            return factory.newResponse400(e);
-        } catch (ServeException e) {
-            return factory.handleServeException(e, "Request handler %s".formatted(caller.method()));
         } catch (Throwable e) {
-            log.at(Level.SEVERE).withCause(e).log("Failed to call method: %s", caller.method());
-            return factory.newResponse500("Failed to call method: %s".formatted(caller.method()), e);
+            return callException(e, caller);
         }
+    }
+
+    private @NotNull HttpResponse callException(@NotNull Throwable error, @NotNull Caller caller) {
+        if (error instanceof ConversionError) {
+            log.at(Level.INFO).withCause(error).log("Request validation failed: %s", error.getMessage());
+            return factory.newResponse400(error);
+        }
+        if (error instanceof ServeException e) {
+            return factory.handleServeException(e, "Request handler %s".formatted(caller.method()));
+        }
+        if (error instanceof InvocationTargetException) {
+            return callException(error.getCause(), caller);
+        }
+
+        log.at(Level.SEVERE).withCause(error).log("Failed to call method: %s", caller.method());
+        return factory.newResponse500("Failed to call method: %s".formatted(caller.method()), error);
     }
 
     @VisibleForTesting

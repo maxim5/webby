@@ -29,8 +29,7 @@ public class MapDbFactory extends BaseKeyValueFactory {
         creator = helper.getOrDefault(MapDbCreator.class, () -> (db, name, key, value) -> null);
     }
 
-    @NotNull
-    public <K, V> MapDbImpl<K, V> getDb(@NotNull String name, @NotNull Class<K> key, @NotNull Class<V> value) {
+    public @NotNull <K, V> MapDbImpl<K, V> getDb(@NotNull String name, @NotNull Class<K> key, @NotNull Class<V> value) {
         return cacheIfAbsent(name, () -> {
             DB.Maker<HTreeMap<?, ?>> customMaker = creator.getMaker(db, name, key, value);
 
@@ -51,8 +50,7 @@ public class MapDbFactory extends BaseKeyValueFactory {
         db.close();
     }
 
-    @NotNull
-    private DB createDefaultMapDB(@NotNull Settings settings) {
+    private @NotNull DB createDefaultMapDB(@NotNull Settings settings) {
         // Consider options: hash or tree
         Path storagePath = settings.storagePath();
         String filename = settings.getProperty("db.mapdb.filename", "mapdb.data");
@@ -98,8 +96,7 @@ public class MapDbFactory extends BaseKeyValueFactory {
     // More flexibility:
     // - force custom
     // - force different out-of-box (e.g. elsa, or packed)
-    @NotNull
-    private <T> Serializer<T> pickSerializer(@NotNull Class<T> klass) {
+    private <T> @NotNull Serializer<T> pickSerializer(@NotNull Class<T> klass) {
         Serializer<?> outOfBox = OUT_OF_BOX.get(klass);
         if (outOfBox != null) {
             return castAny(outOfBox);

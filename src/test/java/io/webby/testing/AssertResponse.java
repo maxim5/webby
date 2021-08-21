@@ -27,12 +27,30 @@ public class AssertResponse {
         assertResponse(response, HttpResponseStatus.OK, content);
     }
 
+    public static void assertTempRedirect(@NotNull HttpResponse response, @NotNull String url) {
+        assertResponse(response, HttpResponseStatus.TEMPORARY_REDIRECT, null);
+        assertHeaders(response, HttpHeaderNames.LOCATION, url);
+    }
+
+    public static void assertPermRedirect(@NotNull HttpResponse response, @NotNull String url) {
+        assertResponse(response, HttpResponseStatus.PERMANENT_REDIRECT, null);
+        assertHeaders(response, HttpHeaderNames.LOCATION, url);
+    }
+
     public static void assert400(HttpResponse response) {
         assert400(response, null);
     }
 
     public static void assert400(HttpResponse response, String content) {
         assertResponse(response, HttpResponseStatus.BAD_REQUEST, content);
+    }
+
+    public static void assert401(HttpResponse response) {
+        assertResponse(response, HttpResponseStatus.UNAUTHORIZED, null);
+    }
+
+    public static void assert403(HttpResponse response) {
+        assertResponse(response, HttpResponseStatus.FORBIDDEN, null);
     }
 
     public static void assert404(HttpResponse response) {

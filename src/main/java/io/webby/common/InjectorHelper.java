@@ -56,8 +56,7 @@ public class InjectorHelper {
 
     // Replacement for injector.getInstance
     // See https://github.com/google/guice/issues/357
-    @NotNull
-    public <T> Binding<T> lazySingleton(@NotNull Key<T> key) {
+    public <T> @NotNull Binding<T> lazySingleton(@NotNull Key<T> key) {
         Binding<?> existing = injector.getBindings().get(key);
         if (existing == null) {
             return castAny(singletons.computeIfAbsent(key, __ -> constantBinding(key, injector.getBinding(key))));
@@ -65,33 +64,28 @@ public class InjectorHelper {
         return castAny(existing);
     }
 
-    @NotNull
-    private <T> Provider<T> lazySingletonProvider(@NotNull Class<T> klass) {
+    private <T> @NotNull Provider<T> lazySingletonProvider(@NotNull Class<T> klass) {
         return lazySingleton(Key.get(klass)).getProvider();
     }
 
-    @NotNull
-    public <T> T lazySingleton(@NotNull Class<T> klass) {
+    public <T> @NotNull T lazySingleton(@NotNull Class<T> klass) {
         return lazySingletonProvider(klass).get();
     }
 
     // Replacement for injector.getInstance
-    @NotNull
-    public <T> Binding<T> ensureSingleton(@NotNull Key<T> key) {
+    public <T> @NotNull Binding<T> ensureSingleton(@NotNull Key<T> key) {
         return castAny(singletons.computeIfAbsent(key, __ -> constantBinding(key, injector.getBinding(key))));
     }
-    @NotNull
-    private <T> Provider<T> ensureSingletonProvider(@NotNull Class<T> klass) {
+
+    private <T> @NotNull Provider<T> ensureSingletonProvider(@NotNull Class<T> klass) {
         return ensureSingleton(Key.get(klass)).getProvider();
     }
 
-    @NotNull
-    public <T> T ensureSingleton(@NotNull Class<T> klass) {
+    public <T> @NotNull T ensureSingleton(@NotNull Class<T> klass) {
         return ensureSingletonProvider(klass).get();
     }
 
-    @NotNull
-    private static <T> Binding<T> constantBinding(@NotNull Key<T> key, @NotNull Binding<T> binding) {
+    private static @NotNull <T> Binding<T> constantBinding(@NotNull Key<T> key, @NotNull Binding<T> binding) {
         T instance = binding.getProvider().get();
         return new Binding<>() {
             @Override

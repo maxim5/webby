@@ -32,19 +32,16 @@ public class QueryParams {
         this.constraints = constraints;
     }
 
-    @NotNull
-    public static QueryParams fromDecoder(@NotNull QueryStringDecoder decoder,
-                                          @NotNull Map<String, Constraint<?>> constraints) {
+    public static @NotNull QueryParams fromDecoder(@NotNull QueryStringDecoder decoder,
+                                                   @NotNull Map<String, Constraint<?>> constraints) {
         return new QueryParams(decoder.path(), decoder.rawQuery(), decoder.parameters(), constraints);
     }
 
-    @NotNull
-    public String path() {
+    public @NotNull String path() {
         return path;
     }
 
-    @NotNull
-    public String query() {
+    public @NotNull String query() {
         return query;
     }
 
@@ -56,23 +53,19 @@ public class QueryParams {
         return parameters.isEmpty();
     }
 
-    @NotNull
-    public Map<String, List<String>> getMap() {
+    public @NotNull Map<String, List<String>> getMap() {
         return parameters;
     }
 
-    @NotNull
-    public Set<String> keys() {
+    public @NotNull Set<String> keys() {
         return parameters.keySet();
     }
 
-    @NotNull
-    public Stream<Map.Entry<String, List<String>>> stream() {
+    public @NotNull Stream<Map.Entry<String, List<String>>> stream() {
         return parameters.entrySet().stream();
     }
 
-    @NotNull
-    public BiStream<String, List<String>> biStream() {
+    public @NotNull BiStream<String, List<String>> biStream() {
         return BiStream.from(parameters);
     }
 
@@ -80,19 +73,16 @@ public class QueryParams {
         return parameters.containsKey(name);
     }
 
-    @NotNull
-    public List<String> getAll(@NotNull String name) {
+    public @NotNull List<String> getAll(@NotNull String name) {
         return parameters.getOrDefault(name, List.of());
     }
 
-    @Nullable
-    public String getOrNull(@NotNull String name) {
+    public @Nullable String getOrNull(@NotNull String name) {
         List<String> values = parameters.get(name);
         return values != null ? values.get(0) : null;
     }
 
-    @Nullable
-    public <T> T getConvertedOrNull(@NotNull String name) throws ConversionError {
+    public <T> @Nullable T getConvertedOrNull(@NotNull String name) throws ConversionError {
         String value = getOrNull(name);
         if (value == null) {
             return null;
