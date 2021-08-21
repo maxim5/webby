@@ -74,15 +74,23 @@ public class AssertResponse {
         }
     }
 
-    public static void assertHeaders(HttpResponse response, CharSequence key, CharSequence value) {
+    public static void assertHeaders(@NotNull HttpResponse response, @NotNull CharSequence key, @NotNull CharSequence value) {
         Assertions.assertEquals(value.toString(), response.headers().get(key));
     }
 
-    public static void assertHeaders(HttpResponse response,
-                                     CharSequence key1, CharSequence value1,
-                                     CharSequence key2, CharSequence value2) {
+    public static void assertHeaders(@NotNull HttpResponse response,
+                                     @NotNull CharSequence key1, @NotNull CharSequence value1,
+                                     @NotNull CharSequence key2, @NotNull CharSequence value2) {
         Assertions.assertEquals(value1.toString(), response.headers().get(key1));
         Assertions.assertEquals(value2.toString(), response.headers().get(key2));
+    }
+
+    public static void assertContentLength(@NotNull HttpResponse response, @NotNull CharSequence expected) {
+        assertHeaders(response, HttpHeaderNames.CONTENT_LENGTH, expected);
+    }
+
+    public static void assertContentType(@NotNull HttpResponse response, @NotNull CharSequence expected) {
+        assertHeaders(response, HttpHeaderNames.CONTENT_TYPE, expected);
     }
 
     public static void assertContentContains(HttpResponse response, String ... substrings) {
@@ -109,7 +117,7 @@ public class AssertResponse {
         return content(response);
     }
 
-    public static byte[] readAll(@NotNull StreamingHttpResponse streaming) throws Exception {
+    public static byte @NotNull [] readAll(@NotNull StreamingHttpResponse streaming) throws Exception {
         ByteArrayOutputStream outputStream = new ByteArrayOutputStream();
         HttpChunkedInput chunkedInput = streaming.chunkedContent();
         try {
@@ -123,7 +131,7 @@ public class AssertResponse {
         return outputStream.toByteArray();
     }
 
-    public static byte[] readAll(@NotNull Stream<HttpContent> stream) {
+    public static byte @NotNull [] readAll(@NotNull Stream<HttpContent> stream) {
         ByteArrayOutputStream outputStream = new ByteArrayOutputStream();
         stream.forEach(Consumers.rethrow(content ->
                 content.content().readBytes(outputStream, content.content().readableBytes())

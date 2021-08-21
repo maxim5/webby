@@ -16,8 +16,8 @@ public record EndpointHttp(@NotNull CharSequence contentType, @NotNull List<Pair
     @NotNull
     public EndpointHttp mergeWithDefault(@NotNull EndpointHttp http) {
         CharSequence newContentType = hasContentType() ? contentType : http.contentType();
-        List<Pair<String, String>> newHeaders = new ArrayList<>(headers);
-        http.headers.forEach(header -> {
+        List<Pair<String, String>> newHeaders = new ArrayList<>(http.headers);
+        headers.forEach(header -> {
             newHeaders.removeIf(existing -> existing.getKey().equalsIgnoreCase(header.getKey()));
             newHeaders.add(header);
         });

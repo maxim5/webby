@@ -1,6 +1,5 @@
 package io.webby.examples.hello;
 
-import io.netty.handler.codec.http.HttpHeaderNames;
 import io.netty.handler.codec.http.HttpHeaderValues;
 import io.netty.handler.codec.http.HttpResponse;
 import io.webby.testing.BaseHttpIntegrationTest;
@@ -41,7 +40,7 @@ public class ReturnValueIntegrationTest extends BaseHttpIntegrationTest {
         assert200(response, """
             {"foo":1,"var":["bar"]}
         """.trim());
-        assertHeaders(response, HttpHeaderNames.CONTENT_TYPE, HttpHeaderValues.APPLICATION_JSON);
+        assertContentType(response, HttpHeaderValues.APPLICATION_JSON);
     }
 
     @Test
@@ -50,7 +49,7 @@ public class ReturnValueIntegrationTest extends BaseHttpIntegrationTest {
         assert200(response, """
             {"foo":1,"var":["bar","baz"]}
         """.trim());
-        assertHeaders(response, HttpHeaderNames.CONTENT_TYPE, HttpHeaderValues.APPLICATION_JSON);
+        assertContentType(response, HttpHeaderValues.APPLICATION_JSON);
     }
 
     @Test
@@ -59,6 +58,6 @@ public class ReturnValueIntegrationTest extends BaseHttpIntegrationTest {
         assert200(response, """
             ["f","o","o","b","a","r"]
         """.trim());
-        assertHeaders(response, HttpHeaderNames.CONTENT_TYPE, HttpHeaderValues.APPLICATION_JSON);
+        assertContentType(response, HttpHeaderValues.APPLICATION_JSON);
     }
 }
