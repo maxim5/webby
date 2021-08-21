@@ -130,7 +130,8 @@ public final class AcceptorsAwareFrameConverter implements FrameConverter<Object
                 .formatted(marshaller, metadata, acceptors, supportedType);
     }
 
-    private enum ConcreteFrameType {
+    @VisibleForTesting
+    enum ConcreteFrameType {
         TEXT,
         BINARY,
         BOTH

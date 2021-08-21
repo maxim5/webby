@@ -16,11 +16,11 @@ repositories {
 
 def os
 if (Os.isFamily(Os.FAMILY_UNIX)) {
-    os = "linux64"
+    os = 'linux64'
 } else if (Os.isFamily(Os.FAMILY_MAC)) {
-    os = "osx64"
+    os = 'osx64'
 } else if (Os.isFamily(Os.FAMILY_WINDOWS)) {
-    os = "win64"
+    os = 'win64'
 }
 
 dependencies {
