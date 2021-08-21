@@ -63,7 +63,7 @@ public class TestingBytes {
 
         @Override
         public String toString() {
-            return unwrap().toString(CHARSET);
+            return unwrap().toString(readerIndex(), readableBytes(), CHARSET);
         }
     }
 

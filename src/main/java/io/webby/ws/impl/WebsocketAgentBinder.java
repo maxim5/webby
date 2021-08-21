@@ -154,6 +154,7 @@ public class WebsocketAgentBinder {
                 Api api = getApi(method, idFromName(method.getName()), defaultApiVersion);
                 String id = api.id();
                 String version = api.version();
+                failIf(id.isEmpty(), "API id can't be empty: %s".formatted(id));
                 failIf(!id.matches("^[a-zA-Z0-9_.-]+$"), "API id contains illegal chars: %s".formatted(id));
                 failIf(id.length() > MAX_ID_SIZE, "API id can't be longer than %d: %s".formatted(MAX_ID_SIZE, id));
                 failIf(!version.matches("^[0-9a-z_.-]+$"), "API version contains illegal chars: %s".formatted(version));
