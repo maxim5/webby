@@ -24,7 +24,7 @@ public class KeyValueDbIntegrationTest {
 
     @ParameterizedTest
     @EnumSource(StorageType.class)
-    public void simple_operations(StorageType storageType) throws Exception {
+    public void simple_operations_fixed_size_key(StorageType storageType) throws Exception {
         Path tempDir = createTempDirectory(storageType);
         KeyValueFactory dbFactory = setup(storageType, tempDir);
 
@@ -59,6 +59,51 @@ public class KeyValueDbIntegrationTest {
             Assertions.assertNull(db.remove(1L));
             assertEqualsTo(db, Map.of(2L, "baz", 3L, "foobar"));
             assertNotContainsAnyOf(db, Map.of(1L, "foo"));
+
+            db.clear();
+            assertEqualsTo(db, Map.of());
+        }
+
+        cleanUp(tempDir);
+    }
+
+    @ParameterizedTest
+    @EnumSource(StorageType.class)
+    public void simple_operations_variable_size_key(StorageType storageType) throws Exception {
+        Path tempDir = createTempDirectory(storageType);
+        KeyValueFactory dbFactory = setup(storageType, tempDir);
+
+        try (KeyValueDb<String, Integer> db = dbFactory.getDb("foo", String.class, Integer.class)) {
+            assertEqualsTo(db, Map.of());
+            assertNotContainsAnyOf(db, Map.of("foo", 1));
+
+            Assertions.assertNull(db.put("foo", 1));
+            assertEqualsTo(db, Map.of("foo", 1));
+            assertNotContainsAnyOf(db, Map.of("bar", 2));
+
+            Assertions.assertNull(db.put("bar", 2));
+            assertEqualsTo(db, Map.of("foo", 1, "bar", 2));
+            assertNotContainsAnyOf(db, Map.of("baz", 3));
+
+            Assertions.assertEquals(2, db.put("bar", 3));
+            assertEqualsTo(db, Map.of("foo", 1, "bar", 3));
+            assertNotContainsAnyOf(db, Map.of("baz", 2));
+
+            db.set("foobar", 2);
+            assertEqualsTo(db, Map.of("foo", 1, "bar", 3, "foobar", 2));
+            assertNotContainsAnyOf(db, Map.of("baz", 0));
+
+            Assertions.assertEquals(2, db.putIfAbsent("foobar", 4));
+            assertEqualsTo(db, Map.of("foo", 1, "bar", 3, "foobar", 2));
+            assertNotContainsAnyOf(db, Map.of("baz", 0));
+
+            Assertions.assertEquals(1, db.remove("foo"));
+            assertEqualsTo(db, Map.of("bar", 3, "foobar", 2));
+            assertNotContainsAnyOf(db, Map.of("foo", 1));
+
+            Assertions.assertNull(db.remove("foo"));
+            assertEqualsTo(db, Map.of("bar", 3, "foobar", 2));
+            assertNotContainsAnyOf(db, Map.of("foo", 1));
 
             db.clear();
             assertEqualsTo(db, Map.of());
