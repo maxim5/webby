@@ -19,7 +19,7 @@ public interface Sender {
     @CanIgnoreReturnValue
     @NotNull ChannelFuture sendFlush(@NotNull WebSocketFrame frame);
 
-    static @NotNull WebSocketFrame text(@NotNull String text) {
+    static @NotNull TextWebSocketFrame text(@NotNull String text) {
         return new TextWebSocketFrame(text);
     }
 
