@@ -47,23 +47,31 @@ public abstract class BaseHttpIntegrationTest extends BaseChannelTest {
         }
     }
 
-    @NotNull
-    protected HttpResponse get(String uri) {
+    protected @NotNull HttpResponse get(@NotNull String uri) {
         return call(HttpMethod.GET, uri, null);
     }
 
-    @NotNull
-    protected HttpResponse post(String uri) {
+    protected @NotNull HttpResponse post(@NotNull String uri) {
         return post(uri, null);
     }
 
-    @NotNull
-    protected HttpResponse post(String uri, @Nullable Object content) {
+    protected @NotNull HttpResponse post(@NotNull String uri, @Nullable Object content) {
         return call(HttpMethod.POST, uri, content);
     }
 
-    @NotNull
-    protected HttpResponse call(HttpMethod method, String uri, @Nullable Object content) {
+    protected @NotNull HttpResponse put(@NotNull String uri) {
+        return call(HttpMethod.PUT, uri, null);
+    }
+
+    protected @NotNull HttpResponse head(@NotNull String uri) {
+        return call(HttpMethod.HEAD, uri, null);
+    }
+
+    protected @NotNull HttpResponse options(@NotNull String uri) {
+        return call(HttpMethod.OPTIONS, uri, null);
+    }
+
+    protected @NotNull HttpResponse call(@NotNull HttpMethod method, @NotNull String uri, @Nullable Object content) {
         assertChannelInitialized();
 
         FullHttpRequest request = request(method, uri, content);
