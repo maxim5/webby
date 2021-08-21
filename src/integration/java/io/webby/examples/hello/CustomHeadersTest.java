@@ -43,12 +43,12 @@ public class CustomHeadersTest extends BaseHttpIntegrationTest {
         Map<String, String> expected = Map.of(
                 "0.txt", "File content for 0",
                 "1.txt", "File content for 1",
-                "2.txt", "File content for 2");
+                "2.txt", "File content for 2"
+        );
         Assertions.assertEquals(expected, unzipBytes(content(response).array()));
     }
 
-    @NotNull
-    private static Map<String, String> unzipBytes(byte[] bytes) throws IOException {
+    private static @NotNull Map<String, String> unzipBytes(byte @NotNull [] bytes) throws IOException {
         Map<String, String> contents = new HashMap<>();
         try (ZipInputStream zipInputStream = new ZipInputStream(new ByteArrayInputStream(bytes))) {
             ZipEntry entry;

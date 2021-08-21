@@ -9,7 +9,6 @@ import io.webby.db.kv.KeyValueDb;
 import io.webby.db.kv.KeyValueFactory;
 import io.webby.db.model.LongIdGenerator;
 import io.webby.netty.request.HttpRequestEx;
-import io.webby.util.Rethrow;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import org.jetbrains.annotations.VisibleForTesting;
@@ -22,6 +21,8 @@ import java.security.SecureRandom;
 import java.util.Arrays;
 import java.util.Base64;
 import java.util.logging.Level;
+
+import static io.webby.util.Rethrow.rethrow;
 
 public class SessionManager {
     private static final FluentLogger log = FluentLogger.forEnclosingClass();
@@ -44,8 +45,7 @@ public class SessionManager {
         db = factory.getDb("sessions", Long.class, Session.class);
     }
 
-    @NotNull
-    public Session getOrCreateSession(@NotNull HttpRequestEx request, @Nullable Cookie cookie) {
+    public @NotNull Session getOrCreateSession(@NotNull HttpRequestEx request, @Nullable Cookie cookie) {
         Session session = getSessionOrNull(cookie);
         if (session == null) {
             return createNewSession(request);
@@ -53,13 +53,11 @@ public class SessionManager {
         return session;
     }
 
-    @Nullable
-    public Session getSessionOrNull(@Nullable Cookie cookie) {
+    public @Nullable Session getSessionOrNull(@Nullable Cookie cookie) {
         return cookie == null ? null : getSessionOrNull(cookie.value());
     }
 
-    @Nullable
-    public Session getSessionOrNull(@Nullable String cookieValue) {
+    public @Nullable Session getSessionOrNull(@Nullable String cookieValue) {
         if (cookieValue == null) {
             return null;
         }
@@ -72,22 +70,19 @@ public class SessionManager {
         }
     }
 
-    @NotNull
-    public Session createNewSession(@NotNull HttpRequestEx request) {
+    public @NotNull Session createNewSession(@NotNull HttpRequestEx request) {
         long sessionId = generator.nextId();
         Session session = Session.fromRequest(sessionId, request);
         db.set(sessionId, session);
         return session;
     }
 
-    @NotNull
-    public String encodeSessionForCookie(@NotNull Session session) {
+    public @NotNull String encodeSessionForCookie(@NotNull Session session) {
         return encodeSessionId(session.sessionId());
     }
 
     @VisibleForTesting
-    @NotNull
-    String encodeSessionId(long sessionId) {
+    @NotNull String encodeSessionId(long sessionId) {
         byte[] bytes = Longs.toByteArray(sessionId);
         byte[] encryptedBytes = encryptBytes(bytes);
         return Base64.getUrlEncoder().withoutPadding().encodeToString(encryptedBytes);
@@ -104,7 +99,7 @@ public class SessionManager {
         try {
             return cipher.doFinal(data);
         } catch (GeneralSecurityException e) {
-            return Rethrow.rethrow("Failed to encrypt the data: %s".formatted(Arrays.toString(data)), e);
+            return rethrow("Failed to encrypt the data: %s".formatted(Arrays.toString(data)), e);
         }
     }
 
@@ -112,7 +107,7 @@ public class SessionManager {
         try {
             return decipher.doFinal(encrypted);
         } catch (GeneralSecurityException e) {
-            return Rethrow.rethrow("Failed to decrypt the data: %s".formatted(Arrays.toString(encrypted)), e);
+            return rethrow("Failed to decrypt the data: %s".formatted(Arrays.toString(encrypted)), e);
         }
     }
 }

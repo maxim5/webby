@@ -5,6 +5,8 @@ import com.google.common.io.MoreFiles;
 import com.google.common.io.RecursiveDeleteOption;
 import com.google.common.truth.Truth;
 import com.google.inject.Injector;
+import io.webby.auth.session.Session;
+import io.webby.auth.session.SessionManager;
 import io.webby.testing.Testing;
 import org.jetbrains.annotations.NotNull;
 import org.junit.jupiter.api.AfterEach;
@@ -18,6 +20,8 @@ import java.nio.file.Path;
 import java.util.Map;
 import java.util.logging.Level;
 
+import static io.webby.testing.FakeRequests.getEx;
+
 public class KeyValueDbIntegrationTest {
     private static final FluentLogger log = FluentLogger.forEnclosingClass();
     private static final boolean CLEAN_UP_IF_SUCCESSFUL = true;
@@ -26,7 +30,7 @@ public class KeyValueDbIntegrationTest {
     @EnumSource(StorageType.class)
     public void simple_operations_fixed_size_key(StorageType storageType) throws Exception {
         Path tempDir = createTempDirectory(storageType);
-        KeyValueFactory dbFactory = setup(storageType, tempDir);
+        KeyValueFactory dbFactory = setupFactory(storageType, tempDir);
 
         try (KeyValueDb<Long, String> db = dbFactory.getDb("foo", Long.class, String.class)) {
             assertEqualsTo(db, Map.of());
@@ -71,7 +75,7 @@ public class KeyValueDbIntegrationTest {
     @EnumSource(StorageType.class)
     public void simple_operations_variable_size_key(StorageType storageType) throws Exception {
         Path tempDir = createTempDirectory(storageType);
-        KeyValueFactory dbFactory = setup(storageType, tempDir);
+        KeyValueFactory dbFactory = setupFactory(storageType, tempDir);
 
         try (KeyValueDb<String, Integer> db = dbFactory.getDb("foo", String.class, Integer.class)) {
             assertEqualsTo(db, Map.of());
@@ -112,6 +116,26 @@ public class KeyValueDbIntegrationTest {
         cleanUp(tempDir);
     }
 
+    @ParameterizedTest
+    @EnumSource(StorageType.class)
+    public void serialize_session(StorageType storageType) throws Exception {
+        Path tempDir = createTempDirectory(storageType);
+        Injector injector = setup(storageType, tempDir);
+        SessionManager sessionManager = injector.getInstance(SessionManager.class);
+        KeyValueFactory dbFactory = injector.getInstance(KeyValueFactory.class);
+
+        Session newSession = sessionManager.createNewSession(getEx("/"));
+        String cookie = sessionManager.encodeSessionForCookie(newSession);
+        Session existingSession = sessionManager.getSessionOrNull(cookie);
+        Assertions.assertEquals(newSession, existingSession);
+
+        try (KeyValueDb<Long, Session> db = dbFactory.getDb("sessions", Long.class, Session.class)) {
+            assertEqualsTo(db, Map.of(newSession.sessionId(), newSession));
+        }
+
+        cleanUp(tempDir);
+    }
+
     @AfterEach
     public void tearDown() {
         Testing.Internals.terminate();
@@ -146,8 +170,12 @@ public class KeyValueDbIntegrationTest {
         }
     }
 
-    private @NotNull KeyValueFactory setup(@NotNull StorageType storageType, @NotNull Path tempDir) {
-        Injector injector = Testing.testStartup(appSettings -> {
+    private @NotNull KeyValueFactory setupFactory(@NotNull StorageType storageType, @NotNull Path tempDir) {
+        return setup(storageType, tempDir).getInstance(KeyValueFactory.class);
+    }
+
+    private @NotNull Injector setup(@NotNull StorageType storageType, @NotNull Path tempDir) {
+        return Testing.testStartup(appSettings -> {
             appSettings.setStorageType(storageType);
             appSettings.setStoragePath(tempDir);
 
@@ -157,7 +185,6 @@ public class KeyValueDbIntegrationTest {
 
             log.at(Level.INFO).log("[Test] Temp storage path: %s", tempDir);
         });
-        return injector.getInstance(KeyValueFactory.class);
     }
 
     private @NotNull Path createTempDirectory(@NotNull StorageType storageType) throws IOException {
