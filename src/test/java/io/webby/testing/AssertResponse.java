@@ -19,11 +19,11 @@ import static io.webby.testing.TestingBytes.asByteBuf;
 import static io.webby.util.Rethrow.*;
 
 public class AssertResponse {
-    public static void assert200(HttpResponse response) {
+    public static void assert200(@NotNull HttpResponse response) {
         assert200(response, null);
     }
 
-    public static void assert200(HttpResponse response, String content) {
+    public static void assert200(@NotNull HttpResponse response, @Nullable String content) {
         assertResponse(response, HttpResponseStatus.OK, content);
     }
 
@@ -37,39 +37,41 @@ public class AssertResponse {
         assertHeaders(response, HttpHeaderNames.LOCATION, url);
     }
 
-    public static void assert400(HttpResponse response) {
+    public static void assert400(@NotNull HttpResponse response) {
         assert400(response, null);
     }
 
-    public static void assert400(HttpResponse response, String content) {
+    public static void assert400(@NotNull HttpResponse response, @Nullable String content) {
         assertResponse(response, HttpResponseStatus.BAD_REQUEST, content);
     }
 
-    public static void assert401(HttpResponse response) {
+    public static void assert401(@NotNull HttpResponse response) {
         assertResponse(response, HttpResponseStatus.UNAUTHORIZED, null);
     }
 
-    public static void assert403(HttpResponse response) {
+    public static void assert403(@NotNull HttpResponse response) {
         assertResponse(response, HttpResponseStatus.FORBIDDEN, null);
     }
 
-    public static void assert404(HttpResponse response) {
+    public static void assert404(@NotNull HttpResponse response) {
         assert404(response, null);
     }
 
-    public static void assert404(HttpResponse response, String content) {
+    public static void assert404(@NotNull HttpResponse response, @Nullable String content) {
         assertResponse(response, HttpResponseStatus.NOT_FOUND, content);
     }
 
-    public static void assert500(HttpResponse response) {
+    public static void assert500(@NotNull HttpResponse response) {
         assertResponse(response, HttpResponseStatus.INTERNAL_SERVER_ERROR, null);
     }
 
-    public static void assert503(HttpResponse response) {
+    public static void assert503(@NotNull HttpResponse response) {
         assertResponse(response, HttpResponseStatus.SERVICE_UNAVAILABLE, null);
     }
 
-    public static void assertResponse(HttpResponse response, HttpResponseStatus status, String content) {
+    public static void assertResponse(@NotNull HttpResponse response,
+                                      @NotNull HttpResponseStatus status,
+                                      @Nullable String content) {
         assertResponse(response, HttpVersion.HTTP_1_1, status, content, null);
     }
 
@@ -92,7 +94,9 @@ public class AssertResponse {
         }
     }
 
-    public static void assertHeaders(@NotNull HttpResponse response, @NotNull CharSequence key, @NotNull CharSequence value) {
+    public static void assertHeaders(@NotNull HttpResponse response,
+                                     @NotNull CharSequence key,
+                                     @NotNull CharSequence value) {
         Assertions.assertEquals(value.toString(), response.headers().get(key));
     }
 
@@ -111,7 +115,7 @@ public class AssertResponse {
         assertHeaders(response, HttpHeaderNames.CONTENT_TYPE, expected);
     }
 
-    public static void assertContentContains(HttpResponse response, String ... substrings) {
+    public static void assertContentContains(@NotNull HttpResponse response, String ... substrings) {
         String content = content(response).toString(Charset.defaultCharset());
         for (String string : substrings) {
             Truth.assertThat(content).contains(string);
