@@ -3,6 +3,7 @@ package io.webby.testing;
 import com.google.inject.Injector;
 import com.google.inject.Module;
 import io.webby.Webby;
+import io.webby.app.AppLifetime;
 import io.webby.app.AppSettings;
 import io.webby.db.kv.StorageType;
 import io.webby.netty.marshal.Json;
@@ -71,6 +72,15 @@ public class Testing {
         return result;
     }
 
+    public static boolean waitFor(long millis) {
+        try {
+            Thread.sleep(millis);
+            return true;
+        } catch (InterruptedException ignore) {
+            return false;
+        }
+    }
+
     public static class Internals {
         private static Injector injector;
 
@@ -82,6 +92,12 @@ public class Testing {
             // An alternative that always works:
             // new GsonMarshaller(new Gson(), TestingBytes.CHARSET)
             return getInstance(Json.class);
+        }
+
+        public static void terminate() {
+            if (injector != null) {
+                injector.getInstance(AppLifetime.class).getLifetime().terminate();
+            }
         }
     }
 }
