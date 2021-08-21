@@ -1,6 +1,7 @@
 package io.webby.auth.session;
 
 import io.webby.db.codec.Codec;
+import io.webby.db.codec.CodecSize;
 import org.jetbrains.annotations.NotNull;
 
 import java.io.IOException;
@@ -11,6 +12,11 @@ import java.time.Instant;
 import static io.webby.db.codec.Codecs.*;
 
 public class SessionCodec implements Codec<Session> {
+    @Override
+    public @NotNull CodecSize size() {
+        return CodecSize.averageSize(160);   // 3 * 8 + 4 + 120 + 12
+    }
+
     @Override
     public int writeTo(@NotNull OutputStream output, @NotNull Session instance) throws IOException {
         return writeLong64(instance.sessionId(), output) +

@@ -1,6 +1,7 @@
 package io.webby.auth.user;
 
 import io.webby.db.codec.Codec;
+import io.webby.db.codec.CodecSize;
 import org.jetbrains.annotations.NotNull;
 
 import java.io.IOException;
@@ -10,6 +11,11 @@ import java.io.OutputStream;
 import static io.webby.db.codec.Codecs.*;
 
 public class DefaultUserCodec implements Codec<DefaultUser> {
+    @Override
+    public @NotNull CodecSize size() {
+        return CodecSize.fixed(12);
+    }
+
     @Override
     public int writeTo(@NotNull OutputStream output, @NotNull DefaultUser instance) throws IOException {
         return writeLong64(instance.userId(), output) +
