@@ -63,12 +63,20 @@ public abstract class BaseHttpIntegrationTest extends BaseChannelTest {
         return call(HttpMethod.PUT, uri, null);
     }
 
+    protected @NotNull HttpResponse delete(@NotNull String uri) {
+        return call(HttpMethod.DELETE, uri, null);
+    }
+
     protected @NotNull HttpResponse head(@NotNull String uri) {
         return call(HttpMethod.HEAD, uri, null);
     }
 
     protected @NotNull HttpResponse options(@NotNull String uri) {
         return call(HttpMethod.OPTIONS, uri, null);
+    }
+
+    protected @NotNull HttpResponse patch(@NotNull String uri) {
+        return call(HttpMethod.PATCH, uri, null);
     }
 
     protected @NotNull HttpResponse call(@NotNull HttpMethod method, @NotNull String uri, @Nullable Object content) {

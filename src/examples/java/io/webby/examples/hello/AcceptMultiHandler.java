@@ -19,6 +19,11 @@ public class AcceptMultiHandler {
         return "put(%d)".formatted(id);
     }
 
+    @DELETE
+    public String delete_int(int id) {
+        return "delete(%d)".formatted(id);
+    }
+
     @Call(methods = {"HEAD", "OPTIONS"})
     public String head_options_int(int id) {
         return "head_options(%d)".formatted(id);
