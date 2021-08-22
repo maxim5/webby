@@ -12,10 +12,10 @@ public class EasyByteBuf {
         return new AsciiString(bytes, false);
     }
 
-    public static @Nullable ByteBuf readUntil(@NotNull ByteBuf content, byte value, int maxLength) {
+    public static @Nullable ByteBuf readUntil(@NotNull ByteBuf content, byte value, int minLength, int maxLength) {
         int start = content.readerIndex();
         int index = content.indexOf(start, start + Math.min(maxLength, content.readableBytes()), value);
-        if (index < 0) {
+        if (index < minLength) {
             return null;
         }
         ByteBuf result = content.readBytes(index - start);
