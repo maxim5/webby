@@ -1,12 +1,17 @@
 package io.webby.ws.meta;
 
 import io.netty.buffer.ByteBuf;
+import io.netty.util.AsciiString;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
 import java.nio.charset.StandardCharsets;
 
 public class EasyByteBuf {
+    public static @NotNull AsciiString toAsciiString(byte @NotNull [] bytes) {
+        return new AsciiString(bytes, false);
+    }
+
     public static @Nullable ByteBuf readUntil(@NotNull ByteBuf content, byte value, int maxLength) {
         int start = content.readerIndex();
         int index = content.indexOf(start, start + Math.min(maxLength, content.readableBytes()), value);
@@ -18,34 +23,36 @@ public class EasyByteBuf {
         return result;
     }
 
-    public static long parseLongSafely(@NotNull ByteBuf content, long defaultValue) {
-        if (content.hasArray()) {
-            return parseLongSafely(content.array(), content.readerIndex(), content.readableBytes(), defaultValue);
-        } else {
-            try {
-                return Long.parseLong(content.toString(StandardCharsets.US_ASCII));
-            } catch (NumberFormatException e) {
-                return defaultValue;
+    public static int parseIntSafe(@NotNull ByteBuf content, int defaultValue) {
+        try {
+            if (content.hasArray()) {
+                return parseInt(content.array(), content.readerIndex(), content.readableBytes(), 10);
+            } else {
+                return Integer.parseInt(content.toString(StandardCharsets.US_ASCII));
             }
+        } catch (NumberFormatException ignore) {
+            return defaultValue;
         }
     }
 
-    // Does not support negative yet
-    // Does not check the boundary
-    public static long parseLongSafely(byte @NotNull [] bytes, int fromIndex, int length, long defaultValue) {
-        assert 0 <= fromIndex : "Invalid from index: %d".formatted(fromIndex);
-        assert length >= 0 : "Invalid length: %d".formatted(length);
-        assert fromIndex + length <= bytes.length : "Invalid to index: %d".formatted(fromIndex + length);
-
-        long result = 0;
-        for (int i = fromIndex, endIndex = fromIndex + length; i < endIndex; i++) {
-            int b = bytes[i];
-            if (b < '0' || b > '9') {
-                return defaultValue;
+    public static long parseLongSafe(@NotNull ByteBuf content, long defaultValue) {
+        try {
+            if (content.hasArray()) {
+                return parseLong(content.array(), content.readerIndex(), content.readableBytes(), 10);
+            } else {
+                return Long.parseLong(content.toString(StandardCharsets.US_ASCII));
             }
-            result = result * 10 + (b - '0');
+        } catch (NumberFormatException ignore) {
+            return defaultValue;
         }
-        return result;
+    }
+
+    public static int parseInt(byte @NotNull [] bytes, int fromIndex, int length, int radix) {
+        return Integer.parseInt(toAsciiString(bytes), fromIndex, length, radix);
+    }
+
+    public static long parseLong(byte @NotNull [] bytes, int fromIndex, int length, int radix) {
+        return Long.parseLong(toAsciiString(bytes), fromIndex, length, radix);
     }
 
     public static void writeIntString(long value, @NotNull ByteBuf dest) {

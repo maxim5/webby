@@ -20,7 +20,7 @@ public record TextSeparatorFrameMetadata(byte separator, int maxAcceptorIdSize) 
         if (acceptorId == null || requestId == null) {
             consumer.accept(null, RequestIds.NO_ID, content);
         } else {
-            consumer.accept(acceptorId, EasyByteBuf.parseLongSafely(requestId, RequestIds.NO_ID), content);
+            consumer.accept(acceptorId, EasyByteBuf.parseLongSafe(requestId, RequestIds.NO_ID), content);
         }
     }
 
