@@ -102,7 +102,7 @@ public class MapDbFactory extends BaseKeyValueFactory {
             return castAny(outOfBox);
         }
 
-        Codec<T> ownCustom = codecProvider.getCodecFor(klass);
+        Codec<T> ownCustom = codecProvider.getCodecOrNull(klass);
         if (ownCustom != null) {
             return new GroupSerializerObjectArray<>() {
                 @Override

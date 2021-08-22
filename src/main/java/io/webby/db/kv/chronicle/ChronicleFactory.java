@@ -70,7 +70,7 @@ public class ChronicleFactory extends BaseKeyValueFactory {
                                        @NotNull Consumer<SizeMarshaller> onSize,
                                        @NotNull LongConsumer onAverageValueSize,
                                        @NotNull Consumer<BytesReaderWriter<T>> onMarshaller) {
-        Codec<T> codec = provider.getCodecFor(klass);
+        Codec<T> codec = provider.getCodecOrNull(klass);
         SerializationBuilder<T> serialization = new SerializationBuilder<>(klass);
         CodecSize codecSize = bestSize(serialization, codec);
         switch (codecSize.estimate()) {

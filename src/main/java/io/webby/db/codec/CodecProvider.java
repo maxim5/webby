@@ -26,9 +26,14 @@ public class CodecProvider {
             String.class, STRING_CODEC
     );
 
-    @Nullable
-    public <T> Codec<T> getCodecFor(@NotNull Class<T> klass) {
+    public <T> @Nullable Codec<T> getCodecOrNull(@NotNull Class<T> klass) {
         return castAny(map.get(klass));
+    }
+
+    public <T> @NotNull Codec<T> getCodecOrDie(@NotNull Class<T> klass) {
+        Codec<T> codec = getCodecOrNull(klass);
+        assert codec != null : "No codec found the class: %s".formatted(klass);
+        return codec;
     }
 
     public static final Codec<Integer> INT_CODEC = new Codec<>() {

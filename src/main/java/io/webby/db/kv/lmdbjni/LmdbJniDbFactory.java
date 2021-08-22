@@ -28,12 +28,8 @@ public class LmdbJniDbFactory extends BaseKeyValueFactory {
 
     @Override
     public @NotNull <K, V> LmdbJniDb<K, V> getDb(@NotNull String name, @NotNull Class<K> key, @NotNull Class<V> value) {
-        Codec<K> keyCodec = codecProvider.getCodecFor(key);
-        assert keyCodec != null : "No codec found the key class: %s".formatted(key);
-
-        Codec<V> valueCodec = codecProvider.getCodecFor(value);
-        assert valueCodec != null : "No codec found the value class: %s".formatted(value);
-
+        Codec<K> keyCodec = codecProvider.getCodecOrDie(key);
+        Codec<V> valueCodec = codecProvider.getCodecOrDie(value);
         Database database = env.openDatabase(name, Constants.CREATE);
         return new LmdbJniDb<>(env, database, keyCodec, valueCodec);
     }
