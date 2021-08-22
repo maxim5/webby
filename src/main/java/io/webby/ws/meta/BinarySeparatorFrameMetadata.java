@@ -12,6 +12,11 @@ public record BinarySeparatorFrameMetadata(byte separator, int maxAcceptorIdSize
         this(DEFAULT_SEPARATOR, MAX_ID_SIZE);
     }
 
+    public BinarySeparatorFrameMetadata {
+        assert maxAcceptorIdSize <= MAX_ID_SIZE :
+                "The acceptorId size can't be larger than %d: %d".formatted(MAX_ID_SIZE, maxAcceptorIdSize);
+    }
+
     @Override
     public void parse(@NotNull ByteBuf content, @NotNull MetadataConsumer consumer) {
         int size = content.readableBytes();

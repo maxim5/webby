@@ -6,6 +6,10 @@ import io.webby.netty.ws.Constants.RequestIds;
 import org.jetbrains.annotations.NotNull;
 
 public record BinaryFixedSizeFrameMetadata(int size) implements FrameMetadata {
+    public BinaryFixedSizeFrameMetadata {
+        assert size <= MAX_ID_SIZE : "The acceptorId size can't be larger than %d: %d".formatted(MAX_ID_SIZE, size);
+    }
+
     @Override
     public void parse(@NotNull ByteBuf content, @NotNull MetadataConsumer consumer) {
         if (content.readableBytes() >= size + 8) {
