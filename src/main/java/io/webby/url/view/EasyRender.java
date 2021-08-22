@@ -2,7 +2,7 @@ package io.webby.url.view;
 
 import io.webby.common.SystemProperties;
 import io.webby.util.EasyCast;
-import io.webby.util.ThrowConsumer;
+import io.webby.util.func.ThrowConsumer;
 import org.jetbrains.annotations.NotNull;
 
 import java.io.*;

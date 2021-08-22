@@ -1,4 +1,4 @@
-package io.webby.util;
+package io.webby.util.func;
 
 @FunctionalInterface
 public interface ThrowFunction<T, R, E extends Throwable> {

@@ -37,7 +37,7 @@ import io.webby.url.view.Renderer;
 import io.webby.util.Pair;
 import io.webby.util.Rethrow.Consumers;
 import io.webby.util.Rethrow.Guava;
-import io.webby.util.ThrowConsumer;
+import io.webby.util.func.ThrowConsumer;
 import org.checkerframework.checker.nullness.qual.Nullable;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.VisibleForTesting;

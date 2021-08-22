@@ -1,6 +1,9 @@
 package io.webby.util;
 
 import com.google.errorprone.annotations.CanIgnoreReturnValue;
+import io.webby.util.func.ThrowConsumer;
+import io.webby.util.func.ThrowFunction;
+import io.webby.util.func.ThrowSupplier;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.function.Consumer;

@@ -11,7 +11,7 @@ import freemarker.template.Version;
 import io.webby.app.Settings;
 import io.webby.common.InjectorHelper;
 import io.webby.url.HandlerConfigError;
-import io.webby.util.ThrowConsumer;
+import io.webby.util.func.ThrowConsumer;
 import org.jetbrains.annotations.NotNull;
 
 import java.io.IOException;

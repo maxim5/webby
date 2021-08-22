@@ -9,7 +9,7 @@ import com.fizzed.rocker.runtime.DefaultRockerModel;
 import com.fizzed.rocker.runtime.OutputStreamOutput;
 import com.fizzed.rocker.runtime.StringBuilderOutput;
 import io.webby.url.HandlerConfigError;
-import io.webby.util.ThrowConsumer;
+import io.webby.util.func.ThrowConsumer;
 import org.jetbrains.annotations.NotNull;
 
 import java.io.OutputStream;

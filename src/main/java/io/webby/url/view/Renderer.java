@@ -1,7 +1,7 @@
 package io.webby.url.view;
 
 import io.webby.url.HandlerConfigError;
-import io.webby.util.ThrowConsumer;
+import io.webby.util.func.ThrowConsumer;
 import org.jetbrains.annotations.NotNull;
 
 import java.io.OutputStream;

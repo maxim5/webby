@@ -2,7 +2,7 @@ package io.webby.url.view;
 
 import com.google.common.flogger.FluentLogger;
 import io.webby.url.HandlerConfigError;
-import io.webby.util.ThrowConsumer;
+import io.webby.util.func.ThrowConsumer;
 import org.jetbrains.annotations.NotNull;
 
 import java.io.OutputStream;

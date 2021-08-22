@@ -11,7 +11,7 @@ import gg.jte.resolve.DirectoryCodeResolver;
 import gg.jte.runtime.Constants;
 import io.webby.app.Settings;
 import io.webby.common.InjectorHelper;
-import io.webby.util.ThrowConsumer;
+import io.webby.util.func.ThrowConsumer;
 import org.jetbrains.annotations.NotNull;
 
 import java.io.IOException;
