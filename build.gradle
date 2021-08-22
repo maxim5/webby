@@ -56,6 +56,7 @@ dependencies {
     compileOnly group: 'org.freemarker', name: 'freemarker', version: '2.3.31'
 
     // Key-Values
+    compileOnly 'com.linkedin.paldb:paldb:1.2.0'
     compileOnly 'net.openhft:chronicle-map:3.21ea81'
     compileOnly group: 'org.deephacks.lmdbjni', name: 'lmdbjni', version: '0.4.6'
     runtimeOnly group: 'org.deephacks.lmdbjni', name: "lmdbjni-$os", version: '0.4.6'
