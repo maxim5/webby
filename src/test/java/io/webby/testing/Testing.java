@@ -11,13 +11,17 @@ import org.apache.logging.log4j.Level;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.core.config.Configurator;
 import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 import org.junit.jupiter.api.Assertions;
 
+import java.nio.charset.Charset;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
 import java.util.function.Consumer;
+
+import static org.junit.jupiter.api.Assertions.assertNotNull;
 
 public class Testing {
     public static final boolean LOG_VERBOSE = false;
@@ -85,7 +89,16 @@ public class Testing {
         private static Injector injector;
 
         public static <T> @NotNull T getInstance(@NotNull Class<T> type) {
+            assertNotNull(injector, "Test Guice Injector is not initialized");
             return injector.getInstance(type);
+        }
+
+        public static <T> @Nullable T getInstanceOrNull(@NotNull Class<T> type) {
+            return injector != null ? getInstance(type) : null;
+        }
+
+        public static @NotNull Charset charset() {
+            return injector != null ? getInstance(Charset.class) : Charset.defaultCharset();
         }
 
         public static @NotNull Json json() {

@@ -46,6 +46,15 @@ public class BinarySeparatorFrameMetadataTest {
     }
 
     @Test
+    public void parse_invalid_empty() {
+        new BinarySeparatorFrameMetadata().parse(asByteBuf(""), (acceptorId, requestId, content) -> {
+            assertNull(acceptorId);
+            assertEquals(Constants.RequestIds.NO_ID, requestId);
+            assertByteBuf(content, "");
+        });
+    }
+
+    @Test
     public void parse_invalid_empty_acceptorId() {
         new BinarySeparatorFrameMetadata().parse(asByteBuf(" 00000000 bar"), (acceptorId, requestId, content) -> {
             assertNull(acceptorId);

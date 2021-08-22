@@ -14,7 +14,7 @@ import java.util.Arrays;
 import static io.webby.util.EasyCast.castAny;
 
 public class TestingBytes {
-    public static final Charset CHARSET = Charset.defaultCharset();
+    public static final Charset CHARSET = Testing.Internals.charset();
     private static final Readability READABILITY_MODE = Readability.HUMAN_READABLE;
 
     private enum Readability { ORIGINAL, HUMAN_READABLE, BYTE_DETAILS }
@@ -29,6 +29,14 @@ public class TestingBytes {
 
     public static @Nullable ByteBuf asByteBufOrNull(@Nullable String content) {
         return content != null ? asByteBuf(content) : null;
+    }
+
+    public static @NotNull String asString(byte @NotNull [] bytes) {
+        return new String(bytes, CHARSET);
+    }
+
+    public static @NotNull String asString(@Nullable ByteBuf buf) {
+        return buf != null ? buf.toString(CHARSET) : "";
     }
 
     public static @Nullable String asStringOrNull(@Nullable ByteBuf buf) {

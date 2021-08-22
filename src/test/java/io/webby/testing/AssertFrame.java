@@ -14,6 +14,14 @@ import java.util.Arrays;
 import java.util.List;
 
 public class AssertFrame {
+    public static void assertTextFrame(@NotNull WebSocketFrame frame, @NotNull String expected) {
+        assertTextFrames(List.of(frame), expected);
+    }
+
+    public static void assertBinaryFrame(@NotNull WebSocketFrame frame, @NotNull String expected) {
+        assertBinaryFrames(List.of(frame), expected);
+    }
+
     public static void assertFrames(@NotNull Iterable<WebSocketFrame> frames) {
         Truth.assertThat(frames).isEmpty();
     }
@@ -38,7 +46,7 @@ public class AssertFrame {
         Truth.assertThat(frames).containsExactlyElementsIn(expected.stream().map(TestingBytes::replaceWithReadable).toList());
     }
 
-    public static void assertBadFrame(@NotNull Iterable<WebSocketFrame> frames) {
+    public static void assertNoFrames(@NotNull Iterable<WebSocketFrame> frames) {
         Truth.assertThat(frames).isEmpty();
     }
 

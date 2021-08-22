@@ -110,7 +110,7 @@ public class AcceptingDifferentTest extends BaseWebsocketIntegrationTest {
         """.trim());
         assertThat(agent.getIncoming()).containsExactly(new PrimitiveMessage().withChar('a').withBool(true));
 
-        assertBadFrame(sendBinary("primitive 777 {'ch': 'a', 'bool': true}"));
+        assertNoFrames(sendBinary("primitive 777 {'ch': 'a', 'bool': true}"));
     }
 
     @Test
@@ -133,7 +133,7 @@ public class AcceptingDifferentTest extends BaseWebsocketIntegrationTest {
         """.trim());
         assertThat(agent.getIncoming()).containsExactly(new PrimitiveMessage().withChar('a').withBool(false));
 
-        assertBadFrame(sendBinary("primitive 777 {'ch': 'a', 'bool': true}"));
+        assertNoFrames(sendBinary("primitive 777 {'ch': 'a', 'bool': true}"));
     }
 
     @Test
@@ -146,7 +146,7 @@ public class AcceptingDifferentTest extends BaseWebsocketIntegrationTest {
         """.trim());
         assertThat(agent.getIncoming()).containsExactly(new PrimitiveMessage().withChar('b').withBool(true));
 
-        assertBadFrame(sendText("primitive 777 {'ch': 'a', 'bool': true}"));
+        assertNoFrames(sendText("primitive 777 {'ch': 'a', 'bool': true}"));
     }
 
     @Test
@@ -169,7 +169,7 @@ public class AcceptingDifferentTest extends BaseWebsocketIntegrationTest {
         """.trim());
         assertThat(agent.getIncoming()).containsExactly(new PrimitiveMessage().withChar('b').withBool(false));
 
-        assertBadFrame(sendText("primitive 777 {'ch': 'a', 'bool': true}"));
+        assertNoFrames(sendText("primitive 777 {'ch': 'a', 'bool': true}"));
     }
 
     @Test
