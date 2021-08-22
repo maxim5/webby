@@ -9,6 +9,7 @@ public class DbModule extends AbstractModule {
     @Override
     protected void configure() {
         bind(CodecProvider.class).asEagerSingleton();
+        bind(AgnosticKeyValueFactory.class).asEagerSingleton();
         bind(KeyValueFactory.class).to(AgnosticKeyValueFactory.class).asEagerSingleton();
     }
 }
