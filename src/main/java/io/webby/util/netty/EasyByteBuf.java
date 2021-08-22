@@ -1,4 +1,4 @@
-package io.webby.ws.meta;
+package io.webby.util.netty;
 
 import io.netty.buffer.ByteBuf;
 import io.netty.util.AsciiString;
@@ -55,7 +55,7 @@ public class EasyByteBuf {
         return Long.parseLong(toAsciiString(bytes), fromIndex, length, radix);
     }
 
-    public static void writeIntString(long value, @NotNull ByteBuf dest) {
+    public static void writeIntString(int value, @NotNull ByteBuf dest) {
         dest.writeCharSequence(String.valueOf(value), StandardCharsets.US_ASCII);
     }
 

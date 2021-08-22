@@ -1,4 +1,4 @@
-package io.webby.ws.meta;
+package io.webby.util.netty;
 
 import io.netty.buffer.ByteBuf;
 import org.junit.jupiter.api.Test;

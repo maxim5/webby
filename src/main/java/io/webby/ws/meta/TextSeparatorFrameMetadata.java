@@ -3,6 +3,7 @@ package io.webby.ws.meta;
 import io.netty.buffer.ByteBuf;
 import io.netty.buffer.Unpooled;
 import io.webby.netty.ws.Constants.RequestIds;
+import io.webby.util.netty.EasyByteBuf;
 import org.jetbrains.annotations.NotNull;
 
 public record TextSeparatorFrameMetadata(byte separator, int maxAcceptorIdSize) implements FrameMetadata {
