@@ -1,6 +1,12 @@
 <component name="ProjectRunConfigurationManager">
   <configuration default="false" name="All Tests" type="JUnit" factoryName="JUnit">
     <module name="webby.integration" />
+    <extension name="coverage">
+      <pattern>
+        <option name="PATTERN" value="io.webby.*" />
+        <option name="ENABLED" value="true" />
+      </pattern>
+    </extension>
     <option name="PACKAGE_NAME" value="io.webby" />
     <option name="MAIN_CLASS_NAME" value="" />
     <option name="METHOD_NAME" value="" />
