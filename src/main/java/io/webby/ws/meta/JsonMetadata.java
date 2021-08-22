@@ -5,6 +5,7 @@ import io.netty.buffer.ByteBuf;
 import io.netty.buffer.Unpooled;
 import io.webby.netty.marshal.Json;
 import io.webby.netty.ws.Constants.RequestIds;
+import io.webby.netty.ws.errors.BadFrameException;
 import org.jetbrains.annotations.NotNull;
 
 import java.nio.charset.Charset;
@@ -13,14 +14,20 @@ import java.util.Map;
 public record JsonMetadata(@NotNull Json json, @NotNull Charset charset) implements FrameMetadata {
     @Override
     public void parse(@NotNull ByteBuf content, @NotNull MetadataConsumer consumer) {
-        Map<?, ?> map = json.readByteBuf(content, Map.class);
+        content.markReaderIndex();
+        Map<?, ?> map;
+        try {
+            map = json.readByteBuf(content, Map.class);
+        } catch (Exception e) {
+            throw new BadFrameException("Failed to parse json", e, null);
+        }
         Object on = map.get("on");
         Object id = map.get("id");
         Object data = map.get("data");
         if (on instanceof String acceptorId && id instanceof Number requestId && data instanceof String inner) {
             consumer.accept(Unpooled.copiedBuffer(acceptorId, charset), requestId.longValue(), Unpooled.copiedBuffer(inner, charset));
         } else {
-            consumer.accept(null, RequestIds.NO_ID, content);
+            consumer.accept(null, RequestIds.NO_ID, content.resetReaderIndex());
         }
     }
 
