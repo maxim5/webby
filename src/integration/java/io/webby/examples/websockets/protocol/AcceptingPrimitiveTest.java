@@ -148,7 +148,7 @@ public class AcceptingPrimitiveTest extends BaseWebsocketIntegrationTest {
     @Test
     public void on_json_metadata() {
         AcceptingPrimitive agent = setupJson(FrameType.TEXT_ONLY,
-                                             new JsonMetadata(Testing.Internals.json(), TestingBytes.CHARSET));
+                                             new JsonMetadata(Testing.Internals.json(), Testing.Internals.charset()));
         Queue<WebSocketFrame> frames = sendText("{'on': 'primitive', id: 123, data: \"{'ch': 'a'}\"}");
         AssertFrame.assertTextFrames(frames, """
         {"id":123,"code":0,\

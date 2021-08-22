@@ -5,6 +5,7 @@ import io.webby.netty.ws.Constants;
 import org.junit.jupiter.api.Test;
 
 import static io.webby.testing.TestingBytes.*;
+import static io.webby.ws.meta.AssertMeta.assertNotParsed;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNull;
 
@@ -47,19 +48,11 @@ public class BinaryFixedSizeFrameMetadataTest {
 
     @Test
     public void parse_invalid_empty() {
-        new BinaryFixedSizeFrameMetadata(3).parse(asByteBuf(""), (acceptorId, requestId, content) -> {
-            assertNull(acceptorId);
-            assertEquals(Constants.RequestIds.NO_ID, requestId);
-            assertByteBuf(content, "");
-        });
+        assertNotParsed("", new BinaryFixedSizeFrameMetadata(3));
     }
 
     @Test
     public void parse_invalid_not_enough_bytes() {
-        new BinaryFixedSizeFrameMetadata(3).parse(asByteBuf("xx12345678"), (acceptorId, requestId, content) -> {
-            assertNull(acceptorId);
-            assertEquals(Constants.RequestIds.NO_ID, requestId);
-            assertByteBuf(content, "xx12345678");
-        });
+        assertNotParsed("xx12345678", new BinaryFixedSizeFrameMetadata(3));
     }
 }

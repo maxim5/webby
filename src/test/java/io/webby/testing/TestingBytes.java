@@ -44,15 +44,24 @@ public class TestingBytes {
     }
 
     public static void assertByteBuf(@Nullable ByteBuf buf, @Nullable String expected) {
-        Assertions.assertEquals(expected, TestingBytes.asStringOrNull(buf));
+        Assertions.assertEquals(expected, asStringOrNull(buf));
     }
 
-    public static @NotNull ByteBuf asReadable(@NotNull ByteBuf buf) {
+    public static void assertByteBufs(@Nullable ByteBuf buf, @Nullable ByteBuf expected) {
+        Assertions.assertEquals(asReadableOrNull(expected), asReadableOrNull(buf));
+    }
+
+    public static @NotNull ByteBuf asReadable(@Nullable ByteBuf buf) {
+        ByteBuf byteBuf = buf == null ? Unpooled.EMPTY_BUFFER : buf;
         return switch (READABILITY_MODE) {
             case ORIGINAL -> throw new IllegalStateException("Readability mode is off: %s".formatted(READABILITY_MODE));
-            case HUMAN_READABLE -> new HumanReadableByteBuf(buf);
-            case BYTE_DETAILS -> new ByteDetailsReadableByteBuf(buf);
+            case HUMAN_READABLE -> new HumanReadableByteBuf(byteBuf);
+            case BYTE_DETAILS -> new ByteDetailsReadableByteBuf(byteBuf);
         };
+    }
+
+    public static @Nullable ByteBuf asReadableOrNull(@Nullable ByteBuf buf) {
+        return buf == null ? null : asReadable(buf);
     }
 
     public static <T> @NotNull T replaceWithReadable(@NotNull T object) {

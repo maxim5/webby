@@ -1,12 +1,11 @@
 package io.webby.ws.meta;
 
 import com.google.common.primitives.Longs;
-import io.webby.netty.ws.Constants;
 import org.junit.jupiter.api.Test;
 
 import static io.webby.testing.TestingBytes.*;
+import static io.webby.ws.meta.AssertMeta.assertNotParsed;
 import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertNull;
 
 public class BinarySeparatorFrameMetadataTest {
     @Test
@@ -47,65 +46,36 @@ public class BinarySeparatorFrameMetadataTest {
 
     @Test
     public void parse_invalid_empty() {
-        new BinarySeparatorFrameMetadata().parse(asByteBuf(""), (acceptorId, requestId, content) -> {
-            assertNull(acceptorId);
-            assertEquals(Constants.RequestIds.NO_ID, requestId);
-            assertByteBuf(content, "");
-        });
+        assertNotParsed("", new BinarySeparatorFrameMetadata());
     }
 
     @Test
     public void parse_invalid_empty_acceptorId() {
-        new BinarySeparatorFrameMetadata().parse(asByteBuf(" 00000000 bar"), (acceptorId, requestId, content) -> {
-            assertNull(acceptorId);
-            assertEquals(Constants.RequestIds.NO_ID, requestId);
-            assertByteBuf(content, " 00000000 bar");
-        });
+        assertNotParsed(" 00000000 bar", new BinarySeparatorFrameMetadata());
     }
 
     @Test
     public void parse_invalid_too_long_acceptorId() {
-        new BinarySeparatorFrameMetadata((byte) ' ', 3)
-                .parse(asByteBuf("foobar 00000000 bar"), (acceptorId, requestId, content) -> {
-            assertNull(acceptorId);
-            assertEquals(Constants.RequestIds.NO_ID, requestId);
-            assertByteBuf(content, "foobar 00000000 bar");
-        });
+        assertNotParsed("foobar 00000000 bar", new BinarySeparatorFrameMetadata((byte) ' ', 3));
     }
 
     @Test
     public void parse_invalid_no_separators() {
-        new BinarySeparatorFrameMetadata().parse(asByteBuf("foo00000000bar"), (acceptorId, requestId, content) -> {
-            assertNull(acceptorId);
-            assertEquals(Constants.RequestIds.NO_ID, requestId);
-            assertByteBuf(content, "foo00000000bar");
-        });
+        assertNotParsed("foo00000000bar", new BinarySeparatorFrameMetadata());
     }
 
     @Test
     public void parse_invalid_no_request_id() {
-        new BinarySeparatorFrameMetadata().parse(asByteBuf("foo "), (acceptorId, requestId, content) -> {
-            assertNull(acceptorId);
-            assertEquals(Constants.RequestIds.NO_ID, requestId);
-            assertByteBuf(content, "foo ");
-        });
+        assertNotParsed("foo ", new BinarySeparatorFrameMetadata());
     }
 
     @Test
     public void parse_invalid_not_enough_bytes() {
-        new BinarySeparatorFrameMetadata().parse(asByteBuf("foo 00000000"), (acceptorId, requestId, content) -> {
-            assertNull(acceptorId);
-            assertEquals(Constants.RequestIds.NO_ID, requestId);
-            assertByteBuf(content, "foo 00000000");
-        });
+        assertNotParsed("foo 00000000", new BinarySeparatorFrameMetadata());
     }
 
     @Test
     public void parse_only_separators() {
-        new BinarySeparatorFrameMetadata().parse(asByteBuf("             "), (acceptorId, requestId, content) -> {
-            assertNull(acceptorId);
-            assertEquals(Constants.RequestIds.NO_ID, requestId);
-            assertByteBuf(content, "             ");
-        });
+        assertNotParsed("             ", new BinarySeparatorFrameMetadata());
     }
 }
