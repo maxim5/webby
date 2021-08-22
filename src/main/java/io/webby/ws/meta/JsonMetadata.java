@@ -15,16 +15,17 @@ public record JsonMetadata(@NotNull Json json, @NotNull Charset charset) impleme
     @Override
     public void parse(@NotNull ByteBuf content, @NotNull MetadataConsumer consumer) {
         content.markReaderIndex();
+
         Map<?, ?> map;
         try {
             map = json.readByteBuf(content, Map.class);
         } catch (Exception e) {
             throw new BadFrameException("Failed to parse json", e, null);
         }
-        Object on = map.get("on");
-        Object id = map.get("id");
-        Object data = map.get("data");
-        if (on instanceof String acceptorId && id instanceof Number requestId && data instanceof String inner) {
+
+        if (map.get("on") instanceof String acceptorId && acceptorId.length() > 0 &&
+            map.get("id") instanceof Number requestId &&
+            map.get("data") instanceof String inner) {
             consumer.accept(Unpooled.copiedBuffer(acceptorId, charset), requestId.longValue(), Unpooled.copiedBuffer(inner, charset));
         } else {
             consumer.accept(null, RequestIds.NO_ID, content.resetReaderIndex());

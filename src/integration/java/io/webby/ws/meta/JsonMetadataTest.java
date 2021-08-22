@@ -9,8 +9,7 @@ import org.junit.jupiter.params.provider.EnumSource;
 
 import static io.webby.testing.TestingBytes.asByteBuf;
 import static io.webby.testing.TestingBytes.assertByteBuf;
-import static io.webby.ws.meta.AssertMeta.EMPTY_CONSUMER;
-import static io.webby.ws.meta.AssertMeta.assertNotParsed;
+import static io.webby.ws.meta.AssertMeta.*;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 
@@ -21,12 +20,20 @@ public class JsonMetadataTest {
         Testing.testStartup(settings -> settings.setProperty("json.library", library.slug));
         JsonMetadata metadata = new JsonMetadata(Testing.Internals.json(), Testing.Internals.charset());
 
-        ByteBuf input = asByteBuf("""
+        ByteBuf input1 = asByteBuf("""
             {"on": "foo", "id": 123, "data": "{'x':'y'}"}
         """);
-
-        metadata.parse(input, (acceptorId, requestId, content) -> {
+        metadata.parse(input1, (acceptorId, requestId, content) -> {
             assertByteBuf(acceptorId, "foo");
+            assertEquals(123, requestId);
+            assertByteBuf(content, "{'x':'y'}");
+        });
+
+        ByteBuf input2 = asByteBuf("""
+            {"on": "bar", "id": 123.0, "data": "{'x':'y'}"}
+        """);
+        metadata.parse(input2, (acceptorId, requestId, content) -> {
+            assertByteBuf(acceptorId, "bar");
             assertEquals(123, requestId);
             assertByteBuf(content, "{'x':'y'}");
         });
@@ -40,8 +47,13 @@ public class JsonMetadataTest {
 
         assertNotParsed("{}", metadata);
         assertNotParsed("{\"on\": \"bar\"}", metadata);
+        assertNotParsed("{\"on\": \"\", \"id\": 123, \"data\": \"\"}", metadata);
         assertNotParsed("{\"on_\": \"foo\", \"id_\": 123, \"data_\": \"\"}", metadata);
         assertNotParsed("{\"on\": \"foo\", \"id\": \"\", \"data\": \"\"}", metadata);
+        assertNotParsed("{\"on\": \"foo\", \"id\": 123, \"data\": 123}", metadata);
+
+        assertNotParsedOrThrows(BadFrameException.class, "[]", metadata);
+        assertNotParsedOrThrows(BadFrameException.class, "123", metadata);
     }
 
     @ParameterizedTest
@@ -49,7 +61,13 @@ public class JsonMetadataTest {
     public void parse_invalid_json(SupportedJsonLibrary library) {
         Testing.testStartup(settings -> settings.setProperty("json.library", library.slug));
         JsonMetadata metadata = new JsonMetadata(Testing.Internals.json(), Testing.Internals.charset());
+
         assertThrows(BadFrameException.class, () -> metadata.parse(asByteBuf(""), EMPTY_CONSUMER));
+        assertThrows(BadFrameException.class, () -> metadata.parse(asByteBuf("foo"), EMPTY_CONSUMER));
+        assertThrows(BadFrameException.class, () -> metadata.parse(asByteBuf("<"), EMPTY_CONSUMER));
         assertThrows(BadFrameException.class, () -> metadata.parse(asByteBuf("!@)*$?<>&(#&(%_#?`~|:"), EMPTY_CONSUMER));
+
+        assertNotParsedOrThrows(BadFrameException.class, "{", metadata);
+        assertNotParsedOrThrows(BadFrameException.class, "}", metadata);
     }
 }
