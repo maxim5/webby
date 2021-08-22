@@ -44,6 +44,10 @@ public interface KeyValueDb<K, V> extends Closeable {
 
     boolean containsValue(@NotNull V value);
 
+    default @NotNull Iterable<K> keys() {
+        return keySet();
+    }
+
     @NotNull Set<K> keySet();
 
     @NotNull Collection<V> values();
