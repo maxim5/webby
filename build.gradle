@@ -57,6 +57,7 @@ dependencies {
 
     // Key-Values
     compileOnly 'com.linkedin.paldb:paldb:1.2.0'
+    compileOnly 'io.swaydb:java_2.13:0.16.2'
     compileOnly 'net.openhft:chronicle-map:3.21ea81'
     compileOnly group: 'org.deephacks.lmdbjni', name: 'lmdbjni', version: '0.4.6'
     runtimeOnly group: 'org.deephacks.lmdbjni', name: "lmdbjni-$os", version: '0.4.6'

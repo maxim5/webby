@@ -8,6 +8,7 @@ import io.webby.db.kv.javamap.JavaMapDbFactory;
 import io.webby.db.kv.lmdbjava.LmdbJavaDbFactory;
 import io.webby.db.kv.lmdbjni.LmdbJniDbFactory;
 import io.webby.db.kv.mapdb.MapDbFactory;
+import io.webby.db.kv.swaydb.SwayDbFactory;
 import org.jetbrains.annotations.NotNull;
 
 public class AgnosticKeyValueFactory implements KeyValueFactory {
@@ -39,6 +40,7 @@ public class AgnosticKeyValueFactory implements KeyValueFactory {
             case CHRONICLE_MAP -> helper.lazySingleton(ChronicleFactory.class);
             case LMDB_JAVA -> helper.lazySingleton(LmdbJavaDbFactory.class);
             case LMDB_JNI -> helper.lazySingleton(LmdbJniDbFactory.class);
+            case SWAY_DB -> helper.lazySingleton(SwayDbFactory.class);
         };
     }
 }

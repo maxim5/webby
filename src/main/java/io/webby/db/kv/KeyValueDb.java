@@ -4,11 +4,9 @@ import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
 import java.io.Closeable;
-import java.util.Collection;
-import java.util.Map;
-import java.util.Objects;
-import java.util.Set;
+import java.util.*;
 import java.util.function.Supplier;
+import java.util.stream.Collectors;
 
 // More Map methods: compute
 public interface KeyValueDb<K, V> extends Closeable {
@@ -36,6 +34,10 @@ public interface KeyValueDb<K, V> extends Closeable {
     default @NotNull V getOrCompute(@NotNull K key, @NotNull Supplier<V> supplier) {
         V value = get(key);
         return value != null ? value : supplier.get();
+    }
+
+    default @NotNull Optional<V> getOptional(@NotNull K key) {
+        return Optional.ofNullable(get(key));
     }
 
     default boolean containsKey(@NotNull K key) {
@@ -106,6 +108,10 @@ public interface KeyValueDb<K, V> extends Closeable {
     }
 
     void clear();
+
+    default @NotNull Map<K, V> copyToMap() {
+        return entrySet().stream().collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue));
+    }
 
     void flush();
 
