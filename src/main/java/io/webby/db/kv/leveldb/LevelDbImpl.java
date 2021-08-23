@@ -1,4 +1,4 @@
-package io.webby.db.kv.leveldbjni;
+package io.webby.db.kv.leveldb;
 
 import io.webby.db.codec.Codec;
 import io.webby.db.kv.KeyValueDb;
@@ -19,10 +19,10 @@ import java.util.function.Function;
 
 import static io.webby.util.EasyIO.Close.closeQuietly;
 
-public class LevelDbJni<K, V> extends ByteArrayDb<K, V> implements KeyValueDb<K, V> {
+public class LevelDbImpl<K, V> extends ByteArrayDb<K, V> implements KeyValueDb<K, V> {
     private final DB db;
 
-    public LevelDbJni(@NotNull DB db, @NotNull Codec<K> keyCodec, @NotNull Codec<V> valueCodec) {
+    public LevelDbImpl(@NotNull DB db, @NotNull Codec<K> keyCodec, @NotNull Codec<V> valueCodec) {
         super(keyCodec, valueCodec);
         this.db = db;
     }

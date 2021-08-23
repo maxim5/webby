@@ -8,7 +8,8 @@ import io.webby.db.kv.KeyValueFactory;
 import io.webby.db.kv.StorageType;
 import io.webby.db.kv.chronicle.ChronicleFactory;
 import io.webby.db.kv.javamap.JavaMapDbFactory;
-import io.webby.db.kv.leveldbjni.LevelDbJniFactory;
+import io.webby.db.kv.leveldb.LevelDbIq80Factory;
+import io.webby.db.kv.leveldb.LevelDbJniFactory;
 import io.webby.db.kv.lmdbjava.LmdbJavaDbFactory;
 import io.webby.db.kv.lmdbjni.LmdbJniDbFactory;
 import io.webby.db.kv.mapdb.MapDbFactory;
@@ -42,6 +43,7 @@ public class AgnosticKeyValueFactory implements KeyValueFactory {
         return switch (storageType) {
             case CHRONICLE_MAP -> helper.lazySingleton(ChronicleFactory.class);
             case JAVA_MAP -> helper.lazySingleton(JavaMapDbFactory.class);
+            case LEVEL_DB_IQ80 -> helper.lazySingleton(LevelDbIq80Factory.class);
             case LEVEL_DB_JNI -> helper.lazySingleton(LevelDbJniFactory.class);
             case LMDB_JAVA -> helper.lazySingleton(LmdbJavaDbFactory.class);
             case LMDB_JNI -> helper.lazySingleton(LmdbJniDbFactory.class);
