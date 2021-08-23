@@ -1,6 +1,6 @@
 package io.webby.db.kv.chronicle;
 
-import io.webby.db.kv.DefaultKeyValueDb;
+import io.webby.db.kv.impl.DefaultKeyValueDb;
 import net.openhft.chronicle.map.ChronicleMap;
 import org.jetbrains.annotations.NotNull;
 

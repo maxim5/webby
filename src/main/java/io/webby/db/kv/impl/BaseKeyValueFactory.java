@@ -1,7 +1,9 @@
-package io.webby.db.kv;
+package io.webby.db.kv.impl;
 
 import com.google.inject.Inject;
 import io.webby.common.Lifetime;
+import io.webby.db.kv.KeyValueDb;
+import io.webby.db.kv.KeyValueFactory;
 import org.jetbrains.annotations.NotNull;
 
 import java.io.Closeable;

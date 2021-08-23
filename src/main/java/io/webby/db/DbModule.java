@@ -1,7 +1,7 @@
 package io.webby.db;
 
 import com.google.inject.AbstractModule;
-import io.webby.db.kv.AgnosticKeyValueFactory;
+import io.webby.db.kv.impl.AgnosticKeyValueFactory;
 import io.webby.db.kv.KeyValueFactory;
 import io.webby.db.codec.CodecProvider;
 

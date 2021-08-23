@@ -5,7 +5,7 @@ import io.webby.app.AppConfigException;
 import io.webby.app.Settings;
 import io.webby.db.codec.Codec;
 import io.webby.db.codec.CodecProvider;
-import io.webby.db.kv.BaseKeyValueFactory;
+import io.webby.db.kv.impl.BaseKeyValueFactory;
 import io.webby.db.kv.KeyValueDb;
 import org.jetbrains.annotations.NotNull;
 

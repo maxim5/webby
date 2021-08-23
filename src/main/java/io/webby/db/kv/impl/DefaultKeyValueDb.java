@@ -1,5 +1,6 @@
-package io.webby.db.kv;
+package io.webby.db.kv.impl;
 
+import io.webby.db.kv.KeyValueDb;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 

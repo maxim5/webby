@@ -1,9 +1,9 @@
 package io.webby.db.kv.lmdbjava;
 
 import com.google.common.collect.Streams;
-import io.netty.buffer.Unpooled;
 import io.webby.db.codec.Codec;
 import io.webby.db.kv.KeyValueDb;
+import io.webby.db.kv.impl.ByteArrayDb;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import org.lmdbjava.CursorIterable;
@@ -16,18 +16,15 @@ import java.util.*;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 
-public class LmdbJavaDb<K, V> implements KeyValueDb<K, V> {
+public class LmdbJavaDb<K, V> extends ByteArrayDb<K, V> implements KeyValueDb<K, V> {
     private final Env<ByteBuffer> env;
     private final Dbi<ByteBuffer> db;
-    private final Codec<K> keyCodec;
-    private final Codec<V> valueCodec;
 
     public LmdbJavaDb(@NotNull Env<ByteBuffer> env, @NotNull Dbi<ByteBuffer> db,
                       @NotNull Codec<K> keyCodec, @NotNull Codec<V> valueCodec) {
+        super(keyCodec, valueCodec);
         this.env = env;
         this.db = db;
-        this.keyCodec = keyCodec;
-        this.valueCodec = valueCodec;
     }
 
     @Override
@@ -45,13 +42,15 @@ public class LmdbJavaDb<K, V> implements KeyValueDb<K, V> {
     @Override
     public @Nullable V get(@NotNull K key) {
         try (Txn<ByteBuffer> txn = env.txnRead()) {
-            return asValue(db.get(txn, fromKey(key)));
+            ByteBuffer bufferKey = directBufferFromKey(key);
+            ByteBuffer bufferValue = db.get(txn, bufferKey);
+            return asValue(bufferValue);
         }
     }
 
     @Override
     public boolean containsValue(@NotNull V value) {
-        ByteBuffer buffer = fromValue(value);
+        ByteBuffer buffer = directBufferFromValue(value);
         return iterate(iterable -> Streams.stream(iterable)
                 .map(CursorIterable.KeyVal::val)
                 .anyMatch(val -> val.equals(buffer)));
@@ -75,7 +74,7 @@ public class LmdbJavaDb<K, V> implements KeyValueDb<K, V> {
         return iterate(iterable -> {
             Set<Map.Entry<K, V>> result = new HashSet<>();
             for (CursorIterable.KeyVal<ByteBuffer> entry : iterable) {
-                result.add(new AbstractMap.SimpleEntry<>(asKey(entry.key()), asValue(entry.val())));
+                result.add(asMapEntry(entry.key(), entry.val()));
             }
             return result;
         });
@@ -91,12 +90,15 @@ public class LmdbJavaDb<K, V> implements KeyValueDb<K, V> {
 
     @Override
     public void set(@NotNull K key, @NotNull V value) {
-        db.put(fromKey(key), fromValue(value));
+        ByteBuffer bufferKey = directBufferFromKey(key);
+        ByteBuffer bufferValue = directBufferFromValue(value);
+        db.put(bufferKey, bufferValue);
     }
 
     @Override
     public void delete(@NotNull K key) {
-        db.delete(fromKey(key));
+        ByteBuffer buffer = directBufferFromKey(key);
+        db.delete(buffer);
     }
 
     @Override
@@ -120,23 +122,5 @@ public class LmdbJavaDb<K, V> implements KeyValueDb<K, V> {
     @Override
     public void close() {
         db.close();
-    }
-
-    private @NotNull ByteBuffer fromKey(@NotNull K key) {
-        byte[] bytes = keyCodec.writeToBytes(key);
-        return ByteBuffer.allocateDirect(bytes.length).put(bytes).flip();
-    }
-
-    private @Nullable K asKey(@Nullable ByteBuffer buffer) {
-        return buffer == null ? null : keyCodec.readFrom(Unpooled.wrappedBuffer(buffer));
-    }
-
-    private @NotNull ByteBuffer fromValue(@NotNull V value) {
-        byte[] bytes = valueCodec.writeToBytes(value);
-        return ByteBuffer.allocateDirect(bytes.length).put(bytes).flip();
-    }
-
-    private @Nullable V asValue(@Nullable ByteBuffer buffer) {
-        return buffer == null ? null : valueCodec.readFrom(Unpooled.wrappedBuffer(buffer));
     }
 }

@@ -4,7 +4,7 @@ import com.google.common.collect.ImmutableMap;
 import com.google.inject.Inject;
 import io.webby.app.Settings;
 import io.webby.common.InjectorHelper;
-import io.webby.db.kv.BaseKeyValueFactory;
+import io.webby.db.kv.impl.BaseKeyValueFactory;
 import io.webby.db.codec.Codec;
 import io.webby.db.codec.CodecProvider;
 import org.jetbrains.annotations.NotNull;

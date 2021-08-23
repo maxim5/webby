@@ -9,6 +9,7 @@ import com.linkedin.paldb.impl.StorageReader;
 import io.webby.db.codec.Codec;
 import io.webby.db.codec.CodecProvider;
 import io.webby.db.kv.KeyValueDb;
+import io.webby.db.kv.impl.ByteArrayDb;
 import io.webby.util.Rethrow;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
@@ -21,12 +22,9 @@ import java.util.concurrent.atomic.AtomicInteger;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
-public class PalDbImpl<K, V> implements KeyValueDb<K, V> {
+public class PalDbImpl<K, V> extends ByteArrayDb<K, V> implements KeyValueDb<K, V> {
     private final String path;
     private final AtomicInteger count = new AtomicInteger();
-
-    private final Codec<K> keyCodec;
-    private final Codec<V> valueCodec;
 
     private StorageReader reader = null;
     private StoreWriter writer = null;
@@ -34,9 +32,8 @@ public class PalDbImpl<K, V> implements KeyValueDb<K, V> {
     private static final Field storageField = internalStorage();
 
     public PalDbImpl(@NotNull String path, @NotNull Codec<K> keyCodec, @NotNull Codec<V> valueCodec) {
+        super(keyCodec, valueCodec);
         this.path = path;
-        this.keyCodec = keyCodec;
-        this.valueCodec = valueCodec;
     }
 
     @Override
@@ -47,9 +44,7 @@ public class PalDbImpl<K, V> implements KeyValueDb<K, V> {
     @Override
     public @Nullable V get(@NotNull K key) {
         try {
-            byte[] keyBytes = keyCodec.writeToBytes(key);
-            byte[] valueBytes = reader().get(keyBytes);
-            return valueBytes != null ? valueCodec.readFrom(valueBytes) : null;
+            return asValue(reader().get(fromKey(key)));
         } catch (IOException e) {
             throw new RuntimeException(e);
         }
@@ -59,36 +54,35 @@ public class PalDbImpl<K, V> implements KeyValueDb<K, V> {
     public boolean containsValue(@NotNull V value) {
         return streamOf(reader().iterator())
                 .map(Map.Entry::getValue)
-                .map(valueCodec::readFrom)
+                .map(this::asValueNotNull)
                 .anyMatch(val -> val.equals(value));
     }
 
     @Override
     public @NotNull Iterable<K> keys() {
-        return streamOf(reader().keys()).map(Map.Entry::getKey).map(keyCodec::readFrom).toList();
+        return streamOf(reader().keys()).map(Map.Entry::getKey).map(this::asKey).toList();
     }
 
     @Override
     public @NotNull Set<K> keySet() {
-        return streamOf(reader().keys()).map(Map.Entry::getKey).map(keyCodec::readFrom).collect(Collectors.toSet());
+        return streamOf(reader().keys()).map(Map.Entry::getKey).map(this::asKey).collect(Collectors.toSet());
     }
 
     @Override
     public @NotNull Collection<V> values() {
-        return streamOf(reader().iterator()).map(Map.Entry::getValue).map(valueCodec::readFrom).toList();
+        return streamOf(reader().iterator()).map(Map.Entry::getValue).map(this::asValue).toList();
     }
 
     @Override
     public @NotNull Set<Map.Entry<K, V>> entrySet() {
         return streamOf(reader().iterator())
-                .map(e -> new AbstractMap.SimpleEntry<>(keyCodec.readFrom(e.getKey()),
-                                                        valueCodec.readFrom(e.getValue())))
+                .map(e -> asMapEntry(e.getKey(), e.getValue()))
                 .collect(Collectors.toSet());
     }
 
     @Override
     public void set(@NotNull K key, @NotNull V value) {
-        writer().put(keyCodec.writeToBytes(key), valueCodec.writeToBytes(value));
+        writer().put(fromKey(key), fromValue(value));
     }
 
     @Override

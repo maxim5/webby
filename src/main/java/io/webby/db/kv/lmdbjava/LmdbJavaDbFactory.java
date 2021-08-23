@@ -5,7 +5,7 @@ import io.webby.app.Settings;
 import io.webby.common.InjectorHelper;
 import io.webby.db.codec.Codec;
 import io.webby.db.codec.CodecProvider;
-import io.webby.db.kv.BaseKeyValueFactory;
+import io.webby.db.kv.impl.BaseKeyValueFactory;
 import org.jetbrains.annotations.NotNull;
 import org.lmdbjava.Dbi;
 import org.lmdbjava.Env;

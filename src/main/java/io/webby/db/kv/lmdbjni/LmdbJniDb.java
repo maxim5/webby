@@ -1,9 +1,9 @@
 package io.webby.db.kv.lmdbjni;
 
 import com.google.common.collect.Streams;
-import io.netty.buffer.Unpooled;
 import io.webby.db.codec.Codec;
 import io.webby.db.kv.KeyValueDb;
+import io.webby.db.kv.impl.ByteArrayDb;
 import org.fusesource.lmdbjni.*;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
@@ -13,17 +13,14 @@ import java.util.function.Function;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
-public class LmdbJniDb <K, V> implements KeyValueDb<K, V> {
+public class LmdbJniDb <K, V> extends ByteArrayDb<K, V> implements KeyValueDb<K, V> {
     private final Env env;
     private final Database db;
-    private final Codec<K> keyCodec;
-    private final Codec<V> valueCodec;
 
     public LmdbJniDb(@NotNull Env env, @NotNull Database db, @NotNull Codec<K> keyCodec, @NotNull Codec<V> valueCodec) {
+        super(keyCodec, valueCodec);
         this.env = env;
         this.db = db;
-        this.keyCodec = keyCodec;
-        this.valueCodec = valueCodec;
     }
 
     @Override
@@ -62,7 +59,7 @@ public class LmdbJniDb <K, V> implements KeyValueDb<K, V> {
         return iterate(iterator -> {
             Set<Map.Entry<K, V>> result = new HashSet<>();
             for (Entry entry : iterator.iterable()) {
-                result.add(new AbstractMap.SimpleEntry<>(asKey(entry.getKey()), asValue(entry.getValue())));
+                result.add(asMapEntry(entry.getKey(), entry.getValue()));
             }
             return result;
         });
@@ -107,22 +104,6 @@ public class LmdbJniDb <K, V> implements KeyValueDb<K, V> {
     @Override
     public void close() {
         db.close();
-    }
-
-    private byte @NotNull [] fromKey(@NotNull K key) {
-        return keyCodec.writeToBytes(key);
-    }
-
-    private @Nullable K asKey(byte @Nullable [] bytes) {
-        return bytes == null ? null : keyCodec.readFrom(Unpooled.wrappedBuffer(bytes));
-    }
-
-    private byte @NotNull [] fromValue(@NotNull V value) {
-        return valueCodec.writeToBytes(value);
-    }
-
-    private @Nullable V asValue(byte @Nullable [] bytes) {
-        return bytes == null ? null : valueCodec.readFrom(Unpooled.wrappedBuffer(bytes));
     }
 
     @SuppressWarnings("UnstableApiUsage")

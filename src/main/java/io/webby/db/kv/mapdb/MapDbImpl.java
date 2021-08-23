@@ -1,6 +1,6 @@
 package io.webby.db.kv.mapdb;
 
-import io.webby.db.kv.DefaultKeyValueDb;
+import io.webby.db.kv.impl.DefaultKeyValueDb;
 import org.jetbrains.annotations.NotNull;
 import org.mapdb.DB;
 import org.mapdb.HTreeMap;

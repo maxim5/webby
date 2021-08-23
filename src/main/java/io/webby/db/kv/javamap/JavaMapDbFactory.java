@@ -1,7 +1,7 @@
 package io.webby.db.kv.javamap;
 
-import io.webby.db.kv.BaseKeyValueFactory;
-import io.webby.db.kv.DefaultKeyValueDb;
+import io.webby.db.kv.impl.BaseKeyValueFactory;
+import io.webby.db.kv.impl.DefaultKeyValueDb;
 import io.webby.db.kv.InMemoryDb;
 import io.webby.db.kv.KeyValueDb;
 import org.jetbrains.annotations.NotNull;

@@ -7,7 +7,7 @@ import io.webby.app.Settings;
 import io.webby.db.codec.Codec;
 import io.webby.db.codec.CodecProvider;
 import io.webby.db.codec.CodecSize;
-import io.webby.db.kv.BaseKeyValueFactory;
+import io.webby.db.kv.impl.BaseKeyValueFactory;
 import io.webby.db.kv.KeyValueDb;
 import net.openhft.chronicle.hash.serialization.*;
 import net.openhft.chronicle.hash.serialization.impl.ExternalizableReader;
