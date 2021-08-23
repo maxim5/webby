@@ -2,14 +2,14 @@ package io.webby.db.kv.chronicle;
 
 import com.google.common.flogger.FluentLogger;
 import com.google.inject.Inject;
-import io.webby.app.AppConfigException;
 import io.webby.app.Settings;
 import io.webby.db.codec.Codec;
 import io.webby.db.codec.CodecProvider;
 import io.webby.db.codec.CodecSize;
-import io.webby.db.kv.impl.BaseKeyValueFactory;
 import io.webby.db.kv.KeyValueDb;
-import net.openhft.chronicle.hash.serialization.*;
+import io.webby.db.kv.impl.BaseKeyValueFactory;
+import net.openhft.chronicle.hash.serialization.SizeMarshaller;
+import net.openhft.chronicle.hash.serialization.SizedReader;
 import net.openhft.chronicle.hash.serialization.impl.ExternalizableReader;
 import net.openhft.chronicle.hash.serialization.impl.SerializableReader;
 import net.openhft.chronicle.hash.serialization.impl.SerializationBuilder;
@@ -45,9 +45,6 @@ public class ChronicleFactory extends BaseKeyValueFactory {
             int replicationId = settings.getIntProperty("db.chronicle.replication.identifier", -1);
             long defaultSize = settings.getLongProperty("db.chronicle.default.size", 1 << 20);
 
-            AppConfigException.failIf(!filename.contains("%s"), "The pattern must contain '%%s': %s".formatted(filename));
-            File destination = storagePath.resolve(filename.formatted(name)).toFile();
-
             ChronicleMapBuilder<K, V> builder = ChronicleMap.of(key, value)
                     .entries(defaultSize)
                     .name(name)
@@ -61,6 +58,7 @@ public class ChronicleFactory extends BaseKeyValueFactory {
             pickSerialization(key, builder::keySizeMarshaller, builder::averageKeySize, builder::keyMarshaller);
             pickSerialization(value, builder::valueSizeMarshaller, builder::averageValueSize, builder::valueMarshaller);
 
+            File destination = storagePath.resolve(formatFileName(filename, name)).toFile();
             ChronicleMap<K, V> map = builder.createPersistedTo(destination);
             return new ChronicleDb<>(map);
         }));
