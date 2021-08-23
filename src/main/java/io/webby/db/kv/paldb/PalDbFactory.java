@@ -1,6 +1,8 @@
 package io.webby.db.kv.paldb;
 
 import com.google.inject.Inject;
+import com.linkedin.paldb.api.Configuration;
+import com.linkedin.paldb.api.PalDB;
 import io.webby.app.Settings;
 import io.webby.db.codec.Codec;
 import io.webby.db.codec.CodecProvider;
@@ -26,7 +28,8 @@ public class PalDbFactory extends BaseKeyValueFactory {
             String path = storagePath.resolve(formatFileName(filename, name)).toString();
             Codec<K> keyCodec = provider.getCodecOrDie(key);
             Codec<V> valueCodec = provider.getCodecOrDie(value);
-            return new PalDbImpl<>(path, keyCodec, valueCodec);
+            Configuration config = PalDB.newConfiguration();
+            return new PalDbImpl<>(path, config, keyCodec, valueCodec);
         });
     }
 

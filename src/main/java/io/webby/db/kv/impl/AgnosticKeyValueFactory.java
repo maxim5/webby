@@ -12,6 +12,7 @@ import io.webby.db.kv.leveldbjni.LevelDbJniFactory;
 import io.webby.db.kv.lmdbjava.LmdbJavaDbFactory;
 import io.webby.db.kv.lmdbjni.LmdbJniDbFactory;
 import io.webby.db.kv.mapdb.MapDbFactory;
+import io.webby.db.kv.paldb.PalDbFactory;
 import io.webby.db.kv.swaydb.SwayDbFactory;
 import org.jetbrains.annotations.NotNull;
 
@@ -46,6 +47,7 @@ public class AgnosticKeyValueFactory implements KeyValueFactory {
             case LMDB_JNI -> helper.lazySingleton(LmdbJniDbFactory.class);
             case SWAY_DB -> helper.lazySingleton(SwayDbFactory.class);
             case LEVEL_DB_JNI -> helper.lazySingleton(LevelDbJniFactory.class);
+            case PAL_DB -> helper.lazySingleton(PalDbFactory.class);
         };
     }
 }

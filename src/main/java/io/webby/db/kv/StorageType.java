@@ -7,5 +7,6 @@ public enum StorageType {
     LMDB_JAVA,
     LMDB_JNI,
     SWAY_DB,
-    LEVEL_DB_JNI
+    LEVEL_DB_JNI,
+    PAL_DB
 }
