@@ -6,5 +6,6 @@ public enum StorageType {
     CHRONICLE_MAP,
     LMDB_JAVA,
     LMDB_JNI,
-    SWAY_DB
+    SWAY_DB,
+    LEVEL_DB_JNI
 }

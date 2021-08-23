@@ -21,7 +21,7 @@ public interface KeyValueDb<K, V> extends Closeable {
     }
 
     default boolean isNotEmpty() {
-        return size() > 0;
+        return !isEmpty();
     }
 
     @Nullable V get(@NotNull K key);
