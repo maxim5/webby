@@ -8,6 +8,7 @@ import io.webby.db.kv.KeyValueFactory;
 import org.jetbrains.annotations.NotNull;
 
 import java.io.Closeable;
+import java.io.IOException;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.function.Supplier;
@@ -32,5 +33,10 @@ public abstract class BaseKeyValueFactory implements KeyValueFactory, Closeable 
                 "The file pattern must contain '%%s' to use separate file per database: %s".formatted(filename)
         );
         return filename.formatted(name);
+    }
+
+    @Override
+    public void close() throws IOException {
+        cache.values().forEach(KeyValueDb::close);
     }
 }

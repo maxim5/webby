@@ -4,7 +4,6 @@ import com.google.inject.Inject;
 import io.webby.app.Settings;
 import io.webby.db.codec.Codec;
 import io.webby.db.codec.CodecProvider;
-import io.webby.db.kv.KeyValueDb;
 import io.webby.db.kv.impl.BaseKeyValueFactory;
 import io.webby.util.Rethrow;
 import org.iq80.leveldb.DB;
@@ -48,10 +47,5 @@ public abstract class BaseLevelDbFactory extends BaseKeyValueFactory {
                 return Rethrow.rethrow(e);
             }
         });
-    }
-
-    @Override
-    public void close() throws IOException {
-        cache.values().forEach(KeyValueDb::close);
     }
 }

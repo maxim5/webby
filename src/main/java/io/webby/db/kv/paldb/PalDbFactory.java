@@ -6,11 +6,9 @@ import com.linkedin.paldb.api.PalDB;
 import io.webby.app.Settings;
 import io.webby.db.codec.Codec;
 import io.webby.db.codec.CodecProvider;
-import io.webby.db.kv.KeyValueDb;
 import io.webby.db.kv.impl.BaseKeyValueFactory;
 import org.jetbrains.annotations.NotNull;
 
-import java.io.IOException;
 import java.nio.file.Path;
 
 public class PalDbFactory extends BaseKeyValueFactory {
@@ -31,10 +29,5 @@ public class PalDbFactory extends BaseKeyValueFactory {
             Configuration config = PalDB.newConfiguration();
             return new PalDbImpl<>(path, config, keyCodec, valueCodec);
         });
-    }
-
-    @Override
-    public void close() throws IOException {
-        cache.values().forEach(KeyValueDb::close);
     }
 }

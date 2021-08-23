@@ -6,7 +6,6 @@ import io.webby.app.Settings;
 import io.webby.db.codec.Codec;
 import io.webby.db.codec.CodecProvider;
 import io.webby.db.codec.CodecSize;
-import io.webby.db.kv.KeyValueDb;
 import io.webby.db.kv.impl.BaseKeyValueFactory;
 import net.openhft.chronicle.hash.serialization.SizeMarshaller;
 import net.openhft.chronicle.hash.serialization.SizedReader;
@@ -19,7 +18,6 @@ import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
 import java.io.File;
-import java.io.IOException;
 import java.nio.file.Path;
 import java.util.Objects;
 import java.util.function.Consumer;
@@ -112,10 +110,5 @@ public class ChronicleFactory extends BaseKeyValueFactory {
 
     private static <T> boolean isDefaultReader(@NotNull SizedReader<T> reader) {
         return reader instanceof SerializableReader || reader instanceof ExternalizableReader;
-    }
-
-    @Override
-    public void close() throws IOException {
-        cache.values().forEach(KeyValueDb::close);
     }
 }

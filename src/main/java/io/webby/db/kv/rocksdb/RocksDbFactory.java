@@ -4,14 +4,12 @@ import com.google.inject.Inject;
 import io.webby.app.Settings;
 import io.webby.db.codec.Codec;
 import io.webby.db.codec.CodecProvider;
-import io.webby.db.kv.KeyValueDb;
 import io.webby.db.kv.impl.BaseKeyValueFactory;
 import org.jetbrains.annotations.NotNull;
 import org.rocksdb.Options;
 import org.rocksdb.RocksDB;
 import org.rocksdb.RocksDBException;
 
-import java.io.IOException;
 import java.nio.file.Path;
 
 import static io.webby.util.Rethrow.rethrow;
@@ -43,10 +41,5 @@ public class RocksDbFactory extends BaseKeyValueFactory {
                 return rethrow(e);
             }
         });
-    }
-
-    @Override
-    public void close() throws IOException {
-        cache.values().forEach(KeyValueDb::close);
     }
 }

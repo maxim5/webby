@@ -4,7 +4,6 @@ import com.google.inject.Inject;
 import io.webby.app.Settings;
 import io.webby.db.codec.Codec;
 import io.webby.db.codec.CodecProvider;
-import io.webby.db.kv.KeyValueDb;
 import io.webby.db.kv.impl.BaseKeyValueFactory;
 import org.jetbrains.annotations.NotNull;
 import swaydb.data.slice.Slice;
@@ -13,7 +12,6 @@ import swaydb.java.persistent.PersistentMap;
 import swaydb.java.serializers.Serializer;
 import swaydb.persistent.DefaultConfigs;
 
-import java.io.IOException;
 import java.nio.file.Path;
 
 public class SwayDbFactory extends BaseKeyValueFactory {
@@ -59,11 +57,6 @@ public class SwayDbFactory extends BaseKeyValueFactory {
                 return codec.readFrom(unbox(array));
             }
         };
-    }
-
-    @Override
-    public void close() throws IOException {
-        cache.values().forEach(KeyValueDb::close);
     }
 
     private static Byte[] box(byte[] bytes) {
