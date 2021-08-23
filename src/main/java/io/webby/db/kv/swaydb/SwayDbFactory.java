@@ -36,8 +36,8 @@ public class SwayDbFactory extends BaseKeyValueFactory {
         });
     }
 
-    @NotNull
-    private static <T> Serializer<T> getSerializer(@NotNull Codec<T> codec) {
+    // See https://github.com/simerplaha/SwayDB/issues/308
+    private static <T> @NotNull Serializer<T> getSerializer(@NotNull Codec<T> codec) {
         return new Serializer<>() {
             @Override
             public Slice<Byte> write(T data) {

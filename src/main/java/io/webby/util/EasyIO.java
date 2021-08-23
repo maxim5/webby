@@ -13,7 +13,7 @@ public interface EasyIO {
             try {
                 Closeables.close(closeable, true);
             } catch (IOException impossible) {
-                throw new AssertionError(impossible);
+                Rethrow.rethrow(impossible);
             }
         }
 
