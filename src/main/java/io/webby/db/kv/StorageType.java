@@ -1,12 +1,12 @@
 package io.webby.db.kv;
 
 public enum StorageType {
-    JAVA_MAP,
-    MAP_DB,
     CHRONICLE_MAP,
+    JAVA_MAP,
+    LEVEL_DB_JNI,
     LMDB_JAVA,
     LMDB_JNI,
-    SWAY_DB,
-    LEVEL_DB_JNI,
-    PAL_DB
+    MAP_DB,
+    PAL_DB,
+    SWAY_DB
 }

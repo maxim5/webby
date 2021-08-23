@@ -40,13 +40,13 @@ public class AgnosticKeyValueFactory implements KeyValueFactory {
 
     private @NotNull KeyValueFactory pickFactory(@NotNull StorageType storageType) {
         return switch (storageType) {
-            case JAVA_MAP -> helper.lazySingleton(JavaMapDbFactory.class);
-            case MAP_DB -> helper.lazySingleton(MapDbFactory.class);
             case CHRONICLE_MAP -> helper.lazySingleton(ChronicleFactory.class);
+            case JAVA_MAP -> helper.lazySingleton(JavaMapDbFactory.class);
+            case LEVEL_DB_JNI -> helper.lazySingleton(LevelDbJniFactory.class);
             case LMDB_JAVA -> helper.lazySingleton(LmdbJavaDbFactory.class);
             case LMDB_JNI -> helper.lazySingleton(LmdbJniDbFactory.class);
+            case MAP_DB -> helper.lazySingleton(MapDbFactory.class);
             case SWAY_DB -> helper.lazySingleton(SwayDbFactory.class);
-            case LEVEL_DB_JNI -> helper.lazySingleton(LevelDbJniFactory.class);
             case PAL_DB -> helper.lazySingleton(PalDbFactory.class);
         };
     }
