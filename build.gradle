@@ -61,10 +61,10 @@ dependencies {
     compileOnly 'net.openhft:chronicle-map:3.21ea81'
     compileOnly group: 'org.deephacks.lmdbjni', name: 'lmdbjni', version: '0.4.6'
     runtimeOnly group: 'org.deephacks.lmdbjni', name: "lmdbjni-$os", version: '0.4.6'
+    compileOnly group: 'org.fusesource.leveldbjni', name: 'leveldbjni', version: '1.8'
+    runtimeOnly group: 'org.fusesource.leveldbjni', name: "leveldbjni-$os", version: '1.8'
     compileOnly 'org.lmdbjava:lmdbjava:0.8.1'
     compileOnly 'org.mapdb:mapdb:3.0.8'
-    compileOnly 'org.fusesource.leveldbjni:leveldbjni:1.8'
-    runtimeOnly group: 'org.fusesource.leveldbjni', name: "leveldbjni-$os", version: '1.8'
 
     // JUnit
     testImplementation 'org.junit.jupiter:junit-jupiter-api:5.7.2'
