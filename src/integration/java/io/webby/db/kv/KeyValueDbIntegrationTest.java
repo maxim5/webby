@@ -181,13 +181,17 @@ public class KeyValueDbIntegrationTest {
     }
 
     private @NotNull Injector setup(@NotNull StorageType storageType, @NotNull Path tempDir) {
-        return Testing.testStartup(appSettings -> {
-            appSettings.setStorageType(storageType);
-            appSettings.setStoragePath(tempDir);
+        return Testing.testStartup(settings -> {
+            settings.setStorageType(storageType);
+            settings.setStoragePath(tempDir);
 
-            appSettings.setProperty("db.chronicle.default.size", 64);
-            appSettings.setProperty("db.lmdbjava.max.map.size.bytes", 64 << 10);
-            appSettings.setProperty("db.lmdbjni.max.map.size.bytes", 64 << 10);
+            settings.setProperty("db.chronicle.default.size", 64);
+            settings.setProperty("db.lmdb-java.max.map.size.bytes", 64 << 10);
+            settings.setProperty("db.lmdb-jni.max.map.size.bytes", 64 << 10);
+
+            settings.setProperty("db.swaydb.init.map.size.bytes", 64 << 10);
+            settings.setProperty("db.swaydb.segment.size.bytes", 64 << 10);
+            settings.setProperty("db.swaydb.appendix.flush.checkpoint.size.bytes", 1 << 10);
 
             log.at(Level.INFO).log("[Test] Temp storage path: %s", tempDir);
         });

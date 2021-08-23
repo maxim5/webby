@@ -41,8 +41,8 @@ public class LmdbJavaDbFactory extends BaseKeyValueFactory {
 
     private @NotNull Env<ByteBuffer> createDefaultEnv(@NotNull Settings settings) {
         Path storagePath = settings.storagePath();
-        long maxMapSize = settings.getLongProperty("db.lmdbjava.max.map.size.bytes", 64 << 20);
-        int maxMapsNum = settings.getIntProperty("db.lmdbjava.max.maps.num", 32);
+        long maxMapSize = settings.getLongProperty("db.lmdb-java.max.map.size.bytes", 64 << 20);
+        int maxMapsNum = settings.getIntProperty("db.lmdb-java.max.maps.num", 32);
 
         return Env.create()
                 // LMDB also needs to know how large our DB might be. Over-estimating is OK.

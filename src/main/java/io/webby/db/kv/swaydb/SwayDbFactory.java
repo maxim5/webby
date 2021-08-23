@@ -11,6 +11,7 @@ import swaydb.data.slice.Slice;
 import swaydb.java.Map;
 import swaydb.java.persistent.PersistentMap;
 import swaydb.java.serializers.Serializer;
+import swaydb.persistent.DefaultConfigs;
 
 import java.io.IOException;
 import java.nio.file.Path;
@@ -24,14 +25,20 @@ public class SwayDbFactory extends BaseKeyValueFactory {
         return cacheIfAbsent(name, () -> {
             Path storagePath = settings.storagePath();
             String filename = settings.getProperty("db.swaydb.filename.pattern", "swaydb-%s");
+            int mapSize = settings.getIntProperty("db.swaydb.init.map.size.bytes", 4 << 20);
+            int minSegmentSize = settings.getIntProperty("db.swaydb.segment.size.bytes", 2 << 20);
+            int checkpointSize = settings.getIntProperty("db.swaydb.appendix.flush.checkpoint.size.bytes", 2 << 20);
 
             Path path = storagePath.resolve(formatFileName(filename, name));
             Codec<K> keyCodec = provider.getCodecOrDie(key);
             Codec<V> valueCodec = provider.getCodecOrDie(value);
 
-            Map<K, V, Void> map = PersistentMap
+            PersistentMap.Config<K, V, Void> config = PersistentMap
                     .functionsOff(path, getSerializer(keyCodec), getSerializer(valueCodec))
-                    .get();
+                    .setMapSize(mapSize)
+                    .setSegmentConfig(DefaultConfigs.segmentConfig(false).copyWithMinSegmentSize(minSegmentSize))
+                    .setAppendixFlushCheckpointSize(checkpointSize);
+            Map<K, V, Void> map = config.get();
             return new SwayDb<>(map);
         });
     }
