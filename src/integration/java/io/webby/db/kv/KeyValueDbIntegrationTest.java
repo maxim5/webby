@@ -24,6 +24,7 @@ import org.junit.jupiter.params.provider.EnumSource;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.Map;
 import java.util.Optional;
@@ -35,7 +36,6 @@ import static org.junit.jupiter.api.Assertions.*;
 
 public class KeyValueDbIntegrationTest {
     private static final FluentLogger log = FluentLogger.forEnclosingClass();
-    private static final boolean CLEAN_UP_IF_SUCCESSFUL = true;
 
     @ParameterizedTest
     @EnumSource(StorageType.class)
@@ -171,6 +171,7 @@ public class KeyValueDbIntegrationTest {
     @AfterEach
     public void tearDown() {
         Testing.Internals.terminate();
+        cleanUpAtExit();
     }
 
     private static <K, V> void assertEqualsTo(@NotNull KeyValueDb<K, V> db, @NotNull Map<K, V> map) {
@@ -236,14 +237,25 @@ public class KeyValueDbIntegrationTest {
         return Files.createTempDirectory("%s_%s_%s.".formatted(className, testName, storageType));
     }
 
-    @SuppressWarnings("UnstableApiUsage")
+    private static final boolean CLEAN_UP_IF_SUCCESSFUL = true;
+    private static final ArrayList<Path> TO_CLEAN = new ArrayList<>(32);
+
     private static void cleanUp(@NotNull Path path) {
         if (CLEAN_UP_IF_SUCCESSFUL) {
-            try {
-                MoreFiles.deleteRecursively(path, RecursiveDeleteOption.ALLOW_INSECURE);
-            } catch (Exception e) {
-                log.at(Level.INFO).withCause(e).log("Clean-up did not complete successfully");
-            }
+            TO_CLEAN.add(path);
         }
+    }
+
+    @SuppressWarnings("UnstableApiUsage")
+    private static void deleteAll(@NotNull Path path) {
+        try {
+            MoreFiles.deleteRecursively(path, RecursiveDeleteOption.ALLOW_INSECURE);
+        } catch (Exception e) {
+            log.at(Level.INFO).withCause(e).log("Clean-up did not complete successfully");
+        }
+    }
+
+    private static void cleanUpAtExit() {
+        Runtime.getRuntime().addShutdownHook(new Thread(() -> TO_CLEAN.forEach(KeyValueDbIntegrationTest::deleteAll)));
     }
 }
