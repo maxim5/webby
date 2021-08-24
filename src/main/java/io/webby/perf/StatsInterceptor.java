@@ -33,7 +33,7 @@ public class StatsInterceptor implements Interceptor {
 
         RequestStatsCollector existing = localStats.get();
         if (existing != null) {
-            log.at(Level.WARNING).log("This thread contains a dirty local-stats: id=%x url=%s", 
+            log.at(Level.WARNING).log("This thread contains a dirty local-stats: id=%x url=%s",
                                       existing.id(), existing.request().uri());
         }
         log.at(Level.FINE).log("Setting a local-stats: id=%x url=%s", stats.id(), request.uri());
@@ -56,7 +56,7 @@ public class StatsInterceptor implements Interceptor {
         log.at(Level.FINE).log("Handler time for %s: %d ms", request.uri(), stats.stopwatch().elapsed(TimeUnit.MILLISECONDS));
         return response;
     }
-    
+
     public void cleanup() {
         RequestStatsCollector collector = localStats.get();
         if (collector != null) {
