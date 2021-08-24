@@ -16,6 +16,7 @@ import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.function.Consumer;
 import java.util.function.Function;
+import java.util.function.Predicate;
 
 import static io.webby.util.EasyIO.Close.closeQuietly;
 
@@ -30,7 +31,7 @@ public class LevelDbImpl<K, V> extends ByteArrayDb<K, V> implements KeyValueDb<K
     @Override
     public int size() {
         AtomicInteger counter = new AtomicInteger();
-        iteratorForEach(entry -> counter.incrementAndGet());
+        forEachEntry(entry -> counter.incrementAndGet());
         return counter.get();
     }
 
@@ -54,14 +55,12 @@ public class LevelDbImpl<K, V> extends ByteArrayDb<K, V> implements KeyValueDb<K
     public boolean containsValue(@NotNull V value) {
         byte[] bytes = fromValue(value);
         AtomicBoolean found = new AtomicBoolean();
-        withIterator(iterator -> {
-            while (iterator.hasNext()) {
-                Map.Entry<byte[], byte[]> next = iterator.next();
-                if (Arrays.equals(next.getValue(), bytes)) {
-                    found.set(true);
-                    return;
-                }
+        forEachEntryEarlyStop(entry -> {
+            if (Arrays.equals(entry.getValue(), bytes)) {
+                found.set(true);
+                return true;
             }
+            return false;
         });
         return found.get();
     }
@@ -110,7 +109,9 @@ public class LevelDbImpl<K, V> extends ByteArrayDb<K, V> implements KeyValueDb<K
     @Override
     public void clear() {
         writeBatch(batch ->
-           iteratorForEach(entry -> batch.delete(entry.getKey()))
+            forEachEntry(entry ->
+                batch.delete(entry.getKey())
+            )
         );
     }
 
@@ -148,7 +149,7 @@ public class LevelDbImpl<K, V> extends ByteArrayDb<K, V> implements KeyValueDb<K
         }
     }
 
-    private void iteratorForEach(@NotNull Consumer<Map.Entry<byte[], byte[]>> action) {
+    private void forEachEntry(@NotNull Consumer<Map.Entry<byte[], byte[]>> action) {
         withIterator(iterator -> {
             for (iterator.seekToFirst(); iterator.hasNext(); ) {
                 action.accept(iterator.next());
@@ -156,9 +157,19 @@ public class LevelDbImpl<K, V> extends ByteArrayDb<K, V> implements KeyValueDb<K
         });
     }
 
+    private void forEachEntryEarlyStop(@NotNull Predicate<Map.Entry<byte[], byte[]>> predicate) {
+        withIterator(iterator -> {
+            for (iterator.seekToFirst(); iterator.hasNext(); ) {
+                if (predicate.test(iterator.next())) {
+                    return;
+                }
+            }
+        });
+    }
+
     private <T, C extends Collection<T>> @NotNull C collect(@NotNull C destination,
                                                             @NotNull Function<Map.Entry<byte[], byte[]>, T> converter) {
-        iteratorForEach(entry -> {
+        forEachEntry(entry -> {
             T item = converter.apply(entry);
             destination.add(item);
         });

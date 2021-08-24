@@ -29,7 +29,7 @@ public class RocksDbImpl<K, V> extends ByteArrayDb<K, V> implements KeyValueDb<K
     @Override
     public int size() {
         AtomicInteger counter = new AtomicInteger();
-        iteratorForEach(iterator -> counter.incrementAndGet());
+        forEachEntry(iterator -> counter.incrementAndGet());
         return counter.get();
     }
 
@@ -46,7 +46,7 @@ public class RocksDbImpl<K, V> extends ByteArrayDb<K, V> implements KeyValueDb<K
     public boolean containsValue(@NotNull V value) {
         byte[] bytes = fromValue(value);
         AtomicBoolean found = new AtomicBoolean();
-        iteratorForEach(iterator -> {
+        forEachEntry(iterator -> {
             if (Arrays.equals(iterator.value(), bytes)) {
                 found.set(true);    // TODO: make it a predicate
             }
@@ -106,7 +106,7 @@ public class RocksDbImpl<K, V> extends ByteArrayDb<K, V> implements KeyValueDb<K
     @Override
     public void clear() {
         writeBatch(batch ->
-            iteratorForEach(iterator ->
+            forEachEntry(iterator ->
                 batch.delete(iterator.key())
             )
         );
@@ -143,7 +143,7 @@ public class RocksDbImpl<K, V> extends ByteArrayDb<K, V> implements KeyValueDb<K
         }
     }
 
-    private void iteratorForEach(@NotNull ThrowConsumer<RocksIterator, RocksDBException> action) {
+    private void forEachEntry(@NotNull ThrowConsumer<RocksIterator, RocksDBException> action) {
         withIterator(iterator -> {
             for (iterator.seekToFirst(); iterator.isValid(); iterator.next()) {
                 action.accept(iterator);
@@ -153,7 +153,7 @@ public class RocksDbImpl<K, V> extends ByteArrayDb<K, V> implements KeyValueDb<K
 
     private <T, C extends Collection<T>> @NotNull C collect(@NotNull C destination,
                                                             @NotNull Function<RocksIterator, T> converter) {
-        iteratorForEach(iterator -> {
+        forEachEntry(iterator -> {
             T item = converter.apply(iterator);
             destination.add(item);
         });
