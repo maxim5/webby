@@ -30,7 +30,7 @@ public class LevelDbImpl<K, V> extends ByteArrayDb<K, V> implements KeyValueDb<K
     @Override
     public int size() {
         AtomicInteger counter = new AtomicInteger();
-        withIterator(iterator -> iterator.forEachRemaining(entry -> counter.incrementAndGet()));
+        iteratorForEach(entry -> counter.incrementAndGet());
         return counter.get();
     }
 
@@ -110,9 +110,7 @@ public class LevelDbImpl<K, V> extends ByteArrayDb<K, V> implements KeyValueDb<K
     @Override
     public void clear() {
         writeBatch(batch ->
-           withIterator(iterator ->
-                iterator.forEachRemaining(entry -> batch.delete(entry.getKey()))
-           )
+           iteratorForEach(entry -> batch.delete(entry.getKey()))
         );
     }
 
@@ -150,12 +148,20 @@ public class LevelDbImpl<K, V> extends ByteArrayDb<K, V> implements KeyValueDb<K
         }
     }
 
+    private void iteratorForEach(@NotNull Consumer<Map.Entry<byte[], byte[]>> action) {
+        withIterator(iterator -> {
+            for (iterator.seekToFirst(); iterator.hasNext(); ) {
+                action.accept(iterator.next());
+            }
+        });
+    }
+
     private <T, C extends Collection<T>> @NotNull C collect(@NotNull C destination,
                                                             @NotNull Function<Map.Entry<byte[], byte[]>, T> converter) {
-        withIterator(iterator -> iterator.forEachRemaining(entry -> {
+        iteratorForEach(entry -> {
             T item = converter.apply(entry);
             destination.add(item);
-        }));
+        });
         return destination;
     }
 }
