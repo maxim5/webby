@@ -2,9 +2,10 @@ package io.webby.db.kv.impl;
 
 import com.google.inject.Inject;
 import io.webby.app.AppConfigException;
+import io.webby.app.Settings;
 import io.webby.common.Lifetime;
 import io.webby.db.kv.KeyValueDb;
-import io.webby.db.kv.KeyValueFactory;
+import io.webby.perf.StatsManager;
 import org.jetbrains.annotations.NotNull;
 
 import java.io.Closeable;
@@ -18,6 +19,9 @@ import static io.webby.util.EasyCast.castAny;
 public abstract class BaseKeyValueFactory implements InternalKeyValueFactory, Closeable {
     protected final Map<String, KeyValueDb<?, ?>> cache = new HashMap<>();
 
+    private @Inject Settings settings;
+    private @Inject StatsManager statsManager;
+
     @Inject
     protected void init(@NotNull Lifetime lifetime) {
         lifetime.onTerminate(this);
@@ -25,7 +29,15 @@ public abstract class BaseKeyValueFactory implements InternalKeyValueFactory, Cl
 
     @Override
     public @NotNull <K, V> KeyValueDb<K, V> getDb(@NotNull String name, @NotNull Class<K> key, @NotNull Class<V> value) {
-        return getInternalDb(name, key, value);
+        KeyValueDb<K, V> internalDb = getInternalDb(name, key, value);
+        if (shouldTrack()) {
+            return new TrackingDbAdapter<>(internalDb, statsManager.getDbListener());
+        }
+        return internalDb;
+    }
+
+    private boolean shouldTrack() {
+        return settings.isDevMode();
     }
 
     protected <K, V, KV extends KeyValueDb<K, V>> @NotNull KV cacheIfAbsent(@NotNull String name, @NotNull Supplier<KV> supplier) {

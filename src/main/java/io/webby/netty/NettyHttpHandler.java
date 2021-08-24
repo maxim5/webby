@@ -93,6 +93,7 @@ public class NettyHttpHandler extends SimpleChannelInboundHandler<FullHttpReques
         try {
             response = handle(request);
         } catch (Throwable throwable) {
+            cleanup();
             response = factory.newResponse500("Unexpected failure", throwable);
             log.at(Level.SEVERE).withCause(throwable).log("Unexpected failure: %s", throwable.getMessage());
         }
@@ -113,6 +114,7 @@ public class NettyHttpHandler extends SimpleChannelInboundHandler<FullHttpReques
 
     @Override
     public void exceptionCaught(@NotNull ChannelHandlerContext context, @NotNull Throwable cause) {
+        cleanup();
         context.channel()
                 .writeAndFlush(factory.newResponse500("Unexpected failure", cause))
                 .addListener(ChannelFutureListener.CLOSE);
@@ -145,6 +147,10 @@ public class NettyHttpHandler extends SimpleChannelInboundHandler<FullHttpReques
             HttpResponse response = call(requestEx, match, endpoint);
             return interceptors.exit(requestEx, response);
         }
+    }
+
+    private void cleanup() {
+        interceptors.cleanup();
     }
 
     private @NotNull HttpResponse call(@NotNull FullHttpRequest request,

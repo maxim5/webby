@@ -14,8 +14,9 @@ public interface Interceptor {
         // Do nothing
     }
 
-    @NotNull
-    default HttpResponse exit(@NotNull MutableHttpRequestEx request, @NotNull HttpResponse response) {
+    default @NotNull HttpResponse exit(@NotNull MutableHttpRequestEx request, @NotNull HttpResponse response) {
         return response;
     }
+
+    default void cleanup() {}
 }
