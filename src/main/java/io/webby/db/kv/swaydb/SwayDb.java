@@ -95,6 +95,10 @@ public class SwayDb<K, V> implements KeyValueDb<K, V> {
         return new HashMap<>(map.asJava());
     }
 
+    public @NotNull Map<K, V, Void> internalMap() {
+        return map;
+    }
+
     @Override
     public void flush() {
     }

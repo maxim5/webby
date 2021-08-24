@@ -113,6 +113,10 @@ public class RocksDbImpl<K, V> extends ByteArrayDb<K, V> implements KeyValueDb<K
         );
     }
 
+    public @NotNull RocksDB internalDb() {
+        return db;
+    }
+
     @Override
     public void flush() {
         try {

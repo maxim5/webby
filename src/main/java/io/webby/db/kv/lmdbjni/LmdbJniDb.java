@@ -91,6 +91,10 @@ public class LmdbJniDb <K, V> extends ByteArrayDb<K, V> implements KeyValueDb<K,
         }
     }
 
+    public @NotNull Database internalDb() {
+        return db;
+    }
+
     @Override
     public void flush() {
         env.sync(false);

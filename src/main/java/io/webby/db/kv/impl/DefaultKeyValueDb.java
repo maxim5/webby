@@ -102,6 +102,11 @@ public abstract class DefaultKeyValueDb<K, V, M extends Map<K, V>> implements Ke
     }
 
     @Override
+    public void clear() {
+        map.clear();
+    }
+
+    @Override
     public @NotNull Map<K, V> asMap() {
         return map;
     }
@@ -111,8 +116,7 @@ public abstract class DefaultKeyValueDb<K, V, M extends Map<K, V>> implements Ke
         return new HashMap<>(map);
     }
 
-    @Override
-    public void clear() {
-        map.clear();
+    public @NotNull M internalMap() {
+        return map;
     }
 }

@@ -101,6 +101,10 @@ public class LevelDbImpl<K, V> extends ByteArrayDb<K, V> implements KeyValueDb<K
         );
     }
 
+    public @NotNull DB internalDb() {
+        return db;
+    }
+
     @Override
     public void flush() {
         // nothing to do
