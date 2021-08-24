@@ -21,7 +21,7 @@ public class RocksDbFactory extends BaseKeyValueFactory {
     @Inject private CodecProvider provider;
 
     @Override
-    public @NotNull <K, V> RocksDbImpl<K, V> getDb(@NotNull String name, @NotNull Class<K> key, @NotNull Class<V> value) {
+    public @NotNull <K, V> RocksDbImpl<K, V> getInternalDb(@NotNull String name, @NotNull Class<K> key, @NotNull Class<V> value) {
         return cacheIfAbsent(name, () -> {
             Path storagePath = settings.storagePath();
             String filename = settings.getProperty("db.rocksdb.filename.pattern", "rocksdb-%s");

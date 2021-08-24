@@ -33,7 +33,7 @@ public class ChronicleFactory extends BaseKeyValueFactory {
     @Inject private CodecProvider provider;
 
     @Override
-    public @NotNull <K, V> ChronicleDb<K, V> getDb(@NotNull String name, @NotNull Class<K> key, @NotNull Class<V> value) {
+    public @NotNull <K, V> ChronicleDb<K, V> getInternalDb(@NotNull String name, @NotNull Class<K> key, @NotNull Class<V> value) {
         return cacheIfAbsent(name, rethrow(() -> {
             Path storagePath = settings.storagePath();
             String filename = settings.getProperty("db.chronicle.filename.pattern", "chronicle-%s.data");

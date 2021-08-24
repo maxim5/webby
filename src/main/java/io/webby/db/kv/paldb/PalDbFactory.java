@@ -18,7 +18,7 @@ public class PalDbFactory extends BaseKeyValueFactory {
     @Inject private CodecProvider provider;
 
     @Override
-    public @NotNull <K, V> PalDbImpl<K, V> getDb(@NotNull String name, @NotNull Class<K> key, @NotNull Class<V> value) {
+    public @NotNull <K, V> PalDbImpl<K, V> getInternalDb(@NotNull String name, @NotNull Class<K> key, @NotNull Class<V> value) {
         return cacheIfAbsent(name, () -> {
             Path storagePath = settings.storagePath();
             String filename = settings.getProperty("db.paldb.filename.pattern", "paldb-%s");

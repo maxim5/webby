@@ -29,7 +29,7 @@ public class MapDbFactory extends BaseKeyValueFactory {
         creator = helper.getOrDefault(MapDbCreator.class, () -> (db, name, key, value) -> null);
     }
 
-    public @NotNull <K, V> MapDbImpl<K, V> getDb(@NotNull String name, @NotNull Class<K> key, @NotNull Class<V> value) {
+    public @NotNull <K, V> MapDbImpl<K, V> getInternalDb(@NotNull String name, @NotNull Class<K> key, @NotNull Class<V> value) {
         return cacheIfAbsent(name, () -> {
             DB.Maker<HTreeMap<?, ?>> customMaker = creator.getMaker(db, name, key, value);
 

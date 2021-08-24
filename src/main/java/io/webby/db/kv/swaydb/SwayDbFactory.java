@@ -19,7 +19,7 @@ public class SwayDbFactory extends BaseKeyValueFactory {
     @Inject private CodecProvider provider;
 
     @Override
-    public @NotNull <K, V> SwayDb<K, V> getDb(@NotNull String name, @NotNull Class<K> key, @NotNull Class<V> value) {
+    public @NotNull <K, V> SwayDb<K, V> getInternalDb(@NotNull String name, @NotNull Class<K> key, @NotNull Class<V> value) {
         return cacheIfAbsent(name, () -> {
             Path storagePath = settings.storagePath();
             String filename = settings.getProperty("db.swaydb.filename.pattern", "swaydb-%s");

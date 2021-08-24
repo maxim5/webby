@@ -28,7 +28,7 @@ public abstract class BaseLevelDbFactory extends BaseKeyValueFactory {
     }
 
     @Override
-    public @NotNull <K, V> LevelDbImpl<K, V> getDb(@NotNull String name, @NotNull Class<K> key, @NotNull Class<V> value) {
+    public @NotNull <K, V> LevelDbImpl<K, V> getInternalDb(@NotNull String name, @NotNull Class<K> key, @NotNull Class<V> value) {
         return cacheIfAbsent(name, () -> {
             Path storagePath = settings.storagePath();
             String filename = settings.getProperty("db.leveldb.filename.pattern", "leveldb-%s");

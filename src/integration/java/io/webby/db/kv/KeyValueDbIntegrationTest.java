@@ -7,9 +7,17 @@ import com.google.common.io.RecursiveDeleteOption;
 import com.google.inject.Injector;
 import io.webby.auth.session.Session;
 import io.webby.auth.session.SessionManager;
+import io.webby.db.kv.chronicle.ChronicleDb;
+import io.webby.db.kv.chronicle.ChronicleFactory;
+import io.webby.db.kv.impl.AgnosticKeyValueFactory;
+import io.webby.db.kv.mapdb.MapDbFactory;
+import io.webby.db.kv.mapdb.MapDbImpl;
+import io.webby.db.kv.paldb.PalDbFactory;
+import io.webby.db.kv.paldb.PalDbImpl;
 import io.webby.testing.Testing;
 import org.jetbrains.annotations.NotNull;
 import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.EnumSource;
 
@@ -135,6 +143,27 @@ public class KeyValueDbIntegrationTest {
         try (KeyValueDb<Long, Session> db = dbFactory.getDb("sessions", Long.class, Session.class)) {
             assertEqualsTo(db, Map.of(newSession.sessionId(), newSession));
         }
+
+        cleanUp(tempDir);
+    }
+
+    @Test
+    public void internal_db() throws Exception {
+        StorageType storageType = StorageType.JAVA_MAP;
+        Path tempDir = createTempDirectory(storageType);
+        AgnosticKeyValueFactory dbFactory = setup(storageType, tempDir).getInstance(AgnosticKeyValueFactory.class);
+
+        ChronicleFactory chronicleFactory = dbFactory.getInternalFactory(StorageType.CHRONICLE_MAP);
+        ChronicleDb<Integer, String> chronicleDb = chronicleFactory.getInternalDb("foo", Integer.class, String.class);
+        assertTrue(chronicleDb.isEmpty());
+
+        MapDbFactory mapDbFactory = dbFactory.getInternalFactory(StorageType.MAP_DB);
+        MapDbImpl<Integer, String> mapDb = mapDbFactory.getInternalDb("foo", Integer.class, String.class);
+        assertTrue(mapDb.isEmpty());
+
+        PalDbFactory palDbFactory = dbFactory.getInternalFactory(StorageType.PAL_DB);
+        PalDbImpl<Integer, String> palDb = palDbFactory.getInternalDb("foo", Integer.class, String.class);
+        assertTrue(palDb.isEmpty());
 
         cleanUp(tempDir);
     }

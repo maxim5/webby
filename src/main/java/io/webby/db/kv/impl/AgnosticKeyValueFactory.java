@@ -18,6 +18,8 @@ import io.webby.db.kv.rocksdb.RocksDbFactory;
 import io.webby.db.kv.swaydb.SwayDbFactory;
 import org.jetbrains.annotations.NotNull;
 
+import static io.webby.util.EasyCast.castAny;
+
 public class AgnosticKeyValueFactory implements KeyValueFactory {
     private final InjectorHelper helper;
     private final KeyValueFactory delegate;
@@ -33,25 +35,23 @@ public class AgnosticKeyValueFactory implements KeyValueFactory {
         return delegate.getDb(name, key, value);
     }
 
-    public <K, V> @NotNull KeyValueDb<K, V> getCustomTypeDb(@NotNull StorageType storageType,
-                                                            @NotNull String name,
-                                                            @NotNull Class<K> key,
-                                                            @NotNull Class<V> value) {
-        return pickFactory(storageType).getDb(name, key, value);
+    public <F extends InternalKeyValueFactory> @NotNull F getInternalFactory(@NotNull StorageType storageType) {
+        return castAny(pickFactory(storageType));
     }
 
-    private @NotNull KeyValueFactory pickFactory(@NotNull StorageType storageType) {
-        return switch (storageType) {
-            case CHRONICLE_MAP -> helper.lazySingleton(ChronicleFactory.class);
-            case JAVA_MAP -> helper.lazySingleton(JavaMapDbFactory.class);
-            case LEVEL_DB_IQ80 -> helper.lazySingleton(LevelDbIq80Factory.class);
-            case LEVEL_DB_JNI -> helper.lazySingleton(LevelDbJniFactory.class);
-            case LMDB_JAVA -> helper.lazySingleton(LmdbJavaDbFactory.class);
-            case LMDB_JNI -> helper.lazySingleton(LmdbJniDbFactory.class);
-            case MAP_DB -> helper.lazySingleton(MapDbFactory.class);
-            case PAL_DB -> helper.lazySingleton(PalDbFactory.class);
-            case ROCKS_DB -> helper.lazySingleton(RocksDbFactory.class);
-            case SWAY_DB -> helper.lazySingleton(SwayDbFactory.class);
+    private @NotNull InternalKeyValueFactory pickFactory(@NotNull StorageType storageType) {
+        Class<? extends InternalKeyValueFactory> factoryClass = switch (storageType) {
+            case CHRONICLE_MAP -> ChronicleFactory.class;
+            case JAVA_MAP -> JavaMapDbFactory.class;
+            case LEVEL_DB_IQ80 -> LevelDbIq80Factory.class;
+            case LEVEL_DB_JNI -> LevelDbJniFactory.class;
+            case LMDB_JAVA -> LmdbJavaDbFactory.class;
+            case LMDB_JNI -> LmdbJniDbFactory.class;
+            case MAP_DB -> MapDbFactory.class;
+            case PAL_DB -> PalDbFactory.class;
+            case ROCKS_DB -> RocksDbFactory.class;
+            case SWAY_DB -> SwayDbFactory.class;
         };
+        return castAny(helper.lazySingleton(factoryClass));
     }
 }

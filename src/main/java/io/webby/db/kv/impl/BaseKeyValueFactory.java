@@ -15,12 +15,17 @@ import java.util.function.Supplier;
 
 import static io.webby.util.EasyCast.castAny;
 
-public abstract class BaseKeyValueFactory implements KeyValueFactory, Closeable {
+public abstract class BaseKeyValueFactory implements InternalKeyValueFactory, Closeable {
     protected final Map<String, KeyValueDb<?, ?>> cache = new HashMap<>();
 
     @Inject
     protected void init(@NotNull Lifetime lifetime) {
         lifetime.onTerminate(this);
+    }
+
+    @Override
+    public @NotNull <K, V> KeyValueDb<K, V> getDb(@NotNull String name, @NotNull Class<K> key, @NotNull Class<V> value) {
+        return getInternalDb(name, key, value);
     }
 
     protected <K, V, KV extends KeyValueDb<K, V>> @NotNull KV cacheIfAbsent(@NotNull String name, @NotNull Supplier<KV> supplier) {
