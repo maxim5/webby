@@ -60,13 +60,15 @@ public class Interceptors {
         if (safeWrapperEnabled) {
             return new DefaultHttpRequestEx(requestEx) {
                 @Override
-                public @Nullable Object attr(int position) {
+                public <T> @NotNull T attrOrDie(int position) {
                     Interceptor owner = unsafeOwners.get(position);
                     if (owner != null) {
                         StackTraceElement caller = CallerFinder.findCallerOf(this.getClass(), new Throwable(), 0);
-                        log.at(Level.WARNING).log("%s asks for %s", caller, owner);
+                        if (caller != null && !caller.getClassName().equals(owner.getClass().getName())) {
+                            log.at(Level.WARNING).log("%s requested conditionally available attribute owned by %s", caller, owner);
+                        }
                     }
-                    return super.attr(position);
+                    return super.attrOrDie(position);
                 }
             };
         }
@@ -94,6 +96,12 @@ public class Interceptors {
             response = item.instance().exit(request, response);
         }
         return response;
+    }
+
+    public void cleanup() {
+        for (InterceptItem item : Lists.reverse(stack)) {
+            item.instance().cleanup();
+        }
     }
 
     public @NotNull Optional<Interceptor> findEnabledInterceptor(@NotNull Predicate<Interceptor> predicate) {
