@@ -1,5 +1,6 @@
 package io.webby.db.kv.leveldb;
 
+import com.google.errorprone.annotations.CanIgnoreReturnValue;
 import io.webby.db.codec.Codec;
 import io.webby.db.kv.KeyValueDb;
 import io.webby.db.kv.impl.ByteArrayDb;
@@ -12,7 +13,6 @@ import org.jetbrains.annotations.Nullable;
 
 import java.io.IOException;
 import java.util.*;
-import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.function.Consumer;
 import java.util.function.Function;
@@ -37,13 +37,7 @@ public class LevelDbImpl<K, V> extends ByteArrayDb<K, V> implements KeyValueDb<K
 
     @Override
     public boolean isEmpty() {
-        DBIterator iterator = db.iterator();
-        try {
-            iterator.seekToFirst();
-            return !iterator.hasNext();
-        } finally {
-            closeQuietly(iterator);
-        }
+        return !withIterator(Iterator::hasNext);
     }
 
     @Override
@@ -54,15 +48,7 @@ public class LevelDbImpl<K, V> extends ByteArrayDb<K, V> implements KeyValueDb<K
     @Override
     public boolean containsValue(@NotNull V value) {
         byte[] bytes = fromValue(value);
-        AtomicBoolean found = new AtomicBoolean();
-        forEachEntryEarlyStop(entry -> {
-            if (Arrays.equals(entry.getValue(), bytes)) {
-                found.set(true);
-                return true;
-            }
-            return false;
-        });
-        return found.get();
+        return forEachEntryEarlyStop(entry -> Arrays.equals(entry.getValue(), bytes));
     }
 
     @Override
@@ -139,11 +125,12 @@ public class LevelDbImpl<K, V> extends ByteArrayDb<K, V> implements KeyValueDb<K
         }
     }
 
-    private void withIterator(@NotNull Consumer<DBIterator> action) {
+    @CanIgnoreReturnValue
+    private <T> T withIterator(@NotNull Function<DBIterator, T> action) {
         DBIterator iterator = db.iterator();
         try {
             iterator.seekToFirst();
-            action.accept(iterator);
+            return action.apply(iterator);
         } finally {
             closeQuietly(iterator);
         }
@@ -154,16 +141,19 @@ public class LevelDbImpl<K, V> extends ByteArrayDb<K, V> implements KeyValueDb<K
             for (iterator.seekToFirst(); iterator.hasNext(); ) {
                 action.accept(iterator.next());
             }
+            return null;
         });
     }
 
-    private void forEachEntryEarlyStop(@NotNull Predicate<Map.Entry<byte[], byte[]>> predicate) {
-        withIterator(iterator -> {
+    @CanIgnoreReturnValue
+    private boolean forEachEntryEarlyStop(@NotNull Predicate<Map.Entry<byte[], byte[]>> predicateToStop) {
+        return withIterator(iterator -> {
             for (iterator.seekToFirst(); iterator.hasNext(); ) {
-                if (predicate.test(iterator.next())) {
-                    return;
+                if (predicateToStop.test(iterator.next())) {
+                    return true;
                 }
             }
+            return false;
         });
     }
 
