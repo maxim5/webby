@@ -1,15 +1,17 @@
 package io.webby.db.kv.rocksdb;
 
+import com.google.errorprone.annotations.CanIgnoreReturnValue;
 import io.webby.db.codec.Codec;
 import io.webby.db.kv.KeyValueDb;
 import io.webby.db.kv.impl.ByteArrayDb;
 import io.webby.util.func.ThrowConsumer;
+import io.webby.util.func.ThrowFunction;
+import io.webby.util.func.ThrowPredicate;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import org.rocksdb.*;
 
 import java.util.*;
-import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.function.Function;
 
@@ -34,6 +36,11 @@ public class RocksDbImpl<K, V> extends ByteArrayDb<K, V> implements KeyValueDb<K
     }
 
     @Override
+    public boolean isEmpty() {
+        return !withIterator(AbstractRocksIterator::isValid);
+    }
+
+    @Override
     public @Nullable V get(@NotNull K key) {
         try {
             return asValue(db.get(fromKey(key)));
@@ -45,13 +52,7 @@ public class RocksDbImpl<K, V> extends ByteArrayDb<K, V> implements KeyValueDb<K
     @Override
     public boolean containsValue(@NotNull V value) {
         byte[] bytes = fromValue(value);
-        AtomicBoolean found = new AtomicBoolean();
-        forEachEntry(iterator -> {
-            if (Arrays.equals(iterator.value(), bytes)) {
-                found.set(true);    // TODO: make it a predicate
-            }
-        });
-        return found.get();
+        return forEachEntryEarlyStop(iterator -> Arrays.equals(iterator.value(), bytes));
     }
 
     @Override
@@ -135,19 +136,34 @@ public class RocksDbImpl<K, V> extends ByteArrayDb<K, V> implements KeyValueDb<K
         }
     }
 
-    private void withIterator(@NotNull ThrowConsumer<RocksIterator, RocksDBException> action) {
+    @CanIgnoreReturnValue
+    private <T> T withIterator(@NotNull ThrowFunction<RocksIterator, T, RocksDBException> action) {
         try (RocksIterator iterator = db.newIterator()) {
-            action.accept(iterator);
+            iterator.seekToFirst();
+            return action.apply(iterator);
         } catch (RocksDBException e) {
-            rethrow(e);
+            return rethrow(e);
         }
     }
 
     private void forEachEntry(@NotNull ThrowConsumer<RocksIterator, RocksDBException> action) {
         withIterator(iterator -> {
-            for (iterator.seekToFirst(); iterator.isValid(); iterator.next()) {
+            for (; iterator.isValid(); iterator.next()) {
                 action.accept(iterator);
             }
+            return null;
+        });
+    }
+
+    @CanIgnoreReturnValue
+    private boolean forEachEntryEarlyStop(@NotNull ThrowPredicate<RocksIterator, RocksDBException> predicateToStop) {
+        return withIterator(iterator -> {
+            for (; iterator.isValid(); iterator.next()) {
+                if (predicateToStop.test(iterator)) {
+                    return true;
+                }
+            }
+            return false;
         });
     }
 

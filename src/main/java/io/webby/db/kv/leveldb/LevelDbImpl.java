@@ -138,7 +138,7 @@ public class LevelDbImpl<K, V> extends ByteArrayDb<K, V> implements KeyValueDb<K
 
     private void forEachEntry(@NotNull Consumer<Map.Entry<byte[], byte[]>> action) {
         withIterator(iterator -> {
-            for (iterator.seekToFirst(); iterator.hasNext(); ) {
+            while (iterator.hasNext()) {
                 action.accept(iterator.next());
             }
             return null;
@@ -148,7 +148,7 @@ public class LevelDbImpl<K, V> extends ByteArrayDb<K, V> implements KeyValueDb<K
     @CanIgnoreReturnValue
     private boolean forEachEntryEarlyStop(@NotNull Predicate<Map.Entry<byte[], byte[]>> predicateToStop) {
         return withIterator(iterator -> {
-            for (iterator.seekToFirst(); iterator.hasNext(); ) {
+            while (iterator.hasNext()) {
                 if (predicateToStop.test(iterator.next())) {
                     return true;
                 }
