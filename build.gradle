@@ -57,15 +57,15 @@ dependencies {
     compileOnly group: 'org.freemarker', name: 'freemarker', version: '2.3.31'
 
     // Key-Values
-    compileOnly 'com.linkedin.paldb:paldb:1.2.0'
-    compileOnly 'io.swaydb:java_2.13:0.16.2'
-    compileOnly 'net.openhft:chronicle-map:3.21ea81'
+    compileOnly group: 'com.linkedin.paldb', name: 'paldb', version: '1.2.0'
+    compileOnly group: 'io.swaydb', name: 'java_2.13', version: '0.16.2'
+    compileOnly group: 'net.openhft', name: 'chronicle-map', version: '3.21.85'
     compileOnly group: 'org.deephacks.lmdbjni', name: 'lmdbjni', version: '0.4.6'
     runtimeOnly group: 'org.deephacks.lmdbjni', name: "lmdbjni-$os", version: '0.4.6'
     compileOnly group: 'org.fusesource.leveldbjni', name: 'leveldbjni', version: '1.8'
     runtimeOnly group: 'org.fusesource.leveldbjni', name: "leveldbjni-$os", version: '1.8'
-    compileOnly 'org.lmdbjava:lmdbjava:0.8.1'
-    compileOnly 'org.mapdb:mapdb:3.0.8'
+    compileOnly group: 'org.lmdbjava', name: 'lmdbjava', version: '0.8.1'
+    compileOnly group: 'org.mapdb', name: 'mapdb', version: '3.0.8'
     compileOnly group: 'org.iq80.leveldb', name: 'leveldb', version: '0.12'
     compileOnly group: 'org.rocksdb', name: 'rocksdbjni', version: '6.22.1.1'
 
