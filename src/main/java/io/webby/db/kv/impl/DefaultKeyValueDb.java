@@ -5,6 +5,7 @@ import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.Collection;
+import java.util.HashMap;
 import java.util.Map;
 import java.util.Set;
 
@@ -98,6 +99,16 @@ public abstract class DefaultKeyValueDb<K, V, M extends Map<K, V>> implements Ke
     @Override
     public @Nullable V remove(@NotNull K key) {
         return map.remove(key);
+    }
+
+    @Override
+    public @NotNull Map<K, V> asMap() {
+        return map;
+    }
+
+    @Override
+    public @NotNull Map<K, V> copyToMap() {
+        return new HashMap<>(map);
     }
 
     @Override

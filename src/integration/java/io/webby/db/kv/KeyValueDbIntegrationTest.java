@@ -1,5 +1,6 @@
 package io.webby.db.kv;
 
+import com.google.common.collect.Lists;
 import com.google.common.flogger.FluentLogger;
 import com.google.common.io.MoreFiles;
 import com.google.common.io.RecursiveDeleteOption;
@@ -148,9 +149,11 @@ public class KeyValueDbIntegrationTest {
         assertEquals(map.isEmpty(), db.isEmpty());
         assertEquals(!map.isEmpty(), db.isNotEmpty());
 
+        assertThat(Lists.newArrayList(db.keys())).containsExactlyElementsIn(map.keySet());
         assertThat(new HashSet<>(db.keySet())).containsExactlyElementsIn(map.keySet());
         assertThat(db.values()).containsExactlyElementsIn(map.values());
         assertThat(new HashSet<>(db.entrySet())).containsExactlyElementsIn(map.entrySet());
+        assertEquals(db.asMap(), map);
         assertEquals(db.copyToMap(), map);
 
         for (Map.Entry<K, V> entry : map.entrySet()) {

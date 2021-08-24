@@ -109,6 +109,10 @@ public interface KeyValueDb<K, V> extends Closeable {
 
     void clear();
 
+    default @NotNull Map<K, V> asMap() {
+        return copyToMap();
+    }
+
     default @NotNull Map<K, V> copyToMap() {
         return entrySet().stream().collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue));
     }

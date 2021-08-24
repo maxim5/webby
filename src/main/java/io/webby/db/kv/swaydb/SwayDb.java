@@ -86,8 +86,13 @@ public class SwayDb<K, V> implements KeyValueDb<K, V> {
     }
 
     @Override
-    public @NotNull java.util.Map<K, V> copyToMap() {
+    public @NotNull java.util.Map<K, V> asMap() {
         return map.asJava();
+    }
+
+    @Override
+    public @NotNull java.util.Map<K, V> copyToMap() {
+        return new HashMap<>(map.asJava());
     }
 
     @Override
