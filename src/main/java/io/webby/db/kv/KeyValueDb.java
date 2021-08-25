@@ -8,11 +8,12 @@ import org.jetbrains.annotations.Nullable;
 import java.io.Closeable;
 import java.util.*;
 import java.util.function.BiConsumer;
+import java.util.function.BiFunction;
+import java.util.function.Function;
 import java.util.function.Supplier;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
-// More Map methods: compute
 public interface KeyValueDb<K, V> extends Closeable {
     // DB size
 
@@ -156,6 +157,64 @@ public interface KeyValueDb<K, V> extends Closeable {
         }
         put(key, newValue);
         return true;
+    }
+
+    // Compute
+
+    default @Nullable V computeIfAbsent(@NotNull K key, @NotNull Function<? super K, ? extends V> mapping) {
+        V v;
+        if ((v = get(key)) == null) {
+            V newValue;
+            if ((newValue = mapping.apply(key)) != null) {
+                put(key, newValue);
+                return newValue;
+            }
+        }
+        return v;
+    }
+
+    default @Nullable V computeIfPresent(@NotNull K key, @NotNull BiFunction<? super K, ? super V, ? extends V> remapping) {
+        V oldValue;
+        if ((oldValue = get(key)) != null) {
+            V newValue = remapping.apply(key, oldValue);
+            if (newValue != null) {
+                put(key, newValue);
+                return newValue;
+            } else {
+                remove(key);
+                return null;
+            }
+        } else {
+            return null;
+        }
+    }
+
+    default @Nullable V compute(@NotNull K key, @NotNull BiFunction<? super K, ? super V, ? extends V> remapping) {
+        V oldValue = get(key);
+        V newValue = remapping.apply(key, oldValue);
+        if (newValue == null) {
+            // delete mapping
+            if (oldValue != null || containsKey(key)) {
+                // something to remove
+                remove(key);
+            }  // otherwise, nothing to do. Leave things as they were.
+            return null;
+        } else {
+            // add or replace old mapping
+            put(key, newValue);
+            return newValue;
+        }
+    }
+
+    default @Nullable V merge(@NotNull K key, @NotNull V value, @NotNull BiFunction<? super V, ? super V, ? extends V> remapping) {
+        V oldValue = get(key);
+        V newValue = (oldValue == null) ? value : remapping.apply(oldValue, value);
+        if (newValue == null) {
+            remove(key);
+        } else {
+            put(key, newValue);
+        }
+        return newValue;
     }
 
     // Delete/remove single

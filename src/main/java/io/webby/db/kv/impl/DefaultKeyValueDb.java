@@ -9,6 +9,8 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.Set;
 import java.util.function.BiConsumer;
+import java.util.function.BiFunction;
+import java.util.function.Function;
 
 public abstract class DefaultKeyValueDb<K, V, M extends Map<K, V>> implements KeyValueDb<K, V> {
     protected final M map;
@@ -105,6 +107,26 @@ public abstract class DefaultKeyValueDb<K, V, M extends Map<K, V>> implements Ke
     @Override
     public boolean replace(@NotNull K key, @Nullable V oldValue, @NotNull V newValue) {
         return map.replace(key, oldValue, newValue);
+    }
+
+    @Override
+    public @Nullable V computeIfAbsent(@NotNull K key, @NotNull Function<? super K, ? extends V> mapping) {
+        return map.computeIfAbsent(key, mapping);
+    }
+
+    @Override
+    public @Nullable V computeIfPresent(@NotNull K key, @NotNull BiFunction<? super K, ? super V, ? extends V> remapping) {
+        return map.computeIfPresent(key, remapping);
+    }
+
+    @Override
+    public @Nullable V compute(@NotNull K key, @NotNull BiFunction<? super K, ? super V, ? extends V> remapping) {
+        return map.compute(key, remapping);
+    }
+
+    @Override
+    public @Nullable V merge(@NotNull K key, @NotNull V value, @NotNull BiFunction<? super V, ? super V, ? extends V> remapping) {
+        return map.merge(key, value, remapping);
     }
 
     @Override

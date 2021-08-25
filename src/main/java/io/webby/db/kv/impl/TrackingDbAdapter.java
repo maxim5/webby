@@ -7,6 +7,8 @@ import org.jetbrains.annotations.Nullable;
 
 import java.util.*;
 import java.util.function.BiConsumer;
+import java.util.function.BiFunction;
+import java.util.function.Function;
 import java.util.function.Supplier;
 import java.util.stream.Stream;
 
@@ -229,6 +231,34 @@ public class TrackingDbAdapter<K, V> implements KeyValueDb<K, V> {
     public boolean replace(@NotNull K key, @Nullable V oldValue, @NotNull V newValue) {
         try (OpContext ignored = listener.reportKey(Op.SET, key)) {
             return delegate.replace(key, oldValue, newValue);
+        }
+    }
+
+    @Override
+    public @Nullable V computeIfAbsent(@NotNull K key, @NotNull Function<? super K, ? extends V> mapping) {
+        try (OpContext ignored = listener.reportKey(Op.SET, key)) {
+            return delegate.computeIfAbsent(key, mapping);
+        }
+    }
+
+    @Override
+    public @Nullable V computeIfPresent(@NotNull K key, @NotNull BiFunction<? super K, ? super V, ? extends V> remapping) {
+        try (OpContext ignored = listener.reportKey(Op.SET, key)) {
+            return delegate.computeIfPresent(key, remapping);
+        }
+    }
+
+    @Override
+    public @Nullable V compute(@NotNull K key, @NotNull BiFunction<? super K, ? super V, ? extends V> remapping) {
+        try (OpContext ignored = listener.reportKey(Op.SET, key)) {
+            return delegate.compute(key, remapping);
+        }
+    }
+
+    @Override
+    public @Nullable V merge(@NotNull K key, @NotNull V value, @NotNull BiFunction<? super V, ? super V, ? extends V> remapping) {
+        try (OpContext ignored = listener.reportKey(Op.SET, key)) {
+            return delegate.merge(key, value, remapping);
         }
     }
 
