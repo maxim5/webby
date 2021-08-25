@@ -33,34 +33,33 @@ public class StatsInterceptor implements Interceptor {
 
         RequestStatsCollector existing = localStats.get();
         if (existing != null) {
-            log.at(Level.WARNING).log("This thread contains a dirty local-stats: id=%x url=%s",
-                                      existing.id(), existing.request().uri());
+            log.at(Level.WARNING).log("This thread contains a dirty local-stats: %s", existing);
         }
-        log.at(Level.FINE).log("Setting a local-stats: id=%x url=%s", stats.id(), request.uri());
+        log.at(Level.FINE).log("Setting a local-stats: %s", stats);
         localStats.set(stats);
     }
 
     @Override
     public @NotNull HttpResponse exit(@NotNull MutableHttpRequestEx request, @NotNull HttpResponse response) {
         RequestStatsCollector stats = request.attrOrDie(Attributes.Stats);
-        RequestStatsCollector collector = localStats.get();
-        if (collector == null) {
+        RequestStatsCollector local = localStats.get();
+        if (local == null) {
             log.at(Level.WARNING).log("This thread lost a local-stats for url=%s", request.uri());
-        } else if (stats.id() != collector.id()) {
-            log.at(Level.WARNING).log("This thread contain the wrong local-stats: %s vs %s", stats, collector);
+        } else if (stats.id() != local.id()) {
+            log.at(Level.WARNING).log("This thread contain the wrong local-stats: %s vs %s", stats, local);
         } else {
-            log.at(Level.FINE).log("Cleaning up a local-stats: id=%x url=%s", collector.id(), request.uri());
+            log.at(Level.FINE).log("Cleaning up a local-stats: %s", local);
         }
         localStats.remove();
 
-        log.at(Level.FINE).log("Handler time for %s: %d ms", request.uri(), stats.stopwatch().elapsed(TimeUnit.MILLISECONDS));
+        log.at(Level.FINE).log("Handle time for %s: %d ms", request.uri(), stats.totalElapsed(TimeUnit.MILLISECONDS));
         return response;
     }
 
     public void cleanup() {
-        RequestStatsCollector collector = localStats.get();
-        if (collector != null) {
-            log.at(Level.WARNING).log("Cleaning up a local-stats: id=%x", collector.id());
+        RequestStatsCollector local = localStats.get();
+        if (local != null) {
+            log.at(Level.WARNING).log("Cleaning up a local-stats: %s", local);
             localStats.remove();
         }
     }

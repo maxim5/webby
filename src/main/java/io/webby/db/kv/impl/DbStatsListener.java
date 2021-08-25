@@ -1,10 +1,11 @@
 package io.webby.db.kv.impl;
 
-import com.google.common.collect.Streams;
+import io.webby.util.EasyList;
 import org.jetbrains.annotations.NotNull;
 
 import java.io.Closeable;
 import java.util.Arrays;
+import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
@@ -14,17 +15,19 @@ public interface DbStatsListener {
 
     @NotNull OpContext reportKey(@NotNull Op op, @NotNull Object key);
 
-    @NotNull OpContext reportKeys(@NotNull Op op, @NotNull Stream<?> keys);
+    @NotNull OpContext reportKeys(@NotNull Op op, @NotNull List<?> keys);
+
+    default @NotNull OpContext reportKeys(@NotNull Op op, @NotNull Stream<?> keys) {
+        return reportKey(op, keys.toList());
+    }
 
     default @NotNull OpContext reportKeys(@NotNull Op op, @NotNull Iterable<?> keys) {
-        return reportKeys(op, Streams.stream(keys));
+        return reportKeys(op, EasyList.asList(keys));
     }
 
     default @NotNull OpContext reportKeys(@NotNull Op op, @NotNull Object[] keys) {
-        return reportKeys(op, Arrays.stream(keys));
+        return reportKeys(op, List.of(keys));
     }
-
-    @NotNull OpContext reportKeyValue(@NotNull Op op, @NotNull Object key, @NotNull Object value);
 
     int DB_STAT = 0;
     enum Op {

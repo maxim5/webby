@@ -208,7 +208,7 @@ public class PalDbImpl<K, V> extends ByteArrayDb<K, V> implements KeyValueDb<K, 
     }
 
     private @NotNull File getFile(int index) {
-        return new File("%s.%08X.paldb".formatted(path, index));
+        return new File("%s.%08x.paldb".formatted(path, index));
     }
 
     private static void closeQuiet(@NotNull StorageReader storageReader) {

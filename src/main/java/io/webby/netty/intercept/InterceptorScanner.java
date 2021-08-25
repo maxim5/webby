@@ -25,8 +25,7 @@ public class InterceptorScanner {
     @Inject private ClasspathScanner scanner;
     @Inject private Injector injector;
 
-    @NotNull
-    public List<InterceptItem> getInterceptorsFromClasspath() {
+    public @NotNull List<InterceptItem> getInterceptorsFromClasspath() {
         Stream<? extends Class<?>> custom = scanner.getDerivedClasses(settings.interceptorFilter(), Interceptor.class).stream();
 
         boolean includeDefaultInterceptors = settings.getBoolProperty("interceptors.default.always.include", true);
@@ -39,8 +38,7 @@ public class InterceptorScanner {
         }
     }
 
-    @NotNull
-    private List<InterceptItem> toItems(@NotNull Stream<? extends Class<?>> stream) {
+    private @NotNull List<InterceptItem> toItems(@NotNull Stream<? extends Class<?>> stream) {
         return stream
                 .map(klass -> {
                     Interceptor instance = castAny(injector.getInstance(klass));

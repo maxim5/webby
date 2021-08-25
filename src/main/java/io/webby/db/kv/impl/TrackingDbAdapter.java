@@ -157,28 +157,28 @@ public class TrackingDbAdapter<K, V> implements KeyValueDb<K, V> {
 
     @Override
     public void set(@NotNull K key, @NotNull V value) {
-        try (OpContext ignored = listener.reportKeyValue(Op.SET, key, value)) {
+        try (OpContext ignored = listener.reportKey(Op.SET, key)) {
             delegate.set(key, value);
         }
     }
 
     @Override
     public @Nullable V put(@NotNull K key, @NotNull V value) {
-        try (OpContext ignored = listener.reportKeyValue(Op.SET, key, value)) {
+        try (OpContext ignored = listener.reportKey(Op.SET, key)) {
             return delegate.put(key, value);
         }
     }
 
     @Override
     public @Nullable V putIfAbsent(@NotNull K key, @NotNull V value) {
-        try (OpContext ignored = listener.reportKeyValue(Op.SET, key, value)) {
+        try (OpContext ignored = listener.reportKey(Op.SET, key)) {
             return delegate.putIfAbsent(key, value);
         }
     }
 
     @Override
     public @Nullable V putIfPresent(@NotNull K key, @NotNull V value) {
-        try (OpContext ignored = listener.reportKeyValue(Op.SET, key, value)) {
+        try (OpContext ignored = listener.reportKey(Op.SET, key)) {
             return delegate.putIfPresent(key, value);
         }
     }
@@ -220,14 +220,14 @@ public class TrackingDbAdapter<K, V> implements KeyValueDb<K, V> {
 
     @Override
     public @Nullable V replace(@NotNull K key, @NotNull V value) {
-        try (OpContext ignored = listener.reportKeyValue(Op.SET, key, value)) {
+        try (OpContext ignored = listener.reportKey(Op.SET, key)) {
             return delegate.replace(key, value);
         }
     }
 
     @Override
     public boolean replace(@NotNull K key, @Nullable V oldValue, @NotNull V newValue) {
-        try (OpContext ignored = listener.reportKeyValue(Op.SET, key, newValue)) {
+        try (OpContext ignored = listener.reportKey(Op.SET, key)) {
             return delegate.replace(key, oldValue, newValue);
         }
     }
