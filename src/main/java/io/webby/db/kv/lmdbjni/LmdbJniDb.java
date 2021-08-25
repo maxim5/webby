@@ -1,6 +1,7 @@
 package io.webby.db.kv.lmdbjni;
 
 import com.google.common.collect.Streams;
+import com.google.mu.util.stream.BiStream;
 import io.webby.db.codec.Codec;
 import io.webby.db.kv.KeyValueDb;
 import io.webby.db.kv.impl.ByteArrayDb;
@@ -9,6 +10,8 @@ import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.*;
+import java.util.function.BiConsumer;
+import java.util.function.Consumer;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
@@ -39,9 +42,40 @@ public class LmdbJniDb <K, V> extends ByteArrayDb<K, V> implements KeyValueDb<K,
     }
 
     @Override
+    public @NotNull List<@Nullable V> getAll(@NotNull K @NotNull [] keys) {
+        try (Transaction transaction = env.createReadTransaction()) {
+            return Arrays.stream(keys).map(this::fromKey).map(key -> db.get(transaction, key)).map(this::asValue).toList();
+        }
+    }
+
+    @Override
+    public @NotNull List<@Nullable V> getAll(@NotNull Iterable<K> keys) {
+        try (Transaction transaction = env.createReadTransaction()) {
+            return Streams.stream(keys).map(this::fromKey).map(key -> db.get(transaction, key)).map(this::asValue).toList();
+        }
+    }
+
+    @Override
     public boolean containsValue(@NotNull V value) {
         byte[] bytes = fromValue(value);
         return iterate(iterator -> streamOf(iterator).map(Entry::getValue).anyMatch(val -> Arrays.equals(val, bytes)));
+    }
+
+    @Override
+    public void forEach(@NotNull BiConsumer<? super K, ? super V> action) {
+        iterate(iterable -> {
+            streamOf(iterable).forEach(entry -> {
+                K key = asKey(entry.getKey());
+                V value = asValue(entry.getValue());
+                action.accept(key, value);
+            });
+            return null;
+        });
+    }
+
+    @Override
+    public @NotNull Iterable<K> keys() {
+        return KeyValueDb.super.keys();
     }
 
     @Override
@@ -65,17 +99,47 @@ public class LmdbJniDb <K, V> extends ByteArrayDb<K, V> implements KeyValueDb<K,
         });
     }
 
-    private <T> @NotNull T iterate(@NotNull Function<EntryIterator, T> converter) {
-        try (Transaction transaction = env.createReadTransaction()) {
-            try (EntryIterator iterator = db.iterate(transaction)) {
-                return converter.apply(iterator);
-            }
-        }
-    }
-
     @Override
     public void set(@NotNull K key, @NotNull V value) {
         db.put(fromKey(key), fromValue(value));
+    }
+
+    @Override
+    public void putAll(@NotNull Map<? extends K, ? extends V> map) {
+        inWriteTransaction(transaction ->
+            map.forEach((key, value) -> putInTransaction(key, value, transaction))
+        );
+    }
+
+    @Override
+    public void putAll(@NotNull Iterable<Map.Entry<? extends K, ? extends V>> entries) {
+        inWriteTransaction(transaction ->
+            entries.forEach(entry -> putInTransaction(entry.getKey(), entry.getValue(), transaction))
+        );
+    }
+
+    @Override
+    public void putAll(@NotNull Stream<Map.Entry<? extends K, ? extends V>> entries) {
+        inWriteTransaction(transaction ->
+            entries.forEach(entry -> putInTransaction(entry.getKey(), entry.getValue(), transaction))
+        );
+    }
+
+    @Override
+    public void putAll(@NotNull K @NotNull [] keys, @NotNull V @NotNull [] values) {
+        assert keys.length == values.length : "Illegal arrays length: %d vs %d".formatted(keys.length, values.length);
+        inWriteTransaction(transaction ->
+            BiStream.zip(Arrays.stream(keys), Arrays.stream(values))
+                    .forEach((key, value) -> putInTransaction(key, value, transaction))
+        );
+    }
+
+    @Override
+    public void putAll(@NotNull Iterable<? extends K> keys, @NotNull Iterable<? extends V> values) {
+        inWriteTransaction(transaction ->
+            BiStream.zip(Streams.stream(keys), Streams.stream(values))
+                    .forEach((key, value) -> putInTransaction(key, value, transaction))
+        );
     }
 
     @Override
@@ -84,15 +148,26 @@ public class LmdbJniDb <K, V> extends ByteArrayDb<K, V> implements KeyValueDb<K,
     }
 
     @Override
-    public void clear() {
-        try (Transaction transaction = env.createWriteTransaction()) {
-            db.drop(transaction, false);
-            transaction.commit();
-        }
+    public void removeAll(@NotNull K @NotNull [] keys) {
+        inWriteTransaction(transaction ->
+            Arrays.stream(keys).forEach(key -> db.delete(transaction, fromKey(key)))
+        );
     }
 
-    public @NotNull Database internalDb() {
-        return db;
+    @Override
+    public void removeAll(@NotNull Iterable<K> keys) {
+        inWriteTransaction(transaction ->
+            Streams.stream(keys).forEach(key -> db.delete(transaction, fromKey(key)))
+        );
+    }
+
+    @Override
+    public void clear() {
+        inWriteTransaction(transaction -> db.drop(transaction, false));
+    }
+
+    public void destroy() {
+        inWriteTransaction(transaction -> db.drop(transaction, true));
     }
 
     @Override
@@ -108,6 +183,29 @@ public class LmdbJniDb <K, V> extends ByteArrayDb<K, V> implements KeyValueDb<K,
     @Override
     public void close() {
         db.close();
+    }
+
+    public @NotNull Database internalDb() {
+        return db;
+    }
+
+    private <T> @NotNull T iterate(@NotNull Function<EntryIterator, T> converter) {
+        try (Transaction transaction = env.createReadTransaction()) {
+            try (EntryIterator iterator = db.iterate(transaction)) {
+                return converter.apply(iterator);
+            }
+        }
+    }
+
+    private void putInTransaction(@NotNull K key, @NotNull V value, @NotNull Transaction transaction) {
+        db.put(transaction, fromKey(key), fromValue(value));
+    }
+
+    private void inWriteTransaction(@NotNull Consumer<Transaction> consumer) {
+        try (Transaction transaction = env.createWriteTransaction()) {
+            consumer.accept(transaction);
+            transaction.commit();
+        }
     }
 
     @SuppressWarnings("UnstableApiUsage")

@@ -18,6 +18,7 @@ import java.lang.reflect.Constructor;
 import java.lang.reflect.InvocationTargetException;
 import java.util.*;
 import java.util.concurrent.atomic.AtomicInteger;
+import java.util.function.BiConsumer;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
@@ -61,6 +62,13 @@ public class PalDbImpl<K, V> extends ByteArrayDb<K, V> implements KeyValueDb<K, 
                 .map(Map.Entry::getValue)
                 .map(this::asValueNotNull)
                 .anyMatch(val -> val.equals(value));
+    }
+
+    @Override
+    public void forEach(@NotNull BiConsumer<? super K, ? super V> action) {
+        streamOf(reader().iterator())
+                .map(e -> asMapEntry(e.getKey(), e.getValue()))
+                .forEach(entry -> action.accept(entry.getKey(), entry.getValue()));
     }
 
     @Override
@@ -130,6 +138,10 @@ public class PalDbImpl<K, V> extends ByteArrayDb<K, V> implements KeyValueDb<K, 
             closeQuiet(reader);
             reader = null;
         }
+    }
+
+    public @NotNull StorageReader internalReader() {
+        return reader();
     }
 
     private @NotNull StorageReader reader() {

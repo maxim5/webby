@@ -1,9 +1,12 @@
 package io.webby.db.kv.rocksdb;
 
+import com.google.common.collect.Streams;
 import com.google.errorprone.annotations.CanIgnoreReturnValue;
+import com.google.mu.util.stream.BiStream;
 import io.webby.db.codec.Codec;
 import io.webby.db.kv.KeyValueDb;
 import io.webby.db.kv.impl.ByteArrayDb;
+import io.webby.util.Rethrow.Consumers;
 import io.webby.util.func.ThrowConsumer;
 import io.webby.util.func.ThrowFunction;
 import io.webby.util.func.ThrowPredicate;
@@ -13,7 +16,9 @@ import org.rocksdb.*;
 
 import java.util.*;
 import java.util.concurrent.atomic.AtomicInteger;
+import java.util.function.BiConsumer;
 import java.util.function.Function;
+import java.util.stream.Stream;
 
 import static io.webby.util.Rethrow.rethrow;
 
@@ -50,9 +55,43 @@ public class RocksDbImpl<K, V> extends ByteArrayDb<K, V> implements KeyValueDb<K
     }
 
     @Override
+    public @NotNull List<@Nullable V> getAll(@NotNull K @NotNull [] keys) {
+        try {
+            return db.multiGetAsList(Arrays.stream(keys).map(this::fromKey).toList()).stream().map(this::asValue).toList();
+        } catch (RocksDBException e) {
+            return rethrow(e);
+        }
+    }
+
+    @Override
+    public @NotNull List<@Nullable V> getAll(@NotNull Iterable<K> keys) {
+        try {
+            return db.multiGetAsList(Streams.stream(keys).map(this::fromKey).toList()).stream().map(this::asValue).toList();
+        } catch (RocksDBException e) {
+            return rethrow(e);
+        }
+    }
+
+    @Override
+    public boolean containsKey(@NotNull K key) {
+        try {
+            return db.get(fromKey(key)) != null;
+        } catch (RocksDBException e) {
+            return rethrow(e);
+        }
+    }
+
+    @Override
     public boolean containsValue(@NotNull V value) {
         byte[] bytes = fromValue(value);
         return forEachEntryEarlyStop(iterator -> Arrays.equals(iterator.value(), bytes));
+    }
+
+    @Override
+    public void forEach(@NotNull BiConsumer<? super K, ? super V> action) {
+        forEachEntry(iterator ->
+            action.accept(asKey(iterator.key()), asValue(iterator.value()))
+        );
     }
 
     @Override
@@ -96,6 +135,48 @@ public class RocksDbImpl<K, V> extends ByteArrayDb<K, V> implements KeyValueDb<K
     }
 
     @Override
+    public void putAll(@NotNull Iterable<Map.Entry<? extends K, ? extends V>> entries) {
+        writeBatch(batch -> {
+            for (Map.Entry<? extends K, ? extends V> entry : entries) {
+               byte[] key = fromKey(entry.getKey());
+               byte[] value = fromValue(entry.getValue());
+               batch.put(key, value);
+            }
+        });
+    }
+
+    @Override
+    public void putAll(@NotNull Stream<Map.Entry<? extends K, ? extends V>> entries) {
+        writeBatch(batch ->
+            entries.forEach(Consumers.rethrow(entry -> {
+               byte[] key = fromKey(entry.getKey());
+               byte[] value = fromValue(entry.getValue());
+               batch.put(key, value);
+            }))
+        );
+    }
+
+    @Override
+    public void putAll(@NotNull K @NotNull [] keys, @NotNull V @NotNull [] values) {
+        assert keys.length == values.length : "Illegal arrays length: %d vs %d".formatted(keys.length, values.length);
+        writeBatch(batch -> {
+            for (int i = 0, n = keys.length; i < n; i++) {
+                batch.put(fromKey(keys[i]), fromValue(values[i]));
+            }
+        });
+    }
+
+    @Override
+    public void putAll(@NotNull Iterable<? extends K> keys, @NotNull Iterable<? extends V> values) {
+        writeBatch(batch ->
+            BiStream.zip(Streams.stream(keys), Streams.stream(values))
+                   .mapKeys(this::fromKey)
+                   .mapValues(this::fromValue)
+                   .forEach(Consumers.rethrow(batch::put))
+        );
+    }
+
+    @Override
     public void delete(@NotNull K key) {
         try {
             db.delete(fromKey(key));
@@ -105,16 +186,30 @@ public class RocksDbImpl<K, V> extends ByteArrayDb<K, V> implements KeyValueDb<K
     }
 
     @Override
+    public void removeAll(@NotNull K @NotNull [] keys) {
+        writeBatch(batch -> {
+           for (K key : keys) {
+               batch.delete(fromKey(key));
+           }
+        });
+    }
+
+    @Override
+    public void removeAll(@NotNull Iterable<K> keys) {
+        writeBatch(batch -> {
+            for (K key : keys) {
+                batch.delete(fromKey(key));
+            }
+        });
+    }
+
+    @Override
     public void clear() {
         writeBatch(batch ->
             forEachEntry(iterator ->
                 batch.delete(iterator.key())
             )
         );
-    }
-
-    public @NotNull RocksDB internalDb() {
-        return db;
     }
 
     @Override
@@ -129,6 +224,10 @@ public class RocksDbImpl<K, V> extends ByteArrayDb<K, V> implements KeyValueDb<K
     @Override
     public void close() {
         db.close();
+    }
+
+    public @NotNull RocksDB internalDb() {
+        return db;
     }
 
     private void writeBatch(@NotNull ThrowConsumer<WriteBatch, RocksDBException> action) {

@@ -8,6 +8,7 @@ import java.util.Collection;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Set;
+import java.util.function.BiConsumer;
 
 public abstract class DefaultKeyValueDb<K, V, M extends Map<K, V>> implements KeyValueDb<K, V> {
     protected final M map;
@@ -47,6 +48,11 @@ public abstract class DefaultKeyValueDb<K, V, M extends Map<K, V>> implements Ke
     }
 
     @Override
+    public void forEach(@NotNull BiConsumer<? super K, ? super V> action) {
+        map.forEach(action);
+    }
+
+    @Override
     public @NotNull Set<K> keySet() {
         return map.keySet();
     }
@@ -59,6 +65,16 @@ public abstract class DefaultKeyValueDb<K, V, M extends Map<K, V>> implements Ke
     @Override
     public @NotNull Set<Map.Entry<K, V>> entrySet() {
         return map.entrySet();
+    }
+
+    @Override
+    public @NotNull Map<K, V> asMap() {
+        return map;
+    }
+
+    @Override
+    public @NotNull Map<K, V> copyToMap() {
+        return new HashMap<>(map);
     }
 
     @Override
@@ -104,16 +120,6 @@ public abstract class DefaultKeyValueDb<K, V, M extends Map<K, V>> implements Ke
     @Override
     public void clear() {
         map.clear();
-    }
-
-    @Override
-    public @NotNull Map<K, V> asMap() {
-        return map;
-    }
-
-    @Override
-    public @NotNull Map<K, V> copyToMap() {
-        return new HashMap<>(map);
     }
 
     public @NotNull M internalMap() {

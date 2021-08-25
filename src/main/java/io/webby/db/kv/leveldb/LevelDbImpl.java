@@ -1,6 +1,8 @@
 package io.webby.db.kv.leveldb;
 
+import com.google.common.collect.Streams;
 import com.google.errorprone.annotations.CanIgnoreReturnValue;
+import com.google.mu.util.stream.BiStream;
 import io.webby.db.codec.Codec;
 import io.webby.db.kv.KeyValueDb;
 import io.webby.db.kv.impl.ByteArrayDb;
@@ -14,9 +16,11 @@ import org.jetbrains.annotations.Nullable;
 import java.io.IOException;
 import java.util.*;
 import java.util.concurrent.atomic.AtomicInteger;
+import java.util.function.BiConsumer;
 import java.util.function.Consumer;
 import java.util.function.Function;
 import java.util.function.Predicate;
+import java.util.stream.Stream;
 
 import static io.webby.util.EasyIO.Close.closeQuietly;
 
@@ -46,9 +50,21 @@ public class LevelDbImpl<K, V> extends ByteArrayDb<K, V> implements KeyValueDb<K
     }
 
     @Override
+    public boolean containsKey(@NotNull K key) {
+        return db.get(fromKey(key)) != null;
+    }
+
+    @Override
     public boolean containsValue(@NotNull V value) {
         byte[] bytes = fromValue(value);
         return forEachEntryEarlyStop(entry -> Arrays.equals(entry.getValue(), bytes));
+    }
+
+    @Override
+    public void forEach(@NotNull BiConsumer<? super K, ? super V> action) {
+        forEachEntry(entry ->
+            action.accept(asKey(entry.getKey()), asValue(entry.getValue()))
+        );
     }
 
     @Override
@@ -88,8 +104,64 @@ public class LevelDbImpl<K, V> extends ByteArrayDb<K, V> implements KeyValueDb<K
     }
 
     @Override
+    public void putAll(@NotNull Iterable<Map.Entry<? extends K, ? extends V>> entries) {
+        writeBatch(batch ->
+            entries.forEach(entry -> {
+                byte[] key = fromKey(entry.getKey());
+                byte[] value = fromValue(entry.getValue());
+                batch.put(key, value);
+            })
+        );
+    }
+
+    @Override
+    public void putAll(@NotNull Stream<Map.Entry<? extends K, ? extends V>> entries) {
+        writeBatch(batch ->
+            entries.forEach(entry -> {
+               byte[] key = fromKey(entry.getKey());
+               byte[] value = fromValue(entry.getValue());
+               batch.put(key, value);
+            })
+        );
+    }
+
+    @Override
+    public void putAll(@NotNull K @NotNull [] keys, @NotNull V @NotNull [] values) {
+        assert keys.length == values.length : "Illegal arrays length: %d vs %d".formatted(keys.length, values.length);
+        writeBatch(batch -> {
+            for (int i = 0, n = keys.length; i < n; i++) {
+                batch.put(fromKey(keys[i]), fromValue(values[i]));
+            }
+        });
+    }
+
+    @Override
+    public void putAll(@NotNull Iterable<? extends K> keys, @NotNull Iterable<? extends V> values) {
+        writeBatch(batch ->
+            BiStream.zip(Streams.stream(keys), Streams.stream(values))
+                    .mapKeys(this::fromKey)
+                    .mapValues(this::fromValue)
+                    .forEach(batch::put)
+        );
+    }
+
+    @Override
     public void delete(@NotNull K key) {
         db.delete(fromKey(key));
+    }
+
+    @Override
+    public void removeAll(@NotNull K @NotNull [] keys) {
+        writeBatch(batch ->
+            Arrays.stream(keys).map(this::fromKey).forEach(batch::delete)
+        );
+    }
+
+    @Override
+    public void removeAll(@NotNull Iterable<K> keys) {
+        writeBatch(batch ->
+            Streams.stream(keys).map(this::fromKey).forEach(batch::delete)
+        );
     }
 
     @Override
@@ -99,10 +171,6 @@ public class LevelDbImpl<K, V> extends ByteArrayDb<K, V> implements KeyValueDb<K
                 batch.delete(entry.getKey())
             )
         );
-    }
-
-    public @NotNull DB internalDb() {
-        return db;
     }
 
     @Override
@@ -117,6 +185,10 @@ public class LevelDbImpl<K, V> extends ByteArrayDb<K, V> implements KeyValueDb<K
         } catch (IOException e) {
             Rethrow.rethrow(e);
         }
+    }
+
+    public @NotNull DB internalDb() {
+        return db;
     }
 
     private void writeBatch(@NotNull Consumer<WriteBatch> action) {

@@ -1,14 +1,15 @@
 package io.webby.db.kv.impl;
 
+import com.google.common.collect.Streams;
+import com.google.mu.util.stream.BiStream;
 import io.webby.db.kv.KeyValueDb;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
-import java.util.Collection;
-import java.util.Map;
-import java.util.Optional;
-import java.util.Set;
+import java.util.*;
+import java.util.function.BiConsumer;
 import java.util.function.Supplier;
+import java.util.stream.Stream;
 
 import static io.webby.db.kv.impl.DbStatsListener.Op;
 import static io.webby.db.kv.impl.DbStatsListener.OpContext;
@@ -79,6 +80,24 @@ public class TrackingDbAdapter<K, V> implements KeyValueDb<K, V> {
     }
 
     @Override
+    public @NotNull List<@Nullable V> getAll(@NotNull K @NotNull [] keys) {
+        try (OpContext ignored = listener.context()) {
+            for (K key : keys) {
+                listener.reportKey(Op.GET, key).close();
+            }
+            return delegate.getAll(keys);
+        }
+    }
+
+    @Override
+    public @NotNull List<@Nullable V> getAll(@NotNull Iterable<K> keys) {
+        try (OpContext ignored = listener.context()) {
+            keys.forEach(key -> listener.reportKey(Op.GET, key).close());
+            return delegate.getAll(keys);
+        }
+    }
+
+    @Override
     public boolean containsKey(@NotNull K key) {
         try (OpContext ignored = listener.reportKey(Op.GET, key)) {
             return delegate.containsKey(key);
@@ -89,6 +108,13 @@ public class TrackingDbAdapter<K, V> implements KeyValueDb<K, V> {
     public boolean containsValue(@NotNull V value) {
         try (OpContext ignored = listener.report(Op.SCAN)) {
             return delegate.containsValue(value);
+        }
+    }
+
+    @Override
+    public void forEach(@NotNull BiConsumer<? super K, ? super V> action) {
+        try (OpContext ignored = listener.report(Op.SCAN)) {
+            delegate.forEach(action);
         }
     }
 
@@ -117,6 +143,20 @@ public class TrackingDbAdapter<K, V> implements KeyValueDb<K, V> {
     public @NotNull Set<Map.Entry<K, V>> entrySet() {
         try (OpContext ignored = listener.report(Op.SCAN)) {
             return delegate.entrySet();
+        }
+    }
+
+    @Override
+    public @NotNull Map<K, V> asMap() {
+        try (OpContext ignored = listener.report(Op.SCAN)) {
+            return delegate.asMap();
+        }
+    }
+
+    @Override
+    public @NotNull Map<K, V> copyToMap() {
+        try (OpContext ignored = listener.report(Op.SCAN)) {
+            return delegate.copyToMap();
         }
     }
 
@@ -151,8 +191,42 @@ public class TrackingDbAdapter<K, V> implements KeyValueDb<K, V> {
     @Override
     public void putAll(@NotNull Map<? extends K, ? extends V> map) {
         try (OpContext ignored = listener.context()) {
-            map.forEach((key, value) -> listener.reportKeyValue(Op.SET, key, value));
+            map.forEach((key, value) -> listener.reportKeyValue(Op.SET, key, value).close());
             delegate.putAll(map);
+        }
+    }
+
+    @Override
+    public void putAll(@NotNull Iterable<Map.Entry<? extends K, ? extends V>> entries) {
+        try (OpContext ignored = listener.context()) {
+            entries.forEach(entry -> listener.reportKeyValue(Op.SET, entry.getKey(), entry.getValue()).close());
+            delegate.putAll(entries);
+        }
+    }
+
+    @Override
+    public void putAll(@NotNull Stream<Map.Entry<? extends K, ? extends V>> entries) {
+        try (OpContext ignored = listener.context()) {
+            entries.forEach(entry -> listener.reportKeyValue(Op.SET, entry.getKey(), entry.getValue()).close());
+            delegate.putAll(entries);
+        }
+    }
+
+    @Override
+    public void putAll(@NotNull K @NotNull [] keys, @NotNull V @NotNull [] values) {
+        try (OpContext ignored = listener.context()) {
+            BiStream.zip(Arrays.stream(keys), Arrays.stream(values))
+                    .forEach((key, value) -> listener.reportKeyValue(Op.SET, key, value).close());
+            delegate.putAll(keys, values);
+        }
+    }
+
+    @Override
+    public void putAll(@NotNull Iterable<? extends K> keys, @NotNull Iterable<? extends V> values) {
+        try (OpContext ignored = listener.context()) {
+            BiStream.zip(Streams.stream(keys), Streams.stream(values))
+                    .forEach((key, value) -> listener.reportKeyValue(Op.SET, key, value).close());
+            delegate.putAll(keys, values);
         }
     }
 
@@ -185,23 +259,25 @@ public class TrackingDbAdapter<K, V> implements KeyValueDb<K, V> {
     }
 
     @Override
+    public void removeAll(@NotNull K @NotNull [] keys) {
+        try (OpContext ignored = listener.context()) {
+            Arrays.stream(keys).forEach(key -> listener.reportKey(Op.DELETE, key).close());
+            delegate.removeAll(keys);
+        }
+    }
+
+    @Override
+    public void removeAll(@NotNull Iterable<K> keys) {
+        try (OpContext ignored = listener.context()) {
+            keys.forEach(key -> listener.reportKey(Op.DELETE, key).close());
+            delegate.removeAll(keys);
+        }
+    }
+
+    @Override
     public void clear() {
         try (OpContext ignored = listener.report(Op.DELETE)) {
             delegate.clear();
-        }
-    }
-
-    @Override
-    public @NotNull Map<K, V> asMap() {
-        try (OpContext ignored = listener.report(Op.SCAN)) {
-            return delegate.asMap();
-        }
-    }
-
-    @Override
-    public @NotNull Map<K, V> copyToMap() {
-        try (OpContext ignored = listener.report(Op.SCAN)) {
-            return delegate.copyToMap();
         }
     }
 

@@ -4,8 +4,10 @@ import io.webby.db.kv.KeyValueDb;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import swaydb.java.Map;
+import swaydb.java.Stream;
 
 import java.util.*;
+import java.util.function.BiConsumer;
 
 public class SwayDb<K, V> implements KeyValueDb<K, V> {
     private final Map<K, V, Void> map;
@@ -50,6 +52,11 @@ public class SwayDb<K, V> implements KeyValueDb<K, V> {
     }
 
     @Override
+    public void forEach(@NotNull BiConsumer<? super K, ? super V> action) {
+        map.forEach(entry -> action.accept(entry.key(), entry.value()));
+    }
+
+    @Override
     public @NotNull List<K> keys() {
         return map.keys().materialize();
     }
@@ -70,6 +77,16 @@ public class SwayDb<K, V> implements KeyValueDb<K, V> {
     }
 
     @Override
+    public @NotNull java.util.Map<K, V> asMap() {
+        return map.asJava();
+    }
+
+    @Override
+    public @NotNull java.util.Map<K, V> copyToMap() {
+        return new HashMap<>(map.asJava());
+    }
+
+    @Override
     public void set(@NotNull K key, @NotNull V value) {
         map.put(key, value);
     }
@@ -80,23 +97,19 @@ public class SwayDb<K, V> implements KeyValueDb<K, V> {
     }
 
     @Override
+    public void removeAll(@NotNull K @NotNull [] keys) {
+        map.remove(Stream.of(Arrays.stream(keys).iterator()));
+    }
+
+    @Override
+    public void removeAll(@NotNull Iterable<K> keys) {
+        map.remove(Stream.of(keys));
+    }
+
+    @Override
     public void clear() {
         // map.delete();
         map.clearKeyValues();
-    }
-
-    @Override
-    public @NotNull java.util.Map<K, V> asMap() {
-        return map.asJava();
-    }
-
-    @Override
-    public @NotNull java.util.Map<K, V> copyToMap() {
-        return new HashMap<>(map.asJava());
-    }
-
-    public @NotNull Map<K, V, Void> internalMap() {
-        return map;
     }
 
     @Override
@@ -106,5 +119,9 @@ public class SwayDb<K, V> implements KeyValueDb<K, V> {
     @Override
     public void close() {
         map.close();
+    }
+
+    public @NotNull Map<K, V, Void> internalMap() {
+        return map;
     }
 }
