@@ -1,18 +1,28 @@
 package io.webby.db.kv.impl;
 
+import com.google.common.collect.Streams;
 import org.jetbrains.annotations.NotNull;
 
 import java.io.Closeable;
 import java.util.Arrays;
 import java.util.Map;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 public interface DbStatsListener {
-    @NotNull OpContext context();
-
     @NotNull OpContext report(@NotNull Op op);
 
     @NotNull OpContext reportKey(@NotNull Op op, @NotNull Object key);
+
+    @NotNull OpContext reportKeys(@NotNull Op op, @NotNull Stream<?> keys);
+
+    default @NotNull OpContext reportKeys(@NotNull Op op, @NotNull Iterable<?> keys) {
+        return reportKeys(op, Streams.stream(keys));
+    }
+
+    default @NotNull OpContext reportKeys(@NotNull Op op, @NotNull Object[] keys) {
+        return reportKeys(op, Arrays.stream(keys));
+    }
 
     @NotNull OpContext reportKeyValue(@NotNull Op op, @NotNull Object key, @NotNull Object value);
 

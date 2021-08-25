@@ -1,7 +1,6 @@
 package io.webby.db.kv.impl;
 
 import com.google.common.collect.Streams;
-import com.google.mu.util.stream.BiStream;
 import io.webby.db.kv.KeyValueDb;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
@@ -81,18 +80,14 @@ public class TrackingDbAdapter<K, V> implements KeyValueDb<K, V> {
 
     @Override
     public @NotNull List<@Nullable V> getAll(@NotNull K @NotNull [] keys) {
-        try (OpContext ignored = listener.context()) {
-            for (K key : keys) {
-                listener.reportKey(Op.GET, key).close();
-            }
+        try (OpContext ignored = listener.reportKeys(Op.GET, keys)) {
             return delegate.getAll(keys);
         }
     }
 
     @Override
     public @NotNull List<@Nullable V> getAll(@NotNull Iterable<K> keys) {
-        try (OpContext ignored = listener.context()) {
-            keys.forEach(key -> listener.reportKey(Op.GET, key).close());
+        try (OpContext ignored = listener.reportKeys(Op.GET, keys)) {
             return delegate.getAll(keys);
         }
     }
@@ -190,42 +185,35 @@ public class TrackingDbAdapter<K, V> implements KeyValueDb<K, V> {
 
     @Override
     public void putAll(@NotNull Map<? extends K, ? extends V> map) {
-        try (OpContext ignored = listener.context()) {
-            map.forEach((key, value) -> listener.reportKeyValue(Op.SET, key, value).close());
+        try (OpContext ignored = listener.reportKeys(Op.SET, map.keySet())) {
             delegate.putAll(map);
         }
     }
 
     @Override
     public void putAll(@NotNull Iterable<Map.Entry<? extends K, ? extends V>> entries) {
-        try (OpContext ignored = listener.context()) {
-            entries.forEach(entry -> listener.reportKeyValue(Op.SET, entry.getKey(), entry.getValue()).close());
+        try (OpContext ignored = listener.reportKeys(Op.SET, Streams.stream(entries).map(Map.Entry::getKey))) {
             delegate.putAll(entries);
         }
     }
 
     @Override
     public void putAll(@NotNull Stream<Map.Entry<? extends K, ? extends V>> entries) {
-        try (OpContext ignored = listener.context()) {
-            entries.forEach(entry -> listener.reportKeyValue(Op.SET, entry.getKey(), entry.getValue()).close());
+        try (OpContext ignored = listener.reportKeys(Op.SET, entries.map(Map.Entry::getKey))) {
             delegate.putAll(entries);
         }
     }
 
     @Override
     public void putAll(@NotNull K @NotNull [] keys, @NotNull V @NotNull [] values) {
-        try (OpContext ignored = listener.context()) {
-            BiStream.zip(Arrays.stream(keys), Arrays.stream(values))
-                    .forEach((key, value) -> listener.reportKeyValue(Op.SET, key, value).close());
+        try (OpContext ignored = listener.reportKeys(Op.SET, keys)) {
             delegate.putAll(keys, values);
         }
     }
 
     @Override
     public void putAll(@NotNull Iterable<? extends K> keys, @NotNull Iterable<? extends V> values) {
-        try (OpContext ignored = listener.context()) {
-            BiStream.zip(Streams.stream(keys), Streams.stream(values))
-                    .forEach((key, value) -> listener.reportKeyValue(Op.SET, key, value).close());
+        try (OpContext ignored = listener.reportKeys(Op.SET, keys)) {
             delegate.putAll(keys, values);
         }
     }
@@ -260,16 +248,14 @@ public class TrackingDbAdapter<K, V> implements KeyValueDb<K, V> {
 
     @Override
     public void removeAll(@NotNull K @NotNull [] keys) {
-        try (OpContext ignored = listener.context()) {
-            Arrays.stream(keys).forEach(key -> listener.reportKey(Op.DELETE, key).close());
+        try (OpContext ignored = listener.reportKeys(Op.DELETE, keys)) {
             delegate.removeAll(keys);
         }
     }
 
     @Override
     public void removeAll(@NotNull Iterable<K> keys) {
-        try (OpContext ignored = listener.context()) {
-            keys.forEach(key -> listener.reportKey(Op.DELETE, key).close());
+        try (OpContext ignored = listener.reportKeys(Op.DELETE, keys)) {
             delegate.removeAll(keys);
         }
     }
