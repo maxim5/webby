@@ -1,8 +1,10 @@
 package io.webby.perf;
 
-import com.carrotsearch.hppc.*;
+import com.carrotsearch.hppc.IntIntHashMap;
+import com.carrotsearch.hppc.IntIntMap;
+import com.carrotsearch.hppc.IntObjectHashMap;
+import com.carrotsearch.hppc.IntObjectMap;
 import com.google.common.base.Stopwatch;
-import com.google.common.base.Supplier;
 import com.google.errorprone.annotations.CanIgnoreReturnValue;
 import io.netty.handler.codec.http.DefaultHttpRequest;
 import io.netty.handler.codec.http.HttpMethod;
@@ -16,6 +18,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicLong;
+import java.util.function.Supplier;
 
 public class RequestStatsCollector {
     private static final IntIdGenerator generator = IntIdGenerator.positiveRandom(null);
@@ -59,7 +62,7 @@ public class RequestStatsCollector {
         long elapsed = System.currentTimeMillis() - millis;
         stats.addTo(key, count);
         StatsRecord record = new StatsRecord(elapsed, hint);
-        getOrCompute(records, key, ArrayList::new).add(record);
+        computeIfAbsent(records, key, ArrayList::new).add(record);
         return millis;
     }
 
@@ -88,8 +91,12 @@ public class RequestStatsCollector {
         return "[id=%08x, uri=%s]".formatted(id, request.uri());
     }
 
-    private static <T> T getOrCompute(IntObjectMap<T> map, int key, Supplier<T> def) {
-        T existing = map.get(key);
-        return existing != null ? existing : def.get();
+    private static <T> T computeIfAbsent(@NotNull IntObjectMap<T> map, int key, @NotNull Supplier<T> def) {
+        T result = map.get(key);
+        if (result == null) {
+            result = def.get();
+            map.put(key, result);
+        }
+        return result;
     }
 }
