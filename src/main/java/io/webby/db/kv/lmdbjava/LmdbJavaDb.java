@@ -82,7 +82,7 @@ public class LmdbJavaDb<K, V> extends ByteArrayDb<K, V> implements KeyValueDb<K,
                 V value = asValue(entry.val());
                 action.accept(key, value);
             });
-            return null;
+            return "";
         });
     }
 

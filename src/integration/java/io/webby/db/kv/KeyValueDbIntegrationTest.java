@@ -267,6 +267,7 @@ public class KeyValueDbIntegrationTest {
 
     private static <K, V> void assertEqualsTo(@NotNull KeyValueDb<K, V> db, @NotNull Map<K, V> map) {
         assertEquals(map.size(), db.size());
+        assertEquals(map.size(), db.longSize());
         assertEquals(map.isEmpty(), db.isEmpty());
         assertEquals(!map.isEmpty(), db.isNotEmpty());
 
@@ -285,6 +286,10 @@ public class KeyValueDbIntegrationTest {
             assertEquals(value, db.get(key));
             assertEquals(Optional.of(value), db.getOptional(key));
         }
+
+        Map<K, V> iterated = new HashMap<>(db.size());
+        db.forEach(iterated::put);
+        assertEquals(iterated, map);
     }
 
     private static <K, V> void assertNotContainsAnyOf(@NotNull KeyValueDb<K, V> db, @NotNull Map<K, V> map) {

@@ -69,7 +69,7 @@ public class LmdbJniDb <K, V> extends ByteArrayDb<K, V> implements KeyValueDb<K,
                 V value = asValue(entry.getValue());
                 action.accept(key, value);
             });
-            return null;
+            return "";
         });
     }
 
