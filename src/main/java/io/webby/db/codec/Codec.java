@@ -18,7 +18,17 @@ public interface Codec<T> {
     int writeTo(@NotNull OutputStream output, @NotNull T instance) throws IOException;
 
     default byte @NotNull [] writeToBytes(@NotNull T instance) {
-        try (ByteArrayOutputStream output = new ByteArrayOutputStream(SystemProperties.DEFAULT_SIZE_BYTES)) {
+        try (ByteArrayOutputStream output = new ByteArrayOutputStream((int) size().numBytes())) {
+            writeTo(output, instance);
+            return output.toByteArray();
+        } catch (IOException impossible) {
+            return rethrow(impossible);
+        }
+    }
+
+    default byte @NotNull [] writeToBytes(byte @NotNull [] prefix, @NotNull T instance) {
+        try (ByteArrayOutputStream output = new ByteArrayOutputStream(prefix.length + (int) size().numBytes())) {
+            output.writeBytes(prefix);
             writeTo(output, instance);
             return output.toByteArray();
         } catch (IOException impossible) {

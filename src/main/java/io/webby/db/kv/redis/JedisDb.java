@@ -4,6 +4,7 @@ import com.google.common.base.Suppliers;
 import com.google.common.collect.Iterables;
 import com.google.common.collect.Streams;
 import com.google.mu.util.stream.BiStream;
+import io.netty.buffer.Unpooled;
 import io.webby.db.codec.Codec;
 import io.webby.db.kv.KeyValueDb;
 import io.webby.db.kv.impl.ByteArrayDb;
@@ -11,6 +12,7 @@ import io.webby.util.MoreIterables;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import redis.clients.jedis.Jedis;
+import redis.clients.jedis.ScanParams;
 import redis.clients.jedis.ScanResult;
 
 import java.util.*;
@@ -22,18 +24,26 @@ import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 public class JedisDb<K, V> extends ByteArrayDb<K, V> implements KeyValueDb<K, V> {
-    private static final byte[] ALL_KEYS_PATTERN = "*".getBytes();
     private static final byte[] CURSOR_START = "0".getBytes();
-
     private static final IntFunction<byte[][]> NEW_ARRAY = byte[][]::new;
 
     private final Jedis jedis;
     private final Supplier<RedisInfo> info = Suppliers.memoize(() -> RedisInfo.parseFrom(internalDb().info()));
 
-    // TODO: namespace
-    public JedisDb(@NotNull Jedis jedis, @NotNull String name, @NotNull Codec<K> keyCodec, @NotNull Codec<V> valueCodec) {
+    private final byte[] namespace;
+    private final byte[] namespacePattern;
+
+    public JedisDb(@NotNull Jedis jedis, @Nullable String name, @NotNull Codec<K> keyCodec, @NotNull Codec<V> valueCodec) {
         super(keyCodec, valueCodec);
         this.jedis = jedis;
+
+        if (name != null) {
+            namespace = "%s:".formatted(name).getBytes();
+            namespacePattern = "%s:*".formatted(name).getBytes();
+        } else {
+            namespace = new byte[0];
+            namespacePattern = "*".getBytes();
+        }
     }
 
     @Override
@@ -43,7 +53,10 @@ public class JedisDb<K, V> extends ByteArrayDb<K, V> implements KeyValueDb<K, V>
 
     @Override
     public long longSize() {
-        return jedis.dbSize();
+        if (namespace.length == 0) {
+            return jedis.dbSize();
+        }
+        return jedis.keys(namespacePattern).size();
     }
 
     @Override
@@ -82,7 +95,7 @@ public class JedisDb<K, V> extends ByteArrayDb<K, V> implements KeyValueDb<K, V>
     public void forEach(@NotNull BiConsumer<? super K, ? super V> action) {
         byte[] cursor = CURSOR_START;
         while (true) {
-            ScanResult<byte[]> scanResult = jedis.scan(cursor);
+            ScanResult<byte[]> scanResult = jedis.scan(cursor, new ScanParams().match(namespacePattern));
             List<byte[]> chunkKeys = scanResult.getResult();
             List<byte[]> chunkValues = chunkKeys.isEmpty() ? List.of() : jedis.mget(chunkKeys.toArray(NEW_ARRAY));
             BiStream.zip(chunkKeys, chunkValues).mapKeys(this::asKey).mapValues(this::asValue).forEach(action);
@@ -96,12 +109,12 @@ public class JedisDb<K, V> extends ByteArrayDb<K, V> implements KeyValueDb<K, V>
     @Override
     public @NotNull Iterable<K> keys() {
         // Optimize: iterate chunks via scan
-        return jedis.keys(ALL_KEYS_PATTERN).stream().map(this::asKey).toList();
+        return jedis.keys(namespacePattern).stream().map(this::asKey).toList();
     }
 
     @Override
     public @NotNull Set<K> keySet() {
-        return jedis.keys(ALL_KEYS_PATTERN).stream().map(this::asKey).collect(Collectors.toSet());
+        return jedis.keys(namespacePattern).stream().map(this::asKey).collect(Collectors.toSet());
     }
 
     @Override
@@ -257,6 +270,16 @@ public class JedisDb<K, V> extends ByteArrayDb<K, V> implements KeyValueDb<K, V>
 
     public @NotNull Jedis internalDb() {
         return jedis;
+    }
+
+    @Override
+    protected byte @NotNull [] fromKey(@NotNull K key) {
+        return keyCodec.writeToBytes(namespace, key);
+    }
+
+    @Override
+    protected @NotNull K asKeyNotNull(byte @NotNull [] bytes) {
+        return keyCodec.readFrom(Unpooled.wrappedBuffer(bytes, namespace.length, bytes.length - namespace.length));
     }
 
     private byte[][] fromKeys(@NotNull K @NotNull [] keys) {

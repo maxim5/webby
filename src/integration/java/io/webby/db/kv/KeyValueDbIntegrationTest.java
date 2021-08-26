@@ -182,7 +182,37 @@ public class KeyValueDbIntegrationTest {
             db.removeAll(List.of());
             assertEqualsTo(db, Map.of("a", "0", "b", "1", "c", "2"));
 
-            db.clear();  // TODO: temp
+            db.clear();
+            assertEqualsTo(db, Map.of());
+        }
+
+        cleanUp(tempDir);
+    }
+
+    @ParameterizedTest
+    @EnumSource(StorageType.class)
+    public void maps_isolation(StorageType storageType) throws Exception {
+        Path tempDir = createTempDirectory(storageType);
+        KeyValueFactory dbFactory = setupFactory(storageType, tempDir);
+
+        try (KeyValueDb<String, String> db1 = dbFactory.getDb("foo", String.class, String.class)) {
+            try (KeyValueDb<String, String> db2 = dbFactory.getDb("bar", String.class, String.class)) {
+                db1.put("a", "b");
+                assertEqualsTo(db1, Map.of("a", "b"));
+                assertEqualsTo(db2, Map.of());
+
+                db2.put("c", "d");
+                assertEqualsTo(db1, Map.of("a", "b"));
+                assertEqualsTo(db2, Map.of("c", "d"));
+
+                db1.remove("a");
+                assertEqualsTo(db1, Map.of());
+                assertEqualsTo(db2, Map.of("c", "d"));
+
+                db2.remove("c");
+                assertEqualsTo(db1, Map.of());
+                assertEqualsTo(db2, Map.of());
+            }
         }
 
         cleanUp(tempDir);
