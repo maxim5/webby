@@ -46,7 +46,7 @@ dependencies {
     compileOnly 'com.alibaba:fastjson:1.2.78'
     compileOnly 'com.dslplatform:dsl-json-java8:1.9.8'
     compileOnly 'com.fasterxml.jackson.core:jackson-databind:2.12.4'
-    compileOnly 'com.google.code.gson:gson:2.8.7'
+    compileOnly 'com.google.code.gson:gson:2.8.8'
     compileOnly 'com.squareup.moshi:moshi:1.12.0'
 
     // Templates
@@ -68,6 +68,9 @@ dependencies {
     compileOnly group: 'org.mapdb', name: 'mapdb', version: '3.0.8'
     compileOnly group: 'org.iq80.leveldb', name: 'leveldb', version: '0.12'
     compileOnly group: 'org.rocksdb', name: 'rocksdbjni', version: '6.22.1.1'
+
+    // NoSQLs
+    compileOnly group: 'redis.clients', name: 'jedis', version: '3.6.3'
 
     // JUnit
     testImplementation 'org.junit.jupiter:junit-jupiter-api:5.7.2'
