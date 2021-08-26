@@ -1,5 +1,6 @@
 package io.webby.db.kv.rocksdb;
 
+import com.google.common.collect.Iterables;
 import com.google.common.collect.Streams;
 import com.google.errorprone.annotations.CanIgnoreReturnValue;
 import com.google.mu.util.stream.BiStream;
@@ -57,7 +58,8 @@ public class RocksDbImpl<K, V> extends ByteArrayDb<K, V> implements KeyValueDb<K
     @Override
     public @NotNull List<@Nullable V> getAll(@NotNull K @NotNull [] keys) {
         try {
-            return db.multiGetAsList(Arrays.stream(keys).map(this::fromKey).toList()).stream().map(this::asValue).toList();
+            return keys.length == 0 ? List.of() :
+                db.multiGetAsList(Arrays.stream(keys).map(this::fromKey).toList()).stream().map(this::asValue).toList();
         } catch (RocksDBException e) {
             return rethrow(e);
         }
@@ -66,7 +68,8 @@ public class RocksDbImpl<K, V> extends ByteArrayDb<K, V> implements KeyValueDb<K
     @Override
     public @NotNull List<@Nullable V> getAll(@NotNull Iterable<K> keys) {
         try {
-            return db.multiGetAsList(Streams.stream(keys).map(this::fromKey).toList()).stream().map(this::asValue).toList();
+            return Iterables.isEmpty(keys) ? List.of() :
+                db.multiGetAsList(Streams.stream(keys).map(this::fromKey).toList()).stream().map(this::asValue).toList();
         } catch (RocksDBException e) {
             return rethrow(e);
         }

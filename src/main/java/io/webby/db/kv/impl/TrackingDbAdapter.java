@@ -201,9 +201,7 @@ public class TrackingDbAdapter<K, V> implements KeyValueDb<K, V> {
 
     @Override
     public void putAll(@NotNull Stream<Map.Entry<? extends K, ? extends V>> entries) {
-        try (OpContext ignored = listener.reportKeys(Op.SET, entries.map(Map.Entry::getKey))) {
-            delegate.putAll(entries);
-        }
+        putAll(entries.toList());   // have to materialize (can't reuse the stream)
     }
 
     @Override
