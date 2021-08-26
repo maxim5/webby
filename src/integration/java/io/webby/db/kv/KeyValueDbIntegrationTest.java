@@ -151,20 +151,41 @@ public class KeyValueDbIntegrationTest {
             db.putAll(List.of(Pair.of("a", "0"), Pair.of("d", "4")));
             assertEqualsTo(db, Map.of("a", "0", "b", "3", "c", "3", "d", "4"));
 
+            db.putAll(Stream.of(Pair.of("c", "5"), Pair.of("e", "6")));
+            assertEqualsTo(db, Map.of("a", "0", "b", "3", "c", "5", "d", "4", "e", "6"));
+
+            db.putAll(array("b", "f"), array("1", "7"));
+            assertEqualsTo(db, Map.of("a", "0", "b", "1", "c", "5", "d", "4", "e", "6", "f", "7"));
+
+            db.putAll(array("c", "g"), array("2", "8"));
+            assertEqualsTo(db, Map.of("a", "0", "b", "1", "c", "2", "d", "4", "e", "6", "f", "7", "g", "8"));
+
             assertThat(db.getAll(array())).isEmpty();
             assertThat(db.getAll(List.of())).isEmpty();
 
-            assertThat(db.getAll(array("a", "b", "e"))).containsExactly("0", "3", null);
-            assertThat(db.getAll(List.of("a", "b", "e"))).containsExactly("0", "3", null);
+            assertThat(db.getAll(array("a", "b", "x"))).containsExactly("0", "1", null);
+            assertThat(db.getAll(List.of("a", "b", "x"))).containsExactly("0", "1", null);
+
+            assertThat(db.getAll(array("x", "y"))).containsExactly(null, null);
+            assertThat(db.getAll(List.of("x", "y"))).containsExactly(null, null);
+
+            assertThat(db.getAll(array("a", "b", "c"))).containsExactly("0", "1", "2");
+            assertThat(db.getAll(List.of("a", "b", "c"))).containsExactly("0", "1", "2");
+
+            db.removeAll(array("f", "g", "h"));
+            assertEqualsTo(db, Map.of("a", "0", "b", "1", "c", "2", "d", "4", "e", "6"));
+
+            db.removeAll(List.of("d", "e", "f"));
+            assertEqualsTo(db, Map.of("a", "0", "b", "1", "c", "2"));
+
+            db.removeAll(array());
+            db.removeAll(List.of());
+            assertEqualsTo(db, Map.of("a", "0", "b", "1", "c", "2"));
 
             db.clear();  // TODO: temp
         }
 
         cleanUp(tempDir);
-    }
-
-    private static <T> T[] array(T ... items) {
-        return items;
     }
 
     @ParameterizedTest
@@ -299,5 +320,10 @@ public class KeyValueDbIntegrationTest {
 
     private static void cleanUpAtExit() {
         Runtime.getRuntime().addShutdownHook(new Thread(() -> TO_CLEAN.forEach(KeyValueDbIntegrationTest::deleteAll)));
+    }
+
+    @SuppressWarnings("unchecked")
+    private static <T> T[] array(T ... items) {
+        return items;
     }
 }

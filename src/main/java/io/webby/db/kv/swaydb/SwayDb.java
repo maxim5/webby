@@ -1,5 +1,6 @@
 package io.webby.db.kv.swaydb;
 
+import com.google.common.collect.Iterables;
 import io.webby.db.kv.KeyValueDb;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
@@ -98,12 +99,16 @@ public class SwayDb<K, V> implements KeyValueDb<K, V> {
 
     @Override
     public void removeAll(@NotNull K @NotNull [] keys) {
-        map.remove(Stream.of(Arrays.stream(keys).iterator()));
+        if (keys.length > 0) {
+            map.remove(Stream.of(Arrays.stream(keys).iterator()));
+        }
     }
 
     @Override
     public void removeAll(@NotNull Iterable<K> keys) {
-        map.remove(Stream.of(keys));
+        if (!Iterables.isEmpty(keys)) {
+            map.remove(Stream.of(keys));
+        }
     }
 
     @Override
