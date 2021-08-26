@@ -36,6 +36,11 @@ public class AgnosticKeyValueFactory implements KeyValueFactory {
         return delegate.getDb(name, key, value);
     }
 
+    public <K, V> @NotNull KeyValueDb<K, V> getDb(@NotNull StorageType storageType, @NotNull String name,
+                                                  @NotNull Class<K> key, @NotNull Class<V> value) {
+        return pickFactory(storageType).getDb(name, key, value);
+    }
+
     public <F extends InternalKeyValueFactory> @NotNull F getInternalFactory(@NotNull StorageType storageType) {
         return castAny(pickFactory(storageType));
     }
