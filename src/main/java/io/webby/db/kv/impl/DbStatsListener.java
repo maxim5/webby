@@ -1,6 +1,6 @@
 package io.webby.db.kv.impl;
 
-import io.webby.util.EasyList;
+import io.webby.util.MoreIterables;
 import org.jetbrains.annotations.NotNull;
 
 import java.io.Closeable;
@@ -22,7 +22,7 @@ public interface DbStatsListener {
     }
 
     default @NotNull OpContext reportKeys(@NotNull Op op, @NotNull Iterable<?> keys) {
-        return reportKeys(op, EasyList.asList(keys));
+        return reportKeys(op, MoreIterables.asList(keys));
     }
 
     default @NotNull OpContext reportKeys(@NotNull Op op, @NotNull Object[] keys) {

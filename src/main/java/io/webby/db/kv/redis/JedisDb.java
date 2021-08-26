@@ -1,12 +1,13 @@
 package io.webby.db.kv.redis;
 
 import com.google.common.base.Suppliers;
+import com.google.common.collect.Iterables;
 import com.google.common.collect.Streams;
 import com.google.mu.util.stream.BiStream;
 import io.webby.db.codec.Codec;
 import io.webby.db.kv.KeyValueDb;
 import io.webby.db.kv.impl.ByteArrayDb;
-import io.webby.util.EasyList;
+import io.webby.util.MoreIterables;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import redis.clients.jedis.Jedis;
@@ -57,7 +58,7 @@ public class JedisDb<K, V> extends ByteArrayDb<K, V> implements KeyValueDb<K, V>
 
     @Override
     public @NotNull List<@Nullable V> getAll(@NotNull Iterable<K> keys) {
-        return jedis.mget(fromKeys(keys)).stream().map(this::asValue).toList();
+        return Iterables.isEmpty(keys) ? List.of() : jedis.mget(fromKeys(keys)).stream().map(this::asValue).toList();
     }
 
     @Override
@@ -151,23 +152,25 @@ public class JedisDb<K, V> extends ByteArrayDb<K, V> implements KeyValueDb<K, V>
 
     @Override
     public void putAll(@NotNull Map<? extends K, ? extends V> map) {
-        byte[][] keyVals = new byte[map.size()][];
+        byte[][] keyVals = new byte[2 * map.size()][];
         int i = 0;
         for (Map.Entry<? extends K, ? extends V> entry : map.entrySet()) {
             keyVals[i++] = fromKey(entry.getKey());
             keyVals[i++] = fromValue(entry.getValue());
         }
-        jedis.mset(keyVals);
+        if (keyVals.length > 0)
+            jedis.mset(keyVals);
     }
 
     @Override
     public void putAll(@NotNull Iterable<Map.Entry<? extends K, ? extends V>> entries) {
-        List<byte[]> keyVals = new ArrayList<>(EasyList.estimateSizeInt(entries, 10));
+        List<byte[]> keyVals = new ArrayList<>(2 * MoreIterables.estimateSizeInt(entries, 5));
         for (Map.Entry<? extends K, ? extends V> entry : entries) {
             keyVals.add(fromKey(entry.getKey()));
             keyVals.add(fromValue(entry.getValue()));
         }
-        jedis.mset(keyVals.toArray(NEW_ARRAY));
+        if (!keyVals.isEmpty())
+            jedis.mset(keyVals.toArray(NEW_ARRAY));
     }
 
     @Override
@@ -177,7 +180,8 @@ public class JedisDb<K, V> extends ByteArrayDb<K, V> implements KeyValueDb<K, V>
             keyVals.add(fromKey(entry.getKey()));
             keyVals.add(fromValue(entry.getValue()));
         });
-        jedis.mset(keyVals.toArray(NEW_ARRAY));
+        if (!keyVals.isEmpty())
+            jedis.mset(keyVals.toArray(NEW_ARRAY));
     }
 
     @Override
@@ -185,28 +189,30 @@ public class JedisDb<K, V> extends ByteArrayDb<K, V> implements KeyValueDb<K, V>
         int n = keys.length;
         int m = values.length;
         assert n == m : "Illegal arrays length: %d vs %d".formatted(n, m);
-        byte[][] keyVals = new byte[n][];
+        byte[][] keyVals = new byte[2 * n][];
         for (int i = 0; i < n; i++) {
             keyVals[i * 2] = fromKey(keys[i]);
             keyVals[i * 2 + 1] = fromValue(values[i]);
         }
-        jedis.mset(keyVals);
+        if (keyVals.length > 0)
+            jedis.mset(keyVals);
     }
 
     @Override
     public void putAll(@NotNull Iterable<? extends K> keys, @NotNull Iterable<? extends V> values) {
-        List<? extends K> keysList = EasyList.asList(keys);
-        List<? extends V> valuesList = EasyList.asList(values);
+        List<? extends K> keysList = MoreIterables.asList(keys);
+        List<? extends V> valuesList = MoreIterables.asList(values);
 
         int n = keysList.size();
         int m = valuesList.size();
         assert n == m : "Illegal iterables lengths: %d vs %d".formatted(n, m);
-        byte[][] keyVals = new byte[n][];
+        byte[][] keyVals = new byte[2 * n][];
         for (int i = 0; i < n; i++) {
             keyVals[i * 2] = fromKey(keysList.get(i));
             keyVals[i * 2 + 1] = fromValue(valuesList.get(i));
         }
-        jedis.mset(keyVals);
+        if (keyVals.length > 0)
+            jedis.mset(keyVals);
     }
 
     @Override
@@ -224,12 +230,14 @@ public class JedisDb<K, V> extends ByteArrayDb<K, V> implements KeyValueDb<K, V>
 
     @Override
     public void removeAll(@NotNull K @NotNull [] keys) {
-        jedis.del(fromKeys(keys));
+        if (keys.length > 0)
+            jedis.del(fromKeys(keys));
     }
 
     @Override
     public void removeAll(@NotNull Iterable<K> keys) {
-        jedis.del(fromKeys(keys));
+        if (!Iterables.isEmpty(keys))
+            jedis.del(fromKeys(keys));
     }
 
     @Override

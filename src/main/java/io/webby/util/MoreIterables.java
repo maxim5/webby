@@ -9,7 +9,7 @@ import java.util.stream.StreamSupport;
 
 import static io.webby.util.EasyCast.castAny;
 
-public class EasyList {
+public class MoreIterables {
     public static <E> List<E> asList(@NotNull Iterable<? extends E> items) {
         return castAny(
                 items instanceof List<?> list

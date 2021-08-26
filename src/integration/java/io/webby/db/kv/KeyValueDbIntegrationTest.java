@@ -15,6 +15,7 @@ import io.webby.db.kv.mapdb.MapDbImpl;
 import io.webby.db.kv.paldb.PalDbFactory;
 import io.webby.db.kv.paldb.PalDbImpl;
 import io.webby.testing.Testing;
+import io.webby.util.Pair;
 import org.jetbrains.annotations.NotNull;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Test;
@@ -25,11 +26,9 @@ import org.junit.jupiter.params.provider.EnumSource;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
-import java.util.ArrayList;
-import java.util.HashSet;
-import java.util.Map;
-import java.util.Optional;
+import java.util.*;
 import java.util.logging.Level;
+import java.util.stream.Stream;
 
 import static com.google.common.truth.Truth.assertThat;
 import static io.webby.testing.FakeRequests.getEx;
@@ -127,6 +126,45 @@ public class KeyValueDbIntegrationTest {
         }
 
         cleanUp(tempDir);
+    }
+
+    @ParameterizedTest
+    @EnumSource(StorageType.class)
+    public void bulk_operations(StorageType storageType) throws Exception {
+        Path tempDir = createTempDirectory(storageType);
+        KeyValueFactory dbFactory = setupFactory(storageType, tempDir);
+
+        try (KeyValueDb<String, String> db = dbFactory.getDb("foo", String.class, String.class)) {
+            db.putAll(Map.of());
+            db.putAll(List.of());
+            db.putAll(Stream.of());
+            db.putAll(array(), array());
+            db.putAll(List.of(), List.of());
+            assertEqualsTo(db, Map.of());
+
+            db.putAll(Map.of("a", "1", "b", "2"));
+            assertEqualsTo(db, Map.of("a", "1", "b", "2"));
+
+            db.putAll(Map.of("b", "3", "c", "3"));
+            assertEqualsTo(db, Map.of("a", "1", "b", "3", "c", "3"));
+
+            db.putAll(List.of(Pair.of("a", "0"), Pair.of("d", "4")));
+            assertEqualsTo(db, Map.of("a", "0", "b", "3", "c", "3", "d", "4"));
+
+            assertThat(db.getAll(array())).isEmpty();
+            assertThat(db.getAll(List.of())).isEmpty();
+
+            assertThat(db.getAll(array("a", "b", "e"))).containsExactly("0", "3", null);
+            assertThat(db.getAll(List.of("a", "b", "e"))).containsExactly("0", "3", null);
+
+            db.clear();  // TODO: temp
+        }
+
+        cleanUp(tempDir);
+    }
+
+    private static <T> T[] array(T ... items) {
+        return items;
     }
 
     @ParameterizedTest
