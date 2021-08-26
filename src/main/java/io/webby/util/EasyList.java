@@ -19,4 +19,14 @@ public class EasyList {
                         : StreamSupport.stream(items.spliterator(), false).toList()
         );
     }
+
+    public static <E> long estimateSize(@NotNull Iterable<E> items, int def) {
+        return items instanceof Collection<?> collection
+                ? collection.size()
+                : Math.min(items.spliterator().estimateSize(), def);
+    }
+
+    public static <E> int estimateSizeInt(@NotNull Iterable<E> items, int def) {
+        return (int) estimateSize(items, def);
+    }
 }

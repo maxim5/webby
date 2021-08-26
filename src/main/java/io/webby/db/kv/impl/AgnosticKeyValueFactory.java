@@ -14,6 +14,7 @@ import io.webby.db.kv.lmdbjava.LmdbJavaDbFactory;
 import io.webby.db.kv.lmdbjni.LmdbJniDbFactory;
 import io.webby.db.kv.mapdb.MapDbFactory;
 import io.webby.db.kv.paldb.PalDbFactory;
+import io.webby.db.kv.redis.JedisDbFactory;
 import io.webby.db.kv.rocksdb.RocksDbFactory;
 import io.webby.db.kv.swaydb.SwayDbFactory;
 import org.jetbrains.annotations.NotNull;
@@ -43,6 +44,7 @@ public class AgnosticKeyValueFactory implements KeyValueFactory {
         Class<? extends InternalKeyValueFactory> factoryClass = switch (storageType) {
             case CHRONICLE_MAP -> ChronicleFactory.class;
             case JAVA_MAP -> JavaMapDbFactory.class;
+            case JEDIS -> JedisDbFactory.class;
             case LEVEL_DB_IQ80 -> LevelDbIq80Factory.class;
             case LEVEL_DB_JNI -> LevelDbJniFactory.class;
             case LMDB_JAVA -> LmdbJavaDbFactory.class;

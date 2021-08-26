@@ -1,5 +1,6 @@
 package io.webby.db.kv.redis;
 
+import com.google.common.base.Suppliers;
 import com.google.common.collect.Streams;
 import com.google.mu.util.stream.BiStream;
 import io.webby.db.codec.Codec;
@@ -15,6 +16,7 @@ import java.util.*;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.function.BiConsumer;
 import java.util.function.IntFunction;
+import java.util.function.Supplier;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
@@ -25,9 +27,10 @@ public class JedisDb<K, V> extends ByteArrayDb<K, V> implements KeyValueDb<K, V>
     private static final IntFunction<byte[][]> NEW_ARRAY = byte[][]::new;
 
     private final Jedis jedis;
+    private final Supplier<RedisInfo> info = Suppliers.memoize(() -> RedisInfo.parseFrom(internalDb().info()));
 
     // TODO: namespace
-    public JedisDb(@NotNull Jedis jedis, @NotNull Codec<K> keyCodec, @NotNull Codec<V> valueCodec) {
+    public JedisDb(@NotNull Jedis jedis, @NotNull String name, @NotNull Codec<K> keyCodec, @NotNull Codec<V> valueCodec) {
         super(keyCodec, valueCodec);
         this.jedis = jedis;
     }
@@ -44,12 +47,12 @@ public class JedisDb<K, V> extends ByteArrayDb<K, V> implements KeyValueDb<K, V>
 
     @Override
     public @Nullable V get(@NotNull K key) {
-        return asValue(jedis.get(fromKey(key)));  // nil?
+        return asValue(jedis.get(fromKey(key)));
     }
 
     @Override
     public @NotNull List<@Nullable V> getAll(@NotNull K @NotNull [] keys) {
-        return jedis.mget(fromKeys(keys)).stream().map(this::asValue).toList();
+        return keys.length == 0 ? List.of() : jedis.mget(fromKeys(keys)).stream().map(this::asValue).toList();
     }
 
     @Override
@@ -80,7 +83,7 @@ public class JedisDb<K, V> extends ByteArrayDb<K, V> implements KeyValueDb<K, V>
         while (true) {
             ScanResult<byte[]> scanResult = jedis.scan(cursor);
             List<byte[]> chunkKeys = scanResult.getResult();
-            List<byte[]> chunkValues = jedis.mget(chunkKeys.toArray(NEW_ARRAY));
+            List<byte[]> chunkValues = chunkKeys.isEmpty() ? List.of() : jedis.mget(chunkKeys.toArray(NEW_ARRAY));
             BiStream.zip(chunkKeys, chunkValues).mapKeys(this::asKey).mapValues(this::asValue).forEach(action);
             if (scanResult.isCompleteIteration()) {
                 return;
@@ -139,10 +142,10 @@ public class JedisDb<K, V> extends ByteArrayDb<K, V> implements KeyValueDb<K, V>
               return redis.call('get', key)
             else
               redis.call('set', key, val)
-              return val
+              return nil
             end
         """.getBytes(), 1, keyBytes, valueBytes);
-        assert result instanceof byte[];
+        assert result == null || result instanceof byte[] : "Unexpected eval result: %s".formatted(result);
         return asValue((byte[]) result);
     }
 
@@ -159,7 +162,7 @@ public class JedisDb<K, V> extends ByteArrayDb<K, V> implements KeyValueDb<K, V>
 
     @Override
     public void putAll(@NotNull Iterable<Map.Entry<? extends K, ? extends V>> entries) {
-        List<byte[]> keyVals = new ArrayList<>();
+        List<byte[]> keyVals = new ArrayList<>(EasyList.estimateSizeInt(entries, 10));
         for (Map.Entry<? extends K, ? extends V> entry : entries) {
             keyVals.add(fromKey(entry.getKey()));
             keyVals.add(fromValue(entry.getValue()));
@@ -179,12 +182,6 @@ public class JedisDb<K, V> extends ByteArrayDb<K, V> implements KeyValueDb<K, V>
 
     @Override
     public void putAll(@NotNull K @NotNull [] keys, @NotNull V @NotNull [] values) {
-        /*
-        byte[][] array = Streams.concat(Arrays.stream(keys).map(this::fromKey),
-                                        Arrays.stream(values).map(this::fromValue))
-                .toArray(NEW_ARRAY);
-        */
-
         int n = keys.length;
         int m = values.length;
         assert n == m : "Illegal arrays length: %d vs %d".formatted(n, m);
@@ -203,7 +200,7 @@ public class JedisDb<K, V> extends ByteArrayDb<K, V> implements KeyValueDb<K, V>
 
         int n = keysList.size();
         int m = valuesList.size();
-        assert n == m : "Illegal input lengths: %d vs %d".formatted(n, m);
+        assert n == m : "Illegal iterables lengths: %d vs %d".formatted(n, m);
         byte[][] keyVals = new byte[n][];
         for (int i = 0; i < n; i++) {
             keyVals[i * 2] = fromKey(keysList.get(i));
@@ -219,7 +216,10 @@ public class JedisDb<K, V> extends ByteArrayDb<K, V> implements KeyValueDb<K, V>
 
     @Override
     public @Nullable V remove(@NotNull K key) {
-        return asValue(jedis.getDel(fromKey(key)));
+        if (info.get().isVersionAfter("6.2.0")) {
+            return asValue(jedis.getDel(fromKey(key)));
+        }
+        return KeyValueDb.super.remove(key);
     }
 
     @Override
@@ -245,6 +245,10 @@ public class JedisDb<K, V> extends ByteArrayDb<K, V> implements KeyValueDb<K, V>
     @Override
     public void close() {
         jedis.close();
+    }
+
+    public @NotNull Jedis internalDb() {
+        return jedis;
     }
 
     private byte[][] fromKeys(@NotNull K @NotNull [] keys) {

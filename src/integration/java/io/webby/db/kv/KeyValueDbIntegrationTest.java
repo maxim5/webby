@@ -18,6 +18,7 @@ import io.webby.testing.Testing;
 import org.jetbrains.annotations.NotNull;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.EnumSource;
 
@@ -34,6 +35,7 @@ import static com.google.common.truth.Truth.assertThat;
 import static io.webby.testing.FakeRequests.getEx;
 import static org.junit.jupiter.api.Assertions.*;
 
+@ExtendWith(EmbeddedRedisExtension.class)
 public class KeyValueDbIntegrationTest {
     private static final FluentLogger log = FluentLogger.forEnclosingClass();
 
@@ -225,6 +227,8 @@ public class KeyValueDbIntegrationTest {
             settings.setProperty("db.swaydb.init.map.size.bytes", 64 << 10);
             settings.setProperty("db.swaydb.segment.size.bytes", 64 << 10);
             settings.setProperty("db.swaydb.appendix.flush.checkpoint.size.bytes", 1 << 10);
+
+            settings.setProperty("db.redis.port", EmbeddedRedisExtension.PORT);
 
             log.at(Level.INFO).log("[Test] Temp storage path: %s", tempDir);
         });
