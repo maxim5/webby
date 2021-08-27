@@ -13,7 +13,9 @@ public enum Stat {
     DB_IO(6),
 
     CODEC_READ(101),
-    CODEC_WRITE(102);
+    CODEC_WRITE(102),
+
+    RENDER(200);
 
     public static final Map<Integer, Stat> VALUES = Arrays.stream(Stat.values()).collect(Collectors.toMap(Stat::key, s -> s));
 

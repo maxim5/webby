@@ -4,6 +4,7 @@ import com.google.common.flogger.FluentLogger;
 import com.google.inject.Inject;
 import io.webby.app.Settings;
 import io.webby.common.InjectorHelper;
+import io.webby.perf.stats.impl.StatsManager;
 import io.webby.url.annotate.Render;
 import org.jetbrains.annotations.NotNull;
 
@@ -14,14 +15,14 @@ public class RendererFactory {
 
     @Inject private InjectorHelper helper;
     @Inject private Settings settings;
+    @Inject private StatsManager statsManager;
 
-    @NotNull
-    public Renderer<?> getRenderer(@NotNull Render render, @NotNull String viewName) {
-        Renderer<?> renderer = createRenderer(render);
+    public @NotNull Renderer<?> getRenderer(@NotNull Render render, @NotNull String viewName) {
+        Renderer<?> renderer = trackIfNecessary(getRawRenderer(render));
         if (settings.isHotReload()) {
             return switch (renderer.hotReload()) {
                 case SELF -> renderer;
-                case RECOMPILE -> new HotReloadRenderer<>(renderer, viewName);
+                case RECOMPILE -> new HotReloadAdapter<>(renderer, viewName);
                 case UNSUPPORTED -> {
                     log.at(Level.WARNING).log("Hot reload is unsupported for %s".formatted(render));
                     yield renderer;
@@ -31,8 +32,18 @@ public class RendererFactory {
         return renderer;
     }
 
-    @NotNull
-    public Renderer<?> createRenderer(@NotNull Render render) {
+    private @NotNull Renderer<?> trackIfNecessary(@NotNull Renderer<?> renderer) {
+        if (shouldTrack()) {
+            return new TrackingRenderAdapter<>(renderer, statsManager.newRenderingStatsListener());
+        }
+        return renderer;
+    }
+
+    private boolean shouldTrack() {
+        return settings.isProfileMode();
+    }
+
+    private @NotNull Renderer<?> getRawRenderer(@NotNull Render render) {
         return switch (render) {
             case FREEMARKER -> helper.lazySingleton(FreeMarkerRenderer.class);
             case HANDLEBARS -> helper.lazySingleton(HandlebarsRenderer.class);

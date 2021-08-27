@@ -2,6 +2,7 @@ package io.webby.perf.stats.impl;
 
 import io.webby.perf.stats.CodecStatsListener;
 import io.webby.perf.stats.DbStatsListener;
+import io.webby.perf.stats.RenderingStatsListener;
 import io.webby.perf.stats.Stat;
 import org.jetbrains.annotations.NotNull;
 
@@ -47,6 +48,13 @@ public class StatsManager {
         return (stat, numBytes, elapsedMillis, hint) -> {
             RequestStatsCollector stats = LocalStatsHolder.getLocalStats();
             stats.report(stat.key(), numBytes, elapsedMillis, hint);
+        };
+    }
+
+    public @NotNull RenderingStatsListener newRenderingStatsListener() {
+        return (stat, size, elapsedMillis, hint) -> {
+            RequestStatsCollector stats = LocalStatsHolder.getLocalStats();
+            stats.report(stat.key(), size, elapsedMillis, hint);
         };
     }
 }
