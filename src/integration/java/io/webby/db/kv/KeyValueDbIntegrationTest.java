@@ -313,6 +313,7 @@ public class KeyValueDbIntegrationTest {
         return Testing.testStartup(settings -> {
             settings.setStorageType(storageType);
             settings.setStoragePath(tempDir);
+            settings.setProfileMode(false);  // not testing TrackingDbAdapter by default
 
             settings.setProperty("db.chronicle.default.size", 64);
             settings.setProperty("db.lmdb-java.max.map.size.bytes", 64 << 10);

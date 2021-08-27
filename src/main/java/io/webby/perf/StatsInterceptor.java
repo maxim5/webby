@@ -23,7 +23,7 @@ public class StatsInterceptor implements Interceptor {
 
     @Override
     public boolean isEnabled() {
-        return settings.isDevMode();
+        return settings.isProfileMode();
     }
 
     @Override

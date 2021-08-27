@@ -20,6 +20,8 @@ public interface Settings {
 
     boolean isHotReload();
 
+    boolean isProfileMode();
+
     boolean isSafeMode();
 
     byte @NotNull [] securityKey();

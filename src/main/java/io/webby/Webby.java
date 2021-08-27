@@ -14,6 +14,7 @@ import io.webby.app.AppSettings;
 import io.webby.auth.AuthModule;
 import io.webby.common.CommonModule;
 import io.webby.db.DbModule;
+import io.webby.db.kv.StorageType;
 import io.webby.netty.NettyBootstrap;
 import io.webby.netty.NettyModule;
 import io.webby.perf.PerfModule;
@@ -64,12 +65,14 @@ public class Webby {
         validateWebPath(settings.webPath());
         validateViewPaths(settings.viewPaths());
         validateHotReload(settings);
+        validateProfileMode(settings);
         validateSafeMode(settings);
+        validateStorageType(settings);
         validateHandlerFilter(settings);
         validateInterceptorFilter(settings);
     }
 
-    private static void validateSecurityKey(byte[] securityKey) {
+    private static void validateSecurityKey(byte @NotNull [] securityKey) {
         if (securityKey.length == 0) {
             throw new AppConfigException("Invalid settings: security key is not set. " +
                     "Please generate the secure random 32-byte string and use it in the app settings");
@@ -112,6 +115,16 @@ public class Webby {
         }
     }
 
+    private static void validateProfileMode(@NotNull AppSettings settings) {
+        if (settings.isProfileModeDefault()) {
+            settings.setProfileMode(settings.isDevMode());
+        } else {
+            if (settings.isProfileMode() && settings.isProdMode()) {
+                log.at(Level.WARNING).log("Configured profile mode in production");
+            }
+        }
+    }
+
     private static void validateSafeMode(@NotNull AppSettings settings) {
         if (settings.isSafeModeDefault()) {
             settings.setSafeMode(settings.isDevMode());
@@ -119,6 +132,12 @@ public class Webby {
             if (settings.isSafeMode() && settings.isProdMode()) {
                 log.at(Level.WARNING).log("Configured safe mode in production");
             }
+        }
+    }
+
+    private static void validateStorageType(@NotNull AppSettings settings) {
+        if (settings.storageType() == StorageType.JAVA_MAP && settings.isProdMode()) {
+            log.at(Level.WARNING).log("Configured non-persistent storage in production: %s", settings.storageType());
         }
     }
 

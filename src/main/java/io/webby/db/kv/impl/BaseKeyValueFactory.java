@@ -37,7 +37,7 @@ public abstract class BaseKeyValueFactory implements InternalKeyValueFactory, Cl
     }
 
     private boolean shouldTrack() {
-        return settings.isDevMode();
+        return settings.isProfileMode();  // add DB-specific property?
     }
 
     protected <K, V, KV extends KeyValueDb<K, V>> @NotNull KV cacheIfAbsent(@NotNull String name, @NotNull Supplier<KV> supplier) {

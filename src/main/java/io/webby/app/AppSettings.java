@@ -24,6 +24,8 @@ public final class AppSettings implements Settings {
     private boolean devMode = true;
     private boolean hotReload = true;
     private boolean hotReloadDefault = true;
+    private boolean profileMode = true;
+    private boolean profileModeDefault = true;
     private boolean safeMode = true;
     private boolean safeModeDefault = true;
 
@@ -78,6 +80,20 @@ public final class AppSettings implements Settings {
     public void setHotReload(boolean hotReload) {
         this.hotReload = hotReload;
         this.hotReloadDefault = false;
+    }
+
+    @Override
+    public boolean isProfileMode() {
+        return profileMode;
+    }
+
+    public void setProfileMode(boolean profileMode) {
+        this.profileMode = profileMode;
+        this.profileModeDefault = false;
+    }
+
+    public boolean isProfileModeDefault() {
+        return profileModeDefault;
     }
 
     @Override
