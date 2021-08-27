@@ -4,6 +4,7 @@ import com.google.inject.AbstractModule;
 import io.webby.db.kv.impl.AgnosticKeyValueFactory;
 import io.webby.db.kv.KeyValueFactory;
 import io.webby.db.codec.CodecProvider;
+import io.webby.db.kv.redis.RedisSettings;
 
 public class DbModule extends AbstractModule {
     @Override
@@ -11,5 +12,7 @@ public class DbModule extends AbstractModule {
         bind(CodecProvider.class).asEagerSingleton();
         bind(AgnosticKeyValueFactory.class).asEagerSingleton();
         bind(KeyValueFactory.class).to(AgnosticKeyValueFactory.class).asEagerSingleton();
+
+        bind(RedisSettings.class).asEagerSingleton();
     }
 }

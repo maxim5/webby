@@ -1,4 +1,4 @@
-package io.webby.perf;
+package io.webby.perf.stats.impl;
 
 import com.google.common.flogger.FluentLogger;
 import com.google.inject.Inject;
@@ -13,7 +13,7 @@ import org.jetbrains.annotations.NotNull;
 import java.util.concurrent.TimeUnit;
 import java.util.logging.Level;
 
-import static io.webby.perf.LocalStatsHolder.*;
+import static io.webby.perf.stats.impl.LocalStatsHolder.*;
 
 @AttributeOwner(position = Attributes.Stats)
 public class StatsInterceptor implements Interceptor {

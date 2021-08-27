@@ -1,4 +1,4 @@
-package io.webby.perf;
+package io.webby.perf.stats.impl;
 
 import com.carrotsearch.hppc.IntIntHashMap;
 import com.carrotsearch.hppc.IntIntMap;
@@ -52,18 +52,21 @@ public class RequestStatsCollector {
         return lock.compareAndSet(0, System.currentTimeMillis());
     }
 
+    @CanIgnoreReturnValue
     public long unlock() {
         return lock.getAndSet(0);
     }
 
-    @CanIgnoreReturnValue
-    public long unlock(int key, int count, @Nullable Object hint) {
+    public void unlock(int key, int count, @Nullable Object hint) {
         long millis = unlock();
-        long elapsed = System.currentTimeMillis() - millis;
+        long elapsedMillis = System.currentTimeMillis() - millis;
+        report(key, count, elapsedMillis, hint);
+    }
+
+    public void report(int key, int count, long elapsedMillis, @Nullable Object hint) {
         stats.addTo(key, count);
-        StatsRecord record = new StatsRecord(elapsed, hint);
+        StatsRecord record = new StatsRecord(elapsedMillis, hint);
         computeIfAbsent(records, key, ArrayList::new).add(record);
-        return millis;
     }
 
     public int id() {

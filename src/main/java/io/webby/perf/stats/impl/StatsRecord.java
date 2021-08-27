@@ -1,4 +1,4 @@
-package io.webby.perf;
+package io.webby.perf.stats.impl;
 
 import org.jetbrains.annotations.Nullable;
 

@@ -5,7 +5,7 @@ import io.webby.app.AppConfigException;
 import io.webby.app.Settings;
 import io.webby.common.Lifetime;
 import io.webby.db.kv.KeyValueDb;
-import io.webby.perf.StatsManager;
+import io.webby.perf.stats.impl.StatsManager;
 import org.jetbrains.annotations.NotNull;
 
 import java.io.Closeable;
@@ -19,8 +19,8 @@ import static io.webby.util.EasyCast.castAny;
 public abstract class BaseKeyValueFactory implements InternalKeyValueFactory, Closeable {
     protected final Map<String, KeyValueDb<?, ?>> cache = new HashMap<>();
 
-    private @Inject Settings settings;
-    private @Inject StatsManager statsManager;
+    @Inject private Settings settings;
+    @Inject private StatsManager statsManager;
 
     @Inject
     protected void init(@NotNull Lifetime lifetime) {
@@ -31,7 +31,7 @@ public abstract class BaseKeyValueFactory implements InternalKeyValueFactory, Cl
     public @NotNull <K, V> KeyValueDb<K, V> getDb(@NotNull String name, @NotNull Class<K> key, @NotNull Class<V> value) {
         KeyValueDb<K, V> internalDb = getInternalDb(name, key, value);
         if (shouldTrack()) {
-            return new TrackingDbAdapter<>(internalDb, statsManager.getDbListener());
+            return new TrackingDbAdapter<>(internalDb, statsManager.newDbListener());
         }
         return internalDb;
     }

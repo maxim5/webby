@@ -3,7 +3,6 @@ package io.webby.db.codec;
 import com.google.errorprone.annotations.CanIgnoreReturnValue;
 import io.netty.buffer.ByteBuf;
 import io.netty.buffer.ByteBufInputStream;
-import io.webby.common.SystemProperties;
 import org.jetbrains.annotations.NotNull;
 
 import java.io.*;

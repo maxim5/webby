@@ -1,10 +1,13 @@
 package io.webby.db.codec;
 
 import com.google.common.collect.ImmutableMap;
+import com.google.inject.Inject;
+import io.webby.app.Settings;
 import io.webby.auth.session.Session;
 import io.webby.auth.session.SessionCodec;
 import io.webby.auth.user.DefaultUser;
 import io.webby.auth.user.DefaultUserCodec;
+import io.webby.perf.stats.impl.StatsManager;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
@@ -26,14 +29,25 @@ public class CodecProvider {
             String.class, STRING_CODEC
     );
 
+    @Inject private Settings settings;
+    @Inject private StatsManager statsManager;
+
     public <T> @Nullable Codec<T> getCodecOrNull(@NotNull Class<T> klass) {
-        return castAny(map.get(klass));
+        Codec<T> codec = castAny(map.get(klass));
+        if (codec != null && shouldTrack()) {
+            return new TrackingCodecAdapter<>(codec, statsManager.newCodecStatsListener());
+        }
+        return codec;
     }
 
     public <T> @NotNull Codec<T> getCodecOrDie(@NotNull Class<T> klass) {
         Codec<T> codec = getCodecOrNull(klass);
         assert codec != null : "No codec found the class: %s".formatted(klass);
         return codec;
+    }
+
+    private boolean shouldTrack() {
+        return settings.isProfileMode();
     }
 
     public static final Codec<Integer> INT_CODEC = new Codec<>() {
