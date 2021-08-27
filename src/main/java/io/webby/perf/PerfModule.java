@@ -6,7 +6,7 @@ import io.webby.perf.stats.impl.StatsManager;
 
 public class PerfModule extends AbstractModule {
     public void configure() {
-        bind(StatsManager.class).asEagerSingleton();
         bind(StatsInterceptor.class).asEagerSingleton();
+        bind(StatsManager.class).asEagerSingleton();
     }
 }

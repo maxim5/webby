@@ -10,10 +10,9 @@ import io.webby.netty.intercept.attr.Attributes;
 import io.webby.netty.request.MutableHttpRequestEx;
 import org.jetbrains.annotations.NotNull;
 
-import java.util.concurrent.TimeUnit;
 import java.util.logging.Level;
 
-import static io.webby.perf.stats.impl.LocalStatsHolder.*;
+import static io.webby.perf.stats.impl.LocalStatsHolder.localStats;
 
 @AttributeOwner(position = Attributes.Stats)
 public class StatsInterceptor implements Interceptor {
@@ -52,7 +51,7 @@ public class StatsInterceptor implements Interceptor {
         }
         localStats.remove();
 
-        log.at(Level.FINE).log("Handle time for %s: %d ms", request.uri(), stats.totalElapsed(TimeUnit.MILLISECONDS));
+        new StatsSummary(settings, stats).summarize(response);
         return response;
     }
 

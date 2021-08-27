@@ -27,7 +27,7 @@ public class RequestStatsCollector {
     private final HttpRequest request;
     private final Stopwatch stopwatch = Stopwatch.createStarted();
     private final AtomicLong lock = new AtomicLong(0);
-    private final IntIntMap stats = new IntIntHashMap();
+    private final IntIntMap main = new IntIntHashMap();
     private final IntObjectMap<List<StatsRecord>> records = new IntObjectHashMap<>();
 
     public RequestStatsCollector(int id, @NotNull HttpRequest request) {
@@ -64,9 +64,16 @@ public class RequestStatsCollector {
     }
 
     public void report(int key, int count, long elapsedMillis, @Nullable Object hint) {
-        stats.addTo(key, count);
+        main.addTo(key, count);
         StatsRecord record = new StatsRecord(elapsedMillis, hint);
         computeIfAbsent(records, key, ArrayList::new).add(record);
+    }
+
+    public @NotNull RequestStatsCollector stop() {
+        if (stopwatch.isRunning()) {
+            stopwatch.stop();
+        }
+        return this;
     }
 
     public int id() {
@@ -82,11 +89,15 @@ public class RequestStatsCollector {
     }
 
     public long totalElapsed(@NotNull TimeUnit timeUnit) {
-        return stopwatch.stop().elapsed(timeUnit);
+        return stopwatch.elapsed(timeUnit);
     }
 
-    public @NotNull IntIntMap stats() {
-        return stats;
+    public @NotNull IntIntMap main() {
+        return main;
+    }
+
+    public @NotNull IntObjectMap<List<StatsRecord>> records() {
+        return records;
     }
 
     @Override
