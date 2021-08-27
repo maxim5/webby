@@ -11,4 +11,6 @@
 <body>
     <h1>${page.title()}</h1>
     <p>Welcome to my example page!</p>
+
+    <script src="/perf.js"></script>
 </body>

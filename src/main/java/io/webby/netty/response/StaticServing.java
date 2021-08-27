@@ -18,7 +18,7 @@ import java.nio.MappedByteBuffer;
 import java.nio.channels.FileChannel;
 import java.nio.file.Files;
 import java.nio.file.Path;
-import java.nio.file.Paths;
+import java.util.Map;
 import java.util.function.Consumer;
 import java.util.logging.Level;
 
@@ -41,15 +41,16 @@ public class StaticServing {
         return method.equals(HttpMethod.GET);
     }
 
-    @NotNull
-    public FullHttpResponse serve(@NotNull String path, @NotNull FullHttpRequest request) throws IOException {
-        ByteBuf byteBuf = getByteBufOrNull(path);
+    public @NotNull FullHttpResponse serve(@NotNull String path, @NotNull FullHttpRequest request) throws IOException {
+        Path fullPath = settings.webPath().resolve(path);
+
+        ByteBuf byteBuf = getByteBufOrNull(fullPath);
         if (byteBuf == null) {
             log.at(Level.WARNING).log("Can't serve the static path: %s. Return 404", path);
             return factory.newResponse404();
         }
 
-        CharSequence contentType = guessContentType(path);
+        CharSequence contentType = guessContentType(fullPath);
         if (contentType == null) {
             contentType = HttpHeaderValues.APPLICATION_OCTET_STREAM;
         }
@@ -60,37 +61,51 @@ public class StaticServing {
         return response;
     }
 
-    @Nullable
-    /*package*/ ByteBuf getByteBufOrNull(@NotNull String path) throws IOException {
-        Path resolve = settings.webPath().resolve(path);
-        if (Files.exists(resolve)) {
-            return fileToByteBuf(resolve.toFile());
+    /*package*/ @Nullable ByteBuf getByteBufOrNull(@NotNull String path) throws IOException {
+        return getByteBufOrNull(settings.webPath().resolve(path));
+    }
+
+    /*package*/ @Nullable ByteBuf getByteBufOrNull(@NotNull Path path) throws IOException {
+        if (Files.exists(path)) {
+            return fileToByteBuf(path.toFile());
         }
         return null;
     }
 
-    /*package*/ byte[] getBytesOrNull(@NotNull String path) throws IOException {
-        Path resolve = settings.webPath().resolve(path);
-        if (Files.exists(resolve)) {
-            return Files.readAllBytes(resolve);
+    /*package*/ byte @Nullable [] getBytesOrNull(@NotNull Path path) throws IOException {
+        if (Files.exists(path)) {
+            return Files.readAllBytes(path);
         }
         return null;
     }
 
-    @NotNull
-    private static ByteBuf fileToByteBuf(@NotNull File file) throws IOException {
+    private static @NotNull ByteBuf fileToByteBuf(@NotNull File file) throws IOException {
         FileInputStream fileInputStream = new FileInputStream(file);
         FileChannel fileChannel = fileInputStream.getChannel();
         MappedByteBuffer mappedByteBuffer = fileChannel.map(FileChannel.MapMode.READ_ONLY, 0, file.length());
         return Unpooled.wrappedBuffer(mappedByteBuffer);
     }
 
+    // Consider also
+    // https://github.com/j256/simplemagic (Unix)
+    // https://github.com/oblac/jodd/
+    // https://github.com/arimus/jmimemagic
+    // org.apache.tika
+    private static final Map<String, CharSequence> EXTENSIONS = Map.of(
+        "js", "application/javascript"
+    );
+
     @VisibleForTesting
-    static CharSequence guessContentType(@NotNull String path) throws IOException {
-        String contentType = URLConnection.guessContentTypeFromName(path);
+    static @Nullable CharSequence guessContentType(@NotNull Path path) throws IOException {
+        String fullName = path.toString();
+        CharSequence knownType = EXTENSIONS.get(com.google.common.io.Files.getFileExtension(fullName));
+        if (knownType != null) {
+            return knownType;
+        }
+        String contentType = URLConnection.guessContentTypeFromName(fullName);
         if (contentType != null) {
             return contentType;
         }
-        return Files.probeContentType(Paths.get(path));
+        return Files.probeContentType(path);
     }
 }
