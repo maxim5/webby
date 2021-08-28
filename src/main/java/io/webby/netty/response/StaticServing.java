@@ -1,5 +1,6 @@
 package io.webby.netty.response;
 
+import com.google.common.base.MoreObjects;
 import com.google.common.flogger.FluentLogger;
 import com.google.inject.Inject;
 import io.netty.buffer.ByteBuf;
@@ -42,23 +43,28 @@ public class StaticServing {
     }
 
     public @NotNull FullHttpResponse serve(@NotNull String path, @NotNull FullHttpRequest request) throws IOException {
+        HttpHeaders headers = request.headers();
         Path fullPath = settings.webPath().resolve(path);
+        if (!HttpCaching.isModifiedSince(fullPath, headers.get(HttpHeaderNames.IF_MODIFIED_SINCE))) {
+            return factory.newResponse304();
+        }
 
         ByteBuf byteBuf = getByteBufOrNull(fullPath);
         if (byteBuf == null) {
             log.at(Level.WARNING).log("Can't serve the static path: %s. Return 404", path);
             return factory.newResponse404();
         }
-
-        CharSequence contentType = guessContentType(fullPath);
-        if (contentType == null) {
-            contentType = HttpHeaderValues.APPLICATION_OCTET_STREAM;
+        if (!HttpCaching.isSimpleEtagChanged(byteBuf, headers.get(HttpHeaderNames.IF_NONE_MATCH))) {
+            return factory.newResponse304();
         }
 
+        CharSequence contentType = MoreObjects.firstNonNull(guessContentType(fullPath), HttpHeaderValues.APPLICATION_OCTET_STREAM);
         FullHttpResponse response = factory.newResponse(byteBuf, HttpResponseStatus.OK, contentType);
+
         if (settings.isProdMode()) {
             response.headers().add(HttpHeaderNames.CACHE_CONTROL, HttpCaching.CACHE_FOREVER);
         } else {
+            response.headers().add(HttpHeaderNames.CONTENT_DISPOSITION, "inline");
             response.headers().add(HttpHeaderNames.ETAG, HttpCaching.simpleEtag(byteBuf));
             response.headers().add(HttpHeaderNames.LAST_MODIFIED, HttpCaching.lastModified(fullPath));
         }

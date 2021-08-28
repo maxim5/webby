@@ -28,57 +28,54 @@ public class HttpResponseFactory {
     @Inject private Settings settings;
     @Inject private StaticServing staticServing;
 
-    @NotNull
-    public FullHttpResponse newResponse(@NotNull CharSequence content, @NotNull HttpResponseStatus status) {
+    public @NotNull FullHttpResponse newResponse(@NotNull CharSequence content, @NotNull HttpResponseStatus status) {
         ByteBuf byteBuf = Unpooled.copiedBuffer(content, settings.charset());
         return newResponse(byteBuf, status);
     }
 
-    @NotNull
-    public FullHttpResponse newResponse(@NotNull CharSequence content,
-                                        @NotNull HttpResponseStatus status,
-                                        @NotNull CharSequence contentType) {
+    public @NotNull FullHttpResponse newResponse(@NotNull CharSequence content,
+                                                 @NotNull HttpResponseStatus status,
+                                                 @NotNull CharSequence contentType) {
         return withContentType(newResponse(content, status), contentType);
     }
 
-    @NotNull
-    public FullHttpResponse newResponse(@NotNull ByteBuf byteBuf, @NotNull HttpResponseStatus status) {
+    public @NotNull FullHttpResponse newResponse(@NotNull ByteBuf byteBuf, @NotNull HttpResponseStatus status) {
         FullHttpResponse response = new DefaultFullHttpResponse(HttpVersion.HTTP_1_1, status, byteBuf);
         response.headers().set(HttpHeaderNames.CONTENT_LENGTH, byteBuf.readableBytes());
         return response;
     }
 
-    @NotNull
-    public FullHttpResponse newResponse(@NotNull ByteBuf content,
-                                        @NotNull HttpResponseStatus status,
-                                        @NotNull CharSequence contentType) {
+    public @NotNull FullHttpResponse newResponse(@NotNull ByteBuf content,
+                                                 @NotNull HttpResponseStatus status,
+                                                 @NotNull CharSequence contentType) {
         return withContentType(newResponse(content, status), contentType);
     }
 
-    @NotNull
-    public FullHttpResponse newResponse(byte[] content, @NotNull HttpResponseStatus status) {
+    public @NotNull FullHttpResponse newResponse(byte[] content, @NotNull HttpResponseStatus status) {
         ByteBuf byteBuf = Unpooled.wrappedBuffer(content);
         return newResponse(byteBuf, status);
     }
 
-    @NotNull
-    public StreamingHttpResponse newResponse(@NotNull InputStream content, @NotNull HttpResponseStatus status) {
+    public @NotNull StreamingHttpResponse newResponse(@NotNull InputStream content, @NotNull HttpResponseStatus status) {
         ChunkedStream stream = new ChunkedStream(content);
         StreamingHttpResponse response = new StreamingHttpResponse(HttpVersion.HTTP_1_1, status, stream);
         response.headers().set(HttpHeaderNames.TRANSFER_ENCODING, HttpHeaderValues.CHUNKED);
         return response;
     }
 
-    @NotNull
-    public StreamingHttpResponse newResponse(@NotNull File content, @NotNull HttpResponseStatus status) throws IOException {
+    public @NotNull StreamingHttpResponse newResponse(@NotNull File content, @NotNull HttpResponseStatus status)
+            throws IOException {
         ChunkedFile chunkedFile = new ChunkedFile(content);
         StreamingHttpResponse response = new StreamingHttpResponse(HttpVersion.HTTP_1_1, status, chunkedFile);
         response.headers().set(HttpHeaderNames.TRANSFER_ENCODING, HttpHeaderValues.CHUNKED);
         return response;
     }
 
-    @NotNull
-    public FullHttpResponse newResponseRedirect(@NotNull String uri, boolean permanent) {
+    public @NotNull FullHttpResponse newResponse304() {
+        return newResponse(statusLine(HttpResponseStatus.NOT_MODIFIED), HttpResponseStatus.NOT_MODIFIED);
+    }
+
+    public @NotNull FullHttpResponse newResponseRedirect(@NotNull String uri, boolean permanent) {
         HttpResponseStatus status = permanent ?
                 HttpResponseStatus.PERMANENT_REDIRECT :
                 HttpResponseStatus.TEMPORARY_REDIRECT;
@@ -88,45 +85,37 @@ public class HttpResponseFactory {
         return response;
     }
 
-    @NotNull
-    public FullHttpResponse newResponse400(@Nullable Throwable error) {
+    public @NotNull FullHttpResponse newResponse400(@Nullable Throwable error) {
         return newErrorResponse(HttpResponseStatus.BAD_REQUEST, null, error);
     }
 
-    @NotNull
-    public FullHttpResponse newResponse401(@Nullable Throwable error) {
+    public @NotNull FullHttpResponse newResponse401(@Nullable Throwable error) {
         return newErrorResponse(HttpResponseStatus.UNAUTHORIZED, null, error);
     }
 
-    @NotNull
-    public FullHttpResponse newResponse403(@Nullable Throwable error) {
+    public @NotNull FullHttpResponse newResponse403(@Nullable Throwable error) {
         return newErrorResponse(HttpResponseStatus.FORBIDDEN, null, error);
     }
 
-    @NotNull
-    public FullHttpResponse newResponse404() {
+    public @NotNull FullHttpResponse newResponse404() {
         return newResponse404(null);
     }
 
-    @NotNull
-    public FullHttpResponse newResponse404(@Nullable Throwable error) {
+    public @NotNull FullHttpResponse newResponse404(@Nullable Throwable error) {
         return newErrorResponse(HttpResponseStatus.NOT_FOUND, null, error);
     }
 
-    @NotNull
-    public FullHttpResponse newResponse500(@NotNull String debugError, @Nullable Throwable cause) {
+    public @NotNull FullHttpResponse newResponse500(@NotNull String debugError, @Nullable Throwable cause) {
         return newErrorResponse(HttpResponseStatus.INTERNAL_SERVER_ERROR, debugError, cause);
     }
 
-    @NotNull
-    public FullHttpResponse newResponse503(@NotNull String debugError, @Nullable Throwable cause) {
+    public @NotNull FullHttpResponse newResponse503(@NotNull String debugError, @Nullable Throwable cause) {
         return newErrorResponse(HttpResponseStatus.SERVICE_UNAVAILABLE, debugError, cause);
     }
 
-    @NotNull
-    public FullHttpResponse newErrorResponse(@NotNull HttpResponseStatus status,
-                                             @Nullable String debugError,
-                                             @Nullable Throwable cause) {
+    public @NotNull FullHttpResponse newErrorResponse(@NotNull HttpResponseStatus status,
+                                                      @Nullable String debugError,
+                                                      @Nullable Throwable cause) {
         // headers().set(CONNECTION, HttpHeaderValues.CLOSE);
 
         String name = "%d.html".formatted(status.code());
@@ -150,8 +139,7 @@ public class HttpResponseFactory {
         return newResponse(statusLine(status), status, HttpHeaderValues.TEXT_HTML);
     }
 
-    @NotNull
-    public FullHttpResponse handleServeException(@NotNull ServeException exception, @NotNull String source) {
+    public @NotNull FullHttpResponse handleServeException(@NotNull ServeException exception, @NotNull String source) {
         try {
             throw exception;
         } catch (BadRequestException e) {
@@ -181,12 +169,11 @@ public class HttpResponseFactory {
         }
     }
 
-    private static String statusLine(@NotNull HttpResponseStatus status) {
+    private static @NotNull String statusLine(@NotNull HttpResponseStatus status) {
         return "%d %s".formatted(status.code(), status.codeAsText());
     }
 
-    @NotNull
-    private ByteBuf getDefaultResource(@NotNull String name) throws IOException {
+    private @NotNull ByteBuf getDefaultResource(@NotNull String name) throws IOException {
         String resource = "%s/%s".formatted(DEFAULT_WEB, name);
         InputStream inputStream = getClass().getResourceAsStream(resource);
         if (inputStream == null) {
@@ -195,14 +182,12 @@ public class HttpResponseFactory {
         return Unpooled.wrappedBuffer(inputStream.readAllBytes());
     }
 
-    @NotNull
-    public static <R extends HttpResponse> R withContentType(@NotNull R response, @NotNull CharSequence contentType) {
+    public static <R extends HttpResponse> @NotNull R withContentType(@NotNull R response, @NotNull CharSequence contentType) {
         response.headers().set(HttpHeaderNames.CONTENT_TYPE, contentType);
         return response;
     }
 
-    @NotNull
-    public static <R extends HttpResponse> R withHeaders(@NotNull R response, @NotNull Consumer<HttpHeaders> consumer) {
+    public static <R extends HttpResponse> @NotNull R withHeaders(@NotNull R response, @NotNull Consumer<HttpHeaders> consumer) {
         HttpHeaders headers = response.headers();
         consumer.accept(headers);
         return response;
