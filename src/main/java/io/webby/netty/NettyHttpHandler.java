@@ -136,7 +136,7 @@ public class NettyHttpHandler extends SimpleChannelInboundHandler<FullHttpReques
             return factory.newResponse404();
         }
 
-        if (endpoint.context().isRawRequest()) {
+        if (endpoint.context().bypassInterceptors()) {
             return call(request, match, endpoint);
         } else {
             DefaultHttpRequestEx requestEx = interceptors.createRequest(request, channel, endpoint.context());
