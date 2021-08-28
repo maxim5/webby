@@ -45,8 +45,6 @@ public class HandlerBinder {
     @Inject private RendererFactory rendererFactory;
     @Inject private StaticServing staticServing;
 
-    private final Map<Class<?>, EndpointContext> contextCache = new HashMap<>();
-
     public @NotNull Router<RouteEndpoint> buildHandlerRouter() throws AppConfigException {
         Set<? extends Class<?>> handlerClasses = scanner.getHandlerClassesFromClasspath();
         List<Binding> bindings = getBindings(handlerClasses);
@@ -183,6 +181,8 @@ public class HandlerBinder {
     void processBindings(@NotNull Collection<Binding> bindings,
                          @NotNull QueryParser parser,
                          @NotNull BiConsumer<String, RouteEndpoint> consumer) {
+        Map<Class<?>, Object> handlersCache = new HashMap<>();  // ensures the same handler instance for all endpoints
+        Map<Class<?>, EndpointContext> contextCache = new HashMap<>();  // to reuse expensive op
         try {
             bindings.stream().collect(Collectors.groupingBy(Binding::url)).values().forEach(group -> {
                 List<SingleRouteEndpoint> endpoints = group.stream().map(binding -> {
@@ -190,9 +190,9 @@ public class HandlerBinder {
                     log.at(Level.ALL).log("Processing %s", method);
 
                     Class<?> klass = method.getDeclaringClass();
-                    Object instance = injector.getInstance(klass);
+                    Object instance = handlersCache.computeIfAbsent(klass, key -> injector.getInstance(klass));
                     EndpointContext context = contextCache.computeIfAbsent(klass,
-                            key -> new EndpointContext(extractConstraints(klass, instance), false, isVoid(method)));
+                            key -> new EndpointContext(extractConstraints(klass, instance), false, isVoid(method)));  // TODO: bug (isVoid is method specific)
 
                     List<String> vars = parser.parse(binding.url())
                             .stream()

@@ -24,4 +24,8 @@ public class TestingModules {
     public static <T> @NotNull Module provided(@NotNull Class<T> klass, @NotNull AtomicReference<T> reference) {
         return binder -> binder.bind(klass).toProvider(reference::get);
     }
+
+    public static <T> @NotNull Module singleton(@NotNull Class<? super T> klass) {
+        return binder -> binder.bind(klass).asEagerSingleton();
+    }
 }

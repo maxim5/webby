@@ -30,7 +30,8 @@ public abstract class BaseHttpIntegrationTest extends BaseChannelTest {
                 DEFAULT_SETTINGS
                         .andThen(settings -> settings.setHandlerClassOnly(klass))
                         .andThen(consumer),
-                modules
+                // Make sure the initialized handler will be the same instance in tests as in endpoints
+                Testing.appendVarArg(TestingModules.singleton(klass), modules)
         );
         return new HttpSetup<>(injector, klass);
     }

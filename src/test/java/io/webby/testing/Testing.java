@@ -1,5 +1,6 @@
 package io.webby.testing;
 
+import com.google.errorprone.annotations.CanIgnoreReturnValue;
 import com.google.inject.Injector;
 import com.google.inject.Module;
 import io.webby.Webby;
@@ -15,10 +16,7 @@ import org.jetbrains.annotations.Nullable;
 import org.junit.jupiter.api.Assertions;
 
 import java.nio.charset.Charset;
-import java.util.LinkedHashMap;
-import java.util.List;
-import java.util.Locale;
-import java.util.Map;
+import java.util.*;
 import java.util.function.Consumer;
 
 import static org.junit.jupiter.api.Assertions.assertNotNull;
@@ -62,7 +60,7 @@ public class Testing {
         return Internals.injector = Webby.initGuice(settings, modules);
     }
 
-    public static <K, V> @NotNull Map<K, V> asMap(Object ... items) {
+    public static <K, V> @NotNull Map<K, V> asMap(@Nullable Object @NotNull ... items) {
         return asMap(List.of(items));
     }
 
@@ -76,6 +74,14 @@ public class Testing {
         return result;
     }
 
+    @SuppressWarnings("unchecked")
+    public static <T> @NotNull T[] appendVarArg(@Nullable T arg, @Nullable T @NotNull ... args) {
+        T[] result = Arrays.copyOf(args, args.length + 1);
+        result[args.length] = arg;
+        return result;
+    }
+
+    @CanIgnoreReturnValue
     public static boolean waitFor(long millis) {
         try {
             Thread.sleep(millis);

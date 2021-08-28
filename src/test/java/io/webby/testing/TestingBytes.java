@@ -8,6 +8,7 @@ import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import org.junit.jupiter.api.Assertions;
 
+import java.io.ByteArrayInputStream;
 import java.nio.charset.Charset;
 import java.util.Arrays;
 
@@ -29,6 +30,10 @@ public class TestingBytes {
 
     public static @Nullable ByteBuf asByteBufOrNull(@Nullable String content) {
         return content != null ? asByteBuf(content) : null;
+    }
+
+    public static @NotNull ByteArrayInputStream asByteStream(@NotNull String str) {
+        return new ByteArrayInputStream(asBytes(str));
     }
 
     public static @NotNull String asString(byte @NotNull [] bytes) {

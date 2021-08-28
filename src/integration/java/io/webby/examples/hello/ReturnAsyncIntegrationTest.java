@@ -1,14 +1,13 @@
 package io.webby.examples.hello;
 
 import io.webby.testing.BaseHttpIntegrationTest;
-import io.webby.testing.Testing;
 import org.junit.jupiter.api.Test;
 
 import static io.webby.testing.AssertResponse.assert200;
 import static io.webby.testing.AssertResponse.assert500;
 
 public class ReturnAsyncIntegrationTest extends BaseHttpIntegrationTest {
-    private final ReturnAsync handler = testSetup(ReturnAsync.class).initHandler();
+    protected final ReturnAsync handler = testSetup(ReturnAsync.class).initHandler();
 
     @Test
     public void futures() {
@@ -46,12 +45,13 @@ public class ReturnAsyncIntegrationTest extends BaseHttpIntegrationTest {
         assert200(get("/r/async/consumer/timeout/200"), "DelayedOutput.");
     }
 
+    /*
     @Override
     protected void flushChannel() {
         do {
             Thread.yield();
         } while (!handler.executor.getQueue().isEmpty());
-        Testing.waitFor(50);
         super.flushChannel();
     }
+    */
 }

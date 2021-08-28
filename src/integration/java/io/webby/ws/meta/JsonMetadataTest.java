@@ -7,6 +7,7 @@ import io.webby.testing.Testing;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.EnumSource;
 
+import static io.webby.testing.AssertJson.withJsonLibrary;
 import static io.webby.testing.TestingBytes.asByteBuf;
 import static io.webby.testing.TestingBytes.assertByteBuf;
 import static io.webby.ws.meta.AssertMeta.*;
@@ -17,7 +18,7 @@ public class JsonMetadataTest {
     @ParameterizedTest
     @EnumSource(SupportedJsonLibrary.class)
     public void parse_strict_json(SupportedJsonLibrary library) {
-        Testing.testStartup(settings -> settings.setProperty("json.library", library.slug));
+        Testing.testStartup(withJsonLibrary(library));
         JsonMetadata metadata = new JsonMetadata(Testing.Internals.json(), Testing.Internals.charset());
 
         ByteBuf input1 = asByteBuf("""
@@ -42,7 +43,7 @@ public class JsonMetadataTest {
     @ParameterizedTest
     @EnumSource(SupportedJsonLibrary.class)
     public void parse_valid_json_wrong_format(SupportedJsonLibrary library) {
-        Testing.testStartup(settings -> settings.setProperty("json.library", library.slug));
+        Testing.testStartup(withJsonLibrary(library));
         JsonMetadata metadata = new JsonMetadata(Testing.Internals.json(), Testing.Internals.charset());
 
         assertNotParsed("{}", metadata);
@@ -59,7 +60,7 @@ public class JsonMetadataTest {
     @ParameterizedTest
     @EnumSource(SupportedJsonLibrary.class)
     public void parse_invalid_json(SupportedJsonLibrary library) {
-        Testing.testStartup(settings -> settings.setProperty("json.library", library.slug));
+        Testing.testStartup(withJsonLibrary(library));
         JsonMetadata metadata = new JsonMetadata(Testing.Internals.json(), Testing.Internals.charset());
 
         assertThrows(BadFrameException.class, () -> metadata.parse(asByteBuf(""), EMPTY_CONSUMER));
