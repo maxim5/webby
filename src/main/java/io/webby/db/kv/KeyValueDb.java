@@ -14,7 +14,7 @@ import java.util.function.Supplier;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
-public interface KeyValueDb<K, V> extends Closeable {
+public interface KeyValueDb<K, V> extends Iterable<Map.Entry<K, V>>, Closeable {
     // DB size
 
     int size();
@@ -73,6 +73,10 @@ public interface KeyValueDb<K, V> extends Closeable {
         for (Map.Entry<K, V> entry : entrySet()) {
             action.accept(entry.getKey(), entry.getValue());
         }
+    }
+
+    default @NotNull Iterator<Map.Entry<K, V>> iterator() {
+        return entrySet().iterator();
     }
 
     default @NotNull Iterable<K> keys() {

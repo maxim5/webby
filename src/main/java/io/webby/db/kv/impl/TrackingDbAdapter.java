@@ -117,6 +117,13 @@ public class TrackingDbAdapter<K, V> implements KeyValueDb<K, V> {
     }
 
     @Override
+    public @NotNull Iterator<Map.Entry<K, V>> iterator() {
+        try (OpContext ignored = listener.report(Stat.DB_SCAN)) {
+            return delegate.iterator();
+        }
+    }
+
+    @Override
     public @NotNull Iterable<K> keys() {
         try (OpContext ignored = listener.report(Stat.DB_SCAN)) {
             return delegate.keys();
