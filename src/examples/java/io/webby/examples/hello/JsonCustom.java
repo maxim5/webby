@@ -22,6 +22,8 @@ public class JsonCustom {
         binder.bind(new TypeLiteral<DslJson<Object>>() {}).toInstance(dslJson);
     }
 
+    // See also
+    // https://github.com/ngs-doo/dsl-json/blob/master/examples/AutoValue/src/main/java/com/dslplatform/autovalue/Example.java
     public static void main(String[] args) throws IOException {
         DslJson<Object> dslJson = new DslJson<>(Settings.basicSetup());
 
