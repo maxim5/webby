@@ -56,7 +56,12 @@ public class StaticServing {
         }
 
         FullHttpResponse response = factory.newResponse(byteBuf, HttpResponseStatus.OK, contentType);
-        response.headers().add(HttpHeaderNames.CACHE_CONTROL, "max-age=31536000");
+        if (settings.isProdMode()) {
+            response.headers().add(HttpHeaderNames.CACHE_CONTROL, HttpCaching.CACHE_FOREVER);
+        } else {
+            response.headers().add(HttpHeaderNames.ETAG, HttpCaching.simpleEtag(byteBuf));
+            response.headers().add(HttpHeaderNames.LAST_MODIFIED, HttpCaching.lastModified(fullPath));
+        }
 
         return response;
     }
