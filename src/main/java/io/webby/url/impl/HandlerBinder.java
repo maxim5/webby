@@ -52,8 +52,8 @@ public class HandlerBinder {
         return setup.build();
     }
 
-    @NotNull
-    private RouterSetup<RouteEndpoint> getRouterSetup(@NotNull List<Binding> bindings) throws AppConfigException {
+    @VisibleForTesting
+    @NotNull RouterSetup<RouteEndpoint> getRouterSetup(@NotNull List<Binding> bindings) throws AppConfigException {
         RouterSetup<RouteEndpoint> setup = new RouterSetup<>();
         QueryParser parser = settings.urlParser();
 
@@ -182,7 +182,7 @@ public class HandlerBinder {
                          @NotNull QueryParser parser,
                          @NotNull BiConsumer<String, RouteEndpoint> consumer) {
         Map<Class<?>, Object> handlersCache = new HashMap<>();  // ensures the same handler instance for all endpoints
-        Map<Class<?>, EndpointContext> contextCache = new HashMap<>();  // to reuse expensive op
+        Map<Class<?>, Map<String, Constraint<?>>> constraintsCache = new HashMap<>();  // to reuse expensive calculation
         try {
             bindings.stream().collect(Collectors.groupingBy(Binding::url)).values().forEach(group -> {
                 List<SingleRouteEndpoint> endpoints = group.stream().map(binding -> {
@@ -191,8 +191,9 @@ public class HandlerBinder {
 
                     Class<?> klass = method.getDeclaringClass();
                     Object instance = handlersCache.computeIfAbsent(klass, key -> injector.getInstance(klass));
-                    EndpointContext context = contextCache.computeIfAbsent(klass,
-                            key -> new EndpointContext(extractConstraints(klass, instance), false, isVoid(method)));  // TODO: bug (isVoid is method specific)
+                    Map<String, Constraint<?>> compute = constraintsCache
+                            .computeIfAbsent(klass, key -> extractConstraints(klass, instance));
+                    EndpointContext context = new EndpointContext(compute, false, isVoid(method));
 
                     List<String> vars = parser.parse(binding.url())
                             .stream()
@@ -216,7 +217,7 @@ public class HandlerBinder {
     }
 
     @VisibleForTesting
-    static @NotNull Map<String, Constraint<?>> extractConstraints(Class<?> klass, Object instance) {
+    static @NotNull Map<String, Constraint<?>> extractConstraints(@NotNull Class<?> klass, @NotNull Object instance) {
         Map<String, Constraint<?>> map = new HashMap<>();
         for (Field field : klass.getDeclaredFields()) {
             if (!field.isAnnotationPresent(Param.class)) {
