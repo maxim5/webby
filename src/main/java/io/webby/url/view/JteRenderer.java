@@ -48,20 +48,17 @@ public class JteRenderer implements Renderer<String> {
     }
 
     @Override
-    @NotNull
-    public String compileTemplate(@NotNull String name) {
+    public @NotNull String compileTemplate(@NotNull String name) {
         return name;
     }
 
     @Override
-    @NotNull
-    public RenderSupport support() {
-        return RenderSupport.BYTE_ARRAY;
+    public @NotNull RenderSupport support() {
+        return settings.isStreamingEnabled() ? RenderSupport.BYTE_STREAM : RenderSupport.BYTE_ARRAY;
     }
 
     @Override
-    @NotNull
-    public String renderToString(@NotNull String template, @NotNull Object model) {
+    public @NotNull String renderToString(@NotNull String template, @NotNull Object model) {
         StringOutput output = pool.get();
         if (model instanceof Map<?, ?> mapModel) {
             templateEngine.render(template, castMap(mapModel), output);
@@ -79,15 +76,13 @@ public class JteRenderer implements Renderer<String> {
     }
 
     @Override
-    @NotNull
-    public ThrowConsumer<OutputStream, Exception> renderToByteStream(@NotNull String template, @NotNull Object model) {
+    public @NotNull ThrowConsumer<OutputStream, Exception> renderToByteStream(@NotNull String template, @NotNull Object model) {
         Utf8ByteOutput output = new Utf8ByteOutput();
         templateEngine.render(template, model, output);
         return output::writeTo;
     }
 
-    @NotNull
-    private TemplateEngine createDefault() {
+    private @NotNull TemplateEngine createDefault() {
         List<Path> paths = settings.getViewPaths("jte.view.paths");
         Path classDir = Path.of(settings.getProperty("jte.class.directory", "build"));
         ContentType contentType = settings.getBoolProperty("jte.output.plain") ? ContentType.Plain : ContentType.Html;

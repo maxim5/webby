@@ -2,11 +2,10 @@ package io.webby.examples.templates;
 
 import io.netty.handler.codec.http.HttpResponse;
 import io.webby.testing.BaseHttpIntegrationTest;
-import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 
 import static io.webby.testing.AssertResponse.assert200;
-import static io.webby.testing.AssertResponse.content;
+import static io.webby.testing.AssertResponse.assertContent;
 
 public class RockerExampleTest extends BaseHttpIntegrationTest {
     protected final RockerExample handler = testSetup(RockerExample.class).initHandler();
@@ -35,6 +34,6 @@ public class RockerExampleTest extends BaseHttpIntegrationTest {
         assert200(rendered);
         HttpResponse manual = get("/templates/manual/rocker/hello");
         assert200(manual);
-        Assertions.assertEquals(content(manual), content(rendered));
+        assertContent(rendered, manual);
     }
 }

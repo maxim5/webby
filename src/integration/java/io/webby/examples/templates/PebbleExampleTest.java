@@ -2,7 +2,6 @@ package io.webby.examples.templates;
 
 import io.netty.handler.codec.http.HttpResponse;
 import io.webby.testing.BaseHttpIntegrationTest;
-import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
@@ -33,7 +32,7 @@ public class PebbleExampleTest extends BaseHttpIntegrationTest {
         assert200(rendered);
         HttpResponse manual = get("/templates/manual/pebble/hello");
         assert200(manual);
-        Assertions.assertEquals(content(manual), content(rendered));
+        assertContent(rendered, manual);
     }
 
     @Test
@@ -42,6 +41,6 @@ public class PebbleExampleTest extends BaseHttpIntegrationTest {
         assert200(rendered);
         HttpResponse manual = get("/templates/manual/pebble/hello/bytes");
         assert200(manual);
-        Assertions.assertEquals(content(manual), content(rendered));
+        assertContent(rendered, manual);
     }
 }

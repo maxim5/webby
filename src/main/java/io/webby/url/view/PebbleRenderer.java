@@ -54,12 +54,11 @@ public class PebbleRenderer implements Renderer<PebbleTemplate> {
 
     @Override
     public @NotNull RenderSupport support() {
-        return RenderSupport.BYTE_ARRAY;
+        return settings.isStreamingEnabled() ? RenderSupport.BYTE_STREAM : RenderSupport.BYTE_ARRAY;
     }
 
     @Override
-    @NotNull
-    public String renderToString(@NotNull PebbleTemplate template, @NotNull Object model) throws Exception {
+    public @NotNull String renderToString(@NotNull PebbleTemplate template, @NotNull Object model) throws Exception {
         return EasyRender.writeToString(writer -> template.evaluate(writer, castMapOrFail(model, this::incompatibleError)));
     }
 
@@ -69,15 +68,15 @@ public class PebbleRenderer implements Renderer<PebbleTemplate> {
     }
 
     @Override
-    @NotNull
-    public ThrowConsumer<OutputStream, Exception> renderToByteStream(@NotNull PebbleTemplate template, @NotNull Object model) {
+    public @NotNull ThrowConsumer<OutputStream, Exception>
+            renderToByteStream(@NotNull PebbleTemplate template, @NotNull Object model) {
         return outputStream -> template.evaluate(
                 new OutputStreamWriter(outputStream),
                 castMapOrFail(model, this::incompatibleError)
         );
     }
 
-    private PebbleEngine createDefault() {
+    private @NotNull PebbleEngine createDefault() {
         Charset charset = settings.charset();
         List<Path> viewPaths = settings.getViewPaths("pebble.view.paths");
         String suffix = settings.getProperty("pebble.filename.suffix");

@@ -40,14 +40,12 @@ public class FreeMarkerRenderer implements Renderer<Template> {
     }
 
     @Override
-    @NotNull
-    public HotReloadSupport hotReload() {
+    public @NotNull HotReloadSupport hotReload() {
         return HotReloadSupport.RECOMPILE;
     }
 
     @Override
-    @NotNull
-    public Template compileTemplate(@NotNull String name) throws HandlerConfigError {
+    public @NotNull Template compileTemplate(@NotNull String name) throws HandlerConfigError {
         try {
             return configuration.getTemplate(name);
         } catch (IOException e) {
@@ -56,14 +54,12 @@ public class FreeMarkerRenderer implements Renderer<Template> {
     }
 
     @Override
-    @NotNull
-    public RenderSupport support() {
-        return RenderSupport.BYTE_ARRAY;
+    public @NotNull RenderSupport support() {
+        return settings.isStreamingEnabled() ? RenderSupport.BYTE_STREAM : RenderSupport.BYTE_ARRAY;
     }
 
     @Override
-    @NotNull
-    public String renderToString(@NotNull Template template, @NotNull Object model) throws Exception {
+    public @NotNull String renderToString(@NotNull Template template, @NotNull Object model) throws Exception {
         return EasyRender.writeToString(writer -> template.process(model, writer));
     }
 
@@ -73,13 +69,15 @@ public class FreeMarkerRenderer implements Renderer<Template> {
     }
 
     @Override
-    @NotNull
-    public ThrowConsumer<OutputStream, Exception> renderToByteStream(@NotNull Template template, @NotNull Object model) {
-        return outputStream -> template.process(model, new OutputStreamWriter(outputStream));
+    public @NotNull ThrowConsumer<OutputStream, Exception> renderToByteStream(@NotNull Template template, @NotNull Object model) {
+        return outputStream -> {
+            try (OutputStreamWriter writer = new OutputStreamWriter(outputStream)) {
+                template.process(model, writer);
+            }
+        };
     }
 
-    @NotNull
-    private Configuration createDefault() {
+    private @NotNull Configuration createDefault() {
         TemplateLoader[] loaders = settings.viewPaths()
                 .stream()
                 .map(Path::toFile)
