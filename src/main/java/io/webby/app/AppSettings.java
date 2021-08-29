@@ -28,6 +28,7 @@ public final class AppSettings implements Settings {
     private boolean profileModeDefault = true;
     private boolean safeMode = true;
     private boolean safeModeDefault = true;
+    private boolean streamingEnabled = false;
 
     private byte[] securityKey = new byte[0];
 
@@ -108,6 +109,15 @@ public final class AppSettings implements Settings {
     public void setSafeMode(boolean safeMode) {
         this.safeMode = safeMode;
         this.safeModeDefault = false;
+    }
+
+    @Override
+    public boolean isStreamingEnabled() {
+        return streamingEnabled;
+    }
+
+    public void setStreamingEnabled(boolean streamingEnabled) {
+        this.streamingEnabled = streamingEnabled;
     }
 
     @Override

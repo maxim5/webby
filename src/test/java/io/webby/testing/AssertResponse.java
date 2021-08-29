@@ -1,6 +1,5 @@
 package io.webby.testing;
 
-import com.google.common.truth.Truth;
 import io.netty.buffer.ByteBuf;
 import io.netty.buffer.ByteBufAllocator;
 import io.netty.buffer.ByteBufHolder;
@@ -12,11 +11,13 @@ import org.jetbrains.annotations.Nullable;
 import org.junit.jupiter.api.Assertions;
 
 import java.io.ByteArrayOutputStream;
-import java.nio.charset.Charset;
 import java.util.stream.Stream;
 
-import static io.webby.testing.TestingBytes.asByteBuf;
-import static io.webby.util.Rethrow.*;
+import static com.google.common.truth.Truth.assertThat;
+import static io.webby.testing.TestingBytes.*;
+import static io.webby.util.Rethrow.Consumers;
+import static io.webby.util.Rethrow.Suppliers;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 
 public class AssertResponse {
     public static void assert200(@NotNull HttpResponse response) {
@@ -80,15 +81,15 @@ public class AssertResponse {
                                       @NotNull HttpResponseStatus status,
                                       @Nullable String expectedContent,
                                       @Nullable HttpHeaders expectedHeaders) {
-        Truth.assertThat(response).isNotNull();
+        assertThat(response).isNotNull();
         HttpHeaders headers = (expectedHeaders != null) ? expectedHeaders : response.headers();
 
         if (response instanceof DefaultFullHttpResponse full) {
             ByteBuf byteBuf = expectedContent != null ? asByteBuf(expectedContent) : full.content();
             HttpHeaders trailing = full.trailingHeaders();
-            Truth.assertThat(response).isEqualTo(new DefaultFullHttpResponse(version, status, byteBuf, headers, trailing));
+            assertThat(response).isEqualTo(new DefaultFullHttpResponse(version, status, byteBuf, headers, trailing));
         } else if (response instanceof DefaultHttpResponse) {
-            Truth.assertThat(response).isEqualTo(new DefaultHttpResponse(version, status, headers));
+            assertThat(response).isEqualTo(new DefaultHttpResponse(version, status, headers));
         } else {
             Assertions.fail("Unrecognized response: " + response);
         }
@@ -97,14 +98,14 @@ public class AssertResponse {
     public static void assertHeaders(@NotNull HttpResponse response,
                                      @NotNull CharSequence key,
                                      @NotNull CharSequence value) {
-        Assertions.assertEquals(value.toString(), response.headers().get(key));
+        assertEquals(value.toString(), response.headers().get(key));
     }
 
     public static void assertHeaders(@NotNull HttpResponse response,
                                      @NotNull CharSequence key1, @NotNull CharSequence value1,
                                      @NotNull CharSequence key2, @NotNull CharSequence value2) {
-        Assertions.assertEquals(value1.toString(), response.headers().get(key1));
-        Assertions.assertEquals(value2.toString(), response.headers().get(key2));
+        assertEquals(value1.toString(), response.headers().get(key1));
+        assertEquals(value2.toString(), response.headers().get(key2));
     }
 
     public static void assertContentLength(@NotNull HttpResponse response, @NotNull CharSequence expected) {
@@ -115,10 +116,14 @@ public class AssertResponse {
         assertHeaders(response, HttpHeaderNames.CONTENT_TYPE, expected);
     }
 
+    public static void assertContent(@NotNull HttpResponse response, @NotNull HttpResponse expected) {
+        assertByteBufs(content(expected), content(response));
+    }
+
     public static void assertContentContains(@NotNull HttpResponse response, String ... substrings) {
-        String content = content(response).toString(Charset.defaultCharset());
+        String content = content(response).toString(CHARSET);
         for (String string : substrings) {
-            Truth.assertThat(content).contains(string);
+            assertThat(content).contains(string);
         }
     }
 

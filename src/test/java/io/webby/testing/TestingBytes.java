@@ -60,8 +60,8 @@ public class TestingBytes {
         ByteBuf byteBuf = buf == null ? Unpooled.EMPTY_BUFFER : buf;
         return switch (READABILITY_MODE) {
             case ORIGINAL -> throw new IllegalStateException("Readability mode is off: %s".formatted(READABILITY_MODE));
-            case HUMAN_READABLE -> new HumanReadableByteBuf(byteBuf);
-            case BYTE_DETAILS -> new ByteDetailsReadableByteBuf(byteBuf);
+            case HUMAN_READABLE -> byteBuf instanceof HumanReadableByteBuf ? byteBuf : new HumanReadableByteBuf(byteBuf);
+            case BYTE_DETAILS -> byteBuf instanceof ByteDetailsReadableByteBuf ? byteBuf : new ByteDetailsReadableByteBuf(byteBuf);
         };
     }
 

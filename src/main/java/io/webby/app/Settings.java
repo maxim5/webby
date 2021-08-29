@@ -24,6 +24,8 @@ public interface Settings {
 
     boolean isSafeMode();
 
+    boolean isStreamingEnabled();
+
     byte @NotNull [] securityKey();
 
     @NotNull Path webPath();

@@ -82,6 +82,7 @@ public abstract class BaseHttpIntegrationTest extends BaseChannelTest {
 
     protected @NotNull HttpResponse call(@NotNull HttpMethod method, @NotNull String uri, @Nullable Object content) {
         assertChannelInitialized();
+        recreateChannelIfClosed();
 
         FullHttpRequest request = request(method, uri, content);
         channel.writeOneInbound(request);
@@ -91,5 +92,13 @@ public abstract class BaseHttpIntegrationTest extends BaseChannelTest {
         return outbound.size() == 1 ?
                 (HttpResponse) outbound.poll() :
                 CompositeHttpResponse.fromObjects(outbound);
+    }
+
+    // Will not be necessary if it's possible to close streaming without closing the channel.
+    private void recreateChannelIfClosed() {
+        if (!channel.isOpen()) {
+            NettyHttpHandler handler = injector.getInstance(NettyHttpHandler.class);
+            channel = new EmbeddedChannel(new ChunkedWriteHandler(), handler);
+        }
     }
 }

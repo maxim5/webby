@@ -205,7 +205,7 @@ public class NettyHttpHandler extends SimpleChannelInboundHandler<FullHttpReques
 
         EndpointView<?> view = options.view();
         if (view != null) {
-            return renderResponse(view, callResult, options);
+            return renderResponse(view, callResult);
         }
 
         Function<Object, HttpResponse> responseFunction = mapper.mapInstance(callResult);
@@ -220,11 +220,11 @@ public class NettyHttpHandler extends SimpleChannelInboundHandler<FullHttpReques
         }
         if (callResult instanceof Consumer<?>) {
             Consumer<OutputStream> consumer = castAny(callResult);
-            return addCallback(consumer, options);
+            return addCallback(consumer);
         }
         if (callResult instanceof ThrowConsumer<?, ?> throwConsumer) {
             Consumer<OutputStream> consumer = castAny(Consumers.rethrow(throwConsumer));
-            return addCallback(consumer, options);
+            return addCallback(consumer);
         }
 
         Marshaller marshaller = marshallers.getMarshaller(options.out());
@@ -232,9 +232,7 @@ public class NettyHttpHandler extends SimpleChannelInboundHandler<FullHttpReques
     }
 
     @VisibleForTesting
-    <T> @NotNull HttpResponse renderResponse(@NotNull EndpointView<T> view,
-                                             @NotNull Object callResult,
-                                             @NotNull EndpointOptions options) throws Exception {
+    <T> @NotNull HttpResponse renderResponse(@NotNull EndpointView<T> view, @NotNull Object callResult) throws Exception {
         Renderer<T> renderer = view.renderer();
         T template = view.template();
         return switch (renderer.support()) {
@@ -249,7 +247,7 @@ public class NettyHttpHandler extends SimpleChannelInboundHandler<FullHttpReques
             case BYTE_STREAM -> {
                 ThrowConsumer<OutputStream, Exception> throwConsumer = renderer.renderToByteStream(template, callResult);
                 Consumer<OutputStream> consumer = castAny(Consumers.rethrow(throwConsumer));
-                yield addCallback(consumer, options);
+                yield addCallback(consumer);
             }
         };
     }
@@ -280,10 +278,10 @@ public class NettyHttpHandler extends SimpleChannelInboundHandler<FullHttpReques
         return new EmptyHttpResponse();
     }
 
-    private @NotNull HttpResponse addCallback(@NotNull Consumer<OutputStream> consumer, @NotNull EndpointOptions options) {
+    private @NotNull HttpResponse addCallback(@NotNull Consumer<OutputStream> consumer) {
         // TODO: use ChunkOutputStream
         Future<?> future = executor().submit(() -> {
-            channel.write(new DefaultHttpResponse(HttpVersion.HTTP_1_1, HttpResponseStatus.OK));
+            channel.write(new DefaultHttpResponse(HttpVersion.HTTP_1_1, HttpResponseStatus.OK));  // TODO: headers?
             consumer.accept(new OutputStream() {
                 @Override
                 public void write(byte @NotNull [] bytes) {
@@ -303,12 +301,13 @@ public class NettyHttpHandler extends SimpleChannelInboundHandler<FullHttpReques
                 }
                 @Override
                 public void close() {
-                    channel.flush();
+                    channel.flush();  // for tests (only?)
+                    channel.close();  // to complete browser's waiting
                 }
             });
         });
 
-        return addCallback(future, options);
+        return new EmptyHttpResponse();
     }
 
     private @NotNull EventExecutor executor() {

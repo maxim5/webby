@@ -107,6 +107,10 @@ public class Testing {
             return injector != null ? getInstance(Charset.class) : Charset.defaultCharset();
         }
 
+        public static @NotNull AppSettings settings() {
+            return getInstance(AppSettings.class);
+        }
+
         public static @NotNull Json json() {
             // An alternative that always works:
             // new GsonMarshaller(new Gson(), TestingBytes.CHARSET)
