@@ -101,6 +101,21 @@ public class AcceptingDifferentTest extends BaseWebsocketIntegrationTest {
     }
 
     @Test
+    public void on_json_binary_same_agent_instance() {
+        AcceptingDifferent agent = setupJson(FrameType.FROM_CLIENT, TEXT_SEPARATOR_META);
+        Queue<WebSocketFrame> frames1 = sendBinary("str 111111111 {'s': null}");
+        assertBinaryFrames(frames1);
+        Queue<WebSocketFrame> frames2 = sendBinary("primitive 1 {'ch': 'w', 'bool': true}");
+        assertBinaryFrames(frames2, """
+            1 0 {"s":"w-true"}
+        """.trim());
+        assertThat(agent.getIncoming()).containsExactly(
+                new StringMessage(null),
+                new PrimitiveMessage().withChar('w').withBool(true)
+        );
+    }
+
+    @Test
     public void compatibility_server_text_only_client_text() {
         AcceptingDifferent agent = setupJson(FrameType.TEXT_ONLY, TEXT_SEPARATOR_META, ClientFrameType.TEXT);
 
