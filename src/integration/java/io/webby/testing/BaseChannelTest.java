@@ -53,6 +53,8 @@ public class BaseChannelTest {
     }
 
     protected void flushChannel() {
-        channel.flushOutbound();
+        if (channel.isOpen()) {
+            channel.flushOutbound();
+        }
     }
 }

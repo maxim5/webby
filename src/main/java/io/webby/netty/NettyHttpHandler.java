@@ -280,8 +280,7 @@ public class NettyHttpHandler extends SimpleChannelInboundHandler<FullHttpReques
 
     private @NotNull HttpResponse addCallback(@NotNull Consumer<OutputStream> consumer) {
         // TODO: use ChunkOutputStream
-        Future<?> future = executor().submit(() -> {
-            channel.write(new DefaultHttpResponse(HttpVersion.HTTP_1_1, HttpResponseStatus.OK));  // TODO: headers?
+        Future<?> future = executor().submit(() ->
             consumer.accept(new OutputStream() {
                 @Override
                 public void write(byte @NotNull [] bytes) {
@@ -304,10 +303,10 @@ public class NettyHttpHandler extends SimpleChannelInboundHandler<FullHttpReques
                     channel.flush();  // for tests (only?)
                     channel.close();  // to complete browser's waiting
                 }
-            });
-        });
+            })
+        );
 
-        return new EmptyHttpResponse();
+        return new DefaultHttpResponse(HttpVersion.HTTP_1_1, HttpResponseStatus.OK);
     }
 
     private @NotNull EventExecutor executor() {
