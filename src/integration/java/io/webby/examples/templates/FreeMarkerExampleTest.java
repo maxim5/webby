@@ -2,12 +2,25 @@ package io.webby.examples.templates;
 
 import io.netty.handler.codec.http.HttpResponse;
 import io.webby.testing.BaseHttpIntegrationTest;
-import org.junit.jupiter.api.Test;
+import org.jetbrains.annotations.NotNull;
+import org.junit.Test;
+import org.junit.runner.RunWith;
+import org.junit.runners.Parameterized;
 
 import static io.webby.testing.AssertResponse.*;
 
+@RunWith(Parameterized.class)
 public class FreeMarkerExampleTest extends BaseHttpIntegrationTest {
-    protected final FreeMarkerExample handler = testSetup(FreeMarkerExample.class).initHandler();
+    protected final FreeMarkerExample handler;
+
+    public FreeMarkerExampleTest(@NotNull TestingRender.Config config) {
+        handler = testSetup(FreeMarkerExample.class, config.asSettingsUpdater()).initHandler();
+    }
+
+    @Parameterized.Parameters(name = "{index}: {0}")
+    public static TestingRender.Config[] configs() {
+        return TestingRender.Config.values();
+    }
 
     @Test
     public void get_hello() {
