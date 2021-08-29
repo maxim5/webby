@@ -7,11 +7,12 @@ import io.netty.handler.codec.http.websocketx.TextWebSocketFrame;
 import io.netty.handler.codec.http.websocketx.WebSocketFrame;
 import io.webby.netty.ws.errors.ClientDeniedException;
 import org.jetbrains.annotations.NotNull;
-import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.function.Executable;
 
 import java.util.Arrays;
 import java.util.List;
+
+import static org.junit.jupiter.api.Assertions.assertThrows;
 
 public class AssertFrame {
     public static void assertTextFrame(@NotNull WebSocketFrame frame, @NotNull String expected) {
@@ -51,6 +52,6 @@ public class AssertFrame {
     }
 
     public static void assertClientDenied(@NotNull Executable setup) {
-        Assertions.assertThrows(ClientDeniedException.class, setup);
+        assertThrows(ClientDeniedException.class, setup);
     }
 }

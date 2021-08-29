@@ -1,23 +1,23 @@
 package io.webby.examples.websockets.protocol;
 
 import io.netty.handler.codec.http.websocketx.WebSocketFrame;
+import io.webby.examples.websockets.protocol.ExampleMessages.PrimitiveMessage;
+import io.webby.examples.websockets.protocol.ExampleMessages.StringMessage;
 import io.webby.testing.BaseWebsocketIntegrationTest;
 import io.webby.testing.FakeClients;
 import io.webby.url.annotate.FrameType;
 import io.webby.url.annotate.Marshal;
-import io.webby.examples.websockets.protocol.ExampleMessages.PrimitiveMessage;
-import io.webby.examples.websockets.protocol.ExampleMessages.StringMessage;
 import io.webby.ws.context.ClientFrameType;
 import io.webby.ws.meta.FrameMetadata;
 import io.webby.ws.meta.TextSeparatorFrameMetadata;
 import org.jetbrains.annotations.NotNull;
-import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 
 import java.util.Queue;
 
 import static com.google.common.truth.Truth.assertThat;
 import static io.webby.testing.AssertFrame.*;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 
 public class AcceptingDifferentTest extends BaseWebsocketIntegrationTest {
     private static final TextSeparatorFrameMetadata TEXT_SEPARATOR_META = new TextSeparatorFrameMetadata();
@@ -66,7 +66,7 @@ public class AcceptingDifferentTest extends BaseWebsocketIntegrationTest {
     public void on_json_text_string_not_null() {
         AcceptingDifferent agent = setupJson(FrameType.TEXT_ONLY, TEXT_SEPARATOR_META);
         Queue<WebSocketFrame> frames = sendText("str 111111111 {'s': 'aaa'}");
-        Assertions.assertEquals(96352, new StringMessage("aaa").hashCode());
+        assertEquals(96352, new StringMessage("aaa").hashCode());
         assertTextFrames(frames, """
             111111111 0 {"i":96352,"l":0,"b":0,"s":0,"ch":"\\u0000","f":0.0,"d":0.0,"bool":false}
         """.trim());
@@ -77,7 +77,7 @@ public class AcceptingDifferentTest extends BaseWebsocketIntegrationTest {
     public void on_json_binary_string_not_null() {
         AcceptingDifferent agent = setupJson(FrameType.BINARY_ONLY, TEXT_SEPARATOR_META);
         Queue<WebSocketFrame> frames = sendBinary("str 111111111 {'s': 'aaa'}");
-        Assertions.assertEquals(96352, new StringMessage("aaa").hashCode());
+        assertEquals(96352, new StringMessage("aaa").hashCode());
         assertBinaryFrames(frames, """
             111111111 0 {"i":96352,"l":0,"b":0,"s":0,"ch":"\\u0000","f":0.0,"d":0.0,"bool":false}
         """.trim());

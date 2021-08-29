@@ -2,10 +2,10 @@ package io.webby.auth.session;
 
 import io.netty.handler.codec.http.cookie.DefaultCookie;
 import io.webby.testing.Testing;
-import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 
-import static io.webby.testing.FakeRequests.*;
+import static io.webby.testing.FakeRequests.getEx;
+import static org.junit.jupiter.api.Assertions.*;
 
 public class SessionManagerTest {
     private final SessionManager manager = Testing.testStartupNoHandlers().getInstance(SessionManager.class);
@@ -24,21 +24,21 @@ public class SessionManagerTest {
 
     @Test
     public void decode_invalid_session_value() {
-        Assertions.assertThrows(RuntimeException.class, () -> manager.decodeSessionId(""));
-        Assertions.assertThrows(RuntimeException.class, () -> manager.decodeSessionId("foo"));
-        Assertions.assertThrows(RuntimeException.class, () -> manager.decodeSessionId("12345"));
+        assertThrows(RuntimeException.class, () -> manager.decodeSessionId(""));
+        assertThrows(RuntimeException.class, () -> manager.decodeSessionId("foo"));
+        assertThrows(RuntimeException.class, () -> manager.decodeSessionId("12345"));
     }
 
     @Test
     public void getOrCreateSession_null() {
         Session session = manager.getOrCreateSession(getEx("/"), null);
-        Assertions.assertTrue(session.shouldRefresh());
+        assertTrue(session.shouldRefresh());
     }
 
     @Test
     public void getOrCreateSession_invalid_cookie() {
         Session session = manager.getOrCreateSession(getEx("/"), new DefaultCookie("name", "foo"));
-        Assertions.assertTrue(session.shouldRefresh());
+        assertTrue(session.shouldRefresh());
     }
 
     @Test
@@ -46,13 +46,13 @@ public class SessionManagerTest {
         Session session = manager.createNewSession(getEx("/"));
         String encoded = manager.encodeSessionForCookie(session);
         Session returned = manager.getOrCreateSession(getEx("/"), new DefaultCookie("name", encoded));
-        Assertions.assertEquals(session, returned);
+        assertEquals(session, returned);
     }
 
     private void assertEncodeDecode(long id, int expectedLength) {
         String encoded = manager.encodeSessionId(id);
-        Assertions.assertEquals(expectedLength, encoded.length());
+        assertEquals(expectedLength, encoded.length());
         long sessionId = manager.decodeSessionId(encoded);
-        Assertions.assertEquals(id, sessionId);
+        assertEquals(id, sessionId);
     }
 }

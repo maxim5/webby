@@ -6,13 +6,13 @@ import io.netty.buffer.DuplicatedByteBuf;
 import io.netty.buffer.Unpooled;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
-import org.junit.jupiter.api.Assertions;
 
 import java.io.ByteArrayInputStream;
 import java.nio.charset.Charset;
 import java.util.Arrays;
 
 import static io.webby.util.EasyCast.castAny;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 
 public class TestingBytes {
     public static final Charset CHARSET = Testing.Internals.charset();
@@ -49,11 +49,11 @@ public class TestingBytes {
     }
 
     public static void assertByteBuf(@Nullable ByteBuf buf, @Nullable String expected) {
-        Assertions.assertEquals(expected, asStringOrNull(buf));
+        assertEquals(expected, asStringOrNull(buf));
     }
 
     public static void assertByteBufs(@Nullable ByteBuf buf, @Nullable ByteBuf expected) {
-        Assertions.assertEquals(asReadableOrNull(expected), asReadableOrNull(buf));
+        assertEquals(asReadableOrNull(expected), asReadableOrNull(buf));
     }
 
     public static @NotNull ByteBuf asReadable(@Nullable ByteBuf buf) {

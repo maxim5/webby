@@ -1,8 +1,10 @@
 package io.webby.netty.intercept.attr;
 
 import io.webby.app.AppConfigException;
-import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
+
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 
 public class AttributesValidatorTest {
     @Test
@@ -26,10 +28,10 @@ public class AttributesValidatorTest {
     }
 
     private void assertPositions(int expected, int... positions) {
-        Assertions.assertEquals(expected, AttributesValidator.validatePositions(positions, value -> null));
+        assertEquals(expected, AttributesValidator.validatePositions(positions, value -> null));
     }
 
     private void assertPositionsThrows(int... positions) {
-        Assertions.assertThrows(AppConfigException.class, () -> AttributesValidator.validatePositions(positions, value -> null));
+        assertThrows(AppConfigException.class, () -> AttributesValidator.validatePositions(positions, value -> null));
     }
 }

@@ -6,7 +6,6 @@ import io.netty.handler.codec.http.HttpResponse;
 import io.routekit.util.CharArray;
 import io.webby.testing.Testing;
 import io.webby.testing.TestingBytes;
-import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 
@@ -18,6 +17,8 @@ import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.function.Function;
 
 import static io.webby.testing.AssertResponse.streamContent;
+import static io.webby.testing.TestingBytes.assertByteBuf;
+import static org.junit.jupiter.api.Assertions.*;
 
 public class ResponseMapperTest {
     private final ResponseMapper mapper = Testing.testStartupNoHandlers().getInstance(ResponseMapper.class);
@@ -37,7 +38,7 @@ public class ResponseMapperTest {
         assertLookupClass(byteBuffer, "foo");
 
         ByteBuffer byteBufferWithoutArray = byteBuffer.asReadOnlyBuffer();
-        Assertions.assertFalse(byteBufferWithoutArray.hasArray());
+        assertFalse(byteBufferWithoutArray.hasArray());
         assertLookupClass(byteBufferWithoutArray, "foo");
     }
 
@@ -50,7 +51,7 @@ public class ResponseMapperTest {
         assertLookupClass(charBuffer, "foo");
 
         CharBuffer charBufferWithoutArray = CharBuffer.wrap("foo");
-        Assertions.assertFalse(charBufferWithoutArray.hasArray());
+        assertFalse(charBufferWithoutArray.hasArray());
         assertLookupClass(charBufferWithoutArray, "foo");
     }
 
@@ -97,7 +98,7 @@ public class ResponseMapperTest {
             }
         };
         mapper.mapInstance(stream).apply(stream);
-        Assertions.assertTrue(closed.get());
+        assertTrue(closed.get());
     }
 
     @Test
@@ -111,7 +112,7 @@ public class ResponseMapperTest {
             }
         };
         mapper.mapInstance(reader).apply(reader);
-        Assertions.assertTrue(closed.get());
+        assertTrue(closed.get());
     }
 
     private void assertLookupClass(Object obj, String expected) {
@@ -124,13 +125,13 @@ public class ResponseMapperTest {
         assertResponseFunction(lookup, obj, expected);
     }
 
-    private void assertResponseFunction(Function<Object, HttpResponse> lookup, Object obj, String expected) {
+    private static void assertResponseFunction(Function<Object, HttpResponse> lookup, Object obj, String expected) {
         if (expected != null) {
-            Assertions.assertNotNull(lookup, () -> describe(obj));
+            assertNotNull(lookup, () -> describe(obj));
             HttpResponse response = lookup.apply(obj);
-            TestingBytes.assertByteBuf(streamContent(response), expected);
+            assertByteBuf(streamContent(response), expected);
         } else {
-            Assertions.assertNull(lookup, () -> describe(obj));
+            assertNull(lookup, () -> describe(obj));
         }
     }
 

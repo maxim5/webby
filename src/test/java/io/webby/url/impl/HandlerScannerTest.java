@@ -2,12 +2,13 @@ package io.webby.url.impl;
 
 import io.webby.url.annotate.*;
 import org.jetbrains.annotations.NotNull;
-import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 
 import java.util.Set;
 
 import static io.webby.url.impl.HandlerScanner.*;
+import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 public class HandlerScannerTest {
     @Test
@@ -15,30 +16,30 @@ public class HandlerScannerTest {
         @Json
         interface Foo {}
 
-        Assertions.assertTrue(matchesAny(Foo.class, Set.of(Json.class)));
-        Assertions.assertFalse(matchesAny(Foo.class, Set.of(Serve.class)));
-        Assertions.assertTrue(matchesAny(Foo.class, Set.of(Serve.class, Json.class)));
-        Assertions.assertTrue(matchesAny(Foo.class, Set.of(Protobuf.class, Json.class)));
-        Assertions.assertFalse(matchesAny(Foo.class, Set.of(Protobuf.class, Serve.class)));
-        Assertions.assertFalse(matchesAny(Foo.class, Set.of(Protobuf.class)));
+        assertTrue(matchesAny(Foo.class, Set.of(Json.class)));
+        assertFalse(matchesAny(Foo.class, Set.of(Serve.class)));
+        assertTrue(matchesAny(Foo.class, Set.of(Serve.class, Json.class)));
+        assertTrue(matchesAny(Foo.class, Set.of(Protobuf.class, Json.class)));
+        assertFalse(matchesAny(Foo.class, Set.of(Protobuf.class, Serve.class)));
+        assertFalse(matchesAny(Foo.class, Set.of(Protobuf.class)));
     }
 
     @Test
     public void matchesAny_class_two_annotations() {
         @Serve @Json interface Foo {}
 
-        Assertions.assertTrue(matchesAny(Foo.class, Set.of(Json.class)));
-        Assertions.assertTrue(matchesAny(Foo.class, Set.of(Serve.class)));
-        Assertions.assertTrue(matchesAny(Foo.class, Set.of(Serve.class, Json.class)));
-        Assertions.assertTrue(matchesAny(Foo.class, Set.of(Protobuf.class, Serve.class)));
-        Assertions.assertFalse(matchesAny(Foo.class, Set.of(Protobuf.class)));
+        assertTrue(matchesAny(Foo.class, Set.of(Json.class)));
+        assertTrue(matchesAny(Foo.class, Set.of(Serve.class)));
+        assertTrue(matchesAny(Foo.class, Set.of(Serve.class, Json.class)));
+        assertTrue(matchesAny(Foo.class, Set.of(Protobuf.class, Serve.class)));
+        assertFalse(matchesAny(Foo.class, Set.of(Protobuf.class)));
     }
 
     @Test
     public void isHandlerClass_serve_class_matches() {
         @Serve interface Foo {}
 
-        Assertions.assertTrue(isHandlerClassDefault(Foo.class));
+        assertTrue(isHandlerClassDefault(Foo.class));
     }
 
     @Test
@@ -48,7 +49,7 @@ public class HandlerScannerTest {
             void foo();
         }
 
-        Assertions.assertTrue(isHandlerClassDefault(Foo.class));
+        assertTrue(isHandlerClassDefault(Foo.class));
     }
 
     @Test
@@ -57,7 +58,7 @@ public class HandlerScannerTest {
             @GET void foo();
         }
 
-        Assertions.assertTrue(isHandlerClassDefault(Foo.class));
+        assertTrue(isHandlerClassDefault(Foo.class));
     }
 
     @Test
@@ -67,7 +68,7 @@ public class HandlerScannerTest {
             void foo();
         }
 
-        Assertions.assertTrue(isHandlerClassDefault(Foo.class));
+        assertTrue(isHandlerClassDefault(Foo.class));
     }
 
     @Test
@@ -77,18 +78,18 @@ public class HandlerScannerTest {
             void foo();
         }
 
-        Assertions.assertTrue(isHandlerClassDefault(Foo.class));
+        assertTrue(isHandlerClassDefault(Foo.class));
     }
 
     @Test
     public void isHandlerClass_simple_class_no_match() {
-        Assertions.assertFalse(isHandlerClassDefault(HandlerScanner.class));
-        Assertions.assertFalse(isHandlerClassDefault(HandlerScannerTest.class));
+        assertFalse(isHandlerClassDefault(HandlerScanner.class));
+        assertFalse(isHandlerClassDefault(HandlerScannerTest.class));
     }
 
     @Test
     public void isHandlerClass_test_method_match() {
-        Assertions.assertTrue(isHandlerClass(HandlerScannerTest.class, Serve.class, Set.of(), Set.of(Test.class)));
+        assertTrue(isHandlerClass(HandlerScannerTest.class, Serve.class, Set.of(), Set.of(Test.class)));
     }
 
     private static boolean isHandlerClassDefault(@NotNull Class<?> klass) {

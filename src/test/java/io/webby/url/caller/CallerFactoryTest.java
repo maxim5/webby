@@ -18,7 +18,6 @@ import io.webby.url.handle.StringHandler;
 import io.webby.url.impl.Binding;
 import io.webby.url.impl.EndpointOptions;
 import org.jetbrains.annotations.NotNull;
-import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 
 import java.lang.reflect.Method;
@@ -31,6 +30,7 @@ import java.util.function.IntSupplier;
 import static io.webby.testing.FakeRequests.getEx;
 import static io.webby.testing.FakeRequests.postEx;
 import static io.webby.testing.Testing.asMap;
+import static org.junit.jupiter.api.Assertions.*;
 
 @SuppressWarnings("unused")
 public class CallerFactoryTest {
@@ -39,41 +39,41 @@ public class CallerFactoryTest {
 
     @Test
     public void types() {
-        Assertions.assertTrue(CallerFactory.isInt(int.class));
-        Assertions.assertFalse(CallerFactory.isInt(short.class));
-        Assertions.assertFalse(CallerFactory.isInt(long.class));
-        Assertions.assertFalse(CallerFactory.isInt(byte.class));
-        Assertions.assertFalse(CallerFactory.isInt(char.class));
-        Assertions.assertFalse(CallerFactory.isInt(Integer.class));
-        Assertions.assertFalse(CallerFactory.isInt(Number.class));
+        assertTrue(CallerFactory.isInt(int.class));
+        assertFalse(CallerFactory.isInt(short.class));
+        assertFalse(CallerFactory.isInt(long.class));
+        assertFalse(CallerFactory.isInt(byte.class));
+        assertFalse(CallerFactory.isInt(char.class));
+        assertFalse(CallerFactory.isInt(Integer.class));
+        assertFalse(CallerFactory.isInt(Number.class));
 
-        Assertions.assertTrue(CallerFactory.isStringLike(String.class));
-        Assertions.assertTrue(CallerFactory.isStringLike(CharSequence.class));
-        Assertions.assertTrue(CallerFactory.isStringLike(CharArray.class));
-        Assertions.assertTrue(CallerFactory.isStringLike(MutableCharArray.class));
-        Assertions.assertTrue(CallerFactory.isStringLike(AsciiString.class));
-        Assertions.assertTrue(CallerFactory.isStringLike(StringBuilder.class));
-        Assertions.assertFalse(CallerFactory.isStringLike(Object.class));
+        assertTrue(CallerFactory.isStringLike(String.class));
+        assertTrue(CallerFactory.isStringLike(CharSequence.class));
+        assertTrue(CallerFactory.isStringLike(CharArray.class));
+        assertTrue(CallerFactory.isStringLike(MutableCharArray.class));
+        assertTrue(CallerFactory.isStringLike(AsciiString.class));
+        assertTrue(CallerFactory.isStringLike(StringBuilder.class));
+        assertFalse(CallerFactory.isStringLike(Object.class));
 
-        Assertions.assertTrue(CallerFactory.canPassHttpRequest(HttpRequest.class));
-        Assertions.assertTrue(CallerFactory.canPassHttpRequest(FullHttpRequest.class));
-        Assertions.assertTrue(CallerFactory.canPassHttpRequest(DefaultHttpRequest.class));
-        Assertions.assertTrue(CallerFactory.canPassHttpRequest(DefaultFullHttpRequest.class));
-        Assertions.assertTrue(CallerFactory.canPassHttpRequest(HttpRequestEx.class));
-        Assertions.assertFalse(CallerFactory.canPassHttpRequest(Object.class));
+        assertTrue(CallerFactory.canPassHttpRequest(HttpRequest.class));
+        assertTrue(CallerFactory.canPassHttpRequest(FullHttpRequest.class));
+        assertTrue(CallerFactory.canPassHttpRequest(DefaultHttpRequest.class));
+        assertTrue(CallerFactory.canPassHttpRequest(DefaultFullHttpRequest.class));
+        assertTrue(CallerFactory.canPassHttpRequest(HttpRequestEx.class));
+        assertFalse(CallerFactory.canPassHttpRequest(Object.class));
 
-        Assertions.assertTrue(CallerFactory.canPassContent(Object.class));
-        Assertions.assertTrue(CallerFactory.canPassContent(Map.class));
-        Assertions.assertFalse(CallerFactory.canPassContent(int.class));
-        Assertions.assertFalse(CallerFactory.canPassContent(String.class));
-        Assertions.assertFalse(CallerFactory.canPassContent(CharSequence.class));
+        assertTrue(CallerFactory.canPassContent(Object.class));
+        assertTrue(CallerFactory.canPassContent(Map.class));
+        assertFalse(CallerFactory.canPassContent(int.class));
+        assertFalse(CallerFactory.canPassContent(String.class));
+        assertFalse(CallerFactory.canPassContent(CharSequence.class));
 
-        Assertions.assertTrue(CallerFactory.canPassBuffer(CharSequence.class));
-        Assertions.assertTrue(CallerFactory.canPassBuffer(CharArray.class));
-        Assertions.assertFalse(CallerFactory.canPassBuffer(MutableCharArray.class));  // routekit contains immutable
-        Assertions.assertFalse(CallerFactory.canPassBuffer(String.class));
-        Assertions.assertFalse(CallerFactory.canPassBuffer(StringBuilder.class));
-        Assertions.assertFalse(CallerFactory.canPassBuffer(Object.class));
+        assertTrue(CallerFactory.canPassBuffer(CharSequence.class));
+        assertTrue(CallerFactory.canPassBuffer(CharArray.class));
+        assertFalse(CallerFactory.canPassBuffer(MutableCharArray.class));  // routekit contains immutable
+        assertFalse(CallerFactory.canPassBuffer(String.class));
+        assertFalse(CallerFactory.canPassBuffer(StringBuilder.class));
+        assertFalse(CallerFactory.canPassBuffer(Object.class));
     }
 
     @Test
@@ -81,10 +81,10 @@ public class CallerFactoryTest {
         Handler<String> instance = (request, variables) -> "%s:%s".formatted(request.method(), variables.keySet());
         Caller caller = factory.create(instance, binding(instance), Map.of(), List.of("foo", "bar"));
 
-        Assertions.assertTrue(caller instanceof NativeCaller);
-        Assertions.assertEquals("GET:[foo]", caller.call(get(), vars("foo", 1)));
-        Assertions.assertEquals("POST:[bar]", caller.call(post(), vars("bar", "x")));
-        Assertions.assertEquals("GET:[foo, bar]", caller.call(get(), vars("foo", 1, "bar", 2)));
+        assertTrue(caller instanceof NativeCaller);
+        assertEquals("GET:[foo]", caller.call(get(), vars("foo", 1)));
+        assertEquals("POST:[bar]", caller.call(post(), vars("bar", "x")));
+        assertEquals("GET:[foo, bar]", caller.call(get(), vars("foo", 1, "bar", 2)));
     }
 
     @Test
@@ -92,11 +92,11 @@ public class CallerFactoryTest {
         IntHandler<String> instance = (request, val) -> "%s:%d".formatted(request.method(), val);
         Caller caller = factory.create(instance, binding(instance), Map.of(), List.of("foo"));
 
-        Assertions.assertTrue(caller instanceof NativeIntCaller);
-        Assertions.assertEquals("GET:1", caller.call(get(), vars("foo", 1)));
-        Assertions.assertEquals("POST:-1", caller.call(post(), vars("foo", -1)));
-        Assertions.assertThrows(ConversionError.class, () -> caller.call(post(), vars("bar", 1)));
-        Assertions.assertThrows(ConversionError.class, () -> caller.call(post(), vars("foo", "x")));
+        assertTrue(caller instanceof NativeIntCaller);
+        assertEquals("GET:1", caller.call(get(), vars("foo", 1)));
+        assertEquals("POST:-1", caller.call(post(), vars("foo", -1)));
+        assertThrows(ConversionError.class, () -> caller.call(post(), vars("bar", 1)));
+        assertThrows(ConversionError.class, () -> caller.call(post(), vars("foo", "x")));
     }
 
     @Test
@@ -104,10 +104,10 @@ public class CallerFactoryTest {
         StringHandler<String> instance = (request, val) -> "%s:%s".formatted(request.method(), val);
         Caller caller = factory.create(instance, binding(instance), Map.of(), List.of("foo"));
 
-        Assertions.assertTrue(caller instanceof NativeStringCaller);
-        Assertions.assertEquals("GET:1", caller.call(get(), vars("foo", "1")));
-        Assertions.assertEquals("POST:bar", caller.call(post(), vars("foo", "bar")));
-        Assertions.assertThrows(ConversionError.class, () -> caller.call(post(), vars("bar", "foo")));
+        assertTrue(caller instanceof NativeStringCaller);
+        assertEquals("GET:1", caller.call(get(), vars("foo", "1")));
+        assertEquals("POST:bar", caller.call(post(), vars("foo", "bar")));
+        assertThrows(ConversionError.class, () -> caller.call(post(), vars("bar", "foo")));
     }
 
     @Test
@@ -115,8 +115,8 @@ public class CallerFactoryTest {
         IntSupplier instance = () -> 42;
         Caller caller = factory.create(instance, binding(instance), Map.of(), List.of());
 
-        Assertions.assertEquals(42, caller.call(get(), vars()));
-        Assertions.assertEquals(42, caller.call(post(), vars()));
+        assertEquals(42, caller.call(get(), vars()));
+        assertEquals(42, caller.call(post(), vars()));
     }
 
     @Test
@@ -127,9 +127,9 @@ public class CallerFactoryTest {
         RequestFunction instance = (request) -> request.method().toString();
         Caller caller = factory.create(instance, binding(instance, "POST"), Map.of(), List.of());
 
-        Assertions.assertEquals("POST", caller.call(post(), vars()));
+        assertEquals("POST", caller.call(post(), vars()));
         // Note: does not fail: RouteEndpoint is responsible for cutting off wrong requests.
-        Assertions.assertEquals("GET", caller.call(get(), vars()));
+        assertEquals("GET", caller.call(get(), vars()));
     }
 
     @Test
@@ -137,9 +137,9 @@ public class CallerFactoryTest {
         IntFunction<String> instance = String::valueOf;
         Caller caller = factory.create(instance, binding(instance), Map.of(), List.of("i"));
 
-        Assertions.assertEquals("10", caller.call(get(), vars("i", 10)));
-        Assertions.assertEquals("10", caller.call(post(), vars("i", 10)));
-        Assertions.assertThrows(ConversionError.class, () -> caller.call(get(), vars("x", 10)));
+        assertEquals("10", caller.call(get(), vars("i", 10)));
+        assertEquals("10", caller.call(post(), vars("i", 10)));
+        assertThrows(ConversionError.class, () -> caller.call(get(), vars("x", 10)));
     }
 
     @Test
@@ -150,11 +150,11 @@ public class CallerFactoryTest {
         IntRequestFunction instance = (request, i) -> "%s:%s".formatted(request.method(), i);
         Caller caller = factory.create(instance, binding(instance), Map.of(), List.of("i"));
 
-        Assertions.assertEquals("GET:10", caller.call(get(), vars("i", 10)));
-        Assertions.assertEquals("GET:0", caller.call(get(), vars("i", 0)));
-        Assertions.assertEquals("POST:10", caller.call(post(), vars("i", 10)));
-        Assertions.assertThrows(ConversionError.class, () -> caller.call(get(), vars("i", "foo")));
-        Assertions.assertThrows(ConversionError.class, () -> caller.call(get(), vars("x", 10)));
+        assertEquals("GET:10", caller.call(get(), vars("i", 10)));
+        assertEquals("GET:0", caller.call(get(), vars("i", 0)));
+        assertEquals("POST:10", caller.call(post(), vars("i", 10)));
+        assertThrows(ConversionError.class, () -> caller.call(get(), vars("i", "foo")));
+        assertThrows(ConversionError.class, () -> caller.call(get(), vars("x", 10)));
     }
 
     @Test
@@ -162,8 +162,8 @@ public class CallerFactoryTest {
         StringFunction<String> instance = String::toUpperCase;
         Caller caller = factory.create(instance, binding(instance), Map.of(), List.of("str"));
 
-        Assertions.assertEquals("FOO", caller.call(get(), vars("str", "foo")));
-        Assertions.assertEquals("BAR", caller.call(post(), vars("str", "bar")));
+        assertEquals("FOO", caller.call(get(), vars("str", "foo")));
+        assertEquals("BAR", caller.call(post(), vars("str", "bar")));
     }
 
     @Test
@@ -174,7 +174,7 @@ public class CallerFactoryTest {
         InjectedFunction instance = (injector) -> "%s".formatted(injector.getClass().getName());
         Caller caller = factory.create(instance, binding(instance), Map.of(), List.of());
 
-        Assertions.assertEquals("com.google.inject.internal.InjectorImpl", caller.call(get(), vars()));
+        assertEquals("com.google.inject.internal.InjectorImpl", caller.call(get(), vars()));
     }
 
     @Test
@@ -185,7 +185,7 @@ public class CallerFactoryTest {
         IntInjectedFunction instance = (injector, i) -> "%s:%d".formatted(injector.getClass().getName(), i);
         Caller caller = factory.create(instance, binding(instance), Map.of(), List.of("i"));
 
-        Assertions.assertEquals("com.google.inject.internal.InjectorImpl:10", caller.call(get(), vars("i", 10)));
+        assertEquals("com.google.inject.internal.InjectorImpl:10", caller.call(get(), vars("i", 10)));
     }
 
     @Test
@@ -196,22 +196,22 @@ public class CallerFactoryTest {
         GenericFunction instance = (request, x, y, z, s) -> "%s:%d:%d:%d:%s".formatted(request.method(), x, y, z, s);
         Caller caller = factory.create(instance, binding(instance), Map.of(), List.of("x", "y", "z", "s"));
 
-        Assertions.assertEquals(
+        assertEquals(
                 "GET:1:2:3:foobar",
                 caller.call(get(), vars("x", 1, "y", 2, "z", 3, "s", "foobar"))
         );
-        Assertions.assertEquals(
+        assertEquals(
                 "GET:0:9223372036854775807:127:foo",
                 caller.call(get(), vars("x", 0, "y", Long.MAX_VALUE, "z", 127, "s", "foo"))
         );
-        Assertions.assertEquals(
+        assertEquals(
                 "GET:-10:-9223372036854775808:-128:bar",
                 caller.call(get(), vars("x", -10, "y", Long.MIN_VALUE, "z", -128, "s", "bar"))
         );
 
-        Assertions.assertThrows(ConversionError.class, () ->
+        assertThrows(ConversionError.class, () ->
                 caller.call(get(), vars("x", 1, "y", 2, "z", 256, "s", "foo")));
-        Assertions.assertThrows(ConversionError.class, () ->
+        assertThrows(ConversionError.class, () ->
                 caller.call(get(), vars("x", 1, "y", 2, "z", 3, "str", "foo")));
     }
 
@@ -223,13 +223,13 @@ public class CallerFactoryTest {
         GenericFunction instance = "%d:%d:%d"::formatted;
         Caller caller = factory.create(instance, binding(instance), Map.of(), List.of("x", "y", "z"));
 
-        Assertions.assertEquals("1:2:3",caller.call(get(), vars("x", 1, "y", 2, "z", 3)));
-        Assertions.assertEquals("0:9223372036854775807:127", caller.call(get(), vars("x", 0, "y", Long.MAX_VALUE, "z", 127)));
-        Assertions.assertEquals("-10:-9223372036854775808:-128", caller.call(get(), vars("x", -10, "y", Long.MIN_VALUE, "z", -128)));
+        assertEquals("1:2:3",caller.call(get(), vars("x", 1, "y", 2, "z", 3)));
+        assertEquals("0:9223372036854775807:127", caller.call(get(), vars("x", 0, "y", Long.MAX_VALUE, "z", 127)));
+        assertEquals("-10:-9223372036854775808:-128", caller.call(get(), vars("x", -10, "y", Long.MIN_VALUE, "z", -128)));
 
-        Assertions.assertThrows(ConversionError.class, () ->
+        assertThrows(ConversionError.class, () ->
                 caller.call(get(), vars("x", 1, "y", 2, "z", 256)));
-        Assertions.assertThrows(ConversionError.class, () ->
+        assertThrows(ConversionError.class, () ->
                 caller.call(get(), vars("x", 1, "y", 2, "w", 3)));
     }
 
@@ -241,8 +241,8 @@ public class CallerFactoryTest {
         GenericFunction instance = "%d:%.2f:%.2f:%s"::formatted;
         Caller caller = factory.create(instance, binding(instance), Map.of(), List.of("x", "y", "z", "b"));
 
-        Assertions.assertEquals("1:2.00:3.00:false", caller.call(get(), vars("x", 1, "y", 2.0, "z", 3.0, "b", false)));
-        Assertions.assertThrows(ConversionError.class, () -> caller.call(get(), vars("x", 1_000_000, "y", 0, "z", 0, "b", true)));
+        assertEquals("1:2.00:3.00:false", caller.call(get(), vars("x", 1, "y", 2.0, "z", 3.0, "b", false)));
+        assertThrows(ConversionError.class, () -> caller.call(get(), vars("x", 1_000_000, "y", 0, "z", 0, "b", true)));
     }
 
     @Test
@@ -253,10 +253,10 @@ public class CallerFactoryTest {
         GenericFunction instance = "%s:%s"::formatted;
         Caller caller = factory.create(instance, binding(instance), Map.of(), List.of("x", "y"));
 
-        Assertions.assertEquals("A:B", caller.call(get(), vars("x", 65, "y", 66)));
-        Assertions.assertEquals("\u90AB:\u0000", caller.call(get(), vars("x", 0x90AB, "y", 0)));
-        // Assertions.assertThrows(ValidationError.class, () -> caller.call(get(), vars("x", -1, "y", -2)));
-        Assertions.assertThrows(ConversionError.class, () -> caller.call(get(), vars("x", -1, "y", Long.MAX_VALUE)));
+        assertEquals("A:B", caller.call(get(), vars("x", 65, "y", 66)));
+        assertEquals("\u90AB:\u0000", caller.call(get(), vars("x", 0x90AB, "y", 0)));
+        // assertThrows(ValidationError.class, () -> caller.call(get(), vars("x", -1, "y", -2)));
+        assertThrows(ConversionError.class, () -> caller.call(get(), vars("x", -1, "y", Long.MAX_VALUE)));
     }
 
     @NotNull
@@ -272,7 +272,7 @@ public class CallerFactoryTest {
     @NotNull
     private static Method getDeclaredMethod(Object instance) {
         Method[] methods = instance.getClass().getDeclaredMethods();
-        Assertions.assertEquals(1, methods.length);
+        assertEquals(1, methods.length);
         return methods[0];
     }
 

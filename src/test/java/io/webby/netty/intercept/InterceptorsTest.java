@@ -8,12 +8,13 @@ import io.webby.netty.request.DefaultHttpRequestEx;
 import io.webby.testing.Testing;
 import io.webby.testing.TestingModules;
 import io.webby.url.impl.EndpointContext;
-import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 
 import java.util.Map;
 
 import static io.webby.testing.FakeRequests.post;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNull;
 
 public class InterceptorsTest {
     private final Interceptors interceptors = Testing.testStartupNoHandlers().getInstance(Interceptors.class);
@@ -26,9 +27,9 @@ public class InterceptorsTest {
         EmbeddedChannel channel = new EmbeddedChannel();
         EndpointContext context = new EndpointContext(Map.of(), false, false);
         DefaultHttpRequestEx request1 = interceptors.createRequest(post("/foo", content1), channel, context);
-        Assertions.assertNull(request1.contentAsJson(Foo.class).fooBar);
+        assertNull(request1.contentAsJson(Foo.class).fooBar);
         DefaultHttpRequestEx request2 = interceptors.createRequest(post("/foo", content2), channel, context);
-        Assertions.assertEquals("bar", request2.contentAsJson(Foo.class).fooBar);
+        assertEquals("bar", request2.contentAsJson(Foo.class).fooBar);
     }
 
     @Test
@@ -43,9 +44,9 @@ public class InterceptorsTest {
         EmbeddedChannel channel = new EmbeddedChannel();
         EndpointContext context = new EndpointContext(Map.of(), false, false);
         DefaultHttpRequestEx request1 = interceptors.createRequest(post("/foo", content1), channel, context);
-        Assertions.assertEquals("bar", request1.contentAsJson(Foo.class).fooBar);
+        assertEquals("bar", request1.contentAsJson(Foo.class).fooBar);
         DefaultHttpRequestEx request2 = interceptors.createRequest(post("/foo", content2), channel, context);
-        Assertions.assertNull(request2.contentAsJson(Foo.class).fooBar);
+        assertNull(request2.contentAsJson(Foo.class).fooBar);
     }
 
     public static class Foo {
