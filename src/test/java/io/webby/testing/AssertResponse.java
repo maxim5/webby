@@ -95,6 +95,14 @@ public class AssertResponse {
         }
     }
 
+    public static void assertHeaders(@NotNull HttpResponse response, @NotNull HttpResponse expected) {
+        assertHeaders(response.headers(), expected.headers());
+    }
+
+    public static void assertHeaders(@NotNull HttpHeaders headers, @NotNull HttpHeaders expected) {
+        assertEquals(expected, headers);
+    }
+
     public static void assertHeaders(@NotNull HttpResponse response,
                                      @NotNull CharSequence key,
                                      @NotNull CharSequence value) {
@@ -125,6 +133,16 @@ public class AssertResponse {
         for (String string : substrings) {
             assertThat(content).contains(string);
         }
+    }
+
+    public static @NotNull HttpHeaders headersWithoutVolatile(@NotNull HttpResponse response) {
+        return headersWithoutVolatile(response.headers());
+    }
+
+    public static @NotNull HttpHeaders headersWithoutVolatile(@NotNull HttpHeaders headers) {
+        return headers.copy()
+                .remove(HttpHeaderNames.SET_COOKIE)
+                .remove("Server-Timing");
     }
 
     public static @NotNull ByteBuf content(@NotNull HttpResponse response) {

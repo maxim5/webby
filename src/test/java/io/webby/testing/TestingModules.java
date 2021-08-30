@@ -8,13 +8,23 @@ import org.jetbrains.annotations.Nullable;
 
 import java.util.concurrent.atomic.AtomicReference;
 
+import static io.webby.util.EasyCast.castAny;
+
 public class TestingModules {
     public static <T> @NotNull Module instance(@NotNull Class<? super T> klass, @NotNull T instance) {
         return binder -> binder.bind(klass).toInstance(instance);
     }
 
+    public static <T> @NotNull Module instance(@NotNull T instance) {
+        return binder -> binder.bind(instance.getClass()).toInstance(castAny(instance));
+    }
+
     public static <T> @NotNull Module mayBeInstance(@NotNull Class<? super T> klass, @Nullable T instance) {
         return instance != null ? instance(klass, instance) : Modules.EMPTY_MODULE;
+    }
+
+    public static <T> @NotNull Module mayBeInstance(@Nullable T instance) {
+        return instance != null ? instance(instance) : Modules.EMPTY_MODULE;
     }
 
     public static <T> @NotNull Module provided(@NotNull Class<T> klass, @NotNull Provider<T> provider) {
