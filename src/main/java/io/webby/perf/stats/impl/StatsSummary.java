@@ -37,13 +37,13 @@ public class StatsSummary {
 
     private @NotNull String mainAsTable() {
         return Streams.stream(stats.main())
-                .map(cursor -> "%s = %d".formatted(Stat.VALUES.get(cursor.key), cursor.value))
+                .map(cursor -> "%s = %d".formatted(Stat.VALUES.get(cursor.key).name().toLowerCase(), cursor.value))
                 .collect(Collectors.joining("\n"));
     }
 
     private @NotNull String mainAsJson() {
         List<Pair<String, Long>> pairs = Streams.stream(stats.main())
-                .map(cursor -> Pair.of(Stat.VALUES.get(cursor.key).name(), (long) cursor.value))
+                .map(cursor -> Pair.of(Stat.VALUES.get(cursor.key).name().toLowerCase(), (long) cursor.value))
                 .collect(Collectors.toCollection(ArrayList::new));
         pairs.add(Pair.of("time", stats.totalElapsed(TimeUnit.MILLISECONDS)));
         return pairs.stream()
