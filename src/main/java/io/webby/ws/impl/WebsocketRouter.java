@@ -1,14 +1,13 @@
 package io.webby.ws.impl;
 
-import com.google.common.base.Stopwatch;
 import com.google.common.flogger.FluentLogger;
 import com.google.inject.Inject;
+import io.webby.util.TimeIt;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import org.jetbrains.annotations.VisibleForTesting;
 
 import java.util.Map;
-import java.util.concurrent.TimeUnit;
 import java.util.logging.Level;
 
 public class WebsocketRouter {
@@ -18,9 +17,10 @@ public class WebsocketRouter {
 
     @Inject
     public WebsocketRouter(@NotNull WebsocketAgentBinder agentBinder) {
-        Stopwatch stopwatch = Stopwatch.createStarted();
-        router = agentBinder.bindAgents();
-        log.at(Level.INFO).log("URL router built in %d ms", stopwatch.stop().elapsed(TimeUnit.MILLISECONDS));
+        this.router = TimeIt.timeIt(
+            agentBinder::bindAgents,
+            (result, millis) -> log.at(Level.INFO).log("Websocket router built in %d ms", millis)
+        );
     }
 
     public @Nullable AgentEndpoint route(@NotNull String url) {

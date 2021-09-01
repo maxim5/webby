@@ -1,6 +1,5 @@
 package io.webby.url.impl;
 
-import com.google.common.base.Stopwatch;
 import com.google.common.flogger.FluentLogger;
 import com.google.common.flogger.LazyArgs;
 import com.google.inject.ConfigurationException;
@@ -19,6 +18,7 @@ import io.webby.url.convert.Constraint;
 import io.webby.url.view.Renderer;
 import io.webby.url.view.RendererFactory;
 import io.webby.util.Pair;
+import io.webby.util.TimeIt;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import org.jetbrains.annotations.VisibleForTesting;
@@ -29,7 +29,6 @@ import java.lang.reflect.AnnotatedElement;
 import java.lang.reflect.Field;
 import java.lang.reflect.Method;
 import java.util.*;
-import java.util.concurrent.TimeUnit;
 import java.util.function.BiConsumer;
 import java.util.function.Consumer;
 import java.util.logging.Level;
@@ -57,23 +56,23 @@ public class HandlerBinder {
         RouterSetup<RouteEndpoint> setup = new RouterSetup<>();
         QueryParser parser = settings.urlParser();
 
-        {
-            Stopwatch stopwatch = Stopwatch.createStarted();
-            processBindings(bindings, parser, (url, endpoint) -> {
+        TimeIt.timeIt(
+            () -> processBindings(bindings, parser, (url, endpoint) -> {
                 setup.add(url, endpoint);
                 log.at(Level.FINEST).log("Rule: %s -> %s", url, LazyArgs.lazy(endpoint::describe));
-            });
-            log.at(Level.INFO).log("Endpoints mapped to urls in %d ms", stopwatch.stop().elapsed(TimeUnit.MILLISECONDS));
-        }
+            }),
+            millis -> log.at(Level.FINE).log("Endpoints mapped to urls in %d ms", millis)
+        );
 
         try {
-            Stopwatch stopwatch = Stopwatch.createStarted();
-            staticServing.iterateStaticFiles(path -> {
-                String url = "/%s".formatted(path);
-                setup.add(url, new StaticRouteEndpoint(path, staticServing));
-                log.at(Level.FINEST).log("Rule: %s -> %s", url, path);
-            });
-            log.at(Level.INFO).log("Static files processed in %d ms", stopwatch.stop().elapsed(TimeUnit.MILLISECONDS));
+            TimeIt.timeItOrDie(
+                () -> staticServing.iterateStaticFiles(path -> {
+                    String url = "/%s".formatted(path);
+                    setup.add(url, new StaticRouteEndpoint(path, staticServing));
+                    log.at(Level.FINEST).log("Rule: %s -> %s", url, path);
+                }),
+                millis -> log.at(Level.FINE).log("Static files processed in %d ms", millis)
+            );
         } catch (IOException e) {
             throw new UrlConfigError("Failed to add static files to URL router", e);
         }
@@ -84,12 +83,14 @@ public class HandlerBinder {
     @VisibleForTesting
     @NotNull List<Binding> getBindings(@NotNull Iterable<? extends Class<?>> handlerClasses) {
         try {
-            Stopwatch stopwatch = Stopwatch.createStarted();
-            ArrayList<Binding> bindings = new ArrayList<>();
-            bindHandlers(handlerClasses, bindings::add);
-            long elapsedMillis = stopwatch.stop().elapsed(TimeUnit.MILLISECONDS);
-            log.at(Level.INFO).log("Extracted %d bindings in %d ms", bindings.size(), elapsedMillis);
-            return bindings;
+            return TimeIt.timeItOrDie(
+                () -> {
+                    ArrayList<Binding> bindings = new ArrayList<>();
+                    bindHandlers(handlerClasses, bindings::add);
+                    return bindings;
+                },
+                (result, millis) -> log.at(Level.FINE).log("Extracted %d bindings in %d ms", result.size(), millis)
+            );
         } catch (AppConfigException e) {
             throw e;
         } catch (Exception e) {
