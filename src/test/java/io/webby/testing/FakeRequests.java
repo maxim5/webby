@@ -26,7 +26,7 @@ public class FakeRequests {
         return request(HttpMethod.POST, uri, content);
     }
 
-    public static @NotNull FullHttpRequest request(@NotNull HttpMethod method, String uri, @Nullable Object content) {
+    public static @NotNull FullHttpRequest request(@NotNull HttpMethod method, @NotNull String uri, @Nullable Object content) {
         ByteBuf byteBuf = TestingBytes.asByteBuf((content instanceof String str) ? str : toJson(content));
         return new DefaultFullHttpRequest(HttpVersion.HTTP_1_1, method, uri, byteBuf);
     }

@@ -9,6 +9,7 @@ import io.webby.auth.user.User;
 import io.webby.netty.intercept.attr.Attributes;
 import io.webby.netty.marshal.Json;
 import io.webby.url.convert.Constraint;
+import io.webby.util.AtomicLazy;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
@@ -18,13 +19,11 @@ import java.net.SocketAddress;
 import java.nio.charset.Charset;
 import java.util.List;
 import java.util.Map;
-import java.util.concurrent.atomic.AtomicReference;
-import java.util.function.Supplier;
 
 import static io.webby.util.EasyCast.castAny;
 
 public class DefaultHttpRequestEx extends DefaultFullHttpRequest implements MutableHttpRequestEx {
-    private final AtomicReference<QueryParams> params = new AtomicReference<>(null);
+    private final AtomicLazy<QueryParams> params = new AtomicLazy<>();
     private final Channel channel;
     private final Json json;
     private final Map<String, Constraint<?>> constraints;
@@ -34,7 +33,7 @@ public class DefaultHttpRequestEx extends DefaultFullHttpRequest implements Muta
                                 @NotNull Channel channel,
                                 @NotNull Json json,
                                 @NotNull Map<String, Constraint<?>> constraints,
-                                Object @NotNull [] attributes) {
+                                @Nullable Object @NotNull [] attributes) {
         super(request.protocolVersion(), request.method(), request.uri(), request.content(),
               request.headers(), request.trailingHeaders());
         this.channel = channel;
@@ -43,7 +42,7 @@ public class DefaultHttpRequestEx extends DefaultFullHttpRequest implements Muta
         this.attributes = attributes;
     }
 
-    public DefaultHttpRequestEx(@NotNull DefaultHttpRequestEx request) {
+    protected DefaultHttpRequestEx(@NotNull DefaultHttpRequestEx request) {
         this(request, request.channel, request.json, request.constraints, request.attributes);
     }
 
@@ -89,7 +88,7 @@ public class DefaultHttpRequestEx extends DefaultFullHttpRequest implements Muta
 
     @Override
     public @NotNull QueryParams params() {
-        return setIfAbsent(params, this::parseQuery);
+        return params.lazyGet(this::parseQuery);
     }
 
     @Override
@@ -151,21 +150,8 @@ public class DefaultHttpRequestEx extends DefaultFullHttpRequest implements Muta
         return attrOrDie(Attributes.User);
     }
 
-    @NotNull
-    private QueryParams parseQuery() {
+    private @NotNull QueryParams parseQuery() {
         QueryStringDecoder decoder = new QueryStringDecoder(uri(), charset());
         return QueryParams.fromDecoder(decoder, constraints);
-    }
-
-    @NotNull
-    private static <T> T setIfAbsent(@NotNull AtomicReference<T> reference, @NotNull Supplier<T> supplier) {
-        T value = reference.get();
-        if (value == null) {
-            value = supplier.get();
-            if (!reference.compareAndSet(null, value)) {
-                return reference.get();
-            }
-        }
-        return value;
     }
 }
