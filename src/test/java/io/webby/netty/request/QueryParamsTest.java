@@ -54,6 +54,46 @@ public class QueryParamsTest {
     }
 
     @Test
+    public void duplicate_params_duplicate_values() {
+        QueryParams params = newQueryParamsWithoutConstraints("/?foo=&foo=&foo=");
+        assertEquals("/", params.path());
+        assertEquals("foo=&foo=&foo=", params.query());
+        assertParams(params, Map.of("foo", List.of("", "", "")));
+    }
+
+    @Test
+    public void invalid_uri_missing_equals() {
+        QueryParams params = newQueryParamsWithoutConstraints("/?foo");
+        assertEquals("/", params.path());
+        assertEquals("foo", params.query());
+        assertParams(params, Map.of("foo", List.of("")));
+    }
+
+    @Test
+    public void invalid_uri_empty_name_only() {
+        QueryParams params = newQueryParamsWithoutConstraints("/?=foo");
+        assertEquals("/", params.path());
+        assertEquals("=foo", params.query());
+        assertParams(params, Map.of("foo", List.of("")));
+    }
+
+    @Test
+    public void invalid_uri_empty_name_with_other_params() {
+        QueryParams params = newQueryParamsWithoutConstraints("/?x=0&=foo");
+        assertEquals("/", params.path());
+        assertEquals("x=0&=foo", params.query());
+        assertParams(params, Map.of("x", List.of("0"), "foo", List.of("")));
+    }
+
+    @Test
+    public void invalid_uri_empty_name_repeated() {
+        QueryParams params = newQueryParamsWithoutConstraints("/?=foo&=");
+        assertEquals("/", params.path());
+        assertEquals("=foo&=", params.query());
+        assertParams(params, Map.of("foo", List.of("")));
+    }
+
+    @Test
     public void int_value() {
         QueryParams params = newQueryParamsWithoutConstraints("/?x=1&y=-1&z=&w=foo");
         assertEquals("/", params.path());
