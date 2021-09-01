@@ -259,25 +259,22 @@ public class CallerFactoryTest {
         assertThrows(ConversionError.class, () -> caller.call(get(), vars("x", -1, "y", Long.MAX_VALUE)));
     }
 
-    @NotNull
-    private static Binding binding(Object instance) {
+    private @NotNull static Binding binding(Object instance) {
         return binding(instance, null);
     }
 
-    @NotNull
-    private static Binding binding(Object instance, String type) {
+    private static @NotNull Binding binding(Object instance, String type) {
         return new Binding(URL, getDeclaredMethod(instance), type, EndpointOptions.DEFAULT);
     }
 
-    @NotNull
-    private static Method getDeclaredMethod(Object instance) {
+    private static @NotNull Method getDeclaredMethod(Object instance) {
         Method[] methods = instance.getClass().getDeclaredMethods();
         assertEquals(1, methods.length);
         return methods[0];
     }
 
     @SuppressWarnings("UnstableApiUsage")
-    private static Map<String, CharArray> vars(Object ... items) {
+    private static Map<String, CharArray> vars(Object @NotNull ... items) {
         List<CharSequence> list = Streams.mapWithIndex(
                 Arrays.stream(items),
                 (item, i) -> (i % 2 == 0) ? item.toString() : new CharArray(item.toString())
@@ -285,13 +282,11 @@ public class CallerFactoryTest {
         return asMap(list);
     }
 
-    @NotNull
-    public static HttpRequestEx get() {
+    public static @NotNull HttpRequestEx get() {
         return getEx(URL);    // Do not care about QueryParams for now
     }
 
-    @NotNull
-    public static HttpRequestEx post() {
+    public static @NotNull HttpRequestEx post() {
         return postEx(URL);   // Do not care about QueryParams for now
     }
 
