@@ -4,7 +4,6 @@ import com.google.common.flogger.FluentLogger;
 import com.google.inject.Inject;
 import io.webby.app.Settings;
 import io.webby.common.InjectorHelper;
-import io.webby.url.HandlerConfigError;
 import io.webby.util.func.ThrowConsumer;
 import org.apache.velocity.Template;
 import org.apache.velocity.VelocityContext;
@@ -50,7 +49,7 @@ public class VelocityRenderer implements Renderer<Template> {
     }
 
     @Override
-    public @NotNull Template compileTemplate(@NotNull String name) throws HandlerConfigError {
+    public @NotNull Template compileTemplate(@NotNull String name) {
         return engine.getTemplate(name, settings.charset().name());
     }
 
@@ -92,8 +91,7 @@ public class VelocityRenderer implements Renderer<Template> {
         return new VelocityEngine(configuration);
     }
 
-    @NotNull
-    private static VelocityContext getVelocityContext(@NotNull Object model) {
+    private static @NotNull VelocityContext getVelocityContext(@NotNull Object model) {
         Map<String, Object> map = castMapOrFail(model, obj ->
             new RenderException("Velocity engine accepts only Map<String, Object> context, but got instead: %s".formatted(obj))
         );
