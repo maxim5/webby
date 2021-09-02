@@ -50,6 +50,7 @@ public class RendererFactory {
             case JTE -> helper.lazySingleton(JteRenderer.class);
             case PEBBLE -> helper.lazySingleton(PebbleRenderer.class);
             case ROCKER -> helper.lazySingleton(RockerRenderer.class);
+            case TRIMOU -> helper.lazySingleton(TrimouRenderer.class);
             case VELOCITY -> helper.lazySingleton(VelocityRenderer.class);
         };
     }

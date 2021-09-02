@@ -56,6 +56,7 @@ dependencies {
     compileOnly group: 'io.pebbletemplates', name: 'pebble', version: '3.1.5'
     compileOnly group: 'org.apache.velocity', name: 'velocity', version: '1.7'
     compileOnly group: 'org.freemarker', name: 'freemarker', version: '2.3.31'
+    compileOnly group: 'org.trimou', name: 'trimou-core', version: '2.5.1.Final'
 
     // Key-Values
     compileOnly group: 'com.linkedin.paldb', name: 'paldb', version: '1.2.0'

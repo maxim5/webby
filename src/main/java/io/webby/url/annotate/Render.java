@@ -6,5 +6,6 @@ public enum Render {
     JTE,
     PEBBLE,
     ROCKER,
+    TRIMOU,
     VELOCITY
 }
