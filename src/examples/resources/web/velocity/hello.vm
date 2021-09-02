@@ -1,0 +1,20 @@
+<html>
+    <body>
+        #set( $count = 1 )
+        <table class="gridtable">
+            <tr>
+                <th>Serial #</th>
+                <th>Product Name</th>
+                <th>Price</th>
+            </tr>
+            #foreach( $product in $products )
+            <tr>
+                <td>$count)</td>
+                <td>${product.name()}</td>
+                <td>${product.price()}</td>
+            </tr>
+            #set( $count = $count + 1 )
+            #end
+        </table>
+    </body>
+</html>

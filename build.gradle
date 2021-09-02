@@ -54,6 +54,7 @@ dependencies {
     compileOnly group: 'com.github.jknack', name: 'handlebars', version: '4.2.0'
     compileOnly group: 'gg.jte', name: 'jte', version: '1.11.3'
     compileOnly group: 'io.pebbletemplates', name: 'pebble', version: '3.1.5'
+    compileOnly group: 'org.apache.velocity', name: 'velocity', version: '1.7'
     compileOnly group: 'org.freemarker', name: 'freemarker', version: '2.3.31'
 
     // Key-Values

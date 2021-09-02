@@ -5,5 +5,6 @@ public enum Render {
     HANDLEBARS,
     JTE,
     PEBBLE,
-    ROCKER
+    ROCKER,
+    VELOCITY
 }
