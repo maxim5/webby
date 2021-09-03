@@ -52,6 +52,7 @@ public class RendererFactory {
             case MUSTACHE_JAVA -> helper.lazySingleton(MustacheJavaRenderer.class);
             case PEBBLE -> helper.lazySingleton(PebbleRenderer.class);
             case ROCKER -> helper.lazySingleton(RockerRenderer.class);
+            case THYMELEAF -> helper.lazySingleton(ThymeleafRenderer.class);
             case TRIMOU -> helper.lazySingleton(TrimouRenderer.class);
             case VELOCITY -> helper.lazySingleton(VelocityRenderer.class);
         };

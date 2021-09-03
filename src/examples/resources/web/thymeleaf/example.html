@@ -1,0 +1,14 @@
+<html xmlns:th="http://www.thymeleaf.org">
+    <body>
+        <table>
+            <tr th:each="student: ${students}">
+                <td th:text="${student.id}" />
+                <td th:text="${student.name}" />
+                <td>
+                    <span th:if="${student.gender} == 'M'" th:text="Male" />
+                    <span th:unless="${student.gender} == 'M'" th:text="Female" />
+                </td>
+            </tr>
+        </table>
+    </body>
+</html>

@@ -8,6 +8,7 @@ public enum Render {
     MUSTACHE_JAVA,
     PEBBLE,
     ROCKER,
+    THYMELEAF,
     TRIMOU,
     VELOCITY
 }
