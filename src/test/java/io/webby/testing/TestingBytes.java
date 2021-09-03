@@ -10,6 +10,7 @@ import org.jetbrains.annotations.Nullable;
 import java.io.ByteArrayInputStream;
 import java.nio.charset.Charset;
 import java.util.Arrays;
+import java.util.List;
 
 import static io.webby.util.EasyCast.castAny;
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -48,12 +49,28 @@ public class TestingBytes {
         return buf != null ? buf.toString(CHARSET) : null;
     }
 
+    public static @Nullable List<String> asLines(@Nullable String str) {
+        return str != null ? str.lines().toList() : null;
+    }
+
+    public static @Nullable List<String> asLines(@Nullable ByteBuf buf) {
+        return asLines(asStringOrNull(buf));
+    }
+
     public static void assertByteBuf(@Nullable ByteBuf buf, @Nullable String expected) {
         assertEquals(expected, asStringOrNull(buf));
     }
 
     public static void assertByteBufs(@Nullable ByteBuf buf, @Nullable ByteBuf expected) {
         assertEquals(asReadableOrNull(expected), asReadableOrNull(buf));
+    }
+
+    public static void assertEqualsIgnoringNewlines(@Nullable ByteBuf buf, @Nullable String expected) {
+        assertEquals(asLines(expected), asLines(buf));
+    }
+
+    public static void assertEqualsIgnoringNewlines(@Nullable String str, @Nullable String expected) {
+        assertEquals(asLines(expected), asLines(str));
     }
 
     public static @NotNull ByteBuf asReadable(@Nullable ByteBuf buf) {

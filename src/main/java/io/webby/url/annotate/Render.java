@@ -4,6 +4,7 @@ public enum Render {
     FREEMARKER,
     HANDLEBARS,
     JTE,
+    MUSTACHE,
     PEBBLE,
     ROCKER,
     TRIMOU,

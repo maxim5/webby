@@ -48,6 +48,7 @@ public class RendererFactory {
             case FREEMARKER -> helper.lazySingleton(FreeMarkerRenderer.class);
             case HANDLEBARS -> helper.lazySingleton(HandlebarsRenderer.class);
             case JTE -> helper.lazySingleton(JteRenderer.class);
+            case MUSTACHE -> helper.lazySingleton(MustacheRenderer.class);
             case PEBBLE -> helper.lazySingleton(PebbleRenderer.class);
             case ROCKER -> helper.lazySingleton(RockerRenderer.class);
             case TRIMOU -> helper.lazySingleton(TrimouRenderer.class);
