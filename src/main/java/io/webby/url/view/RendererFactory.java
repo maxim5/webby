@@ -47,6 +47,7 @@ public class RendererFactory {
         return switch (render) {
             case FREEMARKER -> helper.lazySingleton(FreeMarkerRenderer.class);
             case HANDLEBARS -> helper.lazySingleton(HandlebarsRenderer.class);
+            case JMUSTACHE -> helper.lazySingleton(JMustacheRenderer.class);
             case JTE -> helper.lazySingleton(JteRenderer.class);
             case MUSTACHE_JAVA -> helper.lazySingleton(MustacheJavaRenderer.class);
             case PEBBLE -> helper.lazySingleton(PebbleRenderer.class);
