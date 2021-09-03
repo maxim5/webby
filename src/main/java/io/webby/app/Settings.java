@@ -11,6 +11,7 @@ import org.jetbrains.annotations.Nullable;
 import java.nio.charset.Charset;
 import java.nio.file.Path;
 import java.util.List;
+import java.util.Optional;
 import java.util.function.BiPredicate;
 
 public interface Settings {
@@ -61,6 +62,10 @@ public interface Settings {
     @NotNull String getProperty(@NotNull String key, @NotNull String def);
 
     @NotNull String getProperty(@NotNull String key, @NotNull Object def);
+
+    default @NotNull Optional<String> getOptionalProperty(@NotNull String key) {
+        return Optional.ofNullable(getProperty(key));
+    }
 
     int getIntProperty(@NotNull String key, int def);
 
