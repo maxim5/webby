@@ -11,6 +11,7 @@ import org.junit.runners.Parameterized;
 import static io.webby.examples.templates.TestingRender.assertRenderedStatsHeaderForCurrentConfig;
 import static io.webby.examples.templates.TestingRender.assertSimpleStatsHeaderForCurrentConfig;
 import static io.webby.testing.AssertResponse.*;
+import static io.webby.testing.TestingBytes.assertEqualsIgnoringNewlines;
 
 @RunWith(Parameterized.class)
 public class TrimouExampleTest extends BaseHttpIntegrationTest {
@@ -26,15 +27,16 @@ public class TrimouExampleTest extends BaseHttpIntegrationTest {
     @Test
     public void get_hello() {
         HttpResponse response = get("/templates/trimou/hello");
-        assert200(response, """
-            Total number of items: 4\r
-            The first item is:\s\r
-                    1. Foo (5)\r
-                    2. Bar (15)\r
-                    3. INACTIVE!\s\r
-                    4. Baz (5000)\r
-        \r
-        \r
+        assert200(response);
+        assertEqualsIgnoringNewlines(content(response), """
+            Total number of items: 4
+            The first item is:\s
+                    1. Foo (5)
+                    2. Bar (15)
+                    3. INACTIVE!\s
+                    4. Baz (5000)
+        
+        
         """);
         assertRenderedStatsHeaderForCurrentConfig(response);
     }
