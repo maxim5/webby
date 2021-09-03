@@ -17,7 +17,7 @@ import java.nio.file.Path;
 import java.util.List;
 import java.util.logging.Level;
 
-public class MustacheRenderer implements Renderer<Mustache> {
+public class MustacheJavaRenderer implements Renderer<Mustache> {
     private static final FluentLogger log = FluentLogger.forEnclosingClass();
 
     @Inject private InjectorHelper helper;
@@ -28,7 +28,7 @@ public class MustacheRenderer implements Renderer<Mustache> {
     @Inject
     private void init() {
         if (settings.isHotReload()) {
-            log.at(Level.INFO).log("Mustache hot reload enabled");
+            log.at(Level.INFO).log("Mustache.java hot reload enabled");
         } else {
             factory = helper.getOrDefault(MustacheFactory.class, this::createDefault);
         }
@@ -75,11 +75,11 @@ public class MustacheRenderer implements Renderer<Mustache> {
 
     private @NotNull MustacheFactory createDefault() {
         List<Path> viewPaths = settings.viewPaths();
-        int recursionLimit = settings.getIntProperty("mustache.recursion.limit", 100);
+        int recursionLimit = settings.getIntProperty("mustache-java.recursion.limit", 100);
 
         File fileRoot = viewPaths.stream().map(Path::toFile).findFirst().orElseThrow();
         if (viewPaths.size() > 1) {
-            log.at(Level.INFO).log("Mustache does not support multiple source directories. Using %s", fileRoot);
+            log.at(Level.INFO).log("Mustache.java does not support multiple source directories. Using %s", fileRoot);
         }
 
         DefaultMustacheFactory factory = new DefaultMustacheFactory(fileRoot);

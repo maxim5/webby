@@ -15,12 +15,12 @@ import java.util.List;
 import java.util.Map;
 import java.util.function.Supplier;
 
-@Serve(render = Render.MUSTACHE)
-public class MustacheExample {
-    private static final Supplier<Mustache> ITEMS = Suppliers.memoize(() -> getTemplate("mustache/items.mustache"));
+@Serve(render = Render.MUSTACHE_JAVA)
+public class MustacheJavaExample {
+    private static final Supplier<Mustache> ITEMS = Suppliers.memoize(() -> getTemplate("mustache-java/items.mustache"));
 
-    @GET(url = "/templates/mustache/hello")
-    @View(template = "mustache/items.mustache")
+    @GET(url = "/templates/mustache-java/hello")
+    @View(template = "mustache-java/items.mustache")
     public Map<String, Object> items() {
         return Map.of("items", List.of(
                 new Item("Foo", 10.0, List.of(new Feature("New!"))),
@@ -30,13 +30,13 @@ public class MustacheExample {
         ));
     }
 
-    @GET(url = "/templates/manual/mustache/hello")
+    @GET(url = "/templates/manual/mustache-java/hello")
     public @NotNull String manual_items() {
         Map<String, Object> items = items();
         return EasyRender.writeToString(writer -> ITEMS.get().execute(writer, items));
     }
 
-    // Mustache: can be private
+    // MustacheJava: can be private
     private record Item(String name, double price, List<Feature> features) {}
     private record Feature(String description) {}
 

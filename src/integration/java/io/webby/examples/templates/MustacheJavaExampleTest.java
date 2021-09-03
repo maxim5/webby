@@ -14,9 +14,9 @@ import static io.webby.testing.AssertResponse.*;
 import static io.webby.testing.TestingBytes.assertEqualsIgnoringNewlines;
 
 @RunWith(Parameterized.class)
-public class MustacheExampleTest extends BaseHttpIntegrationTest {
-    public MustacheExampleTest(@NotNull TestingRender.Config config) {
-        testSetup(MustacheExample.class, config.asSettingsUpdater(), TestingModules.instance(config)).initHandler();
+public class MustacheJavaExampleTest extends BaseHttpIntegrationTest {
+    public MustacheJavaExampleTest(@NotNull TestingRender.Config config) {
+        testSetup(MustacheJavaExample.class, config.asSettingsUpdater(), TestingModules.instance(config)).initHandler();
     }
 
     @Parameterized.Parameters(name = "{index}: {0}")
@@ -26,7 +26,7 @@ public class MustacheExampleTest extends BaseHttpIntegrationTest {
 
     @Test
     public void get_items() {
-        HttpResponse response = get("/templates/mustache/hello");
+        HttpResponse response = get("/templates/mustache-java/hello");
         assert200(response);
         assertEqualsIgnoringNewlines(content(response), """
         Name: Foo
@@ -47,11 +47,11 @@ public class MustacheExampleTest extends BaseHttpIntegrationTest {
 
     @Test
     public void get_items_same_as_manual() {
-        HttpResponse rendered = get("/templates/mustache/hello");
+        HttpResponse rendered = get("/templates/mustache-java/hello");
         assert200(rendered);
         assertRenderedStatsHeaderForCurrentConfig(rendered);
 
-        HttpResponse manual = get("/templates/manual/mustache/hello");
+        HttpResponse manual = get("/templates/manual/mustache-java/hello");
         assert200(manual);
         assertSimpleStatsHeaderForCurrentConfig(manual);
 

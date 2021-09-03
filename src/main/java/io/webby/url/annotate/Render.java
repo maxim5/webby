@@ -4,7 +4,7 @@ public enum Render {
     FREEMARKER,
     HANDLEBARS,
     JTE,
-    MUSTACHE,
+    MUSTACHE_JAVA,
     PEBBLE,
     ROCKER,
     TRIMOU,
