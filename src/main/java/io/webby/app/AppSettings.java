@@ -391,6 +391,26 @@ public final class AppSettings implements Settings {
     }
 
     @Override
+    public float getFloatProperty(@NotNull String key, float def) {
+        try {
+            String property = getProperty(key);
+            return property != null ? Float.parseFloat(property) : def;
+        } catch (NumberFormatException ignore) {
+            return def;
+        }
+    }
+
+    @Override
+    public double getDoubleProperty(@NotNull String key, double def) {
+        try {
+            String property = getProperty(key);
+            return property != null ? Double.parseDouble(property) : def;
+        } catch (NumberFormatException ignore) {
+            return def;
+        }
+    }
+
+    @Override
     public boolean getBoolProperty(@NotNull String key) {
         return getBoolProperty(key, false);
     }

@@ -73,6 +73,10 @@ public interface Settings {
 
     byte getByteProperty(@NotNull String key, int def);
 
+    float getFloatProperty(@NotNull String key, float def);
+
+    double getDoubleProperty(@NotNull String key, double def);
+
     boolean getBoolProperty(@NotNull String key);
 
     boolean getBoolProperty(@NotNull String key, boolean def);
