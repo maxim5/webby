@@ -13,7 +13,7 @@ import static io.webby.db.codec.Codecs.*;
 public class DefaultUserCodec implements Codec<DefaultUser> {
     @Override
     public @NotNull CodecSize size() {
-        return CodecSize.fixed(12);
+        return CodecSize.fixed(10);
     }
 
     @Override

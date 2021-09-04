@@ -9,11 +9,13 @@ import org.jetbrains.annotations.NotNull;
 
 import java.nio.ByteBuffer;
 
-public final class OakVariableSizeSerializerAdapter<T> implements OakSerializer<T> {
+public final class OakSerializerAdapter<T> implements OakSerializer<T> {
     private final Codec<T> codec;
+    private final int sizeInBytes;
 
-    public OakVariableSizeSerializerAdapter(@NotNull Codec<T> codec) {
+    public OakSerializerAdapter(@NotNull Codec<T> codec) {
         this.codec = codec;
+        this.sizeInBytes = codec.size().isFixed() ? (int) codec.size().numBytes() : -1;
     }
 
     @Override
@@ -32,6 +34,6 @@ public final class OakVariableSizeSerializerAdapter<T> implements OakSerializer<
 
     @Override
     public int calculateSize(T object) {
-        return codec.writeToBytes(object).length;
+        return sizeInBytes >= 0 ? sizeInBytes : codec.writeToBytes(object).length;
     }
 }

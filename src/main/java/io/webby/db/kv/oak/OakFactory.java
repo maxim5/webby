@@ -37,7 +37,10 @@ public class OakFactory extends BaseKeyValueFactory {
             OakSerializer<V> valueSerializer =
                     Optional.ofNullable(OakKnownTypes.lookupRecord(value))
                     .map(OakRecord::serializer)
-                    .orElseGet(() -> getSerializerAdapter(value));
+                    .orElseGet(() -> {
+                        Codec<V> codec = provider.getCodecOrDie(value);
+                        return new OakSerializerAdapter<>(codec);
+                    });
 
             OakMapBuilder<K, V> builder = new OakMapBuilder<>(keyRecord.comparator(),
                                                               keyRecord.serializer(),
@@ -52,8 +55,7 @@ public class OakFactory extends BaseKeyValueFactory {
         Codec<K> keyCodec = provider.getCodecOrDie(key);
         assert keyCodec.size().isFixed() : "Oak requires fixed size codec for the key: %s".formatted(key);
         int byteSize = (int) keyCodec.size().numBytes();
-
-        OakSerializer<K> keySerializer = new OakFixedSizeSerializerAdapter<>(keyCodec);
+        OakSerializer<K> keySerializer = new OakSerializerAdapter<>(keyCodec);
 
         byte[] zeroBytes = new byte[byteSize];
         K minValue = keyCodec.readFromBytes(zeroBytes);
@@ -83,15 +85,5 @@ public class OakFactory extends BaseKeyValueFactory {
         };
 
         return new OakRecord<>(comparator, keySerializer, minValue);
-    }
-
-    @NotNull
-    private <T> OakSerializer<T> getSerializerAdapter(@NotNull Class<T> klass) {
-        Codec<T> codec = provider.getCodecOrDie(klass);
-        if (codec.size().isFixed()) {
-            return new OakFixedSizeSerializerAdapter<>(codec);
-        } else {
-            return new OakVariableSizeSerializerAdapter<>(codec);
-        }
     }
 }

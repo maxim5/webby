@@ -7,6 +7,8 @@ import com.google.common.io.RecursiveDeleteOption;
 import com.google.inject.Injector;
 import io.webby.auth.session.Session;
 import io.webby.auth.session.SessionManager;
+import io.webby.auth.user.DefaultUser;
+import io.webby.auth.user.UserAccess;
 import io.webby.db.kv.chronicle.ChronicleDb;
 import io.webby.db.kv.chronicle.ChronicleFactory;
 import io.webby.db.kv.impl.AgnosticKeyValueFactory;
@@ -32,6 +34,7 @@ import java.util.stream.Stream;
 
 import static com.google.common.truth.Truth.assertThat;
 import static io.webby.testing.FakeRequests.getEx;
+import static io.webby.testing.FakeRequests.postEx;
 import static org.junit.jupiter.api.Assertions.*;
 
 @ExtendWith(EmbeddedRedisExtension.class)
@@ -238,6 +241,34 @@ public class KeyValueDbIntegrationTest {
         cleanUp(tempDir);
     }
 
+    @ParameterizedTest
+    @EnumSource(StorageType.class)
+    public void multi_session(StorageType storageType) throws Exception {
+        Path tempDir = createTempDirectory(storageType);
+        KeyValueFactory dbFactory = setupFactory(storageType, tempDir);
+
+        try (KeyValueDb<Integer, Session> db = dbFactory.getDb("my-session", Integer.class, Session.class)) {
+            runMultiTest(db, Integer.MIN_VALUE, Integer.MAX_VALUE,
+                         Session.fromRequest(123, getEx("/foo")), Session.fromRequest(321, postEx("/bar")));
+        }
+
+        cleanUp(tempDir);
+    }
+
+    @ParameterizedTest
+    @EnumSource(StorageType.class)
+    public void multi_default_user(StorageType storageType) throws Exception {
+        Path tempDir = createTempDirectory(storageType);
+        KeyValueFactory dbFactory = setupFactory(storageType, tempDir);
+
+        try (KeyValueDb<Long, DefaultUser> db = dbFactory.getDb("my-users", Long.class, DefaultUser.class)) {
+            runMultiTest(db, Long.MIN_VALUE, Long.MAX_VALUE,
+                         new DefaultUser(777, UserAccess.Simple), new DefaultUser(0, UserAccess.Admin));
+        }
+
+        cleanUp(tempDir);
+    }
+
     @Test
     public void internal_db() throws Exception {
         StorageType storageType = StorageType.JAVA_MAP;
@@ -263,6 +294,42 @@ public class KeyValueDbIntegrationTest {
     public void tearDown() {
         Testing.Internals.terminate();
         cleanUpAtExit();
+    }
+
+    private static <K, V> void runMultiTest(@NotNull KeyValueDb<K, V> db,
+                                            @NotNull K key1, @NotNull K key2,
+                                            @NotNull V value1, @NotNull V value2) {
+        assertEqualsTo(db, Map.of());
+        assertNotContainsAnyOf(db, Map.of(key1, value1, key2, value2));
+
+        assertNull(db.put(key1, value1));
+        assertEqualsTo(db, Map.of(key1, value1));
+        assertNotContainsAnyOf(db, Map.of(key2, value2));
+
+        assertNull(db.put(key2, value2));
+        assertEqualsTo(db, Map.of(key1, value1, key2, value2));
+
+        assertEquals(value1, db.put(key1, value2));
+        assertEqualsTo(db, Map.of(key1, value2, key2, value2));
+
+        db.set(key2, value1);
+        assertEqualsTo(db, Map.of(key1, value2, key2, value1));
+
+        assertEquals(value1, db.remove(key2));
+        assertEqualsTo(db, Map.of(key1, value2));
+        assertNotContainsAnyOf(db, Map.of(key2, value1));
+
+        assertEquals(value2, db.putIfPresent(key1, value1));
+        assertEqualsTo(db, Map.of(key1, value1));
+
+        assertEquals(value1, db.putIfAbsent(key1, value1));
+        assertEqualsTo(db, Map.of(key1, value1));
+
+        db.putAll(Map.of(key1, value1, key2, value2));
+        assertEqualsTo(db, Map.of(key1, value1, key2, value2));
+
+        db.removeAll(List.of(key1, key2));
+        assertEqualsTo(db, Map.of());
     }
 
     private static <K, V> void assertEqualsTo(@NotNull KeyValueDb<K, V> db, @NotNull Map<K, V> map) {
