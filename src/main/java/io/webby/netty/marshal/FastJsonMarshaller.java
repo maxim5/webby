@@ -23,7 +23,14 @@ public record FastJsonMarshaller(@NotNull Charset charset) implements Json, Mars
 
     @Override
     public void writeChars(@NotNull Writer writer, @NotNull Object instance) {
-        new JSONSerializer(new SerializeWriter(writer)).write(instance);
+        try (SerializeWriter serializeWriter = new SerializeWriter(writer)) {
+            new JSONSerializer(serializeWriter).write(instance);  // TODO: serialize config?
+        }
+    }
+
+    @Override
+    public @NotNull String writeString(@NotNull Object instance) {
+        return JSON.toJSONString(instance);
     }
 
     @Override

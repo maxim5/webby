@@ -42,7 +42,7 @@ public class JsonIntegrationTest {
     }
 
     @ParameterizedTest
-    @EnumSource(value = MarshallerFactory.SupportedJsonLibrary.class, names = "FAST_JSON", mode = EnumSource.Mode.EXCLUDE)
+    @EnumSource(MarshallerFactory.SupportedJsonLibrary.class)
     public void convert_sample_bean(MarshallerFactory.SupportedJsonLibrary library) {
         Json json = setupJson(library);
         assertJsonConversion(json, new SampleBean(123, "foo", List.of(1, 2)));
@@ -63,7 +63,7 @@ public class JsonIntegrationTest {
         assertJsonConversion(json, new Session(123, -1, Instant.now(), "User-Agent", "127.0.0.1"));
     }
 
-    private static Json setupJson(@NotNull MarshallerFactory.SupportedJsonLibrary library) {
+    private static @NotNull Json setupJson(@NotNull MarshallerFactory.SupportedJsonLibrary library) {
         return Testing.testStartup(withJsonLibrary(library), JsonCustom::customize).getInstance(Json.class);
     }
 }
