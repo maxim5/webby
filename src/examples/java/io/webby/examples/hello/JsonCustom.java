@@ -27,13 +27,13 @@ public class JsonCustom {
     public static void main(String[] args) throws IOException {
         DslJson<Object> dslJson = new DslJson<>(Settings.basicSetup());
 
-        AcceptJsonContent.Sample sample = new AcceptJsonContent.Sample(1, "foo", List.of(1, 2, 3));
+        SampleBean sample = new SampleBean(1, "foo", List.of(1, 2, 3));
         ByteArrayOutputStream os = new ByteArrayOutputStream();
         dslJson.serialize(sample, os);
         System.out.println(os);
 
         byte[] bytes = "{\"x\": 1, \"s\": \"foo\", \"list\": [1, 2, 3]}".getBytes();
-        AcceptJsonContent.Sample deserialize = dslJson.deserialize(AcceptJsonContent.Sample.class, bytes, bytes.length);
+        SampleBean deserialize = dslJson.deserialize(SampleBean.class, bytes, bytes.length);
         System.out.println(deserialize);
     }
 }

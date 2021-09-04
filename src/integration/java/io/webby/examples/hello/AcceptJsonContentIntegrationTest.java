@@ -67,11 +67,11 @@ public class AcceptJsonContentIntegrationTest extends BaseHttpIntegrationTest {
 
     @ParameterizedTest
     @EnumSource(SupportedJsonLibrary.class)
-    public void accept_valid_json_sample_class(SupportedJsonLibrary library) {
+    public void accept_valid_json_sample_bean(SupportedJsonLibrary library) {
         AcceptJsonContent handler = initHandler(library);
 
-        assert200(post("/json/sample/0", "{\"x\": 1, \"s\": \"foo\", \"list\": [1, 2, 3]}"), "ok");
-        assertEquals(handler.getIncoming(), new AcceptJsonContent.Sample(1, "foo", List.of(1, 2, 3)));
+        assert200(post("/json/sample_bean/0", "{\"x\": 1, \"s\": \"foo\", \"list\": [1, 2, 3]}"), "ok");
+        assertEquals(handler.getIncoming(), new SampleBean(1, "foo", List.of(1, 2, 3)));
     }
 
     @ParameterizedTest

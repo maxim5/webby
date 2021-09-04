@@ -4,6 +4,7 @@ import io.webby.auth.session.Session;
 import io.webby.auth.user.DefaultUser;
 import io.webby.auth.user.UserAccess;
 import io.webby.examples.hello.JsonCustom;
+import io.webby.examples.hello.SampleBean;
 import io.webby.testing.Testing;
 import org.jetbrains.annotations.NotNull;
 import org.junit.jupiter.params.ParameterizedTest;
@@ -38,6 +39,13 @@ public class JsonIntegrationTest {
         // not working for Moshi...
         // assertJsonEquivalent(json.readBytes(asBytes("[]"), ArrayList.class), List.of());
         // assertJsonEquivalent(json.readBytes(asByteStream("[]"), ArrayList.class), List.of());
+    }
+
+    @ParameterizedTest
+    @EnumSource(value = MarshallerFactory.SupportedJsonLibrary.class, names = "FAST_JSON", mode = EnumSource.Mode.EXCLUDE)
+    public void convert_sample_bean(MarshallerFactory.SupportedJsonLibrary library) {
+        Json json = setupJson(library);
+        assertJsonConversion(json, new SampleBean(123, "foo", List.of(1, 2)));
     }
 
     // GSON: https://github.com/google/gson/issues/1794
