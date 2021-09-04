@@ -1,6 +1,5 @@
 package io.webby.db.kv.tupl;
 
-import com.google.common.flogger.FluentLogger;
 import com.google.inject.Inject;
 import io.webby.app.Settings;
 import io.webby.db.codec.Codec;
