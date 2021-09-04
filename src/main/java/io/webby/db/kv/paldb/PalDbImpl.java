@@ -1,6 +1,5 @@
 package io.webby.db.kv.paldb;
 
-import com.google.common.collect.Streams;
 import com.linkedin.paldb.api.Configuration;
 import com.linkedin.paldb.api.PalDB;
 import com.linkedin.paldb.api.StoreWriter;
@@ -16,12 +15,15 @@ import java.io.File;
 import java.io.IOException;
 import java.lang.reflect.Constructor;
 import java.lang.reflect.InvocationTargetException;
-import java.util.*;
+import java.util.Collection;
+import java.util.HashMap;
+import java.util.Map;
+import java.util.Set;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.function.BiConsumer;
 import java.util.stream.Collectors;
-import java.util.stream.Stream;
 
+import static io.webby.db.kv.impl.KeyValueCommons.streamOf;
 import static io.webby.util.EasyCast.castAny;
 
 public class PalDbImpl<K, V> extends ByteArrayDb<K, V> implements KeyValueDb<K, V> {
@@ -61,7 +63,7 @@ public class PalDbImpl<K, V> extends ByteArrayDb<K, V> implements KeyValueDb<K, 
         return streamOf(reader().iterator())
                 .map(Map.Entry::getValue)
                 .map(this::asValueNotNull)
-                .anyMatch(val -> val.equals(value));
+                .anyMatch(value::equals);
     }
 
     @Override
@@ -217,10 +219,5 @@ public class PalDbImpl<K, V> extends ByteArrayDb<K, V> implements KeyValueDb<K, 
         } catch (IOException e) {
             Rethrow.rethrow(e);
         }
-    }
-
-    @SuppressWarnings("UnstableApiUsage")
-    private static <T> @NotNull Stream<T> streamOf(@NotNull Iterator<T> iterator) {
-        return Streams.stream(iterator);
     }
 }

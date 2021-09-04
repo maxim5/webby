@@ -6,8 +6,6 @@ import io.webby.db.kv.impl.ByteArrayDb;
 import io.webby.util.Counting.BoolFlag;
 import io.webby.util.func.ThrowConsumer;
 import io.webby.util.func.ThrowFunction;
-import io.webby.util.func.ThrowRunnable;
-import io.webby.util.func.ThrowSupplier;
 import org.cojen.tupl.*;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
@@ -16,6 +14,7 @@ import java.io.IOException;
 import java.util.*;
 import java.util.function.Predicate;
 
+import static io.webby.db.kv.impl.KeyValueCommons.quiet;
 import static io.webby.util.Rethrow.rethrow;
 
 public class TuplDb<K, V> extends ByteArrayDb<K, V> implements KeyValueDb<K, V> {
@@ -177,7 +176,7 @@ public class TuplDb<K, V> extends ByteArrayDb<K, V> implements KeyValueDb<K, V> 
     }
 
     private void inWriteTransaction(@NotNull ThrowConsumer<Transaction, IOException> action) {
-        Transaction transaction = index.newTransaction(DurabilityMode.NO_REDO);
+        Transaction transaction = index.newTransaction(DurabilityMode.NO_SYNC);
         try {
             action.accept(transaction);
             transaction.commit();
@@ -185,22 +184,6 @@ public class TuplDb<K, V> extends ByteArrayDb<K, V> implements KeyValueDb<K, V> 
             rethrow(e);
         } finally {
             quiet(transaction::exit);
-        }
-    }
-
-    private static void quiet(@NotNull ThrowRunnable<IOException> action) {
-        try {
-            action.run();
-        } catch (IOException e) {
-            rethrow(e);
-        }
-    }
-
-    private static <T> T quiet(@NotNull ThrowSupplier<T, IOException> action) {
-        try {
-            return action.get();
-        } catch (IOException e) {
-            return rethrow(e);
         }
     }
 }

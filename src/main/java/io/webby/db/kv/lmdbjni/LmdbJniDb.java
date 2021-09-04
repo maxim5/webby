@@ -16,6 +16,8 @@ import java.util.function.Function;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
+import static io.webby.db.kv.impl.KeyValueCommons.streamOf;
+
 public class LmdbJniDb <K, V> extends ByteArrayDb<K, V> implements KeyValueDb<K, V> {
     private final Env env;
     private final Database db;
@@ -206,10 +208,5 @@ public class LmdbJniDb <K, V> extends ByteArrayDb<K, V> implements KeyValueDb<K,
             consumer.accept(transaction);
             transaction.commit();
         }
-    }
-
-    @SuppressWarnings("UnstableApiUsage")
-    private static @NotNull Stream<Entry> streamOf(@NotNull EntryIterator iterator) {
-        return Streams.stream(iterator);
     }
 }
