@@ -15,7 +15,7 @@ public final class OakSerializerAdapter<T> implements OakSerializer<T> {
 
     public OakSerializerAdapter(@NotNull Codec<T> codec) {
         this.codec = codec;
-        this.sizeInBytes = codec.size().isFixed() ? (int) codec.size().numBytes() : -1;
+        this.sizeInBytes = codec.size().isFixed() ? codec.size().intNumBytes() : -1;
     }
 
     @Override

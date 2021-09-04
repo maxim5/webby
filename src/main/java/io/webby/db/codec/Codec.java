@@ -19,7 +19,7 @@ public interface Codec<T> {
     int writeTo(@NotNull OutputStream output, @NotNull T instance) throws IOException;
 
     default byte @NotNull [] writeToBytes(@NotNull T instance) {
-        try (ByteArrayOutputStream output = new ByteArrayOutputStream((int) size().numBytes())) {
+        try (ByteArrayOutputStream output = new ByteArrayOutputStream(size().intNumBytes())) {
             writeTo(output, instance);
             return output.toByteArray();
         } catch (IOException impossible) {
@@ -28,7 +28,7 @@ public interface Codec<T> {
     }
 
     default byte @NotNull [] writeToBytes(byte @NotNull [] prefix, @NotNull T instance) {
-        try (ByteArrayOutputStream output = new ByteArrayOutputStream(prefix.length + (int) size().numBytes())) {
+        try (ByteArrayOutputStream output = new ByteArrayOutputStream(prefix.length + size().intNumBytes())) {
             output.writeBytes(prefix);
             writeTo(output, instance);
             return output.toByteArray();

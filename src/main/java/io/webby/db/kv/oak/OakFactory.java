@@ -54,7 +54,7 @@ public class OakFactory extends BaseKeyValueFactory {
     private <K> OakRecord<K> inferOakRecord(@NotNull Class<K> key) {
         Codec<K> keyCodec = provider.getCodecOrDie(key);
         assert keyCodec.size().isFixed() : "Oak requires fixed size codec for the key: %s".formatted(key);
-        int byteSize = (int) keyCodec.size().numBytes();
+        int byteSize = keyCodec.size().intNumBytes();
         OakSerializer<K> keySerializer = new OakSerializerAdapter<>(keyCodec);
 
         byte[] zeroBytes = new byte[byteSize];

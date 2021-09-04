@@ -24,4 +24,8 @@ public record CodecSize(@NotNull Estimate estimate, long numBytes) {
     public boolean isFixed() {
         return estimate == Estimate.FIXED;
     }
+
+    public int intNumBytes() {
+        return (int) numBytes;
+    }
 }
