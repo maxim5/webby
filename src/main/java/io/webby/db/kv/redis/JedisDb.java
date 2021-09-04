@@ -279,7 +279,7 @@ public class JedisDb<K, V> extends ByteArrayDb<K, V> implements KeyValueDb<K, V>
 
     @Override
     protected @NotNull K asKeyNotNull(byte @NotNull [] bytes) {
-        return keyCodec.readFrom(Unpooled.wrappedBuffer(bytes, namespace.length, bytes.length - namespace.length));
+        return keyCodec.readFromByteBuf(Unpooled.wrappedBuffer(bytes, namespace.length, bytes.length - namespace.length));
     }
 
     private byte[][] fromKeys(@NotNull K @NotNull [] keys) {

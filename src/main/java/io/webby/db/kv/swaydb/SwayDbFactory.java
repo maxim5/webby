@@ -54,7 +54,7 @@ public class SwayDbFactory extends BaseKeyValueFactory {
             public T read(Slice<Byte> slice) {
                 // return codec.readFrom(slice.toByteArrayInputStream(), slice.size());
                 Byte[] array = (Byte[]) slice.unsafeInnerArray();
-                return codec.readFrom(unbox(array));
+                return codec.readFromBytes(unbox(array));
             }
         };
     }

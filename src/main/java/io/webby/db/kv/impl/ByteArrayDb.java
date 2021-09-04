@@ -1,6 +1,5 @@
 package io.webby.db.kv.impl;
 
-import io.netty.buffer.Unpooled;
 import io.webby.db.codec.Codec;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
@@ -31,11 +30,11 @@ public abstract class ByteArrayDb<K, V> {
     }
 
     protected @NotNull K asKeyNotNull(byte @NotNull [] bytes) {
-        return keyCodec.readFrom(Unpooled.wrappedBuffer(bytes));
+        return keyCodec.readFromBytes(bytes);
     }
 
     protected @Nullable K asKey(@Nullable ByteBuffer buffer) {
-        return buffer == null ? null : keyCodec.readFrom(Unpooled.wrappedBuffer(buffer));
+        return buffer == null ? null : keyCodec.readFromByteBuffer(buffer);
     }
 
     protected byte @NotNull [] fromValue(@NotNull V value) {
@@ -52,11 +51,11 @@ public abstract class ByteArrayDb<K, V> {
     }
 
     protected @NotNull V asValueNotNull(byte @NotNull [] bytes) {
-        return valueCodec.readFrom(Unpooled.wrappedBuffer(bytes));
+        return valueCodec.readFromBytes(bytes);
     }
 
     protected @Nullable V asValue(@Nullable ByteBuffer buffer) {
-        return buffer == null ? null : valueCodec.readFrom(Unpooled.wrappedBuffer(buffer));
+        return buffer == null ? null : valueCodec.readFromByteBuffer(buffer);
     }
 
     protected @NotNull AbstractMap.SimpleEntry<K, V> asMapEntry(byte @Nullable [] key, byte @Nullable [] value) {
