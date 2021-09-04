@@ -22,7 +22,7 @@ public class EmbeddedRedisExtension implements BeforeAllCallback, AfterAllCallba
 
     @Override
     public void afterAll(ExtensionContext context) {
-        log.at(Level.INFO).log("Stopping embedded Redis...", PORT);
+        log.at(Level.INFO).log("Stopping embedded Redis...");
         redisServer.stop();
     }
 }
