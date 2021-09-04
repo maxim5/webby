@@ -3,6 +3,7 @@ package io.webby.testing;
 import com.google.common.collect.Streams;
 import com.google.mu.util.stream.BiStream;
 import io.webby.app.AppSettings;
+import io.webby.netty.marshal.Json;
 import io.webby.netty.marshal.MarshallerFactory.SupportedJsonLibrary;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
@@ -10,6 +11,7 @@ import org.jetbrains.annotations.Nullable;
 import java.util.Map;
 import java.util.function.Consumer;
 
+import static com.google.common.truth.Truth.assertThat;
 import static org.junit.jupiter.api.Assertions.*;
 
 public class AssertJson {
@@ -47,6 +49,13 @@ public class AssertJson {
         assertEquals(((Number) actual).intValue(), expected.intValue());
         assertEquals(((Number) actual).longValue(), expected.longValue());
         assertEquals(((Number) actual).doubleValue(), expected.doubleValue());
+    }
+
+    public static void assertJsonConversion(@NotNull Json json, @NotNull Object object) {
+        String string = json.writeString(object);
+        assertThat(string).isNotEmpty();
+        Object another = json.readString(string, object.getClass());
+        assertEquals(object, another);
     }
 
     public static @NotNull Consumer<AppSettings> withJsonLibrary(@NotNull SupportedJsonLibrary library) {

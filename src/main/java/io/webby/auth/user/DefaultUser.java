@@ -2,6 +2,8 @@ package io.webby.auth.user;
 
 import org.jetbrains.annotations.NotNull;
 
+import java.util.Objects;
+
 public class DefaultUser implements User {
     private final long userId;
     private final UserAccess access;
@@ -19,5 +21,15 @@ public class DefaultUser implements User {
     @Override
     public @NotNull UserAccess access() {
         return access;
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        return o instanceof User that && userId == that.userId() && Objects.equals(access, that.access());
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(userId, access);
     }
 }
