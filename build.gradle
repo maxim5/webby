@@ -64,6 +64,7 @@ dependencies {
 
     // Key-Values
     compileOnly group: 'com.github.cojen', name: 'Tupl', version: '1.5.3.1'
+    compileOnly group: 'com.github.yahoo', name: 'HaloDB', version: 'v0.5.6'
     compileOnly group: 'com.linkedin.paldb', name: 'paldb', version: '1.2.0'
     compileOnly group: 'com.yahoo.oak', name: 'oak', version: '0.2.3.1'
     compileOnly group: 'io.swaydb', name: 'java_2.13', version: '0.16.2'

@@ -7,6 +7,7 @@ import io.webby.db.kv.KeyValueDb;
 import io.webby.db.kv.KeyValueFactory;
 import io.webby.db.kv.StorageType;
 import io.webby.db.kv.chronicle.ChronicleFactory;
+import io.webby.db.kv.halodb.HaloDbFactory;
 import io.webby.db.kv.javamap.JavaMapDbFactory;
 import io.webby.db.kv.leveldb.LevelDbIq80Factory;
 import io.webby.db.kv.leveldb.LevelDbJniFactory;
@@ -50,6 +51,7 @@ public class AgnosticKeyValueFactory implements KeyValueFactory {
     private @NotNull InternalKeyValueFactory pickFactory(@NotNull StorageType storageType) {
         Class<? extends InternalKeyValueFactory> factoryClass = switch (storageType) {
             case CHRONICLE_MAP -> ChronicleFactory.class;
+            case HALO_DB -> HaloDbFactory.class;
             case JAVA_MAP -> JavaMapDbFactory.class;
             case JEDIS -> JedisDbFactory.class;
             case LEVEL_DB_IQ80 -> LevelDbIq80Factory.class;

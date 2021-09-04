@@ -2,6 +2,7 @@ package io.webby.db.kv;
 
 public enum StorageType {
     CHRONICLE_MAP,
+    HALO_DB,
     JAVA_MAP,
     JEDIS,
     LEVEL_DB_IQ80,
