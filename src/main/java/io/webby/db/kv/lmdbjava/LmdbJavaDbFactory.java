@@ -1,6 +1,7 @@
 package io.webby.db.kv.lmdbjava;
 
 import com.google.inject.Inject;
+import com.google.inject.TypeLiteral;
 import io.webby.app.Settings;
 import io.webby.common.InjectorHelper;
 import io.webby.db.codec.Codec;
@@ -23,7 +24,7 @@ public class LmdbJavaDbFactory extends BaseKeyValueFactory {
 
     @Inject
     public LmdbJavaDbFactory(@NotNull InjectorHelper helper) {
-        env = helper.getOrDefault(Env.class, this::createDefaultEnv);
+        env = helper.getOrDefault(new TypeLiteral<>() {}, this::createDefaultEnv);
     }
 
     @Override

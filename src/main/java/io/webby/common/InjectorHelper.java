@@ -32,20 +32,34 @@ public class InjectorHelper {
         return getOrDefault(injector, klass, () -> defaultSupplier.apply(settings));
     }
 
+    public <T> @NotNull T getOrDefault(@NotNull TypeLiteral<? extends T> typeLiteral, @NotNull Supplier<? extends T> defaultSupplier) {
+        return getOrDefault(injector, typeLiteral, defaultSupplier);
+    }
+
+    public <T> @NotNull T getOrDefault(@NotNull TypeLiteral<? extends T> typeLiteral, @NotNull Function<Settings, ? extends T> defaultSupplier) {
+        return getOrDefault(injector, typeLiteral, () -> defaultSupplier.apply(settings));
+    }
+
     public static <T> @NotNull T getOrDefault(@NotNull Injector injector,
                                               @NotNull Class<? extends T> klass,
                                               @NotNull Supplier<? extends T> defaultSupplier) {
+        return getOrDefault(injector, TypeLiteral.get(klass), defaultSupplier);
+    }
+
+    public static <T> @NotNull T getOrDefault(@NotNull Injector injector,
+                                              @NotNull TypeLiteral<? extends T> typeLiteral,
+                                              @NotNull Supplier<? extends T> defaultSupplier) {
         try {
-            if (injector.findBindingsByType(TypeLiteral.get(klass)).size() > 0) {
-                Provider<? extends T> provider = injector.getProvider(klass);
-                log.at(Level.FINE).log("Found explicit %s Guice provider: %s", klass, provider);
+            if (injector.findBindingsByType(typeLiteral).size() > 0) {  // perf: getBindings?
+                Provider<? extends T> provider = injector.getProvider(Key.get(typeLiteral));
+                log.at(Level.FINE).log("Found explicit %s Guice provider: %s", typeLiteral, provider);
                 return provider.get();
             }
         } catch (ConfigurationException e) {
-            log.at(Level.FINEST).withCause(e).log("Failed to find provider for %s", klass);
+            log.at(Level.FINEST).withCause(e).log("Failed to find provider for %s", typeLiteral);
         }
 
-        log.at(Level.FINE).log("Applying default %s supplier", klass);
+        log.at(Level.FINE).log("Applying default %s supplier", typeLiteral);
         return defaultSupplier.get();
     }
 
