@@ -12,6 +12,7 @@ version '0.4.0-SNAPSHOT'
 
 repositories {
     mavenCentral()
+    maven { url 'https://jitpack.io' }
 }
 
 def os
@@ -62,6 +63,7 @@ dependencies {
     compileOnly group: 'org.trimou', name: 'trimou-core', version: '2.5.1.Final'
 
     // Key-Values
+    compileOnly group: 'com.github.cojen', name: 'Tupl', version: '1.5.3.1'
     compileOnly group: 'com.linkedin.paldb', name: 'paldb', version: '1.2.0'
     compileOnly group: 'com.yahoo.oak', name: 'oak', version: '0.2.3.1'
     compileOnly group: 'io.swaydb', name: 'java_2.13', version: '0.16.2'

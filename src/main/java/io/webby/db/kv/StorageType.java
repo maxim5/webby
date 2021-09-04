@@ -12,5 +12,6 @@ public enum StorageType {
     OAK,
     PAL_DB,
     ROCKS_DB,
-    SWAY_DB
+    SWAY_DB,
+    TUPL
 }

@@ -18,6 +18,7 @@ import io.webby.db.kv.paldb.PalDbFactory;
 import io.webby.db.kv.redis.JedisDbFactory;
 import io.webby.db.kv.rocksdb.RocksDbFactory;
 import io.webby.db.kv.swaydb.SwayDbFactory;
+import io.webby.db.kv.tupl.TuplFactory;
 import org.jetbrains.annotations.NotNull;
 
 import static io.webby.util.EasyCast.castAny;
@@ -60,6 +61,7 @@ public class AgnosticKeyValueFactory implements KeyValueFactory {
             case PAL_DB -> PalDbFactory.class;
             case ROCKS_DB -> RocksDbFactory.class;
             case SWAY_DB -> SwayDbFactory.class;
+            case TUPL -> TuplFactory.class;
         };
         return castAny(helper.lazySingleton(factoryClass));
     }
