@@ -17,18 +17,15 @@ public abstract class Lifetime {
     @SuppressWarnings("StaticInitializerReferencesSubClass")
     public static final Lifetime Eternal = new Definition();
 
-    @NotNull
-    public abstract Status status();
+    public abstract @NotNull Status status();
 
-    @NotNull
-    public Lifetime.Definition createNested() {
+    public @NotNull Lifetime.Definition createNested() {
         Definition child = new Definition();
         attach(child);
         return child;
     }
 
-    @NotNull
-    public Lifetime.Definition createNested(@NotNull Consumer<Definition> atomicAction) {
+    public @NotNull Lifetime.Definition createNested(@NotNull Consumer<Definition> atomicAction) {
         Definition nested = createNested();
         try {
             nested.executeIfAlive(() -> atomicAction.accept(nested));
@@ -39,7 +36,7 @@ public abstract class Lifetime {
         }
     }
 
-    public <T> T usingNested(@NotNull Function<Lifetime, T> action) {
+    public <T> @NotNull T usingNested(@NotNull Function<Lifetime, T> action) {
         Definition nested = createNested();
         try {
             return action.apply(nested);
@@ -59,8 +56,7 @@ public abstract class Lifetime {
         private final AtomicReference<Status> status = new AtomicReference<>(Status.Alive);
 
         @Override
-        @NotNull
-        public Status status() {
+        public @NotNull Status status() {
             return status.get();
         }
 

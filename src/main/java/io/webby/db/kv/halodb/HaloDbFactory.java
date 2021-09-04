@@ -33,8 +33,7 @@ public class HaloDbFactory extends BaseKeyValueFactory {
         });
     }
 
-    @NotNull
-    private HaloDBOptions getOptions() {
+    private @NotNull HaloDBOptions getOptions() {
         int maxFileSize = settings.getIntProperty("db.halodb.data.max.file.size.bytes", 1 << 20);
         int maxTombstoneFileSize = settings.getIntProperty("db.halodb.tombstone.max.file.size.bytes", 64 << 20);
         int buildIndexThreads = settings.getIntProperty("db.halodb.build.index.threads", 1);

@@ -230,13 +230,11 @@ public final class AppSettings implements Settings {
         this.interceptorFilter = filter;
     }
 
-    @NotNull
-    private static BiPredicate<String, String> onlyClass(@NotNull Class<?> klass) {
+    private static @NotNull BiPredicate<String, String> onlyClass(@NotNull Class<?> klass) {
         return (pkg, cls) -> pkg.equals(klass.getPackageName()) && cls.equals(klass.getSimpleName());
     }
 
-    @NotNull
-    private static BiPredicate<String, String> allInPackage(@NotNull String packageName) {
+    private static @NotNull BiPredicate<String, String> allInPackage(@NotNull String packageName) {
         return (pkg, cls) -> pkg.startsWith(packageName);
     }
 
@@ -313,26 +311,22 @@ public final class AppSettings implements Settings {
     }
 
     @CanIgnoreReturnValue
-    @Nullable
-    public String setProperty(@NotNull String key, @NotNull String value) {
+    public @Nullable String setProperty(@NotNull String key, @NotNull String value) {
         return properties.put(key, value);
     }
 
     @CanIgnoreReturnValue
-    @Nullable
-    public String setProperty(@NotNull String key, long value) {
+    public @Nullable String setProperty(@NotNull String key, long value) {
         return properties.put(key, Long.toString(value));
     }
 
     @CanIgnoreReturnValue
-    @Nullable
-    public String setProperty(@NotNull String key, int value) {
+    public @Nullable String setProperty(@NotNull String key, int value) {
         return properties.put(key, Integer.toString(value));
     }
 
     @CanIgnoreReturnValue
-    @Nullable
-    public String setProperty(@NotNull String key, boolean value) {
+    public @Nullable String setProperty(@NotNull String key, boolean value) {
         return properties.put(key, Boolean.toString(value));
     }
 
@@ -347,20 +341,17 @@ public final class AppSettings implements Settings {
     }
 
     @Override
-    @Nullable
-    public String getProperty(@NotNull String key) {
+    public @Nullable String getProperty(@NotNull String key) {
         return properties.get(key);
     }
 
     @Override
-    @NotNull
-    public String getProperty(@NotNull String key, @NotNull String def) {
+    public @NotNull String getProperty(@NotNull String key, @NotNull String def) {
         return properties.getOrDefault(key, def);
     }
 
     @Override
-    @NotNull
-    public String getProperty(@NotNull String key, @NotNull Object def) {
+    public @NotNull String getProperty(@NotNull String key, @NotNull Object def) {
         String property = properties.get(key);
         return property != null ? property : def.toString();
     }

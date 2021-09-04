@@ -7,8 +7,7 @@ import org.jetbrains.annotations.NotNull;
 public class AppLifetime implements Provider<Lifetime> {
     private final Lifetime.Definition lifetime = new Lifetime.Definition();
 
-    @NotNull
-    public Lifetime.Definition getLifetime() {
+    public @NotNull Lifetime.Definition getLifetime() {
         return lifetime;
     }
 

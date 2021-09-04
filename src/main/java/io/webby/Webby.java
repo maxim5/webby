@@ -31,22 +31,19 @@ import java.util.logging.Level;
 public class Webby {
     private static final FluentLogger log = FluentLogger.forEnclosingClass();
 
-    @NotNull
-    public static NettyBootstrap nettyBootstrap(@NotNull AppSettings settings, @NotNull Module ... modules) {
+    public static @NotNull NettyBootstrap nettyBootstrap(@NotNull AppSettings settings, @NotNull Module ... modules) {
         Injector injector = initGuice(settings, modules);
         return injector.getInstance(NettyBootstrap.class);
     }
 
-    @NotNull
-    public static Injector initGuice(@NotNull AppSettings settings, @NotNull Module ... modules) {
+    public static @NotNull Injector initGuice(@NotNull AppSettings settings, @NotNull Module ... modules) {
         log.at(Level.INFO).log("Initializing Webby Guice module");
         Stage stage = (settings.isDevMode()) ? Stage.DEVELOPMENT : Stage.PRODUCTION;
         Iterable<Module> iterable = Iterables.concat(List.of(mainModule(settings)), List.of(modules));
         return Guice.createInjector(stage, iterable);
     }
 
-    @NotNull
-    public static Module mainModule(@NotNull AppSettings settings) throws AppConfigException {
+    public static @NotNull Module mainModule(@NotNull AppSettings settings) throws AppConfigException {
         validateSettings(settings);
         return Modules.combine(
             new AppModule(settings),
