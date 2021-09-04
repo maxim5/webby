@@ -14,11 +14,10 @@ import org.jetbrains.annotations.Nullable;
 import java.io.File;
 import java.nio.charset.Charset;
 import java.nio.file.Path;
-import java.util.Arrays;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 import java.util.function.BiPredicate;
+
+import static io.webby.util.EasyCast.castAny;
 
 public final class AppSettings implements Settings {
     private boolean devMode = true;
@@ -337,6 +336,16 @@ public final class AppSettings implements Settings {
         return properties.put(key, Boolean.toString(value));
     }
 
+    @CanIgnoreReturnValue
+    public <T extends Enum<T>> @Nullable String setProperty(@NotNull String key, @NotNull T value) {
+        return properties.put(key, value.name());
+    }
+
+    @CanIgnoreReturnValue
+    public @Nullable String setProperty(@NotNull String key, @NotNull Object value) {
+        return properties.put(key, value.toString());
+    }
+
     @Override
     @Nullable
     public String getProperty(@NotNull String key) {
@@ -390,6 +399,23 @@ public final class AppSettings implements Settings {
     public boolean getBoolProperty(@NotNull String key, boolean def) {
         String property = getProperty(key);
         return property != null ? Boolean.parseBoolean(property) : def;
+    }
+
+    @Override
+    public <T extends Enum<T>> @NotNull T getEnumProperty(@NotNull String key, @NotNull T def) {
+        String property = getProperty(key);
+        if (property == null) {
+            return def;
+        }
+
+        Class<T> enumClass = castAny(def.getClass());
+        T[] enumConstants = enumClass.getEnumConstants();
+        Optional<T> exactMatch = Arrays.stream(enumConstants).filter(v -> v.name().equals(key)).findFirst();
+        if (exactMatch.isPresent()) {
+            return exactMatch.get();
+        }
+        Optional<T> closeMatch = Arrays.stream(enumConstants).filter(v -> v.name().equalsIgnoreCase(key)).findFirst();
+        return closeMatch.orElse(def);
     }
 
     @Override

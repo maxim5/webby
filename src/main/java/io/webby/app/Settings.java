@@ -77,5 +77,7 @@ public interface Settings {
 
     boolean getBoolProperty(@NotNull String key, boolean def);
 
+    <T extends Enum<T>> @NotNull T getEnumProperty(@NotNull String key, @NotNull T def);
+
     @NotNull List<Path> getViewPaths(@NotNull String key);
 }
