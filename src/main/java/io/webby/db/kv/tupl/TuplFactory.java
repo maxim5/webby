@@ -17,8 +17,6 @@ import java.util.concurrent.TimeUnit;
 import static io.webby.util.Rethrow.rethrow;
 
 public class TuplFactory extends BaseKeyValueFactory {
-    // private static final FluentLogger log = FluentLogger.forEnclosingClass();
-
     private final AtomicLazy<Database> db = new AtomicLazy<>();
 
     @Inject private Settings settings;
