@@ -9,6 +9,7 @@ public enum StorageType {
     LMDB_JAVA,
     LMDB_JNI,
     MAP_DB,
+    OAK,
     PAL_DB,
     ROCKS_DB,
     SWAY_DB

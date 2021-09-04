@@ -20,4 +20,8 @@ public record CodecSize(@NotNull Estimate estimate, long numBytes) {
     public static @NotNull CodecSize averageSize(long numBytes) {
         return new CodecSize(Estimate.AVERAGE, numBytes);
     }
+
+    public boolean isFixed() {
+        return estimate == Estimate.FIXED;
+    }
 }

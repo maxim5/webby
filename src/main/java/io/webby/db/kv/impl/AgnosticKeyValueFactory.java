@@ -13,6 +13,7 @@ import io.webby.db.kv.leveldb.LevelDbJniFactory;
 import io.webby.db.kv.lmdbjava.LmdbJavaDbFactory;
 import io.webby.db.kv.lmdbjni.LmdbJniDbFactory;
 import io.webby.db.kv.mapdb.MapDbFactory;
+import io.webby.db.kv.oak.OakFactory;
 import io.webby.db.kv.paldb.PalDbFactory;
 import io.webby.db.kv.redis.JedisDbFactory;
 import io.webby.db.kv.rocksdb.RocksDbFactory;
@@ -55,6 +56,7 @@ public class AgnosticKeyValueFactory implements KeyValueFactory {
             case LMDB_JAVA -> LmdbJavaDbFactory.class;
             case LMDB_JNI -> LmdbJniDbFactory.class;
             case MAP_DB -> MapDbFactory.class;
+            case OAK -> OakFactory.class;
             case PAL_DB -> PalDbFactory.class;
             case ROCKS_DB -> RocksDbFactory.class;
             case SWAY_DB -> SwayDbFactory.class;

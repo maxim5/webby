@@ -53,7 +53,7 @@ public class CodecProvider {
     public static final Codec<Integer> INT_CODEC = new Codec<>() {
         @Override
         public @NotNull CodecSize size() {
-            return CodecSize.fixed(4);
+            return CodecSize.fixed(Integer.BYTES);
         }
 
         @Override
@@ -70,7 +70,7 @@ public class CodecProvider {
     public static final Codec<Long> LONG_CODEC = new Codec<>() {
         @Override
         public @NotNull CodecSize size() {
-            return CodecSize.fixed(8);
+            return CodecSize.fixed(Long.BYTES);
         }
 
         @Override

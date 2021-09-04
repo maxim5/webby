@@ -63,6 +63,7 @@ dependencies {
 
     // Key-Values
     compileOnly group: 'com.linkedin.paldb', name: 'paldb', version: '1.2.0'
+    compileOnly group: 'com.yahoo.oak', name: 'oak', version: '0.2.3.1'
     compileOnly group: 'io.swaydb', name: 'java_2.13', version: '0.16.2'
     compileOnly group: 'net.openhft', name: 'chronicle-map', version: '3.21.85'
     compileOnly group: 'org.deephacks.lmdbjni', name: 'lmdbjni', version: '0.4.6'
