@@ -15,8 +15,6 @@ import java.nio.file.Path;
 import static io.webby.util.Rethrow.rethrow;
 
 public class RocksDbFactory extends BaseKeyValueFactory {
-    // private static final FluentLogger log = FluentLogger.forEnclosingClass();
-
     @Inject private Settings settings;
     @Inject private CodecProvider provider;
 
