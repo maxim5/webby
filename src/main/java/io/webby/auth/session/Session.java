@@ -14,7 +14,7 @@ public record Session(long sessionId, long userId, @NotNull Instant created, @No
     private static final long JUST_CREATED_MILLIS = TimeUnit.SECONDS.toMillis(60);
     private static final long TIME_TO_REFRESH_MILLIS = TimeUnit.DAYS.toMillis(30);
 
-    public static Session fromRequest(long sessionId, @NotNull HttpRequestEx request) {
+    public static @NotNull Session fromRequest(long sessionId, @NotNull HttpRequestEx request) {
         HttpHeaders headers = request.headers();
         String userAgent = headers.get(HttpHeaderNames.USER_AGENT, "");
         String ipAddress = request.remoteIPAddress();
