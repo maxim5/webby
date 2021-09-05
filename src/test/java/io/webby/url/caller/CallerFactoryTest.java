@@ -11,6 +11,7 @@ import io.routekit.util.CharArray;
 import io.routekit.util.MutableCharArray;
 import io.webby.netty.request.HttpRequestEx;
 import io.webby.testing.Testing;
+import io.webby.url.HandlerConfigError;
 import io.webby.url.convert.ConversionError;
 import io.webby.url.handle.Handler;
 import io.webby.url.handle.IntHandler;
@@ -24,8 +25,10 @@ import java.lang.reflect.Method;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
+import java.util.function.Function;
 import java.util.function.IntFunction;
 import java.util.function.IntSupplier;
+import java.util.function.LongFunction;
 
 import static io.webby.testing.FakeRequests.getEx;
 import static io.webby.testing.FakeRequests.postEx;
@@ -111,7 +114,7 @@ public class CallerFactoryTest {
     }
 
     @Test
-    public void zero_vars_optimized() throws Exception {
+    public void optimized_zero_vars() throws Exception {
         IntSupplier instance = () -> 42;
         Caller caller = factory.create(instance, binding(instance), Map.of(), List.of());
 
@@ -120,7 +123,7 @@ public class CallerFactoryTest {
     }
 
     @Test
-    public void zero_vars_optimized_with_request() throws Exception {
+    public void optimized_zero_vars_with_request() throws Exception {
         interface RequestFunction {
             String apply(HttpRequest request);
         }
@@ -133,17 +136,19 @@ public class CallerFactoryTest {
     }
 
     @Test
-    public void one_var_optimized_int() throws Exception {
+    public void optimized_one_var_int() throws Exception {
         IntFunction<String> instance = String::valueOf;
         Caller caller = factory.create(instance, binding(instance), Map.of(), List.of("i"));
 
         assertEquals("10", caller.call(get(), vars("i", 10)));
         assertEquals("10", caller.call(post(), vars("i", 10)));
+        assertThrows(ConversionError.class, () -> caller.call(get(), vars()));
+        assertThrows(ConversionError.class, () -> caller.call(get(), vars("i", "foo")));
         assertThrows(ConversionError.class, () -> caller.call(get(), vars("x", 10)));
     }
 
     @Test
-    public void one_var_optimized_int_with_request() throws Exception {
+    public void optimized_one_var_int_with_request() throws Exception {
         interface IntRequestFunction {
             String apply(HttpRequest request, int i);
         }
@@ -153,13 +158,17 @@ public class CallerFactoryTest {
         assertEquals("GET:10", caller.call(get(), vars("i", 10)));
         assertEquals("GET:0", caller.call(get(), vars("i", 0)));
         assertEquals("POST:10", caller.call(post(), vars("i", 10)));
+        assertThrows(ConversionError.class, () -> caller.call(get(), vars()));
         assertThrows(ConversionError.class, () -> caller.call(get(), vars("i", "foo")));
         assertThrows(ConversionError.class, () -> caller.call(get(), vars("x", 10)));
     }
 
     @Test
-    public void one_var_optimized_string() throws Exception {
-        StringFunction<String> instance = String::toUpperCase;
+    public void optimized_one_var_string() throws Exception {
+        interface StringFunction {
+            String apply(String s);
+        }
+        StringFunction instance = String::toUpperCase;
         Caller caller = factory.create(instance, binding(instance), Map.of(), List.of("str"));
 
         assertEquals("FOO", caller.call(get(), vars("str", "foo")));
@@ -167,7 +176,53 @@ public class CallerFactoryTest {
     }
 
     @Test
-    public void zero_vars_generic_injected_deps() throws Exception {
+    public void optimized_one_var_char_array() throws Exception {
+        interface StringFunction {
+            int apply(CharArray s);
+        }
+        StringFunction instance = CharArray::length;
+        Caller caller = factory.create(instance, binding(instance), Map.of(), List.of("str"));
+
+        assertEquals(3, caller.call(get(), vars("str", "foo")));
+        assertEquals(3, caller.call(post(), vars("str", "bar")));
+    }
+
+    @Test
+    public void optimized_two_vars_int_int() throws Exception {
+        interface BiIntFunction {
+            String apply(int x, int y);
+        }
+        BiIntFunction instance = "%d:%d"::formatted;
+        Caller caller = factory.create(instance, binding(instance), Map.of(), List.of("i", "j"));
+
+        assertEquals("1:0", caller.call(get(), vars("i", 1, "j", 0)));
+        assertEquals("-1:-1", caller.call(post(), vars("i", -1, "j", -1)));
+        assertThrows(ConversionError.class, () -> caller.call(get(), vars("i", 10)));
+        assertThrows(ConversionError.class, () -> caller.call(get(), vars("j", 10)));
+        assertThrows(ConversionError.class, () -> caller.call(get(), vars("i", 10, "j", "foo")));
+    }
+
+    @Test
+    public void optimized_two_vars_string_string() throws Exception {
+        interface BiStrFunction {
+            String apply(String a, String b);
+        }
+        BiStrFunction instance = "%s:%s"::formatted;
+        Caller caller = factory.create(instance, binding(instance), Map.of(), List.of("a", "b"));
+
+        assertEquals("foo:bar", caller.call(get(), vars("a", "foo", "b", "bar")));
+        assertEquals("foo:", caller.call(get(), vars("a", "foo", "b", "")));
+        assertEquals(":bar", caller.call(post(), vars("a", "", "b", "bar")));
+    }
+
+    @Test
+    public void optimized_unrecognized_one_var_object() {
+        Function<Object, String> instance = Object::toString;
+        assertThrows(HandlerConfigError.class, () -> factory.create(instance, binding(instance), Map.of(), List.of("x")));
+    }
+
+    @Test
+    public void generic_zero_vars_injected_deps() throws Exception {
         interface InjectedFunction {
             String apply(Injector injector);
         }
@@ -178,7 +233,19 @@ public class CallerFactoryTest {
     }
 
     @Test
-    public void one_var_generic_injected_deps() throws Exception {
+    public void generic_one_var_long() throws Exception {
+        LongFunction<String> instance = String::valueOf;
+        Caller caller = factory.create(instance, binding(instance), Map.of(), List.of("i"));
+
+        assertEquals("9223372036854775807", caller.call(get(), vars("i", Long.MAX_VALUE)));
+        assertEquals("-9223372036854775808", caller.call(post(), vars("i", Long.MIN_VALUE)));
+        assertThrows(ConversionError.class, () -> caller.call(get(), vars()));
+        assertThrows(ConversionError.class, () -> caller.call(get(), vars("i", "foo")));
+        assertThrows(ConversionError.class, () -> caller.call(get(), vars("x", 10)));
+    }
+
+    @Test
+    public void generic_one_var_injected_deps() throws Exception {
         interface IntInjectedFunction {
             String apply(Injector injector, int i);
         }
@@ -189,7 +256,7 @@ public class CallerFactoryTest {
     }
 
     @Test
-    public void many_vars_generic_primitive_with_request() throws Exception {
+    public void generic_many_vars_primitive_with_request() throws Exception {
         interface GenericFunction {
             String apply(HttpRequest request, int x, long y, byte z, String s);
         }
@@ -216,7 +283,7 @@ public class CallerFactoryTest {
     }
 
     @Test
-    public void many_vars_generic_boxed() throws Exception {
+    public void generic_many_vars_boxed() throws Exception {
         interface GenericFunction {
             String apply(Integer x, Long y, Byte z);
         }
@@ -234,7 +301,7 @@ public class CallerFactoryTest {
     }
 
     @Test
-    public void many_vars_generic_primitive_and_boxed() throws Exception {
+    public void generic_many_vars_primitive_and_boxed() throws Exception {
         interface GenericFunction {
             String apply(short x, float y, Double z, boolean b);
         }
@@ -246,7 +313,7 @@ public class CallerFactoryTest {
     }
 
     @Test
-    public void two_vars_generic_primitive_and_boxed_character() throws Exception {
+    public void generic_two_vars_primitive_and_boxed_character() throws Exception {
         interface GenericFunction {
             String apply(char ch1, Character ch2);
         }
@@ -259,15 +326,15 @@ public class CallerFactoryTest {
         assertThrows(ConversionError.class, () -> caller.call(get(), vars("x", -1, "y", Long.MAX_VALUE)));
     }
 
-    private @NotNull static Binding binding(Object instance) {
+    private static @NotNull Binding binding(Object instance) {
         return binding(instance, null);
     }
 
     private static @NotNull Binding binding(Object instance, String type) {
-        return new Binding(URL, getDeclaredMethod(instance), type, EndpointOptions.DEFAULT);
+        return new Binding(URL, getSingleDeclaredMethod(instance), type, EndpointOptions.DEFAULT);
     }
 
-    private static @NotNull Method getDeclaredMethod(Object instance) {
+    private static @NotNull Method getSingleDeclaredMethod(Object instance) {
         Method[] methods = instance.getClass().getDeclaredMethods();
         assertEquals(1, methods.length);
         return methods[0];
@@ -288,9 +355,5 @@ public class CallerFactoryTest {
 
     public static @NotNull HttpRequestEx post() {
         return postEx(URL);   // Do not care about QueryParams for now
-    }
-
-    private interface StringFunction<T> {
-        T apply(String s);
     }
 }

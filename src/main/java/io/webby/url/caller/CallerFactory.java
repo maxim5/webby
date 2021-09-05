@@ -58,11 +58,10 @@ public class CallerFactory {
     @Inject private Injector injector;
     @Inject private ContentProviderFactory contentProviderFactory;
 
-    @NotNull
-    public Caller create(@NotNull Object instance,
-                         @NotNull Binding binding,
-                         @NotNull Map<String, Constraint<?>> constraints,
-                         @NotNull List<String> vars) throws AppConfigException {
+    public @NotNull Caller create(@NotNull Object instance,
+                                  @NotNull Binding binding,
+                                  @NotNull Map<String, Constraint<?>> constraints,
+                                  @NotNull List<String> vars) throws AppConfigException {
         Method method = binding.method();
 
         Caller nativeCaller = tryCreateNativeCaller(instance, method, constraints, vars);
@@ -84,11 +83,10 @@ public class CallerFactory {
     }
 
     @VisibleForTesting
-    @Nullable
-    Caller tryCreateNativeCaller(@NotNull Object instance,
-                                 @NotNull Method method,
-                                 @NotNull Map<String, Constraint<?>> constraints,
-                                 @NotNull List<String> vars) {
+    @Nullable Caller tryCreateNativeCaller(@NotNull Object instance,
+                                           @NotNull Method method,
+                                           @NotNull Map<String, Constraint<?>> constraints,
+                                           @NotNull List<String> vars) {
         if (instance instanceof Handler<?> handler && isMethodImplementsInterface(method, Handler.class)) {
             return new NativeCaller(handler);
         }
@@ -120,12 +118,11 @@ public class CallerFactory {
     }
 
     @VisibleForTesting
-    @Nullable
-    Caller tryCreateOptimizedCaller(@NotNull Object instance,
-                                    @NotNull Method method,
-                                    @NotNull Binding binding,
-                                    @NotNull Map<String, Constraint<?>> constraints,
-                                    @NotNull List<String> vars) {
+    @Nullable Caller tryCreateOptimizedCaller(@NotNull Object instance,
+                                              @NotNull Method method,
+                                              @NotNull Binding binding,
+                                              @NotNull Map<String, Constraint<?>> constraints,
+                                              @NotNull List<String> vars) {
         Parameter[] parameters = method.getParameters();
 
         boolean wantsRequest = false;
@@ -197,21 +194,21 @@ public class CallerFactory {
                 IntConverter intConverter = getConstraint(constraints, var1, DEFAULT_INT);
                 StringConverter strValidator = getConstraint(constraints, var2, DEFAULT_STR);
                 return new IntStrCaller(instance, method, intConverter, strValidator, var1, var2,
-                        options.toRichStrInt(canPassBuffer(type2), false));
+                                        options.toRichStrInt(canPassBuffer(type2), false));
             }
 
             if (isStringLike(type1) && isInt(type2)) {
                 StringConverter strValidator = getConstraint(constraints, var1, DEFAULT_STR);
                 IntConverter intConverter = getConstraint(constraints, var2, DEFAULT_INT);
                 return new IntStrCaller(instance, method, intConverter, strValidator, var2, var1,
-                        options.toRichStrInt(canPassBuffer(type1), true));
+                                        options.toRichStrInt(canPassBuffer(type1), true));
             }
 
             if (isStringLike(type1) && isStringLike(type2)) {
                 StringConverter validator1 = getConstraint(constraints, var1, DEFAULT_STR);
                 StringConverter validator2 = getConstraint(constraints, var2, DEFAULT_STR);
                 return new StrStrCaller(instance, method, validator1, validator2, var1, var2,
-                        options.toRichStrStr(canPassBuffer(type1), canPassBuffer(type2)));
+                                        options.toRichStrStr(canPassBuffer(type1), canPassBuffer(type2)));
             }
         }
 
@@ -230,11 +227,10 @@ public class CallerFactory {
     }
 
     @VisibleForTesting
-    @Nullable
-    List<CallArgumentFunction> tryCreateGenericMapping(@NotNull Method method,
-                                                       @NotNull Binding binding,
-                                                       @NotNull Map<String, Constraint<?>> constraints,
-                                                       @NotNull List<String> vars) {
+    @Nullable List<CallArgumentFunction> tryCreateGenericMapping(@NotNull Method method,
+                                                                 @NotNull Binding binding,
+                                                                 @NotNull Map<String, Constraint<?>> constraints,
+                                                                 @NotNull List<String> vars) {
         Parameter[] params = method.getParameters();  // forget about previous guesses
         List<CallArgumentFunction> argMapping = new ArrayList<>(params.length);
         Queue<String> varz = new ArrayDeque<>(vars);
