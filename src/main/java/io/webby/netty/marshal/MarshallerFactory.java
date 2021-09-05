@@ -56,22 +56,22 @@ public class MarshallerFactory implements Provider<Json> {
         String property = settings.getProperty("json.library");
         Pair<String, Class<? extends Json>> pair = SUPPORTED_JSON.get(property);
         if (property != null && pair == null) {
-            log.at(Level.CONFIG).log("Unrecognized json library. Available: %s".formatted(SUPPORTED_JSON.keySet()));
+            log.at(Level.CONFIG).log("Unrecognized json library. Available: %s", SUPPORTED_JSON.keySet());
         }
         if (pair != null) {
             if (!EasyClasspath.isInClassPath(pair.first())) {
-                log.at(Level.WARNING).log("Json library not found in classpath: %s".formatted(pair.first()));
+                log.at(Level.WARNING).log("Json library not found in classpath: %s", pair.first());
             }
             return pair.second();
         }
 
         for (Pair<String, Class<? extends Json>> val : SUPPORTED_JSON.values()) {
             if (EasyClasspath.isInClassPath(val.first())) {
-                log.at(Level.INFO).log("Using Json library: %s".formatted(val.first()));
+                log.at(Level.INFO).log("Using Json library: %s", val.first());
                 return val.second();
             }
         }
-        throw new AppConfigException("No JSON library found in classpath. Scanned: %s".formatted(SUPPORTED_JSON.keySet()));
+        throw new AppConfigException("No JSON library found in classpath. Scanned: %s", SUPPORTED_JSON.keySet());
     }
 
     public @NotNull Marshaller getMarshaller(@NotNull Marshal marshal) {

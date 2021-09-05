@@ -14,6 +14,7 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.function.Supplier;
 
+import static io.webby.app.AppConfigException.*;
 import static io.webby.util.EasyCast.castAny;
 
 public abstract class BaseKeyValueFactory implements InternalKeyValueFactory, Closeable {
@@ -44,12 +45,9 @@ public abstract class BaseKeyValueFactory implements InternalKeyValueFactory, Cl
         return castAny(cache.computeIfAbsent(name, k -> supplier.get()));
     }
 
-    protected static @NotNull String formatFileName(@NotNull String filename, @NotNull String name) {
-        AppConfigException.failIf(
-                !filename.contains("%s"),
-                "The file pattern must contain '%%s' to use separate file per database: %s".formatted(filename)
-        );
-        return filename.formatted(name);
+    protected static @NotNull String formatFileName(@NotNull String pattern, @NotNull String name) {
+        assure(pattern.contains("%s"), "The file pattern must contain '%%s' to use separate file per database: %s", pattern);
+        return pattern.formatted(name);
     }
 
     @Override

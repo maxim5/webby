@@ -48,6 +48,7 @@ import java.util.function.IntPredicate;
 import java.util.logging.Level;
 
 import static io.webby.util.EasyCast.castAny;
+import static io.webby.ws.WebsocketAgentConfigError.assure;
 import static io.webby.ws.WebsocketAgentConfigError.failIf;
 import static io.webby.ws.meta.FrameMetadata.MAX_ID_SIZE;
 
@@ -68,8 +69,8 @@ public class WebsocketAgentBinder {
             log.at(Level.INFO).log("Registering websocket-agent at %s -> %s", url, endpoint.agent());
             AgentEndpoint existing = result.put(url, endpoint);
             if (existing != null) {
-                throw new WebsocketAgentConfigError(
-                    "Websocket URL %s used by multiple agents: %s and %s".formatted(url, endpoint.agent(), existing.agent()));
+                throw new WebsocketAgentConfigError("Websocket URL %s used by multiple agents: %s and %s",
+                                                    url, endpoint.agent(), existing.agent());
             }
         });
         return result;
@@ -127,18 +128,18 @@ public class WebsocketAgentBinder {
 
                 if (methods.size() > 1) {
                     Method[] pub = filter(methods, Modifier::isPublic);
-                    failIf(pub.length > 1, "Multiple public methods match %s: %s".formatted(key, Arrays.toString(pub)));
+                    failIf(pub.length > 1, "Multiple public methods match %s: %s", key, Arrays.toString(pub));
                     if (pub.length == 1) {
                         return pub[0];
                     }
 
                     Method[] protect = filter(methods, Modifier::isProtected);
-                    failIf(protect.length > 1, "Multiple protected methods match %s: %s".formatted(key, Arrays.toString(protect)));
+                    failIf(protect.length > 1, "Multiple protected methods match %s: %s", key, Arrays.toString(protect));
                     if (protect.length == 1) {
                         return protect[0];
                     }
 
-                    throw new WebsocketAgentConfigError("Multiple methods match %s: %s".formatted(key, methods));
+                    throw new WebsocketAgentConfigError("Multiple methods match %s: %s", key, methods);
                 }
                 return Iterables.getFirst(methods, null);
             }).toMap();
@@ -154,10 +155,10 @@ public class WebsocketAgentBinder {
                 Api api = getApi(method, idFromName(method.getName()), defaultApiVersion);
                 String id = api.id();
                 String version = api.version();
-                failIf(id.isEmpty(), "API id can't be empty: %s".formatted(id));
-                failIf(!id.matches("^[a-zA-Z0-9_.-]+$"), "API id contains illegal chars: %s".formatted(id));
-                failIf(id.length() > MAX_ID_SIZE, "API id can't be longer than %d: %s".formatted(MAX_ID_SIZE, id));
-                failIf(!version.matches("^[0-9a-z_.-]+$"), "API version contains illegal chars: %s".formatted(version));
+                failIf(id.isEmpty(), "API id can't be empty: %s", id);
+                assure(id.matches("^[a-zA-Z0-9_.-]+$"), "API id contains illegal chars: %s", id);
+                assure(id.length() <= MAX_ID_SIZE, "API id can't be longer than %d chars: %s", MAX_ID_SIZE, id);
+                assure(version.matches("^[0-9a-z_.-]+$"), "API version contains illegal chars: %s", version);
 
                 EndpointView<?> view = getEndpointViewFromAnnotation(method, classRender);
 
@@ -172,8 +173,8 @@ public class WebsocketAgentBinder {
                     .orElse(null);
             if (acceptsFrame && senderField != null && isMessageSenderField(senderField)) {
                 throw new WebsocketAgentConfigError(
-                    "Agents not defining the message type can't use MessageSender (replace with Sender): %s"
-                    .formatted(senderField.getName()));
+                    "Agents not defining the message type can't use MessageSender (replace with Sender): %s",
+                    senderField.getName());
             }
 
             consumer.accept(new AgentBinding(classUrl, klass, messageClass, frameType, metaClass, marshal,
@@ -188,7 +189,7 @@ public class WebsocketAgentBinder {
             try {
                 List<Token> tokens = settings.urlParser().parse(url);
                 boolean isValidUrl = tokens.size() == 1 && tokens.get(0) instanceof ConstToken;
-                failIf(!isValidUrl, "Websocket URL can't contain variables: %s".formatted(url));
+                WebsocketAgentConfigError.assure(isValidUrl, "Websocket URL can't contain variables: %s", url);
             } catch (QueryParseException e) {
                 throw new UrlConfigError("Invalid URL: %s".formatted(url), e);
             }
@@ -254,8 +255,8 @@ public class WebsocketAgentBinder {
             );
         }
         if (metaClass == BinaryFixedSizeFrameMetadata.class) {
-            failIf(minIdLength != maxIdLength,
-                   "%s requires all API ids to have the same length: %s".formatted(metaClass, acceptorIds));
+            assure(minIdLength == maxIdLength,
+                   "%s requires all API ids to have the same length: %s", metaClass, acceptorIds);
             return new BinaryFixedSizeFrameMetadata(maxIdLength);
         }
         if (metaClass == JsonMetadata.class) {
@@ -269,7 +270,7 @@ public class WebsocketAgentBinder {
     static @NotNull Serve getWebsocketAnnotation(@NotNull AnnotatedElement elem) {
         if (elem.isAnnotationPresent(Serve.class)) {
             Serve serve = elem.getAnnotation(Serve.class);
-            failIf(serve.render().length > 1, "@Serve can have only one render: %s".formatted(elem));
+            failIf(serve.render().length > 1, "@Serve can have only one render: %s", elem);
             return serve;
         }
         throw new UnsupportedOperationException("Internal error: %s does not have @Serve annotation".formatted(elem));
@@ -362,7 +363,7 @@ public class WebsocketAgentBinder {
     }
 
     private static <T> T getIfPresent(@NotNull T[] array, @Nullable T def) {
-        failIf(array.length > 1, "Multiple array values are not supported: %s".formatted(Arrays.toString(array)));
+        failIf(array.length > 1, "Multiple array values are not supported: %s", Arrays.toString(array));
         return array.length > 0 ? array[0] : def;
     }
 

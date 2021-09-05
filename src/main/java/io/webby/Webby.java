@@ -29,6 +29,9 @@ import java.util.Collection;
 import java.util.List;
 import java.util.logging.Level;
 
+import static io.webby.app.AppConfigException.assure;
+import static io.webby.app.AppConfigException.failIf;
+
 public class Webby {
     private static final FluentLogger log = FluentLogger.forEnclosingClass();
 
@@ -73,9 +76,9 @@ public class Webby {
 
     private static void validateSecurityKey(byte @NotNull [] securityKey) {
         // TODO: be pro-active and suggest settings
-        check(securityKey.length > 0, "Invalid settings: security key is not set. " +
-                                      "Please generate the secure random 32-byte string and use it in the app settings");
-        check(securityKey.length == 32, "Invalid settings: security key length must be 32 bytes");
+        assure(securityKey.length > 0, "Invalid settings: security key is not set. " +
+                                       "Please generate the secure random 32-byte string and use it in the app settings");
+        assure(securityKey.length == 32, "Invalid settings: security key length must be 32 bytes");
     }
 
     private static void validateWebPath(@Nullable Path webPath) {
@@ -83,7 +86,7 @@ public class Webby {
     }
 
     private static void validateViewPaths(@Nullable List<Path> viewPaths) {
-        check(!isNullOrEmpty(viewPaths), "Invalid settings: view paths are not set");
+        failIf(isNullOrEmpty(viewPaths), "Invalid settings: view paths are not set");
         viewPaths.forEach(viewPath -> validateDirectory(viewPath, "view path", false));
     }
 
@@ -92,17 +95,17 @@ public class Webby {
     }
 
     private static void validateDirectory(@Nullable Path path, @NotNull String name, boolean autoCreate) {
-        check(path != null, "Invalid settings: %s is not set", name);
+        assure(path != null, "Invalid settings: %s is not set", name);
         File file = path.toFile();
         if (!file.exists()) {
             if (autoCreate) {
                 log.at(Level.INFO).log("The %s does not exist. Creating directory: %s", name, path);
-                check(file.mkdirs(), "Failed to create %s directory: %s", name, path);
+                assure(file.mkdirs(), "Failed to create %s directory: %s", name, path);
             } else {
-                fail("Invalid settings: %s does not exist: %s", name, path);
+                throw new AppConfigException("Invalid settings: %s does not exist: %s", name, path);
             }
         }
-        check(file.isDirectory(), "Invalid settings: %s must be a directory: %s", name, path);
+        assure(file.isDirectory(), "Invalid settings: %s must be a directory: %s", name, path);
     }
 
     private static void validateHotReload(@NotNull AppSettings settings) {
@@ -190,16 +193,6 @@ public class Webby {
         //  - mainModule             3
         StackTraceElement caller = CallerFinder.findCallerOf(Webby.class, new Throwable(), 3);
         return caller != null ? caller.getClassName() : null;
-    }
-
-    private static void check(boolean isOk, @NotNull String message, Object @NotNull ... args) {
-        if (!isOk) {
-            throw fail(message, args);
-        }
-    }
-
-    private static <T extends RuntimeException> T fail(@NotNull String message, Object @NotNull ... args) {
-        throw new AppConfigException(message.formatted(args));
     }
 
     private static boolean isNullOrEmpty(@Nullable Collection<?> collection) {
