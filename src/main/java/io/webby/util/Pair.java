@@ -37,6 +37,6 @@ public record Pair<T, U>(T first, U second) implements Map.Entry<T, U> {
 
     @Override
     public String toString() {
-        return "(" + first + ", " + second + ")";
+        return "(%s, %s)".formatted(first, second);
     }
 }
