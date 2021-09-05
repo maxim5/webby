@@ -13,6 +13,7 @@ public class IntConverter implements Converter<Integer> {
     private final int max;
 
     public IntConverter(int min, int max) {
+        assert min <= max : "Invalid converter range: [%d, %d]".formatted(min, max);
         this.min = min;
         this.max = max;
     }
@@ -26,7 +27,7 @@ public class IntConverter implements Converter<Integer> {
                     "Value `%d` is out of bounds: [%d, %d]".formatted(result, min, max));
             return result;
         } catch (NumberFormatException e) {
-            throw new ConversionError(name, "Malformed integer: %s".formatted(value), e);
+            throw new ConversionError(name, "Malformed integer: `%s`".formatted(value), e);
         }
     }
 

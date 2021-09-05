@@ -15,11 +15,11 @@ public interface Constraint<T> extends Function<CharArray, T> {
             return apply(value);
         } catch (ConversionError e) {
             if (!e.hasVariable()) {
-                throw new ConversionError(name, e);
+                throw new ConversionError(name, e.getMessage(), e);
             }
             throw e;
         } catch (RuntimeException e) {
-            throw new ConversionError(name, "Failed to validate %s: %s".formatted(name, e.getMessage()), e);
+            throw new ConversionError(name, "Failed to validate `%s`: %s".formatted(name, e.getMessage()), e);
         }
     }
 }
