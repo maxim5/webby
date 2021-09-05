@@ -58,6 +58,10 @@ public abstract class ByteArrayDb<K, V> {
         return buffer == null ? null : valueCodec.readFromByteBuffer(buffer);
     }
 
+    protected @NotNull AbstractMap.SimpleEntry<K, V> asMapEntry(@Nullable K key, @Nullable V value) {
+        return new AbstractMap.SimpleEntry<>(key, value);
+    }
+
     protected @NotNull AbstractMap.SimpleEntry<K, V> asMapEntry(byte @Nullable [] key, byte @Nullable [] value) {
         return new AbstractMap.SimpleEntry<>(asKey(key), asValue(value));
     }
