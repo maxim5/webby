@@ -3,10 +3,7 @@ package io.webby.db.kv.oak;
 import com.google.common.flogger.FluentLogger;
 import com.google.inject.Inject;
 import com.google.inject.TypeLiteral;
-import com.yahoo.oak.OakComparator;
-import com.yahoo.oak.OakMapBuilder;
-import com.yahoo.oak.OakScopedReadBuffer;
-import com.yahoo.oak.OakSerializer;
+import com.yahoo.oak.*;
 import com.yahoo.oak.common.intbuffer.OakIntBufferComparator;
 import io.webby.app.Settings;
 import io.webby.common.InjectorHelper;
@@ -42,10 +39,18 @@ public class OakFactory extends BaseKeyValueFactory {
                         return new OakSerializerAdapter<>(codec);
                     });
 
+            int chunkMaxItems = settings.getIntProperty("db.oak.chunk.max.items", 4096);  /*Chunk.MAX_ITEMS_DEFAULT*/
+            long memoryCapacity = settings.getLongProperty("db.oak.memory.capacity", 16L << 30);  /*MAX_MEM_CAPACITY*/
+            int preferredBlockSize = settings.getIntProperty("db.oak.preferred.block.size.bytes",
+                                                             256 << 20);  /*BlocksPool.DEFAULT_BLOCK_SIZE_BYTES*/
+
             OakMapBuilder<K, V> builder = new OakMapBuilder<>(keyRecord.comparator(),
                                                               keyRecord.serializer(),
                                                               valueSerializer,
-                                                              keyRecord.minValue());
+                                                              keyRecord.minValue())
+                    .setChunkMaxItems(chunkMaxItems)
+                    .setMemoryCapacity(memoryCapacity)
+                    .setPreferredBlockSize(preferredBlockSize);
             return new OakDb<>(builder.build());
         });
     }

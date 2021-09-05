@@ -20,6 +20,7 @@ import io.webby.testing.Testing;
 import io.webby.util.Pair;
 import org.jetbrains.annotations.NotNull;
 import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.Assumptions;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.junit.jupiter.params.ParameterizedTest;
@@ -40,6 +41,7 @@ import static org.junit.jupiter.api.Assertions.*;
 @ExtendWith(EmbeddedRedisExtension.class)
 public class KeyValueDbIntegrationTest {
     private static final FluentLogger log = FluentLogger.forEnclosingClass();
+    private static final StorageType testOnly = null;
 
     @ParameterizedTest
     @EnumSource(StorageType.class)
@@ -397,6 +399,9 @@ public class KeyValueDbIntegrationTest {
     }
 
     private @NotNull Path createTempDirectory(@NotNull StorageType storageType) throws IOException {
+        //noinspection ConstantConditions
+        Assumptions.assumeTrue(testOnly == null || storageType == testOnly, "This storage type ignored by `testOnly`");
+
         StackTraceElement[] stack = new Throwable().getStackTrace();
         String className = stack[1].getClassName();
         String testName = stack[1].getMethodName();
