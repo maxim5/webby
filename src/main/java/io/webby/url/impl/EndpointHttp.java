@@ -13,8 +13,7 @@ public record EndpointHttp(@NotNull CharSequence contentType, @NotNull List<Pair
         return !contentType.isEmpty();
     }
 
-    @NotNull
-    public EndpointHttp mergeWithDefault(@NotNull EndpointHttp http) {
+    public @NotNull EndpointHttp mergeWithDefault(@NotNull EndpointHttp http) {
         CharSequence newContentType = hasContentType() ? contentType : http.contentType();
         List<Pair<String, String>> newHeaders = new ArrayList<>(http.headers);
         headers.forEach(header -> {

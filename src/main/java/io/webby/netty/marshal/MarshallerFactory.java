@@ -51,8 +51,7 @@ public class MarshallerFactory implements Provider<Json> {
         jsonMarshallerClass = pickJsonMarshaller(settings);
     }
 
-    @NotNull
-    private static Class<? extends Json> pickJsonMarshaller(@NotNull Settings settings) {
+    private static @NotNull Class<? extends Json> pickJsonMarshaller(@NotNull Settings settings) {
         String property = settings.getProperty("json.library");
         Pair<String, Class<? extends Json>> pair = SUPPORTED_JSON.get(property);
         if (property != null && pair == null) {

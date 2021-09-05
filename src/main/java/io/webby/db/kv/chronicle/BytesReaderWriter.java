@@ -18,9 +18,8 @@ final class BytesReaderWriter<T> implements BytesReader<T>, BytesWriter<T> {
         this.codec = codec;
     }
 
-    @NotNull
     @Override
-    public T read(Bytes in, @Nullable T using) {
+    public @NotNull T read(Bytes in, @Nullable T using) {
         try {
             return codec.readFrom(in.inputStream(), (int) in.readRemaining());
         } catch (IOException e) {

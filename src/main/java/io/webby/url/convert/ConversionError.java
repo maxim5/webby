@@ -38,8 +38,7 @@ public class ConversionError extends RuntimeException {
         }
     }
 
-    @NotNull
-    private static String joinMessage(@Nullable String var, @NotNull String message) {
+    private static @NotNull String joinMessage(@Nullable String var, @NotNull String message) {
         return var != null ? "[%s]: %s".formatted(var, message) : message;
     }
 }

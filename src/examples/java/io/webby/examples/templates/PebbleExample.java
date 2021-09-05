@@ -37,8 +37,7 @@ class PebbleExample {
         return EasyRender.writeToBytes(writer -> HELLO.get().evaluate(writer, context));
     }
 
-    @NotNull
-    private static PebbleTemplate getTemplate(@NotNull String templateName) {
+    private static @NotNull PebbleTemplate getTemplate(@NotNull String templateName) {
         ClasspathLoader loader = new ClasspathLoader();
         loader.setPrefix("web/pebble");
         PebbleEngine engine = new PebbleEngine.Builder().loader(loader).build();

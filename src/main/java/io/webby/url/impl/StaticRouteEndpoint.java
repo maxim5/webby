@@ -23,14 +23,12 @@ public final class StaticRouteEndpoint implements RouteEndpoint {
     }
 
     @Override
-    @Nullable
-    public Endpoint getAcceptedEndpointOrNull(@NotNull HttpRequest request) {
+    public @Nullable Endpoint getAcceptedEndpointOrNull(@NotNull HttpRequest request) {
         return serving.accept(request.method()) ? endpoint : null;
     }
 
     @Override
-    @NotNull
-    public String describe() {
+    public @NotNull String describe() {
         return endpoint.caller().method().toString();
     }
 
@@ -47,8 +45,7 @@ public final class StaticRouteEndpoint implements RouteEndpoint {
         }
 
         @Override
-        @NotNull
-        public Object method() {
+        public @NotNull Object method() {
             return path;
         }
     }

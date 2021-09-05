@@ -27,8 +27,7 @@ public record MapCaller(Object instance, Method method,
         }
     }
 
-    @NotNull
-    private Map<String, ?> convert(@NotNull Map<String, CharArray> variables) {
+    private @NotNull Map<String, ?> convert(@NotNull Map<String, CharArray> variables) {
         return BiStream.from(variables.entrySet())
                 .mapValues((key, value) -> constraints.getOrDefault(key, identity).applyWithName(key, value))
                 .toMap();

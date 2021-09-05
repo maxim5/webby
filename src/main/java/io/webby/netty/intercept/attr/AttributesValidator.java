@@ -17,8 +17,7 @@ public class AttributesValidator {
     private static final FluentLogger log = FluentLogger.forEnclosingClass();
     private static final int MAX_POSITION = 255;
 
-    @NotNull
-    public static Result validateAttributeOwners(@NotNull Collection<InterceptItem> items) {
+    public static @NotNull Result validateAttributeOwners(@NotNull Collection<InterceptItem> items) {
         int[] positions = items.stream()
                 .filter(InterceptItem::isOwner)
                 .mapToInt(InterceptItem::position)

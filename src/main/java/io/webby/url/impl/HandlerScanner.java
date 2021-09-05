@@ -23,8 +23,7 @@ public class HandlerScanner {
     @Inject private ClasspathScanner scanner;
 
     // More precisely, handler candidates.
-    @NotNull
-    public Set<? extends Class<?>> getHandlerClassesFromClasspath() {
+    public @NotNull Set<? extends Class<?>> getHandlerClassesFromClasspath() {
         return scanner.getMatchingClasses(
             settings.handlerFilter(),
             klass -> isHandlerClass(klass, MAIN_HANDLER_ANNOTATION, HANDLER_CLASS_ANNOTATIONS, HANDLER_METHOD_ANNOTATIONS),

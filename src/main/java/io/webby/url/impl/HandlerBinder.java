@@ -168,8 +168,7 @@ public class HandlerBinder {
                     Call ann = method.getAnnotation(Call.class);
                     for (String type : ann.methods()) {
                         if (!type.equals(type.toUpperCase())) {
-                            log.at(Level.WARNING).log(
-                                    "@Call http method is not upper-case: %s (at %s)".formatted(type, method));
+                            log.at(Level.WARNING).log("@Call http method is not upper-case: %s (at %s)", type, method);
                         }
                         sink.accept(type, ann.url(), true);
                     }

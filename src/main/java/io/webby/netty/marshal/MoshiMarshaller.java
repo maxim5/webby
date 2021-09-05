@@ -57,8 +57,7 @@ public record MoshiMarshaller(@NotNull Moshi moshi, @NotNull Charset charset) im
         return Objects.requireNonNull(moshi.adapter(klass).fromJson(buffer));
     }
 
-    @NotNull
-    private static Moshi defaultMoshi() {
+    private static @NotNull Moshi defaultMoshi() {
         return new Moshi.Builder().build();
     }
 }

@@ -11,12 +11,11 @@ public class CookieUtil {
     private static final ServerCookieEncoder ENCODER = ServerCookieEncoder.LAX;
     private static final ServerCookieDecoder DECODER = ServerCookieDecoder.LAX;
 
-    public static String encode(@NotNull Cookie cookie) {
+    public static @NotNull String encode(@NotNull Cookie cookie) {
         return ENCODER.encode(cookie);
     }
 
-    @NotNull
-    public static List<Cookie> decodeAll(@NotNull String cookieHeader) {
+    public static @NotNull List<Cookie> decodeAll(@NotNull String cookieHeader) {
         return DECODER.decodeAll(cookieHeader);
     }
 }

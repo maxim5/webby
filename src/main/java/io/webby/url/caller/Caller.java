@@ -9,6 +9,5 @@ import java.util.Map;
 public interface Caller {
     Object call(@NotNull FullHttpRequest request, @NotNull Map<String, CharArray> variables) throws Exception;
 
-    @NotNull
-    Object method();
+    @NotNull Object method();
 }
