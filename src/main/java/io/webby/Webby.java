@@ -20,11 +20,13 @@ import io.webby.netty.NettyModule;
 import io.webby.perf.PerfModule;
 import io.webby.url.UrlModule;
 import io.webby.ws.WebsocketModule;
+import org.apache.commons.lang.WordUtils;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
-import java.nio.file.Files;
+import java.io.File;
 import java.nio.file.Path;
+import java.util.Collection;
 import java.util.List;
 import java.util.logging.Level;
 
@@ -61,6 +63,7 @@ public class Webby {
         validateSecurityKey(settings.securityKey());
         validateWebPath(settings.webPath());
         validateViewPaths(settings.viewPaths());
+        validateStoragePath(settings.storagePath());
         validateHotReload(settings);
         validateProfileMode(settings);
         validateSafeMode(settings);
@@ -70,36 +73,37 @@ public class Webby {
     }
 
     private static void validateSecurityKey(byte @NotNull [] securityKey) {
-        if (securityKey.length == 0) {
-            throw new AppConfigException("Invalid settings: security key is not set. " +
-                    "Please generate the secure random 32-byte string and use it in the app settings");
-        }
-        if (securityKey.length != 32) {
-            throw new AppConfigException("Invalid settings: security key length must be 32 bytes");
-        }
+        // TODO: be pro-active and suggest settings
+        check(securityKey.length > 0, "Invalid settings: security key is not set. " +
+                                      "Please generate the secure random 32-byte string and use it in the app settings");
+        check(securityKey.length == 32, "Invalid settings: security key length must be 32 bytes");
     }
 
     private static void validateWebPath(@Nullable Path webPath) {
-        if (webPath == null) {
-            throw new AppConfigException("Invalid settings: static web path is not set");
-        }
-        if (!Files.exists(webPath)) {
-            throw new AppConfigException("Invalid settings: static web path does not exist: %s".formatted(webPath));
-        }
+        validateDirectory(webPath, "static web path", false);
     }
 
     private static void validateViewPaths(@Nullable List<Path> viewPaths) {
-        if (viewPaths == null || viewPaths.isEmpty()) {
-            throw new AppConfigException("Invalid settings: view paths are not set");
+        check(!isNullOrEmpty(viewPaths), "Invalid settings: view paths are not set");
+        viewPaths.forEach(viewPath -> validateDirectory(viewPath, "view path", false));
+    }
+
+    private static void validateStoragePath(@Nullable Path storagePath) {
+        validateDirectory(storagePath, "storage path", true);
+    }
+
+    private static void validateDirectory(@Nullable Path path, @NotNull String name, boolean autoCreate) {
+        check(path != null, "Invalid settings: %s is not set", name);
+        File file = path.toFile();
+        if (!file.exists()) {
+            if (autoCreate) {
+                log.at(Level.INFO).log("%s does not exist. Creating directory: %s", WordUtils.capitalize(name), path);
+                check(file.mkdirs(), "Failed to create %s directory: %s", name, path);
+            } else {
+                fail("Invalid settings: %s does not exist: %s", name, path);
+            }
         }
-        viewPaths.forEach(viewPath -> {
-            if (viewPath == null) {
-                throw new AppConfigException("Invalid settings: view path is null");
-            }
-            if (!Files.exists(viewPath)) {
-                throw new AppConfigException("Invalid settings: view path does not exist: %s".formatted(viewPath));
-            }
-        });
+        check(file.isDirectory(), "Invalid settings: %s must be a directory: %s", name, path);
     }
 
     private static void validateHotReload(@NotNull AppSettings settings) {
@@ -187,5 +191,19 @@ public class Webby {
         //  - mainModule             3
         StackTraceElement caller = CallerFinder.findCallerOf(Webby.class, new Throwable(), 3);
         return caller != null ? caller.getClassName() : null;
+    }
+
+    private static void check(boolean isOk, @NotNull String message, Object @NotNull ... args) {
+        if (!isOk) {
+            throw fail(message, args);
+        }
+    }
+
+    private static <T extends RuntimeException> T fail(@NotNull String message, Object @NotNull ... args) {
+        throw new AppConfigException(message.formatted(args));
+    }
+
+    private static boolean isNullOrEmpty(@Nullable Collection<?> collection) {
+        return collection == null || collection.isEmpty();
     }
 }
