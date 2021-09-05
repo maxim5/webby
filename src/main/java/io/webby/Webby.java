@@ -20,7 +20,6 @@ import io.webby.netty.NettyModule;
 import io.webby.perf.PerfModule;
 import io.webby.url.UrlModule;
 import io.webby.ws.WebsocketModule;
-import org.apache.commons.lang.WordUtils;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
@@ -97,7 +96,7 @@ public class Webby {
         File file = path.toFile();
         if (!file.exists()) {
             if (autoCreate) {
-                log.at(Level.INFO).log("%s does not exist. Creating directory: %s", WordUtils.capitalize(name), path);
+                log.at(Level.INFO).log("The %s does not exist. Creating directory: %s", name, path);
                 check(file.mkdirs(), "Failed to create %s directory: %s", name, path);
             } else {
                 fail("Invalid settings: %s does not exist: %s", name, path);
