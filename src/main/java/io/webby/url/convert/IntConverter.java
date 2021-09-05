@@ -11,17 +11,23 @@ public class IntConverter implements Converter<Integer> {
 
     private final int min;
     private final int max;
+    private final int radix;
 
     public IntConverter(int min, int max) {
+        this(min, max, 10);
+    }
+
+    public IntConverter(int min, int max, int radix) {
         assert min <= max : "Invalid converter range: [%d, %d]".formatted(min, max);
         this.min = min;
         this.max = max;
+        this.radix = radix;
     }
 
     public int validateInt(@Nullable String name, @Nullable CharSequence value) {
         ConversionError.failIf(value == null, name, "Variable is expected, but not provided");
         try {
-            int result = Integer.parseInt(value, 0, value.length(), 10);
+            int result = Integer.parseInt(value, 0, value.length(), radix);
             ConversionError.failIf(
                     result < min || result > max, name,
                     "Value `%d` is out of bounds: [%d, %d]".formatted(result, min, max));
