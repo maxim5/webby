@@ -11,6 +11,7 @@ import org.jetbrains.annotations.Nullable;
 
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 import java.util.Set;
 import java.util.stream.Stream;
 
@@ -82,16 +83,6 @@ public class QueryParams {
         return values != null ? values.get(0) : null;
     }
 
-    public <T> @Nullable T getConvertedOrNull(@NotNull String name) throws ConversionError {
-        String value = getOrNull(name);
-        if (value == null) {
-            return null;
-        }
-
-        Constraint<?> constraint = constraints.get(name);
-        return castAny(constraint.applyWithName(name, new CharArray(value)));
-    }
-
     public int getInt(@NotNull String name, int def) {
         try {
             String value = getOrNull(name);
@@ -148,5 +139,21 @@ public class QueryParams {
         } catch (NumberFormatException ignore) {
             return def;
         }
+    }
+
+    public <T> @Nullable T getConvertedOrNull(@NotNull String name) throws ConversionError {
+        String value = getOrNull(name);
+        if (value == null) {
+            return null;
+        }
+
+        Constraint<?> constraint = constraints.get(name);
+        return castAny(constraint.applyWithName(name, new CharArray(value)));
+    }
+
+    public <T> @NotNull T getConvertedOrDie(@NotNull String name) throws ConversionError {
+        String value = Objects.requireNonNull(getOrNull(name), () -> "Param `%s` is not query: %s".formatted(name, keys()));
+        Constraint<?> constraint = constraints.get(name);
+        return castAny(constraint.applyWithName(name, new CharArray(value)));
     }
 }
