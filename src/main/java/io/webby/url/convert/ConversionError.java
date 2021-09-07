@@ -32,7 +32,15 @@ public class ConversionError extends RuntimeException {
         return var != null;
     }
 
-    public static void failIf(boolean cond, @Nullable String name, @NotNull String message, @Nullable Object @NotNull ... args) {
+    public static void assure(boolean cond, @Nullable String name, @NotNull String message,
+                              @Nullable Object @NotNull ... args) {
+        if (!cond) {
+            throw new ConversionError(name, message.formatted(args));
+        }
+    }
+
+    public static void failIf(boolean cond, @Nullable String name, @NotNull String message,
+                              @Nullable Object @NotNull ... args) {
         if (cond) {
             throw new ConversionError(name, message.formatted(args));
         }
