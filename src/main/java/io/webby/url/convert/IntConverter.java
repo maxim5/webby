@@ -4,6 +4,8 @@ import io.routekit.util.CharArray;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
+import static io.webby.url.convert.ConversionError.failIf;
+
 public class IntConverter implements Converter<Integer> {
     public static IntConverter ANY = new IntConverter(Integer.MIN_VALUE, Integer.MAX_VALUE);
     public static IntConverter POSITIVE = new IntConverter(1, Integer.MAX_VALUE);
@@ -25,12 +27,10 @@ public class IntConverter implements Converter<Integer> {
     }
 
     public int validateInt(@Nullable String name, @Nullable CharSequence value) {
-        ConversionError.failIf(value == null, name, "Variable is expected, but not provided");
+        failIf(value == null, name, "Variable is expected, but not provided");
         try {
             int result = Integer.parseInt(value, 0, value.length(), radix);
-            ConversionError.failIf(
-                    result < min || result > max, name,
-                    "Value `%d` is out of bounds: [%d, %d]".formatted(result, min, max));
+            failIf(result < min || result > max, name, "Value `%d` is out of bounds: [%d, %d]", result, min, max);
             return result;
         } catch (NumberFormatException e) {
             throw new ConversionError(name, "Malformed integer: `%s`".formatted(value), e);

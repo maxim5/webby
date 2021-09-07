@@ -6,6 +6,8 @@ import org.jetbrains.annotations.Nullable;
 
 import java.util.Objects;
 
+import static io.webby.url.convert.ConversionError.failIf;
+
 public class StringConverter implements Converter<String> {
     public static final StringConverter UNLIMITED = new StringConverter(Integer.MAX_VALUE);
     public static final StringConverter MAX_256 = new StringConverter(256);
@@ -17,8 +19,8 @@ public class StringConverter implements Converter<String> {
     }
 
     public void validateString(@Nullable String name, @Nullable CharSequence value) {
-        ConversionError.failIf(value == null, name, "Variable is expected, but not provided");
-        ConversionError.failIf(value.length() > maxLength, name, "The value exceeds max length %d".formatted(maxLength));
+        failIf(value == null, name, "Variable is expected, but not provided");
+        failIf(value.length() > maxLength, name, "The value exceeds max length %d", maxLength);
     }
 
     @Override
