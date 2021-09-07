@@ -4,11 +4,12 @@ import com.google.inject.Injector;
 import io.netty.channel.embedded.EmbeddedChannel;
 import io.webby.app.AppSettings;
 import org.jetbrains.annotations.NotNull;
-import org.junit.jupiter.api.Assertions;
 
 import java.util.ArrayDeque;
 import java.util.Queue;
 import java.util.function.Consumer;
+
+import static org.junit.jupiter.api.Assertions.assertNotNull;
 
 public class BaseChannelTest {
     private static final String EXAMPLES_WEB_PATH = "src/examples/resources/web";
@@ -38,8 +39,7 @@ public class BaseChannelTest {
     };
 
     protected void assertChannelInitialized() {
-        Assertions.assertNotNull(channel,
-            "Channel is not initialized. Add @BeforeEach setup method calling testStartup()");
+        assertNotNull(channel, "Channel is not initialized. Add @BeforeEach setup method calling testStartup()");
     }
 
     @NotNull

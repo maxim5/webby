@@ -6,10 +6,11 @@ import io.netty.buffer.Unpooled;
 import io.netty.handler.codec.http.*;
 import io.webby.netty.response.ContentHolder;
 import org.jetbrains.annotations.NotNull;
-import org.junit.jupiter.api.Assertions;
 
 import java.util.Queue;
 import java.util.stream.Stream;
+
+import static org.junit.jupiter.api.Assertions.assertFalse;
 
 public class CompositeHttpResponse extends DefaultHttpResponse implements ContentHolder {
     private ByteBuf content = Unpooled.EMPTY_BUFFER;
@@ -19,12 +20,10 @@ public class CompositeHttpResponse extends DefaultHttpResponse implements Conten
     }
 
     public static @NotNull CompositeHttpResponse fromObjects(@NotNull Queue<HttpObject> objects) {
-        if (objects.isEmpty()) {
-            Assertions.fail("No objects provided: " + objects);
-        }
+        assertFalse(objects.isEmpty(), "No objects provided: " + objects);
 
         HttpResponse response = (HttpResponse) objects.poll();
-        Assertions.assertFalse(response instanceof FullHttpResponse);
+        assertFalse(response instanceof FullHttpResponse);
         CompositeHttpResponse httpResponse = new CompositeHttpResponse(response.protocolVersion(), response.status(), response.headers());
 
         Stream<HttpContent> stream = objects.stream().map(object -> (HttpContent) object);

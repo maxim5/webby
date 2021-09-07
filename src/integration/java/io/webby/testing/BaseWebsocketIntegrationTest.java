@@ -20,7 +20,6 @@ import io.webby.ws.impl.AgentEndpoint;
 import io.webby.ws.impl.WebsocketRouter;
 import io.webby.ws.meta.FrameMetadata;
 import org.jetbrains.annotations.NotNull;
-import org.junit.jupiter.api.Assertions;
 
 import java.lang.reflect.Constructor;
 import java.util.ArrayDeque;
@@ -28,6 +27,7 @@ import java.util.Queue;
 import java.util.function.Consumer;
 
 import static io.webby.util.EasyCast.castAny;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
 
 public class BaseWebsocketIntegrationTest extends BaseChannelTest {
     protected <T> @NotNull WebsocketSetup<T> testSetup(@NotNull Class<T> klass) {
@@ -57,7 +57,7 @@ public class BaseWebsocketIntegrationTest extends BaseChannelTest {
 
         public @NotNull T initAgent(@NotNull ClientInfo clientInfo) {
             AgentEndpoint endpoint = injector.getInstance(WebsocketRouter.class).findAgentEndpointByClass(klass);
-            Assertions.assertNotNull(endpoint, "No Endpoint found for: %s".formatted(klass));
+            assertNotNull(endpoint, "No Endpoint found for: %s".formatted(klass));
             NettyWebsocketHandler handler = new NettyWebsocketHandler(endpoint, clientInfo);
             injector.injectMembers(handler);
             channel = new EmbeddedChannel(handler);

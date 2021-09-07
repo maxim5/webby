@@ -1,20 +1,21 @@
 package io.webby.netty;
 
-import com.google.common.truth.Truth;
-import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
+
+import static com.google.common.truth.Truth.assertThat;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 
 public class NettyDispatcherTest {
     @Test
     public void parseProtocol_simple() {
-        Truth.assertThat(NettyDispatcher.parseProtocol("")).isEmpty();
-        Truth.assertThat(NettyDispatcher.parseProtocol(",")).isEmpty();
-        Truth.assertThat(NettyDispatcher.parseProtocol("foo,bar")).isEmpty();
-        Truth.assertThat(NettyDispatcher.parseProtocol("foo, bar ,,,")).isEmpty();
-        Truth.assertThat(NettyDispatcher.parseProtocol("foo, a|b")).containsExactly("a", "b");
-        Truth.assertThat(NettyDispatcher.parseProtocol("foo, a|b, x|, |y")).containsExactly("a", "b", "x", "", "", "y");
-        Truth.assertThat(NettyDispatcher.parseProtocol("foo, a|b|c, |||")).containsExactly("a", "b|c", "", "||");
-        Truth.assertThat(NettyDispatcher.parseProtocol("foo, |")).containsExactly("", "");
-        Assertions.assertThrows(IllegalStateException.class, () -> NettyDispatcher.parseProtocol("a|b, a|c"));
+        assertThat(NettyDispatcher.parseProtocol("")).isEmpty();
+        assertThat(NettyDispatcher.parseProtocol(",")).isEmpty();
+        assertThat(NettyDispatcher.parseProtocol("foo,bar")).isEmpty();
+        assertThat(NettyDispatcher.parseProtocol("foo, bar ,,,")).isEmpty();
+        assertThat(NettyDispatcher.parseProtocol("foo, a|b")).containsExactly("a", "b");
+        assertThat(NettyDispatcher.parseProtocol("foo, a|b, x|, |y")).containsExactly("a", "b", "x", "", "", "y");
+        assertThat(NettyDispatcher.parseProtocol("foo, a|b|c, |||")).containsExactly("a", "b|c", "", "||");
+        assertThat(NettyDispatcher.parseProtocol("foo, |")).containsExactly("", "");
+        assertThrows(IllegalStateException.class, () -> NettyDispatcher.parseProtocol("a|b, a|c"));
     }
 }

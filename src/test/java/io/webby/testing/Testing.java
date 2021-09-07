@@ -13,12 +13,12 @@ import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.core.config.Configurator;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
-import org.junit.jupiter.api.Assertions;
 
 import java.nio.charset.Charset;
 import java.util.*;
 import java.util.function.Consumer;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 
 public class Testing {
@@ -66,7 +66,7 @@ public class Testing {
 
     @SuppressWarnings("unchecked")
     public static <K, V> @NotNull Map<K, V> asMap(@NotNull List<?> items) {
-        Assertions.assertEquals(0, items.size() % 2);
+        assertEquals(0, items.size() % 2);
         LinkedHashMap<K, V> result = new LinkedHashMap<>();
         for (int i = 0; i < items.size(); i += 2) {
             result.put((K) items.get(i), (V) items.get(i + 1));

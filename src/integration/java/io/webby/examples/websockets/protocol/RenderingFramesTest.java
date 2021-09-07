@@ -1,7 +1,6 @@
 package io.webby.examples.websockets.protocol;
 
 import io.netty.handler.codec.http.websocketx.WebSocketFrame;
-import io.webby.testing.AssertFrame;
 import io.webby.testing.BaseWebsocketIntegrationTest;
 import io.webby.testing.FakeClients;
 import io.webby.url.annotate.FrameType;
@@ -12,6 +11,9 @@ import org.junit.jupiter.api.Test;
 
 import java.util.Queue;
 
+import static io.webby.testing.AssertFrame.assertBinaryFrames;
+import static io.webby.testing.AssertFrame.assertTextFrames;
+
 public class RenderingFramesTest extends BaseWebsocketIntegrationTest {
     protected void setupJson(@NotNull FrameType frameType) {
         setupAgent(RenderingFrames.class, Marshal.JSON, frameType, new TextSeparatorFrameMetadata(), FakeClients.DEFAULT);
@@ -21,7 +23,7 @@ public class RenderingFramesTest extends BaseWebsocketIntegrationTest {
     public void render_as_string() {
         setupJson(FrameType.TEXT_ONLY);
         Queue<WebSocketFrame> frames = sendText("str 777 {'s': '(foo)'}");
-        AssertFrame.assertTextFrames(frames, """
+        assertTextFrames(frames, """
             777 0 "\\u003cdiv\\u003e(foo)\\u003c/div\\u003e"
         """.trim());
     }
@@ -30,7 +32,7 @@ public class RenderingFramesTest extends BaseWebsocketIntegrationTest {
     public void render_as_bytes() {
         setupJson(FrameType.BINARY_ONLY);
         Queue<WebSocketFrame> frames = sendBinary("str 777 {'s': 'XXX'}");
-        AssertFrame.assertBinaryFrames(frames, """
+        assertBinaryFrames(frames, """
             777 0 [60,100,105,118,62,88,88,88,60,47,100,105,118,62]
         """.trim());
     }

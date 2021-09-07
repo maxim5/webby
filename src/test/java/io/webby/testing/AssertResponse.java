@@ -8,7 +8,6 @@ import io.netty.handler.codec.http.*;
 import io.webby.netty.response.StreamingHttpResponse;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
-import org.junit.jupiter.api.Assertions;
 
 import java.io.ByteArrayOutputStream;
 import java.util.stream.Stream;
@@ -18,6 +17,7 @@ import static io.webby.testing.TestingBytes.*;
 import static io.webby.util.Rethrow.Consumers;
 import static io.webby.util.Rethrow.Suppliers;
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.fail;
 
 public class AssertResponse {
     public static void assert200(@NotNull HttpResponse response) {
@@ -91,7 +91,7 @@ public class AssertResponse {
         } else if (response instanceof DefaultHttpResponse) {
             assertThat(response).isEqualTo(new DefaultHttpResponse(version, status, headers));
         } else {
-            Assertions.fail("Unrecognized response: " + response);
+            fail("Unrecognized response: " + response);
         }
     }
 
@@ -152,7 +152,7 @@ public class AssertResponse {
         if (response instanceof DefaultHttpResponse) {
             return Unpooled.EMPTY_BUFFER;
         }
-        return Assertions.fail("Unrecognized response: " + response);
+        return fail("Unrecognized response: " + response);
     }
 
     public static @NotNull ByteBuf streamContent(@NotNull HttpResponse response) {

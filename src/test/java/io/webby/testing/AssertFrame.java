@@ -1,6 +1,5 @@
 package io.webby.testing;
 
-import com.google.common.truth.Truth;
 import io.netty.buffer.Unpooled;
 import io.netty.handler.codec.http.websocketx.BinaryWebSocketFrame;
 import io.netty.handler.codec.http.websocketx.TextWebSocketFrame;
@@ -12,6 +11,7 @@ import org.junit.jupiter.api.function.Executable;
 import java.util.Arrays;
 import java.util.List;
 
+import static com.google.common.truth.Truth.assertThat;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 
 public class AssertFrame {
@@ -24,7 +24,7 @@ public class AssertFrame {
     }
 
     public static void assertFrames(@NotNull Iterable<WebSocketFrame> frames) {
-        Truth.assertThat(frames).isEmpty();
+        assertThat(frames).isEmpty();
     }
 
     public static void assertFrames(@NotNull Iterable<WebSocketFrame> frames, @NotNull String ... expected) {
@@ -44,11 +44,11 @@ public class AssertFrame {
     }
 
     public static void assertFrames(@NotNull Iterable<WebSocketFrame> frames, @NotNull List<? extends WebSocketFrame> expected) {
-        Truth.assertThat(frames).containsExactlyElementsIn(expected.stream().map(TestingBytes::replaceWithReadable).toList());
+        assertThat(frames).containsExactlyElementsIn(expected.stream().map(TestingBytes::replaceWithReadable).toList());
     }
 
     public static void assertNoFrames(@NotNull Iterable<WebSocketFrame> frames) {
-        Truth.assertThat(frames).isEmpty();
+        assertThat(frames).isEmpty();
     }
 
     public static void assertClientDenied(@NotNull Executable setup) {

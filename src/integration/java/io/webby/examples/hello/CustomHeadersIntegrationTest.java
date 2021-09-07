@@ -4,7 +4,6 @@ import com.google.common.io.ByteStreams;
 import io.netty.handler.codec.http.HttpResponse;
 import io.webby.testing.BaseHttpIntegrationTest;
 import org.jetbrains.annotations.NotNull;
-import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 
 import java.io.ByteArrayInputStream;
@@ -15,6 +14,7 @@ import java.util.zip.ZipEntry;
 import java.util.zip.ZipInputStream;
 
 import static io.webby.testing.AssertResponse.*;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 
 public class CustomHeadersIntegrationTest extends BaseHttpIntegrationTest {
     protected final CustomHeaders handler = testSetup(CustomHeaders.class).initHandler();
@@ -45,7 +45,7 @@ public class CustomHeadersIntegrationTest extends BaseHttpIntegrationTest {
                 "1.txt", "File content for 1",
                 "2.txt", "File content for 2"
         );
-        Assertions.assertEquals(expected, unzipBytes(content(response).array()));
+        assertEquals(expected, unzipBytes(content(response).array()));
     }
 
     private static @NotNull Map<String, String> unzipBytes(byte @NotNull [] bytes) throws IOException {

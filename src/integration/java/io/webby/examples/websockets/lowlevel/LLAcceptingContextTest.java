@@ -1,7 +1,6 @@
 package io.webby.examples.websockets.lowlevel;
 
 import io.netty.handler.codec.http.websocketx.WebSocketFrame;
-import io.webby.testing.AssertFrame;
 import io.webby.testing.BaseWebsocketIntegrationTest;
 import io.webby.testing.FakeClients;
 import io.webby.url.annotate.FrameType;
@@ -15,6 +14,8 @@ import org.junit.jupiter.api.Test;
 
 import java.util.Queue;
 
+import static io.webby.testing.AssertFrame.assertTextFrames;
+
 public class LLAcceptingContextTest extends BaseWebsocketIntegrationTest {
     protected void setupJson(@NotNull FrameType type, @NotNull FrameMetadata metadata, @NotNull ClientInfo clientInfo) {
         setupAgent(LLAcceptingContext.class, Marshal.JSON, type, metadata, clientInfo);
@@ -24,13 +25,13 @@ public class LLAcceptingContextTest extends BaseWebsocketIntegrationTest {
     public void on_json_text_no_client() {
         setupJson(FrameType.TEXT_ONLY, new TextSeparatorFrameMetadata(), FakeClients.DEFAULT);
         Queue<WebSocketFrame> frames = sendText("foo");
-        AssertFrame.assertTextFrames(frames, "Ack foo null");
+        assertTextFrames(frames, "Ack foo null");
     }
 
     @Test
     public void on_json_text_with_client() {
         setupJson(FrameType.TEXT_ONLY, new TextSeparatorFrameMetadata(), FakeClients.client("2.0", ClientFrameType.ANY));
         Queue<WebSocketFrame> frames = sendText("bar");
-        AssertFrame.assertTextFrames(frames, "Ack bar 2.0");
+        assertTextFrames(frames, "Ack bar 2.0");
     }
 }
