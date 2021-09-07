@@ -16,6 +16,7 @@ import org.jetbrains.annotations.VisibleForTesting;
 import java.util.logging.Level;
 
 import static io.webby.netty.marshal.MarshallerFactory.SupportedJsonLibrary.*;
+import static io.webby.util.EasyCast.castAny;
 
 public class MarshallerFactory implements Provider<Json> {
     private static final FluentLogger log = FluentLogger.forEnclosingClass();
@@ -82,8 +83,8 @@ public class MarshallerFactory implements Provider<Json> {
         };
     }
 
-    public @NotNull Json getJson() {
-        return helper.lazySingleton(jsonMarshallerClass);
+    public <J extends Json> @NotNull J getJson() {
+        return castAny(helper.lazySingleton(jsonMarshallerClass));
     }
 
     @Override
