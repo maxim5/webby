@@ -233,6 +233,17 @@ public class CallerFactoryTest {
     }
 
     @Test
+    public void generic_zero_vars_injected_deps_with_request() throws Exception {
+        interface InjectedFunction {
+            String apply(Injector injector, HttpRequest request);
+        }
+        InjectedFunction instance = (injector, request) -> "%s:%s".formatted(injector.getClass().getName(), request.method());
+        Caller caller = factory.create(instance, binding(instance), Map.of(), List.of());
+
+        assertEquals("com.google.inject.internal.InjectorImpl:GET", caller.call(get(), vars()));
+    }
+
+    @Test
     public void generic_one_var_long() throws Exception {
         LongFunction<String> instance = String::valueOf;
         Caller caller = factory.create(instance, binding(instance), Map.of(), List.of("i"));
@@ -256,6 +267,17 @@ public class CallerFactoryTest {
     }
 
     @Test
+    public void generic_one_var_injected_deps_swapped() throws Exception {
+        interface IntInjectedFunction {
+            String apply(int i, Injector injector);
+        }
+        IntInjectedFunction instance = (i, injector) -> "%d:%s".formatted(i, injector.getClass().getName());
+        Caller caller = factory.create(instance, binding(instance), Map.of(), List.of("i"));
+
+        assertEquals("10:com.google.inject.internal.InjectorImpl", caller.call(get(), vars("i", 10)));
+    }
+
+    @Test
     public void generic_many_vars_primitive_with_request() throws Exception {
         interface GenericFunction {
             String apply(HttpRequest request, int x, long y, byte z, String s);
@@ -263,23 +285,14 @@ public class CallerFactoryTest {
         GenericFunction instance = (request, x, y, z, s) -> "%s:%d:%d:%d:%s".formatted(request.method(), x, y, z, s);
         Caller caller = factory.create(instance, binding(instance), Map.of(), List.of("x", "y", "z", "s"));
 
-        assertEquals(
-                "GET:1:2:3:foobar",
-                caller.call(get(), vars("x", 1, "y", 2, "z", 3, "s", "foobar"))
-        );
-        assertEquals(
-                "GET:0:9223372036854775807:127:foo",
-                caller.call(get(), vars("x", 0, "y", Long.MAX_VALUE, "z", 127, "s", "foo"))
-        );
-        assertEquals(
-                "GET:-10:-9223372036854775808:-128:bar",
-                caller.call(get(), vars("x", -10, "y", Long.MIN_VALUE, "z", -128, "s", "bar"))
-        );
+        assertEquals("GET:1:2:3:foobar", caller.call(get(), vars("x", 1, "y", 2, "z", 3, "s", "foobar")));
+        assertEquals("GET:0:9223372036854775807:127:foo",
+                     caller.call(get(), vars("x", 0, "y", Long.MAX_VALUE, "z", 127, "s", "foo")));
+        assertEquals("GET:-10:-9223372036854775808:-128:bar",
+                     caller.call(get(), vars("x", -10, "y", Long.MIN_VALUE, "z", -128, "s", "bar")));
 
-        assertThrows(ConversionError.class, () ->
-                caller.call(get(), vars("x", 1, "y", 2, "z", 256, "s", "foo")));
-        assertThrows(ConversionError.class, () ->
-                caller.call(get(), vars("x", 1, "y", 2, "z", 3, "str", "foo")));
+        assertThrows(ConversionError.class, () -> caller.call(get(), vars("x", 1, "y", 2, "z", 256, "s", "foo")));
+        assertThrows(ConversionError.class, () -> caller.call(get(), vars("x", 1, "y", 2, "z", 3, "str", "foo")));
     }
 
     @Test
@@ -294,10 +307,8 @@ public class CallerFactoryTest {
         assertEquals("0:9223372036854775807:127", caller.call(get(), vars("x", 0, "y", Long.MAX_VALUE, "z", 127)));
         assertEquals("-10:-9223372036854775808:-128", caller.call(get(), vars("x", -10, "y", Long.MIN_VALUE, "z", -128)));
 
-        assertThrows(ConversionError.class, () ->
-                caller.call(get(), vars("x", 1, "y", 2, "z", 256)));
-        assertThrows(ConversionError.class, () ->
-                caller.call(get(), vars("x", 1, "y", 2, "w", 3)));
+        assertThrows(ConversionError.class, () -> caller.call(get(), vars("x", 1, "y", 2, "z", 256)));
+        assertThrows(ConversionError.class, () -> caller.call(get(), vars("x", 1, "y", 2, "w", 3)));
     }
 
     @Test
