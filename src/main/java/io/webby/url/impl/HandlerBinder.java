@@ -34,6 +34,8 @@ import java.util.function.Consumer;
 import java.util.logging.Level;
 import java.util.stream.Collectors;
 
+import static io.webby.url.HandlerConfigError.failIf;
+
 public class HandlerBinder {
     private static final FluentLogger log = FluentLogger.forEnclosingClass();
 
@@ -135,8 +137,7 @@ public class HandlerBinder {
 
                 Sink sink = (type, url, usuallyExpectsContent) -> {
                     if (url.isEmpty()) {
-                        HandlerConfigError.failIf(classUrl.isEmpty(),
-                                "URL is not set neither in class %s nor in method %s".formatted(klass, method));
+                        failIf(classUrl.isEmpty(), "URL is not set neither in class %s nor in method %s", klass, method);
                         url = classUrl;
                     }
 
@@ -233,9 +234,9 @@ public class HandlerBinder {
             try {
                 Object value = field.get(instance);
                 if (value instanceof Constraint<?> constraint) {
-                    HandlerConfigError.failIf(map.containsKey(var), "Duplicate constraints for %s variable".formatted(var));
+                    failIf(map.containsKey(var), "Duplicate constraints for %s variable", var);
                     map.put(var, constraint);
-                    log.at(Level.FINE).log("Recognized a constraint for %s variable".formatted(var));
+                    log.at(Level.FINE).log("Recognized a constraint for %s variable", var);
                 } else {
                     log.at(Level.WARNING).log(
                             "Field %s.%s is not used as converter/validator because is not a Constraint instance " +
@@ -255,7 +256,7 @@ public class HandlerBinder {
     static @NotNull Serve getServeAnnotation(@NotNull AnnotatedElement elem) {
         if (elem.isAnnotationPresent(Serve.class)) {
             Serve serve = elem.getAnnotation(Serve.class);
-            HandlerConfigError.failIf(serve.render().length > 1, "@Serve can have only one render: %s".formatted(elem));
+            failIf(serve.render().length > 1, "@Serve can have only one render: %s", elem);
             return serve;
         }
         return new Serve() {
@@ -291,9 +292,9 @@ public class HandlerBinder {
         boolean isJson = elem.isAnnotationPresent(Json.class);
         boolean isProto = elem.isAnnotationPresent(Protobuf.class);
         boolean isView = elem.isAnnotationPresent(View.class);
-        HandlerConfigError.failIf(isProto && isJson, "Incompatible @Json and @Protobuf declaration for %s".formatted(elem));
-        HandlerConfigError.failIf(isProto && isView, "Incompatible @View and @Protobuf declaration for %s".formatted(elem));
-        HandlerConfigError.failIf(isJson && isView, "Incompatible @Json and @View declaration for %s".formatted(elem));
+        failIf(isProto && isJson, "Incompatible @Json and @Protobuf declaration for %s", elem);
+        failIf(isProto && isView, "Incompatible @View and @Protobuf declaration for %s", elem);
+        failIf(isJson && isView, "Incompatible @Json and @View declaration for %s", elem);
         return isJson ? Marshal.JSON : (isProto && def != Marshal.PROTOBUF_JSON) ? Marshal.PROTOBUF_BINARY : def;
     }
 

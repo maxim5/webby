@@ -28,6 +28,8 @@ import java.lang.reflect.Parameter;
 import java.util.*;
 import java.util.logging.Level;
 
+import static io.webby.url.HandlerConfigError.failIf;
+
 public class CallerFactory {
     private static final FluentLogger log = FluentLogger.forEnclosingClass();
 
@@ -79,7 +81,7 @@ public class CallerFactory {
             return new GenericCaller(instance, method, mapping);
         }
 
-        throw new HandlerConfigError("Failed to recognize method signature: %s".formatted(method));
+        throw new HandlerConfigError("Failed to recognize method signature: %s", method);
     }
 
     @VisibleForTesting
@@ -216,14 +218,10 @@ public class CallerFactory {
     }
 
     private static void assertVarsMatchParams(@NotNull List<String> vars, int params, @NotNull Method method) {
-        HandlerConfigError.failIf(
-                vars.size() < params,
-                "Method %s has extra arguments that can't be matched to URL variables: %s".formatted(method, vars)
-        );
-        HandlerConfigError.failIf(
-                vars.size() > params,
-                "Method %s does not accept enough arguments for requested URL variables: %s".formatted(method, vars)
-        );
+        failIf(vars.size() < params,
+               "Method %s has extra arguments that can't be matched to URL variables: %s", method, vars);
+        failIf(vars.size() > params,
+               "Method %s does not accept enough arguments for requested URL variables: %s", method, vars);
     }
 
     @VisibleForTesting

@@ -8,6 +8,8 @@ import org.jetbrains.annotations.NotNull;
 import java.io.OutputStream;
 import java.util.logging.Level;
 
+import static io.webby.url.HandlerConfigError.assure;
+
 public record HotReloadAdapter<T>(@NotNull Renderer<T> delegate, @NotNull String viewName) implements Renderer<T> {
     private static final FluentLogger log = FluentLogger.forEnclosingClass();
 
@@ -23,7 +25,7 @@ public record HotReloadAdapter<T>(@NotNull Renderer<T> delegate, @NotNull String
 
     @Override
     public @NotNull T compileTemplate(@NotNull String name) throws HandlerConfigError {
-        HandlerConfigError.failIf(!name.equals(viewName), "Expected %s view name, got %s instead".formatted(viewName, name));
+        assure(name.equals(viewName), "Expected %s view name, got %s instead", viewName, name);
         return delegate.compileTemplate(name);
     }
 
