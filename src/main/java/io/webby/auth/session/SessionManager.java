@@ -65,7 +65,7 @@ public class SessionManager {
             long sessionId = decodeSessionId(cookieValue);
             return db.get(sessionId);
         } catch (Throwable throwable) {
-            log.at(Level.WARNING).withCause(throwable).log("Failed to decode a cookie: %s".formatted(cookieValue));
+            log.at(Level.WARNING).withCause(throwable).log("Failed to decode a cookie: %s", cookieValue);
             return null;
         }
     }
