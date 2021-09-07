@@ -3,7 +3,7 @@ package io.webby.db.kv.tupl;
 import io.webby.db.codec.Codec;
 import io.webby.db.kv.KeyValueDb;
 import io.webby.db.kv.impl.ByteArrayDb;
-import io.webby.util.Counting.BoolFlag;
+import io.webby.util.PrimitiveWrappers.BoolFlag;
 import io.webby.util.func.ThrowConsumer;
 import io.webby.util.func.ThrowFunction;
 import org.cojen.tupl.*;

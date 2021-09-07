@@ -2,7 +2,7 @@ package io.webby.db.codec;
 
 import io.webby.perf.stats.CodecStatsListener;
 import io.webby.perf.stats.Stat;
-import io.webby.util.Counting.IntCount;
+import io.webby.util.PrimitiveWrappers.IntCounter;
 import org.jetbrains.annotations.NotNull;
 
 import java.io.IOException;
@@ -34,47 +34,47 @@ public class TrackingCodecAdapter<T> implements Codec<T> {
 
     @Override
     public @NotNull T readFrom(@NotNull InputStream input, int available) throws IOException {
-        IntCount counter = new IntCount();
+        IntCounter counter = new IntCounter();
         InputStream wrapper = new InputStream() {
             @Override
             public int read() throws IOException {
                 int result = input.read();
-                counter.val += result;
+                counter.value += result;
                 return result;
             }
 
             @Override
             public int read(byte @NotNull [] b) throws IOException {
                 int result = input.read(b);
-                counter.val += result;
+                counter.value += result;
                 return result;
             }
 
             @Override
             public int read(byte @NotNull [] b, int off, int len) throws IOException {
                 int result = input.read(b, off, len);
-                counter.val += result;
+                counter.value += result;
                 return result;
             }
 
             @Override
             public byte[] readAllBytes() throws IOException {
                 byte[] result = input.readAllBytes();
-                counter.val += result.length;
+                counter.value += result.length;
                 return result;
             }
 
             @Override
             public byte[] readNBytes(int len) throws IOException {
                 byte[] result = input.readNBytes(len);
-                counter.val += result.length;
+                counter.value += result.length;
                 return result;
             }
 
             @Override
             public int readNBytes(byte[] b, int off, int len) throws IOException {
                 int result = input.readNBytes(b, off, len);
-                counter.val += result;
+                counter.value += result;
                 return result;
             }
         };
@@ -82,7 +82,7 @@ public class TrackingCodecAdapter<T> implements Codec<T> {
         long start = System.currentTimeMillis();
         T instance = delegate.readFrom(wrapper, available);
         long elapsedMillis = System.currentTimeMillis() - start;
-        listener.report(Stat.CODEC_READ, counter.val, elapsedMillis, delegate);
+        listener.report(Stat.CODEC_READ, counter.value, elapsedMillis, delegate);
         return instance;
     }
 }

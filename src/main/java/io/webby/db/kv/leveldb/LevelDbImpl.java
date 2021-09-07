@@ -6,7 +6,6 @@ import com.google.mu.util.stream.BiStream;
 import io.webby.db.codec.Codec;
 import io.webby.db.kv.KeyValueDb;
 import io.webby.db.kv.impl.ByteArrayDb;
-import io.webby.util.Counting;
 import io.webby.util.Rethrow;
 import org.iq80.leveldb.DB;
 import org.iq80.leveldb.DBIterator;
@@ -16,14 +15,13 @@ import org.jetbrains.annotations.Nullable;
 
 import java.io.IOException;
 import java.util.*;
-import java.util.concurrent.atomic.AtomicInteger;
 import java.util.function.BiConsumer;
 import java.util.function.Consumer;
 import java.util.function.Function;
 import java.util.function.Predicate;
 import java.util.stream.Stream;
 
-import static io.webby.util.Counting.*;
+import static io.webby.util.PrimitiveWrappers.IntCounter;
 import static io.webby.util.EasyIO.Close.closeQuietly;
 
 public class LevelDbImpl<K, V> extends ByteArrayDb<K, V> implements KeyValueDb<K, V> {
@@ -36,9 +34,9 @@ public class LevelDbImpl<K, V> extends ByteArrayDb<K, V> implements KeyValueDb<K
 
     @Override
     public int size() {
-        IntCount counter = new IntCount();
-        forEachEntry(entry -> counter.val++);
-        return counter.val;
+        IntCounter counter = new IntCounter();
+        forEachEntry(entry -> counter.value++);
+        return counter.value;
     }
 
     @Override

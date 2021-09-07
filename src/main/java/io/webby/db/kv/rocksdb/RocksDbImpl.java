@@ -7,8 +7,7 @@ import com.google.mu.util.stream.BiStream;
 import io.webby.db.codec.Codec;
 import io.webby.db.kv.KeyValueDb;
 import io.webby.db.kv.impl.ByteArrayDb;
-import io.webby.util.Counting;
-import io.webby.util.Counting.IntCount;
+import io.webby.util.PrimitiveWrappers.IntCounter;
 import io.webby.util.Rethrow.Consumers;
 import io.webby.util.func.ThrowConsumer;
 import io.webby.util.func.ThrowFunction;
@@ -16,10 +15,8 @@ import io.webby.util.func.ThrowPredicate;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import org.rocksdb.*;
-import swaydb.data.util.Counter;
 
 import java.util.*;
-import java.util.concurrent.atomic.AtomicInteger;
 import java.util.function.BiConsumer;
 import java.util.function.Function;
 import java.util.stream.Stream;
@@ -39,9 +36,9 @@ public class RocksDbImpl<K, V> extends ByteArrayDb<K, V> implements KeyValueDb<K
 
     @Override
     public int size() {
-        IntCount counter = new IntCount();
-        forEachEntry(iterator -> counter.val++);
-        return counter.val;
+        IntCounter counter = new IntCounter();
+        forEachEntry(iterator -> counter.value++);
+        return counter.value;
     }
 
     @Override

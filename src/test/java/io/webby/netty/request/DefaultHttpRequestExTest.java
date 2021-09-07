@@ -2,7 +2,7 @@ package io.webby.netty.request;
 
 import io.netty.handler.codec.http.cookie.DefaultCookie;
 import io.webby.testing.Testing;
-import io.webby.util.Counting.IntCount;
+import io.webby.util.PrimitiveWrappers.IntCounter;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
@@ -29,11 +29,11 @@ public class DefaultHttpRequestExTest {
 
     @Test
     public void contentAsJson_simple() {
-        HttpRequestEx request = wrapAsEx(post("/", "{\"val\": 123}"), Map.of(), 0);
+        HttpRequestEx request = wrapAsEx(post("/", "{\"value\": 123}"), Map.of(), 0);
         Map<?, ?> map = request.contentAsJson(Map.class);
-        assertJsonEquivalent(map, Map.of("val", 123));
-        IntCount intCount = request.contentAsJson(IntCount.class);
-        assertEquals(123, intCount.val);
+        assertJsonEquivalent(map, Map.of("value", 123));
+        IntCounter counter = request.contentAsJson(IntCounter.class);
+        assertEquals(123, counter.value);
     }
 
     @Test
