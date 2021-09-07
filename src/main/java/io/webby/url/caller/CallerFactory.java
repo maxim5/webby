@@ -10,10 +10,7 @@ import io.webby.app.AppConfigException;
 import io.webby.url.HandlerConfigError;
 import io.webby.url.annotate.Json;
 import io.webby.url.annotate.Protobuf;
-import io.webby.url.convert.Constraint;
-import io.webby.url.convert.Converter;
-import io.webby.url.convert.IntConverter;
-import io.webby.url.convert.StringConverter;
+import io.webby.url.convert.*;
 import io.webby.url.handle.Handler;
 import io.webby.url.handle.IntHandler;
 import io.webby.url.handle.StringHandler;
@@ -34,13 +31,14 @@ public class CallerFactory {
     private static final FluentLogger log = FluentLogger.forEnclosingClass();
 
     private static final IntConverter DEFAULT_INT = IntConverter.ANY;
+    private static final LongConverter DEFAULT_LONG = LongConverter.ANY;
     private static final StringConverter DEFAULT_STR = StringConverter.MAX_256;
     private static final ImmutableMap<Class<?>, Converter<?>> DEFAULT_CONVERTERS =
             ImmutableMap.<Class<?>, Converter<?>>builder()
             .put(int.class, DEFAULT_INT)
             .put(Integer.class, DEFAULT_INT)
-            .put(long.class, Long::parseLong)
-            .put(Long.class, Long::valueOf)
+            .put(long.class, DEFAULT_LONG)
+            .put(Long.class, DEFAULT_LONG)
             .put(short.class, Short::parseShort)
             .put(Short.class, Short::valueOf)
             .put(byte.class, Byte::parseByte)
