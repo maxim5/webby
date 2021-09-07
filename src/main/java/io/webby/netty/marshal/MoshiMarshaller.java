@@ -40,9 +40,10 @@ public record MoshiMarshaller(@NotNull Moshi moshi, @NotNull Charset charset) im
 
     @Override
     public void writeBytes(@NotNull OutputStream output, @NotNull Object instance) throws IOException {
-        Class<Object> type = castAny(instance.getClass());
-        BufferedSink buffer = Okio.buffer(Okio.sink(output));
-        moshi.adapter(type).toJson(buffer, instance);
+        try (BufferedSink buffer = Okio.buffer(Okio.sink(output))) {
+            Class<Object> type = castAny(instance.getClass());
+            moshi.adapter(type).toJson(buffer, instance);
+        }
     }
 
     @Override
@@ -53,8 +54,9 @@ public record MoshiMarshaller(@NotNull Moshi moshi, @NotNull Charset charset) im
 
     @Override
     public <T> @NotNull T readBytes(@NotNull InputStream input, @NotNull Class<T> klass) throws IOException {
-        BufferedSource buffer = Okio.buffer(Okio.source(input));
-        return Objects.requireNonNull(moshi.adapter(klass).fromJson(buffer));
+        try (BufferedSource buffer = Okio.buffer(Okio.source(input))) {
+            return Objects.requireNonNull(moshi.adapter(klass).fromJson(buffer));
+        }
     }
 
     private static @NotNull Moshi defaultMoshi() {
