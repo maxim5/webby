@@ -16,7 +16,7 @@ import org.jetbrains.annotations.NotNull;
 
 @Serve
 public class AcceptRequest {
-    @Param private static final Converter<String> name = StringConverter.DEFAULT_256;
+    @Param private static final Converter<String> name = StringConverter.MAX_256;
     @Param final Converter<String> buf = new StringConverter(10);
 
     @GET(url="/request/simple")

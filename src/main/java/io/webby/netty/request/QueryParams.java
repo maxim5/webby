@@ -141,7 +141,7 @@ public class QueryParams {
         }
     }
 
-    public <T> @Nullable T getConvertedOrNull(@NotNull String name) throws ConversionError {
+    public <T> @Nullable T getConvertedIfExists(@NotNull String name) throws ConversionError {
         String value = getOrNull(name);
         if (value == null) {
             return null;

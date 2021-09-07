@@ -4,6 +4,7 @@ import io.netty.handler.codec.http.QueryStringDecoder;
 import io.webby.url.convert.Constraint;
 import io.webby.url.convert.ConversionError;
 import io.webby.url.convert.IntConverter;
+import io.webby.url.convert.StringConverter;
 import org.jetbrains.annotations.NotNull;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.function.Executable;
@@ -223,64 +224,95 @@ public class QueryParamsTest {
 
         QueryParams params1 = newQueryParams("/?x=999", Map.of("x", converter));
         assertEquals(999, params1.getInt("x", -1));
-        assertEquals(999, (Integer) params1.getConvertedOrNull("x"));
+        assertEquals(999, (Integer) params1.getConvertedOrDie("x"));
 
         QueryParams params2 = newQueryParams("/?y=0", Map.of("x", converter));
         assertEquals(-1, params2.getInt("x", -1));
-        assertNull(params2.getConvertedOrNull("x"));
+        assertNull(params2.getConvertedIfExists("x"));
+        assertThrows(NullPointerException.class, () -> params2.getConvertedOrDie("x"));
 
         QueryParams params3 = newQueryParams("/?x=foo", Map.of("x", converter));
         assertEquals(-1, params3.getInt("x", -1));
-        assertConversionError(() -> params3.getConvertedOrNull("x"), "[x]: Malformed integer: `foo`");
+        assertConversionError(() -> params3.getConvertedOrDie("x"), "[x]: Malformed integer: `foo`");
 
         QueryParams params4 = newQueryParams("/?x=", Map.of("x", converter));
         assertEquals(-1, params4.getInt("x", -1));
-        assertConversionError(() -> params4.getConvertedOrNull("x"), "[x]: Malformed integer: ``");
+        assertConversionError(() -> params4.getConvertedOrDie("x"), "[x]: Malformed integer: ``");
     }
 
     @Test
     public void int_constraint_any() {
         QueryParams params1 = newQueryParams("/?x=0", Map.of("x", IntConverter.ANY));
         assertEquals(0, params1.getInt("x", -1));
-        assertEquals(0, (Integer) params1.getConvertedOrNull("x"));
+        assertEquals(0, (Integer) params1.getConvertedOrDie("x"));
 
         QueryParams params2 = newQueryParams("/?x=-11", Map.of("x", IntConverter.ANY));
         assertEquals(-11, params2.getInt("x", -1));
-        assertEquals(-11, (Integer) params2.getConvertedOrNull("x"));
+        assertEquals(-11, (Integer) params2.getConvertedOrDie("x"));
 
         QueryParams params3 = newQueryParams("/?x=123", Map.of("x", IntConverter.ANY));
         assertEquals(123, params3.getInt("x", -1));
-        assertEquals(123, (Integer) params3.getConvertedOrNull("x"));
+        assertEquals(123, (Integer) params3.getConvertedOrDie("x"));
     }
 
     @Test
     public void int_constraint_positive() {
         QueryParams params1 = newQueryParams("/?x=0", Map.of("x", IntConverter.POSITIVE));
         assertEquals(0, params1.getInt("x", -1));
-        assertConversionError(() -> params1.getConvertedOrNull("x"), "[x]: Value `0` is out of bounds: [1, 2147483647]");
+        assertConversionError(() -> params1.getConvertedOrDie("x"), "[x]: Value `0` is out of bounds: [1, 2147483647]");
 
         QueryParams params2 = newQueryParams("/?x=-11", Map.of("x", IntConverter.POSITIVE));
         assertEquals(-11, params2.getInt("x", -1));
-        assertConversionError(() -> params2.getConvertedOrNull("x"), "[x]: Value `-11` is out of bounds: [1, 2147483647]");
+        assertConversionError(() -> params2.getConvertedOrDie("x"), "[x]: Value `-11` is out of bounds: [1, 2147483647]");
 
         QueryParams params3 = newQueryParams("/?x=123", Map.of("x", IntConverter.POSITIVE));
         assertEquals(123, params3.getInt("x", -1));
-        assertEquals(123, (Integer) params3.getConvertedOrNull("x"));
+        assertEquals(123, (Integer) params3.getConvertedOrDie("x"));
     }
 
     @Test
     public void int_constraint_non_negative() {
         QueryParams params1 = newQueryParams("/?x=0", Map.of("x", IntConverter.NON_NEGATIVE));
         assertEquals(0, params1.getInt("x", -1));
-        assertEquals(0, (Integer) params1.getConvertedOrNull("x"));
+        assertEquals(0, (Integer) params1.getConvertedOrDie("x"));
 
         QueryParams params2 = newQueryParams("/?x=-11", Map.of("x", IntConverter.NON_NEGATIVE));
         assertEquals(-11, params2.getInt("x", -1));
-        assertConversionError(() -> params2.getConvertedOrNull("x"), "[x]: Value `-11` is out of bounds: [0, 2147483647]");
+        assertConversionError(() -> params2.getConvertedOrDie("x"), "[x]: Value `-11` is out of bounds: [0, 2147483647]");
 
         QueryParams params3 = newQueryParams("/?x=123", Map.of("x", IntConverter.NON_NEGATIVE));
         assertEquals(123, params3.getInt("x", -1));
-        assertEquals(123, (Integer) params3.getConvertedOrNull("x"));
+        assertEquals(123, (Integer) params3.getConvertedOrDie("x"));
+    }
+
+    @Test
+    public void string_constraint_limited() {
+        QueryParams params1 = newQueryParams("/?s=12345678", Map.of("s", new StringConverter(8)));
+        assertEquals("12345678", params1.getOrNull("s"));
+        assertEquals("12345678", params1.getConvertedOrDie("s"));
+
+        QueryParams params2 = newQueryParams("/?s=123456789", Map.of("s", new StringConverter(8)));
+        assertEquals("123456789", params2.getOrNull("s"));
+        assertConversionError(() -> params2.getConvertedOrDie("s"), "[s]: The value exceeds max length 8");
+
+        QueryParams params3 = newQueryParams("/?s=", Map.of("s", new StringConverter(8)));
+        assertEquals("", params3.getOrNull("s"));
+        assertEquals("", params3.getConvertedOrDie("s"));
+    }
+
+    @Test
+    public void string_constraint_unlimited() {
+        QueryParams params1 = newQueryParams("/?s=12345678", Map.of("s", StringConverter.UNLIMITED));
+        assertEquals("12345678", params1.getOrNull("s"));
+        assertEquals("12345678", params1.getConvertedOrDie("s"));
+
+        QueryParams params2 = newQueryParams("/?s=123456789", Map.of("s", StringConverter.UNLIMITED));
+        assertEquals("123456789", params2.getOrNull("s"));
+        assertEquals("123456789", params2.getConvertedOrDie("s"));
+
+        QueryParams params3 = newQueryParams("/?s=", Map.of("s", StringConverter.UNLIMITED));
+        assertEquals("", params3.getOrNull("s"));
+        assertEquals("", params3.getConvertedOrDie("s"));
     }
 
     private static void assertParams(@NotNull QueryParams params, @NotNull Map<String, List<String>> expected) {

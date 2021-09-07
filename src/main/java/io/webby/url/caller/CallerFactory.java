@@ -34,7 +34,7 @@ public class CallerFactory {
     private static final FluentLogger log = FluentLogger.forEnclosingClass();
 
     private static final IntConverter DEFAULT_INT = IntConverter.ANY;
-    private static final StringConverter DEFAULT_STR = StringConverter.DEFAULT_256;
+    private static final StringConverter DEFAULT_STR = StringConverter.MAX_256;
     private static final ImmutableMap<Class<?>, Converter<?>> DEFAULT_CONVERTERS =
             ImmutableMap.<Class<?>, Converter<?>>builder()
             .put(int.class, DEFAULT_INT)

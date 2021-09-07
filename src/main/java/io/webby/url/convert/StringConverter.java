@@ -8,7 +8,7 @@ import java.util.Objects;
 
 public class StringConverter implements Converter<String> {
     public static final StringConverter UNLIMITED = new StringConverter(Integer.MAX_VALUE);
-    public static final StringConverter DEFAULT_256 = new StringConverter(256);
+    public static final StringConverter MAX_256 = new StringConverter(256);
 
     private final int maxLength;
 
