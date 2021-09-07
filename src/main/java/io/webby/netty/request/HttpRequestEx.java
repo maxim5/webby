@@ -27,6 +27,8 @@ public interface HttpRequestEx extends FullHttpRequest {
 
     @NotNull QueryParams params();
 
+    @NotNull String contentAsString();
+
     <T> @NotNull T contentAsJson(@NotNull Class<T> klass) throws IllegalArgumentException;
 
     @Nullable Object attr(int position);

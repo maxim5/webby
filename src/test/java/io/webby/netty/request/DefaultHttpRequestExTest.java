@@ -12,6 +12,7 @@ import java.util.Map;
 import static io.webby.testing.AssertJson.assertJsonEquivalent;
 import static io.webby.testing.FakeRequests.*;
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 
 public class DefaultHttpRequestExTest {
     @BeforeEach
@@ -28,8 +29,18 @@ public class DefaultHttpRequestExTest {
     }
 
     @Test
-    public void contentAsJson_simple() {
+    public void contentAs_empty() {
+        HttpRequestEx request = wrapAsEx(post("/"), Map.of(), 0);
+        assertEquals("", request.contentAsString());
+        assertThrows(IllegalArgumentException.class, () -> request.contentAsJson(Map.class));
+        assertThrows(IllegalArgumentException.class, () -> request.contentAsJson(List.class));
+        assertThrows(IllegalArgumentException.class, () -> request.contentAsJson(Object.class));
+    }
+
+    @Test
+    public void contentAs_simple() {
         HttpRequestEx request = wrapAsEx(post("/", "{\"value\": 123}"), Map.of(), 0);
+        assertEquals("{\"value\": 123}", request.contentAsString());
         Map<?, ?> map = request.contentAsJson(Map.class);
         assertJsonEquivalent(map, Map.of("value", 123));
         IntCounter counter = request.contentAsJson(IntCounter.class);

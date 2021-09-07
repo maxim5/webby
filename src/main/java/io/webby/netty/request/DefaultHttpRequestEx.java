@@ -92,6 +92,11 @@ public class DefaultHttpRequestEx extends DefaultFullHttpRequest implements Muta
     }
 
     @Override
+    public @NotNull String contentAsString() {
+        return content().toString(charset());
+    }
+
+    @Override
     public <T> @NotNull T contentAsJson(@NotNull Class<T> klass) throws IllegalArgumentException {
         try {
             return json.withCustomCharset(charset()).readByteBuf(content().markReaderIndex(), klass);
