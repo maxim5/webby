@@ -2,22 +2,39 @@ package io.webby.examples.templates;
 
 import io.netty.handler.codec.http.HttpResponse;
 import io.webby.testing.BaseHttpIntegrationTest;
-import org.junit.jupiter.api.Test;
+import io.webby.testing.TestingModules;
+import org.jetbrains.annotations.NotNull;
+import org.junit.Test;
+import org.junit.runner.RunWith;
+import org.junit.runners.Parameterized;
 
-import static io.webby.testing.AssertResponse.assert200;
-import static io.webby.testing.AssertResponse.assertContent;
+import static io.webby.examples.templates.TestingRender.assertRenderedStatsHeaderForCurrentConfig;
+import static io.webby.examples.templates.TestingRender.assertSimpleStatsHeaderForCurrentConfig;
+import static io.webby.testing.AssertResponse.*;
 
+@RunWith(Parameterized.class)
 public class RockerExampleTest extends BaseHttpIntegrationTest {
-    protected final RockerExample handler = testSetup(RockerExample.class).initHandler();
+    public RockerExampleTest(@NotNull TestingRender.Config config) {
+        testSetup(RockerExample.class, config.asSettingsUpdater(), TestingModules.instance(config)).initHandler();
+    }
+
+    @Parameterized.Parameters(name = "{index}: {0}")
+    public static TestingRender.Config[] configs() {
+        return TestingRender.Config.values();
+    }
 
     @Test
     public void get_bound_template() {
-        assert200(get("/templates/rocker/hello"), "Hello World!\n");
+        HttpResponse response = get("/templates/rocker/hello");
+        assert200(response, "Hello World!\n");
+        assertRenderedStatsHeaderForCurrentConfig(response);
     }
 
     @Test
     public void get_model() {
-        assert200(get("/templates/rocker/hello/model"), "Hello Model!\n");
+        HttpResponse response = get("/templates/rocker/hello/model");
+        assert200(response, "Hello Model!\n");
+        assertRenderedStatsHeaderForCurrentConfig(response);
     }
 
     @Test
@@ -32,8 +49,13 @@ public class RockerExampleTest extends BaseHttpIntegrationTest {
     public void get_hello_same_as_manual() {
         HttpResponse rendered = get("/templates/rocker/hello");
         assert200(rendered);
+        assertRenderedStatsHeaderForCurrentConfig(rendered);
+
         HttpResponse manual = get("/templates/manual/rocker/hello");
         assert200(manual);
+        assertSimpleStatsHeaderForCurrentConfig(manual);
+
         assertContent(rendered, manual);
+        assertHeaders(headersWithoutVolatile(rendered), headersWithoutVolatile(manual));
     }
 }
