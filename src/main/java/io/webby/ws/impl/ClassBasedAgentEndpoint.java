@@ -32,7 +32,7 @@ public record ClassBasedAgentEndpoint(@NotNull Object agent,
             Object callResult = acceptor.call(agent, frame, context, forceRenderAsString);
             consumer.accept(callResult, context);
         } else {
-            throw new BadFrameException("Agent %s doesn't handle the frame: %s".formatted(agent, klass));
+            throw new BadFrameException("Agent %s doesn't handle the frame: %s", agent, klass);
         }
     }
 

@@ -52,13 +52,13 @@ public final class AcceptorsAwareFrameConverter implements FrameConverter<Object
         return switch (supportedType) {
             case TEXT_ONLY -> {
                 if (clientType != ClientFrameType.TEXT && clientType != ClientFrameType.ANY) {
-                    throw new ClientDeniedException("Unsupported type: client=%s supported=%s".formatted(clientType, supportedType));
+                    throw new ClientDeniedException("Unsupported type: client=%s supported=%s", clientType, supportedType);
                 }
                 yield ConcreteFrameType.TEXT;
             }
             case BINARY_ONLY -> {
                 if (clientType != ClientFrameType.BINARY && clientType != ClientFrameType.ANY) {
-                    throw new ClientDeniedException("Unsupported type: client=%s supported=%s".formatted(clientType, supportedType));
+                    throw new ClientDeniedException("Unsupported type: client=%s supported=%s", clientType, supportedType);
                 }
                 yield ConcreteFrameType.BINARY;
             }
@@ -77,10 +77,10 @@ public final class AcceptorsAwareFrameConverter implements FrameConverter<Object
     public void toMessage(@NotNull WebSocketFrame frame, @NotNull ParsedFrameConsumer<Object> success) {
         assert concreteFrameType != null : "Converter is not initialized";
         if (concreteFrameType == ConcreteFrameType.TEXT && !(frame instanceof TextWebSocketFrame)) {
-            throw new BadFrameException("Unsupported frame received: %s, expected text".formatted(frame.getClass()));
+            throw new BadFrameException("Unsupported frame received: %s, expected text", frame.getClass());
         }
         if (concreteFrameType == ConcreteFrameType.BINARY && !(frame instanceof BinaryWebSocketFrame)) {
-            throw new BadFrameException("Unsupported frame received: %s, expected binary".formatted(frame.getClass()));
+            throw new BadFrameException("Unsupported frame received: %s, expected binary", frame.getClass());
         }
 
         ByteBuf frameContent = Unpooled.wrappedBuffer(frame.content());
@@ -90,7 +90,7 @@ public final class AcceptorsAwareFrameConverter implements FrameConverter<Object
             }
             Acceptor acceptor = acceptors.get(acceptorId);
             if (acceptor == null) {
-                throw new BadFrameException("Acceptor not found: %s".formatted(acceptorId));    // not readable!
+                throw new BadFrameException("Acceptor not found: %s", acceptorId);    // not readable!
             }
 
             RequestContext context = new RequestContext(requestId, frame, clientInfo);
@@ -98,7 +98,7 @@ public final class AcceptorsAwareFrameConverter implements FrameConverter<Object
                 if (acceptor.type().isAssignableFrom(frame.getClass())) {
                     success.accept(acceptor, frame, context);
                 } else {
-                    throw new BadFrameException("Acceptor doesn't expect %s".formatted(frame.getClass()));
+                    throw new BadFrameException("Acceptor doesn't expect %s", frame.getClass());
                 }
             } else {
                 Object payload = marshaller.readByteBuf(content, acceptor.type());
