@@ -49,6 +49,6 @@ public class IntConverter implements Converter<Integer> {
 
     @Override
     public String toString() {
-        return "IntConverter[%d, %d]".formatted(min, max);
+        return "IntConverter[%d, %d, %d]".formatted(min, max, radix);
     }
 }
