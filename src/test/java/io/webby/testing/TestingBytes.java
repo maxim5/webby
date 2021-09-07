@@ -62,11 +62,11 @@ public class TestingBytes {
     }
 
     public static void assertBytes(byte @Nullable [] bytes, @Nullable String expected) {
-        assertByteBufs(asByteBufOrNull(expected), asByteBufOrNull(bytes));
+        assertByteBufs(asByteBufOrNull(bytes), asByteBufOrNull(expected));
     }
 
     public static void assertBytes(byte @Nullable [] bytes, byte @Nullable [] expected) {
-        assertByteBufs(asByteBufOrNull(expected), asByteBufOrNull(bytes));
+        assertByteBufs(asByteBufOrNull(bytes), asByteBufOrNull(expected));
     }
 
     public static void assertByteBuf(@Nullable ByteBuf buf, @Nullable String expected) {

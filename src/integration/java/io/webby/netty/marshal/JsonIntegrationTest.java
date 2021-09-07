@@ -13,49 +13,93 @@ import org.junit.jupiter.params.provider.EnumSource;
 import java.io.IOException;
 import java.io.StringReader;
 import java.time.Instant;
-import java.util.Arrays;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
+import java.util.concurrent.ConcurrentHashMap;
 
 import static io.webby.testing.AssertJson.*;
 import static io.webby.testing.TestingBytes.*;
 import static io.webby.url.view.EasyRender.outputToBytes;
 import static io.webby.url.view.EasyRender.writeToString;
 import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assumptions.assumeFalse;
 
 public class JsonIntegrationTest {
     @ParameterizedTest
     @EnumSource(MarshallerFactory.SupportedJsonLibrary.class)
-    public void parse_json_simple(MarshallerFactory.SupportedJsonLibrary library) throws Exception {
+    public void parse_json_to_map(MarshallerFactory.SupportedJsonLibrary library) throws Exception {
         Json json = setupJson(library);
 
+        // Map interface
         assertJsonRead(json, "{}", Map.class, Map.of());
         assertJsonRead(json, "{\"foo\": 1}", Map.class, Map.of("foo", 1));
+        assertJsonRead(json, "{\"foo\": \"bar\"}", Map.class, Map.of("foo", "bar"));
+        assertJsonRead(json, "{\"foo\": null}", Map.class, Collections.singletonMap("foo", null));
+
+        // Concrete Map types
+        assertJsonRead(json, "{\"foo\": \"bar\"}", HashMap.class, Map.of("foo", "bar"));
+        assertJsonRead(json, "{\"foo\": \"bar\"}", LinkedHashMap.class, Map.of("foo", "bar"));
+        assertJsonRead(json, "{\"foo\": \"bar\"}", ConcurrentHashMap.class, Map.of("foo", "bar"));
+
+        // Map should be a default for Object
         assertJsonRead(json, "{\"foo\": \"bar\"}", Object.class, Map.of("foo", "bar"));
+    }
+
+    @ParameterizedTest
+    @EnumSource(MarshallerFactory.SupportedJsonLibrary.class)
+    public void parse_json_to_list(MarshallerFactory.SupportedJsonLibrary library) throws Exception {
+        Json json = setupJson(library);
+
+        // List interface
         assertJsonRead(json, "[]", List.class, List.of());
         assertJsonRead(json, "[\"foo\"]", List.class, List.of("foo"));
         assertJsonRead(json, "[123]", List.class, List.of(123));
         assertJsonRead(json, "[123, \"foo\", null]", List.class, Arrays.asList(123, "foo", null));
 
-        // not working for Moshi...
-        // assertJsonRead(json, "[]", ArrayList.class, List.of());
+        // Concrete List types
+        assertJsonRead(json, "[]", ArrayList.class, List.of());
+        assertJsonRead(json, "[0]", LinkedList.class, List.of(0));
+
+        // Other collections
+        assertJsonRead(json, "[]", Set.class, List.of());
+        assertJsonRead(json, "[1]", HashSet.class, List.of(1));
+        assertJsonRead(json, "[2]", ArrayDeque.class, List.of(2));
     }
 
     @ParameterizedTest
     @EnumSource(MarshallerFactory.SupportedJsonLibrary.class)
-    public void to_json_simple(MarshallerFactory.SupportedJsonLibrary library) throws Exception {
-        // not working for Moshi yet...
-        assumeFalse(library == MarshallerFactory.SupportedJsonLibrary.MOSHI);
+    public void to_json_from_map(MarshallerFactory.SupportedJsonLibrary library) throws Exception {
         Json json = setupJson(library);
 
+        // Map interface
         assertJsonWrite(json, Map.of(), "{}");
         assertJsonWrite(json, Map.of("foo", 1), "{\"foo\":1}");
         assertJsonWrite(json, Map.of("foo", "bar"), "{\"foo\":\"bar\"}");
+
+        // Concrete Map types
+        assertJsonWrite(json, new HashMap<>(), "{}");
+        assertJsonWrite(json, new LinkedHashMap<>(), "{}");
+        assertJsonWrite(json, new ConcurrentHashMap<>(), "{}");
+
+        // assertJsonWrite(json, new Object(), "{}");
+    }
+
+    @ParameterizedTest
+    @EnumSource(MarshallerFactory.SupportedJsonLibrary.class)
+    public void to_json_from_list(MarshallerFactory.SupportedJsonLibrary library) throws Exception {
+        Json json = setupJson(library);
+
+        // List interface
         assertJsonWrite(json, List.of(), "[]");
         assertJsonWrite(json, List.of("foo"), "[\"foo\"]");
         assertJsonWrite(json, List.of(1, 2, 3), "[1,2,3]");
+
+        // Concrete List types
         assertJsonWrite(json, Arrays.asList(123, "foo", null), "[123,\"foo\",null]");
+        assertJsonWrite(json, new ArrayList<>(), "[]");
+        assertJsonWrite(json, new LinkedList<>(List.of("foo")), "[\"foo\"]");
+
+        // Other collections
+        assertJsonWrite(json, new HashSet<>(List.of(0)), "[0]");
+        assertJsonWrite(json, new ArrayDeque<>(List.of(1)), "[1]");
     }
 
     @ParameterizedTest
