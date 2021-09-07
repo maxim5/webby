@@ -22,8 +22,7 @@ public class AssertJson {
                 .forEach(AssertJson::assertJsonEquivalent);
     }
 
-    public static void assertJsonEquivalent(@Nullable Object actual, @NotNull Object expected) {
-        assertNotNull(actual);
+    public static void assertJsonEquivalent(@Nullable Object actual, @Nullable Object expected) {
         if (expected instanceof Number number) {
             assertSameNumber(actual, number);
         } else if (expected instanceof Iterable<?> iterable) {

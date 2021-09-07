@@ -33,6 +33,10 @@ public class TestingBytes {
         return content != null ? asByteBuf(content) : null;
     }
 
+    public static @Nullable ByteBuf asByteBufOrNull(byte @Nullable [] bytes) {
+        return bytes != null ? Unpooled.wrappedBuffer(bytes) : null;
+    }
+
     public static @NotNull ByteArrayInputStream asByteStream(@NotNull String str) {
         return new ByteArrayInputStream(asBytes(str));
     }
@@ -55,6 +59,14 @@ public class TestingBytes {
 
     public static @Nullable List<String> asLines(@Nullable ByteBuf buf) {
         return asLines(asStringOrNull(buf));
+    }
+
+    public static void assertBytes(byte @Nullable [] bytes, @Nullable String expected) {
+        assertByteBufs(asByteBufOrNull(expected), asByteBufOrNull(bytes));
+    }
+
+    public static void assertBytes(byte @Nullable [] bytes, byte @Nullable [] expected) {
+        assertByteBufs(asByteBufOrNull(expected), asByteBufOrNull(bytes));
     }
 
     public static void assertByteBuf(@Nullable ByteBuf buf, @Nullable String expected) {
