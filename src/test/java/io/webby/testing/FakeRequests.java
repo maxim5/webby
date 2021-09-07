@@ -8,6 +8,7 @@ import io.netty.handler.codec.http.HttpMethod;
 import io.netty.handler.codec.http.HttpVersion;
 import io.webby.netty.request.DefaultHttpRequestEx;
 import io.webby.netty.request.HttpRequestEx;
+import io.webby.url.convert.Constraint;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
@@ -32,15 +33,22 @@ public class FakeRequests {
     }
 
     public static @NotNull HttpRequestEx getEx(@NotNull String uri) {
-        return requestEx(get(uri));
+        return wrapAsEx(get(uri));
     }
 
     public static @NotNull HttpRequestEx postEx(@NotNull String uri) {
-        return requestEx(post(uri));
+        return wrapAsEx(post(uri));
     }
 
-    public static @NotNull HttpRequestEx requestEx(@NotNull FullHttpRequest request) {
-        return new DefaultHttpRequestEx(request, new EmbeddedChannel(), Testing.Internals.json(), Map.of(), new Object[0]);
+    public static @NotNull HttpRequestEx wrapAsEx(@NotNull FullHttpRequest request) {
+        return wrapAsEx(request, Map.of(), 0);
+    }
+
+    public static @NotNull DefaultHttpRequestEx wrapAsEx(@NotNull FullHttpRequest request,
+                                                         @NotNull Map<String, Constraint<?>> constraints,
+                                                         int attributes) {
+        return new DefaultHttpRequestEx(request, new EmbeddedChannel(), Testing.Internals.json(),
+                                        constraints, new Object[attributes]);
     }
 
     public static @Nullable String toJson(@Nullable Object obj) {

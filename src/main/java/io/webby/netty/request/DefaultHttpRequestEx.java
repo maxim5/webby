@@ -94,9 +94,11 @@ public class DefaultHttpRequestEx extends DefaultFullHttpRequest implements Muta
     @Override
     public <T> @NotNull T contentAsJson(@NotNull Class<T> klass) throws IllegalArgumentException {
         try {
-            return json.withCustomCharset(charset()).readByteBuf(content(), klass);
+            return json.withCustomCharset(charset()).readByteBuf(content().markReaderIndex(), klass);
         } catch (RuntimeException e) {
             throw new IllegalArgumentException("Failed to parse JSON content", e);
+        } finally {
+            content().resetReaderIndex();
         }
     }
 
@@ -122,6 +124,12 @@ public class DefaultHttpRequestEx extends DefaultFullHttpRequest implements Muta
     public void setNullableAttr(int position, @Nullable Object attr) {
         assert attributes[position] == null : "Attributes can't be overwritten: %d".formatted(position);
         attributes[position] = attr;
+    }
+
+    public @NotNull DefaultHttpRequestEx withHeaders(@NotNull Map<CharSequence, Object> headers) {
+        HttpHeaders requestHeaders = headers();
+        headers.forEach(requestHeaders::add);
+        return this;
     }
 
     @Override
