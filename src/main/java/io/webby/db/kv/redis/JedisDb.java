@@ -176,7 +176,7 @@ public class JedisDb<K, V> extends ByteArrayDb<K, V> implements KeyValueDb<K, V>
     }
 
     @Override
-    public void putAll(@NotNull Iterable<Map.Entry<? extends K, ? extends V>> entries) {
+    public void putAll(@NotNull Iterable<? extends Map.Entry<? extends K, ? extends V>> entries) {
         List<byte[]> keyVals = new ArrayList<>(2 * MoreIterables.estimateSizeInt(entries, 5));
         for (Map.Entry<? extends K, ? extends V> entry : entries) {
             keyVals.add(fromKey(entry.getKey()));
@@ -187,7 +187,7 @@ public class JedisDb<K, V> extends ByteArrayDb<K, V> implements KeyValueDb<K, V>
     }
 
     @Override
-    public void putAll(@NotNull Stream<Map.Entry<? extends K, ? extends V>> entries) {
+    public void putAll(@NotNull Stream<? extends Map.Entry<? extends K, ? extends V>> entries) {
         List<byte[]> keyVals = new ArrayList<>();
         entries.forEach(entry -> {
             keyVals.add(fromKey(entry.getKey()));

@@ -201,14 +201,14 @@ public class TrackingDbAdapter<K, V> implements KeyValueDb<K, V> {
     }
 
     @Override
-    public void putAll(@NotNull Iterable<Map.Entry<? extends K, ? extends V>> entries) {
+    public void putAll(@NotNull Iterable<? extends Map.Entry<? extends K, ? extends V>> entries) {
         try (OpContext ignored = listener.reportKeys(Stat.DB_SET, Streams.stream(entries).map(Map.Entry::getKey).toList())) {
             delegate.putAll(entries);
         }
     }
 
     @Override
-    public void putAll(@NotNull Stream<Map.Entry<? extends K, ? extends V>> entries) {
+    public void putAll(@NotNull Stream<? extends Map.Entry<? extends K, ? extends V>> entries) {
         putAll(entries.toList());   // have to materialize (can't reuse the stream)
     }
 

@@ -138,7 +138,7 @@ public class RocksDbImpl<K, V> extends ByteArrayDb<K, V> implements KeyValueDb<K
     }
 
     @Override
-    public void putAll(@NotNull Iterable<Map.Entry<? extends K, ? extends V>> entries) {
+    public void putAll(@NotNull Iterable<? extends Map.Entry<? extends K, ? extends V>> entries) {
         writeBatch(batch -> {
             for (Map.Entry<? extends K, ? extends V> entry : entries) {
                byte[] key = fromKey(entry.getKey());
@@ -149,7 +149,7 @@ public class RocksDbImpl<K, V> extends ByteArrayDb<K, V> implements KeyValueDb<K
     }
 
     @Override
-    public void putAll(@NotNull Stream<Map.Entry<? extends K, ? extends V>> entries) {
+    public void putAll(@NotNull Stream<? extends Map.Entry<? extends K, ? extends V>> entries) {
         writeBatch(batch ->
             entries.forEach(Consumers.rethrow(entry -> {
                byte[] key = fromKey(entry.getKey());

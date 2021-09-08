@@ -128,14 +128,14 @@ public class LmdbJavaDb<K, V> extends ByteArrayDb<K, V> implements KeyValueDb<K,
     }
 
     @Override
-    public void putAll(@NotNull Iterable<Map.Entry<? extends K, ? extends V>> entries) {
+    public void putAll(@NotNull Iterable<? extends Map.Entry<? extends K, ? extends V>> entries) {
         inWriteTxn(txn ->
             entries.forEach(entry -> putInTxn(entry.getKey(), entry.getValue(), txn))
         );
     }
 
     @Override
-    public void putAll(@NotNull Stream<Map.Entry<? extends K, ? extends V>> entries) {
+    public void putAll(@NotNull Stream<? extends Map.Entry<? extends K, ? extends V>> entries) {
         inWriteTxn(txn ->
             entries.forEach(entry -> putInTxn(entry.getKey(), entry.getValue(), txn))
         );

@@ -125,11 +125,11 @@ public interface KeyValueDb<K, V> extends Iterable<Map.Entry<K, V>>, Closeable {
         map.forEach(this::set);
     }
 
-    default void putAll(@NotNull Iterable<Map.Entry<? extends K, ? extends V>> entries) {
+    default void putAll(@NotNull Iterable<? extends Map.Entry<? extends K, ? extends V>> entries) {
         entries.forEach(entry -> set(entry.getKey(), entry.getValue()));
     }
 
-    default void putAll(@NotNull Stream<Map.Entry<? extends K, ? extends V>> entries) {
+    default void putAll(@NotNull Stream<? extends Map.Entry<? extends K, ? extends V>> entries) {
         entries.forEach(entry -> set(entry.getKey(), entry.getValue()));
     }
 
