@@ -42,8 +42,7 @@ public class BaseChannelTest {
         assertNotNull(channel, "Channel is not initialized. Add @BeforeEach setup method calling testStartup()");
     }
 
-    @NotNull
-    protected static <T> Queue<T> readAllOutbound(@NotNull EmbeddedChannel channel) {
+    protected static <T> @NotNull Queue<T> readAllOutbound(@NotNull EmbeddedChannel channel) {
         Queue<T> result = new ArrayDeque<>();
         T object;
         while ((object = channel.readOutbound()) != null) {

@@ -184,8 +184,7 @@ public class Webby {
         }
     }
 
-    @Nullable
-    private static String getCallerClassName() {
+    private static @Nullable String getCallerClassName() {
         // `mainModule` is the earliest possible external call. The trace counts right now:
         //  - getCallerClassName     0
         //  - validateHandlerFilter  1

@@ -6,6 +6,5 @@ import org.mapdb.DB;
 import org.mapdb.HTreeMap;
 
 public interface MapDbCreator {
-    @Nullable
-    DB.Maker<HTreeMap<?,?>> getMaker(@NotNull DB db, @NotNull String name, @NotNull Class<?> key, @NotNull Class<?> value);
+    @Nullable DB.Maker<HTreeMap<?,?>> getMaker(@NotNull DB db, @NotNull String name, @NotNull Class<?> key, @NotNull Class<?> value);
 }

@@ -12,8 +12,7 @@ public class WebsocketAgentScanner {
     @Inject private Settings settings;
     @Inject private ClasspathScanner scanner;
 
-    @NotNull
-    public Set<? extends Class<?>> getAgentClassesFromClasspath() {
+    public @NotNull Set<? extends Class<?>> getAgentClassesFromClasspath() {
         return scanner.getAnnotatedClasses(settings.handlerFilter(), Serve.class);
     }
 }

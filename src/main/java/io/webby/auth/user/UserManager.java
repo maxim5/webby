@@ -19,8 +19,7 @@ public class UserManager {
         db = castAny(dbFactory.getDb("users", Long.class, userFactory.getUserClass()));
     }
 
-    @Nullable
-    public User findById(long id) {
+    public @Nullable User findById(long id) {
         return db.get(id);
     }
 

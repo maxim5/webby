@@ -11,8 +11,7 @@ import java.util.concurrent.atomic.AtomicBoolean;
 public class AppMaintenanceInterceptor implements Interceptor {
     private final AtomicBoolean maintenance = new AtomicBoolean(false);
 
-    @NotNull
-    public AtomicBoolean maintenance() {
+    public @NotNull AtomicBoolean maintenance() {
         return maintenance;
     }
 
