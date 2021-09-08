@@ -11,7 +11,7 @@ import org.jetbrains.annotations.NotNull;
 
 import java.nio.file.Path;
 
-import static io.webby.db.kv.impl.KeyValueCommons.quiet;
+import static io.webby.util.Rethrow.Suppliers.runRethrow;
 
 public class HaloDbFactory extends BaseKeyValueFactory {
     @Inject private Settings settings;
@@ -28,7 +28,7 @@ public class HaloDbFactory extends BaseKeyValueFactory {
             if (keyCodec.size().isFixed()) {
                 options.setFixedKeySize(keyCodec.size().intNumBytes());
             }
-            HaloDB db = quiet(() -> HaloDB.open(storagePath.resolve(name).toFile(), options));
+            HaloDB db = runRethrow(() -> HaloDB.open(storagePath.resolve(name).toFile(), options));
             return new HaloDbImpl<>(db, keyCodec, valueCodec);
         });
     }

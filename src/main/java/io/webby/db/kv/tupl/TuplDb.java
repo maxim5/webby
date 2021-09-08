@@ -14,7 +14,8 @@ import java.io.IOException;
 import java.util.*;
 import java.util.function.Predicate;
 
-import static io.webby.db.kv.impl.KeyValueCommons.quiet;
+import static io.webby.util.Rethrow.Runnables.runRethrow;
+import static io.webby.util.Rethrow.Suppliers.runRethrow;
 import static io.webby.util.Rethrow.rethrow;
 
 public class TuplDb<K, V> extends ByteArrayDb<K, V> implements KeyValueDb<K, V> {
@@ -34,7 +35,7 @@ public class TuplDb<K, V> extends ByteArrayDb<K, V> implements KeyValueDb<K, V> 
 
     @Override
     public long longSize() {
-        return quiet(() -> index.count(null, true, null, true));
+        return runRethrow(() -> index.count(null, true, null, true));
     }
 
     @Override
@@ -126,22 +127,22 @@ public class TuplDb<K, V> extends ByteArrayDb<K, V> implements KeyValueDb<K, V> 
     }
 
     public void destroy() {
-        quiet(() -> database.deleteIndex(index));
+        runRethrow(() -> database.deleteIndex(index));
     }
 
     @Override
     public void flush() {
-        quiet(database::flush);
+        runRethrow(database::flush);
     }
 
     @Override
     public void forceFlush() {
-        quiet(database::sync);
+        runRethrow(database::sync);
     }
 
     @Override
     public void close() {
-        quiet(index::close);
+        runRethrow(index::close);
     }
 
     public @NotNull Index internalIndex() {
@@ -171,7 +172,7 @@ public class TuplDb<K, V> extends ByteArrayDb<K, V> implements KeyValueDb<K, V> 
         } catch (IOException e) {
             return rethrow(e);
         } finally {
-            quiet(transaction::exit);
+            runRethrow(transaction::exit);
         }
     }
 
@@ -183,7 +184,7 @@ public class TuplDb<K, V> extends ByteArrayDb<K, V> implements KeyValueDb<K, V> 
         } catch (IOException e) {
             rethrow(e);
         } finally {
-            quiet(transaction::exit);
+            runRethrow(transaction::exit);
         }
     }
 }

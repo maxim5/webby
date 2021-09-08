@@ -1,10 +1,7 @@
 package io.webby.util;
 
 import com.google.errorprone.annotations.CanIgnoreReturnValue;
-import io.webby.util.func.ThrowBiConsumer;
-import io.webby.util.func.ThrowConsumer;
-import io.webby.util.func.ThrowFunction;
-import io.webby.util.func.ThrowSupplier;
+import io.webby.util.func.*;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.function.BiConsumer;
@@ -21,6 +18,26 @@ public interface Rethrow {
     @CanIgnoreReturnValue
     static <T> T rethrow(@NotNull String message, @NotNull Throwable exception) {
         throw new RuntimeException(message, exception);
+    }
+
+    interface Runnables {
+        static <E extends Throwable> @NotNull Runnable rethrow(@NotNull ThrowRunnable<E> consumer) {
+            return () -> {
+                try {
+                    consumer.run();
+                } catch (Throwable e) {
+                    Rethrow.rethrow(e);
+                }
+            };
+        }
+
+        static <E extends Throwable> void runRethrow(@NotNull ThrowRunnable<E> action) {
+            try {
+                action.run();
+            } catch (Throwable e) {
+                Rethrow.rethrow(e);
+            }
+        }
     }
 
     interface Consumers {
@@ -54,6 +71,14 @@ public interface Rethrow {
                     return Rethrow.rethrow(e);
                 }
             };
+        }
+
+        static <T, E extends Throwable> T runRethrow(@NotNull ThrowSupplier<T, E> action) {
+            try {
+                return action.get();
+            } catch (Throwable e) {
+                return Rethrow.rethrow(e);
+            }
         }
     }
 

@@ -1,7 +1,9 @@
 package io.webby.db.kv.halodb;
 
+import com.oath.halodb.HaloDB;
+import com.oath.halodb.HaloDBIterator;
 import com.oath.halodb.Record;
-import com.oath.halodb.*;
+import com.oath.halodb.RecordKey;
 import io.webby.db.codec.Codec;
 import io.webby.db.kv.KeyValueDb;
 import io.webby.db.kv.impl.ByteArrayDb;
@@ -14,8 +16,9 @@ import java.util.Map;
 import java.util.Set;
 import java.util.stream.Collectors;
 
-import static io.webby.db.kv.impl.KeyValueCommons.quiet;
 import static io.webby.db.kv.impl.KeyValueCommons.streamOf;
+import static io.webby.util.Rethrow.Runnables.runRethrow;
+import static io.webby.util.Rethrow.Suppliers.runRethrow;
 
 public class HaloDbImpl<K, V> extends ByteArrayDb<K, V> implements KeyValueDb<K, V> {
     private final HaloDB db;
@@ -37,7 +40,7 @@ public class HaloDbImpl<K, V> extends ByteArrayDb<K, V> implements KeyValueDb<K,
 
     @Override
     public @Nullable V get(@NotNull K key) {
-        return quiet(() -> asValue(db.get(fromKey(key))));
+        return runRethrow(() -> asValue(db.get(fromKey(key))));
     }
 
     @Override
@@ -69,12 +72,12 @@ public class HaloDbImpl<K, V> extends ByteArrayDb<K, V> implements KeyValueDb<K,
 
     @Override
     public void set(@NotNull K key, @NotNull V value) {
-        quiet(() -> db.put(fromKey(key), fromValue(value)));
+        runRethrow(() -> db.put(fromKey(key), fromValue(value)));
     }
 
     @Override
     public void delete(@NotNull K key) {
-        quiet(() -> db.delete(fromKey(key)));
+        runRethrow(() -> db.delete(fromKey(key)));
     }
 
     @Override
@@ -89,7 +92,7 @@ public class HaloDbImpl<K, V> extends ByteArrayDb<K, V> implements KeyValueDb<K,
 
     @Override
     public void close() {
-        quiet(db::close);
+        runRethrow(db::close);
     }
 
     public @NotNull HaloDB internalDb() {
@@ -97,6 +100,6 @@ public class HaloDbImpl<K, V> extends ByteArrayDb<K, V> implements KeyValueDb<K,
     }
 
     private @NotNull HaloDBIterator dbIterator() {
-        return quiet(db::newIterator);
+        return runRethrow(db::newIterator);
     }
 }

@@ -20,7 +20,7 @@ import java.util.Set;
 import java.util.concurrent.CompletableFuture;
 import java.util.stream.Collectors;
 
-import static io.webby.db.kv.impl.KeyValueCommons.quiet;
+import static io.webby.util.Rethrow.Suppliers.runRethrow;
 
 public class JetcdDb<K, V> extends ByteArrayDb<K, V> implements KeyValueDb<K, V> {
     private final KV kv;
@@ -40,12 +40,12 @@ public class JetcdDb<K, V> extends ByteArrayDb<K, V> implements KeyValueDb<K, V>
 
     @Override
     public int size() {
-        return quiet(() -> kv.get(namespace, withGetOptions(true)).get().getKvs()).size();
+        return runRethrow(() -> kv.get(namespace, withGetOptions(true)).get().getKvs()).size();
     }
 
     @Override
     public boolean isEmpty() {
-        return quiet(() -> kv.get(namespace, withGetOptions(true)).get().getKvs()).isEmpty();
+        return runRethrow(() -> kv.get(namespace, withGetOptions(true)).get().getKvs()).isEmpty();
     }
 
     public @NotNull CompletableFuture<GetResponse> asyncGet(@NotNull K key) {
@@ -54,7 +54,7 @@ public class JetcdDb<K, V> extends ByteArrayDb<K, V> implements KeyValueDb<K, V>
 
     @Override
     public @Nullable V get(@NotNull K key) {
-        List<KeyValue> keyValues = quiet(() -> asyncGet(key).get().getKvs());
+        List<KeyValue> keyValues = runRethrow(() -> asyncGet(key).get().getKvs());
         return keyValues.isEmpty() ? null : toValue(keyValues.get(0).getValue());
     }
 
@@ -65,19 +65,19 @@ public class JetcdDb<K, V> extends ByteArrayDb<K, V> implements KeyValueDb<K, V>
 
     @Override
     public @NotNull Set<K> keySet() {
-        List<KeyValue> keyValues = quiet(() -> kv.get(namespace, withGetOptions(true)).get().getKvs());
+        List<KeyValue> keyValues = runRethrow(() -> kv.get(namespace, withGetOptions(true)).get().getKvs());
         return keyValues.stream().map(KeyValue::getKey).map(this::toKey).collect(Collectors.toSet());
     }
 
     @Override
     public @NotNull Collection<V> values() {
-        List<KeyValue> keyValues = quiet(() -> kv.get(namespace, withGetOptions(false)).get().getKvs());
+        List<KeyValue> keyValues = runRethrow(() -> kv.get(namespace, withGetOptions(false)).get().getKvs());
         return keyValues.stream().map(KeyValue::getValue).map(this::toValue).toList();
     }
 
     @Override
     public @NotNull Set<Map.Entry<K, V>> entrySet() {
-        List<KeyValue> keyValues = quiet(() -> kv.get(namespace, withGetOptions(false)).get().getKvs());
+        List<KeyValue> keyValues = runRethrow(() -> kv.get(namespace, withGetOptions(false)).get().getKvs());
         return keyValues.stream()
                 .map(entry -> asMapEntry(toKey(entry.getKey()), toValue(entry.getValue())))
                 .collect(Collectors.toSet());
@@ -85,12 +85,12 @@ public class JetcdDb<K, V> extends ByteArrayDb<K, V> implements KeyValueDb<K, V>
 
     @Override
     public void set(@NotNull K key, @NotNull V value) {
-        quiet(() -> kv.put(wrapByteSequence(fromKey(key)), wrapByteSequence(fromValue(value))).get());
+        runRethrow(() -> kv.put(wrapByteSequence(fromKey(key)), wrapByteSequence(fromValue(value))).get());
     }
 
     @Override
     public void delete(@NotNull K key) {
-        quiet(() -> kv.delete(wrapByteSequence(fromKey(key))).get());
+        runRethrow(() -> kv.delete(wrapByteSequence(fromKey(key))).get());
     }
 
     @Override
