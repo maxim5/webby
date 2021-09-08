@@ -5,6 +5,7 @@ import com.google.common.flogger.FluentLogger;
 import io.netty.handler.codec.http.HttpResponse;
 import io.webby.app.Settings;
 import io.webby.perf.stats.Stat;
+import io.webby.util.LazyBoolean;
 import io.webby.util.Pair;
 import org.jetbrains.annotations.NotNull;
 
@@ -17,12 +18,14 @@ import java.util.stream.Collectors;
 public class StatsSummary {
     private static final FluentLogger log = FluentLogger.forEnclosingClass();
 
-    private final Settings settings;
     private final RequestStatsCollector stats;
+    private final LazyBoolean isRecordsSummaryEnabled;
 
     public StatsSummary(@NotNull Settings settings, @NotNull RequestStatsCollector stats) {
-        this.settings = settings;
         this.stats = stats.stop();
+        this.isRecordsSummaryEnabled = new LazyBoolean(() ->
+            settings.getBoolProperty("perf.track.summary.records.enabled", false)
+        );
     }
 
     public void summarize(@NotNull HttpResponse response) {
@@ -32,22 +35,36 @@ public class StatsSummary {
         }
 
         // See https://stackoverflow.com/questions/220231/accessing-the-web-pages-http-headers-in-javascript
-        response.headers().add("Server-Timing", "%s;desc=\"%s\"".formatted("main", mainAsJson()));
+        String timing = isRecordsSummaryEnabled.get() ?
+                "%s;desc=\"%s\", %s;desc=\"%s\"".formatted("main", mainAsJson(), "records", recordsAsJson()) :
+                "%s;desc=\"%s\"".formatted("main", mainAsJson());
+        response.headers().add("Server-Timing", timing);
     }
 
     private @NotNull String mainAsTable() {
         return Streams.stream(stats.main())
-                .map(cursor -> "%s = %d".formatted(Stat.VALUES.get(cursor.key).name().toLowerCase(), cursor.value))
+                .map(cursor -> "%s = %d".formatted(Stat.NAMES.get(cursor.key), cursor.value))
                 .collect(Collectors.joining("\n"));
     }
 
     private @NotNull String mainAsJson() {
         List<Pair<String, Long>> pairs = Streams.stream(stats.main())
-                .map(cursor -> Pair.of(Stat.VALUES.get(cursor.key).name().toLowerCase(), (long) cursor.value))
+                .map(cursor -> Pair.of(Stat.NAMES.get(cursor.key), (long) cursor.value))
                 .collect(Collectors.toCollection(ArrayList::new));
         pairs.add(Pair.of("time", stats.totalElapsed(TimeUnit.MILLISECONDS)));
         return pairs.stream()
                 .map(pair -> "%s:%d".formatted(pair.first(), pair.second()))
                 .collect(Collectors.joining(",", "{", "}"));
+    }
+
+    private @NotNull String recordsAsJson() {
+        return Streams.stream(stats.records())
+                .map(cursor -> {
+                    String name = Stat.NAMES.get(cursor.key);
+                    String value = cursor.value.stream()
+                            .map(StatsRecord::toCompactString)
+                            .collect(Collectors.joining(",", "[", "]"));
+                    return "'%s':%s".formatted(name, value);
+                }).collect(Collectors.joining(",", "{", "}"));
     }
 }

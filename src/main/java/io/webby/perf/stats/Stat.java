@@ -1,5 +1,7 @@
 package io.webby.perf.stats;
 
+import com.google.mu.util.stream.BiStream;
+
 import java.util.Arrays;
 import java.util.Map;
 import java.util.stream.Collectors;
@@ -18,6 +20,7 @@ public enum Stat {
     RENDER(200);
 
     public static final Map<Integer, Stat> VALUES = Arrays.stream(Stat.values()).collect(Collectors.toMap(Stat::key, s -> s));
+    public static final Map<Integer, String> NAMES = BiStream.from(VALUES).mapValues(stat -> stat.name().toLowerCase()).toMap();
 
     private final int key;
 
