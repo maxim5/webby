@@ -1,9 +1,13 @@
 package io.webby.db.kv.tupl;
 
+import com.google.common.collect.Streams;
+import com.google.mu.util.stream.BiStream;
 import io.webby.db.codec.Codec;
 import io.webby.db.kv.KeyValueDb;
 import io.webby.db.kv.impl.ByteArrayDb;
+import io.webby.util.MoreIterables;
 import io.webby.util.PrimitiveWrappers.BoolFlag;
+import io.webby.util.Rethrow.Consumers;
 import io.webby.util.func.ThrowConsumer;
 import io.webby.util.func.ThrowFunction;
 import org.cojen.tupl.*;
@@ -12,7 +16,9 @@ import org.jetbrains.annotations.Nullable;
 
 import java.io.IOException;
 import java.util.*;
+import java.util.function.BiConsumer;
 import java.util.function.Predicate;
+import java.util.stream.Stream;
 
 import static io.webby.util.Rethrow.Runnables.runRethrow;
 import static io.webby.util.Rethrow.Suppliers.runRethrow;
@@ -53,6 +59,30 @@ public class TuplDb<K, V> extends ByteArrayDb<K, V> implements KeyValueDb<K, V> 
     }
 
     @Override
+    public @NotNull List<@Nullable V> getAll(@NotNull K @NotNull [] keys) {
+        return inReadTransaction(transaction -> {
+            ArrayList<@Nullable V> result = new ArrayList<>(keys.length);
+            for (K key : keys) {
+                V value = asValue(index.load(transaction, fromKey(key)));
+                result.add(value);
+            }
+            return result;
+        });
+    }
+
+    @Override
+    public @NotNull List<@Nullable V> getAll(@NotNull Iterable<K> keys) {
+        return inReadTransaction(transaction -> {
+            ArrayList<@Nullable V> result = new ArrayList<>(MoreIterables.estimateSizeInt(keys, 5));
+            for (K key : keys) {
+                V value = asValue(index.load(transaction, fromKey(key)));
+                result.add(value);
+            }
+            return result;
+        });
+    }
+
+    @Override
     public boolean containsValue(@NotNull V value) {
         BoolFlag found = new BoolFlag();
         byte[] bytes = fromValue(value);
@@ -65,6 +95,18 @@ public class TuplDb<K, V> extends ByteArrayDb<K, V> implements KeyValueDb<K, V> 
             return currentBytes != null;
         });
         return found.flag;
+    }
+
+    @Override
+    public void forEach(@NotNull BiConsumer<? super K, ? super V> action) {
+        iterate(cursor -> {
+            byte[] key = cursor.key();
+            byte[] value = cursor.value();
+            if (key != null) {
+                action.accept(asKey(key), asValue(value));
+            }
+            return key != null;
+        });
     }
 
     @Override
@@ -113,8 +155,74 @@ public class TuplDb<K, V> extends ByteArrayDb<K, V> implements KeyValueDb<K, V> 
     }
 
     @Override
+    public @Nullable V put(@NotNull K key, @NotNull V value) {
+        return fromWriteTransaction(transaction -> asValue(index.exchange(transaction, fromKey(key), fromValue(value))));
+    }
+
+    @Override
+    public void putAll(@NotNull Map<? extends K, ? extends V> map) {
+        putAll(map.entrySet());
+    }
+
+    @Override
+    public void putAll(@NotNull Iterable<? extends Map.Entry<? extends K, ? extends V>> entries) {
+        inWriteTransaction(transaction -> {
+            for (Map.Entry<? extends K, ? extends V> entry : entries) {
+                index.store(transaction, fromKey(entry.getKey()), fromValue(entry.getValue()));
+            }
+        });
+    }
+
+    @Override
+    public void putAll(@NotNull Stream<? extends Map.Entry<? extends K, ? extends V>> entries) {
+        inWriteTransaction(transaction ->
+            entries.forEach(Consumers.rethrow(entry ->
+                index.store(transaction, fromKey(entry.getKey()), fromValue(entry.getValue()))
+            ))
+        );
+    }
+
+    @Override
+    public void putAll(@NotNull K @NotNull [] keys, @NotNull V @NotNull [] values) {
+        assert keys.length == values.length : "Illegal arrays length: %d vs %d".formatted(keys.length, values.length);
+        inWriteTransaction(transaction -> {
+            for (int i = 0, n = keys.length; i < n; i++) {
+                index.store(transaction, fromKey(keys[i]), fromValue(values[i]));
+            }
+        });
+    }
+
+    @Override
+    public void putAll(@NotNull Iterable<? extends K> keys, @NotNull Iterable<? extends V> values) {
+        inWriteTransaction(transaction -> {
+            BiStream.zip(Streams.stream(keys), Streams.stream(values))
+                    .mapKeys(this::fromKey)
+                    .mapValues(this::fromValue)
+                    .forEach(Consumers.rethrow((k, v) -> index.store(transaction, k, v)));
+        });
+    }
+
+    @Override
     public void delete(@NotNull K key) {
         inWriteTransaction(transaction -> index.delete(transaction, fromKey(key)));
+    }
+
+    @Override
+    public void removeAll(@NotNull K @NotNull [] keys) {
+        inWriteTransaction(transaction -> {
+            for (K key : keys) {
+                index.delete(transaction, fromKey(key));
+            }
+        });
+    }
+
+    @Override
+    public void removeAll(@NotNull Iterable<K> keys) {
+        inWriteTransaction(transaction -> {
+            for (K key : keys) {
+                index.delete(transaction, fromKey(key));
+            }
+        });
     }
 
     @Override
@@ -183,6 +291,19 @@ public class TuplDb<K, V> extends ByteArrayDb<K, V> implements KeyValueDb<K, V> 
             transaction.commit();
         } catch (IOException e) {
             rethrow(e);
+        } finally {
+            runRethrow(transaction::exit);
+        }
+    }
+
+    private <T> T fromWriteTransaction(@NotNull ThrowFunction<Transaction, T, IOException> action) {
+        Transaction transaction = index.newTransaction(DurabilityMode.NO_SYNC);
+        try {
+            T result = action.apply(transaction);
+            transaction.commit();
+            return result;
+        } catch (IOException e) {
+            return rethrow(e);
         } finally {
             runRethrow(transaction::exit);
         }
