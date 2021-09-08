@@ -4,7 +4,6 @@ import com.google.common.base.Suppliers;
 import com.google.common.collect.Iterables;
 import com.google.common.collect.Streams;
 import com.google.mu.util.stream.BiStream;
-import io.netty.buffer.Unpooled;
 import io.webby.db.codec.Codec;
 import io.webby.db.kv.KeyValueDb;
 import io.webby.db.kv.impl.ByteArrayDb;
@@ -279,7 +278,7 @@ public class JedisDb<K, V> extends ByteArrayDb<K, V> implements KeyValueDb<K, V>
 
     @Override
     protected @NotNull K asKeyNotNull(byte @NotNull [] bytes) {
-        return keyCodec.readFromByteBuf(Unpooled.wrappedBuffer(bytes, namespace.length, bytes.length - namespace.length));
+        return keyCodec.readFromBytes(namespace.length, bytes);
     }
 
     private byte[][] fromKeys(@NotNull K @NotNull [] keys) {

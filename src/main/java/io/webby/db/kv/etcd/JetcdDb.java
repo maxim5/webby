@@ -129,6 +129,11 @@ public class JetcdDb<K, V> extends ByteArrayDb<K, V> implements KeyValueDb<K, V>
         return keyCodec.writeToBytes(namespace.getBytes(), key);
     }
 
+    @Override
+    protected @NotNull K asKeyNotNull(byte @NotNull [] bytes) {
+        return keyCodec.readFromBytes(namespace.size(), bytes);
+    }
+
     private @Nullable K toKey(@Nullable ByteSequence byteSequence) {
         return byteSequence != null ? asKey(byteSequence.getBytes()) : null;
     }

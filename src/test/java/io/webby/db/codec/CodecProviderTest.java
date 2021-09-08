@@ -1,13 +1,17 @@
 package io.webby.db.codec;
 
+import io.netty.buffer.ByteBuf;
 import io.webby.auth.session.Session;
 import io.webby.auth.user.DefaultUser;
 import io.webby.auth.user.UserAccess;
 import io.webby.testing.Testing;
+import io.webby.testing.TestingBytes;
 import org.jetbrains.annotations.NotNull;
 import org.junit.jupiter.api.Test;
 
+import java.nio.ByteBuffer;
 import java.time.Instant;
+import java.util.Arrays;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
@@ -27,7 +31,17 @@ public class CodecProviderTest {
 
     private static <T> void assertCodecRoundTrip(@NotNull Codec<T> codec, @NotNull T value) {
         byte[] bytes = codec.writeToBytes(value);
-        T object = codec.readFromBytes(bytes);
-        assertEquals(value, object);
+        assertEquals(value, codec.readFromBytes(bytes));
+
+        ByteBuffer buffer = codec.writeToByteBuffer(value);
+        assertEquals(value, codec.readFromByteBuffer(buffer));
+
+        ByteBuf byteBuf = codec.writeToByteBuf(value);
+        assertEquals(value, codec.readFromByteBuf(byteBuf));
+
+        byte[] prefix = { 0, 1, 2 };
+        byte[] prefixedBytes = codec.writeToBytes(prefix, value);
+        TestingBytes.assertBytes(bytes, Arrays.copyOfRange(prefixedBytes, prefix.length, prefixedBytes.length));
+        assertEquals(value, codec.readFromBytes(prefix.length, prefixedBytes));
     }
 }

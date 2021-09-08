@@ -55,6 +55,15 @@ public interface Codec<T> {
         }
     }
 
+    default @NotNull T readFromBytes(int skipBytes, byte @NotNull [] bytes) {
+        assert skipBytes <= bytes.length : "Invalid prefix: skip=%d, array-length=%d".formatted(skipBytes, bytes.length);
+        try (ByteArrayInputStream input = new ByteArrayInputStream(bytes, skipBytes, bytes.length)) {
+            return readFrom(input, input.available());
+        } catch (IOException impossible) {
+            return rethrow(impossible);
+        }
+    }
+
     default @NotNull T readFromByteBuf(@NotNull ByteBuf buf) {
         try (ByteBufInputStream input = new ByteBufInputStream(buf)) {
             return readFrom(input, input.available());
