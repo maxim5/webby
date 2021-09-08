@@ -189,7 +189,7 @@ public class WebsocketAgentBinder {
             try {
                 List<Token> tokens = settings.urlParser().parse(url);
                 boolean isValidUrl = tokens.size() == 1 && tokens.get(0) instanceof ConstToken;
-                WebsocketAgentConfigError.assure(isValidUrl, "Websocket URL can't contain variables: %s", url);
+                assure(isValidUrl, "Websocket URL can't contain variables: %s", url);
             } catch (QueryParseException e) {
                 throw new UrlConfigError("Invalid URL: %s".formatted(url), e);
             }
