@@ -19,7 +19,7 @@ public class TestingRender {
 
         public @NotNull Consumer<AppSettings> asSettingsUpdater() {
             return settings -> {
-                settings.setDevMode(this != Config.BytesStatsDisabled);
+                settings.setProfileMode(this != Config.BytesStatsDisabled);
                 settings.setStreamingEnabled(this == Config.StreamingEnabled);
             };
         }

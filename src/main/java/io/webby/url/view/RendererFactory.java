@@ -6,6 +6,7 @@ import io.webby.app.Settings;
 import io.webby.common.InjectorHelper;
 import io.webby.perf.stats.impl.StatsManager;
 import io.webby.url.annotate.Render;
+import io.webby.util.LazyBoolean;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.logging.Level;
@@ -16,6 +17,10 @@ public class RendererFactory {
     @Inject private InjectorHelper helper;
     @Inject private Settings settings;
     @Inject private StatsManager statsManager;
+
+    private final LazyBoolean isTrackingRenderingOn = new LazyBoolean(() ->
+        settings.isProfileMode() && settings.getBoolProperty("perf.track.render.enabled", true)
+    );
 
     public @NotNull Renderer<?> getRenderer(@NotNull Render render, @NotNull String viewName) {
         Renderer<?> renderer = trackIfNecessary(getRawRenderer(render));
@@ -33,14 +38,10 @@ public class RendererFactory {
     }
 
     private @NotNull Renderer<?> trackIfNecessary(@NotNull Renderer<?> renderer) {
-        if (shouldTrack()) {
+        if (isTrackingRenderingOn.get()) {
             return new TrackingRenderAdapter<>(renderer, statsManager.newRenderingStatsListener());
         }
         return renderer;
-    }
-
-    private boolean shouldTrack() {
-        return settings.isProfileMode();
     }
 
     private @NotNull Renderer<?> getRawRenderer(@NotNull Render render) {

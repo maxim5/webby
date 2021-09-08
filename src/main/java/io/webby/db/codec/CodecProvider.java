@@ -8,6 +8,7 @@ import io.webby.auth.session.SessionCodec;
 import io.webby.auth.user.DefaultUser;
 import io.webby.auth.user.DefaultUserCodec;
 import io.webby.perf.stats.impl.StatsManager;
+import io.webby.util.LazyBoolean;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
@@ -32,9 +33,13 @@ public class CodecProvider {
     @Inject private Settings settings;
     @Inject private StatsManager statsManager;
 
+    private final LazyBoolean isTrackingCodecOn = new LazyBoolean(() ->
+        settings.isProfileMode() && settings.getBoolProperty("perf.track.codec.enabled", true)
+    );
+
     public <T> @Nullable Codec<T> getCodecOrNull(@NotNull Class<T> klass) {
         Codec<T> codec = castAny(map.get(klass));
-        if (codec != null && shouldTrack()) {
+        if (codec != null && isTrackingCodecOn.get()) {
             return new TrackingCodecAdapter<>(codec, statsManager.newCodecStatsListener());
         }
         return codec;
@@ -42,12 +47,8 @@ public class CodecProvider {
 
     public <T> @NotNull Codec<T> getCodecOrDie(@NotNull Class<T> klass) {
         Codec<T> codec = getCodecOrNull(klass);
-        assert codec != null : "No codec found the class: %s".formatted(klass);
+        assert codec != null : "No codec found for the class: %s".formatted(klass);
         return codec;
-    }
-
-    private boolean shouldTrack() {
-        return settings.isProfileMode();
     }
 
     public static final Codec<Integer> INT_CODEC = new Codec<>() {

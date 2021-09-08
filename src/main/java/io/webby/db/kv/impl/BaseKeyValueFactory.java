@@ -5,6 +5,7 @@ import io.webby.app.Settings;
 import io.webby.common.Lifetime;
 import io.webby.db.kv.KeyValueDb;
 import io.webby.perf.stats.impl.StatsManager;
+import io.webby.util.LazyBoolean;
 import org.jetbrains.annotations.NotNull;
 
 import java.io.Closeable;
@@ -22,6 +23,10 @@ public abstract class BaseKeyValueFactory implements InternalKeyValueFactory, Cl
     @Inject private Settings settings;
     @Inject private StatsManager statsManager;
 
+    private final LazyBoolean isTrackingKeyValuesOn = new LazyBoolean(() ->
+        settings.isProfileMode() && settings.getBoolProperty("perf.track.db.kv.enabled", true)
+    );
+
     @Inject
     protected void init(@NotNull Lifetime lifetime) {
         lifetime.onTerminate(this);
@@ -30,14 +35,10 @@ public abstract class BaseKeyValueFactory implements InternalKeyValueFactory, Cl
     @Override
     public @NotNull <K, V> KeyValueDb<K, V> getDb(@NotNull String name, @NotNull Class<K> key, @NotNull Class<V> value) {
         KeyValueDb<K, V> internalDb = getInternalDb(name, key, value);
-        if (shouldTrack()) {
+        if (isTrackingKeyValuesOn.get()) {
             return new TrackingDbAdapter<>(internalDb, statsManager.newDbListener());
         }
         return internalDb;
-    }
-
-    private boolean shouldTrack() {
-        return settings.isProfileMode();  // add DB-specific property?
     }
 
     protected <K, V, KV extends KeyValueDb<K, V>> @NotNull KV cacheIfAbsent(@NotNull String name, @NotNull Supplier<KV> supplier) {
