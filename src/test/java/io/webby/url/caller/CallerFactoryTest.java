@@ -173,6 +173,7 @@ public class CallerFactoryTest {
 
         assertEquals("FOO", caller.call(get(), vars("str", "foo")));
         assertEquals("BAR", caller.call(post(), vars("str", "bar")));
+        assertThrows(ConversionError.class, () -> caller.call(get(), vars()));
     }
 
     @Test
@@ -185,6 +186,7 @@ public class CallerFactoryTest {
 
         assertEquals(3, caller.call(get(), vars("str", "foo")));
         assertEquals(3, caller.call(post(), vars("str", "bar")));
+        assertThrows(ConversionError.class, () -> caller.call(get(), vars()));
     }
 
     @Test
@@ -213,6 +215,27 @@ public class CallerFactoryTest {
         assertEquals("foo:bar", caller.call(get(), vars("a", "foo", "b", "bar")));
         assertEquals("foo:", caller.call(get(), vars("a", "foo", "b", "")));
         assertEquals(":bar", caller.call(post(), vars("a", "", "b", "bar")));
+        assertEquals(":", caller.call(post(), vars("a", "", "b", "")));
+        assertThrows(ConversionError.class, () -> caller.call(get(), vars("a", "foo")));
+        assertThrows(ConversionError.class, () -> caller.call(get(), vars("b", "bar")));
+        assertThrows(ConversionError.class, () -> caller.call(get(), vars()));
+    }
+
+    @Test
+    public void optimized_two_vars_int_string() throws Exception {
+        interface IntStrFunction {
+            String apply(int a, String b);
+        }
+        IntStrFunction instance = "%d:%s"::formatted;
+        Caller caller = factory.create(instance, binding(instance), Map.of(), List.of("a", "b"));
+
+        assertEquals("1:bar", caller.call(get(), vars("a", 1, "b", "bar")));
+        assertEquals("0:", caller.call(get(), vars("a", 0, "b", "")));
+        assertEquals("0:bar", caller.call(post(), vars("a", 0, "b", "bar")));
+        assertThrows(ConversionError.class, () -> caller.call(get(), vars("a", "foo", "b", "bar")));
+        assertThrows(ConversionError.class, () -> caller.call(get(), vars("a", 10)));
+        assertThrows(ConversionError.class, () -> caller.call(get(), vars("b", "bar")));
+        assertThrows(ConversionError.class, () -> caller.call(get(), vars()));
     }
 
     @Test

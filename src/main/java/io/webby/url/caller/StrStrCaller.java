@@ -7,6 +7,7 @@ import org.jetbrains.annotations.NotNull;
 
 import java.lang.reflect.Method;
 import java.util.Map;
+import java.util.Objects;
 
 public record StrStrCaller(Object instance, Method method,
                            StringConverter validator1, StringConverter validator2,
@@ -14,10 +15,10 @@ public record StrStrCaller(Object instance, Method method,
                            RichCallOptions opts) implements Caller {
     @Override
     public Object call(@NotNull FullHttpRequest request, @NotNull Map<String, CharArray> variables) throws Exception {
-        CharSequence value1 = (opts.wantsBuffer1) ? variables.get(name1) : variables.get(name1).toString();
+        CharSequence value1 = (opts.wantsBuffer1) ? variables.get(name1) : Objects.toString(variables.get(name1), null);
         validator1.validateString(name1, value1);
 
-        CharSequence value2 = (opts.wantsBuffer2) ? variables.get(name2) : variables.get(name2).toString();
+        CharSequence value2 = (opts.wantsBuffer2) ? variables.get(name2) : Objects.toString(variables.get(name2), null);
         validator2.validateString(name2, value2);
 
         if (opts.wantsContent()) {
