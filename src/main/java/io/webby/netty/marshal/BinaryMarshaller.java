@@ -7,6 +7,7 @@ import io.webby.common.SystemProperties;
 import org.jetbrains.annotations.NotNull;
 
 import java.io.*;
+import java.nio.ByteBuffer;
 
 import static io.webby.util.Rethrow.rethrow;
 
@@ -22,6 +23,10 @@ public interface BinaryMarshaller {
         }
     }
 
+    default @NotNull ByteBuffer writeByteBuffer(@NotNull Object instance) {
+        return ByteBuffer.wrap(writeBytes(instance));
+    }
+
     default @NotNull ByteBuf writeByteBuf(@NotNull Object instance) {
         return Unpooled.wrappedBuffer(writeBytes(instance));
     }
@@ -34,6 +39,10 @@ public interface BinaryMarshaller {
         } catch (IOException impossible) {
             return rethrow(impossible);
         }
+    }
+
+    default <T> @NotNull T readFromByteBuffer(@NotNull ByteBuffer buffer, @NotNull Class<T> klass) {
+        return readByteBuf(Unpooled.wrappedBuffer(buffer), klass);
     }
 
     default <T> @NotNull T readByteBuf(@NotNull ByteBuf byteBuf, @NotNull Class<T> klass) {

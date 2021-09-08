@@ -37,12 +37,12 @@ public interface Codec<T> {
         }
     }
 
-    default @NotNull ByteBuf writeToByteBuf(@NotNull T instance) {
-        return Unpooled.wrappedBuffer(writeToBytes(instance));
-    }
-
     default @NotNull ByteBuffer writeToByteBuffer(@NotNull T instance) {
         return ByteBuffer.wrap(writeToBytes(instance));
+    }
+
+    default @NotNull ByteBuf writeToByteBuf(@NotNull T instance) {
+        return Unpooled.wrappedBuffer(writeToBytes(instance));
     }
 
     @NotNull T readFrom(@NotNull InputStream input, int available) throws IOException;
@@ -64,15 +64,15 @@ public interface Codec<T> {
         }
     }
 
+    default @NotNull T readFromByteBuffer(@NotNull ByteBuffer buffer) {
+        return readFromByteBuf(Unpooled.wrappedBuffer(buffer));
+    }
+
     default @NotNull T readFromByteBuf(@NotNull ByteBuf buf) {
         try (ByteBufInputStream input = new ByteBufInputStream(buf)) {
             return readFrom(input, input.available());
         } catch (IOException impossible) {
             return rethrow(impossible);
         }
-    }
-
-    default @NotNull T readFromByteBuffer(@NotNull ByteBuffer buffer) {
-        return readFromByteBuf(Unpooled.wrappedBuffer(buffer));
     }
 }
