@@ -50,7 +50,7 @@ public class AssertJson {
         assertEquals(((Number) actual).doubleValue(), expected.doubleValue());
     }
 
-    public static void assertJsonConversion(@NotNull Json json, @NotNull Object object) {
+    public static void assertJsonStringRoundTrip(@NotNull Json json, @NotNull Object object) {
         String string = json.writeString(object);
         assertThat(string).isNotEmpty();
         Object another = json.readString(string, object.getClass());

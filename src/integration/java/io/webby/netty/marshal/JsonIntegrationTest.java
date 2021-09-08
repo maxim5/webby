@@ -10,7 +10,6 @@ import org.jetbrains.annotations.NotNull;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.EnumSource;
 
-import java.io.IOException;
 import java.io.StringReader;
 import java.time.Instant;
 import java.util.*;
@@ -104,24 +103,24 @@ public class JsonIntegrationTest {
 
     @ParameterizedTest
     @EnumSource(MarshallerFactory.SupportedJsonLibrary.class)
-    public void convert_sample_bean(MarshallerFactory.SupportedJsonLibrary library) {
+    public void roundtrip_sample_bean(MarshallerFactory.SupportedJsonLibrary library) {
         Json json = setupJson(library);
-        assertJsonConversion(json, new SampleBean(123, "foo", List.of(1, 2)));
+        assertJsonStringRoundTrip(json, new SampleBean(123, "foo", List.of(1, 2)));
     }
 
     // GSON: https://github.com/google/gson/issues/1794
     @ParameterizedTest
     @EnumSource(value = MarshallerFactory.SupportedJsonLibrary.class, names = "DSL_JSON")
-    public void convert_default_user(MarshallerFactory.SupportedJsonLibrary library) {
+    public void roundtrip_default_user(MarshallerFactory.SupportedJsonLibrary library) {
         Json json = setupJson(library);
-        assertJsonConversion(json, new DefaultUser(123, UserAccess.Simple));
+        assertJsonStringRoundTrip(json, new DefaultUser(123, UserAccess.Simple));
     }
 
     // @ParameterizedTest
     // @EnumSource(value = MarshallerFactory.SupportedJsonLibrary.class)
-    public void convert_session(MarshallerFactory.SupportedJsonLibrary library) {
+    public void roundtrip_session(MarshallerFactory.SupportedJsonLibrary library) {
         Json json = setupJson(library);
-        assertJsonConversion(json, new Session(123, -1, Instant.now(), "User-Agent", "127.0.0.1"));
+        assertJsonStringRoundTrip(json, new Session(123, -1, Instant.now(), "User-Agent", "127.0.0.1"));
     }
 
     private static void assertJsonRead(Json json, String input, Class<?> klass, Object expected) throws Exception {
@@ -132,7 +131,7 @@ public class JsonIntegrationTest {
         assertJsonEquivalent(json.readByteBuf(asByteBuf(input), klass), expected);
     }
 
-    private void assertJsonWrite(Json json, Object instance, String expected) throws IOException {
+    private static void assertJsonWrite(Json json, Object instance, String expected) throws Exception {
         assertEquals(expected, json.writeString(instance));
         assertEquals(expected, writeToString(writer -> json.writeChars(writer, instance)));
         assertBytes(json.writeBytes(instance), expected);
