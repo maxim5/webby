@@ -31,7 +31,7 @@ public class Codecs {
     }
 
     public static int readByte8(@NotNull InputStream input) throws IOException {
-        return input.read();
+        return (byte) input.read();
     }
 
     public static int writeInt16(int value, @NotNull OutputStream output) throws IOException {
@@ -185,7 +185,7 @@ public class Codecs {
         return byteLength >= 0 ? INT16_SIZE + byteLength : -1;
     }
 
-    public static int nullableShortStringSize(@Nullable String value, @NotNull Charset charset) {
+    public static int shortNullableStringSize(@Nullable String value, @NotNull Charset charset) {
         int byteLength = getByteLength(value, charset);
         return byteLength >= 0 ? INT16_SIZE + byteLength : -1;
     }
