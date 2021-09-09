@@ -7,6 +7,7 @@ import com.google.common.primitives.Longs;
 import com.google.common.primitives.Shorts;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
+import org.jetbrains.annotations.VisibleForTesting;
 
 import java.io.IOException;
 import java.io.InputStream;
@@ -190,7 +191,8 @@ public class Codecs {
     }
 
     @SuppressWarnings("UnstableApiUsage")
-    private static int getByteLength(@Nullable CharSequence s, @NotNull Charset charset) {
+    @VisibleForTesting
+    static int getByteLength(@Nullable CharSequence s, @NotNull Charset charset) {
         if (s == null || s.isEmpty()) {
             return 0;
         }

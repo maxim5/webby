@@ -6,7 +6,6 @@ import io.webby.auth.session.Session;
 import io.webby.auth.user.DefaultUser;
 import io.webby.auth.user.UserAccess;
 import io.webby.testing.Testing;
-import io.webby.testing.TestingBytes;
 import org.jetbrains.annotations.NotNull;
 import org.junit.jupiter.api.Test;
 
@@ -15,6 +14,7 @@ import java.nio.ByteBuffer;
 import java.time.Instant;
 import java.util.Arrays;
 
+import static io.webby.testing.TestingBytes.assertBytes;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
 public class CodecProviderTest {
@@ -57,7 +57,8 @@ public class CodecProviderTest {
 
         byte[] prefix = { 0, 1, 2 };
         byte[] prefixedBytes = codec.writeToBytes(prefix, value);
-        TestingBytes.assertBytes(bytes, Arrays.copyOfRange(prefixedBytes, prefix.length, prefixedBytes.length));
+        assertBytes(prefix, Arrays.copyOfRange(prefixedBytes, 0, prefix.length));
+        assertBytes(bytes, Arrays.copyOfRange(prefixedBytes, prefix.length, prefixedBytes.length));
         assertEquals(value, codec.readFromBytes(prefix.length, prefixedBytes));
         assertSize(prefixedBytes.length - prefix.length, predictedSize);
     }
