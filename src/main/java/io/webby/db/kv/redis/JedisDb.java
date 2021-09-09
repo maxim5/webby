@@ -7,7 +7,7 @@ import com.google.mu.util.stream.BiStream;
 import io.webby.db.codec.Codec;
 import io.webby.db.kv.KeyValueDb;
 import io.webby.db.kv.impl.ByteArrayDb;
-import io.webby.util.MoreIterables;
+import io.webby.util.EasyIterables;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import redis.clients.jedis.Jedis;
@@ -176,7 +176,7 @@ public class JedisDb<K, V> extends ByteArrayDb<K, V> implements KeyValueDb<K, V>
 
     @Override
     public void putAll(@NotNull Iterable<? extends Map.Entry<? extends K, ? extends V>> entries) {
-        List<byte[]> keyVals = new ArrayList<>(2 * MoreIterables.estimateSizeInt(entries, 5));
+        List<byte[]> keyVals = new ArrayList<>(2 * EasyIterables.estimateSizeInt(entries, 5));
         for (Map.Entry<? extends K, ? extends V> entry : entries) {
             keyVals.add(fromKey(entry.getKey()));
             keyVals.add(fromValue(entry.getValue()));
@@ -212,8 +212,8 @@ public class JedisDb<K, V> extends ByteArrayDb<K, V> implements KeyValueDb<K, V>
 
     @Override
     public void putAll(@NotNull Iterable<? extends K> keys, @NotNull Iterable<? extends V> values) {
-        List<? extends K> keysList = MoreIterables.asList(keys);
-        List<? extends V> valuesList = MoreIterables.asList(values);
+        List<? extends K> keysList = EasyIterables.asList(keys);
+        List<? extends V> valuesList = EasyIterables.asList(values);
 
         int n = keysList.size();
         int m = valuesList.size();

@@ -21,7 +21,7 @@ import java.util.function.Function;
 import java.util.function.Predicate;
 import java.util.stream.Stream;
 
-import static io.webby.util.PrimitiveWrappers.IntCounter;
+import static io.webby.util.EasyPrimitives.IntCounter;
 import static io.webby.util.EasyIO.Close.closeQuietly;
 
 public class LevelDbImpl<K, V> extends ByteArrayDb<K, V> implements KeyValueDb<K, V> {

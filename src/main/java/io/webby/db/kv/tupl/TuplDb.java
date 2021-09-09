@@ -5,8 +5,8 @@ import com.google.mu.util.stream.BiStream;
 import io.webby.db.codec.Codec;
 import io.webby.db.kv.KeyValueDb;
 import io.webby.db.kv.impl.ByteArrayDb;
-import io.webby.util.MoreIterables;
-import io.webby.util.PrimitiveWrappers.BoolFlag;
+import io.webby.util.EasyIterables;
+import io.webby.util.EasyPrimitives.BoolFlag;
 import io.webby.util.Rethrow.Consumers;
 import io.webby.util.func.ThrowConsumer;
 import io.webby.util.func.ThrowFunction;
@@ -73,7 +73,7 @@ public class TuplDb<K, V> extends ByteArrayDb<K, V> implements KeyValueDb<K, V> 
     @Override
     public @NotNull List<@Nullable V> getAll(@NotNull Iterable<K> keys) {
         return inReadTransaction(transaction -> {
-            ArrayList<@Nullable V> result = new ArrayList<>(MoreIterables.estimateSizeInt(keys, 5));
+            ArrayList<@Nullable V> result = new ArrayList<>(EasyIterables.estimateSizeInt(keys, 5));
             for (K key : keys) {
                 V value = asValue(index.load(transaction, fromKey(key)));
                 result.add(value);

@@ -26,7 +26,7 @@ public class HaloDbFactory extends BaseKeyValueFactory {
             Path storagePath = settings.storagePath();
             HaloDBOptions options = getOptions();
             if (keyCodec.size().isFixed()) {
-                options.setFixedKeySize(keyCodec.size().intNumBytes());
+                options.setFixedKeySize(keyCodec.size().numBytes());
             }
             HaloDB db = runRethrow(() -> HaloDB.open(storagePath.resolve(name).toFile(), options));
             return new HaloDbImpl<>(db, keyCodec, valueCodec);

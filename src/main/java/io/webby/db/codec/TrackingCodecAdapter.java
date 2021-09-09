@@ -2,7 +2,7 @@ package io.webby.db.codec;
 
 import io.webby.perf.stats.CodecStatsListener;
 import io.webby.perf.stats.Stat;
-import io.webby.util.PrimitiveWrappers.IntCounter;
+import io.webby.util.EasyPrimitives.IntCounter;
 import org.jetbrains.annotations.NotNull;
 
 import java.io.IOException;
@@ -21,6 +21,11 @@ public class TrackingCodecAdapter<T> implements Codec<T> {
     @Override
     public @NotNull CodecSize size() {
         return delegate.size();
+    }
+
+    @Override
+    public int sizeOf(@NotNull T instance) {
+        return delegate.sizeOf(instance);
     }
 
     @Override

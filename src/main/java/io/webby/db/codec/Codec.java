@@ -4,22 +4,30 @@ import com.google.errorprone.annotations.CanIgnoreReturnValue;
 import io.netty.buffer.ByteBuf;
 import io.netty.buffer.ByteBufInputStream;
 import io.netty.buffer.Unpooled;
+import io.webby.common.SystemProperties;
 import org.jetbrains.annotations.NotNull;
 
 import java.io.*;
 import java.nio.ByteBuffer;
 
+import static io.webby.util.EasyPrimitives.firstNonNegative;
 import static io.webby.util.Rethrow.rethrow;
 
 // Aka Serializer
 public interface Codec<T> {
     @NotNull CodecSize size();
 
+    default int sizeOf(@NotNull T instance) {
+        CodecSize size = size();
+        return size.isFixed() ? size.numBytes() : - 1;
+    }
+
     @CanIgnoreReturnValue
     int writeTo(@NotNull OutputStream output, @NotNull T instance) throws IOException;
 
     default byte @NotNull [] writeToBytes(@NotNull T instance) {
-        try (ByteArrayOutputStream output = new ByteArrayOutputStream(size().intNumBytes())) {
+        int expectedSize = firstNonNegative(sizeOf(instance), size().numBytes(), SystemProperties.DEFAULT_SIZE_BYTES);
+        try (ByteArrayOutputStream output = new ByteArrayOutputStream(expectedSize)) {
             writeTo(output, instance);
             return output.toByteArray();
         } catch (IOException impossible) {
@@ -28,7 +36,8 @@ public interface Codec<T> {
     }
 
     default byte @NotNull [] writeToBytes(byte @NotNull [] prefix, @NotNull T instance) {
-        try (ByteArrayOutputStream output = new ByteArrayOutputStream(prefix.length + size().intNumBytes())) {
+        int expectedSize = firstNonNegative(sizeOf(instance), size().numBytes(), SystemProperties.DEFAULT_SIZE_BYTES);
+        try (ByteArrayOutputStream output = new ByteArrayOutputStream(prefix.length + expectedSize)) {
             output.writeBytes(prefix);
             writeTo(output, instance);
             return output.toByteArray();

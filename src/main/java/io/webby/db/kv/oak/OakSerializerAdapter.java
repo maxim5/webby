@@ -11,11 +11,11 @@ import java.nio.ByteBuffer;
 
 public final class OakSerializerAdapter<T> implements OakSerializer<T> {
     private final Codec<T> codec;
-    private final int sizeInBytes;
+    private final int fixedSizeInBytes;
 
     public OakSerializerAdapter(@NotNull Codec<T> codec) {
         this.codec = codec;
-        this.sizeInBytes = codec.size().isFixed() ? codec.size().intNumBytes() : -1;
+        this.fixedSizeInBytes = codec.size().isFixed() ? codec.size().numBytes() : -1;
     }
 
     @Override
@@ -34,6 +34,9 @@ public final class OakSerializerAdapter<T> implements OakSerializer<T> {
 
     @Override
     public int calculateSize(T object) {
-        return sizeInBytes >= 0 ? sizeInBytes : codec.writeToBytes(object).length;
+        int size;
+        return fixedSizeInBytes >= 0 ? fixedSizeInBytes :
+                (size = codec.sizeOf(object)) >= 0 ? size :
+                        codec.writeToBytes(object).length;
     }
 }
