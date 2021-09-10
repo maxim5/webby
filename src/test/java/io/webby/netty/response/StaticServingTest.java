@@ -9,7 +9,7 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 
 public class StaticServingTest {
     @Test
-    public void guessContentType_simple() throws Exception {
+    public void guessContentType_simple() {
         assertEquals("image/jpeg", guessContentType(Path.of("foo.jpg")));
         assertEquals("image/png", guessContentType(Path.of("foo.png")));
         assertEquals("image/gif", guessContentType(Path.of("foo.gif")));

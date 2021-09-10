@@ -7,6 +7,7 @@ import io.netty.buffer.ByteBuf;
 import io.netty.buffer.Unpooled;
 import io.netty.handler.codec.http.*;
 import io.webby.app.Settings;
+import io.webby.util.Rethrow;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import org.jetbrains.annotations.VisibleForTesting;
@@ -19,8 +20,9 @@ import java.nio.MappedByteBuffer;
 import java.nio.channels.FileChannel;
 import java.nio.file.Files;
 import java.nio.file.Path;
-import java.util.Map;
+import java.util.List;
 import java.util.function.Consumer;
+import java.util.function.Supplier;
 import java.util.logging.Level;
 
 public class StaticServing {
@@ -97,26 +99,22 @@ public class StaticServing {
         return Unpooled.wrappedBuffer(mappedByteBuffer);
     }
 
-    // Consider also
-    // https://github.com/j256/simplemagic (Unix)
-    // https://github.com/oblac/jodd/
-    // https://github.com/arimus/jmimemagic
-    // org.apache.tika
-    private static final Map<String, CharSequence> EXTENSIONS = Map.of(
-        "js", "application/javascript"
-    );
-
     @VisibleForTesting
-    static @Nullable CharSequence guessContentType(@NotNull Path path) throws IOException {
-        String fullName = path.toString();
-        CharSequence knownType = EXTENSIONS.get(com.google.common.io.Files.getFileExtension(fullName));
-        if (knownType != null) {
-            return knownType;
+    static @Nullable CharSequence guessContentType(@NotNull Path path) {
+        return firstNotNull(List.of(
+            () -> URLConnection.guessContentTypeFromName(path.toString()),
+            Rethrow.Suppliers.rethrow(() -> Files.probeContentType(path)),
+            Rethrow.Suppliers.rethrow(() -> ThirdPartyMimeTypeDetectors.detect(path.toFile()))
+        ));
+    }
+
+    private static <T> @Nullable T firstNotNull(@NotNull Iterable<Supplier<@Nullable T>> suppliers) {
+        for (Supplier<T> supplier : suppliers) {
+            T value = supplier.get();
+            if (value != null) {
+                return value;
+            }
         }
-        String contentType = URLConnection.guessContentTypeFromName(fullName);
-        if (contentType != null) {
-            return contentType;
-        }
-        return Files.probeContentType(path);
+        return null;
     }
 }
