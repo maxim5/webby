@@ -8,7 +8,6 @@ import com.google.protobuf.TextFormat;
 import org.jetbrains.annotations.NotNull;
 
 import java.io.*;
-import java.net.UnknownServiceException;
 import java.nio.charset.Charset;
 
 import static io.webby.util.EasyCast.castAny;
@@ -29,24 +28,36 @@ public record ProtobufMarshaller(@NotNull Charset charset) implements Marshaller
     public void writeChars(@NotNull Writer writer, @NotNull Object instance) throws IOException {
         if (instance instanceof Message message) {
             writer.write(message.toString());
+        } else {
+            throw protoUnavailableFor(instance);
         }
-        throw new UnsupportedOperationException("Protobuf is not available for non-Message classes: %s".formatted(instance));
+    }
+
+    @Override
+    public @NotNull String writeString(@NotNull Object instance) {
+        if (instance instanceof Message message) {
+            return message.toString();
+        } else {
+            throw protoUnavailableFor(instance);
+        }
     }
 
     @Override
     public void writeBytes(@NotNull OutputStream output, @NotNull Object instance) throws IOException {
         if (instance instanceof Message message) {
             message.writeTo(output);
+        } else {
+            throw protoUnavailableFor(instance);
         }
-        throw new UnknownServiceException("Protobuf is not available for non-Message classes: %s".formatted(instance));
     }
 
     @Override
     public byte @NotNull [] writeBytes(@NotNull Object instance) {
         if (instance instanceof Message message) {
             return message.toByteArray();
+        } else {
+            throw protoUnavailableFor(instance);
         }
-        throw new UnsupportedOperationException("Protobuf is not available for non-Message classes: %s".formatted(instance));
     }
 
     @Override
@@ -56,7 +67,7 @@ public record ProtobufMarshaller(@NotNull Charset charset) implements Marshaller
             TextFormat.merge(reader, builder);
             return castAny(builder.build());
         }
-        throw new UnsupportedOperationException("Protobuf is not available for non-Message classes: %s".formatted(klass));
+        throw protoUnavailableFor(klass);
     }
 
     @Override
@@ -64,7 +75,7 @@ public record ProtobufMarshaller(@NotNull Charset charset) implements Marshaller
         if (Message.class.isAssignableFrom(klass)) {
             return getParser(klass).parseFrom(input);
         }
-        throw new UnknownServiceException("Protobuf is not available for non-Message classes: %s".formatted(klass));
+        throw protoUnavailableFor(klass);
     }
 
     @Override
@@ -76,7 +87,7 @@ public record ProtobufMarshaller(@NotNull Charset charset) implements Marshaller
                 return rethrow(e);
             }
         }
-        throw new UnsupportedOperationException("Protobuf is not available for non-Message classes: %s".formatted(klass));
+        throw protoUnavailableFor(klass);
     }
 
     private static <T> @NotNull Parser<T> getParser(@NotNull Class<T> klass) {
@@ -93,5 +104,12 @@ public record ProtobufMarshaller(@NotNull Charset charset) implements Marshaller
         } catch (Exception e) {
             return rethrow(e);
         }
+    }
+
+    private static @NotNull UnsupportedOperationException protoUnavailableFor(@NotNull Object obj) {
+        return new UnsupportedOperationException(
+                "Protobuf is not available for non-Message class: %s"
+                .formatted(obj instanceof Class<?> ? obj : obj.getClass() + " (" + obj + ")")
+        );
     }
 }
