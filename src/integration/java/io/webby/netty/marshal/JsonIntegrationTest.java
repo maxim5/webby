@@ -34,8 +34,11 @@ public class JsonIntegrationTest {
         assertJsonRead(json, "{\"foo\": null}", Map.class, Collections.singletonMap("foo", null));
 
         // Concrete Map types
+        assertJsonRead(json, "{}", HashMap.class, Map.of());
         assertJsonRead(json, "{\"foo\": \"bar\"}", HashMap.class, Map.of("foo", "bar"));
+        assertJsonRead(json, "{}", LinkedHashMap.class, Map.of());
         assertJsonRead(json, "{\"foo\": \"bar\"}", LinkedHashMap.class, Map.of("foo", "bar"));
+        assertJsonRead(json, "{}", ConcurrentHashMap.class, Map.of());
         assertJsonRead(json, "{\"foo\": \"bar\"}", ConcurrentHashMap.class, Map.of("foo", "bar"));
 
         // Map should be a default for Object
@@ -55,11 +58,16 @@ public class JsonIntegrationTest {
 
         // Concrete List types
         assertJsonRead(json, "[]", ArrayList.class, List.of());
+        assertJsonRead(json, "[\"foo\"]", ArrayList.class, List.of("foo"));
+        assertJsonRead(json, "[]", LinkedList.class, List.of());
         assertJsonRead(json, "[0]", LinkedList.class, List.of(0));
 
         // Other collections
         assertJsonRead(json, "[]", Set.class, List.of());
+        assertJsonRead(json, "[0]", Set.class, List.of(0));
+        assertJsonRead(json, "[]", HashSet.class, List.of());
         assertJsonRead(json, "[1]", HashSet.class, List.of(1));
+        assertJsonRead(json, "[]", ArrayDeque.class, List.of());
         assertJsonRead(json, "[2]", ArrayDeque.class, List.of(2));
     }
 
@@ -75,8 +83,11 @@ public class JsonIntegrationTest {
 
         // Concrete Map types
         assertJsonWrite(json, new HashMap<>(), "{}");
+        assertJsonWrite(json, new HashMap<>(Map.of("foo", 1)), "{\"foo\":1}");
         assertJsonWrite(json, new LinkedHashMap<>(), "{}");
+        assertJsonWrite(json, new LinkedHashMap<>(Map.of("foo", 1)), "{\"foo\":1}");
         assertJsonWrite(json, new ConcurrentHashMap<>(), "{}");
+        assertJsonWrite(json, new ConcurrentHashMap<>(Map.of("foo", 1)), "{\"foo\":1}");
 
         // assertJsonWrite(json, new Object(), "{}");
     }
@@ -92,12 +103,17 @@ public class JsonIntegrationTest {
         assertJsonWrite(json, List.of(1, 2, 3), "[1,2,3]");
 
         // Concrete List types
+        assertJsonWrite(json, Collections.emptyList(), "[]");
         assertJsonWrite(json, Arrays.asList(123, "foo", null), "[123,\"foo\",null]");
         assertJsonWrite(json, new ArrayList<>(), "[]");
+        assertJsonWrite(json, new ArrayList<>(List.of("foo")), "[\"foo\"]");
+        assertJsonWrite(json, new LinkedList<>(), "[]");
         assertJsonWrite(json, new LinkedList<>(List.of("foo")), "[\"foo\"]");
 
         // Other collections
+        assertJsonWrite(json, new HashSet<>(), "[]");
         assertJsonWrite(json, new HashSet<>(List.of(0)), "[0]");
+        assertJsonWrite(json, new ArrayDeque<>(), "[]");
         assertJsonWrite(json, new ArrayDeque<>(List.of(1)), "[1]");
     }
 

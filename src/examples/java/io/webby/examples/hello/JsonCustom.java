@@ -1,46 +1,21 @@
 package io.webby.examples.hello;
 
 import com.dslplatform.json.DslJson;
-import com.dslplatform.json.runtime.CollectionAnalyzer;
 import com.dslplatform.json.runtime.Settings;
 import com.google.common.collect.Lists;
 import com.google.inject.Binder;
-import com.google.inject.TypeLiteral;
 import com.squareup.moshi.Moshi;
 import org.jetbrains.annotations.NotNull;
 
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
-import java.util.*;
-import java.util.concurrent.ConcurrentHashMap;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Map;
 
 public class JsonCustom {
     public static void customize(@NotNull Binder binder) {
-        DslJson<Object> dslJson = new DslJson<>(Settings.basicSetup());
-        dslJson.registerReader(Object.class, dslJson.tryFindReader(Map.class));  /* ObjectConverter.MapReader */
-        dslJson.registerReader(ConcurrentHashMap.class, dslJson.tryFindReader(Map.class));  /* ObjectConverter.MapReader */
-        dslJson.registerReader(Set.class, CollectionAnalyzer.Runtime.JSON_READER);
-        dslJson.registerReader(HashSet.class, CollectionAnalyzer.Runtime.JSON_READER);
-        dslJson.registerReader(List.class, CollectionAnalyzer.Runtime.JSON_READER);
-        dslJson.registerReader(ArrayList.class, CollectionAnalyzer.Runtime.JSON_READER);
-        dslJson.registerReader(LinkedList.class, CollectionAnalyzer.Runtime.JSON_READER);
-        dslJson.registerReader(ArrayDeque.class, CollectionAnalyzer.Runtime.JSON_READER);
-        binder.bind(new TypeLiteral<DslJson<Object>>() {}).toInstance(dslJson);
-
-        binder.bind(Moshi.class).toInstance(new Moshi.Builder().add((type, annotations, moshi) -> {
-            if (type instanceof Class<?> klass) {
-                if (List.class.isAssignableFrom(klass) && klass != List.class) {
-                    return moshi.adapter(List.class);
-                }
-                if (Collection.class.isAssignableFrom(klass) && klass != Collection.class) {
-                    return moshi.adapter(Collection.class);
-                }
-                if (Map.class.isAssignableFrom(klass) && klass != Map.class) {
-                    return moshi.adapter(Map.class);
-                }
-            }
-            return null;
-        }).build());
+        // nothing to do
     }
 
     public static void main(String[] args) throws IOException {

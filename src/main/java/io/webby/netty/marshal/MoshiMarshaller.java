@@ -11,16 +11,14 @@ import org.jetbrains.annotations.NotNull;
 
 import java.io.*;
 import java.nio.charset.Charset;
+import java.util.Collection;
+import java.util.List;
+import java.util.Map;
 import java.util.Objects;
 
 import static io.webby.util.EasyCast.castAny;
 
 public record MoshiMarshaller(@NotNull Moshi moshi, @NotNull Charset charset) implements Json {
-    public MoshiMarshaller(@NotNull Moshi moshi, @NotNull Charset charset) {
-        this.moshi = moshi;
-        this.charset = charset;
-    }
-
     @Inject
     public MoshiMarshaller(@NotNull InjectorHelper helper, @NotNull Charset charset) {
         this(helper.getOrDefault(Moshi.class, MoshiMarshaller::defaultMoshi), charset);
@@ -60,6 +58,19 @@ public record MoshiMarshaller(@NotNull Moshi moshi, @NotNull Charset charset) im
     }
 
     private static @NotNull Moshi defaultMoshi() {
-        return new Moshi.Builder().build();
+        return new Moshi.Builder().add((type, annotations, moshi) -> {
+            if (type instanceof Class<?> klass) {
+                if (List.class.isAssignableFrom(klass) && klass != List.class) {
+                    return moshi.adapter(List.class);
+                }
+                if (Collection.class.isAssignableFrom(klass) && klass != Collection.class) {
+                    return moshi.adapter(Collection.class);
+                }
+                if (Map.class.isAssignableFrom(klass) && klass != Map.class) {
+                    return moshi.adapter(Map.class);
+                }
+            }
+            return null;
+        }).build();
     }
 }
