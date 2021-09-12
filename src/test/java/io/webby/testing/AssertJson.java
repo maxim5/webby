@@ -52,7 +52,8 @@ public class AssertJson {
         assertEquals(((Number) actual).doubleValue(), expected.doubleValue());
     }
 
-    public static void assertJsonStringRoundTrip(@NotNull Json json, @NotNull Object object) {
+    public static void assertJsonStringRoundTrip(@NotNull Object object) {
+        Json json = Testing.Internals.json();
         String string = json.writeString(object);
         assertThat(string).isNotEmpty();
         Object another = json.readString(string, object.getClass());

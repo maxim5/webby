@@ -3,8 +3,9 @@ package io.webby.examples.hello;
 import io.webby.netty.marshal.MarshallerFactory.SupportedJsonLibrary;
 import io.webby.testing.BaseHttpIntegrationTest;
 import org.jetbrains.annotations.NotNull;
-import org.junit.jupiter.params.ParameterizedTest;
-import org.junit.jupiter.params.provider.EnumSource;
+import org.junit.Test;
+import org.junit.runner.RunWith;
+import org.junit.runners.Parameterized;
 
 import java.util.List;
 import java.util.Map;
@@ -16,12 +17,21 @@ import static io.webby.testing.AssertResponse.assert400;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNull;
 
+@RunWith(Parameterized.class)
 public class AcceptJsonContentIntegrationTest extends BaseHttpIntegrationTest {
-    @ParameterizedTest
-    @EnumSource(SupportedJsonLibrary.class)
-    public void accept_valid_json_map(SupportedJsonLibrary library) {
-        AcceptJsonContent handler = initHandler(library);
+    private final AcceptJsonContent handler;
 
+    public AcceptJsonContentIntegrationTest(@NotNull SupportedJsonLibrary library) {
+        handler = testSetup(AcceptJsonContent.class, withJsonLibrary(library), JsonCustom::customize).initHandler();
+    }
+
+    @Parameterized.Parameters(name = "{index}: {0}")
+    public static SupportedJsonLibrary[] libraries() {
+        return SupportedJsonLibrary.values();
+    }
+    
+    @Test
+    public void accept_valid_json_map() {
         assert200(post("/json/map/0", "{}"), "ok");
         assertJsonEquivalent(handler.getIncoming(), Map.of());
 
@@ -35,11 +45,8 @@ public class AcceptJsonContentIntegrationTest extends BaseHttpIntegrationTest {
         assertJsonEquivalent(handler.getIncoming(), Map.of("foo", "bar"));
     }
 
-    @ParameterizedTest
-    @EnumSource(SupportedJsonLibrary.class)
-    public void accept_valid_json_list(SupportedJsonLibrary library) {
-        AcceptJsonContent handler = initHandler(library);
-
+    @Test
+    public void accept_valid_json_list() {
         assert200(post("/json/list/0", "[]"));
         assertEquals(handler.getIncoming(), List.of());
 
@@ -56,29 +63,20 @@ public class AcceptJsonContentIntegrationTest extends BaseHttpIntegrationTest {
         assertJsonEquivalent(handler.getIncoming(), List.of("foo", "bar", 123));
     }
 
-    @ParameterizedTest
-    @EnumSource(SupportedJsonLibrary.class)
-    public void accept_valid_json_object(SupportedJsonLibrary library) {
-        AcceptJsonContent handler = initHandler(library);
-
+    @Test
+    public void accept_valid_json_object() {
         assert200(post("/json/obj/0", "{\"foo\": 1}"), "ok");
         assertJsonEquivalent(handler.getIncoming(), Map.of("foo", 1));
     }
 
-    @ParameterizedTest
-    @EnumSource(SupportedJsonLibrary.class)
-    public void accept_valid_json_sample_bean(SupportedJsonLibrary library) {
-        AcceptJsonContent handler = initHandler(library);
-
+    @Test
+    public void accept_valid_json_sample_bean() {
         assert200(post("/json/sample_bean/0", "{\"x\": 1, \"s\": \"foo\", \"list\": [1, 2, 3]}"), "ok");
         assertEquals(handler.getIncoming(), new SampleBean(1, "foo", List.of(1, 2, 3)));
     }
 
-    @ParameterizedTest
-    @EnumSource(SupportedJsonLibrary.class)
-    public void invalid_json(SupportedJsonLibrary library) {
-        AcceptJsonContent handler = initHandler(library);
-
+    @Test
+    public void invalid_json() {
         assert400(post("/json/obj/0", "{"));
         assertNull(handler.getIncoming());
 
@@ -89,16 +87,9 @@ public class AcceptJsonContentIntegrationTest extends BaseHttpIntegrationTest {
         assertNull(handler.getIncoming());
     }
 
-    @ParameterizedTest
-    @EnumSource(SupportedJsonLibrary.class)
-    public void wrong_format_json(SupportedJsonLibrary library) {
-        AcceptJsonContent handler = initHandler(library);
-
+    @Test
+    public void wrong_format_json() {
         assert400(post("/json/map/0", "[1, 2]"));
         assertNull(handler.getIncoming());
-    }
-
-    private @NotNull AcceptJsonContent initHandler(@NotNull SupportedJsonLibrary library) {
-        return testSetup(AcceptJsonContent.class, withJsonLibrary(library), JsonCustom::customize).initHandler();
     }
 }
