@@ -15,7 +15,7 @@ public interface ContentProvider {
     default @Nullable Object getContent(@NotNull FullHttpRequest request) {
         try {
             return getContent(request.content(), HttpUtil.getCharset(request));
-        } catch (Exception e) {
+        } catch (Throwable e) {
             throw new ConversionError("Failed to parse request content", e);
         }
     }

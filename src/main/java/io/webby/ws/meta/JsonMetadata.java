@@ -19,7 +19,7 @@ public record JsonMetadata(@NotNull Json json, @NotNull Charset charset) impleme
         Map<?, ?> map;
         try {
             map = json.readByteBuf(content, Map.class);
-        } catch (Exception e) {
+        } catch (Throwable e) {
             throw new BadFrameException("Failed to parse json", e, null);
         }
 
