@@ -14,6 +14,7 @@ import java.io.InputStream;
 import java.io.OutputStream;
 import java.nio.charset.Charset;
 import java.nio.charset.StandardCharsets;
+import java.util.Set;
 import java.util.logging.Level;
 
 public class Codecs {
@@ -190,6 +191,24 @@ public class Codecs {
         return byteLength >= 0 ? INT16_SIZE + byteLength : -1;
     }
 
+    private static final Set<Charset> SINGLE_BYTE_CHARSETS = Set.of(
+        StandardCharsets.US_ASCII,
+        StandardCharsets.ISO_8859_1,
+        Charset.forName("KOI8-R"),
+        Charset.forName("KOI8-U"),
+        Charset.forName("windows-1250"),
+        Charset.forName("windows-1251"),
+        Charset.forName("windows-1252"),
+        Charset.forName("windows-1253"),
+        Charset.forName("windows-1254"),
+        Charset.forName("windows-1257")
+    );
+    private static final Set<Charset> DOUBLE_BYTE_CHARSETS = Set.of(
+        StandardCharsets.UTF_16,
+        StandardCharsets.UTF_16BE,
+        StandardCharsets.UTF_16LE
+    );
+
     @SuppressWarnings("UnstableApiUsage")
     @VisibleForTesting
     static int getByteLength(@Nullable CharSequence s, @NotNull Charset charset) {
@@ -203,8 +222,11 @@ public class Codecs {
                 log.at(Level.WARNING).withCause(e).log("Failed to get bytes length by decoding UTF-8: %s", s);
             }
         }
-        if (charset == StandardCharsets.UTF_16) {
-            return 2 * s.length();
+        if (SINGLE_BYTE_CHARSETS.contains(charset)) {
+            return s.length();
+        }
+        if (DOUBLE_BYTE_CHARSETS.contains(charset)) {
+            return s.length() * 2;
         }
         return -1;
     }

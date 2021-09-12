@@ -100,7 +100,7 @@ public class DefaultHttpRequestEx extends DefaultFullHttpRequest implements Muta
     public <T> @NotNull T contentAsJson(@NotNull Class<T> klass) throws IllegalArgumentException {
         try {
             return json.withCustomCharset(charset()).readByteBuf(content().markReaderIndex(), klass);
-        } catch (RuntimeException e) {
+        } catch (Throwable e) {
             throw new IllegalArgumentException("Failed to parse JSON content", e);
         } finally {
             content().resetReaderIndex();

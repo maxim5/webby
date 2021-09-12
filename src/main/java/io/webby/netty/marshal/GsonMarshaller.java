@@ -27,6 +27,8 @@ public record GsonMarshaller(@NotNull Gson gson, @NotNull Charset charset) imple
 
     @Override
     public <T> @NotNull T readChars(@NotNull Reader reader, @NotNull Class<T> klass) {
-        return gson.fromJson(reader, klass);
+        T obj = gson.fromJson(reader, klass);
+        assert obj != null : "GSON failed to parse the instance of class `%s` from the reader".formatted(klass);
+        return obj;
     }
 }
