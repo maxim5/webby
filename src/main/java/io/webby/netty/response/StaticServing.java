@@ -1,6 +1,5 @@
 package io.webby.netty.response;
 
-import com.google.common.base.MoreObjects;
 import com.google.common.flogger.FluentLogger;
 import com.google.inject.Inject;
 import io.netty.buffer.ByteBuf;
@@ -22,8 +21,9 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.List;
 import java.util.function.Consumer;
-import java.util.function.Supplier;
 import java.util.logging.Level;
+
+import static io.webby.util.EasyObjects.firstNonNull;
 
 public class StaticServing {
     private static final FluentLogger log = FluentLogger.forEnclosingClass();
@@ -60,9 +60,7 @@ public class StaticServing {
             return factory.newResponse304();
         }
 
-        CharSequence contentType = MoreObjects.firstNonNull(guessContentType(fullPath), HttpHeaderValues.APPLICATION_OCTET_STREAM);
-        FullHttpResponse response = factory.newResponse(byteBuf, HttpResponseStatus.OK, contentType);
-
+        FullHttpResponse response = factory.newResponse(byteBuf, HttpResponseStatus.OK, guessContentType(fullPath));
         if (settings.isProdMode()) {
             response.headers().add(HttpHeaderNames.CACHE_CONTROL, HttpCaching.CACHE_FOREVER);
         } else {
@@ -100,21 +98,11 @@ public class StaticServing {
     }
 
     @VisibleForTesting
-    static @Nullable CharSequence guessContentType(@NotNull Path path) {
-        return firstNotNull(List.of(
+    static CharSequence guessContentType(@NotNull Path path) {
+        return firstNonNull(List.of(
             () -> URLConnection.guessContentTypeFromName(path.toString()),
             Rethrow.Suppliers.rethrow(() -> Files.probeContentType(path)),
             Rethrow.Suppliers.rethrow(() -> ThirdPartyMimeTypeDetectors.detect(path.toFile()))
-        ));
-    }
-
-    private static <T> @Nullable T firstNotNull(@NotNull Iterable<Supplier<@Nullable T>> suppliers) {
-        for (Supplier<T> supplier : suppliers) {
-            T value = supplier.get();
-            if (value != null) {
-                return value;
-            }
-        }
-        return null;
+        ), HttpHeaderValues.APPLICATION_OCTET_STREAM);
     }
 }
