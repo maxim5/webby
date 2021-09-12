@@ -24,6 +24,7 @@ if (Os.isFamily(Os.FAMILY_UNIX)) {
     os = 'win64'
 }
 
+// Prod
 dependencies {
     // API
     api group: 'com.google.guava', name: 'guava', version: '30.1.1-jre'
@@ -85,18 +86,21 @@ dependencies {
     // MimeType utils
     compileOnly group: 'com.j256.simplemagic', name: 'simplemagic', version: '1.16'
     compileOnly group: 'eu.medsea.mimeutil', name: 'mime-util', version: '2.1.3'
+}
 
-    // JUnit
+// Testing
+dependencies {
+    // JUnit, Truth
     testImplementation group: 'org.junit.jupiter', name: 'junit-jupiter-api', version: '5.7.2'
     testCompileOnly group: 'org.junit.jupiter', name: 'junit-jupiter-params', version: '5.7.2'
     testRuntimeOnly group: 'org.junit.jupiter', name: 'junit-jupiter-engine', version: '5.7.2'
-    // Google Truth
     testImplementation group: 'com.google.truth', name: 'truth', version: '1.1.3'
     // Unit tests
     testImplementation group: 'com.google.code.gson', name: 'gson', version: '2.8.8'
+    testImplementation group: 'com.google.flogger', name: 'flogger-log4j2-backend', version: '0.6'
     testImplementation group: 'com.squareup.okio', name: 'okio', version: '2.10.0'
     testImplementation group: 'com.j256.simplemagic', name: 'simplemagic', version: '1.16'
-    // Integration testing
+    // Integration tests
     testImplementation group: 'io.etcd', name: 'jetcd-test', version: '0.5.10'
     testImplementation group: 'it.ozimov', name: 'embedded-redis', version: '0.7.3'
 }
