@@ -2,12 +2,14 @@ package io.webby.testing;
 
 import com.google.common.collect.Streams;
 import com.google.mu.util.stream.BiStream;
+import io.netty.buffer.ByteBuf;
 import io.webby.app.AppSettings;
 import io.webby.netty.marshal.Json;
 import io.webby.netty.marshal.MarshallerFactory.SupportedJsonLibrary;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
+import java.util.Arrays;
 import java.util.Map;
 import java.util.function.Consumer;
 
@@ -57,7 +59,18 @@ public class AssertJson {
         assertEquals(object, another);
     }
 
+    public static void assertJsonValue(@NotNull ByteBuf actual, @NotNull Object object) {
+        Json json = Testing.Internals.json();
+        Object another = json.readByteBuf(actual, object.getClass());
+        assertEquals(object, another);
+    }
+
     public static @NotNull Consumer<AppSettings> withJsonLibrary(@NotNull SupportedJsonLibrary library) {
         return settings -> settings.setProperty("json.library", library.slug);
+    }
+
+    public static @NotNull SupportedJsonLibrary getJsonLibrary() {
+        String property = Testing.Internals.settings().getProperty("json.library");
+        return Arrays.stream(SupportedJsonLibrary.values()).filter(val -> val.slug.equals(property)).findAny().orElseThrow();
     }
 }

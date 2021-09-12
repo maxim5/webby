@@ -1,12 +1,8 @@
 package io.webby.examples.hello;
 
-import com.google.common.collect.ImmutableMap;
-import com.google.gson.Gson;
-import com.google.gson.JsonElement;
 import io.netty.buffer.ByteBuf;
 import io.netty.buffer.Unpooled;
 import io.webby.url.annotate.GET;
-import io.webby.url.annotate.Json;
 import io.webby.url.annotate.Serve;
 
 import java.io.ByteArrayInputStream;
@@ -18,7 +14,6 @@ import java.nio.CharBuffer;
 import java.nio.channels.Channels;
 import java.nio.channels.ReadableByteChannel;
 import java.nio.charset.Charset;
-import java.util.List;
 
 @Serve
 public class ReturnValue {
@@ -70,21 +65,5 @@ public class ReturnValue {
     @GET(url = "/r/file/{path}")
     public File file(String path) {
         return new File(path);
-    }
-
-    @GET(url = "/r/json/map/{*var}")
-    @Json
-    public Object json_map(String var) {
-        return ImmutableMap.of(
-            "foo", 1,
-            "var", var.split("/")
-        );
-    }
-
-    @GET(url = "/r/json/tree/{var}")
-    @Json
-    public JsonElement json_tree(String var) {
-        List<Character> characters = var.chars().boxed().map(i -> (char) i.intValue()).toList();
-        return new Gson().toJsonTree(characters);
     }
 }

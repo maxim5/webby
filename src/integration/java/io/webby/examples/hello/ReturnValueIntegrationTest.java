@@ -1,11 +1,11 @@
 package io.webby.examples.hello;
 
-import io.netty.handler.codec.http.HttpHeaderValues;
 import io.netty.handler.codec.http.HttpResponse;
 import io.webby.testing.BaseHttpIntegrationTest;
 import org.junit.jupiter.api.Test;
 
-import static io.webby.testing.AssertResponse.*;
+import static io.webby.testing.AssertResponse.assert200;
+import static io.webby.testing.AssertResponse.assertContentContains;
 
 public class ReturnValueIntegrationTest extends BaseHttpIntegrationTest {
     protected final ReturnValue handler = testSetup(ReturnValue.class).initHandler();
@@ -32,32 +32,5 @@ public class ReturnValueIntegrationTest extends BaseHttpIntegrationTest {
         HttpResponse response = get("/r/file/README.md");
         assert200(response);
         assertContentContains(response, "<h4 align=\"center\">Web Server for Humans</h4>");
-    }
-
-    @Test
-    public void json_map() {
-        HttpResponse response = get("/r/json/map/bar");
-        assert200(response, """
-            {"foo":1,"var":["bar"]}
-        """.trim());
-        assertContentType(response, HttpHeaderValues.APPLICATION_JSON);
-    }
-
-    @Test
-    public void json_map_value_with_slash() {
-        HttpResponse response = get("/r/json/map/bar/baz");
-        assert200(response, """
-            {"foo":1,"var":["bar","baz"]}
-        """.trim());
-        assertContentType(response, HttpHeaderValues.APPLICATION_JSON);
-    }
-
-    @Test
-    public void json_tree() {
-        HttpResponse response = get("/r/json/tree/foobar");
-        assert200(response, """
-            ["f","o","o","b","a","r"]
-        """.trim());
-        assertContentType(response, HttpHeaderValues.APPLICATION_JSON);
     }
 }
