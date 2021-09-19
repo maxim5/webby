@@ -9,6 +9,7 @@ import io.webby.app.Settings;
 import io.webby.common.InjectorHelper;
 import io.webby.url.annotate.Marshal;
 import io.webby.util.EasyClasspath;
+import io.webby.util.EasyMaps;
 import io.webby.util.Pair;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.VisibleForTesting;
@@ -23,11 +24,12 @@ public class MarshallerFactory implements Provider<Json> {
 
     @VisibleForTesting
     public enum SupportedJsonLibrary {
+        DSL_JSON("dslplatform:dsl-json"),
+        FAST_JSON("alibaba:fastjson"),
         GSON("google:gson"),
         JACKSON("fasterxml:jackson-databind"),
-        FAST_JSON("alibaba:fastjson"),
-        MOSHI("squareup:moshi"),
-        DSL_JSON("dslplatform:dsl-json");
+        JODD_JSON("jodd:jodd-json"),
+        MOSHI("squareup:moshi");
 
         public final String slug;
 
@@ -36,12 +38,13 @@ public class MarshallerFactory implements Provider<Json> {
         }
     }
 
-    private static final ImmutableMap<String, Pair<String, Class<? extends Json>>> SUPPORTED_JSON = ImmutableMap.of(
+    private static final ImmutableMap<String, Pair<String, Class<? extends Json>>> SUPPORTED_JSON = EasyMaps.immutableOf(
             GSON.slug, Pair.of("com.google.gson.Gson", GsonMarshaller.class),
             JACKSON.slug, Pair.of("com.fasterxml.jackson.databind.ObjectMapper", JacksonMarshaller.class),
             FAST_JSON.slug, Pair.of("com.alibaba.fastjson.JSON", FastJsonMarshaller.class),
             MOSHI.slug, Pair.of("com.squareup.moshi.Moshi", MoshiMarshaller.class),
-            DSL_JSON.slug, Pair.of("com.dslplatform.json.DslJson", DslJsonMarshaller.class)
+            DSL_JSON.slug, Pair.of("com.dslplatform.json.DslJson", DslJsonMarshaller.class),
+            JODD_JSON.slug, Pair.of("jodd.json.JsonParser", JoddJsonMarshaller.class)
     );
 
     private final Class<? extends Json> jsonMarshallerClass;
