@@ -88,6 +88,8 @@ public class VelocityRenderer implements Renderer<Template> {
         configuration.setProperty(RuntimeConstants.RESOURCE_LOADER, "file");
         configuration.setProperty(RuntimeConstants.FILE_RESOURCE_LOADER_CACHE, String.valueOf(!settings.isHotReload()));
         configuration.setProperty(RuntimeConstants.FILE_RESOURCE_LOADER_PATH, viewPaths);
+        configuration.setProperty(RuntimeConstants.RUNTIME_LOG, "");
+        configuration.setProperty(RuntimeConstants.RUNTIME_LOG_LOGSYSTEM_CLASS, "org.apache.velocity.runtime.log.NullLogChute");
         return new VelocityEngine(configuration);
     }
 

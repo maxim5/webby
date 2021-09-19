@@ -44,6 +44,8 @@ public class VelocityExample {
         configuration.setProperty(RuntimeConstants.RESOURCE_LOADER, "file");
         configuration.setProperty(RuntimeConstants.FILE_RESOURCE_LOADER_CACHE, "false");
         configuration.setProperty(RuntimeConstants.FILE_RESOURCE_LOADER_PATH, "src/examples/resources/web");
+        configuration.setProperty(RuntimeConstants.RUNTIME_LOG, "");
+        configuration.setProperty(RuntimeConstants.RUNTIME_LOG_LOGSYSTEM_CLASS, "org.apache.velocity.runtime.log.NullLogChute");
         return new VelocityEngine(configuration).getTemplate(name);
     }
 }
