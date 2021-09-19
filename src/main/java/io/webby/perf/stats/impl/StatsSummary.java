@@ -4,6 +4,7 @@ import com.google.common.collect.Streams;
 import com.google.common.flogger.FluentLogger;
 import io.netty.handler.codec.http.HttpResponse;
 import io.webby.app.Settings;
+import io.webby.netty.response.ResponseHeaders;
 import io.webby.perf.stats.Stat;
 import io.webby.util.LazyBoolean;
 import io.webby.util.Pair;
@@ -40,7 +41,7 @@ public class StatsSummary {
         String timing = isRecordsSummaryEnabled.get() ?
                 "%s;desc=\"%s\", %s;desc=\"%s\"".formatted("main", mainAsJson(), "records", recordsAsJson()) :
                 "%s;desc=\"%s\"".formatted("main", mainAsJson());
-        response.headers().add("Server-Timing", timing);
+        response.headers().add(ResponseHeaders.SERVER_TIMING, timing);
     }
 
     private @NotNull String mainAsTable() {

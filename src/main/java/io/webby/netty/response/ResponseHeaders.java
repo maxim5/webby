@@ -13,7 +13,9 @@ import java.util.List;
 
 public class ResponseHeaders {
     public static final AsciiString CONTENT_SECURITY_POLICY = HttpHeaderNames.CONTENT_SECURITY_POLICY;
+    public static final AsciiString CONTENT_LENGTH = HttpHeaderNames.CONTENT_LENGTH;
     public static final AsciiString CONTENT_TYPE = HttpHeaderNames.CONTENT_TYPE;
+    public static final AsciiString SERVER_TIMING = AsciiString.of("Server-Timing");
     public static final AsciiString X_FRAME_OPTIONS = HttpHeaderNames.X_FRAME_OPTIONS;
     public static final AsciiString X_XSS_PROTECTION = AsciiString.of("X-XSS-Protection");
     public static final AsciiString X_CONTENT_TYPE_OPTIONS = AsciiString.of("X-Content-Type-Options");

@@ -150,7 +150,7 @@ public class AssertResponse {
     public static @NotNull HttpHeaders headersWithoutVolatile(@NotNull HttpHeaders headers) {
         return headers.copy()
                 .remove(HttpHeaderNames.SET_COOKIE)
-                .remove("Server-Timing");
+                .remove(ResponseHeaders.SERVER_TIMING);
     }
 
     public static @NotNull ByteBuf content(@NotNull HttpResponse response) {

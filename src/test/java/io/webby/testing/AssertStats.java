@@ -2,6 +2,7 @@ package io.webby.testing;
 
 import com.google.common.collect.Streams;
 import io.netty.handler.codec.http.HttpResponse;
+import io.webby.netty.response.ResponseHeaders;
 import io.webby.perf.stats.Stat;
 import org.jetbrains.annotations.NotNull;
 
@@ -16,7 +17,7 @@ import static org.junit.jupiter.api.Assertions.*;
 
 public class AssertStats {
     public static void assertNoStatsHeaders(@NotNull HttpResponse response) {
-        assertNull(response.headers().get("Server-Timing"));
+        assertNull(response.headers().get(ResponseHeaders.SERVER_TIMING));
     }
 
     public static void assertStatsHeader(@NotNull HttpResponse response, @NotNull Stat ... expectedStats) {
@@ -24,7 +25,7 @@ public class AssertStats {
     }
 
     public static void assertStatsHeader(@NotNull HttpResponse response, @NotNull Iterable<Stat> expectedStats) {
-        String serverTiming = response.headers().get("Server-Timing");
+        String serverTiming = response.headers().get(ResponseHeaders.SERVER_TIMING);
         assertNotNull(serverTiming);
 
         Matcher matcher = Pattern.compile("main;desc=\"\\{(.*)}\"").matcher(serverTiming);
