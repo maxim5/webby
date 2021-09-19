@@ -107,9 +107,7 @@ public record ProtobufMarshaller(@NotNull Charset charset) implements Marshaller
     }
 
     private static @NotNull UnsupportedOperationException protoUnavailableFor(@NotNull Object obj) {
-        return new UnsupportedOperationException(
-                "Protobuf is not available for non-Message class: %s"
-                .formatted(obj instanceof Class<?> ? obj : obj.getClass() + " (" + obj + ")")
-        );
+        Object desc = obj instanceof Class<?> ? obj : "%s (%s)".formatted(obj.getClass(), obj);
+        return new UnsupportedOperationException("Protobuf is not available for non-Message class: %s".formatted(desc));
     }
 }

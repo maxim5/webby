@@ -328,8 +328,8 @@ public class NettyHttpHandler extends SimpleChannelInboundHandler<FullHttpReques
         CharSequence contentType = options.http().hasContentType() ?
                 options.http().contentType() :
                 (options.out() == Marshal.JSON) ?
-                        HttpHeaderValues.APPLICATION_JSON :
-                        HttpHeaderValues.TEXT_HTML;
+                        ResponseHeaders.APPLICATION_JSON :
+                        ResponseHeaders.TEXT_HTML;
         return headers.defaultHeaders(contentType);
     }
 

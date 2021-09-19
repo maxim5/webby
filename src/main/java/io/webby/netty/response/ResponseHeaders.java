@@ -32,6 +32,7 @@ public class ResponseHeaders {
     public static final AsciiString APPLICATION_JSON = HttpHeaderValues.APPLICATION_JSON;
     public static final AsciiString TEXT_HTML = HttpHeaderValues.TEXT_HTML;
     public static final AsciiString TEXT_HTML_UTF8 = AsciiString.cached("text/html; charset=UTF-8");
+    public static final AsciiString TEXT_PLAIN = HttpHeaderValues.TEXT_PLAIN;
     public static final AsciiString TEXT_PLAIN_UTF8 = AsciiString.cached("text/plain; charset=UTF-8");
 
     public static final AsciiString INLINE = AsciiString.of("inline");
@@ -43,10 +44,10 @@ public class ResponseHeaders {
     @Inject private Charset charset;
 
     public @NotNull CharSequence ensureCharset(@NotNull CharSequence contentType) {
-        if (contentType == HttpHeaderValues.TEXT_HTML) {
+        if (contentType == TEXT_HTML) {
             return charset == StandardCharsets.UTF_8 ? TEXT_HTML_UTF8 : "%s; charset=%s".formatted(contentType, charset);
         }
-        if (contentType == HttpHeaderValues.TEXT_PLAIN) {
+        if (contentType == TEXT_PLAIN) {
             return charset == StandardCharsets.UTF_8 ? TEXT_PLAIN_UTF8 : "%s; charset=%s".formatted(contentType, charset);
         }
         return contentType;
