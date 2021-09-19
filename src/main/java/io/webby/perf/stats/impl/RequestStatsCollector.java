@@ -4,6 +4,7 @@ import com.carrotsearch.hppc.IntIntHashMap;
 import com.carrotsearch.hppc.IntIntMap;
 import com.carrotsearch.hppc.IntObjectHashMap;
 import com.carrotsearch.hppc.IntObjectMap;
+import com.carrotsearch.hppc.cursors.IntIntCursor;
 import com.google.common.base.Stopwatch;
 import com.google.errorprone.annotations.CanIgnoreReturnValue;
 import io.netty.handler.codec.http.DefaultHttpRequest;
@@ -11,10 +12,12 @@ import io.netty.handler.codec.http.HttpMethod;
 import io.netty.handler.codec.http.HttpRequest;
 import io.netty.handler.codec.http.HttpVersion;
 import io.webby.db.model.IntIdGenerator;
+import io.webby.perf.stats.Stat;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicLong;
@@ -100,6 +103,14 @@ public class RequestStatsCollector {
         return records;
     }
 
+    public void forEach(@NotNull StatsConsumer consumer) {
+        for (IntIntCursor cursor : main) {
+            Stat stat = Stat.VALUES.get(cursor.key);
+            List<StatsRecord> statsRecords = records.getOrDefault(cursor.key, Collections.emptyList());
+            consumer.consume(stat, cursor.value, statsRecords);
+        }
+    }
+
     @Override
     public String toString() {
         return "[id=%08x, uri=%s]".formatted(id, request.uri());
@@ -112,5 +123,9 @@ public class RequestStatsCollector {
             map.put(key, result);
         }
         return result;
+    }
+
+    public interface StatsConsumer {
+        void consume(@NotNull Stat key, int value, @NotNull List<StatsRecord> records);
     }
 }

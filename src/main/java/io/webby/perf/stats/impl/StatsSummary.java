@@ -10,6 +10,7 @@ import io.webby.util.Pair;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.ArrayList;
+import java.util.Formatter;
 import java.util.List;
 import java.util.concurrent.TimeUnit;
 import java.util.logging.Level;
@@ -20,18 +21,19 @@ public class StatsSummary {
 
     private final RequestStatsCollector stats;
     private final LazyBoolean isRecordsSummaryEnabled;
+    private final Level logLevel;
 
     public StatsSummary(@NotNull Settings settings, @NotNull RequestStatsCollector stats) {
         this.stats = stats.stop();
         this.isRecordsSummaryEnabled = new LazyBoolean(() ->
             settings.getBoolProperty("perf.track.summary.records.enabled", false)
         );
+        this.logLevel = settings.isDevMode() ? Level.INFO : Level.FINE;
     }
 
     public void summarize(@NotNull HttpResponse response) {
-        if (log.at(Level.FINE).isEnabled()) {
-            log.at(Level.FINE).log("Handle time for %s: %d ms", stats.uri(), stats.totalElapsed(TimeUnit.MILLISECONDS));
-            log.at(Level.FINE).log("Performance stats summary:\n%s\n", mainAsTable());
+        if (log.at(logLevel).isEnabled()) {
+            log.at(logLevel).log("Performance stats summary for %s:\n%s\n", stats.uri(), mainAsTable());
         }
 
         // See https://stackoverflow.com/questions/220231/accessing-the-web-pages-http-headers-in-javascript
@@ -42,9 +44,17 @@ public class StatsSummary {
     }
 
     private @NotNull String mainAsTable() {
-        return Streams.stream(stats.main())
-                .map(cursor -> "%s = %d".formatted(Stat.NAMES.get(cursor.key), cursor.value))
-                .collect(Collectors.joining("\n"));
+        String ROW_FMT = "%-" + Stat.MAX_NAME_LENGTH + "s | %4d ms | %4s %s";
+
+        StringBuilder builder = new StringBuilder((stats.main().size() + 1) * 36);
+        builder.append(ROW_FMT.formatted("Total", stats.totalElapsed(TimeUnit.MILLISECONDS), "", ""));
+        Formatter formatter = new Formatter(builder);
+        stats.forEach((key, value, records) -> {
+            builder.append('\n');
+            long totalMillis = records.stream().mapToLong(StatsRecord::elapsedMillis).sum();
+            formatter.format(ROW_FMT, key.lowerName(), totalMillis, value, key.unit().lowerName());
+        });
+        return builder.toString();
     }
 
     private @NotNull String mainAsJson() {
