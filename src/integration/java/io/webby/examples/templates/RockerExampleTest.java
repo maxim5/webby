@@ -8,8 +8,7 @@ import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.junit.runners.Parameterized;
 
-import static io.webby.examples.templates.TestingRender.assertRenderedStatsHeaderForCurrentConfig;
-import static io.webby.examples.templates.TestingRender.assertSimpleStatsHeaderForCurrentConfig;
+import static io.webby.examples.templates.TestingRender.*;
 import static io.webby.testing.AssertResponse.*;
 
 @RunWith(Parameterized.class)
@@ -56,6 +55,6 @@ public class RockerExampleTest extends BaseHttpIntegrationTest {
         assertSimpleStatsHeaderForCurrentConfig(manual);
 
         assertContent(rendered, manual);
-        assertHeaders(headersWithoutVolatile(rendered), headersWithoutVolatile(manual));
+        assertHeadersForCurrentConfig(rendered, manual);
     }
 }

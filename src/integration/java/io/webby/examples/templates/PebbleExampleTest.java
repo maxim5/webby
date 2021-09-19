@@ -11,8 +11,7 @@ import org.junit.runners.Parameterized;
 
 import java.util.function.Consumer;
 
-import static io.webby.examples.templates.TestingRender.assertRenderedStatsHeaderForCurrentConfig;
-import static io.webby.examples.templates.TestingRender.assertSimpleStatsHeaderForCurrentConfig;
+import static io.webby.examples.templates.TestingRender.*;
 import static io.webby.testing.AssertResponse.*;
 
 @RunWith(Parameterized.class)
@@ -52,7 +51,7 @@ public class PebbleExampleTest extends BaseHttpIntegrationTest {
         assertSimpleStatsHeaderForCurrentConfig(manual);
 
         assertContent(rendered, manual);
-        assertHeaders(headersWithoutVolatile(rendered), headersWithoutVolatile(manual));
+        assertHeadersForCurrentConfig(rendered, manual);
     }
 
     @Test
@@ -66,6 +65,6 @@ public class PebbleExampleTest extends BaseHttpIntegrationTest {
         assertSimpleStatsHeaderForCurrentConfig(manual);
 
         assertContent(rendered, manual);
-        assertHeaders(headersWithoutVolatile(rendered), headersWithoutVolatile(manual));
+        assertHeadersForCurrentConfig(rendered, manual);
     }
 }
