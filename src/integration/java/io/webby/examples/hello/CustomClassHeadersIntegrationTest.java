@@ -1,7 +1,7 @@
 package io.webby.examples.hello;
 
 import io.netty.handler.codec.http.HttpResponse;
-import io.webby.netty.response.ResponseHeaders;
+import io.webby.netty.HttpConst;
 import io.webby.testing.BaseHttpIntegrationTest;
 import org.junit.jupiter.api.Test;
 
@@ -16,7 +16,7 @@ public class CustomClassHeadersIntegrationTest extends BaseHttpIntegrationTest {
         assert200(response, "etag");
         assertContentLength(response, 4);
         assertContentType(response, TEXT_HTML_CHARSET);
-        assertHeaders(response, ResponseHeaders.CACHE_CONTROL, "no-cache", ResponseHeaders.ETAG, "foobar");
+        assertHeaders(response, HttpConst.CACHE_CONTROL, "no-cache", HttpConst.ETAG, "foobar");
     }
 
     @Test
@@ -25,6 +25,6 @@ public class CustomClassHeadersIntegrationTest extends BaseHttpIntegrationTest {
         assert200(response, "cache");
         assertContentLength(response, 5);
         assertContentType(response, TEXT_HTML_CHARSET);
-        assertHeaders(response, ResponseHeaders.CACHE_CONTROL, "only-if-cached");
+        assertHeaders(response, HttpConst.CACHE_CONTROL, "only-if-cached");
     }
 }

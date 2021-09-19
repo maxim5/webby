@@ -9,6 +9,7 @@ import io.netty.handler.codec.http.*;
 import io.netty.handler.stream.ChunkedFile;
 import io.netty.handler.stream.ChunkedStream;
 import io.webby.app.Settings;
+import io.webby.netty.HttpConst;
 import io.webby.netty.errors.*;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
@@ -42,7 +43,7 @@ public class HttpResponseFactory {
 
     public @NotNull FullHttpResponse newResponse(@NotNull ByteBuf byteBuf, @NotNull HttpResponseStatus status) {
         FullHttpResponse response = new DefaultFullHttpResponse(HttpVersion.HTTP_1_1, status, byteBuf);
-        response.headers().set(ResponseHeaders.CONTENT_LENGTH, byteBuf.readableBytes());
+        response.headers().set(HttpConst.CONTENT_LENGTH, byteBuf.readableBytes());
         return response;
     }
 
@@ -82,7 +83,7 @@ public class HttpResponseFactory {
                 HttpResponseStatus.TEMPORARY_REDIRECT;
         String content = statusLine(status);
         FullHttpResponse response = newResponse(content, status);
-        response.headers().add(ResponseHeaders.LOCATION, uri);
+        response.headers().add(HttpConst.LOCATION, uri);
         return response;
     }
 
@@ -128,16 +129,16 @@ public class HttpResponseFactory {
                         debugError != null ? debugError : "",
                         cause != null ? Throwables.getStackTraceAsString(cause) : ""
                 );
-                return newResponse(content, status, ResponseHeaders.TEXT_HTML);
+                return newResponse(content, status, HttpConst.TEXT_HTML);
             } else {
                 if (clientError != null) {
-                    return newResponse(clientError, status, ResponseHeaders.TEXT_HTML);
+                    return newResponse(clientError, status, HttpConst.TEXT_HTML);
                 }
             }
         } catch (Exception e) {
             log.at(Level.SEVERE).withCause(e).log("Failed to read the resource: %s, returning default response", name);
         }
-        return newResponse(statusLine(status), status, ResponseHeaders.TEXT_HTML);
+        return newResponse(statusLine(status), status, HttpConst.TEXT_HTML);
     }
 
     public @NotNull FullHttpResponse handleServeException(@NotNull ServeException exception, @NotNull String source) {
@@ -184,7 +185,7 @@ public class HttpResponseFactory {
     }
 
     private static <R extends HttpResponse> @NotNull R withContentType(@NotNull R response, @NotNull CharSequence contentType) {
-        response.headers().set(ResponseHeaders.CONTENT_TYPE, contentType);
+        response.headers().set(HttpConst.CONTENT_TYPE, contentType);
         return response;
     }
 

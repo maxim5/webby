@@ -6,7 +6,7 @@ import io.netty.buffer.ByteBufHolder;
 import io.netty.buffer.Unpooled;
 import io.netty.handler.codec.http.*;
 import io.netty.util.AsciiString;
-import io.webby.netty.response.ResponseHeaders;
+import io.webby.netty.HttpConst;
 import io.webby.netty.response.StreamingHttpResponse;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
@@ -23,7 +23,7 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.fail;
 
 public class AssertResponse {
-    public static final AsciiString APPLICATION_JSON = ResponseHeaders.APPLICATION_JSON;
+    public static final AsciiString APPLICATION_JSON = HttpConst.APPLICATION_JSON;
     public static final String TEXT_HTML_CHARSET = "text/html; charset=%s".formatted(Testing.Internals.charset());
     // See https://stackoverflow.com/questions/13827325/correct-mime-type-for-favicon-ico
     public static final List<CharSequence> ICON_MIME_TYPES = List.of("image/x-icon", "image/x-ico", "image/vnd.microsoft.icon");
@@ -38,12 +38,12 @@ public class AssertResponse {
 
     public static void assertTempRedirect(@NotNull HttpResponse response, @NotNull String url) {
         assertResponse(response, HttpResponseStatus.TEMPORARY_REDIRECT, null);
-        assertHeaders(response, ResponseHeaders.LOCATION, url);
+        assertHeaders(response, HttpConst.LOCATION, url);
     }
 
     public static void assertPermRedirect(@NotNull HttpResponse response, @NotNull String url) {
         assertResponse(response, HttpResponseStatus.PERMANENT_REDIRECT, null);
-        assertHeaders(response, ResponseHeaders.LOCATION, url);
+        assertHeaders(response, HttpConst.LOCATION, url);
     }
 
     public static void assert400(@NotNull HttpResponse response) {
@@ -129,11 +129,11 @@ public class AssertResponse {
     }
 
     public static void assertContentLength(@NotNull HttpResponse response, @NotNull CharSequence expected) {
-        assertHeaders(response, ResponseHeaders.CONTENT_LENGTH, expected);
+        assertHeaders(response, HttpConst.CONTENT_LENGTH, expected);
     }
 
     public static void assertContentType(@NotNull HttpResponse response, @NotNull CharSequence expected) {
-        assertHeaders(response, ResponseHeaders.CONTENT_TYPE, expected);
+        assertHeaders(response, HttpConst.CONTENT_TYPE, expected);
     }
 
     public static void assertContent(@NotNull HttpResponse response, @NotNull HttpResponse expected) {
@@ -153,8 +153,8 @@ public class AssertResponse {
 
     public static @NotNull HttpHeaders headersWithoutVolatile(@NotNull HttpHeaders headers) {
         return headers.copy()
-                .remove(ResponseHeaders.SET_COOKIE)
-                .remove(ResponseHeaders.SERVER_TIMING);
+                .remove(HttpConst.SET_COOKIE)
+                .remove(HttpConst.SERVER_TIMING);
     }
 
     public static @NotNull ByteBuf content(@NotNull HttpResponse response) {

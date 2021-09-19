@@ -6,12 +6,12 @@ import io.netty.handler.codec.http.HttpResponse;
 import io.netty.handler.codec.http.cookie.Cookie;
 import io.netty.handler.codec.http.cookie.DefaultCookie;
 import io.webby.auth.CookieUtil;
+import io.webby.netty.HttpConst;
 import io.webby.netty.errors.ServeException;
 import io.webby.netty.intercept.Interceptor;
 import io.webby.netty.intercept.attr.AttributeOwner;
 import io.webby.netty.intercept.attr.Attributes;
 import io.webby.netty.request.MutableHttpRequestEx;
-import io.webby.netty.response.ResponseHeaders;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.List;
@@ -46,7 +46,7 @@ public class SessionInterceptor implements Interceptor {
             String cookieValue = sessionManager.encodeSessionForCookie(session);
             Cookie cookie = new DefaultCookie(COOKIE_ID, cookieValue);
             cookie.setMaxAge(COOKIE_AGE);
-            response.headers().set(ResponseHeaders.SET_COOKIE, CookieUtil.encode(cookie));
+            response.headers().set(HttpConst.SET_COOKIE, CookieUtil.encode(cookie));
             log.at(Level.FINER).log("Response set-cookie: %s", cookie);
         }
         return response;

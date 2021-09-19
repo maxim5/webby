@@ -3,7 +3,7 @@ package io.webby.examples.templates;
 import io.netty.handler.codec.http.HttpHeaders;
 import io.netty.handler.codec.http.HttpResponse;
 import io.webby.app.AppSettings;
-import io.webby.netty.response.ResponseHeaders;
+import io.webby.netty.HttpConst;
 import io.webby.perf.stats.Stat;
 import io.webby.testing.Testing;
 import org.jetbrains.annotations.NotNull;
@@ -61,7 +61,7 @@ public class TestingRender {
         HttpHeaders renderedHeaders = headersWithoutVolatile(rendered);
         HttpHeaders manualHeaders = headersWithoutVolatile(manual);
         if (currentConfig() == Config.StreamingEnabled) {
-            manualHeaders.remove(ResponseHeaders.CONTENT_LENGTH);
+            manualHeaders.remove(HttpConst.CONTENT_LENGTH);
         }
         assertHeaders(renderedHeaders, manualHeaders);
     }
