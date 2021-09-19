@@ -30,9 +30,9 @@ import java.util.function.IntFunction;
 import java.util.function.IntSupplier;
 import java.util.function.LongFunction;
 
+import static io.webby.testing.AssertBasics.asMap;
 import static io.webby.testing.FakeRequests.getEx;
 import static io.webby.testing.FakeRequests.postEx;
-import static io.webby.testing.Testing.asMap;
 import static org.junit.jupiter.api.Assertions.*;
 
 @SuppressWarnings("unused")

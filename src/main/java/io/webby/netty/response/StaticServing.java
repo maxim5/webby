@@ -6,6 +6,7 @@ import io.netty.buffer.ByteBuf;
 import io.netty.buffer.Unpooled;
 import io.netty.handler.codec.http.*;
 import io.webby.app.Settings;
+import io.webby.common.InjectorHelper;
 import io.webby.util.Rethrow;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
@@ -28,8 +29,14 @@ import static io.webby.util.EasyObjects.firstNonNull;
 public class StaticServing {
     private static final FluentLogger log = FluentLogger.forEnclosingClass();
 
+    private ContentTypeProvider contentTypeProvider;
     @Inject private Settings settings;
     @Inject private HttpResponseFactory factory;
+
+    @Inject
+    private void init(@NotNull InjectorHelper helper) {
+        contentTypeProvider = helper.getOrDefault(ContentTypeProvider.class, () -> path -> null);
+    }
 
     public void iterateStaticFiles(@NotNull Consumer<String> consumer) throws IOException {
         Path webPath = settings.webPath();
@@ -98,8 +105,9 @@ public class StaticServing {
     }
 
     @VisibleForTesting
-    static CharSequence guessContentType(@NotNull Path path) {
+    CharSequence guessContentType(@NotNull Path path) {
         return firstNonNull(List.of(
+            () -> contentTypeProvider.getContentType(path),
             () -> URLConnection.guessContentTypeFromName(path.toString()),
             Rethrow.Suppliers.rethrow(() -> Files.probeContentType(path)),
             Rethrow.Suppliers.rethrow(() -> ThirdPartyMimeTypeDetectors.detect(path.toFile()))

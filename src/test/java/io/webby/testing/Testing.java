@@ -1,6 +1,5 @@
 package io.webby.testing;
 
-import com.google.errorprone.annotations.CanIgnoreReturnValue;
 import com.google.inject.Injector;
 import com.google.inject.Module;
 import io.webby.Webby;
@@ -15,10 +14,9 @@ import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
 import java.nio.charset.Charset;
-import java.util.*;
+import java.util.Locale;
 import java.util.function.Consumer;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 
 public class Testing {
@@ -58,37 +56,6 @@ public class Testing {
         Locale.setDefault(Locale.US);  // any way to remove this?
 
         return Internals.injector = Webby.initGuice(settings, modules);
-    }
-
-    public static <K, V> @NotNull Map<K, V> asMap(@Nullable Object @NotNull ... items) {
-        return asMap(List.of(items));
-    }
-
-    @SuppressWarnings("unchecked")
-    public static <K, V> @NotNull Map<K, V> asMap(@NotNull List<?> items) {
-        assertEquals(0, items.size() % 2);
-        LinkedHashMap<K, V> result = new LinkedHashMap<>();
-        for (int i = 0; i < items.size(); i += 2) {
-            result.put((K) items.get(i), (V) items.get(i + 1));
-        }
-        return result;
-    }
-
-    @SuppressWarnings("unchecked")
-    public static <T> @NotNull T[] appendVarArg(@Nullable T arg, @Nullable T @NotNull ... args) {
-        T[] result = Arrays.copyOf(args, args.length + 1);
-        result[args.length] = arg;
-        return result;
-    }
-
-    @CanIgnoreReturnValue
-    public static boolean waitFor(long millis) {
-        try {
-            Thread.sleep(millis);
-            return true;
-        } catch (InterruptedException ignore) {
-            return false;
-        }
     }
 
     public static class Internals {
