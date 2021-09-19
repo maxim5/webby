@@ -44,7 +44,6 @@ import org.jetbrains.annotations.VisibleForTesting;
 
 import java.io.OutputStream;
 import java.lang.reflect.InvocationTargetException;
-import java.util.List;
 import java.util.concurrent.Future;
 import java.util.concurrent.TimeUnit;
 import java.util.function.Consumer;
@@ -59,6 +58,7 @@ public class NettyHttpHandler extends SimpleChannelInboundHandler<FullHttpReques
     @Inject private Settings settings;
     @Inject private Interceptors interceptors;
     @Inject private HttpResponseFactory factory;
+    @Inject private ResponseHeaders headers;
     @Inject private ResponseMapper mapper;
     @Inject private Router<RouteEndpoint> router;
     @Inject private MarshallerFactory marshallers;
@@ -330,17 +330,7 @@ public class NettyHttpHandler extends SimpleChannelInboundHandler<FullHttpReques
                 (options.out() == Marshal.JSON) ?
                         HttpHeaderValues.APPLICATION_JSON :
                         HttpHeaderValues.TEXT_HTML;
-
-        return List.of(
-                Pair.of(HttpHeaderNames.CONTENT_TYPE, contentType),
-                Pair.of(HttpHeaderNames.X_FRAME_OPTIONS, "SAMEORIGIN"),  // iframe attack
-                Pair.of("X-XSS-Protection", "1;mode=block"),  // XSS Filtering
-                Pair.of(HttpHeaderNames.CONTENT_SECURITY_POLICY, "script-src 'self'"),  // Whitelisting Sources
-                Pair.of("X-Content-Type-Options", "nosniff")  // MIME-sniffing attacks
-
-                // Content-Security-Policy: upgrade-insecure-requests
-                // Strict-Transport-Security: max-age=1000; includeSubDomains; preload
-        );
+        return headers.defaultHeaders(contentType);
     }
 
     @VisibleForTesting

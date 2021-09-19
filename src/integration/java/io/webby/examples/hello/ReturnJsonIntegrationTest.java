@@ -1,6 +1,5 @@
 package io.webby.examples.hello;
 
-import io.netty.handler.codec.http.HttpHeaderValues;
 import io.netty.handler.codec.http.HttpResponse;
 import io.webby.netty.marshal.MarshallerFactory.SupportedJsonLibrary;
 import io.webby.testing.BaseHttpIntegrationTest;
@@ -32,7 +31,7 @@ public class ReturnJsonIntegrationTest extends BaseHttpIntegrationTest {
         assert200(response, """
             {"foo":1,"var":["foo"]}
         """.trim());
-        assertContentType(response, HttpHeaderValues.APPLICATION_JSON);
+        assertContentType(response, APPLICATION_JSON);
     }
 
     @Test
@@ -41,7 +40,7 @@ public class ReturnJsonIntegrationTest extends BaseHttpIntegrationTest {
         assert200(response, """
             {"foo":1,"var":["foo","bar"]}
         """.trim());
-        assertContentType(response, HttpHeaderValues.APPLICATION_JSON);
+        assertContentType(response, APPLICATION_JSON);
     }
 
     @Test
@@ -50,7 +49,7 @@ public class ReturnJsonIntegrationTest extends BaseHttpIntegrationTest {
         assert200(response, """
             ["foo",1,["foo","bar"]]
         """.trim());
-        assertContentType(response, HttpHeaderValues.APPLICATION_JSON);
+        assertContentType(response, APPLICATION_JSON);
     }
 
     @Test
@@ -58,7 +57,7 @@ public class ReturnJsonIntegrationTest extends BaseHttpIntegrationTest {
         HttpResponse response = get("/r/json/sample_bean/bar/baz");
         assert200(response);
         assertJsonValue(content(response), new SampleBean(0, "bar/baz", List.of(1, 2, 3)));
-        assertContentType(response, HttpHeaderValues.APPLICATION_JSON);
+        assertContentType(response, APPLICATION_JSON);
     }
 
     @Test
@@ -68,6 +67,6 @@ public class ReturnJsonIntegrationTest extends BaseHttpIntegrationTest {
         assert200(response, """
             ["f","o","o","b","a","r"]
         """.trim());
-        assertContentType(response, HttpHeaderValues.APPLICATION_JSON);
+        assertContentType(response, APPLICATION_JSON);
     }
 }

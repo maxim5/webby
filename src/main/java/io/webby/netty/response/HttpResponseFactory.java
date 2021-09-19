@@ -27,6 +27,7 @@ public class HttpResponseFactory {
 
     @Inject private Settings settings;
     @Inject private StaticServing staticServing;
+    @Inject private ResponseHeaders headers;
 
     public @NotNull FullHttpResponse newResponse(@NotNull CharSequence content, @NotNull HttpResponseStatus status) {
         ByteBuf byteBuf = Unpooled.copiedBuffer(content, settings.charset());
@@ -36,7 +37,7 @@ public class HttpResponseFactory {
     public @NotNull FullHttpResponse newResponse(@NotNull CharSequence content,
                                                  @NotNull HttpResponseStatus status,
                                                  @NotNull CharSequence contentType) {
-        return withContentType(newResponse(content, status), contentType);
+        return withContentType(newResponse(content, status), headers.ensureCharset(contentType));
     }
 
     public @NotNull FullHttpResponse newResponse(@NotNull ByteBuf byteBuf, @NotNull HttpResponseStatus status) {
@@ -48,7 +49,7 @@ public class HttpResponseFactory {
     public @NotNull FullHttpResponse newResponse(@NotNull ByteBuf content,
                                                  @NotNull HttpResponseStatus status,
                                                  @NotNull CharSequence contentType) {
-        return withContentType(newResponse(content, status), contentType);
+        return withContentType(newResponse(content, status), headers.ensureCharset(contentType));
     }
 
     public @NotNull FullHttpResponse newResponse(byte[] content, @NotNull HttpResponseStatus status) {
@@ -127,16 +128,16 @@ public class HttpResponseFactory {
                         debugError != null ? debugError : "",
                         cause != null ? Throwables.getStackTraceAsString(cause) : ""
                 );
-                return newResponse(content, status, HttpHeaderValues.TEXT_HTML);
+                return newResponse(content, status, ResponseHeaders.TEXT_HTML);
             } else {
                 if (clientError != null) {
-                    return newResponse(clientError, status, HttpHeaderValues.TEXT_HTML);
+                    return newResponse(clientError, status, ResponseHeaders.TEXT_HTML);
                 }
             }
         } catch (Exception e) {
             log.at(Level.SEVERE).withCause(e).log("Failed to read the resource: %s, returning default response", name);
         }
-        return newResponse(statusLine(status), status, HttpHeaderValues.TEXT_HTML);
+        return newResponse(statusLine(status), status, ResponseHeaders.TEXT_HTML);
     }
 
     public @NotNull FullHttpResponse handleServeException(@NotNull ServeException exception, @NotNull String source) {
@@ -182,8 +183,8 @@ public class HttpResponseFactory {
         return Unpooled.wrappedBuffer(inputStream.readAllBytes());
     }
 
-    public static <R extends HttpResponse> @NotNull R withContentType(@NotNull R response, @NotNull CharSequence contentType) {
-        response.headers().set(HttpHeaderNames.CONTENT_TYPE, contentType);
+    private static <R extends HttpResponse> @NotNull R withContentType(@NotNull R response, @NotNull CharSequence contentType) {
+        response.headers().set(ResponseHeaders.CONTENT_TYPE, contentType);
         return response;
     }
 

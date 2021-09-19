@@ -6,6 +6,7 @@ import io.webby.netty.intercept.Interceptors;
 import io.webby.netty.marshal.Json;
 import io.webby.netty.marshal.MarshallerFactory;
 import io.webby.netty.response.HttpResponseFactory;
+import io.webby.netty.response.ResponseHeaders;
 import io.webby.netty.response.ResponseMapper;
 import io.webby.netty.response.StaticServing;
 import io.webby.netty.ws.sender.ChannelSender;
@@ -15,6 +16,7 @@ public class NettyModule extends AbstractModule {
     @Override
     protected void configure() {
         bind(HttpResponseFactory.class).asEagerSingleton();
+        bind(ResponseHeaders.class).asEagerSingleton();
         bind(ResponseMapper.class).asEagerSingleton();
         bind(StaticServing.class).asEagerSingleton();
 

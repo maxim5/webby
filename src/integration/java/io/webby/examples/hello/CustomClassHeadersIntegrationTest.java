@@ -14,7 +14,7 @@ public class CustomClassHeadersIntegrationTest extends BaseHttpIntegrationTest {
         HttpResponse response = get("/headers/etag");
         assert200(response, "etag");
         assertContentLength(response, "4");
-        assertContentType(response, "text/html");
+        assertContentType(response, TEXT_HTML_CHARSET);
         assertHeaders(response, "Cache-Control", "no-cache", "Etag", "foobar");
     }
 
@@ -23,7 +23,7 @@ public class CustomClassHeadersIntegrationTest extends BaseHttpIntegrationTest {
         HttpResponse response = get("/headers/cache");
         assert200(response, "cache");
         assertContentLength(response, "5");
-        assertContentType(response, "text/html");
+        assertContentType(response, TEXT_HTML_CHARSET);
         assertHeaders(response, "Cache-Control", "only-if-cached");
     }
 }
