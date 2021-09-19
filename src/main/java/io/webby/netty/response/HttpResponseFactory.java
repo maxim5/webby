@@ -61,7 +61,7 @@ public class HttpResponseFactory {
     public @NotNull StreamingHttpResponse newResponse(@NotNull InputStream content, @NotNull HttpResponseStatus status) {
         ChunkedStream stream = new ChunkedStream(content);
         StreamingHttpResponse response = new StreamingHttpResponse(HttpVersion.HTTP_1_1, status, stream);
-        response.headers().set(HttpHeaderNames.TRANSFER_ENCODING, HttpHeaderValues.CHUNKED);
+        response.headers().set(HttpConst.TRANSFER_ENCODING, HttpConst.CHUNKED);
         return response;
     }
 
@@ -69,7 +69,7 @@ public class HttpResponseFactory {
             throws IOException {
         ChunkedFile chunkedFile = new ChunkedFile(content);
         StreamingHttpResponse response = new StreamingHttpResponse(HttpVersion.HTTP_1_1, status, chunkedFile);
-        response.headers().set(HttpHeaderNames.TRANSFER_ENCODING, HttpHeaderValues.CHUNKED);
+        response.headers().set(HttpConst.TRANSFER_ENCODING, HttpConst.CHUNKED);
         return response;
     }
 

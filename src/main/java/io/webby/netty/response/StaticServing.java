@@ -112,6 +112,6 @@ public class StaticServing {
             () -> URLConnection.guessContentTypeFromName(path.toString()),
             Rethrow.Suppliers.rethrow(() -> Files.probeContentType(path)),
             Rethrow.Suppliers.rethrow(() -> ThirdPartyMimeTypeDetectors.detect(path.toFile()))
-        ), HttpHeaderValues.APPLICATION_OCTET_STREAM);
+        ), HttpConst.APPLICATION_OCTET_STREAM);
     }
 }

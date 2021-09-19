@@ -6,6 +6,7 @@ import io.netty.handler.codec.http.cookie.Cookie;
 import io.webby.auth.CookieUtil;
 import io.webby.auth.session.Session;
 import io.webby.auth.user.User;
+import io.webby.netty.HttpConst;
 import io.webby.netty.intercept.attr.Attributes;
 import io.webby.netty.marshal.Json;
 import io.webby.url.convert.Constraint;
@@ -139,7 +140,7 @@ public class DefaultHttpRequestEx extends DefaultFullHttpRequest implements Muta
 
     @Override
     public @NotNull List<Cookie> cookies() {
-        String cookieHeader = headers().get(HttpHeaderNames.COOKIE);
+        String cookieHeader = headers().get(HttpConst.COOKIE);
         return cookieHeader != null ? CookieUtil.decodeAll(cookieHeader) : List.of();
     }
 

@@ -17,17 +17,22 @@ public class HttpConst {
     public static final AsciiString CONTENT_TYPE = HttpHeaderNames.CONTENT_TYPE;
     public static final AsciiString LOCATION = HttpHeaderNames.LOCATION;
     public static final AsciiString SERVER_TIMING = AsciiString.of("Server-Timing");
+    public static final AsciiString COOKIE = HttpHeaderNames.COOKIE;
     public static final AsciiString SET_COOKIE = HttpHeaderNames.SET_COOKIE;
+    public static final AsciiString TRANSFER_ENCODING = HttpHeaderNames.TRANSFER_ENCODING;
     public static final AsciiString X_FRAME_OPTIONS = HttpHeaderNames.X_FRAME_OPTIONS;
     public static final AsciiString X_XSS_PROTECTION = AsciiString.of("X-XSS-Protection");
     public static final AsciiString X_CONTENT_TYPE_OPTIONS = AsciiString.of("X-Content-Type-Options");
+    public static final AsciiString USER_AGENT = HttpHeaderNames.USER_AGENT;
 
     public static final AsciiString APPLICATION_JSON = HttpHeaderValues.APPLICATION_JSON;
+    public static final AsciiString APPLICATION_OCTET_STREAM = HttpHeaderValues.APPLICATION_OCTET_STREAM;
     public static final AsciiString TEXT_HTML = HttpHeaderValues.TEXT_HTML;
     public static final AsciiString TEXT_HTML_UTF8 = AsciiString.cached("text/html; charset=UTF-8");
     public static final AsciiString TEXT_PLAIN = HttpHeaderValues.TEXT_PLAIN;
     public static final AsciiString TEXT_PLAIN_UTF8 = AsciiString.cached("text/plain; charset=UTF-8");
 
+    public static final AsciiString CHUNKED = HttpHeaderValues.CHUNKED;
     public static final AsciiString INLINE = AsciiString.of("inline");
     public static final AsciiString SAMEORIGIN = AsciiString.of("SAMEORIGIN");
     public static final AsciiString MODE_BLOCK = AsciiString.of("1;mode=block");
