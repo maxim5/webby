@@ -1,6 +1,6 @@
 package io.webby.ws.meta;
 
-import io.webby.netty.ws.Constants;
+import io.webby.netty.ws.FrameConst;
 import org.junit.jupiter.api.Test;
 
 import static io.webby.testing.TestingBytes.asByteBuf;
@@ -49,7 +49,7 @@ public class TextSeparatorFrameMetadataTest {
     public void parse_fail_to_parse_request_id() {
         new TextSeparatorFrameMetadata().parse(asByteBuf("foo xxx bar"), (acceptorId, requestId, content) -> {
             assertByteBuf(acceptorId, "foo");
-            assertEquals(Constants.RequestIds.NO_ID, requestId);
+            assertEquals(FrameConst.RequestIds.NO_ID, requestId);
             assertByteBuf(content, "bar");
         });
     }

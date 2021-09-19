@@ -2,7 +2,7 @@ package io.webby.ws.impl;
 
 import io.netty.handler.codec.http.websocketx.TextWebSocketFrame;
 import io.netty.handler.codec.http.websocketx.WebSocketFrame;
-import io.webby.netty.ws.Constants.RequestIds;
+import io.webby.netty.ws.FrameConst.RequestIds;
 import io.webby.netty.ws.errors.BadFrameException;
 import io.webby.ws.context.BaseRequestContext;
 import io.webby.ws.context.ClientInfo;

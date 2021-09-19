@@ -4,7 +4,7 @@ import com.google.common.collect.ImmutableMap;
 import io.netty.buffer.ByteBuf;
 import io.netty.buffer.Unpooled;
 import io.webby.netty.marshal.Json;
-import io.webby.netty.ws.Constants.RequestIds;
+import io.webby.netty.ws.FrameConst.RequestIds;
 import io.webby.netty.ws.errors.BadFrameException;
 import org.jetbrains.annotations.NotNull;
 

@@ -1,6 +1,6 @@
 package io.webby.netty.ws;
 
-public class Constants {
+public class FrameConst {
     public static class StatusCodes {
         public static final int OK = 0;
         public static final int BAD_FRAME = 1;

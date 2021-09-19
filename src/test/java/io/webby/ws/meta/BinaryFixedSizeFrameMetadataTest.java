@@ -1,13 +1,11 @@
 package io.webby.ws.meta;
 
 import com.google.common.primitives.Longs;
-import io.webby.netty.ws.Constants;
 import org.junit.jupiter.api.Test;
 
 import static io.webby.testing.TestingBytes.*;
 import static io.webby.ws.meta.AssertMeta.assertNotParsed;
 import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertNull;
 
 public class BinaryFixedSizeFrameMetadataTest {
     @Test

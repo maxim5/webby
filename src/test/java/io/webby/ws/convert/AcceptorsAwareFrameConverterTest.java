@@ -6,7 +6,7 @@ import io.netty.buffer.ByteBuf;
 import io.netty.handler.codec.http.websocketx.BinaryWebSocketFrame;
 import io.netty.handler.codec.http.websocketx.TextWebSocketFrame;
 import io.webby.netty.marshal.MarshallerFactory;
-import io.webby.netty.ws.Constants.StatusCodes;
+import io.webby.netty.ws.FrameConst.StatusCodes;
 import io.webby.netty.ws.errors.BadFrameException;
 import io.webby.netty.ws.errors.ClientDeniedException;
 import io.webby.testing.FakeClients;

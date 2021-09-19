@@ -1,7 +1,7 @@
 package io.webby.ws.impl;
 
 import io.netty.handler.codec.http.websocketx.WebSocketFrame;
-import io.webby.netty.ws.Constants.StatusCodes;
+import io.webby.netty.ws.FrameConst.StatusCodes;
 import io.webby.ws.context.BaseRequestContext;
 import io.webby.ws.context.ClientInfo;
 import io.webby.ws.context.RequestContext;

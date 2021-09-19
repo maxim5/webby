@@ -1,6 +1,6 @@
 package io.webby.ws.meta;
 
-import io.webby.netty.ws.Constants;
+import io.webby.netty.ws.FrameConst;
 import org.jetbrains.annotations.NotNull;
 
 import static io.webby.testing.TestingBytes.asByteBuf;
@@ -13,7 +13,7 @@ public class AssertMeta {
     public static void assertNotParsed(@NotNull String input, @NotNull FrameMetadata metadata) {
         metadata.parse(asByteBuf(input), (acceptorId, requestId, content) -> {
             assertNull(acceptorId);
-            assertEquals(Constants.RequestIds.NO_ID, requestId);
+            assertEquals(FrameConst.RequestIds.NO_ID, requestId);
             assertByteBuf(content, input);
         });
     }

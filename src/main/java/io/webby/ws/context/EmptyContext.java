@@ -1,6 +1,6 @@
 package io.webby.ws.context;
 
-import io.webby.netty.ws.Constants;
+import io.webby.netty.ws.FrameConst;
 
 public record EmptyContext(boolean isTextRequest) implements BaseRequestContext {
     public static BaseRequestContext EMPTY_TEXT_CONTEXT = new EmptyContext(true);
@@ -8,6 +8,6 @@ public record EmptyContext(boolean isTextRequest) implements BaseRequestContext 
 
     @Override
     public long requestId() {
-        return Constants.RequestIds.NO_ID;
+        return FrameConst.RequestIds.NO_ID;
     }
 }
