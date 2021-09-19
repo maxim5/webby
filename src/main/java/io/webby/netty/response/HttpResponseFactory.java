@@ -42,7 +42,7 @@ public class HttpResponseFactory {
 
     public @NotNull FullHttpResponse newResponse(@NotNull ByteBuf byteBuf, @NotNull HttpResponseStatus status) {
         FullHttpResponse response = new DefaultFullHttpResponse(HttpVersion.HTTP_1_1, status, byteBuf);
-        response.headers().set(HttpHeaderNames.CONTENT_LENGTH, byteBuf.readableBytes());
+        response.headers().set(ResponseHeaders.CONTENT_LENGTH, byteBuf.readableBytes());
         return response;
     }
 
@@ -82,7 +82,7 @@ public class HttpResponseFactory {
                 HttpResponseStatus.TEMPORARY_REDIRECT;
         String content = statusLine(status);
         FullHttpResponse response = newResponse(content, status);
-        response.headers().add(HttpHeaderNames.LOCATION, uri);
+        response.headers().add(ResponseHeaders.LOCATION, uri);
         return response;
     }
 

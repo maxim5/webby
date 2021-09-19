@@ -19,10 +19,10 @@ public class StaticServingIntegrationTest extends BaseHttpIntegrationTest {
     public void serve_exists() throws Exception {
         FullHttpResponse response = serving.serve("favicon.ico", FakeRequests.get("/favicon.ico"));
         assert200(response);
-        assertEquals("15406", response.headers().get(HttpHeaderNames.CONTENT_LENGTH));
-        assertOneOf(response.headers().get(HttpHeaderNames.CONTENT_TYPE), ICON_MIME_TYPES);
-        assertEquals("1e5d75d6", response.headers().get(HttpHeaderNames.ETAG));
-        assertNotNull(HttpCaching.DATE_FORMAT.parse(response.headers().get(HttpHeaderNames.LAST_MODIFIED)));
+        assertEquals("15406", response.headers().get(ResponseHeaders.CONTENT_LENGTH));
+        assertOneOf(response.headers().get(ResponseHeaders.CONTENT_TYPE), ICON_MIME_TYPES);
+        assertEquals("1e5d75d6", response.headers().get(ResponseHeaders.ETAG));
+        assertNotNull(HttpCaching.DATE_FORMAT.parse(response.headers().get(ResponseHeaders.LAST_MODIFIED)));
     }
 
     @Test

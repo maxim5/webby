@@ -23,7 +23,7 @@ public class CustomHeadersIntegrationTest extends BaseHttpIntegrationTest {
     public void get_plain_text() {
         HttpResponse response = get("/headers/plain/10");
         assert200(response, "Hello int <b>10</b>!");
-        assertContentLength(response, "20");
+        assertContentLength(response, 20);
         assertContentType(response, "text/plain");
     }
 
@@ -31,7 +31,7 @@ public class CustomHeadersIntegrationTest extends BaseHttpIntegrationTest {
     public void get_xml() {
         HttpResponse response = get("/headers/xml");
         assert200(response, "<foo><bar/></foo>");
-        assertContentLength(response, "17");
+        assertContentLength(response, 17);
         assertContentType(response, "application/xml");
     }
 

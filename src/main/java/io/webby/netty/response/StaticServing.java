@@ -54,7 +54,7 @@ public class StaticServing {
     public @NotNull FullHttpResponse serve(@NotNull String path, @NotNull FullHttpRequest request) throws IOException {
         HttpHeaders headers = request.headers();
         Path fullPath = settings.webPath().resolve(path);
-        if (!HttpCaching.isModifiedSince(fullPath, headers.get(HttpHeaderNames.IF_MODIFIED_SINCE))) {
+        if (!HttpCaching.isModifiedSince(fullPath, headers.get(ResponseHeaders.IF_MODIFIED_SINCE))) {
             return factory.newResponse304();
         }
 
@@ -63,17 +63,17 @@ public class StaticServing {
             log.at(Level.WARNING).log("Can't serve the static path: %s. Return 404", path);
             return factory.newResponse404();
         }
-        if (!HttpCaching.isSimpleEtagChanged(byteBuf, headers.get(HttpHeaderNames.IF_NONE_MATCH))) {
+        if (!HttpCaching.isSimpleEtagChanged(byteBuf, headers.get(ResponseHeaders.IF_NONE_MATCH))) {
             return factory.newResponse304();
         }
 
         FullHttpResponse response = factory.newResponse(byteBuf, HttpResponseStatus.OK, guessContentType(fullPath));
         if (settings.isProdMode()) {
-            response.headers().add(HttpHeaderNames.CACHE_CONTROL, HttpCaching.CACHE_FOREVER);
+            response.headers().add(ResponseHeaders.CACHE_CONTROL, HttpCaching.CACHE_FOREVER);
         } else {
-            response.headers().add(HttpHeaderNames.CONTENT_DISPOSITION, "inline");
-            response.headers().add(HttpHeaderNames.ETAG, HttpCaching.simpleEtag(byteBuf));
-            response.headers().add(HttpHeaderNames.LAST_MODIFIED, HttpCaching.lastModified(fullPath));
+            response.headers().add(ResponseHeaders.CONTENT_DISPOSITION, ResponseHeaders.INLINE);
+            response.headers().add(ResponseHeaders.ETAG, HttpCaching.simpleEtag(byteBuf));
+            response.headers().add(ResponseHeaders.LAST_MODIFIED, HttpCaching.lastModified(fullPath));
         }
 
         return response;

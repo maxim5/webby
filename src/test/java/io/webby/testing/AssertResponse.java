@@ -38,12 +38,12 @@ public class AssertResponse {
 
     public static void assertTempRedirect(@NotNull HttpResponse response, @NotNull String url) {
         assertResponse(response, HttpResponseStatus.TEMPORARY_REDIRECT, null);
-        assertHeaders(response, HttpHeaderNames.LOCATION, url);
+        assertHeaders(response, ResponseHeaders.LOCATION, url);
     }
 
     public static void assertPermRedirect(@NotNull HttpResponse response, @NotNull String url) {
         assertResponse(response, HttpResponseStatus.PERMANENT_REDIRECT, null);
-        assertHeaders(response, HttpHeaderNames.LOCATION, url);
+        assertHeaders(response, ResponseHeaders.LOCATION, url);
     }
 
     public static void assert400(@NotNull HttpResponse response) {
@@ -124,19 +124,23 @@ public class AssertResponse {
         assertEquals(value2.toString(), response.headers().get(key2));
     }
 
+    public static void assertContentLength(@NotNull HttpResponse response, int expected) {
+        assertContentLength(response, String.valueOf(expected));
+    }
+
     public static void assertContentLength(@NotNull HttpResponse response, @NotNull CharSequence expected) {
-        assertHeaders(response, HttpHeaderNames.CONTENT_LENGTH, expected);
+        assertHeaders(response, ResponseHeaders.CONTENT_LENGTH, expected);
     }
 
     public static void assertContentType(@NotNull HttpResponse response, @NotNull CharSequence expected) {
-        assertHeaders(response, HttpHeaderNames.CONTENT_TYPE, expected);
+        assertHeaders(response, ResponseHeaders.CONTENT_TYPE, expected);
     }
 
     public static void assertContent(@NotNull HttpResponse response, @NotNull HttpResponse expected) {
         assertByteBufs(content(expected), content(response));
     }
 
-    public static void assertContentContains(@NotNull HttpResponse response, String ... substrings) {
+    public static void assertContentContains(@NotNull HttpResponse response, @NotNull String @NotNull ... substrings) {
         String content = content(response).toString(CHARSET);
         for (String string : substrings) {
             assertThat(content).contains(string);
@@ -149,7 +153,7 @@ public class AssertResponse {
 
     public static @NotNull HttpHeaders headersWithoutVolatile(@NotNull HttpHeaders headers) {
         return headers.copy()
-                .remove(HttpHeaderNames.SET_COOKIE)
+                .remove(ResponseHeaders.SET_COOKIE)
                 .remove(ResponseHeaders.SERVER_TIMING);
     }
 
