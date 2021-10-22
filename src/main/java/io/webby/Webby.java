@@ -190,7 +190,7 @@ public class Webby {
         //  - validateHandlerFilter  1
         //  - validateSettings       2
         //  - mainModule             3
-        StackTraceElement caller = CallerFinder.findCallerOf(Webby.class, new Throwable(), 3);
+        StackTraceElement caller = CallerFinder.findCallerOf(Webby.class, 3);
         return caller != null ? caller.getClassName() : null;
     }
 

@@ -63,7 +63,7 @@ public class Interceptors {
                 public <T> @NotNull T attrOrDie(int position) {
                     Interceptor owner = unsafeOwners.get(position);
                     if (owner != null) {
-                        StackTraceElement caller = CallerFinder.findCallerOf(this.getClass(), new Throwable(), 0);
+                        StackTraceElement caller = CallerFinder.findCallerOf(this.getClass(), 0);
                         if (caller != null && !caller.getClassName().equals(owner.getClass().getName())) {
                             log.at(Level.WARNING).log("%s requested conditionally available attribute owned by %s", caller, owner);
                         }

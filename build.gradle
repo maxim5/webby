@@ -27,37 +27,37 @@ if (Os.isFamily(Os.FAMILY_UNIX)) {
 // Prod
 dependencies {
     // API
-    api group: 'com.google.guava', name: 'guava', version: '30.1.1-jre'
+    api group: 'com.google.guava', name: 'guava', version: '31.0.1-jre'
     api group: 'com.google.inject', name: 'guice', version: '5.0.1'
     api group: 'com.google.mug', name: 'mug', version: '5.5'
-    api group: 'io.netty', name: 'netty-all', version: '4.1.67.Final'
+    api group: 'io.netty', name: 'netty-all', version: '4.1.69.Final'
 
     // Implementation
     implementation group: 'com.carrotsearch', name: 'hppc', version: '0.9.0'
-    compileOnly group: 'com.google.protobuf', name: 'protobuf-java', version: '3.18.0'
+    compileOnly group: 'com.google.protobuf', name: 'protobuf-java', version: '3.18.1'
     implementation group: 'org.jetbrains', name: 'annotations', version: '22.0.0'
 
     // RouteKit
     implementation group: 'io.routekit', name: 'routekit', version: 'v0.2.0'
 
     // Google Flogger
-    compileOnly group: 'com.google.flogger', name: 'flogger', version: '0.6'
-    runtimeOnly group: 'com.google.flogger', name: 'flogger-log4j2-backend', version: '0.6'
+    compileOnly group: 'com.google.flogger', name: 'flogger', version: '0.7.1'
+    runtimeOnly group: 'com.google.flogger', name: 'flogger-log4j2-backend', version: '0.7.1'
 
     // Json
     compileOnly group: 'com.alibaba', name: 'fastjson', version: '1.2.78'
     compileOnly group: 'com.dslplatform', name: 'dsl-json-java8', version: '1.9.8'
-    compileOnly group: 'com.fasterxml.jackson.core', name: 'jackson-databind', version: '2.12.5'
+    compileOnly group: 'com.fasterxml.jackson.core', name: 'jackson-databind', version: '2.13.0'
     compileOnly group: 'com.google.code.gson', name: 'gson', version: '2.8.8'
     compileOnly group: 'com.squareup.moshi', name: 'moshi', version: '1.12.0'
     compileOnly group: 'org.jodd', name: 'jodd-json', version: '6.0.3'
 
     // Templates
     compileOnly group: 'com.fizzed', name: 'rocker-runtime', version: '1.3.0'
-    compileOnly group: 'com.github.jknack', name: 'handlebars', version: '4.2.0'
+    compileOnly group: 'com.github.jknack', name: 'handlebars', version: '4.3.0'
     compileOnly group: 'com.github.spullara.mustache.java', name: 'compiler', version: '0.9.10'
     compileOnly group: 'com.samskivert', name: 'jmustache', version: '1.15'
-    compileOnly group: 'gg.jte', name: 'jte', version: '1.11.4'
+    compileOnly group: 'gg.jte', name: 'jte', version: '1.12.0'
     compileOnly group: 'io.pebbletemplates', name: 'pebble', version: '3.1.5'
     compileOnly group: 'org.apache.velocity', name: 'velocity', version: '1.7'
     compileOnly group: 'org.freemarker', name: 'freemarker', version: '2.3.31'
@@ -76,7 +76,7 @@ dependencies {
     compileOnly group: 'org.fusesource.leveldbjni', name: 'leveldbjni', version: '1.8'
     runtimeOnly group: 'org.fusesource.leveldbjni', name: "leveldbjni-$os", version: '1.8'
     compileOnly group: 'org.iq80.leveldb', name: 'leveldb', version: '0.12'
-    compileOnly group: 'org.lmdbjava', name: 'lmdbjava', version: '0.8.1'
+    compileOnly group: 'org.lmdbjava', name: 'lmdbjava', version: '0.8.2'
     compileOnly group: 'org.mapdb', name: 'mapdb', version: '3.0.8'
     compileOnly group: 'org.rocksdb', name: 'rocksdbjni', version: '6.22.1.1'
 
@@ -92,13 +92,13 @@ dependencies {
 // Testing
 dependencies {
     // JUnit, Truth
-    testImplementation group: 'org.junit.jupiter', name: 'junit-jupiter-api', version: '5.8.0'
-    testCompileOnly group: 'org.junit.jupiter', name: 'junit-jupiter-params', version: '5.8.0'
-    testRuntimeOnly group: 'org.junit.jupiter', name: 'junit-jupiter-engine', version: '5.8.0'
+    testImplementation group: 'org.junit.jupiter', name: 'junit-jupiter-api', version: '5.8.1'
+    testCompileOnly group: 'org.junit.jupiter', name: 'junit-jupiter-params', version: '5.8.1'
+    testRuntimeOnly group: 'org.junit.jupiter', name: 'junit-jupiter-engine', version: '5.8.1'
     testImplementation group: 'com.google.truth', name: 'truth', version: '1.1.3'
     // Unit tests
     testImplementation group: 'com.google.code.gson', name: 'gson', version: '2.8.8'
-    testImplementation group: 'com.google.flogger', name: 'flogger-log4j2-backend', version: '0.6'
+    testImplementation group: 'com.google.flogger', name: 'flogger-log4j2-backend', version: '0.7.1'
     testImplementation group: 'com.squareup.okio', name: 'okio', version: '2.10.0'
     testImplementation group: 'com.j256.simplemagic', name: 'simplemagic', version: '1.16'
     // Integration tests
