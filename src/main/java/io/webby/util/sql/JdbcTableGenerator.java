@@ -227,7 +227,7 @@ public class JdbcTableGenerator {
     }
 
     private void valuesForInsert() throws IOException {
-        ArrayConverterGenerator generator = new ArrayConverterGenerator();
+        ArrayConversionGenerator generator = new ArrayConversionGenerator();
         generator.generateConvert(table.fields());
         Map<String, String> context = Map.of(
             "$array_init", generator.getArrayInit(),
@@ -279,7 +279,7 @@ public class JdbcTableGenerator {
         List<TableField> nonPrimary = table.fields().stream().filter(Predicate.not(TableField::isPrimaryKey)).toList();
         Iterable<TableField> fields = Iterables.concat(nonPrimary, primary);
 
-        ArrayConverterGenerator generator = new ArrayConverterGenerator();
+        ArrayConversionGenerator generator = new ArrayConversionGenerator();
         generator.generateConvert(fields);
         Map<String, String> context = Map.of(
             "$array_init", generator.getArrayInit(),
@@ -297,7 +297,7 @@ public class JdbcTableGenerator {
         """, EasyMaps.merge(context, mainContext));
     }
 
-    private static class ArrayConverterGenerator {
+    private static class ArrayConversionGenerator {
         private final List<TableField> initPerColumns = new ArrayList<>();
         private final List<Pair<TableField, Integer>> convertAccess = new ArrayList<>();
 
@@ -335,7 +335,7 @@ public class JdbcTableGenerator {
 
     private void fromRow() throws IOException {
         Map<String, String> context = Map.of(
-            "$fields_assignments", new ResultSetConverterGenerator().generateAssignments(table),
+            "$fields_assignments", new ResultSetConversionGenerator().generateAssignments(table),
             "$data_fields", table.fields().stream().map(TableField::javaName).collect(COMMA_JOINER)
         );
 
@@ -347,7 +347,7 @@ public class JdbcTableGenerator {
         """, EasyMaps.merge(mainContext, context));
     }
 
-    private static class ResultSetConverterGenerator {
+    private static class ResultSetConversionGenerator {
         private int columnIndex = 0;
 
         public @NotNull String generateAssignments(@NotNull TableSchema table) {
