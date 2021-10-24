@@ -1,14 +1,16 @@
 package io.webby.util.sql;
 
+import com.google.common.primitives.Primitives;
 import io.webby.util.EasyMaps;
-import io.webby.util.sql.api.QueryRunner;
+import io.webby.util.Pair;
+import io.webby.util.sql.api.*;
 import io.webby.util.sql.schema.*;
 import org.jetbrains.annotations.NotNull;
 
 import java.io.IOException;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 import java.util.function.Predicate;
+import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 import static io.webby.util.sql.schema.ColumnJoins.*;
@@ -42,6 +44,15 @@ public class JdbcTableGenerator {
         );
     }
 
+    private static boolean requiresDataConverter(@NotNull TableField field) {
+        Class<?> javaType = field.javaType();
+        if (javaType.isPrimitive() || Primitives.isWrapperType(javaType)) {
+            return false;
+        }
+        // Check method exists in SqlDataConverter.
+        return true;
+    }
+
     public void generateJava() throws IOException {
         imports();
 
@@ -63,20 +74,33 @@ public class JdbcTableGenerator {
     }
 
     private void imports() throws IOException {
+        List<Class<?>> classesToImport = List.of(QueryRunner.class, QueryException.class, LongKeyTable.class);
+        List<Pair<String, String>> dataConvertersToImport = table.fields().stream()
+                .filter(JdbcTableGenerator::requiresDataConverter)
+                .map(TableField::javaType)
+                .map(type -> Pair.of(type.getPackageName(), "%sDataConverter".formatted(type.getSimpleName())))
+                .toList();
+
         Map<String, String> context = Map.of(
             "$package", options.packageName(),
-            "$sql_utils", QueryRunner.class.getPackageName()
+            "$imports", classesToImport.stream().map(Class::getPackageName).distinct()
+                                .map("import %s.*;"::formatted)
+                                .collect(Collectors.joining("\n")),
+            "$static_imports", dataConvertersToImport.stream()
+                                .map(fqn -> "import static %s.%s.*;".formatted(fqn.first(), fqn.second()))
+                                .collect(Collectors.joining("\n"))
         );
 
         appendCode(0, """
         package $package;
 
-        import $sql_utils.*;
-        
         import java.sql.*;
         import java.util.*;
         import java.util.function.*;
-        import javax.annotation.*;\n
+        import javax.annotation.*;
+        
+        $imports
+        $static_imports\n
         """, context);
     }
 
@@ -137,7 +161,7 @@ public class JdbcTableGenerator {
         public @Nullable $DataClass getByPkOrNull($pk_type $pk_name) {
             String query = "SELECT $all_columns FROM $sql_table WHERE $pk_cols_assign";
             try (ResultSet result = runner.runQuery(query, $pk_name)) {
-                return fromRow(result);
+                return result.next() ? fromRow(result) : null;
             } catch (SQLException e) {
                 throw new QueryException("$sql_table.getByPkOrNull() failed", query, $pk_name, e);
             }
@@ -239,11 +263,62 @@ public class JdbcTableGenerator {
     }
 
     private void fromRow() throws IOException {
+        Map<String, String> context = Map.of(
+            "$fields_assignments", new ResultSetConverterGenerator().generateAssignments(table),
+            "$data_fields", table.fields().stream().map(TableField::javaName).collect(COMMA_JOINER)
+        );
+
         appendCode("""
-        private static @Nullable $DataClass fromRow(ResultSet result) throws SQLException {
-            return null;
+        private static @Nonnull $DataClass fromRow(ResultSet result) throws SQLException {
+        $fields_assignments
+            return new $DataClass($data_fields);
         }\n
-        """, mainContext);
+        """, EasyMaps.merge(mainContext, context));
+    }
+
+    private static class ResultSetConverterGenerator {
+        private int columnIndex = 0;
+
+        public @NotNull String generateAssignments(@NotNull TableSchema table) {
+            StringBuilder builder = new StringBuilder();
+            for (TableField field : table.fields()) {
+                String fieldName = field.javaName();
+                Class<?> fieldType = field.javaType();
+
+                String lhs = "%s %s".formatted(fieldType.getSimpleName(), fieldName);
+                String rhs;
+
+                if (fieldType.isPrimitive() || Primitives.isWrapperType(fieldType)) {
+                    assert field instanceof SimpleTableField;
+                    rhs = resultSetGetterExpr(((SimpleTableField) field).column(), ++columnIndex);
+                } else if (field instanceof SimpleTableField simpleField) {
+                    String param = resultSetGetterExpr(simpleField.column(), ++columnIndex);
+                    rhs = "convertTo%s(%s)".formatted(fieldType.getSimpleName(), param);
+                } else {
+                    String params = joinWithTransform(field.columns(), column -> resultSetGetterExpr(column, ++columnIndex));
+                    rhs = "convertTo%s(%s)".formatted(fieldType.getSimpleName(), params);
+                }
+
+                builder.append("    %s = %s;\n".formatted(lhs, rhs));
+            }
+            return builder.toString();
+        }
+
+        private static final Map<SqlDataFamily, String> RESULT_SET_GETTERS = EasyMaps.asMap(
+            SqlDataFamily.Boolean, "getBoolean",
+            SqlDataFamily.Integer, "getInt",
+            SqlDataFamily.Long, "getLong",
+            SqlDataFamily.Float, "getFloat",
+            SqlDataFamily.Double, "getDouble",
+            SqlDataFamily.FixedString, "getString",
+            SqlDataFamily.VariableString, "getString",
+            SqlDataFamily.Binary, "getBytes"
+        );
+
+        private static @NotNull String resultSetGetterExpr(@NotNull Column column, int columnIndex) {
+            String getter = RESULT_SET_GETTERS.get(column.type().family());
+            return "result.%s(%d)".formatted(getter, columnIndex);
+        }
     }
 
     private JdbcTableGenerator append(@NotNull String value) throws IOException {

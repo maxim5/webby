@@ -19,7 +19,7 @@ public record TableSchema(@NotNull String sqlName,
         return fields.stream().filter(TableField::isPrimaryKey).findFirst().orElse(null);
     }
 
-    public @NotNull Iterable<Column> columns() {
+    public @NotNull List<Column> columns() {
         return columns(tableField -> true);
     }
 

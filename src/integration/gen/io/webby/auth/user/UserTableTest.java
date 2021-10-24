@@ -43,8 +43,21 @@ public class UserTableTest {
 
         assertEquals(1, userTable.count());
         assertFalse(userTable.isEmpty());
-        assertEquals(/*user*/null, userTable.getByPkOrNull(1));
+        assertEquals(user, userTable.getByPkOrNull(1));
         assertNull(userTable.getByPkOrNull(2));
-        assertThat(userTable.fetchAll()).containsExactly(/*user*/null);
+        assertThat(userTable.fetchAll()).containsExactly(user);
+    }
+
+    @Test
+    public void update_user() {
+        userTable.insert(new DefaultUser(1, UserAccess.Simple));
+        DefaultUser user = new DefaultUser(1, UserAccess.Admin);
+        userTable.updateByPk(user);
+
+        assertEquals(1, userTable.count());
+        assertFalse(userTable.isEmpty());
+        assertEquals(user, userTable.getByPkOrNull(1));
+        assertNull(userTable.getByPkOrNull(2));
+        assertThat(userTable.fetchAll()).containsExactly(user);
     }
 }

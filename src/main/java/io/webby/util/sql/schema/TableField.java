@@ -34,8 +34,8 @@ public abstract class TableField implements WithColumns {
         return javaField;
     }
 
-    public @NotNull Type javaType() {
-        return javaField.hasFirst() ? javaField.first().getGenericType() : javaField.second().getGenericReturnType();
+    public @NotNull Class<?> javaType() {
+        return javaField.hasFirst() ? javaField.first().getType() : javaField.second().getReturnType();
     }
 
     public @NotNull String javaName() {

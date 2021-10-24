@@ -3,6 +3,7 @@ package io.webby.util.sql.schema;
 import com.google.common.collect.Streams;
 import org.jetbrains.annotations.NotNull;
 
+import java.util.function.Function;
 import java.util.stream.Collector;
 import java.util.stream.Collectors;
 
@@ -16,5 +17,9 @@ public class ColumnJoins {
 
     public static @NotNull String joinWithPattern(@NotNull Iterable<Column> columns, @NotNull String pattern) {
         return Streams.stream(columns).map(Column::sqlName).map(pattern::formatted).collect(COMMA_JOINER);
+    }
+
+    public static @NotNull String joinWithTransform(@NotNull Iterable<Column> columns, @NotNull Function<Column, String> transform) {
+        return Streams.stream(columns).map(transform).collect(COMMA_JOINER);
     }
 }
