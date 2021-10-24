@@ -16,6 +16,10 @@ dependencies {
     integrationImplementation group: 'org.slf4j', name: 'slf4j-nop', version: '2.0.0-alpha4'
 }
 
+if (new File(project.GENERATED_SQL_PATH).exists()) {
+    sourceSets.integration.java.srcDirs += ['src/integration/gen']
+}
+
 idea {
     module {
         testSourceDirs += project.sourceSets.integration.java.srcDirs
