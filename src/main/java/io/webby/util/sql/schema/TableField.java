@@ -1,27 +1,28 @@
 package io.webby.util.sql.schema;
 
-import io.webby.util.OneOf;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
 import java.lang.reflect.Field;
 import java.lang.reflect.Method;
-import java.lang.reflect.Type;
 
 public abstract class TableField implements WithColumns {
     protected final TableSchema table;
-    protected final OneOf<Field, Method> javaField;
+    protected final Field javaField;
+    protected final Method javaGetter;
     protected final boolean primaryKey;
     protected final TableSchema foreignKey;
 
     public TableField(@NotNull TableSchema table,
-                      @NotNull OneOf<Field, Method> javaField,
+                      @NotNull Field javaField,
+                      @NotNull Method javaGetter,
                       boolean primaryKey,
                       @Nullable TableSchema foreignKey) {
         assert !primaryKey || foreignKey == null : "Field can't be PK and FK: %s".formatted(foreignKey);
 
         this.table = table;
         this.javaField = javaField;
+        this.javaGetter = javaGetter;
         this.primaryKey = primaryKey;
         this.foreignKey = foreignKey;
     }
@@ -30,16 +31,20 @@ public abstract class TableField implements WithColumns {
         return table;
     }
 
-    public @NotNull OneOf<Field, Method> javaField() {
+    public @NotNull Field javaField() {
         return javaField;
     }
 
+    public @NotNull Method javaGetter() {
+        return javaGetter;
+    }
+
     public @NotNull Class<?> javaType() {
-        return javaField.hasFirst() ? javaField.first().getType() : javaField.second().getReturnType();
+        return javaField.getType();
     }
 
     public @NotNull String javaName() {
-        return javaField.hasFirst() ? javaField.first().getName() : javaField.second().getName();
+        return javaField.getName();
     }
 
     public boolean isPrimaryKey() {

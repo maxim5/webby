@@ -1,5 +1,6 @@
 package io.webby.util.sql;
 
+import com.google.common.collect.Iterables;
 import com.google.common.primitives.Primitives;
 import io.webby.util.EasyMaps;
 import io.webby.util.Pair;
@@ -46,7 +47,7 @@ public class JdbcTableGenerator {
 
     private static boolean requiresDataConverter(@NotNull TableField field) {
         Class<?> javaType = field.javaType();
-        if (javaType.isPrimitive() || Primitives.isWrapperType(javaType)) {
+        if (isPrimitive(javaType)) {
             return false;
         }
         // Check method exists in SqlDataConverter.
@@ -66,7 +67,9 @@ public class JdbcTableGenerator {
         iterator();
 
         insert();
+        valuesForInsert();
         update();
+        valuesForUpdate();
 
         fromRow();
 
@@ -219,15 +222,27 @@ public class JdbcTableGenerator {
            } catch (SQLException e) {
                throw new QueryException("$sql_table.insert() failed", query, $data_param, e);
            }
-        }
-        
-        private static @Nonnull Object[] valuesForInsert(@Nonnull $DataClass $data_param) {
-            return new Object[] {
-                $data_param.userId(),
-                $data_param.access().level(),
-            };
         }\n
         """, EasyMaps.merge(mainContext, context));
+    }
+
+    private void valuesForInsert() throws IOException {
+        ArrayConverterGenerator generator = new ArrayConverterGenerator();
+        generator.generateConvert(table.fields());
+        Map<String, String> context = Map.of(
+            "$array_init", generator.getArrayInit(),
+            "$array_convert", generator.getArrayConvert()
+        );
+
+        appendCode("""
+        private static @Nonnull Object[] valuesForInsert(@Nonnull $DataClass $data_param) {
+            Object[] array = {
+        $array_init
+            };
+        $array_convert
+            return array;
+        }\n
+        """, EasyMaps.merge(context, mainContext));
     }
 
     private void update() throws IOException {
@@ -251,15 +266,71 @@ public class JdbcTableGenerator {
            } catch (SQLException e) {
                throw new QueryException("$sql_table.insert() failed", query, $data_param, e);
            }
-        }
-        
-        private static @Nonnull Object[] valuesForUpdate(@Nonnull $DataClass $data_param) {
-            return new Object[] {
-                $data_param.access().level(),
-                $data_param.userId(),
-            };
         }\n
         """, EasyMaps.merge(mainContext, pkContext, context));
+    }
+
+    private void valuesForUpdate() throws IOException {
+        if (!table.hasPrimaryKeyField()) {
+            return;
+        }
+
+        List<TableField> primary = table.fields().stream().filter(TableField::isPrimaryKey).toList();
+        List<TableField> nonPrimary = table.fields().stream().filter(Predicate.not(TableField::isPrimaryKey)).toList();
+        Iterable<TableField> fields = Iterables.concat(nonPrimary, primary);
+
+        ArrayConverterGenerator generator = new ArrayConverterGenerator();
+        generator.generateConvert(fields);
+        Map<String, String> context = Map.of(
+            "$array_init", generator.getArrayInit(),
+            "$array_convert", generator.getArrayConvert()
+        );
+
+        appendCode("""
+        private static @Nonnull Object[] valuesForUpdate(@Nonnull $DataClass $data_param) {
+            Object[] array = {
+        $array_init
+            };
+        $array_convert
+            return array;
+        }\n
+        """, EasyMaps.merge(context, mainContext));
+    }
+
+    private static class ArrayConverterGenerator {
+        private final List<TableField> initPerColumns = new ArrayList<>();
+        private final List<Pair<TableField, Integer>> convertAccess = new ArrayList<>();
+
+        public void generateConvert(@NotNull Iterable<TableField> fields) {
+            int columnIndex = 0;
+            for (TableField field : fields) {
+                int columnsNumber = field.columnsNumber();
+                if (!requiresDataConverter(field)) {
+                    initPerColumns.add(field);
+                } else {
+                    for (int i = 0; i < columnsNumber; i++) {
+                        initPerColumns.add(null);
+                    }
+                    convertAccess.add(Pair.of(field, columnIndex));
+                }
+                columnIndex += columnsNumber;
+            }
+        }
+
+        public @NotNull String getArrayInit() {
+            return initPerColumns.stream().map(field -> {
+                if (field == null) {
+                    return "null,";
+                }
+                return "$data_param.%s(),".formatted(field.javaGetter().getName());
+            }).map(s -> "        " + s).collect(Collectors.joining("\n"));
+        }
+
+        public @NotNull String getArrayConvert() {
+            return convertAccess.stream().map(pair -> {
+                return "toArray($data_param.%s(), array, %d);".formatted(pair.first().javaGetter().getName(), pair.second());
+            }).map(s -> "    " + s).collect(Collectors.joining("\n"));
+        }
     }
 
     private void fromRow() throws IOException {
@@ -288,7 +359,7 @@ public class JdbcTableGenerator {
                 String lhs = "%s %s".formatted(fieldType.getSimpleName(), fieldName);
                 String rhs;
 
-                if (fieldType.isPrimitive() || Primitives.isWrapperType(fieldType)) {
+                if (isPrimitive(fieldType)) {
                     assert field instanceof SimpleTableField;
                     rhs = resultSetGetterExpr(((SimpleTableField) field).column(), ++columnIndex);
                 } else if (field instanceof SimpleTableField simpleField) {
@@ -368,5 +439,9 @@ public class JdbcTableGenerator {
         public @NotNull String directoryName() {
             return packageName.replaceAll("\\.", "/");
         }
+    }
+
+    private static boolean isPrimitive(@NotNull Class<?> javaType) {
+        return javaType.isPrimitive() || Primitives.isWrapperType(javaType);
     }
 }
