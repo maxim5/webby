@@ -17,17 +17,16 @@ import java.util.stream.Stream;
 import static io.webby.util.sql.schema.ColumnJoins.*;
 
 @SuppressWarnings("UnnecessaryStringEscape")
-public class JdbcTableGenerator {
+public class DataTableGenerator extends BaseGenerator {
     private final TableSchema table;
-    private final Appendable writer;
     private final Options options;
 
     private final Map<String, String> mainContext;
     private final Map<String, String> pkContext;
 
-    public JdbcTableGenerator(@NotNull TableSchema table, @NotNull Appendable writer, @NotNull Options options) {
+    public DataTableGenerator(@NotNull TableSchema table, @NotNull Appendable writer, @NotNull Options options) {
+        super(writer);
         this.table = table;
-        this.writer = writer;
         this.options = options;
 
         this.mainContext = EasyMaps.asMap(
@@ -79,7 +78,7 @@ public class JdbcTableGenerator {
     private void imports() throws IOException {
         List<Class<?>> classesToImport = List.of(QueryRunner.class, QueryException.class, LongKeyTable.class);
         List<Pair<String, String>> dataConvertersToImport = table.fields().stream()
-                .filter(JdbcTableGenerator::requiresDataConverter)
+                .filter(DataTableGenerator::requiresDataConverter)
                 .map(TableField::javaType)
                 .map(type -> Pair.of(type.getPackageName(), "%sDataConverter".formatted(type.getSimpleName())))
                 .toList();
@@ -390,45 +389,6 @@ public class JdbcTableGenerator {
             String getter = RESULT_SET_GETTERS.get(column.type().family());
             return "result.%s(%d)".formatted(getter, columnIndex);
         }
-    }
-
-    private JdbcTableGenerator append(@NotNull String value) throws IOException {
-        writer.append(value);
-        return this;
-    }
-
-    private JdbcTableGenerator indent(int level) throws IOException {
-        for (int i = 0; i < level; i++) {
-            writer.append("    ");
-        }
-        return this;
-    }
-
-    private JdbcTableGenerator appendCode(@NotNull String code) throws IOException {
-        return appendCode(1, code, Map.of());
-    }
-
-    private JdbcTableGenerator appendCode(@NotNull String code, @NotNull Map<String, String> context) throws IOException {
-        return appendCode(1, code, context);
-    }
-
-    private JdbcTableGenerator appendCode(int indent, @NotNull String code, @NotNull Map<String, String> context) throws IOException {
-        for (Map.Entry<String, String> entry : context.entrySet()) {
-            code = code.replace(entry.getKey(), entry.getValue());
-        }
-        String[] lines = code.lines().toArray(String[]::new);
-        for (String line : lines) {
-            indent(indent).appendLine(line);
-        }
-        return this;
-    }
-
-    private JdbcTableGenerator appendLine(@NotNull String ... values) throws IOException {
-        for (String value : values) {
-            writer.append(value);
-        }
-        writer.append("\n");
-        return this;
     }
 
     public record Options(@NotNull String packageName) {
