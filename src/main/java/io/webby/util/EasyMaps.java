@@ -6,6 +6,7 @@ import org.jetbrains.annotations.Nullable;
 
 import java.util.LinkedHashMap;
 import java.util.List;
+import java.util.Map;
 
 import static io.webby.util.EasyCast.castAny;
 
@@ -32,5 +33,18 @@ public class EasyMaps {
             builder.put(castAny(items[i]), castAny(items[i + 1]));
         }
         return builder.build();
+    }
+
+    public static <K, V> @NotNull Map<K, V> merge(@NotNull Map<K, V> map1, @NotNull Map<K, V> map2) {
+        LinkedHashMap<K, V> result = new LinkedHashMap<>(map1);
+        result.putAll(map2);
+        return result;
+    }
+
+    public static <K, V> @NotNull Map<K, V> merge(@NotNull Map<K, V> map1, @NotNull Map<K, V> map2, @NotNull Map<K, V> map3) {
+        LinkedHashMap<K, V> result = new LinkedHashMap<>(map1);
+        result.putAll(map2);
+        result.putAll(map3);
+        return result;
     }
 }
