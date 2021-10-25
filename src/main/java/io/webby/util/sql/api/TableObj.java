@@ -5,7 +5,7 @@ import org.jetbrains.annotations.Nullable;
 
 import java.util.Optional;
 
-public interface ObjectKeyTable<K, E> extends BaseTable<E> {
+public interface TableObj<K, E> extends BaseTable<E> {
     @Nullable E getByPkOrNull(@NotNull K key);
 
     @NotNull E getByPkOrDie(@NotNull K key);

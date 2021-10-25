@@ -5,7 +5,7 @@ import org.jetbrains.annotations.Nullable;
 
 import java.util.Optional;
 
-public interface LongKeyTable<E> extends ObjectKeyTable<Long, E> {
+public interface TableLong<E> extends TableObj<Long, E> {
     @Nullable E getByPkOrNull(long key);
 
     @Override

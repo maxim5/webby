@@ -76,7 +76,7 @@ public class DataTableGenerator extends BaseGenerator {
     }
 
     private void imports() throws IOException {
-        List<Class<?>> classesToImport = List.of(QueryRunner.class, QueryException.class, LongKeyTable.class);
+        List<Class<?>> classesToImport = List.of(QueryRunner.class, QueryException.class, TableLong.class);
         List<Pair<String, String>> dataConvertersToImport = table.fields().stream()
                 .filter(DataTableGenerator::requiresDataConverter)
                 .map(TableField::javaType)
@@ -107,7 +107,7 @@ public class DataTableGenerator extends BaseGenerator {
     }
 
     private void classDef() throws IOException {
-        String baseClass = "LongKeyTable<%s>".formatted(table.dataClass().getSimpleName());
+        String baseClass = "%s<%s>".formatted(TableLong.class.getSimpleName(), table.dataClass().getSimpleName());
         appendCode(0, "public class $ClassTable implements $BaseClass {", Map.of(
             "$ClassTable", table.javaName(),
             "$BaseClass", baseClass
