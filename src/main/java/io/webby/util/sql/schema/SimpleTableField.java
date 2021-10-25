@@ -11,13 +11,13 @@ import java.util.List;
 public class SimpleTableField extends TableField {
     private final Column column;
 
-    public SimpleTableField(@NotNull TableSchema table,
-                            @NotNull Field javaField,
+    public SimpleTableField(@NotNull Field javaField,
                             @NotNull Method javaGetter,
                             boolean primaryKey,
                             @Nullable TableSchema foreignKey,
+                            boolean customType,
                             @NotNull Column column) {
-        super(table, javaField, javaGetter, primaryKey, foreignKey);
+        super(javaField, javaGetter, primaryKey, foreignKey, customType);
         this.column = column;
     }
 

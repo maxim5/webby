@@ -7,28 +7,24 @@ import java.lang.reflect.Field;
 import java.lang.reflect.Method;
 
 public abstract class TableField implements WithColumns {
-    protected final TableSchema table;
     protected final Field javaField;
     protected final Method javaGetter;
     protected final boolean primaryKey;
     protected final TableSchema foreignKey;
+    private final boolean customType;
 
-    public TableField(@NotNull TableSchema table,
-                      @NotNull Field javaField,
+    public TableField(@NotNull Field javaField,
                       @NotNull Method javaGetter,
                       boolean primaryKey,
-                      @Nullable TableSchema foreignKey) {
+                      @Nullable TableSchema foreignKey,
+                      boolean customType) {
         assert !primaryKey || foreignKey == null : "Field can't be PK and FK: %s".formatted(foreignKey);
 
-        this.table = table;
         this.javaField = javaField;
         this.javaGetter = javaGetter;
         this.primaryKey = primaryKey;
         this.foreignKey = foreignKey;
-    }
-
-    public @NotNull TableSchema table() {
-        return table;
+        this.customType = customType;
     }
 
     public @NotNull Field javaField() {
@@ -57,5 +53,9 @@ public abstract class TableField implements WithColumns {
 
     public @Nullable TableSchema getForeignTable() {
         return foreignKey;
+    }
+
+    public boolean isCustomType() {
+        return customType;
     }
 }

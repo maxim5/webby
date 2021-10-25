@@ -19,7 +19,7 @@ public class UserTableTest {
     @BeforeEach
     void setUp() throws Exception {
         connection = DriverManager.getConnection(URL);
-        connection.createStatement().executeUpdate("CREATE TABLE user (userId INTEGER PRIMARY KEY, access INTEGER)");
+        connection.createStatement().executeUpdate("CREATE TABLE user (user_id INTEGER PRIMARY KEY, access INTEGER)");
         userTable = new UserTable(connection);
     }
 

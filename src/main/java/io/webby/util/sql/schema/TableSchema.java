@@ -9,6 +9,7 @@ import java.util.function.Predicate;
 
 public record TableSchema(@NotNull String sqlName,
                           @NotNull String javaName,
+                          @NotNull String dataName,
                           @NotNull Class<?> dataClass,
                           @NotNull List<TableField> fields) implements WithColumns {
     public boolean hasPrimaryKeyField() {

@@ -1,19 +1,23 @@
 package io.webby.util.sql;
 
 import com.google.common.collect.Iterables;
-import com.google.common.primitives.Primitives;
 import io.webby.util.EasyMaps;
 import io.webby.util.Pair;
-import io.webby.util.sql.api.*;
+import io.webby.util.sql.api.QueryException;
+import io.webby.util.sql.api.QueryRunner;
+import io.webby.util.sql.api.TableLong;
 import io.webby.util.sql.schema.*;
 import org.jetbrains.annotations.NotNull;
 
 import java.io.IOException;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Map;
 import java.util.function.Predicate;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
+import static io.webby.util.sql.SchemaFactory.isPrimitive;
 import static io.webby.util.sql.schema.ColumnJoins.*;
 
 @SuppressWarnings("UnnecessaryStringEscape")
@@ -30,9 +34,10 @@ public class DataTableGenerator extends BaseGenerator {
         this.options = options;
 
         this.mainContext = EasyMaps.asMap(
+            "$TableClass", table.javaName(),
             "$sql_table", table.sqlName(),
             "$DataClass", table.dataClass().getSimpleName(),
-            "$data_param", table.dataClass().getSimpleName().toLowerCase(),
+            "$data_param", table.dataName().toLowerCase(),
             "$all_columns", joinWithComma(table.columns())
         );
 
@@ -108,8 +113,8 @@ public class DataTableGenerator extends BaseGenerator {
 
     private void classDef() throws IOException {
         String baseClass = "%s<%s>".formatted(TableLong.class.getSimpleName(), table.dataClass().getSimpleName());
-        appendCode(0, "public class $ClassTable implements $BaseClass {", Map.of(
-            "$ClassTable", table.javaName(),
+        appendCode(0, "public class $TableClass implements $BaseClass {", Map.of(
+            "$TableClass", table.javaName(),
             "$BaseClass", baseClass
         ));
     }
@@ -119,11 +124,11 @@ public class DataTableGenerator extends BaseGenerator {
         protected final Connection connection;
         protected final QueryRunner runner;
     
-        public $ClassTable(@Nonnull Connection connection) {
+        public $TableClass(@Nonnull Connection connection) {
             this.connection = connection;
             this.runner = new QueryRunner(connection);
         }\n
-        """, Map.of("$ClassTable", table.javaName()));
+        """, mainContext);
     }
 
     private void count() throws IOException {
@@ -199,7 +204,7 @@ public class DataTableGenerator extends BaseGenerator {
         public @Nonnull ResultSetIterator<$DataClass> iterator() {
             String query = "SELECT $all_columns FROM $sql_table";
             try {
-                return new ResultSetIterator<>(runner.runQuery(query), UserTable::fromRow);
+                return new ResultSetIterator<>(runner.runQuery(query), $TableClass::fromRow);
             } catch (SQLException e) {
                 throw new QueryException("$sql_table.iterator() failed", query, e);
             }
@@ -304,7 +309,7 @@ public class DataTableGenerator extends BaseGenerator {
             int columnIndex = 0;
             for (TableField field : fields) {
                 int columnsNumber = field.columnsNumber();
-                if (!requiresDataConverter(field)) {
+                if (!field.isCustomType()) {
                     initPerColumns.add(field);
                 } else {
                     for (int i = 0; i < columnsNumber; i++) {
@@ -399,9 +404,5 @@ public class DataTableGenerator extends BaseGenerator {
         public @NotNull String directoryName() {
             return packageName.replaceAll("\\.", "/");
         }
-    }
-
-    private static boolean isPrimitive(@NotNull Class<?> javaType) {
-        return javaType.isPrimitive() || Primitives.isWrapperType(javaType);
     }
 }
