@@ -116,10 +116,10 @@ public class DataTableGenerator extends BaseGenerator {
 
     private void constructor() throws IOException {
         appendCode("""
-        private final Connection connection;
-        private final QueryRunner runner;
+        protected final Connection connection;
+        protected final QueryRunner runner;
     
-        public $ClassTable(Connection connection) {
+        public $ClassTable(@Nonnull Connection connection) {
             this.connection = connection;
             this.runner = new QueryRunner(connection);
         }\n
@@ -234,7 +234,7 @@ public class DataTableGenerator extends BaseGenerator {
         );
 
         appendCode("""
-        private static @Nonnull Object[] valuesForInsert(@Nonnull $DataClass $data_param) {
+        protected static @Nonnull Object[] valuesForInsert(@Nonnull $DataClass $data_param) {
             Object[] array = {
         $array_init
             };
@@ -286,7 +286,7 @@ public class DataTableGenerator extends BaseGenerator {
         );
 
         appendCode("""
-        private static @Nonnull Object[] valuesForUpdate(@Nonnull $DataClass $data_param) {
+        protected static @Nonnull Object[] valuesForUpdate(@Nonnull $DataClass $data_param) {
             Object[] array = {
         $array_init
             };
@@ -339,7 +339,7 @@ public class DataTableGenerator extends BaseGenerator {
         );
 
         appendCode("""
-        private static @Nonnull $DataClass fromRow(ResultSet result) throws SQLException {
+        public static @Nonnull $DataClass fromRow(@Nonnull ResultSet result) throws SQLException {
         $fields_assignments
             return new $DataClass($data_fields);
         }\n
