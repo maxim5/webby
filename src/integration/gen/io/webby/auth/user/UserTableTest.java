@@ -39,7 +39,7 @@ public class UserTableTest {
     @Test
     public void insert_user() {
         DefaultUser user = new DefaultUser(1, UserAccess.Simple);
-        userTable.insert(user);
+        assertEquals(1, userTable.insert(user));
 
         assertEquals(1, userTable.count());
         assertFalse(userTable.isEmpty());
@@ -52,7 +52,7 @@ public class UserTableTest {
     public void update_user() {
         userTable.insert(new DefaultUser(1, UserAccess.Simple));
         DefaultUser user = new DefaultUser(1, UserAccess.Admin);
-        userTable.updateByPk(user);
+        assertEquals(1, userTable.updateByPk(user));
 
         assertEquals(1, userTable.count());
         assertFalse(userTable.isEmpty());

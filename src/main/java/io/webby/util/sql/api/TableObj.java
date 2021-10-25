@@ -1,5 +1,6 @@
 package io.webby.util.sql.api;
 
+import com.google.errorprone.annotations.CanIgnoreReturnValue;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
@@ -12,5 +13,6 @@ public interface TableObj<K, E> extends BaseTable<E> {
 
     @NotNull Optional<E> getOptionalByPk(@NotNull K key);
 
+    @CanIgnoreReturnValue
     int updateByPk(@NotNull E entity);
 }
