@@ -58,4 +58,8 @@ public abstract class TableField implements WithColumns {
     public boolean isNativelySupportedType() {
         return nativelySupportedType;
     }
+
+    public boolean isCustomSupportType() {
+        return !nativelySupportedType;
+    }
 }

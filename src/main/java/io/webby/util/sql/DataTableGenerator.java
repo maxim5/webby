@@ -1,10 +1,12 @@
 package io.webby.util.sql;
 
 import com.google.common.collect.Iterables;
+import com.google.common.collect.Streams;
 import io.webby.util.EasyMaps;
 import io.webby.util.Pair;
 import io.webby.util.sql.api.QueryException;
 import io.webby.util.sql.api.QueryRunner;
+import io.webby.util.sql.api.ResultSetIterator;
 import io.webby.util.sql.api.TableLong;
 import io.webby.util.sql.schema.Column;
 import io.webby.util.sql.schema.SimpleTableField;
@@ -20,17 +22,21 @@ import java.util.function.Predicate;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
+import static io.webby.util.sql.DataClassAdaptersLocator.adapterName;
 import static io.webby.util.sql.schema.ColumnJoins.*;
 
 @SuppressWarnings("UnnecessaryStringEscape")
 public class DataTableGenerator extends BaseGenerator {
+    private final DataClassAdaptersLocator adaptersLocator;
     private final TableSchema table;
 
     private final Map<String, String> mainContext;
     private final Map<String, String> pkContext;
 
-    public DataTableGenerator(@NotNull TableSchema table, @NotNull Appendable writer) {
+    public DataTableGenerator(@NotNull DataClassAdaptersLocator adaptersLocator,
+                              @NotNull TableSchema table, @NotNull Appendable writer) {
         super(writer);
+        this.adaptersLocator = adaptersLocator;
         this.table = table;
 
         this.mainContext = EasyMaps.asMap(
@@ -47,14 +53,6 @@ public class DataTableGenerator extends BaseGenerator {
             "$pk_name", primaryKeyField.javaName(),
             "$pk_sql", ((SimpleTableField) primaryKeyField).column().sqlName()
         );
-    }
-
-    private static boolean requiresDataConverter(@NotNull TableField field) {
-        if (field.isNativelySupportedType()) {
-            return false;
-        }
-        // Check method exists in SqlDataConverter.
-        return true;
     }
 
     public void generateJava() throws IOException {
@@ -80,21 +78,20 @@ public class DataTableGenerator extends BaseGenerator {
     }
 
     private void imports() throws IOException {
-        List<Class<?>> classesToImport = List.of(QueryRunner.class, QueryException.class, TableLong.class);
-        List<Pair<String, String>> dataConvertersToImport = table.fields().stream()
-                .filter(DataTableGenerator::requiresDataConverter)
+        List<Class<?>> customClasses = table.fields().stream()
+                .filter(TableField::isCustomSupportType)
                 .map(TableField::javaType)
-                .map(type -> Pair.of(type.getPackageName(), "%sDataConverter".formatted(type.getSimpleName())))
-                .toList();
+                .collect(Collectors.toList());
+
+        List<String> classesToImport = Streams.concat(
+            Stream.of(QueryRunner.class, QueryException.class, TableLong.class, ResultSetIterator.class).map(FQN::of),
+            customClasses.stream().map(FQN::of),
+            customClasses.stream().map(adaptersLocator::locate)
+        ).filter(fqn -> !fqn.packageName().equals(table.packageName())).map(FQN::importName).sorted().distinct().toList();
 
         Map<String, String> context = Map.of(
             "$package", table.packageName(),
-            "$imports", classesToImport.stream().map(Class::getPackageName).distinct()
-                                .map("import %s.*;"::formatted)
-                                .collect(Collectors.joining("\n")),
-            "$static_imports", dataConvertersToImport.stream()
-                                .map(fqn -> "import static %s.%s.*;".formatted(fqn.first(), fqn.second()))
-                                .collect(Collectors.joining("\n"))
+            "$imports", classesToImport.stream().map("import %s;"::formatted).collect(Collectors.joining("\n"))
         );
 
         appendCode(0, """
@@ -105,8 +102,7 @@ public class DataTableGenerator extends BaseGenerator {
         import java.util.function.*;
         import javax.annotation.*;
         
-        $imports
-        $static_imports\n
+        $imports\n
         """, context);
     }
 
@@ -331,7 +327,8 @@ public class DataTableGenerator extends BaseGenerator {
 
         public @NotNull String getArrayConvert() {
             return convertAccess.stream().map(pair -> {
-                return "toArray($data_param.%s(), array, %d);".formatted(pair.first().javaGetter().getName(), pair.second());
+                return "%s.fillArrayValues($data_param.%s(), array, %d);"
+                        .formatted(adapterName(pair.first().javaType()), pair.first().javaGetter().getName(), pair.second());
             }).map(s -> "    " + s).collect(Collectors.joining("\n"));
         }
     }
@@ -367,10 +364,10 @@ public class DataTableGenerator extends BaseGenerator {
                     rhs = resultSetGetterExpr(((SimpleTableField) field).column(), ++columnIndex);
                 } else if (field instanceof SimpleTableField simpleField) {
                     String param = resultSetGetterExpr(simpleField.column(), ++columnIndex);
-                    rhs = "convertTo%s(%s)".formatted(fieldType.getSimpleName(), param);
+                    rhs = "%s.createInstance(%s)".formatted(adapterName(fieldType), param);
                 } else {
                     String params = joinWithTransform(field.columns(), column -> resultSetGetterExpr(column, ++columnIndex));
-                    rhs = "convertTo%s(%s)".formatted(fieldType.getSimpleName(), params);
+                    rhs = "%s.createInstance(%s)".formatted(adapterName(fieldType), params);
                 }
 
                 builder.append("    %s = %s;\n".formatted(lhs, rhs));
