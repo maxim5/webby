@@ -11,7 +11,10 @@ import org.jetbrains.annotations.VisibleForTesting;
 import java.lang.reflect.Field;
 import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;
+import java.sql.Time;
+import java.sql.Timestamp;
 import java.util.Arrays;
+import java.util.Date;
 import java.util.List;
 import java.util.Map;
 
@@ -72,10 +75,15 @@ public class SchemaFactory {
         boolean.class, SqlDataFamily.Boolean,
         int.class, SqlDataFamily.Integer,
         long.class, SqlDataFamily.Long,
+        short.class, SqlDataFamily.Short,
+        byte.class, SqlDataFamily.Byte,
         float.class, SqlDataFamily.Float,
         double.class, SqlDataFamily.Double,
-        String.class, SqlDataFamily.FixedString,
-        byte[].class, SqlDataFamily.Binary
+        String.class, SqlDataFamily.String,
+        byte[].class, SqlDataFamily.Binary,
+        Date.class, SqlDataFamily.Date,
+        Time.class, SqlDataFamily.Time,
+        Timestamp.class, SqlDataFamily.Timestamp
     );
 
     @SuppressWarnings("ConstantConditions")

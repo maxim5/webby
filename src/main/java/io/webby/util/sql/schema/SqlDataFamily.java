@@ -4,9 +4,13 @@ public enum SqlDataFamily {
     Boolean,
     Integer,
     Long,
+    Short,
+    Byte,
     Float,
     Double,
-    FixedString,
-    VariableString,
+    String,
     Binary,
+    Date,
+    Time,
+    Timestamp
 }

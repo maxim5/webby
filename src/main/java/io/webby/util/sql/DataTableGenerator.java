@@ -385,9 +385,11 @@ public class DataTableGenerator extends BaseGenerator {
             SqlDataFamily.Long, "getLong",
             SqlDataFamily.Float, "getFloat",
             SqlDataFamily.Double, "getDouble",
-            SqlDataFamily.FixedString, "getString",
-            SqlDataFamily.VariableString, "getString",
-            SqlDataFamily.Binary, "getBytes"
+            SqlDataFamily.String, "getString",
+            SqlDataFamily.Binary, "getBytes",
+            SqlDataFamily.Date, "getDate",
+            SqlDataFamily.Time, "getTime",
+            SqlDataFamily.Timestamp, "getTimestamp"
         );
 
         private static @NotNull String resultSetGetterExpr(@NotNull Column column, int columnIndex) {
