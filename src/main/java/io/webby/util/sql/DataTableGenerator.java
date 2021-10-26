@@ -23,15 +23,13 @@ import static io.webby.util.sql.schema.ColumnJoins.*;
 @SuppressWarnings("UnnecessaryStringEscape")
 public class DataTableGenerator extends BaseGenerator {
     private final TableSchema table;
-    private final Options options;
 
     private final Map<String, String> mainContext;
     private final Map<String, String> pkContext;
 
-    public DataTableGenerator(@NotNull TableSchema table, @NotNull Appendable writer, @NotNull Options options) {
+    public DataTableGenerator(@NotNull TableSchema table, @NotNull Appendable writer) {
         super(writer);
         this.table = table;
-        this.options = options;
 
         this.mainContext = EasyMaps.asMap(
             "$TableClass", table.javaName(),
@@ -89,7 +87,7 @@ public class DataTableGenerator extends BaseGenerator {
                 .toList();
 
         Map<String, String> context = Map.of(
-            "$package", options.packageName(),
+            "$package", table.packageName(),
             "$imports", classesToImport.stream().map(Class::getPackageName).distinct()
                                 .map("import %s.*;"::formatted)
                                 .collect(Collectors.joining("\n")),
@@ -395,16 +393,6 @@ public class DataTableGenerator extends BaseGenerator {
         private static @NotNull String resultSetGetterExpr(@NotNull Column column, int columnIndex) {
             String getter = RESULT_SET_GETTERS.get(column.type().family());
             return "result.%s(%d)".formatted(getter, columnIndex);
-        }
-    }
-
-    public record Options(@NotNull String packageName) {
-        public static @NotNull Options of(@NotNull Class<?> dataClass) {
-            return new Options(dataClass.getPackageName());
-        }
-
-        public @NotNull String directoryName() {
-            return packageName.replaceAll("\\.", "/");
         }
     }
 }

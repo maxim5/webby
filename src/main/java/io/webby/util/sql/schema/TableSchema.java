@@ -12,6 +12,10 @@ public record TableSchema(@NotNull String sqlName,
                           @NotNull String dataName,
                           @NotNull Class<?> dataClass,
                           @NotNull List<TableField> fields) implements WithColumns {
+    public @NotNull String packageName() {
+        return dataClass.getPackageName();
+    }
+
     public boolean hasPrimaryKeyField() {
         return fields.stream().anyMatch(TableField::isPrimaryKey);
     }

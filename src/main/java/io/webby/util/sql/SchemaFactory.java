@@ -19,11 +19,9 @@ import java.util.List;
 import java.util.Map;
 
 public class SchemaFactory {
-    public static @NotNull TableSchema buildTableSchema(@NotNull Class<?> dataClass) {
-        return buildTableSchema(dataClass, dataClass.getSimpleName());
-    }
-
-    public static @NotNull TableSchema buildTableSchema(@NotNull Class<?> dataClass, @NotNull String dataName) {
+    public static @NotNull TableSchema buildTableSchema(@NotNull DataClassInput input) {
+        Class<?> dataClass = input.dataClass;
+        String dataName = input.dataName;
         String sqlName = camelToSnake(dataName);
         String javaName = "%sTable".formatted(dataName);
         List<TableField> fields = Arrays.stream(dataClass.getDeclaredFields())
@@ -98,5 +96,11 @@ public class SchemaFactory {
 
     public static boolean isPrimitive(@NotNull Class<?> javaType) {
         return javaType.isPrimitive() || Primitives.isWrapperType(javaType) || javaType == String.class;
+    }
+
+    public record DataClassInput(@NotNull Class<?> dataClass, @NotNull String dataName) {
+        public DataClassInput(@NotNull Class<?> dataClass) {
+            this(dataClass, dataClass.getSimpleName());
+        }
     }
 }
