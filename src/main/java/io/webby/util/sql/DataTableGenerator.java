@@ -6,7 +6,10 @@ import io.webby.util.Pair;
 import io.webby.util.sql.api.QueryException;
 import io.webby.util.sql.api.QueryRunner;
 import io.webby.util.sql.api.TableLong;
-import io.webby.util.sql.schema.*;
+import io.webby.util.sql.schema.Column;
+import io.webby.util.sql.schema.SimpleTableField;
+import io.webby.util.sql.schema.TableField;
+import io.webby.util.sql.schema.TableSchema;
 import org.jetbrains.annotations.NotNull;
 
 import java.io.IOException;
@@ -17,7 +20,6 @@ import java.util.function.Predicate;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
-import static io.webby.util.sql.SchemaFactory.isPrimitive;
 import static io.webby.util.sql.schema.ColumnJoins.*;
 
 @SuppressWarnings("UnnecessaryStringEscape")
@@ -48,8 +50,7 @@ public class DataTableGenerator extends BaseGenerator {
     }
 
     private static boolean requiresDataConverter(@NotNull TableField field) {
-        Class<?> javaType = field.javaType();
-        if (isPrimitive(javaType)) {
+        if (field.isNativelySupportedType()) {
             return false;
         }
         // Check method exists in SqlDataConverter.
@@ -307,7 +308,7 @@ public class DataTableGenerator extends BaseGenerator {
             int columnIndex = 0;
             for (TableField field : fields) {
                 int columnsNumber = field.columnsNumber();
-                if (!field.isCustomType()) {
+                if (field.isNativelySupportedType()) {
                     initPerColumns.add(field);
                 } else {
                     for (int i = 0; i < columnsNumber; i++) {
@@ -361,7 +362,7 @@ public class DataTableGenerator extends BaseGenerator {
                 String lhs = "%s %s".formatted(fieldType.getSimpleName(), fieldName);
                 String rhs;
 
-                if (isPrimitive(fieldType)) {
+                if (field.isNativelySupportedType()) {
                     assert field instanceof SimpleTableField;
                     rhs = resultSetGetterExpr(((SimpleTableField) field).column(), ++columnIndex);
                 } else if (field instanceof SimpleTableField simpleField) {
@@ -377,21 +378,8 @@ public class DataTableGenerator extends BaseGenerator {
             return builder.toString();
         }
 
-        private static final Map<SqlDataFamily, String> RESULT_SET_GETTERS = EasyMaps.asMap(
-            SqlDataFamily.Boolean, "getBoolean",
-            SqlDataFamily.Integer, "getInt",
-            SqlDataFamily.Long, "getLong",
-            SqlDataFamily.Float, "getFloat",
-            SqlDataFamily.Double, "getDouble",
-            SqlDataFamily.String, "getString",
-            SqlDataFamily.Binary, "getBytes",
-            SqlDataFamily.Date, "getDate",
-            SqlDataFamily.Time, "getTime",
-            SqlDataFamily.Timestamp, "getTimestamp"
-        );
-
         private static @NotNull String resultSetGetterExpr(@NotNull Column column, int columnIndex) {
-            String getter = RESULT_SET_GETTERS.get(column.type().family());
+            String getter = column.type().jdbcType().getterMethod();
             return "result.%s(%d)".formatted(getter, columnIndex);
         }
     }

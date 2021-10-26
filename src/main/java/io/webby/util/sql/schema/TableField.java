@@ -11,20 +11,20 @@ public abstract class TableField implements WithColumns {
     protected final Method javaGetter;
     protected final boolean primaryKey;
     protected final TableSchema foreignKey;
-    private final boolean customType;
+    protected final boolean nativelySupportedType;
 
     public TableField(@NotNull Field javaField,
                       @NotNull Method javaGetter,
                       boolean primaryKey,
                       @Nullable TableSchema foreignKey,
-                      boolean customType) {
+                      boolean nativelySupportedType) {
         assert !primaryKey || foreignKey == null : "Field can't be PK and FK: %s".formatted(foreignKey);
 
         this.javaField = javaField;
         this.javaGetter = javaGetter;
         this.primaryKey = primaryKey;
         this.foreignKey = foreignKey;
-        this.customType = customType;
+        this.nativelySupportedType = nativelySupportedType;
     }
 
     public @NotNull Field javaField() {
@@ -55,7 +55,7 @@ public abstract class TableField implements WithColumns {
         return foreignKey;
     }
 
-    public boolean isCustomType() {
-        return customType;
+    public boolean isNativelySupportedType() {
+        return nativelySupportedType;
     }
 }
