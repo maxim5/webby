@@ -13,25 +13,44 @@ import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;
 import java.sql.Time;
 import java.sql.Timestamp;
-import java.util.Arrays;
-import java.util.Date;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 public class SchemaFactory {
-    public static @NotNull TableSchema buildTableSchema(@NotNull DataClassInput input) {
-        Class<?> dataClass = input.dataClass;
-        String dataName = input.dataName;
-        String sqlName = camelToSnake(dataName);
-        String javaName = "%sTable".formatted(dataName);
-        List<TableField> fields = Arrays.stream(dataClass.getDeclaredFields())
-                .filter(field -> !Modifier.isStatic(field.getModifiers()))
-                .map(field -> buildTableField(field, dataName))
-                .toList();
-        return new TableSchema(sqlName, javaName, dataName, dataClass, fields);
+    private final Collection<DataClassInput> inputs;
+    private final Map<DataClassInput, TableSchema> schemas = new HashMap<>();
+
+    public SchemaFactory(@NotNull Collection<DataClassInput> inputs) {
+        this.inputs = inputs;
     }
 
-    public static @NotNull TableField buildTableField(@NotNull Field field, @NotNull String dataName) {
+    public @NotNull Collection<TableSchema> buildSchemas() {
+        for (DataClassInput input : inputs) {
+            schemas.put(input, buildShallowTable(input));
+        }
+        for (Map.Entry<DataClassInput, TableSchema> entry : schemas.entrySet()) {
+            completeTable(entry.getKey(), entry.getValue());
+        }
+        return schemas.values();
+    }
+
+    @VisibleForTesting
+    @NotNull TableSchema buildShallowTable(@NotNull DataClassInput input) {
+        String sqlName = camelToSnake(input.dataName);
+        String javaName = "%sTable".formatted(input.dataName);
+        return new TableSchema(sqlName, javaName, input.dataName, input.dataClass, new ArrayList<>());
+    }
+
+    @VisibleForTesting
+    void completeTable(@NotNull DataClassInput input, @NotNull TableSchema schema) {
+        List<TableField> fields = Arrays.stream(input.dataClass.getDeclaredFields())
+                .filter(field -> !Modifier.isStatic(field.getModifiers()))
+                .map(field -> buildTableField(field, input.dataName))
+                .toList();
+        schema.fields().addAll(fields);
+    }
+
+    @VisibleForTesting
+    @NotNull TableField buildTableField(@NotNull Field field, @NotNull String dataName) {
         String fieldName = field.getName();
         Class<?> fieldType = field.getType();
 
