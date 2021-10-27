@@ -113,8 +113,6 @@ test {
     useJUnitPlatform()
 }
 
-// Generated paths
-project.ext.set("GENERATED_SQL_PATH", 'build/generated/sql/java')
-
+apply from: 'src/examplesModel/examplesModel.gradle'
 apply from: 'src/examples/examples.gradle'
 apply from: 'src/integration/integration.gradle'

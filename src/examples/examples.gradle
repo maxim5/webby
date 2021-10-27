@@ -29,6 +29,6 @@ rocker {
 
 sourceSets.examples.java.srcDirs += [rocker.configurations.examples.outputDir]
 
-if (new File(project.GENERATED_SQL_PATH).exists()) {
-    sourceSets.examples.java.srcDirs += [project.GENERATED_SQL_PATH]
+if (new File(project.GENERATED_EXAMPLES_SQL_PATH).exists()) {
+    sourceSets.examples.java.srcDirs += [project.GENERATED_EXAMPLES_SQL_PATH]
 }
