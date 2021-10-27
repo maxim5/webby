@@ -21,11 +21,6 @@ public class SimpleTableField extends TableField {
         this.column = column;
     }
 
-    @Override
-    public int columnsNumber() {
-        return 1;
-    }
-
     public @NotNull Column column() {
         return column;
     }
@@ -33,5 +28,10 @@ public class SimpleTableField extends TableField {
     @Override
     public @NotNull List<Column> columns() {
         return Collections.singletonList(column);
+    }
+
+    @Override
+    public int columnsNumber() {
+        return 1;
     }
 }

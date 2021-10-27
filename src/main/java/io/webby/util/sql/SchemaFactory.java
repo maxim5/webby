@@ -1,7 +1,8 @@
 package io.webby.util.sql;
 
 import com.google.common.base.CaseFormat;
-import com.google.common.primitives.Primitives;
+import com.google.mu.util.stream.BiStream;
+import io.webby.util.EasyClasspath;
 import io.webby.util.sql.schema.*;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
@@ -10,13 +11,18 @@ import org.jetbrains.annotations.VisibleForTesting;
 import java.lang.reflect.Field;
 import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;
+import java.lang.reflect.Parameter;
 import java.util.*;
 
 public class SchemaFactory {
+    private final DataClassAdaptersLocator adaptersLocator;
+
     private final Collection<DataClassInput> inputs;
     private final Map<DataClassInput, TableSchema> schemas = new HashMap<>();
 
-    public SchemaFactory(@NotNull Collection<DataClassInput> inputs) {
+    public SchemaFactory(@NotNull DataClassAdaptersLocator adaptersLocator,
+                         @NotNull Collection<DataClassInput> inputs) {
+        this.adaptersLocator = adaptersLocator;
         this.inputs = inputs;
     }
 
@@ -48,22 +54,86 @@ public class SchemaFactory {
 
     @VisibleForTesting
     @NotNull TableField buildTableField(@NotNull Field field, @NotNull String dataName) {
+        Method getter = findGetterMethod(field);
+        assert getter != null : "No getter found for field: %s".formatted(field);
+        boolean isPrimaryKey = isPrimaryKeyField(field, dataName, field.getName());
+
+        FieldInference inference = inferFieldSchema(field);
+        if (inference.isSingleColumn()) {
+            boolean nativelySupportedType = JdbcType.findByMatchingNativeType(field.getType()) != null;
+            return new SimpleTableField(field, getter, isPrimaryKey,
+                                        inference.foreignTable,
+                                        nativelySupportedType,
+                                        Objects.requireNonNull(inference.singleColumn));
+        } else {
+            return new MultiColumnTableField(field, getter, isPrimaryKey,
+                                             inference.foreignTable,
+                                             Objects.requireNonNull(inference.multiColumns));
+        }
+    }
+
+    private static boolean isPrimaryKeyField(@NotNull Field field, @NotNull String dataName, String name) {
+        return name.equals("id") || field.getName().equals(camelUpperToLower(dataName) + "Id");
+    }
+
+    private @NotNull FieldInference inferFieldSchema(@NotNull Field field) {
         String fieldName = field.getName();
         Class<?> fieldType = field.getType();
 
-        Method getter = findGetterMethod(field);
-        assert getter != null : "No getter found for field: %s".formatted(field);
-        boolean isPrimaryKey = fieldName.equals("id") || fieldName.equals(camelUpperToLower(dataName) + "Id");
-
-        // enum, foreign data class, pojo class, known type (DateTime, Instant, ...)
-        JdbcType jdbcType = JdbcType.TYPES_BY_CLASS.get(Primitives.unwrap(fieldType));
-        boolean isNativeType = jdbcType != null;
-        if (jdbcType == null) {
-            jdbcType = JdbcType.Int;  // ?
+        JdbcType jdbcType = JdbcType.findByMatchingNativeType(fieldType);
+        if (jdbcType != null) {
+            return FieldInference.ofSingleColumn(new Column(camelToSnake(fieldName), new ColumnType(jdbcType, null)));
         }
-        Column column = new Column(camelToSnake(fieldName), new ColumnType(jdbcType, null));
 
-        return new SimpleTableField(field, getter, isPrimaryKey, null, isNativeType, column);
+        Class<?> adapterClass = adaptersLocator.locateAdapterClass(fieldType);
+        if (adapterClass != null) {
+            Parameter[] parameters = getCreationParameters(adapterClass);
+            if (parameters.length == 1) {
+                JdbcType paramType = JdbcType.findByMatchingNativeType(parameters[0].getType());
+                assert paramType != null : "JDBC adapter `createInstance` has incompatible parameters: %s".formatted(adapterClass);
+                return FieldInference.ofSingleColumn(new Column(camelToSnake(fieldName), new ColumnType(paramType, null)));
+            } else {
+                List<Column> columns = BiStream.from(Arrays.stream(parameters),
+                                                     Parameter::getName,
+                                                     param -> JdbcType.findByMatchingNativeType(param.getType()))
+                        .mapKeys(name -> "%s_%s".formatted(camelToSnake(fieldName), camelToSnake(name)))
+                        .mapValues(paramType -> new ColumnType(paramType, null))
+                        .mapToObj(Column::new)
+                        .toList();
+                return FieldInference.ofMultiColumns(columns);
+            }
+        }
+
+        //   enum,
+        //   foreign data class,
+        //   pojo class,
+        // + known type (DateTime, Instant, ...)
+
+        // throw new UnsupportedOperationException("Adapter class not found for `%s`. Not implemented".formatted(field));
+        return FieldInference.ofSingleColumn(new Column(camelToSnake(fieldName), new ColumnType(JdbcType.Int, null)));
+    }
+
+    private static record FieldInference(@Nullable Column singleColumn,
+                                         @Nullable List<Column> multiColumns,
+                                         @Nullable TableSchema foreignTable) {
+        public static FieldInference ofSingleColumn(@NotNull Column column) {
+            return new FieldInference(column, null, null);
+        }
+
+        public static FieldInference ofMultiColumns(@NotNull List<Column> columns) {
+            return new FieldInference(null, columns, null);
+        }
+
+        public boolean isSingleColumn() {
+            return singleColumn != null;
+        }
+    }
+
+    @VisibleForTesting
+    static @NotNull Parameter[] getCreationParameters(@NotNull Class<?> adapterClass) {
+        Method method = EasyClasspath.findMethod(adapterClass, "createInstance");
+        assert method != null : "JDBC adapter does not implement `createInstance` method: %s".formatted(adapterClass);
+        return method.getParameters();
     }
 
     @VisibleForTesting

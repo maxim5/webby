@@ -1,6 +1,8 @@
 package io.webby.util.sql.schema;
 
+import com.google.common.primitives.Primitives;
 import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 
 import java.util.Arrays;
 import java.util.Map;
@@ -34,6 +36,10 @@ public enum JdbcType {
         return "get%s".formatted(name());
     }
 
-    public static final Map<Class<?>, JdbcType> TYPES_BY_CLASS =
+    private static final Map<Class<?>, JdbcType> TYPES_BY_CLASS =
             Arrays.stream(JdbcType.values()).collect(Collectors.toMap(JdbcType::nativeType, type -> type));
+
+    public static @Nullable JdbcType findByMatchingNativeType(@NotNull Class<?> nativeType) {
+        return TYPES_BY_CLASS.get(Primitives.unwrap(nativeType));
+    }
 }

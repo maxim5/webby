@@ -1,6 +1,5 @@
 package io.webby.util.sql.schema;
 
-import com.google.common.collect.Streams;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
@@ -29,6 +28,6 @@ public record TableSchema(@NotNull String sqlName,
     }
 
     public @NotNull List<Column> columns(@NotNull Predicate<TableField> fieldsFilter) {
-        return fields.stream().filter(fieldsFilter).map(WithColumns::columns).flatMap(Streams::stream).toList();
+        return fields.stream().filter(fieldsFilter).map(WithColumns::columns).flatMap(List::stream).toList();
     }
 }

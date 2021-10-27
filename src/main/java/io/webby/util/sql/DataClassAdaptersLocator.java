@@ -3,6 +3,7 @@ package io.webby.util.sql;
 import com.google.inject.Inject;
 import io.webby.common.ClasspathScanner;
 import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 
 import java.util.Map;
 import java.util.regex.Pattern;
@@ -22,7 +23,12 @@ public class DataClassAdaptersLocator {
         ).stream().collect(Collectors.toMap(Class::getSimpleName, klass -> klass));
     }
 
-    public @NotNull FQN locate(@NotNull Class<?> dataClass) {
+    public @Nullable Class<?> locateAdapterClass(@NotNull Class<?> dataClass) {
+        String adapterName = adapterName(dataClass);
+        return matchedClasses.get(adapterName);
+    }
+
+    public @NotNull FQN locateAdapterFqn(@NotNull Class<?> dataClass) {
         String adapterName = adapterName(dataClass);
         Class<?> klass = matchedClasses.get(adapterName);
         if (klass != null) {

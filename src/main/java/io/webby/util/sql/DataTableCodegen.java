@@ -86,7 +86,7 @@ public class DataTableCodegen extends BaseCodegen {
         List<String> classesToImport = Streams.concat(
             Stream.of(QueryRunner.class, QueryException.class, TableLong.class, ResultSetIterator.class).map(FQN::of),
             customClasses.stream().map(FQN::of),
-            customClasses.stream().map(adaptersLocator::locate)
+            customClasses.stream().map(adaptersLocator::locateAdapterFqn)
         ).filter(fqn -> !fqn.packageName().equals(table.packageName())).map(FQN::importName).sorted().distinct().toList();
 
         Map<String, String> context = Map.of(
