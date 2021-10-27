@@ -3,8 +3,7 @@ package io.webby.util.sql.adapter;
 import java.time.Instant;
 
 public class InstantJdbcAdapter {
-    // long!
-    public static Instant createInstance(int value) {
+    public static Instant createInstance(long value) {
         return Instant.ofEpochSecond(value);
     }
 

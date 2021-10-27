@@ -26,15 +26,15 @@ import static io.webby.util.sql.DataClassAdaptersLocator.adapterName;
 import static io.webby.util.sql.schema.ColumnJoins.*;
 
 @SuppressWarnings("UnnecessaryStringEscape")
-public class DataTableGenerator extends BaseGenerator {
+public class DataTableCodegen extends BaseCodegen {
     private final DataClassAdaptersLocator adaptersLocator;
     private final TableSchema table;
 
     private final Map<String, String> mainContext;
     private final Map<String, String> pkContext;
 
-    public DataTableGenerator(@NotNull DataClassAdaptersLocator adaptersLocator,
-                              @NotNull TableSchema table, @NotNull Appendable writer) {
+    public DataTableCodegen(@NotNull DataClassAdaptersLocator adaptersLocator,
+                            @NotNull TableSchema table, @NotNull Appendable writer) {
         super(writer);
         this.adaptersLocator = adaptersLocator;
         this.table = table;
