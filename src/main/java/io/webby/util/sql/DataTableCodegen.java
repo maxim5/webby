@@ -2,12 +2,10 @@ package io.webby.util.sql;
 
 import com.google.common.collect.Iterables;
 import com.google.common.collect.Streams;
+import com.google.common.primitives.Primitives;
 import io.webby.util.EasyMaps;
 import io.webby.util.Pair;
-import io.webby.util.sql.api.QueryException;
-import io.webby.util.sql.api.QueryRunner;
-import io.webby.util.sql.api.ResultSetIterator;
-import io.webby.util.sql.api.TableLong;
+import io.webby.util.sql.api.*;
 import io.webby.util.sql.schema.Column;
 import io.webby.util.sql.schema.SimpleTableField;
 import io.webby.util.sql.schema.TableField;
@@ -49,7 +47,8 @@ public class DataTableCodegen extends BaseCodegen {
 
         TableField primaryKeyField = table.primaryKeyField();
         this.pkContext = primaryKeyField == null ? Map.of() : EasyMaps.asMap(
-            "$pk_type", primaryKeyField.javaType().getTypeName(),
+            "$pk_type", primaryKeyField.javaType().getSimpleName(),
+            "$pk_annotation", primaryKeyField.javaType().isPrimitive() ? "" : "@Nonnull ",
             "$pk_name", primaryKeyField.javaName(),
             "$pk_sql", ((SimpleTableField) primaryKeyField).column().sqlName()
         );
@@ -84,7 +83,7 @@ public class DataTableCodegen extends BaseCodegen {
                 .collect(Collectors.toList());
 
         List<String> classesToImport = Streams.concat(
-            Stream.of(QueryRunner.class, QueryException.class, TableLong.class, ResultSetIterator.class).map(FQN::of),
+            Stream.of(pickBaseTableClass(), QueryRunner.class, QueryException.class, ResultSetIterator.class).map(FQN::of),
             customClasses.stream().map(FQN::of),
             customClasses.stream().map(adaptersLocator::locateAdapterFqn)
         ).filter(fqn -> !fqn.packageName().equals(table.packageName())).map(FQN::importName).sorted().distinct().toList();
@@ -107,11 +106,28 @@ public class DataTableCodegen extends BaseCodegen {
     }
 
     private void classDef() throws IOException {
-        String baseClass = "%s<%s>".formatted(TableLong.class.getSimpleName(), table.dataClass().getSimpleName());
-        appendCode(0, "public class $TableClass implements $BaseClass {", Map.of(
-            "$TableClass", table.javaName(),
-            "$BaseClass", baseClass
-        ));
+        Class<?> baseTableClass = pickBaseTableClass();
+        Map<String, String> context = Map.of(
+            "$BaseClass", baseTableClass.getSimpleName(),
+            "$BaseGenerics", baseTableClass == TableObj.class ? "$pk_type, $DataClass" : "$DataClass"
+        );
+        appendCode(0, "public class $TableClass implements $BaseClass<$BaseGenerics> {",
+                   EasyMaps.merge(context, mainContext, pkContext));
+    }
+
+    private @NotNull Class<?> pickBaseTableClass() {
+        TableField primaryKeyField = table.primaryKeyField();
+        if (primaryKeyField == null) {
+            return BaseTable.class;
+        }
+        Class<?> unwrappedType = Primitives.unwrap(primaryKeyField.javaType());
+        if (unwrappedType == int.class) {
+            return TableInt.class;
+        }
+        if (unwrappedType == long.class) {
+            return TableLong.class;
+        }
+        return TableObj.class;
     }
 
     private void constructor() throws IOException {
@@ -160,7 +176,7 @@ public class DataTableCodegen extends BaseCodegen {
 
         appendCode("""
         @Override
-        public @Nullable $DataClass getByPkOrNull($pk_type $pk_name) {
+        public @Nullable $DataClass getByPkOrNull($pk_annotation$pk_type $pk_name) {
             String query = "SELECT $all_columns FROM $sql_table WHERE $pk_cols_assign";
             try (ResultSet result = runner.runQuery(query, $pk_name)) {
                 return result.next() ? fromRow(result) : null;
@@ -170,12 +186,12 @@ public class DataTableCodegen extends BaseCodegen {
         }
         
         @Override
-        public @Nonnull $DataClass getByPkOrDie($pk_type $pk_name) {
+        public @Nonnull $DataClass getByPkOrDie($pk_annotation$pk_type $pk_name) {
             return Objects.requireNonNull(getByPkOrNull($pk_name), "$sql_table not found by PK: $pk_name=" + $pk_name);
         }
         
         @Override
-        public @Nonnull Optional<$DataClass> getOptionalByPk($pk_type $pk_name) {
+        public @Nonnull Optional<$DataClass> getOptionalByPk($pk_annotation$pk_type $pk_name) {
             return Optional.ofNullable(getByPkOrNull($pk_name));
         }\n
         """, EasyMaps.merge(mainContext, pkContext, context));
