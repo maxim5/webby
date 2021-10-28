@@ -41,10 +41,23 @@ public class EasyMaps {
         return result;
     }
 
-    public static <K, V> @NotNull Map<K, V> merge(@NotNull Map<K, V> map1, @NotNull Map<K, V> map2, @NotNull Map<K, V> map3) {
+    public static <K, V> @NotNull Map<K, V> merge(@NotNull Map<K, V> map1,
+                                                  @NotNull Map<K, V> map2,
+                                                  @NotNull Map<K, V> map3) {
         LinkedHashMap<K, V> result = new LinkedHashMap<>(map1);
         result.putAll(map2);
         result.putAll(map3);
         return result;
+    }
+
+    public static <K, V> @NotNull ImmutableMap<K, V> mergeToImmutable(@NotNull Map<K, V> map1,
+                                                                      @NotNull Map<K, V> map2) {
+        return ImmutableMap.<K, V>builder().putAll(map1).putAll(map2).build();
+    }
+
+    public static <K, V> @NotNull ImmutableMap<K, V> mergeToImmutable(@NotNull Map<K, V> map1,
+                                                                      @NotNull Map<K, V> map2,
+                                                                      @NotNull Map<K, V> map3) {
+        return ImmutableMap.<K, V>builder().putAll(map1).putAll(map2).putAll(map3).build();
     }
 }
