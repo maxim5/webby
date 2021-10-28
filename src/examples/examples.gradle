@@ -9,7 +9,9 @@ configurations {
 
 dependencies {
     examplesImplementation sourceSets.main.output
+    examplesImplementation sourceSets.examplesModel.output
     examplesRuntimeOnly sourceSets.main.output
+    examplesRuntimeOnly sourceSets.examplesModel.output
 
     // Silence SLF4J: https://stackoverflow.com/questions/66386000/how-to-disable-slf4j-in-jetty
     examplesRuntimeOnly group: 'org.slf4j', name: 'slf4j-nop', version: '2.0.0-alpha4'

@@ -1,13 +1,16 @@
-package io.webby.examples.model;
+package io.webby.examples;
 
+import com.google.common.flogger.FluentLogger;
 import io.webby.auth.session.Session;
 import io.webby.auth.user.DefaultUser;
 import io.webby.common.ClasspathScanner;
+import io.webby.examples.model.PrimitiveModel;
+import io.webby.examples.model.StringModel;
 import io.webby.util.TimeIt;
 import io.webby.util.sql.DataClassAdaptersLocator;
 import io.webby.util.sql.DataTableCodegen;
 import io.webby.util.sql.SchemaFactory;
-import io.webby.util.sql.schema.*;
+import io.webby.util.sql.schema.TableSchema;
 import org.jetbrains.annotations.NotNull;
 
 import java.io.File;
@@ -16,24 +19,32 @@ import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.List;
+import java.util.logging.Level;
 
-public class ExamplesCodegenRunner {
+public class ExamplesCodegenMain {
+    private static final FluentLogger log = FluentLogger.forEnclosingClass();
     private static final String DESTINATION_DIRECTORY = "src/examples/generated/sql";
 
     private static final DataClassAdaptersLocator locator = new DataClassAdaptersLocator(new ClasspathScanner());
 
     public static void main(String[] args) throws Exception {
-        SchemaFactory factory = new SchemaFactory(locator, List.of(
+        List<SchemaFactory.DataClassInput> inputs = List.of(
             new SchemaFactory.DataClassInput(DefaultUser.class, "User"),
-            new SchemaFactory.DataClassInput(Session.class)
-        ));
+            new SchemaFactory.DataClassInput(Session.class),
 
-        for (TableSchema tableSchema : factory.buildSchemas()) {
-            rungGenerate(tableSchema);
-        }
+            new SchemaFactory.DataClassInput(PrimitiveModel.class),
+            new SchemaFactory.DataClassInput(StringModel.class)
+        );
+
+        TimeIt.timeItOrDie(() -> {
+            SchemaFactory factory = new SchemaFactory(locator, inputs);
+            for (TableSchema tableSchema : factory.buildSchemas()) {
+                runGenerate(tableSchema);
+            }
+        }, millis -> log.at(Level.INFO).log("Generated %d tables in %d millis", inputs.size(), millis));
     }
 
-    private static void rungGenerate(@NotNull TableSchema tableSchema) throws IOException {
+    private static void runGenerate(@NotNull TableSchema tableSchema) throws IOException {
         Path destinationDir = Path.of(DESTINATION_DIRECTORY, directoryName(tableSchema));
         if (!Files.exists(destinationDir)) {
             boolean success = destinationDir.toFile().mkdirs();
@@ -57,22 +68,5 @@ public class ExamplesCodegenRunner {
 
     public static @NotNull String directoryName(@NotNull TableSchema tableSchema) {
         return tableSchema.packageName().replaceAll("\\.", "/");
-    }
-
-    private static void misc() throws IOException {
-        String[] files = {
-                "src/main/java/io/webby/util/AnyLog.java",
-                "src/main/java/io/webby/util/AtomicLazy.java",
-                "src/main/java/io/webby/util/EasyCast.java",
-                "src/main/java/io/webby/util/EasyIO.java",
-                "src/main/java/io/webby/util/EasyIterables.java",
-        };
-
-        TimeIt.timeItOrDie(() -> {
-            // for (int i = 0; i < 10; i++)
-            for (String file : files) {
-                Files.getLastModifiedTime(Path.of(file));
-            }
-        }, value -> System.out.println(value));
     }
 }
