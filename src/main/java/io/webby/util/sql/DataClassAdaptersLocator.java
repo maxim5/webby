@@ -2,6 +2,7 @@ package io.webby.util.sql;
 
 import com.google.inject.Inject;
 import io.webby.common.ClasspathScanner;
+import io.webby.util.sql.schema.AdapterSignature;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
@@ -24,20 +25,16 @@ public class DataClassAdaptersLocator {
     }
 
     public @Nullable Class<?> locateAdapterClass(@NotNull Class<?> dataClass) {
-        String adapterName = adapterName(dataClass);
+        String adapterName = AdapterSignature.defaultAdapterName(dataClass);
         return matchedClasses.get(adapterName);
     }
 
     public @NotNull FQN locateAdapterFqn(@NotNull Class<?> dataClass) {
-        String adapterName = adapterName(dataClass);
+        String adapterName = AdapterSignature.defaultAdapterName(dataClass);
         Class<?> klass = matchedClasses.get(adapterName);
         if (klass != null) {
             return FQN.of(klass);
         }
         return new FQN(dataClass.getPackageName(), adapterName);
-    }
-
-    public static @NotNull String adapterName(@NotNull Class<?> klass) {
-        return "%sJdbcAdapter".formatted(klass.getSimpleName());
     }
 }

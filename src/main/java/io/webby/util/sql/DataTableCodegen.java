@@ -20,8 +20,8 @@ import java.util.function.Predicate;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
-import static io.webby.util.sql.DataClassAdaptersLocator.adapterName;
 import static io.webby.util.sql.schema.ColumnJoins.*;
+import static java.util.Objects.requireNonNull;
 
 @SuppressWarnings("UnnecessaryStringEscape")
 public class DataTableCodegen extends BaseCodegen {
@@ -323,7 +323,7 @@ public class DataTableCodegen extends BaseCodegen {
                 return "";
             }
             return "%s.fillArrayValues($data_param.%s(), array, %d);"
-                    .formatted(adapterName(field.javaType()), field.javaGetter().getName(), columnIndex);
+                    .formatted(requireNonNull(field.adapterInfo()).staticRef(), field.javaGetter().getName(), columnIndex);
         }
     }
 
@@ -369,11 +369,11 @@ public class DataTableCodegen extends BaseCodegen {
                 assert field instanceof SimpleTableField;
                 return resultSetGetterExpr(((SimpleTableField) field).column(), ++columnIndex);
             } else {
-                String adapterName = adapterName(field.javaType());
+                String staticRef = requireNonNull(field.adapterInfo()).staticRef();
                 String params = field instanceof SimpleTableField simpleField ?
                         resultSetGetterExpr(simpleField.column(), ++columnIndex) :
                         joinWithTransform(field.columns(), column -> resultSetGetterExpr(column, ++columnIndex));
-                return "%s.createInstance(%s)".formatted(adapterName, params);
+                return "%s.createInstance(%s)".formatted(staticRef, params);
             }
         }
 

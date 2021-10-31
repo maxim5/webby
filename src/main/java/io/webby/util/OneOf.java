@@ -1,5 +1,9 @@
 package io.webby.util;
 
+import org.jetbrains.annotations.NotNull;
+
+import java.util.function.Function;
+
 public class OneOf<U, V> {
     private final U first;
     private final V second;
@@ -48,6 +52,10 @@ public class OneOf<U, V> {
 
     public V second() {
         return second;
+    }
+
+    public <T> @NotNull T fromEither(@NotNull Function<U, T> fromFirst, @NotNull Function<V, T> fromSecond) {
+        return hasFirst() ? fromFirst.apply(first) : fromSecond.apply(second);
     }
 
     @Override

@@ -28,4 +28,8 @@ public record AdapterInfo(@NotNull OneOf<Class<?>, AdapterSignature> oneOf) {
     public @Nullable AdapterSignature signature() {
         return oneOf.second();
     }
+
+    public @NotNull String staticRef() {
+        return oneOf.fromEither(Class::getSimpleName, AdapterSignature::className);
+    }
 }

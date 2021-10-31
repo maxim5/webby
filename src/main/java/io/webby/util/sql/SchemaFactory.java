@@ -114,7 +114,8 @@ public class SchemaFactory {
 
         // throw new UnsupportedOperationException("Adapter class not found for `%s`. Not implemented".formatted(field));
         Column column = new Column(camelToSnake(fieldName), new ColumnType(JdbcType.Int, null));
-        return FieldInference.ofSingle(column, AdapterInfo.ofSignature(new AdapterSignature()));
+        AdapterSignature signature = new AdapterSignature(fieldType);
+        return FieldInference.ofSingle(column, AdapterInfo.ofSignature(signature));
     }
 
     private static record FieldInference(@Nullable Column singleColumn,
