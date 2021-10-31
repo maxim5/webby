@@ -11,6 +11,7 @@ dependencies {
     integrationImplementation sourceSets.main.output
     integrationImplementation sourceSets.test.output
     integrationImplementation sourceSets.examples.output
+    integrationImplementation sourceSets.examplesModel.output
 
     // Silence SLF4J: https://stackoverflow.com/questions/66386000/how-to-disable-slf4j-in-jetty
     integrationImplementation group: 'org.slf4j', name: 'slf4j-nop', version: '2.0.0-alpha4'
