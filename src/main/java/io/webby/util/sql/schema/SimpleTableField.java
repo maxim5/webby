@@ -15,9 +15,9 @@ public class SimpleTableField extends TableField {
                             @NotNull Method javaGetter,
                             boolean primaryKey,
                             @Nullable TableSchema foreignKey,
-                            boolean nativelySupportedType,
+                            @Nullable AdapterInfo adapterInfo,
                             @NotNull Column column) {
-        super(javaField, javaGetter, primaryKey, foreignKey, nativelySupportedType);
+        super(javaField, javaGetter, primaryKey, foreignKey, adapterInfo);
         this.column = column;
     }
 

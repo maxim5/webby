@@ -14,8 +14,9 @@ public class MultiColumnTableField extends TableField {
                                  @NotNull Method javaGetter,
                                  boolean primaryKey,
                                  @Nullable TableSchema foreignKey,
+                                 @NotNull AdapterInfo adapterInfo,
                                  @NotNull List<Column> columns) {
-        super(javaField, javaGetter, primaryKey, foreignKey, false);
+        super(javaField, javaGetter, primaryKey, foreignKey, adapterInfo);
         this.columns = columns;
     }
 

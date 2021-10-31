@@ -14,6 +14,8 @@ import java.lang.reflect.Modifier;
 import java.lang.reflect.Parameter;
 import java.util.*;
 
+import static java.util.Objects.requireNonNull;
+
 public class SchemaFactory {
     private final DataClassAdaptersLocator adaptersLocator;
 
@@ -60,15 +62,15 @@ public class SchemaFactory {
 
         FieldInference inference = inferFieldSchema(field);
         if (inference.isSingleColumn()) {
-            boolean nativelySupportedType = JdbcType.findByMatchingNativeType(field.getType()) != null;
             return new SimpleTableField(field, getter, isPrimaryKey,
                                         inference.foreignTable,
-                                        nativelySupportedType,
-                                        Objects.requireNonNull(inference.singleColumn));
+                                        inference.adapterInfo(),
+                                        requireNonNull(inference.singleColumn));
         } else {
             return new MultiColumnTableField(field, getter, isPrimaryKey,
                                              inference.foreignTable,
-                                             Objects.requireNonNull(inference.multiColumns));
+                                             requireNonNull(inference.adapterInfo()),
+                                             requireNonNull(inference.multiColumns));
         }
     }
 
@@ -82,7 +84,7 @@ public class SchemaFactory {
 
         JdbcType jdbcType = JdbcType.findByMatchingNativeType(fieldType);
         if (jdbcType != null) {
-            return FieldInference.ofSingleColumn(new Column(camelToSnake(fieldName), new ColumnType(jdbcType, null)));
+            return FieldInference.ofNativeColumn(new Column(camelToSnake(fieldName), new ColumnType(jdbcType, null)));
         }
 
         Class<?> adapterClass = adaptersLocator.locateAdapterClass(fieldType);
@@ -91,7 +93,8 @@ public class SchemaFactory {
             if (parameters.length == 1) {
                 JdbcType paramType = JdbcType.findByMatchingNativeType(parameters[0].getType());
                 assert paramType != null : "JDBC adapter `createInstance` has incompatible parameters: %s".formatted(adapterClass);
-                return FieldInference.ofSingleColumn(new Column(camelToSnake(fieldName), new ColumnType(paramType, null)));
+                Column column = new Column(camelToSnake(fieldName), new ColumnType(paramType, null));
+                return FieldInference.ofSingleColumn(column, adapterClass);
             } else {
                 List<Column> columns = BiStream.from(Arrays.stream(parameters),
                                                      Parameter::getName,
@@ -100,7 +103,7 @@ public class SchemaFactory {
                         .mapValues(paramType -> new ColumnType(paramType, null))
                         .mapToObj(Column::new)
                         .toList();
-                return FieldInference.ofMultiColumns(columns);
+                return FieldInference.ofMultiColumns(columns, adapterClass);
             }
         }
 
@@ -110,18 +113,28 @@ public class SchemaFactory {
         // + known type (DateTime, Instant, ...)
 
         // throw new UnsupportedOperationException("Adapter class not found for `%s`. Not implemented".formatted(field));
-        return FieldInference.ofSingleColumn(new Column(camelToSnake(fieldName), new ColumnType(JdbcType.Int, null)));
+        Column column = new Column(camelToSnake(fieldName), new ColumnType(JdbcType.Int, null));
+        return FieldInference.ofSingle(column, AdapterInfo.ofSignature(new AdapterSignature()));
     }
 
     private static record FieldInference(@Nullable Column singleColumn,
                                          @Nullable List<Column> multiColumns,
+                                         @Nullable AdapterInfo adapterInfo,
                                          @Nullable TableSchema foreignTable) {
-        public static FieldInference ofSingleColumn(@NotNull Column column) {
-            return new FieldInference(column, null, null);
+        public static FieldInference ofNativeColumn(@NotNull Column column) {
+            return new FieldInference(column, null, null, null);
         }
 
-        public static FieldInference ofMultiColumns(@NotNull List<Column> columns) {
-            return new FieldInference(null, columns, null);
+        public static FieldInference ofSingleColumn(@NotNull Column column, @Nullable Class<?> adapterClass) {
+            return new FieldInference(column, null, AdapterInfo.ofClass(adapterClass), null);
+        }
+
+        public static FieldInference ofMultiColumns(@NotNull List<Column> columns, @Nullable Class<?> adapterClass) {
+            return new FieldInference(null, columns, AdapterInfo.ofClass(adapterClass), null);
+        }
+
+        public static FieldInference ofSingle(@NotNull Column column, @NotNull AdapterInfo adapterInfo) {
+            return new FieldInference(column, null, adapterInfo, null);
         }
 
         public boolean isSingleColumn() {
