@@ -92,7 +92,7 @@ public class SchemaFactory {
             Parameter[] parameters = getCreationParameters(adapterClass);
             if (parameters.length == 1) {
                 JdbcType paramType = JdbcType.findByMatchingNativeType(parameters[0].getType());
-                assert paramType != null : "JDBC adapter `createInstance` has incompatible parameters: %s".formatted(adapterClass);
+                assert paramType != null : "JDBC adapter `%s` has incompatible parameters: %s".formatted(AdapterInfo.CREATE, adapterClass);
                 Column column = new Column(camelToSnake(fieldName), new ColumnType(paramType, null));
                 return FieldInference.ofSingleColumn(column, adapterClass);
             } else {
@@ -145,8 +145,8 @@ public class SchemaFactory {
 
     @VisibleForTesting
     static @NotNull Parameter[] getCreationParameters(@NotNull Class<?> adapterClass) {
-        Method method = EasyClasspath.findMethod(adapterClass, "createInstance");
-        assert method != null : "JDBC adapter does not implement `createInstance` method: %s".formatted(adapterClass);
+        Method method = EasyClasspath.findMethod(adapterClass, AdapterInfo.CREATE);
+        assert method != null : "JDBC adapter does not implement `%s` method: %s".formatted(AdapterInfo.CREATE, adapterClass);
         return method.getParameters();
     }
 
