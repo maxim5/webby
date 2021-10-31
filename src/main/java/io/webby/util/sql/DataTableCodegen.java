@@ -356,28 +356,25 @@ public class DataTableCodegen extends BaseCodegen {
         private int columnIndex = 0;
 
         public @NotNull String generateAssignments(@NotNull TableSchema table) {
-            StringBuilder builder = new StringBuilder();
-            for (TableField field : table.fields()) {
-                String fieldName = field.javaName();
-                Class<?> fieldType = field.javaType();
+            return table.fields().stream().map(this::assignFieldLine).collect(linesJoiner(INDENT));
+        }
 
-                String lhs = "%s %s".formatted(fieldType.getSimpleName(), fieldName);
-                String rhs;
+        private @NotNull String assignFieldLine(@NotNull TableField field) {
+            Class<?> fieldType = field.javaType();
+            return "%s %s = %s;".formatted(fieldType.getSimpleName(), field.javaName(), createExpr(field));
+        }
 
-                if (field.isNativelySupportedType()) {
-                    assert field instanceof SimpleTableField;
-                    rhs = resultSetGetterExpr(((SimpleTableField) field).column(), ++columnIndex);
-                } else if (field instanceof SimpleTableField simpleField) {
-                    String param = resultSetGetterExpr(simpleField.column(), ++columnIndex);
-                    rhs = "%s.createInstance(%s)".formatted(adapterName(fieldType), param);
-                } else {
-                    String params = joinWithTransform(field.columns(), column -> resultSetGetterExpr(column, ++columnIndex));
-                    rhs = "%s.createInstance(%s)".formatted(adapterName(fieldType), params);
-                }
-
-                builder.append("    %s = %s;\n".formatted(lhs, rhs));
+        private @NotNull String createExpr(@NotNull TableField field) {
+            if (field.isNativelySupportedType()) {
+                assert field instanceof SimpleTableField;
+                return resultSetGetterExpr(((SimpleTableField) field).column(), ++columnIndex);
+            } else {
+                String adapterName = adapterName(field.javaType());
+                String params = field instanceof SimpleTableField simpleField ?
+                        resultSetGetterExpr(simpleField.column(), ++columnIndex) :
+                        joinWithTransform(field.columns(), column -> resultSetGetterExpr(column, ++columnIndex));
+                return "%s.createInstance(%s)".formatted(adapterName, params);
             }
-            return builder.toString();
         }
 
         private static @NotNull String resultSetGetterExpr(@NotNull Column column, int columnIndex) {
