@@ -7,10 +7,13 @@ import java.util.Map;
 import java.util.stream.Stream;
 
 @SuppressWarnings("UnusedReturnValue")
-public class BaseCodegen {
+public abstract class BaseCodegen {
+    protected static final String INDENT = "    ";
+    protected static final String INDENT2 = "        ";
+
     protected final Appendable writer;
 
-    public BaseCodegen(@NotNull Appendable writer) {
+    protected BaseCodegen(@NotNull Appendable writer) {
         this.writer = writer;
     }
 
@@ -21,7 +24,7 @@ public class BaseCodegen {
 
     private BaseCodegen indent(int level) throws IOException {
         for (int i = 0; i < level; i++) {
-            writer.append("    ");
+            writer.append(INDENT);
         }
         return this;
     }

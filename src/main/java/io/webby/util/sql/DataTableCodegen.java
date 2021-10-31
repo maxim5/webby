@@ -4,7 +4,7 @@ import com.google.common.collect.Iterables;
 import com.google.common.collect.Streams;
 import com.google.common.primitives.Primitives;
 import io.webby.util.EasyMaps;
-import io.webby.util.Pair;
+import io.webby.util.func.ObjIntBiFunction;
 import io.webby.util.sql.api.*;
 import io.webby.util.sql.schema.Column;
 import io.webby.util.sql.schema.SimpleTableField;
@@ -242,11 +242,10 @@ public class DataTableCodegen extends BaseCodegen {
     }
 
     private void valuesForInsert() throws IOException {
-        ArrayConversionGenerator generator = new ArrayConversionGenerator();
-        generator.generateConvert(table.fields());
+        List<FieldArrayConversion> conversions = zipWithColumnIndex(table.fields(), FieldArrayConversion::new);
         Map<String, String> context = Map.of(
-            "$array_init", generator.getArrayInit(),
-            "$array_convert", generator.getArrayConvert()
+            "$array_init", conversions.stream().map(FieldArrayConversion::initLine).collect(linesJoiner(INDENT2)),
+            "$array_convert", conversions.stream().map(FieldArrayConversion::fillValuesLine).collect(linesJoiner(INDENT, true))
         );
 
         appendCode("""
@@ -294,11 +293,10 @@ public class DataTableCodegen extends BaseCodegen {
         List<TableField> nonPrimary = table.fields().stream().filter(Predicate.not(TableField::isPrimaryKey)).toList();
         Iterable<TableField> fields = Iterables.concat(nonPrimary, primary);
 
-        ArrayConversionGenerator generator = new ArrayConversionGenerator();
-        generator.generateConvert(fields);
+        List<FieldArrayConversion> conversions = zipWithColumnIndex(fields, FieldArrayConversion::new);
         Map<String, String> context = Map.of(
-            "$array_init", generator.getArrayInit(),
-            "$array_convert", generator.getArrayConvert()
+            "$array_init", conversions.stream().map(FieldArrayConversion::initLine).collect(linesJoiner(INDENT2)),
+            "$array_convert", conversions.stream().map(FieldArrayConversion::fillValuesLine).collect(linesJoiner(INDENT, true))
         );
 
         appendCode("""
@@ -312,41 +310,32 @@ public class DataTableCodegen extends BaseCodegen {
         """, EasyMaps.merge(context, mainContext));
     }
 
-    private static class ArrayConversionGenerator {
-        private final List<TableField> initPerColumns = new ArrayList<>();
-        private final List<Pair<TableField, Integer>> convertAccess = new ArrayList<>();
-
-        public void generateConvert(@NotNull Iterable<TableField> fields) {
-            int columnIndex = 0;
-            for (TableField field : fields) {
-                int columnsNumber = field.columnsNumber();
-                if (field.isNativelySupportedType()) {
-                    initPerColumns.add(field);
-                } else {
-                    for (int i = 0; i < columnsNumber; i++) {
-                        initPerColumns.add(null);
-                    }
-                    convertAccess.add(Pair.of(field, columnIndex));
-                }
-                columnIndex += columnsNumber;
+    private record FieldArrayConversion(@NotNull TableField field, int columnIndex) {
+        public @NotNull String initLine() {
+            if (!field.isNativelySupportedType()) {
+                return "null,";
             }
+            return "$data_param.%s(),".formatted(field.javaGetter().getName());
         }
 
-        public @NotNull String getArrayInit() {
-            return initPerColumns.stream().map(field -> {
-                if (field == null) {
-                    return "null,";
-                }
-                return "$data_param.%s(),".formatted(field.javaGetter().getName());
-            }).map(s -> "        " + s).collect(Collectors.joining("\n"));
+        public @NotNull String fillValuesLine() {
+            if (field.isNativelySupportedType()) {
+                return "";
+            }
+            return "%s.fillArrayValues($data_param.%s(), array, %d);"
+                    .formatted(adapterName(field.javaType()), field.javaGetter().getName(), columnIndex);
         }
+    }
 
-        public @NotNull String getArrayConvert() {
-            return convertAccess.stream().map(pair -> {
-                return "%s.fillArrayValues($data_param.%s(), array, %d);"
-                        .formatted(adapterName(pair.first().javaType()), pair.first().javaGetter().getName(), pair.second());
-            }).map(s -> "    " + s).collect(Collectors.joining("\n"));
+    private static <T> @NotNull List<T> zipWithColumnIndex(@NotNull Iterable<TableField> fields,
+                                                           @NotNull ObjIntBiFunction<TableField, T> converter) {
+        ArrayList<T> result = new ArrayList<>();
+        int columnIndex = 0;
+        for (TableField field : fields) {
+            result.add(converter.apply(field, columnIndex));
+            columnIndex += field.columnsNumber();
         }
+        return result;
     }
 
     private void fromRow() throws IOException {
