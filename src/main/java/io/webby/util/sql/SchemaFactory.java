@@ -110,7 +110,6 @@ public class SchemaFactory {
         //   enum,
         //   foreign data class,
         //   pojo class,
-        // + known type (DateTime, Instant, ...)
 
         // throw new UnsupportedOperationException("Adapter class not found for `%s`. Not implemented".formatted(field));
         Column column = new Column(camelToSnake(fieldName), new ColumnType(JdbcType.Int, null));

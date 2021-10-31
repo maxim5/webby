@@ -91,7 +91,7 @@ public class DataTableCodegen extends BaseCodegen {
 
         Map<String, String> context = Map.of(
             "$package", table.packageName(),
-            "$imports", classesToImport.stream().map("import %s;"::formatted).collect(Collectors.joining("\n"))
+            "$imports", classesToImport.stream().map("import %s;"::formatted).collect(LINE_JOINER)
         );
 
         appendCode(0, """

@@ -16,6 +16,7 @@ import java.util.stream.Collectors;
 public class ColumnJoins {
     public static final String EQ_QUESTION = "%s=?";
     public static final Collector<CharSequence, ?, String> COMMA_JOINER = Collectors.joining(", ");
+    public static final Collector<CharSequence, ?, String> LINE_JOINER = Collectors.joining("\n");
 
     public static @NotNull String joinWithComma(@NotNull Iterable<Column> columns) {
         return Streams.stream(columns).map(Column::sqlName).collect(COMMA_JOINER);
