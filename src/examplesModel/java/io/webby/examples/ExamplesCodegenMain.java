@@ -6,6 +6,8 @@ import io.webby.auth.user.DefaultUser;
 import io.webby.common.ClasspathScanner;
 import io.webby.examples.model.PrimitiveModel;
 import io.webby.examples.model.StringModel;
+import io.webby.examples.model.TimingModel;
+import io.webby.examples.model.WrappersModel;
 import io.webby.util.TimeIt;
 import io.webby.util.sql.DataClassAdaptersLocator;
 import io.webby.util.sql.DataTableCodegen;
@@ -33,7 +35,9 @@ public class ExamplesCodegenMain {
             new SchemaFactory.DataClassInput(Session.class),
 
             new SchemaFactory.DataClassInput(PrimitiveModel.class),
-            new SchemaFactory.DataClassInput(StringModel.class)
+            new SchemaFactory.DataClassInput(StringModel.class),
+            new SchemaFactory.DataClassInput(TimingModel.class),
+            new SchemaFactory.DataClassInput(WrappersModel.class)
         );
 
         TimeIt.timeItOrDie(() -> {

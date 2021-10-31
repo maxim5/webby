@@ -1,6 +1,8 @@
 package io.webby.util.sql.schema;
 
+import com.google.common.collect.ImmutableMap;
 import com.google.common.primitives.Primitives;
+import io.webby.util.EasyMaps;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
@@ -18,7 +20,7 @@ public enum JdbcType {
     Double(double.class),
     String(String.class),
     Bytes(byte[].class),
-    Date(java.util.Date.class),
+    Date(java.sql.Date.class),
     Time(java.sql.Time.class),
     Timestamp(java.sql.Timestamp.class);
 
@@ -36,8 +38,10 @@ public enum JdbcType {
         return "get%s".formatted(name());
     }
 
-    private static final Map<Class<?>, JdbcType> TYPES_BY_CLASS =
-            Arrays.stream(JdbcType.values()).collect(Collectors.toMap(JdbcType::nativeType, type -> type));
+    private static final ImmutableMap<Class<?>, JdbcType> TYPES_BY_CLASS = EasyMaps.mergeToImmutable(
+        Arrays.stream(JdbcType.values()).collect(Collectors.toMap(JdbcType::nativeType, type -> type)),
+        Map.of(java.util.Date.class, Date)
+    );
 
     public static @Nullable JdbcType findByMatchingNativeType(@NotNull Class<?> nativeType) {
         return TYPES_BY_CLASS.get(Primitives.unwrap(nativeType));
