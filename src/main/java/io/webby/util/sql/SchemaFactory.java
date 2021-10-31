@@ -47,11 +47,11 @@ public class SchemaFactory {
 
     @VisibleForTesting
     void completeTable(@NotNull DataClassInput input, @NotNull TableSchema schema) {
-        List<TableField> fields = Arrays.stream(input.dataClass.getDeclaredFields())
+        List<TableField> fields = schema.fields();
+        Arrays.stream(input.dataClass.getDeclaredFields())
                 .filter(field -> !Modifier.isStatic(field.getModifiers()))
                 .map(field -> buildTableField(field, input.dataName))
-                .toList();
-        schema.fields().addAll(fields);
+                .forEach(fields::add);
     }
 
     @VisibleForTesting

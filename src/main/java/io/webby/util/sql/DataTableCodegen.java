@@ -2,7 +2,6 @@ package io.webby.util.sql;
 
 import com.google.common.collect.Iterables;
 import com.google.common.collect.Streams;
-import com.google.common.primitives.Primitives;
 import io.webby.util.EasyMaps;
 import io.webby.util.func.ObjIntBiFunction;
 import io.webby.util.sql.api.*;
@@ -125,11 +124,11 @@ public class DataTableCodegen extends BaseCodegen {
         if (primaryKeyField == null) {
             return BaseTable.class;
         }
-        Class<?> unwrappedType = Primitives.unwrap(primaryKeyField.javaType());
-        if (unwrappedType == int.class) {
+        Class<?> javaType = primaryKeyField.javaType();
+        if (javaType == int.class) {
             return TableInt.class;
         }
-        if (unwrappedType == long.class) {
+        if (javaType == long.class) {
             return TableLong.class;
         }
         return TableObj.class;
