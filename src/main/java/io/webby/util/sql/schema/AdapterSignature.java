@@ -1,13 +1,10 @@
 package io.webby.util.sql.schema;
 
+import io.webby.util.sql.DataClassAdaptersLocator;
 import org.jetbrains.annotations.NotNull;
 
 public record AdapterSignature(@NotNull Class<?> fieldType) {
     public @NotNull String className() {
-        return defaultAdapterName(fieldType);
-    }
-
-    public static @NotNull String defaultAdapterName(@NotNull Class<?> klass) {
-        return "%sJdbcAdapter".formatted(klass.getSimpleName());
+        return DataClassAdaptersLocator.defaultAdapterName(fieldType);
     }
 }

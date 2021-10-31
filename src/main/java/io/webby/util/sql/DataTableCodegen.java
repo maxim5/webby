@@ -16,6 +16,7 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import java.util.function.Predicate;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
@@ -86,7 +87,7 @@ public class DataTableCodegen extends BaseCodegen {
             Stream.of(pickBaseTableClass(), QueryRunner.class, QueryException.class, ResultSetIterator.class).map(FQN::of),
             customClasses.stream().map(FQN::of),
             customClasses.stream().map(adaptersLocator::locateAdapterFqn)
-        ).filter(fqn -> !fqn.packageName().equals(table.packageName())).map(FQN::importName).sorted().distinct().toList();
+        ).filter(fqn -> !isSkippablePackage(fqn.packageName())).map(FQN::importName).sorted().distinct().toList();
 
         Map<String, String> context = Map.of(
             "$package", table.packageName(),
@@ -103,6 +104,10 @@ public class DataTableCodegen extends BaseCodegen {
         
         $imports\n
         """, context);
+    }
+
+    private boolean isSkippablePackage(@NotNull String packageName) {
+        return packageName.equals(table.packageName()) || packageName.equals("java.util") || packageName.equals("java.lang");
     }
 
     private void classDef() throws IOException {
@@ -353,6 +358,7 @@ public class DataTableCodegen extends BaseCodegen {
     }
 
     private static class ResultSetConversionGenerator {
+        private static final Set<Class<?>> FULL_NAME_CLASSES = Set.of(java.util.Date.class, java.sql.Date.class);
         private int columnIndex = 0;
 
         public @NotNull String generateAssignments(@NotNull TableSchema table) {
@@ -361,7 +367,8 @@ public class DataTableCodegen extends BaseCodegen {
 
         private @NotNull String assignFieldLine(@NotNull TableField field) {
             Class<?> fieldType = field.javaType();
-            return "%s %s = %s;".formatted(fieldType.getSimpleName(), field.javaName(), createExpr(field));
+            String fieldClassName = FULL_NAME_CLASSES.contains(fieldType) ? fieldType.getName() : fieldType.getSimpleName();
+            return "%s %s = %s;".formatted(fieldClassName, field.javaName(), createExpr(field));
         }
 
         private @NotNull String createExpr(@NotNull TableField field) {
