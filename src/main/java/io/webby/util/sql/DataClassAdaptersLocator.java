@@ -4,6 +4,7 @@ import com.google.common.collect.ImmutableMap;
 import com.google.inject.Inject;
 import io.webby.common.ClasspathScanner;
 import io.webby.util.sql.adapter.JdbcAdapt;
+import io.webby.util.sql.schema.Naming;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
@@ -40,7 +41,7 @@ public class DataClassAdaptersLocator {
     }
 
     public @Nullable Class<?> locateAdapterClass(@NotNull Class<?> dataClass) {
-        return byClass.containsKey(dataClass) ? byClass.get(dataClass) : bySimpleName.get(dataClass.getSimpleName());
+        return byClass.containsKey(dataClass) ? byClass.get(dataClass) : bySimpleName.get(Naming.generatedSimpleName(dataClass));
     }
 
     public @NotNull FQN locateAdapterFqn(@NotNull Class<?> dataClass) {
@@ -52,10 +53,14 @@ public class DataClassAdaptersLocator {
     }
 
     public static @NotNull String defaultAdapterName(@NotNull Class<?> klass) {
+        if (klass.isMemberClass()) {
+            return "%s_JdbcAdapter".formatted(Naming.generatedSimpleName(klass));
+        }
         return "%sJdbcAdapter".formatted(klass.getSimpleName());
     }
 
     public static @NotNull String defaultDataClassName(@NotNull String adapterName) {
-        return adapterName.substring(0, adapterName.length() - "JdbcAdapter".length());
+        assert adapterName.endsWith("JdbcAdapter") : "Unexpected adapter name: %s".formatted(adapterName);
+        return Naming.cutSuffix(adapterName, "JdbcAdapter");
     }
 }

@@ -5,10 +5,7 @@ import com.google.common.collect.Streams;
 import io.webby.util.EasyMaps;
 import io.webby.util.func.ObjIntBiFunction;
 import io.webby.util.sql.api.*;
-import io.webby.util.sql.schema.Column;
-import io.webby.util.sql.schema.SimpleTableField;
-import io.webby.util.sql.schema.TableField;
-import io.webby.util.sql.schema.TableSchema;
+import io.webby.util.sql.schema.*;
 import org.jetbrains.annotations.NotNull;
 
 import java.io.IOException;
@@ -40,14 +37,14 @@ public class DataTableCodegen extends BaseCodegen {
         this.mainContext = EasyMaps.asMap(
             "$TableClass", table.javaName(),
             "$sql_table", table.sqlName(),
-            "$DataClass", table.dataClass().getSimpleName(),
+            "$DataClass", Naming.shortCanonicalName(table.dataClass()),
             "$data_param", table.dataName().toLowerCase(),
             "$all_columns", joinWithComma(table.columns())
         );
 
         TableField primaryKeyField = table.primaryKeyField();
         this.pkContext = primaryKeyField == null ? Map.of() : EasyMaps.asMap(
-            "$pk_type", primaryKeyField.javaType().getSimpleName(),
+            "$pk_type", Naming.shortCanonicalName(primaryKeyField.javaType()),
             "$pk_annotation", primaryKeyField.javaType().isPrimitive() ? "" : "@Nonnull ",
             "$pk_name", primaryKeyField.javaName(),
             "$pk_sql", ((SimpleTableField) primaryKeyField).column().sqlName()
@@ -112,7 +109,7 @@ public class DataTableCodegen extends BaseCodegen {
     private void classDef() throws IOException {
         Class<?> baseTableClass = pickBaseTableClass();
         Map<String, String> context = Map.of(
-            "$BaseClass", baseTableClass.getSimpleName(),
+            "$BaseClass", Naming.shortCanonicalName(baseTableClass),
             "$BaseGenerics", baseTableClass == TableObj.class ? "$pk_type, $DataClass" : "$DataClass"
         );
         appendCode(0, "public class $TableClass implements $BaseClass<$BaseGenerics> {",
@@ -366,7 +363,9 @@ public class DataTableCodegen extends BaseCodegen {
 
         private @NotNull String assignFieldLine(@NotNull TableField field) {
             Class<?> fieldType = field.javaType();
-            String fieldClassName = FULL_NAME_CLASSES.contains(fieldType) ? fieldType.getName() : fieldType.getSimpleName();
+            String fieldClassName = FULL_NAME_CLASSES.contains(fieldType) ?
+                    fieldType.getName() :
+                    Naming.shortCanonicalName(fieldType);
             return "%s %s = %s;".formatted(fieldClassName, field.javaName(), createExpr(field));
         }
 

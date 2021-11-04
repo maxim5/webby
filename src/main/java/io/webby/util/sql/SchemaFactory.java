@@ -1,6 +1,5 @@
 package io.webby.util.sql;
 
-import com.google.common.base.CaseFormat;
 import com.google.mu.util.stream.BiStream;
 import io.webby.util.EasyClasspath;
 import io.webby.util.sql.schema.*;
@@ -20,7 +19,8 @@ public class SchemaFactory {
     private final DataClassAdaptersLocator adaptersLocator;
 
     private final Collection<DataClassInput> inputs;
-    private final Map<DataClassInput, TableSchema> schemas = new HashMap<>();
+    private final Map<DataClassInput, TableSchema> tables = new HashMap<>();
+    private final Map<Class<?>, AdapterSchema> adapters = new HashMap<>();
 
     public SchemaFactory(@NotNull DataClassAdaptersLocator adaptersLocator,
                          @NotNull Collection<DataClassInput> inputs) {
@@ -28,19 +28,29 @@ public class SchemaFactory {
         this.inputs = inputs;
     }
 
-    public @NotNull Collection<TableSchema> buildSchemas() {
+    public void build() {
+        tables.clear();
+        adapters.clear();
+
         for (DataClassInput input : inputs) {
-            schemas.put(input, buildShallowTable(input));
+            tables.put(input, buildShallowTable(input));
         }
-        for (Map.Entry<DataClassInput, TableSchema> entry : schemas.entrySet()) {
+        for (Map.Entry<DataClassInput, TableSchema> entry : tables.entrySet()) {
             completeTable(entry.getKey(), entry.getValue());
         }
-        return schemas.values();
+    }
+
+    public @NotNull Collection<TableSchema> getTableSchemas() {
+        return tables.values();
+    }
+
+    public @NotNull Collection<AdapterSchema> getAdapterSchemas() {
+        return adapters.values();
     }
 
     @VisibleForTesting
     @NotNull TableSchema buildShallowTable(@NotNull DataClassInput input) {
-        String sqlName = camelToSnake(input.dataName);
+        String sqlName = Naming.camelToSnake(input.dataName);
         String javaName = "%sTable".formatted(input.dataName);
         return new TableSchema(sqlName, javaName, input.dataName, input.dataClass, new ArrayList<>());
     }
@@ -75,7 +85,7 @@ public class SchemaFactory {
     }
 
     private static boolean isPrimaryKeyField(@NotNull Field field, @NotNull String dataName, String name) {
-        return name.equals("id") || field.getName().equals(camelUpperToLower(dataName) + "Id");
+        return name.equals("id") || field.getName().equals(Naming.camelUpperToLower(dataName) + "Id");
     }
 
     private @NotNull FieldInference inferFieldSchema(@NotNull Field field) {
@@ -84,7 +94,7 @@ public class SchemaFactory {
 
         JdbcType jdbcType = JdbcType.findByMatchingNativeType(fieldType);
         if (jdbcType != null) {
-            return FieldInference.ofNativeColumn(new Column(camelToSnake(fieldName), new ColumnType(jdbcType, null)));
+            return FieldInference.ofNativeColumn(new Column(Naming.camelToSnake(fieldName), new ColumnType(jdbcType, null)));
         }
 
         Class<?> adapterClass = adaptersLocator.locateAdapterClass(fieldType);
@@ -93,13 +103,13 @@ public class SchemaFactory {
             if (parameters.length == 1) {
                 JdbcType paramType = JdbcType.findByMatchingNativeType(parameters[0].getType());
                 assert paramType != null : "JDBC adapter `%s` has incompatible parameters: %s".formatted(AdapterInfo.CREATE, adapterClass);
-                Column column = new Column(camelToSnake(fieldName), new ColumnType(paramType, null));
+                Column column = new Column(Naming.camelToSnake(fieldName), new ColumnType(paramType, null));
                 return FieldInference.ofSingleColumn(column, adapterClass);
             } else {
                 List<Column> columns = BiStream.from(Arrays.stream(parameters),
                                                      Parameter::getName,
                                                      param -> JdbcType.findByMatchingNativeType(param.getType()))
-                        .mapKeys(name -> "%s_%s".formatted(camelToSnake(fieldName), camelToSnake(name)))
+                        .mapKeys(name -> "%s_%s".formatted(Naming.camelToSnake(fieldName), Naming.camelToSnake(name)))
                         .mapValues(paramType -> new ColumnType(paramType, null))
                         .mapToObj(Column::new)
                         .toList();
@@ -112,8 +122,9 @@ public class SchemaFactory {
         //   pojo class,
 
         // throw new UnsupportedOperationException("Adapter class not found for `%s`. Not implemented".formatted(field));
-        Column column = new Column(camelToSnake(fieldName), new ColumnType(JdbcType.Int, null));
+        Column column = new Column(Naming.camelToSnake(fieldName), new ColumnType(JdbcType.Int, null));
         AdapterSignature signature = new AdapterSignature(fieldType);
+        adapters.put(fieldType, new AdapterSchema(signature));
         return FieldInference.ofSingle(column, AdapterInfo.ofSignature(signature));
     }
 
@@ -164,19 +175,9 @@ public class SchemaFactory {
                 .orElse(null);
     }
 
-    @SuppressWarnings("ConstantConditions")
-    public static @NotNull String camelToSnake(@NotNull String s) {
-        return CaseFormat.UPPER_CAMEL.converterTo(CaseFormat.LOWER_UNDERSCORE).convert(s);
-    }
-
-    @SuppressWarnings("ConstantConditions")
-    public static @NotNull String camelUpperToLower(@NotNull String s) {
-        return CaseFormat.UPPER_CAMEL.converterTo(CaseFormat.LOWER_CAMEL).convert(s);
-    }
-
     public record DataClassInput(@NotNull Class<?> dataClass, @NotNull String dataName) {
         public DataClassInput(@NotNull Class<?> dataClass) {
-            this(dataClass, dataClass.getSimpleName());
+            this(dataClass, Naming.generatedSimpleName(dataClass));
         }
     }
 }
