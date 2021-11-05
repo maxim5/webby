@@ -24,7 +24,7 @@ public class AdapterCodegen extends BaseCodegen {
 
         this.mainContext = EasyMaps.asMap(
             "$AdapterClass", adapter.javaName(),
-            "$DataClass", Naming.shortCanonicalName(adapter.pojoSchema().type())
+            "$ModelClass", Naming.shortCanonicalName(adapter.pojoSchema().type())
         );
     }
 
@@ -57,7 +57,7 @@ public class AdapterCodegen extends BaseCodegen {
 
     private void classDef() throws IOException {
         appendCode(0, """
-        @JdbcAdapt($DataClass.class)
+        @JdbcAdapt($ModelClass.class)
         public class $AdapterClass {
         """, mainContext);
     }
@@ -84,7 +84,7 @@ public class AdapterCodegen extends BaseCodegen {
         );
 
         appendCode("""
-        public @Nonnull $DataClass createInstance($params) {
+        public @Nonnull $ModelClass createInstance($params) {
             return $constructor;
         }\n
         """, EasyMaps.merge(mainContext, context));
@@ -117,7 +117,7 @@ public class AdapterCodegen extends BaseCodegen {
         );
 
         appendCode("""
-        public void fillArrayValues(@Nonnull $DataClass instance, Object[] array, int start) {
+        public void fillArrayValues(@Nonnull $ModelClass instance, Object[] array, int start) {
         $assignments
         }
         """, EasyMaps.merge(mainContext, context));

@@ -17,14 +17,13 @@ import static io.webby.util.sql.schema.InvalidSqlModelException.failIf;
 import static java.util.Objects.requireNonNull;
 
 public class SchemaFactory {
-    private final DataClassAdaptersLocator adaptersLocator;
+    private final ModelAdaptersLocator adaptersLocator;
 
-    private final Collection<DataClassInput> inputs;
-    private final Map<DataClassInput, TableSchema> tables = new HashMap<>();
+    private final Iterable<ModelClassInput> inputs;
+    private final Map<ModelClassInput, TableSchema> tables = new HashMap<>();
     private final Map<Class<?>, PojoSchema> pojos = new HashMap<>();
 
-    public SchemaFactory(@NotNull DataClassAdaptersLocator adaptersLocator,
-                         @NotNull Collection<DataClassInput> inputs) {
+    public SchemaFactory(@NotNull ModelAdaptersLocator adaptersLocator, @NotNull Iterable<ModelClassInput> inputs) {
         this.adaptersLocator = adaptersLocator;
         this.inputs = inputs;
     }
@@ -33,10 +32,10 @@ public class SchemaFactory {
         tables.clear();
         pojos.clear();
 
-        for (DataClassInput input : inputs) {
+        for (ModelClassInput input : inputs) {
             tables.put(input, buildShallowTable(input));
         }
-        for (Map.Entry<DataClassInput, TableSchema> entry : tables.entrySet()) {
+        for (Map.Entry<ModelClassInput, TableSchema> entry : tables.entrySet()) {
             completeTable(entry.getKey(), entry.getValue());
         }
     }
@@ -50,25 +49,25 @@ public class SchemaFactory {
     }
 
     @VisibleForTesting
-    @NotNull TableSchema buildShallowTable(@NotNull DataClassInput input) {
-        String sqlName = Naming.camelToSnake(input.dataName);
-        String javaName = "%sTable".formatted(input.dataName);
-        return new TableSchema(sqlName, javaName, input.dataName, input.dataClass, new ArrayList<>());
+    @NotNull TableSchema buildShallowTable(@NotNull ModelClassInput input) {
+        String sqlName = Naming.camelToSnake(input.modelName());
+        String javaName = "%sTable".formatted(input.modelName());
+        return new TableSchema(sqlName, javaName, input.modelName(), input.modelClass(), new ArrayList<>());
     }
 
     @VisibleForTesting
-    void completeTable(@NotNull DataClassInput input, @NotNull TableSchema schema) {
+    void completeTable(@NotNull ModelClassInput input, @NotNull TableSchema schema) {
         List<TableField> fields = schema.fields();
-        Arrays.stream(input.dataClass.getDeclaredFields())
+        Arrays.stream(input.modelClass().getDeclaredFields())
                 .filter(field -> !Modifier.isStatic(field.getModifiers()))
-                .map(field -> buildTableField(field, input.dataName))
+                .map(field -> buildTableField(field, input.modelName()))
                 .forEach(fields::add);
     }
 
     @VisibleForTesting
-    @NotNull TableField buildTableField(@NotNull Field field, @NotNull String dataName) {
+    @NotNull TableField buildTableField(@NotNull Field field, @NotNull String modelName) {
         Method getter = findGetterMethodOrDie(field);
-        boolean isPrimaryKey = isPrimaryKeyField(field, dataName, field.getName());
+        boolean isPrimaryKey = isPrimaryKeyField(field, modelName, field.getName());
 
         FieldInference inference = inferFieldSchema(field);
         if (inference.isSingleColumn()) {
@@ -82,10 +81,6 @@ public class SchemaFactory {
                                              requireNonNull(inference.adapterInfo()),
                                              requireNonNull(inference.multiColumns));
         }
-    }
-
-    private static boolean isPrimaryKeyField(@NotNull Field field, @NotNull String dataName, String name) {
-        return name.equals("id") || field.getName().equals(Naming.camelUpperToLower(dataName) + "Id");
     }
 
     private @NotNull FieldInference inferFieldSchema(@NotNull Field field) {
@@ -194,10 +189,10 @@ public class SchemaFactory {
 
     @VisibleForTesting
     static @Nullable Method findGetterMethod(@NotNull Field field) {
-        Class<?> dataClass = field.getDeclaringClass();
+        Class<?> modelClass = field.getDeclaringClass();
         Class<?> fieldType = field.getType();
         String fieldName = field.getName().toLowerCase();
-        return Arrays.stream(dataClass.getDeclaredMethods())
+        return Arrays.stream(modelClass.getDeclaredMethods())
                 .filter(method -> method.getReturnType() == fieldType &&
                                   method.getParameterCount() == 0 &&
                                   Modifier.isPublic(method.getModifiers()) &&
@@ -207,20 +202,19 @@ public class SchemaFactory {
                 .orElse(null);
     }
 
-    public record DataClassInput(@NotNull Class<?> dataClass, @NotNull String dataName) {
-        public DataClassInput(@NotNull Class<?> dataClass) {
-            this(dataClass, Naming.generatedSimpleName(dataClass));
-        }
+    private static boolean isPrimaryKeyField(@NotNull Field field, @NotNull String modelName, String name) {
+        return name.equals("id") || field.getName().equals(Naming.camelUpperToLower(modelName) + "Id");
     }
 
     private static void validateFieldForPojo(@NotNull Field field) {
-        Class<?> type = field.getType();
-        Class<?> klass = field.getDeclaringClass();
-        String name = field.getName();
-        String typeName = type.getSimpleName();
+        Class<?> modelClass = field.getDeclaringClass();
+        Class<?> fieldType = field.getType();
+        String fieldName = field.getName();
+        String typeName = fieldType.getSimpleName();
 
-        failIf(type.isInterface(), "Model class `%s` contains an interface field `%s` without a matching adapter: %s",
-               klass, typeName, name);
-        failIf(Collection.class.isAssignableFrom(type), "Model class `%s` contains a collection field: %s", klass, name);
+        failIf(fieldType.isInterface(), "Model class `%s` contains an interface field `%s` without a matching adapter: %s",
+               modelClass, typeName, fieldName);
+        failIf(Collection.class.isAssignableFrom(fieldType), "Model class `%s` contains a collection field: %s",
+               modelClass, fieldName);
     }
 }

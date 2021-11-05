@@ -21,24 +21,24 @@ import static io.webby.util.sql.schema.ColumnJoins.*;
 import static java.util.Objects.requireNonNull;
 
 @SuppressWarnings("UnnecessaryStringEscape")
-public class DataTableCodegen extends BaseCodegen {
-    private final DataClassAdaptersLocator adaptersLocator;
+public class ModelTableCodegen extends BaseCodegen {
+    private final ModelAdaptersLocator adaptersLocator;
     private final TableSchema table;
 
     private final Map<String, String> mainContext;
     private final Map<String, String> pkContext;
 
-    public DataTableCodegen(@NotNull DataClassAdaptersLocator adaptersLocator,
-                            @NotNull TableSchema table, @NotNull Appendable writer) {
+    public ModelTableCodegen(@NotNull ModelAdaptersLocator adaptersLocator,
+                             @NotNull TableSchema table, @NotNull Appendable writer) {
         super(writer);
         this.adaptersLocator = adaptersLocator;
         this.table = table;
 
         this.mainContext = EasyMaps.asMap(
             "$TableClass", table.javaName(),
-            "$sql_table", table.sqlName(),
-            "$DataClass", Naming.shortCanonicalName(table.dataClass()),
-            "$data_param", table.dataName().toLowerCase(),
+            "$table_sql", table.sqlName(),
+            "$ModelClass", Naming.shortCanonicalName(table.modelClass()),
+            "$model_param", table.modelName().toLowerCase(),
             "$all_columns", joinWithComma(table.columns())
         );
 
@@ -110,7 +110,7 @@ public class DataTableCodegen extends BaseCodegen {
         Class<?> baseTableClass = pickBaseTableClass();
         Map<String, String> context = Map.of(
             "$BaseClass", Naming.shortCanonicalName(baseTableClass),
-            "$BaseGenerics", baseTableClass == TableObj.class ? "$pk_type, $DataClass" : "$DataClass"
+            "$BaseGenerics", baseTableClass == TableObj.class ? "$pk_type, $ModelClass" : "$ModelClass"
         );
         appendCode(0, "public class $TableClass implements $BaseClass<$BaseGenerics> {",
                    EasyMaps.merge(context, mainContext, pkContext));
@@ -147,11 +147,11 @@ public class DataTableCodegen extends BaseCodegen {
         appendCode("""
         @Override
         public int count() {
-            String query = "SELECT COUNT(*) FROM $sql_table";
+            String query = "SELECT COUNT(*) FROM $table_sql";
             try (ResultSet result = runner.runQuery(query)) {
                 return result.getInt(1);
             } catch (SQLException e) {
-                throw new QueryException("$sql_table.count() failed", query, e);
+                throw new QueryException("$table_sql.count() failed", query, e);
             }
         }\n
         """, mainContext);
@@ -177,22 +177,22 @@ public class DataTableCodegen extends BaseCodegen {
 
         appendCode("""
         @Override
-        public @Nullable $DataClass getByPkOrNull($pk_annotation$pk_type $pk_name) {
-            String query = "SELECT $all_columns FROM $sql_table WHERE $pk_cols_assign";
+        public @Nullable $ModelClass getByPkOrNull($pk_annotation$pk_type $pk_name) {
+            String query = "SELECT $all_columns FROM $table_sql WHERE $pk_cols_assign";
             try (ResultSet result = runner.runQuery(query, $pk_name)) {
                 return result.next() ? fromRow(result) : null;
             } catch (SQLException e) {
-                throw new QueryException("$sql_table.getByPkOrNull() failed", query, $pk_name, e);
+                throw new QueryException("$table_sql.getByPkOrNull() failed", query, $pk_name, e);
             }
         }
         
         @Override
-        public @Nonnull $DataClass getByPkOrDie($pk_annotation$pk_type $pk_name) {
-            return Objects.requireNonNull(getByPkOrNull($pk_name), "$sql_table not found by PK: $pk_name=" + $pk_name);
+        public @Nonnull $ModelClass getByPkOrDie($pk_annotation$pk_type $pk_name) {
+            return Objects.requireNonNull(getByPkOrNull($pk_name), "$table_sql not found by PK: $pk_name=" + $pk_name);
         }
         
         @Override
-        public @Nonnull Optional<$DataClass> getOptionalByPk($pk_annotation$pk_type $pk_name) {
+        public @Nonnull Optional<$ModelClass> getOptionalByPk($pk_annotation$pk_type $pk_name) {
             return Optional.ofNullable(getByPkOrNull($pk_name));
         }\n
         """, EasyMaps.merge(mainContext, pkContext, context));
@@ -201,24 +201,24 @@ public class DataTableCodegen extends BaseCodegen {
     private void iterator() throws IOException {
         appendCode("""
         @Override
-        public void forEach(@Nonnull Consumer<? super $DataClass> consumer) {
-            String query = "SELECT $all_columns FROM $sql_table";
+        public void forEach(@Nonnull Consumer<? super $ModelClass> consumer) {
+            String query = "SELECT $all_columns FROM $table_sql";
             try (ResultSet result = runner.runQuery(query)) {
                 while (result.next()) {
                     consumer.accept(fromRow(result));
                 }
             } catch (SQLException e) {
-                throw new QueryException("$sql_table.forEach() failed", query, e);
+                throw new QueryException("$table_sql.forEach() failed", query, e);
             }
         }
     
         @Override
-        public @Nonnull ResultSetIterator<$DataClass> iterator() {
-            String query = "SELECT $all_columns FROM $sql_table";
+        public @Nonnull ResultSetIterator<$ModelClass> iterator() {
+            String query = "SELECT $all_columns FROM $table_sql";
             try {
                 return new ResultSetIterator<>(runner.runQuery(query), $TableClass::fromRow);
             } catch (SQLException e) {
-                throw new QueryException("$sql_table.iterator() failed", query, e);
+                throw new QueryException("$table_sql.iterator() failed", query, e);
             }
         }\n
         """, mainContext);
@@ -231,12 +231,12 @@ public class DataTableCodegen extends BaseCodegen {
         
         appendCode("""
         @Override
-        public int insert(@Nonnull $DataClass $data_param) {
-           String query = "INSERT INTO $sql_table($all_columns) VALUES($placeholders)";
+        public int insert(@Nonnull $ModelClass $model_param) {
+           String query = "INSERT INTO $table_sql($all_columns) VALUES($placeholders)";
            try {
-               return runner.runUpdate(query, valuesForInsert($data_param));
+               return runner.runUpdate(query, valuesForInsert($model_param));
            } catch (SQLException e) {
-               throw new QueryException("$sql_table.insert() failed", query, $data_param, e);
+               throw new QueryException("$table_sql.insert() failed", query, $model_param, e);
            }
         }\n
         """, EasyMaps.merge(mainContext, context));
@@ -250,7 +250,7 @@ public class DataTableCodegen extends BaseCodegen {
         );
 
         appendCode("""
-        protected static @Nonnull Object[] valuesForInsert(@Nonnull $DataClass $data_param) {
+        protected static @Nonnull Object[] valuesForInsert(@Nonnull $ModelClass $model_param) {
             Object[] array = {
         $array_init
             };
@@ -274,12 +274,12 @@ public class DataTableCodegen extends BaseCodegen {
 
         appendCode("""
         @Override
-        public int updateByPk(@Nonnull $DataClass $data_param) {
-           String query = "UPDATE $sql_table SET $npk_cols_assign WHERE $pk_cols_assign";
+        public int updateByPk(@Nonnull $ModelClass $model_param) {
+           String query = "UPDATE $table_sql SET $npk_cols_assign WHERE $pk_cols_assign";
            try {
-               return runner.runUpdate(query, valuesForUpdate($data_param));
+               return runner.runUpdate(query, valuesForUpdate($model_param));
            } catch (SQLException e) {
-               throw new QueryException("$sql_table.insert() failed", query, $data_param, e);
+               throw new QueryException("$table_sql.insert() failed", query, $model_param, e);
            }
         }\n
         """, EasyMaps.merge(mainContext, pkContext, context));
@@ -301,7 +301,7 @@ public class DataTableCodegen extends BaseCodegen {
         );
 
         appendCode("""
-        protected static @Nonnull Object[] valuesForUpdate(@Nonnull $DataClass $data_param) {
+        protected static @Nonnull Object[] valuesForUpdate(@Nonnull $ModelClass $model_param) {
             Object[] array = {
         $array_init
             };
@@ -316,14 +316,14 @@ public class DataTableCodegen extends BaseCodegen {
             if (!field.isNativelySupportedType()) {
                 return "null,";
             }
-            return "$data_param.%s(),".formatted(field.javaGetter().getName());
+            return "$model_param.%s(),".formatted(field.javaGetter().getName());
         }
 
         public @NotNull String fillValuesLine() {
             if (field.isNativelySupportedType()) {
                 return "";
             }
-            return "%s.fillArrayValues($data_param.%s(), array, %d);"
+            return "%s.fillArrayValues($model_param.%s(), array, %d);"
                     .formatted(requireNonNull(field.adapterInfo()).staticRef(), field.javaGetter().getName(), columnIndex);
         }
     }
@@ -342,13 +342,13 @@ public class DataTableCodegen extends BaseCodegen {
     private void fromRow() throws IOException {
         Map<String, String> context = Map.of(
             "$fields_assignments", new ResultSetConversionGenerator().generateAssignments(table),
-            "$data_fields", table.fields().stream().map(TableField::javaName).collect(COMMA_JOINER)
+            "$model_fields", table.fields().stream().map(TableField::javaName).collect(COMMA_JOINER)
         );
 
         appendCode("""
-        public static @Nonnull $DataClass fromRow(@Nonnull ResultSet result) throws SQLException {
+        public static @Nonnull $ModelClass fromRow(@Nonnull ResultSet result) throws SQLException {
         $fields_assignments
-            return new $DataClass($data_fields);
+            return new $ModelClass($model_fields);
         }\n
         """, EasyMaps.merge(mainContext, context));
     }

@@ -6,10 +6,7 @@ import io.webby.auth.user.DefaultUser;
 import io.webby.common.ClasspathScanner;
 import io.webby.examples.model.*;
 import io.webby.util.TimeIt;
-import io.webby.util.sql.AdapterCodegen;
-import io.webby.util.sql.DataClassAdaptersLocator;
-import io.webby.util.sql.DataTableCodegen;
-import io.webby.util.sql.SchemaFactory;
+import io.webby.util.sql.*;
 import io.webby.util.sql.schema.AdapterSchema;
 import io.webby.util.sql.schema.JavaNameHolder;
 import io.webby.util.sql.schema.TableSchema;
@@ -27,19 +24,19 @@ public class ExamplesCodegenMain {
     private static final FluentLogger log = FluentLogger.forEnclosingClass();
     private static final String DESTINATION_DIRECTORY = "src/examples/generated/sql";
 
-    private static final DataClassAdaptersLocator locator = new DataClassAdaptersLocator(new ClasspathScanner());
+    private static final ModelAdaptersLocator locator = new ModelAdaptersLocator(new ClasspathScanner());
 
     public static void main(String[] args) throws Exception {
-        List<SchemaFactory.DataClassInput> inputs = List.of(
-            new SchemaFactory.DataClassInput(DefaultUser.class, "User"),
-            new SchemaFactory.DataClassInput(Session.class),
+        List<ModelClassInput> inputs = List.of(
+            new ModelClassInput(DefaultUser.class, "User"),
+            new ModelClassInput(Session.class),
 
-            new SchemaFactory.DataClassInput(PrimitiveModel.class),
-            new SchemaFactory.DataClassInput(StringModel.class),
-            new SchemaFactory.DataClassInput(TimingModel.class),
-            new SchemaFactory.DataClassInput(WrappersModel.class),
+            new ModelClassInput(PrimitiveModel.class),
+            new ModelClassInput(StringModel.class),
+            new ModelClassInput(TimingModel.class),
+            new ModelClassInput(WrappersModel.class),
 
-            new SchemaFactory.DataClassInput(InnerDataModel.class)
+            new ModelClassInput(NestedModel.class)
         );
 
         TimeIt.timeItOrDie(() -> {
@@ -69,7 +66,7 @@ public class ExamplesCodegenMain {
 
     private static void runGenerate(@NotNull TableSchema tableSchema) throws IOException {
         try (FileWriter writer = new FileWriter(getDestinationFile(tableSchema))) {
-            DataTableCodegen generator = new DataTableCodegen(locator, tableSchema, writer);
+            ModelTableCodegen generator = new ModelTableCodegen(locator, tableSchema, writer);
             generator.generateJava();
         }
     }

@@ -8,11 +8,11 @@ import java.util.function.Predicate;
 
 public record TableSchema(@NotNull String sqlName,
                           @NotNull String javaName,
-                          @NotNull String dataName,
-                          @NotNull Class<?> dataClass,
+                          @NotNull String modelName,
+                          @NotNull Class<?> modelClass,
                           @NotNull List<TableField> fields) implements WithColumns, JavaNameHolder {
     public @NotNull String packageName() {
-        return dataClass.getPackageName();
+        return modelClass.getPackageName();
     }
 
     public boolean hasPrimaryKeyField() {

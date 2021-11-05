@@ -1,7 +1,8 @@
 package io.webby.examples.model;
 
 import io.webby.testing.Testing;
-import io.webby.util.sql.DataClassAdaptersLocator;
+import io.webby.util.sql.ModelAdaptersLocator;
+import io.webby.util.sql.ModelClassInput;
 import io.webby.util.sql.SchemaFactory;
 import io.webby.util.sql.schema.InvalidSqlModelException;
 import org.jetbrains.annotations.NotNull;
@@ -15,8 +16,8 @@ import java.util.Set;
 
 import static org.junit.jupiter.api.Assertions.assertThrows;
 
-public class DataTableCodegenTest {
-    private final DataClassAdaptersLocator locator = Testing.testStartupNoHandlers().getInstance(DataClassAdaptersLocator.class);
+public class ModelTableCodegenTest {
+    private final ModelAdaptersLocator locator = Testing.testStartupNoHandlers().getInstance(ModelAdaptersLocator.class);
 
     @Test
     public void invalid_list_field() {
@@ -44,7 +45,7 @@ public class DataTableCodegenTest {
 
     private void assertInvalidModel(@NotNull Class<?> ... models) {
         assertThrows(InvalidSqlModelException.class, () -> {
-            List<SchemaFactory.DataClassInput> inputs = Arrays.stream(models).map(SchemaFactory.DataClassInput::new).toList();
+            List<ModelClassInput> inputs = Arrays.stream(models).map(ModelClassInput::new).toList();
             SchemaFactory factory = new SchemaFactory(locator, inputs);
             factory.build();
         });

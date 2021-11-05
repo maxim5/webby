@@ -1,6 +1,6 @@
 package io.webby.util.sql.schema;
 
-import io.webby.util.sql.DataClassAdaptersLocator;
+import io.webby.util.sql.ModelAdaptersLocator;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.LinkedHashMap;
@@ -13,7 +13,7 @@ import static java.util.Objects.requireNonNull;
 
 public record PojoSchema(@NotNull Class<?> type, @NotNull List<PojoField> fields) implements WithColumns {
     public @NotNull String adapterName() {
-        return DataClassAdaptersLocator.defaultAdapterName(type);
+        return ModelAdaptersLocator.defaultAdapterName(type);
     }
 
     public boolean isEnum() {
