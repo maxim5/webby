@@ -42,7 +42,7 @@ public record PojoSchema(@NotNull Class<?> type, @NotNull List<PojoField> fields
             if (peek.isNativelySupported()) {
                 String pathName = fieldsPath.stream().map(PojoField::name).map(Naming::camelToSnake).collect(Collectors.joining("_"));
                 JdbcType type = requireNonNull(peek.jdbcType());
-                Column column = new Column(pathName, new ColumnType(type, null));
+                Column column = new Column(pathName, new ColumnType(type));
                 result.put(peek, column);
             }
         });

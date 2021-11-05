@@ -90,7 +90,7 @@ public class ModelSchemaFactory {
 
         JdbcType jdbcType = JdbcType.findByMatchingNativeType(fieldType);
         if (jdbcType != null) {
-            return FieldInference.ofNativeColumn(new Column(sqlFieldName, new ColumnType(jdbcType, null)));
+            return FieldInference.ofNativeColumn(new Column(sqlFieldName, new ColumnType(jdbcType)));
         }
 
         Class<?> adapterClass = adaptersLocator.locateAdapterClass(fieldType);
@@ -99,14 +99,14 @@ public class ModelSchemaFactory {
             if (parameters.length == 1) {
                 JdbcType paramType = JdbcType.findByMatchingNativeType(parameters[0].getType());
                 failIf(paramType == null, "JDBC adapter `%s` has incompatible parameters: %s", AdapterInfo.CREATE, adapterClass);
-                Column column = new Column(sqlFieldName, new ColumnType(paramType, null));
+                Column column = new Column(sqlFieldName, new ColumnType(paramType));
                 return FieldInference.ofSingleColumn(column, AdapterInfo.ofClass(adapterClass));
             } else {
                 List<Column> columns = BiStream.from(Arrays.stream(parameters),
                                                      Parameter::getName,
                                                      param -> JdbcType.findByMatchingNativeType(param.getType()))
                         .mapKeys(name -> "%s_%s".formatted(sqlFieldName, Naming.camelToSnake(name)))
-                        .mapValues(paramType -> new ColumnType(paramType, null))
+                        .mapValues(ColumnType::new)
                         .mapToObj(Column::new)
                         .toList();
                 return FieldInference.ofMultiColumns(columns, AdapterInfo.ofClass(adapterClass));
