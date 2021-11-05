@@ -35,12 +35,12 @@ public class AdapterInfo {
     private static @NotNull String classToStaticRef(@NotNull Class<?> klass) {
         String canonicalName = Naming.shortCanonicalName(klass);
 
-        if (hasMethod(klass, method -> isPublicStatic(method) && method.getName().equals(CREATE)) &&
-            hasMethod(klass, method -> isPublicStatic(method) && method.getName().equals(FILL_VALUES))) {
+        if (hasMethod(klass, Scope.DECLARED, method -> isPublicStatic(method) && method.getName().equals(CREATE)) &&
+            hasMethod(klass, Scope.DECLARED, method -> isPublicStatic(method) && method.getName().equals(FILL_VALUES))) {
             return canonicalName;
         }
 
-        Field staticField = findField(klass, field -> isPublicStatic(field) && field.getType().isAssignableFrom(klass));
+        Field staticField = findField(klass, Scope.DECLARED, field -> isPublicStatic(field) && field.getType().isAssignableFrom(klass));
         if (staticField != null) {
             return "%s.%s".formatted(canonicalName, staticField);
         }

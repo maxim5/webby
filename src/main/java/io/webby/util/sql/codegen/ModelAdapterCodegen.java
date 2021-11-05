@@ -71,17 +71,9 @@ public class ModelAdapterCodegen extends BaseCodegen {
 
     private void createInstance() throws IOException {
         PojoSchema pojo = adapter.pojoSchema();
-        Map<PojoField, Column> columnsPerFields = pojo.columnsPerFields();
-
-        String params = columnsPerFields.values().stream().map(column -> {
-            Class<?> nativeType = column.type().jdbcType().nativeType();
-            String sqlName = column.sqlName();
-            return "%s %s".formatted(nativeType.getSimpleName(), sqlName);
-        }).collect(COMMA_JOINER);
-
         Map<String, String> context = Map.of(
-            "$params", params,
-            "$constructor", fieldConstructor(pojo, columnsPerFields, new StringBuilder())
+            "$params", pojo.columns().stream().map(ModelAdapterCodegen::columnToParam).collect(COMMA_JOINER),
+            "$constructor", fieldConstructor(pojo, pojo.columnsPerFields(), new StringBuilder())
         );
 
         appendCode("""
@@ -91,10 +83,23 @@ public class ModelAdapterCodegen extends BaseCodegen {
         """, EasyMaps.merge(mainContext, context));
     }
 
+    private static @NotNull String columnToParam(@NotNull Column column) {
+        Class<?> nativeType = column.type().jdbcType().nativeType();
+        String sqlName = column.sqlName();
+        return "%s %s".formatted(nativeType.getSimpleName(), sqlName);
+    }
+
     private static @NotNull String fieldConstructor(@NotNull PojoSchema pojo,
                                                     @NotNull Map<PojoField, Column> columnsPerFields,
                                                     @NotNull StringBuilder builder) {
-        builder.append("new ").append(Naming.shortCanonicalName(pojo.type())).append("(");
+        String canonicalName = Naming.shortCanonicalName(pojo.type());
+
+        if (pojo.isEnum()) {
+            String name = columnsPerFields.get(pojo.fields().get(0)).sqlName();
+            return builder.append(canonicalName).append(".values()[").append(name).append("]").toString();
+        }
+
+        builder.append("new ").append(canonicalName).append("(");
         boolean isFirst = true;
         for (PojoField field : pojo.fields()) {
             if (isFirst) {

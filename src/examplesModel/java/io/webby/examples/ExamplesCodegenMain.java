@@ -36,6 +36,7 @@ public class ExamplesCodegenMain {
             new ModelClassInput(TimingModel.class),
             new ModelClassInput(WrappersModel.class),
 
+            new ModelClassInput(EnumModel.class),
             new ModelClassInput(NestedModel.class)
         );
 

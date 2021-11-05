@@ -2,6 +2,7 @@ package io.webby.util.sql.codegen;
 
 import com.google.mu.util.stream.BiStream;
 import io.webby.util.EasyClasspath;
+import io.webby.util.EasyClasspath.Scope;
 import io.webby.util.sql.schema.*;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
@@ -148,7 +149,7 @@ public class ModelSchemaFactory {
 
     @VisibleForTesting
     static @NotNull Parameter[] getCreationParameters(@NotNull Class<?> adapterClass) {
-        Method method = EasyClasspath.findMethod(adapterClass, AdapterInfo.CREATE);
+        Method method = EasyClasspath.findMethod(adapterClass, Scope.DECLARED, AdapterInfo.CREATE);
         failIf(method == null, "JDBC adapter does not implement `%s` method: %s", AdapterInfo.CREATE, adapterClass);
         return method.getParameters();
     }
@@ -158,7 +159,7 @@ public class ModelSchemaFactory {
             // adaptersLocator.locateAdapterClass(type);
 
             if (type.isEnum()) {
-                return new PojoSchema(type, Collections.emptyList());
+                return new PojoSchema(type, List.of(PojoField.ofEnum(type)));
             }
 
             List<PojoField> pojoFields = Arrays.stream(type.getDeclaredFields())

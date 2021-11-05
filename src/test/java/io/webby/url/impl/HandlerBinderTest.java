@@ -6,6 +6,7 @@ import io.routekit.SimpleQueryParser;
 import io.webby.testing.Testing;
 import io.webby.url.annotate.GET;
 import io.webby.url.caller.Caller;
+import io.webby.util.EasyClasspath.Scope;
 import io.webby.util.Pair;
 import org.jetbrains.annotations.NotNull;
 import org.junit.jupiter.api.Test;
@@ -15,6 +16,7 @@ import java.util.*;
 import java.util.function.BiPredicate;
 
 import static io.webby.util.EasyClasspath.findMethod;
+import static java.util.Objects.requireNonNull;
 import static org.junit.jupiter.api.Assertions.*;
 
 public class HandlerBinderTest {
@@ -44,7 +46,7 @@ public class HandlerBinderTest {
     private static @NotNull Object assertCaller(@NotNull Caller caller, @NotNull String method) throws Exception {
         Pair<String, String> pair = Pair.of(method.split("\\."));
         assertEquals(pair.second(), ((Method) caller.method()).getName());
-        Object instance = Objects.requireNonNull(findMethod(caller.getClass(), "instance")).invoke(caller);
+        Object instance = requireNonNull(findMethod(caller.getClass(), Scope.DECLARED, "instance")).invoke(caller);
         assertEquals(pair.first(), instance.getClass().getSimpleName());
         return instance;
     }
