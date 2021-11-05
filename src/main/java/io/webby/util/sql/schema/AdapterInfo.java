@@ -13,10 +13,10 @@ public class AdapterInfo {
     public static final String CREATE = "createInstance";
     public static final String FILL_VALUES = "fillArrayValues";
 
-    private final @NotNull OneOf<Class<?>, AdapterSignature> oneOf;
+    private final @NotNull OneOf<Class<?>, PojoSchema> oneOf;
     private final AtomicLazy<String> staticClassRef = new AtomicLazy<>();
 
-    private AdapterInfo(@NotNull OneOf<Class<?>, AdapterSignature> oneOf) {
+    private AdapterInfo(@NotNull OneOf<Class<?>, PojoSchema> oneOf) {
         this.oneOf = oneOf;
     }
 
@@ -24,28 +24,12 @@ public class AdapterInfo {
         return adapterClass != null ? new AdapterInfo(OneOf.ofFirst(adapterClass)) : null;
     }
 
-    public static @NotNull AdapterInfo ofSignature(@NotNull AdapterSignature signature) {
-        return new AdapterInfo(OneOf.ofSecond(signature));
-    }
-
-    public boolean hasClass() {
-        return oneOf.hasFirst();
-    }
-
-    public @Nullable Class<?> klass() {
-        return oneOf.first();
-    }
-
-    public boolean hasSignature() {
-        return oneOf.hasSecond();
-    }
-
-    public @Nullable AdapterSignature signature() {
-        return oneOf.second();
+    public static @NotNull AdapterInfo ofSignature(@NotNull PojoSchema pojoSchema) {
+        return new AdapterInfo(OneOf.ofSecond(pojoSchema));
     }
 
     public @NotNull String staticRef() {
-        return staticClassRef.lazyGet(() -> oneOf.fromEither(AdapterInfo::classToStaticRef, AdapterSignature::className));
+        return staticClassRef.lazyGet(() -> oneOf.fromEither(AdapterInfo::classToStaticRef, PojoSchema::adapterName));
     }
 
     private static @NotNull String classToStaticRef(@NotNull Class<?> klass) {

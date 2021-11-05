@@ -2,14 +2,14 @@ package io.webby.util.sql.schema;
 
 import org.jetbrains.annotations.NotNull;
 
-public record AdapterSchema(@NotNull AdapterSignature signature) implements JavaNameHolder {
+public record AdapterSchema(@NotNull PojoSchema pojoSchema) implements JavaNameHolder {
     @Override
     public @NotNull String javaName() {
-        return signature().className();
+        return pojoSchema.adapterName();
     }
 
     @Override
     public @NotNull String packageName() {
-        return signature.packageName();
+        return pojoSchema.type().getPackageName();
     }
 }

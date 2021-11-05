@@ -20,7 +20,7 @@ public class SchemaFactory {
 
     private final Collection<DataClassInput> inputs;
     private final Map<DataClassInput, TableSchema> tables = new HashMap<>();
-    private final Map<Class<?>, AdapterSchema> adapters = new HashMap<>();
+    private final Map<Class<?>, PojoSchema> pojos = new HashMap<>();
 
     public SchemaFactory(@NotNull DataClassAdaptersLocator adaptersLocator,
                          @NotNull Collection<DataClassInput> inputs) {
@@ -30,7 +30,7 @@ public class SchemaFactory {
 
     public void build() {
         tables.clear();
-        adapters.clear();
+        pojos.clear();
 
         for (DataClassInput input : inputs) {
             tables.put(input, buildShallowTable(input));
@@ -45,7 +45,7 @@ public class SchemaFactory {
     }
 
     public @NotNull Collection<AdapterSchema> getAdapterSchemas() {
-        return adapters.values();
+        return pojos.values().stream().map(AdapterSchema::new).toList();
     }
 
     @VisibleForTesting
@@ -91,10 +91,11 @@ public class SchemaFactory {
     private @NotNull FieldInference inferFieldSchema(@NotNull Field field) {
         String fieldName = field.getName();
         Class<?> fieldType = field.getType();
+        String sqlFieldName = Naming.camelToSnake(fieldName);
 
         JdbcType jdbcType = JdbcType.findByMatchingNativeType(fieldType);
         if (jdbcType != null) {
-            return FieldInference.ofNativeColumn(new Column(Naming.camelToSnake(fieldName), new ColumnType(jdbcType, null)));
+            return FieldInference.ofNativeColumn(new Column(sqlFieldName, new ColumnType(jdbcType, null)));
         }
 
         Class<?> adapterClass = adaptersLocator.locateAdapterClass(fieldType);
@@ -103,29 +104,31 @@ public class SchemaFactory {
             if (parameters.length == 1) {
                 JdbcType paramType = JdbcType.findByMatchingNativeType(parameters[0].getType());
                 assert paramType != null : "JDBC adapter `%s` has incompatible parameters: %s".formatted(AdapterInfo.CREATE, adapterClass);
-                Column column = new Column(Naming.camelToSnake(fieldName), new ColumnType(paramType, null));
-                return FieldInference.ofSingleColumn(column, adapterClass);
+                Column column = new Column(sqlFieldName, new ColumnType(paramType, null));
+                return FieldInference.ofSingleColumn(column, AdapterInfo.ofClass(adapterClass));
             } else {
                 List<Column> columns = BiStream.from(Arrays.stream(parameters),
                                                      Parameter::getName,
                                                      param -> JdbcType.findByMatchingNativeType(param.getType()))
-                        .mapKeys(name -> "%s_%s".formatted(Naming.camelToSnake(fieldName), Naming.camelToSnake(name)))
+                        .mapKeys(name -> "%s_%s".formatted(sqlFieldName, Naming.camelToSnake(name)))
                         .mapValues(paramType -> new ColumnType(paramType, null))
                         .mapToObj(Column::new)
                         .toList();
-                return FieldInference.ofMultiColumns(columns, adapterClass);
+                return FieldInference.ofMultiColumns(columns, AdapterInfo.ofClass(adapterClass));
             }
         }
 
-        //   enum,
-        //   foreign data class,
-        //   pojo class,
+        PojoSchema pojoSchema = buildSchemaForPojoField(fieldType);
+        List<Column> columns = pojoSchema.columns().stream()
+                .map(column -> column.renamed("%s_%s".formatted(sqlFieldName, column.sqlName())))
+                .toList();
+        if (columns.size() == 1) {
+            return FieldInference.ofSingleColumn(columns.get(0), AdapterInfo.ofSignature(pojoSchema));
+        } else {
+            return FieldInference.ofMultiColumns(columns, AdapterInfo.ofSignature(pojoSchema));
+        }
 
         // throw new UnsupportedOperationException("Adapter class not found for `%s`. Not implemented".formatted(field));
-        Column column = new Column(Naming.camelToSnake(fieldName), new ColumnType(JdbcType.Int, null));
-        AdapterSignature signature = new AdapterSignature(fieldType);
-        adapters.put(fieldType, new AdapterSchema(signature));
-        return FieldInference.ofSingle(column, AdapterInfo.ofSignature(signature));
     }
 
     private static record FieldInference(@Nullable Column singleColumn,
@@ -136,16 +139,12 @@ public class SchemaFactory {
             return new FieldInference(column, null, null, null);
         }
 
-        public static FieldInference ofSingleColumn(@NotNull Column column, @Nullable Class<?> adapterClass) {
-            return new FieldInference(column, null, AdapterInfo.ofClass(adapterClass), null);
-        }
-
-        public static FieldInference ofMultiColumns(@NotNull List<Column> columns, @Nullable Class<?> adapterClass) {
-            return new FieldInference(null, columns, AdapterInfo.ofClass(adapterClass), null);
-        }
-
-        public static FieldInference ofSingle(@NotNull Column column, @NotNull AdapterInfo adapterInfo) {
+        public static FieldInference ofSingleColumn(@NotNull Column column, @NotNull AdapterInfo adapterInfo) {
             return new FieldInference(column, null, adapterInfo, null);
+        }
+
+        public static FieldInference ofMultiColumns(@NotNull List<Column> columns, @NotNull AdapterInfo adapterInfo) {
+            return new FieldInference(null, columns, adapterInfo, null);
         }
 
         public boolean isSingleColumn() {
@@ -158,6 +157,33 @@ public class SchemaFactory {
         Method method = EasyClasspath.findMethod(adapterClass, AdapterInfo.CREATE);
         assert method != null : "JDBC adapter does not implement `%s` method: %s".formatted(AdapterInfo.CREATE, adapterClass);
         return method.getParameters();
+    }
+
+    private @NotNull PojoSchema buildSchemaForPojoField(@NotNull Class<?> type) {
+        return pojos.computeIfAbsent(type, k -> {
+            // adaptersLocator.locateAdapterClass(type);
+
+            if (type.isEnum()) {
+                return new PojoSchema(type, Collections.emptyList());
+            }
+
+            List<PojoField> pojoFields = Arrays.stream(type.getDeclaredFields())
+                    .filter(field -> !Modifier.isStatic(field.getModifiers()))
+                    .map(field -> {
+                Method getter = findGetterMethod(field);
+                assert getter != null : "No getter found for field: %s".formatted(field);
+
+                Class<?> subFieldType = field.getType();
+                JdbcType jdbcType = JdbcType.findByMatchingNativeType(subFieldType);
+                if (jdbcType != null) {
+                    return PojoField.ofNative(field, getter, jdbcType);
+                } else {
+                    PojoSchema subField = buildSchemaForPojoField(subFieldType);
+                    return PojoField.ofSubPojo(field, getter, subField);
+                }
+            }).toList();
+            return new PojoSchema(type, pojoFields);
+        });
     }
 
     @VisibleForTesting
