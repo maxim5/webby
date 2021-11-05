@@ -1,4 +1,4 @@
-package io.webby.util.sql;
+package io.webby.util.sql.codegen;
 
 import com.google.common.collect.ImmutableMap;
 import com.google.inject.Inject;

@@ -1,4 +1,4 @@
-package io.webby.util.sql;
+package io.webby.util.sql.codegen;
 
 import io.webby.util.sql.schema.Naming;
 import org.jetbrains.annotations.NotNull;

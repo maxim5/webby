@@ -1,4 +1,4 @@
-package io.webby.util.sql;
+package io.webby.util.sql.codegen;
 
 import io.webby.util.EasyMaps;
 import io.webby.util.sql.adapter.JdbcAdapt;
@@ -14,11 +14,12 @@ import java.util.stream.Stream;
 import static io.webby.util.sql.schema.ColumnJoins.*;
 import static java.util.Objects.requireNonNull;
 
-public class AdapterCodegen extends BaseCodegen {
+@SuppressWarnings("UnnecessaryStringEscape")
+public class ModelAdapterCodegen extends BaseCodegen {
     private final AdapterSchema adapter;
     private final Map<String, String> mainContext;
 
-    public AdapterCodegen(@NotNull AdapterSchema adapter, @NotNull Appendable writer) {
+    public ModelAdapterCodegen(@NotNull AdapterSchema adapter, @NotNull Appendable writer) {
         super(writer);
         this.adapter = adapter;
 

@@ -1,6 +1,6 @@
 package io.webby.util.sql.schema;
 
-import io.webby.util.sql.ModelAdaptersLocator;
+import io.webby.util.sql.codegen.ModelAdaptersLocator;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.LinkedHashMap;

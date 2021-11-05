@@ -1,4 +1,4 @@
-package io.webby.util.sql;
+package io.webby.util.sql.codegen;
 
 import com.google.mu.util.stream.BiStream;
 import io.webby.util.EasyClasspath;
@@ -16,14 +16,14 @@ import java.util.*;
 import static io.webby.util.sql.schema.InvalidSqlModelException.failIf;
 import static java.util.Objects.requireNonNull;
 
-public class SchemaFactory {
+public class ModelSchemaFactory {
     private final ModelAdaptersLocator adaptersLocator;
 
     private final Iterable<ModelClassInput> inputs;
     private final Map<ModelClassInput, TableSchema> tables = new HashMap<>();
     private final Map<Class<?>, PojoSchema> pojos = new HashMap<>();
 
-    public SchemaFactory(@NotNull ModelAdaptersLocator adaptersLocator, @NotNull Iterable<ModelClassInput> inputs) {
+    public ModelSchemaFactory(@NotNull ModelAdaptersLocator adaptersLocator, @NotNull Iterable<ModelClassInput> inputs) {
         this.adaptersLocator = adaptersLocator;
         this.inputs = inputs;
     }
