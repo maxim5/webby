@@ -1,6 +1,6 @@
 package io.webby.examples.model;
 
-public record EnumModel(Foo foo, Nested nested) {
+public record EnumModel(Foo id, Foo foo, Nested nested) {
 
     public enum Foo {
         FIRST,

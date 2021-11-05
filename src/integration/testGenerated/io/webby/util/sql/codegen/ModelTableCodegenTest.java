@@ -1,9 +1,6 @@
-package io.webby.examples.model;
+package io.webby.util.sql.codegen;
 
 import io.webby.testing.Testing;
-import io.webby.util.sql.codegen.ModelAdaptersLocator;
-import io.webby.util.sql.codegen.ModelClassInput;
-import io.webby.util.sql.codegen.ModelSchemaFactory;
 import io.webby.util.sql.schema.InvalidSqlModelException;
 import org.jetbrains.annotations.NotNull;
 import org.junit.jupiter.api.Test;

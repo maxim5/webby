@@ -245,7 +245,7 @@ public class ModelTableCodegen extends BaseCodegen {
     private void valuesForInsert() throws IOException {
         List<FieldArrayConversion> conversions = zipWithColumnIndex(table.fields(), FieldArrayConversion::new);
         Map<String, String> context = Map.of(
-            "$array_init", conversions.stream().map(FieldArrayConversion::initLine).collect(linesJoiner(INDENT2)),
+            "$array_init", conversions.stream().flatMap(FieldArrayConversion::initLines).collect(linesJoiner(INDENT2)),
             "$array_convert", conversions.stream().map(FieldArrayConversion::fillValuesLine).collect(linesJoiner(INDENT, true))
         );
 
@@ -296,7 +296,7 @@ public class ModelTableCodegen extends BaseCodegen {
 
         List<FieldArrayConversion> conversions = zipWithColumnIndex(fields, FieldArrayConversion::new);
         Map<String, String> context = Map.of(
-            "$array_init", conversions.stream().map(FieldArrayConversion::initLine).collect(linesJoiner(INDENT2)),
+            "$array_init", conversions.stream().flatMap(FieldArrayConversion::initLines).collect(linesJoiner(INDENT2)),
             "$array_convert", conversions.stream().map(FieldArrayConversion::fillValuesLine).collect(linesJoiner(INDENT, true))
         );
 
@@ -312,11 +312,11 @@ public class ModelTableCodegen extends BaseCodegen {
     }
 
     private record FieldArrayConversion(@NotNull TableField field, int columnIndex) {
-        public @NotNull String initLine() {
+        public @NotNull Stream<String> initLines() {
             if (!field.isNativelySupportedType()) {
-                return "null,";
+                return Stream.generate(() -> "null,").limit(field.columnsNumber());
             }
-            return "$model_param.%s(),".formatted(field.javaGetter().getName());
+            return Stream.of("$model_param.%s(),".formatted(field.javaGetter().getName()));
         }
 
         public @NotNull String fillValuesLine() {
