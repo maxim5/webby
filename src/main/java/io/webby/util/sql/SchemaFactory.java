@@ -13,6 +13,7 @@ import java.lang.reflect.Modifier;
 import java.lang.reflect.Parameter;
 import java.util.*;
 
+import static io.webby.util.sql.schema.InvalidSqlModelException.failIf;
 import static java.util.Objects.requireNonNull;
 
 public class SchemaFactory {
@@ -66,8 +67,7 @@ public class SchemaFactory {
 
     @VisibleForTesting
     @NotNull TableField buildTableField(@NotNull Field field, @NotNull String dataName) {
-        Method getter = findGetterMethod(field);
-        assert getter != null : "No getter found for field: %s".formatted(field);
+        Method getter = findGetterMethodOrDie(field);
         boolean isPrimaryKey = isPrimaryKeyField(field, dataName, field.getName());
 
         FieldInference inference = inferFieldSchema(field);
@@ -103,7 +103,7 @@ public class SchemaFactory {
             Parameter[] parameters = getCreationParameters(adapterClass);
             if (parameters.length == 1) {
                 JdbcType paramType = JdbcType.findByMatchingNativeType(parameters[0].getType());
-                assert paramType != null : "JDBC adapter `%s` has incompatible parameters: %s".formatted(AdapterInfo.CREATE, adapterClass);
+                failIf(paramType == null, "JDBC adapter `%s` has incompatible parameters: %s", AdapterInfo.CREATE, adapterClass);
                 Column column = new Column(sqlFieldName, new ColumnType(paramType, null));
                 return FieldInference.ofSingleColumn(column, AdapterInfo.ofClass(adapterClass));
             } else {
@@ -118,6 +118,8 @@ public class SchemaFactory {
             }
         }
 
+        validateFieldForPojo(field);
+
         PojoSchema pojoSchema = buildSchemaForPojoField(fieldType);
         List<Column> columns = pojoSchema.columns().stream()
                 .map(column -> column.renamed("%s_%s".formatted(sqlFieldName, column.sqlName())))
@@ -127,8 +129,6 @@ public class SchemaFactory {
         } else {
             return FieldInference.ofMultiColumns(columns, AdapterInfo.ofSignature(pojoSchema));
         }
-
-        // throw new UnsupportedOperationException("Adapter class not found for `%s`. Not implemented".formatted(field));
     }
 
     private static record FieldInference(@Nullable Column singleColumn,
@@ -138,7 +138,6 @@ public class SchemaFactory {
         public static FieldInference ofNativeColumn(@NotNull Column column) {
             return new FieldInference(column, null, null, null);
         }
-
         public static FieldInference ofSingleColumn(@NotNull Column column, @NotNull AdapterInfo adapterInfo) {
             return new FieldInference(column, null, adapterInfo, null);
         }
@@ -155,7 +154,7 @@ public class SchemaFactory {
     @VisibleForTesting
     static @NotNull Parameter[] getCreationParameters(@NotNull Class<?> adapterClass) {
         Method method = EasyClasspath.findMethod(adapterClass, AdapterInfo.CREATE);
-        assert method != null : "JDBC adapter does not implement `%s` method: %s".formatted(AdapterInfo.CREATE, adapterClass);
+        failIf(method == null, "JDBC adapter does not implement `%s` method: %s", AdapterInfo.CREATE, adapterClass);
         return method.getParameters();
     }
 
@@ -170,8 +169,8 @@ public class SchemaFactory {
             List<PojoField> pojoFields = Arrays.stream(type.getDeclaredFields())
                     .filter(field -> !Modifier.isStatic(field.getModifiers()))
                     .map(field -> {
-                Method getter = findGetterMethod(field);
-                assert getter != null : "No getter found for field: %s".formatted(field);
+                validateFieldForPojo(field);
+                Method getter = findGetterMethodOrDie(field);
 
                 Class<?> subFieldType = field.getType();
                 JdbcType jdbcType = JdbcType.findByMatchingNativeType(subFieldType);
@@ -184,6 +183,13 @@ public class SchemaFactory {
             }).toList();
             return new PojoSchema(type, pojoFields);
         });
+    }
+
+    @VisibleForTesting
+    static @NotNull Method findGetterMethodOrDie(@NotNull Field field) {
+        Method getter = findGetterMethod(field);
+        failIf(getter == null, "Model class `%s` exposes no getter field: %s", field.getDeclaringClass(), field.getName());
+        return getter;
     }
 
     @VisibleForTesting
@@ -205,5 +211,16 @@ public class SchemaFactory {
         public DataClassInput(@NotNull Class<?> dataClass) {
             this(dataClass, Naming.generatedSimpleName(dataClass));
         }
+    }
+
+    private static void validateFieldForPojo(@NotNull Field field) {
+        Class<?> type = field.getType();
+        Class<?> klass = field.getDeclaringClass();
+        String name = field.getName();
+        String typeName = type.getSimpleName();
+
+        failIf(type.isInterface(), "Model class `%s` contains an interface field `%s` without a matching adapter: %s",
+               klass, typeName, name);
+        failIf(Collection.class.isAssignableFrom(type), "Model class `%s` contains a collection field: %s", klass, name);
     }
 }
