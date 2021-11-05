@@ -84,7 +84,7 @@ public class AdapterCodegen extends BaseCodegen {
         );
 
         appendCode("""
-        public static @Nonnull $DataClass createInstance($params) {
+        public @Nonnull $DataClass createInstance($params) {
             return $constructor;
         }\n
         """, EasyMaps.merge(mainContext, context));
@@ -117,7 +117,7 @@ public class AdapterCodegen extends BaseCodegen {
         );
 
         appendCode("""
-        public static void fillArrayValues(@Nonnull $DataClass instance, Object[] array, int start) {
+        public void fillArrayValues(@Nonnull $DataClass instance, Object[] array, int start) {
         $assignments
         }
         """, EasyMaps.merge(mainContext, context));
@@ -136,7 +136,8 @@ public class AdapterCodegen extends BaseCodegen {
                 index++;
             } else {
                 PojoSchema subPojo = requireNonNull(field.pojo());
-                result.add("%s.fillArrayValues(%s, array, %s);".formatted(subPojo.adapterName(), getter, arrayIndex));
+                AdapterInfo info = AdapterInfo.ofSignature(subPojo);
+                result.add("%s.fillArrayValues(%s, array, %s);".formatted(info.staticRef(), getter, arrayIndex));
                 index += subPojo.columnsNumber();
             }
         }

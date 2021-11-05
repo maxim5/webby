@@ -29,7 +29,7 @@ public class AdapterInfo {
     }
 
     public @NotNull String staticRef() {
-        return staticClassRef.lazyGet(() -> oneOf.fromEither(AdapterInfo::classToStaticRef, PojoSchema::adapterName));
+        return staticClassRef.lazyGet(() -> oneOf.fromEither(AdapterInfo::classToStaticRef, AdapterInfo::signatureStaticRef));
     }
 
     private static @NotNull String classToStaticRef(@NotNull Class<?> klass) {
@@ -46,5 +46,9 @@ public class AdapterInfo {
         }
 
         return "new %s()".formatted(canonicalName);
+    }
+
+    private static @NotNull String signatureStaticRef(@NotNull PojoSchema pojoSchema) {
+        return "%s.ADAPTER".formatted(pojoSchema.adapterName());
     }
 }
