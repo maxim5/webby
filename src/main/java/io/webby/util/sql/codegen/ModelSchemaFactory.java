@@ -1,8 +1,11 @@
 package io.webby.util.sql.codegen;
 
+import com.google.common.collect.ImmutableMap;
 import com.google.mu.util.stream.BiStream;
 import io.webby.util.EasyClasspath;
 import io.webby.util.EasyClasspath.Scope;
+import io.webby.util.EasyIterables;
+import io.webby.util.EasyObjects;
 import io.webby.util.sql.schema.*;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
@@ -13,6 +16,7 @@ import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;
 import java.lang.reflect.Parameter;
 import java.util.*;
+import java.util.function.Function;
 
 import static io.webby.util.sql.schema.InvalidSqlModelException.failIf;
 import static java.util.Objects.requireNonNull;
@@ -68,7 +72,7 @@ public class ModelSchemaFactory {
     @VisibleForTesting
     @NotNull TableField buildTableField(@NotNull Field field, @NotNull String modelName) {
         Method getter = findGetterMethodOrDie(field);
-        boolean isPrimaryKey = isPrimaryKeyField(field, modelName, field.getName());
+        boolean isPrimaryKey = isPrimaryKeyField(field.getName(), modelName);
 
         FieldInference inference = inferFieldSchema(field);
         if (inference.isSingleColumn()) {
@@ -181,8 +185,7 @@ public class ModelSchemaFactory {
         });
     }
 
-    @VisibleForTesting
-    static @NotNull Method findGetterMethodOrDie(@NotNull Field field) {
+    private static @NotNull Method findGetterMethodOrDie(@NotNull Field field) {
         Method getter = findGetterMethod(field);
         failIf(getter == null, "Model class `%s` exposes no getter field: %s", field.getDeclaringClass(), field.getName());
         return getter;
@@ -190,21 +193,28 @@ public class ModelSchemaFactory {
 
     @VisibleForTesting
     static @Nullable Method findGetterMethod(@NotNull Field field) {
-        Class<?> modelClass = field.getDeclaringClass();
         Class<?> fieldType = field.getType();
         String fieldName = field.getName().toLowerCase();
-        return Arrays.stream(modelClass.getDeclaredMethods())
+
+        Map<String, Method> eligibleMethods = Arrays.stream(field.getDeclaringClass().getMethods())
                 .filter(method -> method.getReturnType() == fieldType &&
                                   method.getParameterCount() == 0 &&
                                   Modifier.isPublic(method.getModifiers()) &&
-                                  !Modifier.isStatic(method.getModifiers()) &&
-                                  method.getName().toLowerCase().contains(fieldName))
-                .findFirst()
-                .orElse(null);
+                                  !Modifier.isStatic(method.getModifiers()))
+                .collect(ImmutableMap.toImmutableMap(Method::getName, Function.identity()));
+
+        return EasyObjects.firstNonNull(List.of(
+            () -> eligibleMethods.get(fieldName),
+            () -> eligibleMethods.get("get%s".formatted(Naming.camelLowerToUpper(fieldName))),
+            () -> EasyIterables.getOnlyItem(eligibleMethods.values().stream().filter(method -> {
+                    String name = method.getName().toLowerCase();
+                    return name.startsWith("get") && name.contains(fieldName.toLowerCase());
+                })).orElse(null)
+        ));
     }
 
-    private static boolean isPrimaryKeyField(@NotNull Field field, @NotNull String modelName, String name) {
-        return name.equals("id") || field.getName().equals(Naming.camelUpperToLower(modelName) + "Id");
+    private static boolean isPrimaryKeyField(@NotNull String fieldName, @NotNull String modelName) {
+        return fieldName.equals("id") || fieldName.equals(Naming.camelUpperToLower(modelName) + "Id");
     }
 
     private static void validateFieldForPojo(@NotNull Field field) {

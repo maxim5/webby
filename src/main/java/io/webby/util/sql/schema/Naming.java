@@ -14,6 +14,11 @@ public class Naming {
         return CaseFormat.UPPER_CAMEL.converterTo(CaseFormat.LOWER_CAMEL).convert(s);
     }
 
+    @SuppressWarnings("ConstantConditions")
+    public static @NotNull String camelLowerToUpper(@NotNull String s) {
+        return CaseFormat.LOWER_CAMEL.converterTo(CaseFormat.UPPER_CAMEL).convert(s);
+    }
+
     public static @NotNull String generatedSimpleName(@NotNull Class<?> klass) {
         if (klass.isMemberClass()) {
             return shortCanonicalName(klass).replace('.', '_');
