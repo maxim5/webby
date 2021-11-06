@@ -187,14 +187,15 @@ public class ModelSchemaFactory {
 
     private static @NotNull Method findGetterMethodOrDie(@NotNull Field field) {
         Method getter = findGetterMethod(field);
-        failIf(getter == null, "Model class `%s` exposes no getter field: %s", field.getDeclaringClass(), field.getName());
+        failIf(getter == null, "Model class `%s` exposes no getter field: %s",
+               field.getDeclaringClass().getSimpleName(), field.getName());
         return getter;
     }
 
     @VisibleForTesting
     static @Nullable Method findGetterMethod(@NotNull Field field) {
         Class<?> fieldType = field.getType();
-        String fieldName = field.getName().toLowerCase();
+        String fieldName = field.getName();
 
         Map<String, Method> eligibleMethods = Arrays.stream(field.getDeclaringClass().getMethods())
                 .filter(method -> method.getReturnType() == fieldType &&
