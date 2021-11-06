@@ -14,7 +14,6 @@ import java.util.Map;
 import java.util.stream.Stream;
 
 import static io.webby.util.sql.schema.ColumnJoins.*;
-import static java.util.Objects.requireNonNull;
 
 @SuppressWarnings("UnnecessaryStringEscape")
 public class ModelAdapterCodegen extends BaseCodegen {
@@ -130,7 +129,7 @@ public class ModelAdapterCodegen extends BaseCodegen {
                 String name = columnsPerFields.get(field).sqlName();
                 builder.append(name);
             } else {
-                fieldConstructor(requireNonNull(field.pojo()), columnsPerFields, builder);
+                fieldConstructor(field.pojoOrDie(), columnsPerFields, builder);
             }
         }
         return builder.append(")").toString();
@@ -159,11 +158,11 @@ public class ModelAdapterCodegen extends BaseCodegen {
         assert fields.size() == 1 : "Expected a single pojo field, but found: %s".formatted(fields);
 
         PojoField field = fields.get(0);
-        String getter = "instance.%s()".formatted(field.getter().getName());
+        String getter = "instance.%s()".formatted(field.javaGetter());
         if (field.isNativelySupported()) {
             return getter;
         } else {
-            PojoSchema subPojo = requireNonNull(field.pojo());
+            PojoSchema subPojo = field.pojoOrDie();
             AdapterInfo info = AdapterInfo.ofSignature(subPojo);
             return "%s.toValueObject(%s);".formatted(info.staticRef(), getter);
         }
@@ -192,13 +191,13 @@ public class ModelAdapterCodegen extends BaseCodegen {
         int index = 0;
         for (PojoField field : pojo.fields()) {
             String arrayIndex = index == 0 ? "start" : "start+%d".formatted(index);
-            String getter = "instance.%s()".formatted(field.getter().getName());
+            String getter = "instance.%s()".formatted(field.javaGetter());
 
             if (field.isNativelySupported()) {
                 result.add("array[%s] = %s;".formatted(arrayIndex, getter));
                 index++;
             } else {
-                PojoSchema subPojo = requireNonNull(field.pojo());
+                PojoSchema subPojo = field.pojoOrDie();
                 AdapterInfo info = AdapterInfo.ofSignature(subPojo);
                 result.add("%s.fillArrayValues(%s, array, %s);".formatted(info.staticRef(), getter, arrayIndex));
                 index += subPojo.columnsNumber();

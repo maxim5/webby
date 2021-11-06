@@ -3,21 +3,18 @@ package io.webby.util.sql.schema;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
-import java.lang.reflect.Field;
-import java.lang.reflect.Method;
 import java.util.Collections;
 import java.util.List;
 
 public class SimpleTableField extends TableField {
     private final Column column;
 
-    public SimpleTableField(@NotNull Field javaField,
-                            @NotNull Method javaGetter,
+    public SimpleTableField(@NotNull ModelField field,
                             boolean primaryKey,
                             @Nullable TableSchema foreignKey,
                             @Nullable AdapterInfo adapterInfo,
                             @NotNull Column column) {
-        super(javaField, javaGetter, primaryKey, foreignKey, adapterInfo);
+        super(field, primaryKey, foreignKey, adapterInfo);
         this.column = column;
     }
 

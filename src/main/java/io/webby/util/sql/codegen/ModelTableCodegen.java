@@ -329,7 +329,7 @@ public class ModelTableCodegen extends BaseCodegen {
             if (!field.isNativelySupportedType()) {
                 return Stream.generate(() -> "null,").limit(field.columnsNumber());
             }
-            return Stream.of("$model_param.%s(),".formatted(field.javaGetter().getName()));
+            return Stream.of("$model_param.%s(),".formatted(field.javaGetter()));
         }
 
         public @NotNull String fillValuesLine() {
@@ -337,7 +337,7 @@ public class ModelTableCodegen extends BaseCodegen {
                 return "";
             }
             return "%s.fillArrayValues($model_param.%s(), array, %d);"
-                    .formatted(requireNonNull(field.adapterInfo()).staticRef(), field.javaGetter().getName(), columnIndex);
+                    .formatted(requireNonNull(field.adapterInfo()).staticRef(), field.javaGetter(), columnIndex);
         }
     }
 

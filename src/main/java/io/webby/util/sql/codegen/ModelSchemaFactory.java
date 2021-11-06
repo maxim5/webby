@@ -1,5 +1,6 @@
 package io.webby.util.sql.codegen;
 
+import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
 import com.google.mu.util.stream.BiStream;
 import io.webby.util.EasyClasspath;
@@ -76,12 +77,14 @@ public class ModelSchemaFactory {
 
         FieldInference inference = inferFieldSchema(field);
         if (inference.isSingleColumn()) {
-            return new SimpleTableField(field, getter, isPrimaryKey,
+            return new SimpleTableField(ModelField.of(field, getter),
+                                        isPrimaryKey,
                                         inference.foreignTable,
                                         inference.adapterInfo(),
                                         requireNonNull(inference.singleColumn));
         } else {
-            return new MultiColumnTableField(field, getter, isPrimaryKey,
+            return new MultiColumnTableField(ModelField.of(field, getter),
+                                             isPrimaryKey,
                                              inference.foreignTable,
                                              requireNonNull(inference.adapterInfo()),
                                              requireNonNull(inference.multiColumns));
@@ -132,7 +135,7 @@ public class ModelSchemaFactory {
     }
 
     private static record FieldInference(@Nullable Column singleColumn,
-                                         @Nullable List<Column> multiColumns,
+                                         @Nullable ImmutableList<Column> multiColumns,
                                          @Nullable AdapterInfo adapterInfo,
                                          @Nullable TableSchema foreignTable) {
         public static FieldInference ofNativeColumn(@NotNull Column column) {
@@ -143,7 +146,7 @@ public class ModelSchemaFactory {
         }
 
         public static FieldInference ofMultiColumns(@NotNull List<Column> columns, @NotNull AdapterInfo adapterInfo) {
-            return new FieldInference(null, columns, adapterInfo, null);
+            return new FieldInference(null, ImmutableList.copyOf(columns), adapterInfo, null);
         }
 
         public boolean isSingleColumn() {
@@ -163,10 +166,10 @@ public class ModelSchemaFactory {
             // adaptersLocator.locateAdapterClass(type);
 
             if (type.isEnum()) {
-                return new PojoSchema(type, List.of(PojoField.ofEnum(type)));
+                return new PojoSchema(type, ImmutableList.of(PojoField.ofEnum(type)));
             }
 
-            List<PojoField> pojoFields = Arrays.stream(type.getDeclaredFields())
+            ImmutableList<PojoField> pojoFields = Arrays.stream(type.getDeclaredFields())
                     .filter(field -> !Modifier.isStatic(field.getModifiers()))
                     .map(field -> {
                 validateFieldForPojo(field);
@@ -180,7 +183,7 @@ public class ModelSchemaFactory {
                     PojoSchema subField = buildSchemaForPojoField(subFieldType);
                     return PojoField.ofSubPojo(field, getter, subField);
                 }
-            }).toList();
+            }).collect(ImmutableList.toImmutableList());
             return new PojoSchema(type, pojoFields);
         });
     }
