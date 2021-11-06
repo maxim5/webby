@@ -3,12 +3,15 @@ package io.webby.util.sql.adapter;
 import java.sql.Timestamp;
 import java.time.LocalDateTime;
 
-public class LocalDateTimeJdbcAdapter {
-    public static LocalDateTime createInstance(Timestamp value) {
+public class LocalDateTimeJdbcAdapter implements JdbcSingleColumnArrayAdapter<LocalDateTime> {
+    public static final LocalDateTimeJdbcAdapter ADAPTER = new LocalDateTimeJdbcAdapter();
+
+    public LocalDateTime createInstance(Timestamp value) {
         return value.toLocalDateTime();
     }
 
-    public static void fillArrayValues(LocalDateTime instance, Object[] array, int start) {
-        array[start] = Timestamp.valueOf(instance);
+    @Override
+    public Object toValueObject(LocalDateTime instance) {
+        return Timestamp.valueOf(instance);
     }
 }

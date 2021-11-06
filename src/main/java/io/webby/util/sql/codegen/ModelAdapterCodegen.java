@@ -2,6 +2,8 @@ package io.webby.util.sql.codegen;
 
 import io.webby.util.EasyMaps;
 import io.webby.util.sql.adapter.JdbcAdapt;
+import io.webby.util.sql.adapter.JdbcArrayAdapter;
+import io.webby.util.sql.adapter.JdbcSingleColumnArrayAdapter;
 import io.webby.util.sql.schema.*;
 import org.jetbrains.annotations.NotNull;
 
@@ -36,13 +38,21 @@ public class ModelAdapterCodegen extends BaseCodegen {
         staticConst();
 
         createInstance();
+
+        toValueObject();
         fillArrayValues();
+        toNewValuesArray();
 
         appendLine("}");
     }
 
     private void imports() throws IOException {
-        List<String> classesToImport = Stream.of(JdbcAdapt.class).map(FQN::of).map(FQN::importName).toList();
+        List<String> classesToImport = Stream.of(JdbcAdapt.class, getBaseClass())
+                .map(FQN::of)
+                .map(FQN::importName)
+                .sorted()
+                .distinct()
+                .toList();
         Map<String, String> context = Map.of(
             "$package", adapter.packageName(),
             "$imports", classesToImport.stream().map("import %s;"::formatted).collect(LINE_JOINER)
@@ -56,11 +66,20 @@ public class ModelAdapterCodegen extends BaseCodegen {
         """, context);
     }
 
+    private @NotNull Class<?> getBaseClass() {
+        return adapter.pojoSchema().columnsNumber() == 1 ? JdbcSingleColumnArrayAdapter.class : JdbcArrayAdapter.class;
+    }
+
     private void classDef() throws IOException {
+        Map<String, String> context = Map.of(
+            "$BaseClass", getBaseClass().getSimpleName(),
+            "$BaseGeneric", "$ModelClass"
+        );
+
         appendCode(0, """
         @JdbcAdapt($ModelClass.class)
-        public class $AdapterClass {
-        """, mainContext);
+        public class $AdapterClass implements $BaseClass<$BaseGeneric> {
+        """, EasyMaps.merge(context, mainContext));
     }
 
     private void staticConst() throws IOException {
@@ -117,20 +136,58 @@ public class ModelAdapterCodegen extends BaseCodegen {
         return builder.append(")").toString();
     }
 
-    private void fillArrayValues() throws IOException {
+    private void toValueObject() throws IOException {
+        PojoSchema pojo = adapter.pojoSchema();
+        if (pojo.columnsNumber() != 1) {
+            return;
+        }
+
         Map<String, String> context = Map.of(
-            "$assignments", pojoAssignmentLines(adapter.pojoSchema()).stream().collect(linesJoiner(INDENT))
+            "$instance_getter", pojoSingleGetter(pojo)
         );
 
         appendCode("""
+        @Override
+        public Object toValueObject($ModelClass instance) {
+            return $instance_getter;
+        }\n
+        """, EasyMaps.merge(context, mainContext));
+    }
+
+    private static @NotNull String pojoSingleGetter(@NotNull PojoSchema pojo) {
+        List<PojoField> fields = pojo.fields();
+        assert fields.size() == 1 : "Expected a single pojo field, but found: %s".formatted(fields);
+
+        PojoField field = fields.get(0);
+        String getter = "instance.%s()".formatted(field.getter().getName());
+        if (field.isNativelySupported()) {
+            return getter;
+        } else {
+            PojoSchema subPojo = requireNonNull(field.pojo());
+            AdapterInfo info = AdapterInfo.ofSignature(subPojo);
+            return "%s.toValueObject(%s);".formatted(info.staticRef(), getter);
+        }
+    }
+
+    private void fillArrayValues() throws IOException {
+        PojoSchema pojo = adapter.pojoSchema();
+        if (pojo.columnsNumber() == 1) {
+            return;
+        }
+
+        Map<String, String> context = Map.of(
+            "$assignments", pojoAssignmentLines(pojo).stream().collect(linesJoiner(INDENT))
+        );
+
+        appendCode("""
+        @Override
         public void fillArrayValues(@Nonnull $ModelClass instance, Object[] array, int start) {
         $assignments
-        }
+        }\n
         """, EasyMaps.merge(mainContext, context));
     }
 
-    @NotNull
-    private static List<String> pojoAssignmentLines(@NotNull PojoSchema pojo) {
+    private static @NotNull List<String> pojoAssignmentLines(@NotNull PojoSchema pojo) {
         ArrayList<String> result = new ArrayList<>();
         int index = 0;
         for (PojoField field : pojo.fields()) {
@@ -148,5 +205,21 @@ public class ModelAdapterCodegen extends BaseCodegen {
             }
         }
         return result;
+    }
+
+    private void toNewValuesArray() throws IOException {
+        int columnsNumber = adapter.pojoSchema().columnsNumber();
+        if (columnsNumber == 1) {
+            return;
+        }
+
+        appendCode("""
+        @Override
+        public @Nonnull Object[] toNewValuesArray($ModelClass instance) {
+            Object[] array = new Object[$columns_number];
+            fillArrayValues(instance, array, 0);
+            return array;
+        }\n
+        """, EasyMaps.merge(mainContext, Map.of("$columns_number", String.valueOf(columnsNumber))));
     }
 }

@@ -12,6 +12,7 @@ import static io.webby.util.EasyClasspath.*;
 public class AdapterInfo {
     public static final String CREATE = "createInstance";
     public static final String FILL_VALUES = "fillArrayValues";
+    public static final String NEW_ARRAY = "toNewValuesArray";
 
     private final @NotNull OneOf<Class<?>, PojoSchema> oneOf;
     private final AtomicLazy<String> staticClassRef = new AtomicLazy<>();
@@ -35,14 +36,15 @@ public class AdapterInfo {
     private static @NotNull String classToStaticRef(@NotNull Class<?> klass) {
         String canonicalName = Naming.shortCanonicalName(klass);
 
-        if (hasMethod(klass, Scope.DECLARED, method -> isPublicStatic(method) && method.getName().equals(CREATE)) &&
-            hasMethod(klass, Scope.DECLARED, method -> isPublicStatic(method) && method.getName().equals(FILL_VALUES))) {
+        if (hasMethod(klass, Scope.ALL, method -> isPublicStatic(method) && method.getName().equals(CREATE)) &&
+            hasMethod(klass, Scope.ALL, method -> isPublicStatic(method) && method.getName().equals(FILL_VALUES)) &&
+            hasMethod(klass, Scope.ALL, method -> isPublicStatic(method) && method.getName().equals(NEW_ARRAY))) {
             return canonicalName;
         }
 
         Field staticField = findField(klass, Scope.DECLARED, field -> isPublicStatic(field) && field.getType().isAssignableFrom(klass));
         if (staticField != null) {
-            return "%s.%s".formatted(canonicalName, staticField);
+            return "%s.%s".formatted(canonicalName, staticField.getName());
         }
 
         return "new %s()".formatted(canonicalName);

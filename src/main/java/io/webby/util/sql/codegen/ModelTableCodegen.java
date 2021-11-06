@@ -172,14 +172,15 @@ public class ModelTableCodegen extends BaseCodegen {
 
         List<Column> primaryColumns = table.columns(TableField::isPrimaryKey);
         Map<String, String> context = EasyMaps.asMap(
-            "$pk_cols_assign", joinWithPattern(primaryColumns, EQ_QUESTION)
+            "$pk_cols_assign", joinWithPattern(primaryColumns, EQ_QUESTION),
+            "$pk_object", toKeyObject(requireNonNull(table.primaryKeyField()), "$pk_name")
         );
 
         appendCode("""
         @Override
         public @Nullable $ModelClass getByPkOrNull($pk_annotation$pk_type $pk_name) {
             String query = "SELECT $all_columns FROM $table_sql WHERE $pk_cols_assign";
-            try (ResultSet result = runner.runQuery(query, $pk_name)) {
+            try (ResultSet result = runner.runQuery(query, $pk_object)) {
                 return result.next() ? fromRow(result) : null;
             } catch (SQLException e) {
                 throw new QueryException("$table_sql.getByPkOrNull() failed", query, $pk_name, e);
@@ -195,7 +196,19 @@ public class ModelTableCodegen extends BaseCodegen {
         public @Nonnull Optional<$ModelClass> getOptionalByPk($pk_annotation$pk_type $pk_name) {
             return Optional.ofNullable(getByPkOrNull($pk_name));
         }\n
-        """, EasyMaps.merge(mainContext, pkContext, context));
+        """, EasyMaps.merge(context, mainContext, pkContext));
+    }
+
+    private static @NotNull String toKeyObject(@NotNull TableField field, @NotNull String paramName) {
+        if (field.isNativelySupportedType()) {
+            return paramName;
+        }
+        AdapterInfo adapterInfo = requireNonNull(field.adapterInfo());
+        if (field.columnsNumber() == 1) {
+            return "%s.toValueObject(%s)".formatted(adapterInfo.staticRef(), paramName);
+        } else {
+            return "%s.toNewValuesArray(%s)".formatted(adapterInfo.staticRef(), paramName);
+        }
     }
 
     private void iterator() throws IOException {
