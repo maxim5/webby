@@ -3,7 +3,7 @@ package io.webby.util.sql.adapter;
 import java.sql.Timestamp;
 import java.time.LocalDateTime;
 
-public class LocalDateTimeJdbcAdapter implements JdbcSingleColumnArrayAdapter<LocalDateTime> {
+public class LocalDateTimeJdbcAdapter implements JdbcSingleValueAdapter<LocalDateTime> {
     public static final LocalDateTimeJdbcAdapter ADAPTER = new LocalDateTimeJdbcAdapter();
 
     public LocalDateTime createInstance(Timestamp value) {

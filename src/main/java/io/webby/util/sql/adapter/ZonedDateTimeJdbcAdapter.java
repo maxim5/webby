@@ -4,7 +4,7 @@ import java.sql.Timestamp;
 import java.time.ZoneId;
 import java.time.ZonedDateTime;
 
-public class ZonedDateTimeJdbcAdapter implements JdbcSingleColumnArrayAdapter<ZonedDateTime> {
+public class ZonedDateTimeJdbcAdapter implements JdbcSingleValueAdapter<ZonedDateTime> {
     public static final ZonedDateTimeJdbcAdapter ADAPTER = new ZonedDateTimeJdbcAdapter();
 
     public ZonedDateTime createInstance(Timestamp value) {

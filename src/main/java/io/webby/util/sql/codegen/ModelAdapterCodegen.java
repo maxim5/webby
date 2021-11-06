@@ -3,7 +3,7 @@ package io.webby.util.sql.codegen;
 import io.webby.util.EasyMaps;
 import io.webby.util.sql.adapter.JdbcAdapt;
 import io.webby.util.sql.adapter.JdbcArrayAdapter;
-import io.webby.util.sql.adapter.JdbcSingleColumnArrayAdapter;
+import io.webby.util.sql.adapter.JdbcSingleValueAdapter;
 import io.webby.util.sql.schema.*;
 import org.jetbrains.annotations.NotNull;
 
@@ -67,7 +67,7 @@ public class ModelAdapterCodegen extends BaseCodegen {
     }
 
     private @NotNull Class<?> getBaseClass() {
-        return adapter.pojoSchema().columnsNumber() == 1 ? JdbcSingleColumnArrayAdapter.class : JdbcArrayAdapter.class;
+        return adapter.pojoSchema().columnsNumber() == 1 ? JdbcSingleValueAdapter.class : JdbcArrayAdapter.class;
     }
 
     private void classDef() throws IOException {

@@ -3,7 +3,7 @@ package io.webby.util.sql.adapter;
 import java.sql.Timestamp;
 import java.time.Instant;
 
-public class InstantJdbcAdapter implements JdbcSingleColumnArrayAdapter<Instant> {
+public class InstantJdbcAdapter implements JdbcSingleValueAdapter<Instant> {
     public static final InstantJdbcAdapter ADAPTER = new InstantJdbcAdapter();
 
     public Instant createInstance(Timestamp value) {

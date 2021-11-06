@@ -2,7 +2,7 @@ package io.webby.util.sql.adapter;
 
 import org.jetbrains.annotations.NotNull;
 
-public interface JdbcSingleColumnArrayAdapter<E> extends JdbcArrayAdapter<E> {
+public interface JdbcSingleValueAdapter<E> extends JdbcArrayAdapter<E> {
     Object toValueObject(E instance);
 
     @Override
