@@ -33,7 +33,7 @@ public class TimingModelTableTest extends BaseModelKeyTableTest<Timestamp, Timin
 
     @Override
     protected @NotNull TimingModel createEntity(@NotNull Timestamp key, int version) {
-        Instant instant = Instant.ofEpochMilli(System.currentTimeMillis() - version * 60 * 1000L);
+        Instant instant = Instant.now().truncatedTo(ChronoUnit.MILLIS).minus(version, ChronoUnit.MINUTES);
         LocalDate localDate = LocalDate.ofInstant(instant.truncatedTo(ChronoUnit.SECONDS), ZoneId.systemDefault());
         LocalTime localTime = LocalTime.ofInstant(instant.truncatedTo(ChronoUnit.SECONDS), ZoneId.systemDefault());
         return new TimingModel(key,

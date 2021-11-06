@@ -5,6 +5,7 @@ import org.jetbrains.annotations.NotNull;
 
 import java.sql.Connection;
 import java.time.Instant;
+import java.time.temporal.ChronoUnit;
 
 public class SessionTableTest extends BaseModelKeyTableTest<Long, Session, SessionTable> {
     @Override
@@ -23,6 +24,6 @@ public class SessionTableTest extends BaseModelKeyTableTest<Long, Session, Sessi
 
     @Override
     protected @NotNull Session createEntity(@NotNull Long key, int version) {
-        return new Session(key, 1, Instant.ofEpochMilli(System.currentTimeMillis()), String.valueOf(version), "127.0.0.1");
+        return new Session(key, 1, Instant.now().truncatedTo(ChronoUnit.MILLIS), String.valueOf(version), "127.0.0.1");
     }
 }
