@@ -3,7 +3,8 @@ package io.webby.examples.model;
 import java.sql.Timestamp;
 import java.time.*;
 
-public record TimingModel(java.util.Date utilDate,
+public record TimingModel(Timestamp id,
+                          java.util.Date utilDate,
                           java.sql.Date sqlDate,
                           java.sql.Time time,
                           Instant instant,

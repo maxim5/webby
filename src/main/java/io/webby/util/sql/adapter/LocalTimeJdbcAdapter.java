@@ -1,7 +1,6 @@
 package io.webby.util.sql.adapter;
 
 import java.sql.Time;
-import java.time.LocalDateTime;
 import java.time.LocalTime;
 
 public class LocalTimeJdbcAdapter implements JdbcSingleColumnArrayAdapter<LocalTime> {
