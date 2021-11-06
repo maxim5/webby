@@ -1,6 +1,7 @@
 package io.webby.util;
 
 import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 
 import java.util.function.Function;
 
@@ -42,7 +43,7 @@ public class OneOf<U, V> {
         return which == Which.FIRST;
     }
 
-    public U first() {
+    public @Nullable U first() {
         return first;
     }
 
@@ -50,7 +51,7 @@ public class OneOf<U, V> {
         return which == Which.SECOND;
     }
 
-    public V second() {
+    public @Nullable V second() {
         return second;
     }
 
