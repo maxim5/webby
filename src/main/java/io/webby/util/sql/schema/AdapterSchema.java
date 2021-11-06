@@ -10,6 +10,6 @@ public record AdapterSchema(@NotNull PojoSchema pojoSchema) implements JavaNameH
 
     @Override
     public @NotNull String packageName() {
-        return pojoSchema.type().getPackageName();
+        return pojoSchema.pojoType().getPackageName();
     }
 }

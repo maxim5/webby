@@ -11,13 +11,13 @@ import java.util.Stack;
 import java.util.function.Consumer;
 import java.util.stream.Collectors;
 
-public record PojoSchema(@NotNull Class<?> type, @NotNull ImmutableList<PojoField> fields) implements WithColumns {
+public record PojoSchema(@NotNull Class<?> pojoType, @NotNull ImmutableList<PojoField> fields) implements WithColumns {
     public @NotNull String adapterName() {
-        return ModelAdaptersLocator.defaultAdapterName(type);
+        return ModelAdaptersLocator.defaultAdapterName(pojoType);
     }
 
     public boolean isEnum() {
-        return type.isEnum();
+        return pojoType.isEnum();
     }
 
     public void iterateAllFields(@NotNull Consumer<Stack<PojoField>> consumer) {
@@ -45,7 +45,7 @@ public record PojoSchema(@NotNull Class<?> type, @NotNull ImmutableList<PojoFiel
                 Column column = new Column(pathName, new ColumnType(type));
                 assert !result.containsKey(peek) :
                         "Internal error. Several columns for one field: `%s` of `%s`: %s, %s"
-                        .formatted(peek, type(), column, result.get(peek));
+                        .formatted(peek, pojoType(), column, result.get(peek));
                 result.put(peek, column);
             }
         });

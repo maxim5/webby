@@ -35,7 +35,7 @@ public class OneOf<U, V> {
         return new OneOf<>(null, second, Which.SECOND);
     }
 
-    public Which getCase() {
+    public @NotNull Which getCase() {
         return which;
     }
 

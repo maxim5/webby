@@ -26,7 +26,7 @@ public class ModelAdapterCodegen extends BaseCodegen {
 
         this.mainContext = EasyMaps.asMap(
             "$AdapterClass", adapter.javaName(),
-            "$ModelClass", Naming.shortCanonicalName(adapter.pojoSchema().type())
+            "$ModelClass", Naming.shortCanonicalName(adapter.pojoSchema().pojoType())
         );
     }
 
@@ -110,7 +110,7 @@ public class ModelAdapterCodegen extends BaseCodegen {
     private static @NotNull String fieldConstructor(@NotNull PojoSchema pojo,
                                                     @NotNull Map<PojoField, Column> columnsPerFields,
                                                     @NotNull StringBuilder builder) {
-        String canonicalName = Naming.shortCanonicalName(pojo.type());
+        String canonicalName = Naming.shortCanonicalName(pojo.pojoType());
 
         if (pojo.isEnum()) {
             String name = columnsPerFields.get(pojo.fields().get(0)).sqlName();
