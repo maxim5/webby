@@ -14,6 +14,8 @@ public class StringModelTableTest extends BaseModelKeyTableTest<String, StringMo
         connection.createStatement().executeUpdate("""
             CREATE TABLE string_model (
                 id TEXT PRIMARY KEY,
+                sequence TEXT,
+                chars TEXT,
                 raw_bytes BLOB
             )
         """);
@@ -23,6 +25,6 @@ public class StringModelTableTest extends BaseModelKeyTableTest<String, StringMo
 
     @Override
     protected @NotNull StringModel createEntity(@NotNull String key, int version) {
-        return new StringModel(key, Ints.toByteArray(version));
+        return new StringModel(key, key, key.toCharArray(), Ints.toByteArray(version));
     }
 }
