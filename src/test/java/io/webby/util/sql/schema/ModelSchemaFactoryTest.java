@@ -1,4 +1,4 @@
-package io.webby.util.sql.codegen;
+package io.webby.util.sql.schema;
 
 import io.webby.util.reflect.EasyClasspath;
 import org.jetbrains.annotations.NotNull;

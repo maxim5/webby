@@ -9,6 +9,7 @@ import io.webby.util.base.TimeIt;
 import io.webby.util.sql.codegen.*;
 import io.webby.util.sql.schema.AdapterSchema;
 import io.webby.util.sql.schema.JavaNameHolder;
+import io.webby.util.sql.schema.ModelSchemaFactory;
 import io.webby.util.sql.schema.TableSchema;
 import org.jetbrains.annotations.NotNull;
 

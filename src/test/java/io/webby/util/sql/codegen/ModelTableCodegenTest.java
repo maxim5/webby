@@ -2,6 +2,7 @@ package io.webby.util.sql.codegen;
 
 import io.webby.testing.Testing;
 import io.webby.util.sql.schema.InvalidSqlModelException;
+import io.webby.util.sql.schema.ModelSchemaFactory;
 import org.jetbrains.annotations.NotNull;
 import org.junit.jupiter.api.Test;
 

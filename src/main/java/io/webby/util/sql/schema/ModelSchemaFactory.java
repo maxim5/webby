@@ -1,10 +1,11 @@
-package io.webby.util.sql.codegen;
+package io.webby.util.sql.schema;
 
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
-import io.webby.util.collect.EasyIterables;
 import io.webby.util.base.EasyObjects;
-import io.webby.util.sql.schema.*;
+import io.webby.util.collect.EasyIterables;
+import io.webby.util.sql.codegen.ModelAdaptersLocator;
+import io.webby.util.sql.codegen.ModelClassInput;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import org.jetbrains.annotations.VisibleForTesting;
