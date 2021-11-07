@@ -39,7 +39,8 @@ public class ExamplesCodegenMain {
 
             new ModelClassInput(EnumModel.class),
             new ModelClassInput(NestedModel.class),
-            new ModelClassInput(DeepNestedModel.class)
+            new ModelClassInput(DeepNestedModel.class),
+            new ModelClassInput(PojoWithAdapterModel.class)
         );
 
         TimeIt.timeItOrDie(() -> {

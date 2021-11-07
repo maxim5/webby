@@ -106,9 +106,7 @@ public class ModelSchemaFactory {
             return FieldInference.ofColumns(columns, adapterInfo);
         }
 
-        validateFieldForPojo(field);
-
-        PojoSchema pojo = buildSchemaForPojoField(fieldType).reattachedTo(PojoParent.ofTerminal(fieldName));
+        PojoSchema pojo = buildSchemaForPojoField(field).reattachedTo(PojoParent.ofTerminal(fieldName));
         return FieldInference.ofColumns(pojo.columns(), AdapterInfo.ofSignature(pojo));
     }
 
@@ -137,32 +135,45 @@ public class ModelSchemaFactory {
         }
     }
 
-    private @NotNull PojoSchema buildSchemaForPojoField(@NotNull Class<?> type) {
-        return pojos.computeIfAbsent(type, k -> {
-            // adaptersLocator.locateAdapterClass(type);
+    private @NotNull PojoSchema buildSchemaForPojoField(@NotNull Field field) {
+        Class<?> type = field.getType();
+        PojoSchema pojo = pojos.get(type);
+        if (pojo == null) {
+            pojo = buildSchemaForPojoFieldImpl(field);
+            pojos.put(type, pojo);
+        }
+        return pojo;
+    }
 
-            if (type.isEnum()) {
-                return new PojoSchema(type, ImmutableList.of(PojoField.ofEnum(type)));
-            }
+    private @NotNull PojoSchema buildSchemaForPojoFieldImpl(@NotNull Field field) {
+        validateFieldForPojo(field);
+        Class<?> type = field.getType();
 
-            ImmutableList<PojoField> pojoFields = Arrays.stream(type.getDeclaredFields())
-                    .filter(field -> !Modifier.isStatic(field.getModifiers()))
-                    .map(field -> {
-                        validateFieldForPojo(field);
-                        Method getter = findGetterMethodOrDie(field);
-                        ModelField modelField = ModelField.of(field, getter);
+        if (type.isEnum()) {
+            return new PojoSchema(type, ImmutableList.of(PojoFieldNative.ofEnum(type)));
+        }
 
-                        Class<?> subFieldType = field.getType();
-                        JdbcType jdbcType = JdbcType.findByMatchingNativeType(subFieldType);
-                        if (jdbcType != null) {
-                            return PojoField.ofNative(modelField, jdbcType);
-                        } else {
-                            PojoSchema subPojo = buildSchemaForPojoField(subFieldType);
-                            return PojoField.ofSubPojo(modelField, subPojo);
-                        }
-                    }).collect(ImmutableList.toImmutableList());
-            return new PojoSchema(type, pojoFields);
-        });
+        ImmutableList<PojoField> pojoFields = Arrays.stream(type.getDeclaredFields())
+                .filter(subField -> !Modifier.isStatic(subField.getModifiers()))
+                .map(subField -> {
+                    Method getter = findGetterMethodOrDie(subField);
+                    ModelField modelField = ModelField.of(subField, getter);
+
+                    Class<?> subFieldType = subField.getType();
+                    JdbcType jdbcType = JdbcType.findByMatchingNativeType(subFieldType);
+                    if (jdbcType != null) {
+                        return PojoFieldNative.ofNative(modelField, jdbcType);
+                    }
+
+                    Class<?> adapterClass = adaptersLocator.locateAdapterClass(subFieldType);
+                    if (adapterClass != null) {
+                        return PojoFieldAdapter.ofAdapter(modelField, adapterClass);
+                    }
+
+                    PojoSchema nestedPojo = buildSchemaForPojoField(subField);
+                    return PojoFieldNested.ofNestedPojo(modelField, nestedPojo);
+                }).collect(ImmutableList.toImmutableList());
+        return new PojoSchema(type, pojoFields);
     }
 
     private static @NotNull Method findGetterMethodOrDie(@NotNull Field field) {

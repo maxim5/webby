@@ -1,5 +1,6 @@
 package io.webby.util.sql.schema;
 
+import com.google.errorprone.annotations.Immutable;
 import io.webby.util.lazy.AtomicLazy;
 import io.webby.util.lazy.DelayedInitLazy;
 import io.webby.util.collect.OneOf;
@@ -9,6 +10,7 @@ import java.util.Optional;
 
 import static java.util.Objects.requireNonNull;
 
+@Immutable
 public class PojoParent {
     public static final PojoParent DETACHED = new PojoParent(OneOf.ofFirst(Optional.empty()));
 

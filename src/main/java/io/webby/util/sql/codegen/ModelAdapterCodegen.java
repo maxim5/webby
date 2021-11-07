@@ -1,5 +1,6 @@
 package io.webby.util.sql.codegen;
 
+import com.google.common.collect.Streams;
 import io.webby.util.collect.EasyMaps;
 import io.webby.util.sql.adapter.JdbcAdapt;
 import io.webby.util.sql.adapter.JdbcArrayAdapter;
@@ -9,6 +10,7 @@ import org.jetbrains.annotations.NotNull;
 
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Stream;
@@ -46,12 +48,10 @@ public class ModelAdapterCodegen extends BaseCodegen {
     }
 
     private void imports() throws IOException {
-        List<String> classesToImport = Stream.of(JdbcAdapt.class, getBaseClass())
-                .map(FQN::of)
-                .map(FQN::importName)
-                .sorted()
-                .distinct()
-                .toList();
+        List<String> classesToImport = Streams.concat(
+            Stream.of(JdbcAdapt.class, getBaseClass()).map(FQN::of),
+            getNestedAdapters().stream().map(FQN::of)
+        ).filter(fqn -> !isSkippablePackage(fqn.packageName())).map(FQN::importName).sorted().distinct().toList();
         Map<String, String> context = Map.of(
             "$package", adapter.packageName(),
             "$imports", classesToImport.stream().map("import %s;"::formatted).collect(LINE_JOINER)
@@ -67,6 +67,20 @@ public class ModelAdapterCodegen extends BaseCodegen {
 
     private @NotNull Class<?> getBaseClass() {
         return adapter.pojoSchema().columnsNumber() == 1 ? JdbcSingleValueAdapter.class : JdbcArrayAdapter.class;
+    }
+
+    private @NotNull List<Class<?>> getNestedAdapters() {
+        ArrayList<Class<?>> result = new ArrayList<>();
+        adapter.pojoSchema().iterateAllFields(field -> {
+            if (field instanceof PojoFieldAdapter fieldAdapter) {
+                result.add(fieldAdapter.adapterClass());
+            }
+        });
+        return result;
+    }
+
+    private boolean isSkippablePackage(@NotNull String packageName) {
+        return packageName.equals(adapter.packageName()) || packageName.equals("java.util") || packageName.equals("java.lang");
     }
 
     private void classDef() throws IOException {
@@ -91,7 +105,7 @@ public class ModelAdapterCodegen extends BaseCodegen {
         PojoSchema pojo = adapter.pojoSchema();
         Map<String, String> context = Map.of(
             "$params", pojo.columns().stream().map(ModelAdapterCodegen::columnToParam).collect(COMMA_JOINER),
-            "$constructor", fieldConstructor(pojo, pojo.columnsPerFields(), new StringBuilder())
+            "$constructor", fieldConstructor(pojo, nativeFieldsColumnIndex(pojo), new StringBuilder())
         );
 
         appendCode("""
@@ -107,31 +121,45 @@ public class ModelAdapterCodegen extends BaseCodegen {
         return "%s %s".formatted(nativeType.getSimpleName(), sqlName);
     }
 
+    private static @NotNull Map<PojoField, Column> nativeFieldsColumnIndex(@NotNull PojoSchema pojo) {
+        Map<PojoField, Column> result = new LinkedHashMap<>();
+        pojo.iterateAllFields(field -> {
+            if (field instanceof PojoFieldNative fieldNative) {
+                assert !result.containsKey(field) :
+                        "Internal error. Several columns for one field: `%s` of `%s`: %s, %s"
+                        .formatted(field, pojo.pojoType(), fieldNative.column(), result.get(field));
+                result.put(field, fieldNative.column());
+            }
+        });
+        return result;
+    }
+
     private static @NotNull String fieldConstructor(@NotNull PojoSchema pojo,
-                                                    @NotNull Map<PojoField, Column> columnsPerFields,
+                                                    @NotNull Map<PojoField, Column> nativeFieldsColumns,
                                                     @NotNull StringBuilder builder) {
         String canonicalName = Naming.shortCanonicalName(pojo.pojoType());
 
         if (pojo.isEnum()) {
-            String name = columnsPerFields.get(pojo.fields().get(0)).sqlName();
+            String name = nativeFieldsColumns.get(pojo.fields().get(0)).sqlName();
             return builder.append(canonicalName).append(".values()[").append(name).append("]").toString();
         }
 
         builder.append("new ").append(canonicalName).append("(");
-        boolean isFirst = true;
         for (PojoField field : pojo.fields()) {
-            if (isFirst) {
-                isFirst = false;
-            } else {
-                builder.append(", ");
-            }
-            if (field.isNativelySupported()) {
-                String name = columnsPerFields.get(field).sqlName();
+            if (field instanceof PojoFieldNative) {
+                String name = nativeFieldsColumns.get(field).sqlName();
                 builder.append(name);
+            } else if (field instanceof PojoFieldNested fieldNested) {
+                fieldConstructor(fieldNested.pojo(), nativeFieldsColumns, builder);
+            } else if (field instanceof PojoFieldAdapter fieldAdapter) {
+                String params = joinWithComma(fieldAdapter.columns());
+                builder.append("%s.createInstance(%s)".formatted(fieldAdapter.adapterInfo().staticRef(), params));
             } else {
-                fieldConstructor(field.pojoOrDie(), columnsPerFields, builder);
+                throw new IllegalStateException("Internal error. Unrecognized field: " + field);
             }
+            builder.append(", ");
         }
+        builder.setLength(builder.length() - 2);  // last comma
         return builder.append(")").toString();
     }
 
@@ -162,8 +190,7 @@ public class ModelAdapterCodegen extends BaseCodegen {
         if (field.isNativelySupported()) {
             return getter;
         } else {
-            PojoSchema subPojo = field.pojoOrDie();
-            AdapterInfo info = AdapterInfo.ofSignature(subPojo);
+            AdapterInfo info = field.adapterInfo();
             return "%s.toValueObject(%s);".formatted(info.staticRef(), getter);
         }
     }
@@ -197,10 +224,9 @@ public class ModelAdapterCodegen extends BaseCodegen {
                 result.add("array[%s] = %s;".formatted(arrayIndex, getter));
                 index++;
             } else {
-                PojoSchema subPojo = field.pojoOrDie();
-                AdapterInfo info = AdapterInfo.ofSignature(subPojo);
+                AdapterInfo info = field.adapterInfo();
                 result.add("%s.fillArrayValues(%s, array, %s);".formatted(info.staticRef(), getter, arrayIndex));
-                index += subPojo.columnsNumber();
+                index += info.adapterColumnsNumber();
             }
         }
         return result;

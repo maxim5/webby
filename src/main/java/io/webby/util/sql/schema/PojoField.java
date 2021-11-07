@@ -1,31 +1,28 @@
 package io.webby.util.sql.schema;
 
 import com.google.common.collect.Streams;
-import io.webby.util.collect.OneOf;
+import com.google.errorprone.annotations.Immutable;
 import io.webby.util.collect.Pair;
+import io.webby.util.lazy.AtomicLazy;
+import io.webby.util.lazy.DelayedAccessLazy;
 import org.jetbrains.annotations.NotNull;
 
-import java.util.Collections;
-import java.util.LinkedList;
-import java.util.List;
-import java.util.Optional;
+import java.util.*;
 import java.util.stream.Collectors;
 
-import static java.util.Objects.requireNonNull;
+@Immutable
+public abstract class PojoField {
+    protected final PojoParent parent;
+    protected final ModelField field;
+    private final DelayedAccessLazy<String> lazyNameRef = AtomicLazy.emptyLazy();
 
-public record PojoField(@NotNull PojoParent parent, @NotNull ModelField field, @NotNull OneOf<JdbcType, PojoSchema> ref) {
-    public static @NotNull PojoField ofNative(@NotNull ModelField field, @NotNull JdbcType jdbcType) {
-        return new PojoField(PojoParent.DETACHED, field, OneOf.ofFirst(jdbcType));
+    protected PojoField(@NotNull PojoParent parent, @NotNull ModelField field) {
+        this.parent = parent;
+        this.field = field;
     }
 
-    public static @NotNull PojoField ofEnum(@NotNull Class<?> type) {
-        assert type.isEnum() : "Type is not an enum: %s".formatted(type);
-        ModelField field = new ModelField("ord", "ordinal", type, type);
-        return ofNative(field, JdbcType.Int);
-    }
-
-    public static @NotNull PojoField ofSubPojo(@NotNull ModelField field, @NotNull PojoSchema pojo) {
-        return newReattachedSubPojo(PojoParent.DETACHED, field, pojo);
+    public @NotNull PojoParent parent() {
+        return parent;
     }
 
     public @NotNull String javaName() {
@@ -37,10 +34,12 @@ public record PojoField(@NotNull PojoParent parent, @NotNull ModelField field, @
     }
 
     public @NotNull String fullSqlName() {
-        Pair<Optional<String>, List<PojoField>> fullPath = fullPath();
-        return Streams.concat(fullPath.first().stream(), fullPath.second().stream().map(PojoField::javaName))
-                .map(Naming::camelToSnake)
-                .collect(Collectors.joining("_"));
+        return lazyNameRef.lazyGet(() -> {
+            Pair<Optional<String>, List<PojoField>> fullPath = fullPath();
+            return Streams.concat(fullPath.first().stream(), fullPath.second().stream().map(PojoField::javaName))
+                    .map(Naming::camelToSnake)
+                    .collect(Collectors.joining("_"));
+        });
     }
 
     private @NotNull Pair<Optional<String>, List<PojoField>> fullPath() {
@@ -59,35 +58,20 @@ public record PojoField(@NotNull PojoParent parent, @NotNull ModelField field, @
     }
 
     public boolean isNativelySupported() {
-        return ref.hasFirst();
+        return false;
     }
 
-    public @NotNull JdbcType jdbcTypeOrDie() {
-        return requireNonNull(ref.first());
+    public abstract @NotNull AdapterInfo adapterInfo();
+
+    public abstract @NotNull PojoField reattachedTo(@NotNull PojoParent parent);
+
+    @Override
+    public boolean equals(Object obj) {
+        return obj instanceof PojoField that && Objects.equals(this.parent, that.parent) && Objects.equals(this.field, that.field);
     }
 
-    public boolean hasPojo() {
-        return ref.hasSecond();
-    }
-
-    public @NotNull PojoSchema pojoOrDie() {
-        return requireNonNull(ref.second());
-    }
-
-    public @NotNull PojoField reattachedTo(@NotNull PojoParent parent) {
-        if (hasPojo()) {
-            return newReattachedSubPojo(parent, field, pojoOrDie());
-        }
-        return new PojoField(parent, field, ref);
-    }
-
-    private static @NotNull PojoField newReattachedSubPojo(@NotNull PojoParent parent,
-                                                           @NotNull ModelField field,
-                                                           @NotNull PojoSchema pojo) {
-        PojoParent thisParent = PojoParent.ofUninitializedField();
-        PojoSchema copy = pojo.reattachedTo(thisParent);
-        PojoField thisField = new PojoField(parent, field, OneOf.ofSecond(copy));
-        thisParent.initializeOrDie(thisField);
-        return thisField;
+    @Override
+    public int hashCode() {
+        return Objects.hash(parent, field);
     }
 }

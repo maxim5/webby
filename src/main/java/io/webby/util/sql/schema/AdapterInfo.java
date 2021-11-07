@@ -67,6 +67,10 @@ public class AdapterInfo {
         return oneOf.mapToObj(klass -> classToAdapterColumns(klass, fieldName), pojo -> pojoToColumns(pojo, fieldName));
     }
 
+    public int adapterColumnsNumber() {
+        return oneOf.mapToInt(klass -> getCreationParameters(klass).length, WithColumns::columnsNumber);
+    }
+
     private static @NotNull List<Column> classToAdapterColumns(@NotNull Class<?> klass, @NotNull String fieldName) {
         String sqlFieldName = Naming.camelToSnake(fieldName);
         Parameter[] parameters = getCreationParameters(klass);

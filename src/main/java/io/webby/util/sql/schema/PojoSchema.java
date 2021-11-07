@@ -1,20 +1,32 @@
 package io.webby.util.sql.schema;
 
 import com.google.common.collect.ImmutableList;
+import io.webby.util.lazy.AtomicLazy;
+import io.webby.util.lazy.DelayedAccessLazy;
 import io.webby.util.sql.codegen.ModelAdaptersLocator;
 import org.jetbrains.annotations.NotNull;
 
-import java.util.LinkedHashMap;
+import java.util.ArrayList;
 import java.util.List;
-import java.util.Map;
+import java.util.Objects;
 import java.util.function.Consumer;
 
-public record PojoSchema(@NotNull Class<?> pojoType, @NotNull ImmutableList<PojoField> fields) implements WithColumns {
-    public @NotNull PojoSchema reattachedTo(@NotNull PojoParent parent) {
-        ImmutableList<PojoField> reattachedFields = fields().stream()
-                .map(field -> field.reattachedTo(parent))
-                .collect(ImmutableList.toImmutableList());
-        return new PojoSchema(pojoType, reattachedFields);
+public final class PojoSchema implements WithColumns {
+    private final @NotNull Class<?> pojoType;
+    private final @NotNull ImmutableList<PojoField> fields;
+    private final DelayedAccessLazy<List<Column>> columnsRef = AtomicLazy.emptyLazy();
+
+    public PojoSchema(@NotNull Class<?> pojoType, @NotNull ImmutableList<PojoField> fields) {
+        this.pojoType = pojoType;
+        this.fields = fields;
+    }
+
+    public @NotNull Class<?> pojoType() {
+        return pojoType;
+    }
+
+    public @NotNull ImmutableList<PojoField> fields() {
+        return fields;
     }
 
     public @NotNull String adapterName() {
@@ -26,32 +38,53 @@ public record PojoSchema(@NotNull Class<?> pojoType, @NotNull ImmutableList<Pojo
     }
 
     public void iterateAllFields(@NotNull Consumer<PojoField> consumer) {
-        for (PojoField field : fields()) {
+        for (PojoField field : fields) {
             consumer.accept(field);
-            if (field.hasPojo()) {
-                field.pojoOrDie().iterateAllFields(consumer);
+            if (field instanceof PojoFieldNested fieldNested) {
+                fieldNested.pojo().iterateAllFields(consumer);
             }
         }
     }
 
-    public @NotNull Map<PojoField, Column> columnsPerFields() {
-        Map<PojoField, Column> result = new LinkedHashMap<>();
-        iterateAllFields(field -> {
-            if (field.isNativelySupported()) {
-                String sqlName = field.fullSqlName();
-                JdbcType type = field.jdbcTypeOrDie();
-                Column column = new Column(sqlName, new ColumnType(type));
-                assert !result.containsKey(field) :
-                        "Internal error. Several columns for one field: `%s` of `%s`: %s, %s"
-                        .formatted(field, pojoType(), column, result.get(field));
-                result.put(field, column);
-            }
+    @Override
+    public @NotNull List<Column> columns() {
+        return columnsRef.lazyGet(() -> {
+            ArrayList<Column> result = new ArrayList<>();
+            iterateAllFields(field -> {
+                if (field instanceof PojoFieldNative fieldNative) {
+                    result.add(fieldNative.column());
+                } else if (field instanceof PojoFieldAdapter fieldAdapter) {
+                    result.addAll(fieldAdapter.columns());
+                } else if (field instanceof PojoFieldNested ignore) {
+                    // no columns for this field (nested to be processed later)
+                } else {
+                    throw new IllegalStateException("Internal error. Unrecognized field: " + field);
+                }
+            });
+            return result;
         });
-        return result;
+    }
+
+    public @NotNull PojoSchema reattachedTo(@NotNull PojoParent parent) {
+        ImmutableList<PojoField> reattachedFields = fields.stream()
+                .map(field -> field.reattachedTo(parent))
+                .collect(ImmutableList.toImmutableList());
+        return new PojoSchema(pojoType, reattachedFields);
     }
 
     @Override
-    public @NotNull List<Column> columns() {
-        return columnsPerFields().values().stream().toList();
+    public boolean equals(Object obj) {
+        return obj instanceof PojoSchema that &&
+               Objects.equals(this.pojoType, that.pojoType) && Objects.equals(this.fields, that.fields);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(pojoType, fields);
+    }
+
+    @Override
+    public String toString() {
+        return "PojoSchema[type=%s, fields=%s]".formatted(pojoType, fields);
     }
 }
