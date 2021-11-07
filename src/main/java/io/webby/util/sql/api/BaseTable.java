@@ -24,4 +24,6 @@ public interface BaseTable<E> extends Iterable<E> {
 
     @CanIgnoreReturnValue
     int insert(@NotNull E item);
+
+    @NotNull TableMeta meta();
 }

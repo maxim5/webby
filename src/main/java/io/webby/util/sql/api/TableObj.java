@@ -15,6 +15,4 @@ public interface TableObj<K, E> extends BaseTable<E> {
 
     @CanIgnoreReturnValue
     int updateByPk(@NotNull E entity);
-
-    @NotNull TableMeta meta();
 }
