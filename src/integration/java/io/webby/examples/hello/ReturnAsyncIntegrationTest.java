@@ -1,6 +1,7 @@
 package io.webby.examples.hello;
 
 import io.webby.testing.BaseHttpIntegrationTest;
+import io.webby.testing.TestingUtil;
 import org.junit.jupiter.api.Test;
 
 import static io.webby.testing.AssertResponse.assert200;
@@ -45,13 +46,9 @@ public class ReturnAsyncIntegrationTest extends BaseHttpIntegrationTest {
         assert200(get("/r/async/consumer/timeout/200"), "DelayedOutput.");
     }
 
-    /*
     @Override
     protected void flushChannel() {
-        do {
-            Thread.yield();
-        } while (!handler.executor.getQueue().isEmpty());
+        TestingUtil.waitFor(20);
         super.flushChannel();
     }
-    */
 }

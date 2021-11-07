@@ -12,7 +12,10 @@ public class EmbeddedRedisExtension implements BeforeAllCallback, AfterAllCallba
     private static final FluentLogger log = FluentLogger.forEnclosingClass();
     public static final int PORT = 6379;
 
-    private final RedisServer redisServer = new RedisServer(PORT);
+    // See
+    // https://github.com/kstyrc/embedded-redis/issues/52
+    // https://stackoverflow.com/questions/30233543/error-when-open-redis-server
+    private final RedisServer redisServer = RedisServer.builder().port(PORT).setting("maxheap 512M").build();
 
     @Override
     public void beforeAll(ExtensionContext context) {
