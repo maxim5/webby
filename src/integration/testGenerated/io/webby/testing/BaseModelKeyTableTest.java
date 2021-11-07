@@ -1,5 +1,7 @@
 package io.webby.testing;
 
+import io.webby.util.sql.api.SqlDebug;
+import io.webby.util.sql.api.QueryRunner;
 import io.webby.util.sql.api.TableObj;
 import org.jetbrains.annotations.NotNull;
 import org.junit.jupiter.api.AfterEach;
@@ -8,7 +10,10 @@ import org.junit.jupiter.api.Test;
 
 import java.sql.Connection;
 import java.sql.DriverManager;
+import java.sql.ResultSet;
+import java.sql.SQLException;
 import java.util.Arrays;
+import java.util.List;
 
 import static com.google.common.truth.Truth.assertThat;
 import static org.junit.jupiter.api.Assertions.*;
@@ -35,6 +40,13 @@ public abstract class BaseModelKeyTableTest<K, E, T extends TableObj<K, E>> {
     protected abstract void setUp(@NotNull Connection connection) throws Exception;
 
     @Test
+    public void column_names() throws Exception {
+        String tableName = table.meta().sqlTableName();
+        List<String> expectedColumns = parseColumnNamesFromDb(tableName);
+        assertThat(table.meta().sqlColumns()).containsExactlyElementsIn(expectedColumns);
+    }
+
+    @Test
     public void empty() {
         assumeKeys(1);
         assertEquals(0, table.count());
@@ -54,6 +66,21 @@ public abstract class BaseModelKeyTableTest<K, E, T extends TableObj<K, E>> {
         assertEquals(entity, table.getByPkOrNull(keys[0]));
         assertNull(table.getByPkOrNull(keys[1]));
         assertThat(table.fetchAll()).containsExactly(entity);
+    }
+
+    @Test
+    public void insert_two_entities() {
+        assumeKeys(2);
+        E entity1 = createEntity(keys[0]);
+        assertEquals(1, table.insert(entity1));
+        E entity2 = createEntity(keys[1]);
+        assertEquals(1, table.insert(entity2));
+
+        assertEquals(2, table.count());
+        assertFalse(table.isEmpty());
+        assertEquals(entity1, table.getByPkOrNull(keys[0]));
+        assertEquals(entity2, table.getByPkOrNull(keys[1]));
+        assertThat(table.fetchAll()).containsExactly(entity1, entity2);
     }
 
     @Test
@@ -80,5 +107,23 @@ public abstract class BaseModelKeyTableTest<K, E, T extends TableObj<K, E>> {
         assertNotNull(keys);
         assumeTrue(keys.length >= minimumNum,
                    "Can't run the test because not enough keys available: %s".formatted(Arrays.toString(keys)));
+    }
+
+    protected List<String> parseColumnNamesFromDb(@NotNull String name) throws SQLException {
+        ResultSet resultSet = new QueryRunner(connection).runQuery("SELECT sql FROM sqlite_master WHERE name=?", name);
+        List<SqlDebug.Row> rows = SqlDebug.toDebugRows(resultSet);
+        assertFalse(rows.isEmpty(), "SQL table not found in DB: %s".formatted(name));
+        assertThat(rows).hasSize(1);
+
+        String sql = rows.get(0).findValue("sql")
+                .map(SqlDebug.RowValue::value)
+                .orElseThrow()
+                .replaceAll("\\s+", " ")
+                .replaceFirst(".*\\((.*?)\\)", "$1");
+
+        return Arrays.stream(sql.split(","))
+                .map(String::trim)
+                .map(line -> line.replaceFirst("(\\w+) .*", "$1"))
+                .toList();
     }
 }
