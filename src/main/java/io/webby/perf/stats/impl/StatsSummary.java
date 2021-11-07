@@ -6,7 +6,7 @@ import io.netty.handler.codec.http.HttpResponse;
 import io.webby.app.Settings;
 import io.webby.netty.HttpConst;
 import io.webby.perf.stats.Stat;
-import io.webby.util.LazyBoolean;
+import io.webby.util.lazy.LazyBoolean;
 import io.webby.util.Pair;
 import org.jetbrains.annotations.NotNull;
 

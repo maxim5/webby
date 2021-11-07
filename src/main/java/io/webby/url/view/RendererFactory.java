@@ -6,7 +6,7 @@ import io.webby.app.Settings;
 import io.webby.common.InjectorHelper;
 import io.webby.perf.stats.impl.StatsManager;
 import io.webby.url.annotate.Render;
-import io.webby.util.LazyBoolean;
+import io.webby.util.lazy.LazyBoolean;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.logging.Level;

@@ -10,8 +10,8 @@ import io.webby.netty.HttpConst;
 import io.webby.netty.intercept.attr.Attributes;
 import io.webby.netty.marshal.Json;
 import io.webby.url.convert.Constraint;
-import io.webby.util.AtomicLazy;
-import io.webby.util.DelayedAccessLazy;
+import io.webby.util.lazy.AtomicLazy;
+import io.webby.util.lazy.DelayedAccessLazy;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 

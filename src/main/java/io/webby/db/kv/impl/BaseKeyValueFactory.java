@@ -5,7 +5,7 @@ import io.webby.app.Settings;
 import io.webby.common.Lifetime;
 import io.webby.db.kv.KeyValueDb;
 import io.webby.perf.stats.impl.StatsManager;
-import io.webby.util.LazyBoolean;
+import io.webby.util.lazy.LazyBoolean;
 import org.jetbrains.annotations.NotNull;
 
 import java.io.Closeable;

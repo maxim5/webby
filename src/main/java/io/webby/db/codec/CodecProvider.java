@@ -9,7 +9,7 @@ import io.webby.auth.session.SessionCodec;
 import io.webby.auth.user.DefaultUser;
 import io.webby.auth.user.DefaultUserCodec;
 import io.webby.perf.stats.impl.StatsManager;
-import io.webby.util.LazyBoolean;
+import io.webby.util.lazy.LazyBoolean;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 

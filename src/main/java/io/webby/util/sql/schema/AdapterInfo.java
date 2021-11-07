@@ -1,8 +1,8 @@
 package io.webby.util.sql.schema;
 
 import com.google.mu.util.stream.BiStream;
-import io.webby.util.AtomicLazy;
-import io.webby.util.DelayedAccessLazy;
+import io.webby.util.lazy.AtomicLazy;
+import io.webby.util.lazy.DelayedAccessLazy;
 import io.webby.util.EasyClasspath;
 import io.webby.util.OneOf;
 import org.jetbrains.annotations.NotNull;
