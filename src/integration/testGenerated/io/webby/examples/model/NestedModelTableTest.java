@@ -5,23 +5,24 @@ import org.jetbrains.annotations.NotNull;
 
 import java.sql.Connection;
 
+import static io.webby.testing.TestingUtil.array;
+
 public class NestedModelTableTest extends BaseModelKeyTableTest<Long, NestedModel, NestedModelTable> {
     @Override
     protected void setUp(@NotNull Connection connection) throws Exception {
         connection.createStatement().executeUpdate("""
-        CREATE TABLE nested_model (
-            id INTEGER PRIMARY KEY,
-            simple_id INTEGER,
-            simple_a INTEGER,
-            simple_b TEXT,
-            level1_id INTEGER,
-            level1_simple_id INTEGER,
-            level1_simple_a INTEGER,
-            level1_simple_b TEXT
-        )
+            CREATE TABLE nested_model (
+                id INTEGER PRIMARY KEY,
+                simple_id INTEGER,
+                simple_a INTEGER,
+                simple_b TEXT,
+                level1_id INTEGER,
+                level1_simple_id INTEGER,
+                level1_simple_a INTEGER,
+                level1_simple_b TEXT
+            )
         """);
-        key1 = 1L;
-        key2 = 2L;
+        keys = array(1L, 2L);
         table = new NestedModelTable(connection);
     }
 

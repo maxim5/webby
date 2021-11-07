@@ -8,17 +8,18 @@ import org.junit.jupiter.api.Test;
 
 import java.sql.Connection;
 import java.sql.DriverManager;
+import java.util.Arrays;
 
 import static com.google.common.truth.Truth.assertThat;
 import static org.junit.jupiter.api.Assertions.*;
+import static org.junit.jupiter.api.Assumptions.assumeTrue;
 
 public abstract class BaseModelKeyTableTest<K, E, T extends TableObj<K, E>> {
     private static final String URL = "jdbc:sqlite:%s".formatted(":memory:");
 
     protected Connection connection;
     protected T table;
-    protected K key1;
-    protected K key2;
+    protected K[] keys;
 
     @BeforeEach
     void setUp() throws Exception {
@@ -35,34 +36,37 @@ public abstract class BaseModelKeyTableTest<K, E, T extends TableObj<K, E>> {
 
     @Test
     public void empty() {
+        assumeKeys(1);
         assertEquals(0, table.count());
         assertTrue(table.isEmpty());
-        assertNull(table.getByPkOrNull(key1));
+        assertNull(table.getByPkOrNull(keys[0]));
         assertThat(table.fetchAll()).isEmpty();
     }
 
     @Test
     public void insert_entity() {
-        E entity = createEntity(key1);
+        assumeKeys(2);
+        E entity = createEntity(keys[0]);
         assertEquals(1, table.insert(entity));
 
         assertEquals(1, table.count());
         assertFalse(table.isEmpty());
-        assertEquals(entity, table.getByPkOrNull(key1));
-        assertNull(table.getByPkOrNull(key2));
+        assertEquals(entity, table.getByPkOrNull(keys[0]));
+        assertNull(table.getByPkOrNull(keys[1]));
         assertThat(table.fetchAll()).containsExactly(entity);
     }
 
     @Test
     public void update_entity() {
-        table.insert(createEntity(key1, 0));
-        E entity = createEntity(key1, 1);
+        assumeKeys(2);
+        table.insert(createEntity(keys[0], 0));
+        E entity = createEntity(keys[0], 1);
         assertEquals(1, table.updateByPk(entity));
 
         assertEquals(1, table.count());
         assertFalse(table.isEmpty());
-        assertEquals(entity, table.getByPkOrNull(key1));
-        assertNull(table.getByPkOrNull(key2));
+        assertEquals(entity, table.getByPkOrNull(keys[0]));
+        assertNull(table.getByPkOrNull(keys[1]));
         assertThat(table.fetchAll()).containsExactly(entity);
     }
 
@@ -71,4 +75,10 @@ public abstract class BaseModelKeyTableTest<K, E, T extends TableObj<K, E>> {
     }
 
     protected abstract @NotNull E createEntity(@NotNull K key, int version);
+
+    private void assumeKeys(int minimumNum) {
+        assertNotNull(keys);
+        assumeTrue(keys.length >= minimumNum,
+                   "Can't run the test because not enough keys available: %s".formatted(Arrays.toString(keys)));
+    }
 }

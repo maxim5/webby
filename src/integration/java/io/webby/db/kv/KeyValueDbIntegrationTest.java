@@ -35,6 +35,7 @@ import java.util.stream.Stream;
 import static com.google.common.truth.Truth.assertThat;
 import static io.webby.testing.FakeRequests.getEx;
 import static io.webby.testing.FakeRequests.postEx;
+import static io.webby.testing.TestingUtil.array;
 import static org.junit.jupiter.api.Assertions.*;
 import static org.junit.jupiter.api.Assumptions.assumeTrue;
 
@@ -428,10 +429,5 @@ public class KeyValueDbIntegrationTest {
 
     private static void cleanUpAtExit() {
         Runtime.getRuntime().addShutdownHook(new Thread(() -> TO_CLEAN.forEach(KeyValueDbIntegrationTest::deleteAll)));
-    }
-
-    @SuppressWarnings("unchecked")
-    private static <T> T[] array(T ... items) {
-        return items;
     }
 }

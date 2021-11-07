@@ -5,12 +5,18 @@ import org.jetbrains.annotations.NotNull;
 
 import java.sql.Connection;
 
+import static io.webby.testing.TestingUtil.array;
+
 public class UserTableTest extends BaseModelKeyTableTest<Long, DefaultUser, UserTable> {
     @Override
     protected void setUp(@NotNull Connection connection) throws Exception {
-        connection.createStatement().executeUpdate("CREATE TABLE user (user_id INTEGER PRIMARY KEY, access_level INTEGER)");
-        key1 = 1L;
-        key2 = 2L;
+        connection.createStatement().executeUpdate("""
+            CREATE TABLE user (
+                user_id INTEGER PRIMARY KEY,
+                access_level INTEGER
+            )
+        """);
+        keys = array(1L, 2L);
         table = new UserTable(connection);
     }
 

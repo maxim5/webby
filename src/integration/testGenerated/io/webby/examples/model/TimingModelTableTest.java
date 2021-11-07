@@ -9,25 +9,26 @@ import java.sql.Timestamp;
 import java.time.*;
 import java.time.temporal.ChronoUnit;
 
+import static io.webby.testing.TestingUtil.array;
+
 public class TimingModelTableTest extends BaseModelKeyTableTest<Timestamp, TimingModel, TimingModelTable> {
     @Override
     protected void setUp(@NotNull Connection connection) throws Exception {
         connection.createStatement().executeUpdate("""
-        CREATE TABLE timing_model (
-            id INTEGER PRIMARY KEY,
-            util_date INTEGER,
-            sql_date INTEGER,
-            time INTEGER,
-            instant INTEGER,
-            timestamp INTEGER,
-            local_date INTEGER,
-            local_time INTEGER,
-            local_date_time INTEGER,
-            zoned_date_time INTEGER
-        )
+            CREATE TABLE timing_model (
+                id INTEGER PRIMARY KEY,
+                util_date INTEGER,
+                sql_date INTEGER,
+                time INTEGER,
+                instant INTEGER,
+                timestamp INTEGER,
+                local_date INTEGER,
+                local_time INTEGER,
+                local_date_time INTEGER,
+                zoned_date_time INTEGER
+            )
         """);
-        key1 = Timestamp.valueOf("2000-01-01 00:00:00");
-        key2 = Timestamp.valueOf("2020-01-01 00:00:00");
+        keys = array(Timestamp.valueOf("2000-01-01 00:00:00"), Timestamp.valueOf("2020-01-01 00:00:00"));
         table = new TimingModelTable(connection);
     }
 

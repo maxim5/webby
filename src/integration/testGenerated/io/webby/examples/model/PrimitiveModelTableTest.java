@@ -5,24 +5,25 @@ import org.jetbrains.annotations.NotNull;
 
 import java.sql.Connection;
 
+import static io.webby.testing.TestingUtil.array;
+
 public class PrimitiveModelTableTest extends BaseModelKeyTableTest<Integer, PrimitiveModel, PrimitiveModelTable> {
     @Override
     protected void setUp(@NotNull Connection connection) throws Exception {
         connection.createStatement().executeUpdate("""
-        CREATE TABLE primitive_model (
-            id INTEGER PRIMARY KEY,
-            i INTEGER,
-            l INTEGER,
-            b INTEGER,
-            s INTEGER,
-            ch TEXT,
-            f REAL,
-            d REAL,
-            bool INTEGER
-        )
+            CREATE TABLE primitive_model (
+                id INTEGER PRIMARY KEY,
+                i INTEGER,
+                l INTEGER,
+                b INTEGER,
+                s INTEGER,
+                ch TEXT,
+                f REAL,
+                d REAL,
+                bool INTEGER
+            )
         """);
-        key1 = 1;
-        key2 = 2;
+        keys = array(1, 2);
         table = new PrimitiveModelTable(connection);
     }
 

@@ -5,24 +5,25 @@ import org.jetbrains.annotations.NotNull;
 
 import java.sql.Connection;
 
+import static io.webby.testing.TestingUtil.array;
+
 public class WrappersModelTableTest extends BaseModelKeyTableTest<Integer, WrappersModel, WrappersModelTable> {
     @Override
     protected void setUp(@NotNull Connection connection) throws Exception {
         connection.createStatement().executeUpdate("""
-        CREATE TABLE wrappers_model (
-            id INTEGER PRIMARY KEY,
-            i INTEGER,
-            l INTEGER,
-            b INTEGER,
-            s INTEGER,
-            ch TEXT,
-            f REAL,
-            d REAL,
-            bool INTEGER
-        )
+            CREATE TABLE wrappers_model (
+                id INTEGER PRIMARY KEY,
+                i INTEGER,
+                l INTEGER,
+                b INTEGER,
+                s INTEGER,
+                ch TEXT,
+                f REAL,
+                d REAL,
+                bool INTEGER
+            )
         """);
-        key1 = 1;
-        key2 = 2;
+        keys = array(1, 2);
         table = new WrappersModelTable(connection);
     }
 

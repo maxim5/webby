@@ -7,18 +7,21 @@ import java.sql.Connection;
 import java.time.Instant;
 import java.time.temporal.ChronoUnit;
 
+import static io.webby.testing.TestingUtil.array;
+
 public class SessionTableTest extends BaseModelKeyTableTest<Long, Session, SessionTable> {
     @Override
     protected void setUp(@NotNull Connection connection) throws Exception {
         connection.createStatement().executeUpdate("""
-        CREATE TABLE session (session_id INTEGER PRIMARY KEY,
-                              user_id INTEGER,
-                              created INTEGER,
-                              user_agent TEXT,
-                              ip_address TEXT)
+            CREATE TABLE session (
+                session_id INTEGER PRIMARY KEY,
+                user_id INTEGER,
+                created INTEGER,
+                user_agent TEXT,
+                ip_address TEXT
+            )
         """);
-        key1 = 1L;
-        key2 = 2L;
+        keys = array(1L, 2L);
         table = new SessionTable(connection);
     }
 

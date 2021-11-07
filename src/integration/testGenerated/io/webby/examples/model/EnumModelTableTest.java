@@ -5,19 +5,20 @@ import org.jetbrains.annotations.NotNull;
 
 import java.sql.Connection;
 
+import static io.webby.testing.TestingUtil.array;
+
 public class EnumModelTableTest extends BaseModelKeyTableTest<EnumModel.Foo, EnumModel, EnumModelTable> {
     @Override
     protected void setUp(@NotNull Connection connection) throws Exception {
         connection.createStatement().executeUpdate("""
-        CREATE TABLE enum_model (
-            id_ord INTEGER PRIMARY KEY,
-            foo_ord INTEGER,
-            nested_foo_ord INTEGER,
-            nested_s TEXT
-        )
+            CREATE TABLE enum_model (
+                id_ord INTEGER PRIMARY KEY,
+                foo_ord INTEGER,
+                nested_foo_ord INTEGER,
+                nested_s TEXT
+            )
         """);
-        key1 = EnumModel.Foo.FIRST;
-        key2 = EnumModel.Foo.SECOND;
+        keys = array(EnumModel.Foo.FIRST, EnumModel.Foo.SECOND);
         table = new EnumModelTable(connection);
     }
 

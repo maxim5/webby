@@ -8,6 +8,11 @@ import java.util.Arrays;
 
 public class TestingUtil {
     @SuppressWarnings("unchecked")
+    public static <T> T[] array(T... items) {
+        return items;
+    }
+
+    @SuppressWarnings("unchecked")
     public static <T> @NotNull T[] appendVarArg(@Nullable T arg, @Nullable T @NotNull ... args) {
         T[] result = Arrays.copyOf(args, args.length + 1);
         result[args.length] = arg;
