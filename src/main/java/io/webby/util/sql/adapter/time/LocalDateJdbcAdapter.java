@@ -1,4 +1,6 @@
-package io.webby.util.sql.adapter;
+package io.webby.util.sql.adapter.time;
+
+import io.webby.util.sql.adapter.JdbcSingleValueAdapter;
 
 import java.sql.Date;
 import java.time.LocalDate;

@@ -1,5 +1,6 @@
-package io.webby.util.sql.adapter;
+package io.webby.util.sql.adapter.time;
 
+import io.webby.util.sql.adapter.JdbcMultiValueAdapter;
 import org.jetbrains.annotations.NotNull;
 
 import java.sql.Timestamp;

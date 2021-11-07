@@ -1,4 +1,7 @@
-package io.webby.util.sql.adapter;
+package io.webby.util.sql.adapter.chars;
+
+import io.webby.util.sql.adapter.JdbcAdapt;
+import io.webby.util.sql.adapter.JdbcSingleValueAdapter;
 
 @JdbcAdapt(CharSequence.class)
 public class CharSequenceJdbcAdapter implements JdbcSingleValueAdapter<CharSequence> {

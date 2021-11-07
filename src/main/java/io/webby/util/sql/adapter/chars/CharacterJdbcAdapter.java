@@ -1,5 +1,6 @@
-package io.webby.util.sql.adapter;
+package io.webby.util.sql.adapter.chars;
 
+import io.webby.util.sql.adapter.JdbcAdapt;
 import org.jetbrains.annotations.NotNull;
 
 @JdbcAdapt({char.class, Character.class})
