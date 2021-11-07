@@ -11,6 +11,7 @@ import io.webby.netty.intercept.attr.Attributes;
 import io.webby.netty.marshal.Json;
 import io.webby.url.convert.Constraint;
 import io.webby.util.AtomicLazy;
+import io.webby.util.DelayedAccessLazy;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
@@ -24,7 +25,7 @@ import java.util.Map;
 import static io.webby.util.EasyCast.castAny;
 
 public class DefaultHttpRequestEx extends DefaultFullHttpRequest implements MutableHttpRequestEx {
-    private final AtomicLazy<QueryParams> params = new AtomicLazy<>();
+    private final DelayedAccessLazy<QueryParams> params = AtomicLazy.emptyLazy();
     private final Channel channel;
     private final Json json;
     private final Map<String, Constraint<?>> constraints;

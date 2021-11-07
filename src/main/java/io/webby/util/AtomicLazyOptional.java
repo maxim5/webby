@@ -8,9 +8,9 @@ import java.util.concurrent.atomic.AtomicReference;
 import java.util.function.Supplier;
 
 public class AtomicLazyOptional<T> {
-    private final AtomicReference<Optional<T>> value = new AtomicReference<>(null);
+    private final AtomicReference<Optional<T>> ref = new AtomicReference<>(null);
 
     public @Nullable T lazyGet(@NotNull Supplier<T> supplier) {
-        return AtomicLazy.setIfAbsent(value, () -> Optional.ofNullable(supplier.get())).orElse(null);
+        return AtomicLazy.setIfAbsent(ref, () -> Optional.ofNullable(supplier.get())).orElse(null);
     }
 }

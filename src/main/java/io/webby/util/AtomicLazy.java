@@ -6,19 +6,50 @@ import org.jetbrains.annotations.Nullable;
 import java.util.concurrent.atomic.AtomicReference;
 import java.util.function.Supplier;
 
-public class AtomicLazy<T> {
-    private final AtomicReference<T> value;
+import static java.util.Objects.requireNonNull;
 
-    public AtomicLazy(@Nullable T initValue) {
-        value = new AtomicReference<>(initValue);
+public class AtomicLazy<T> implements DelayedInitLazy<T>, DelayedAccessLazy<T> {
+    private final AtomicReference<T> ref;
+
+    protected AtomicLazy(@Nullable T initValue) {
+        ref = new AtomicReference<>(initValue);
     }
 
-    public AtomicLazy() {
+    protected AtomicLazy() {
         this(null);
     }
 
+    public static <T> @NotNull DelayedAccessLazy<T> emptyLazy() {
+        return new AtomicLazy<>(null);
+    }
+
+    public static <T> @NotNull DelayedInitLazy<T> ofUninitialized() {
+        return new AtomicLazy<>(null);
+    }
+
+    public static <T> @NotNull DelayedInitLazy<T> ofInitialized(@NotNull T value) {
+        return new AtomicLazy<>(value);
+    }
+
+    @Override
+    public boolean isInitialized() {
+        return ref.get() == null;
+    }
+
+    @Override
+    public void initializeOrDie(@NotNull T value) {
+        boolean success = ref.compareAndSet(null, value);
+        assert success : "Invalid state. %s already initialized: %s".formatted(getClass().getSimpleName(), ref.get());
+    }
+
+    @Override
     public @NotNull T lazyGet(@NotNull Supplier<T> supplier) {
-        return setIfAbsent(value, supplier);
+        return setIfAbsent(ref, supplier);
+    }
+
+    @Override
+    public @NotNull T getOrDie() {
+        return requireNonNull(ref.get());
     }
 
     public static <T> @NotNull T setIfAbsent(@NotNull AtomicReference<T> reference, @NotNull Supplier<T> supplier) {

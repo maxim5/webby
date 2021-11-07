@@ -55,6 +55,14 @@ public class OneOf<U, V> {
         return second;
     }
 
+    public <T> @NotNull OneOf<T, V> mapFirst(@NotNull Function<U, T> convert) {
+        return fromEither(first -> ofFirst(convert.apply(first)), OneOf::ofSecond);
+    }
+
+    public <T> @NotNull OneOf<U, T> mapSecond(@NotNull Function<V, T> convert) {
+        return fromEither(OneOf::ofFirst, second -> ofSecond(convert.apply(second)));
+    }
+
     public <T> @NotNull T fromEither(@NotNull Function<U, T> fromFirst, @NotNull Function<V, T> fromSecond) {
         return hasFirst() ? fromFirst.apply(first) : fromSecond.apply(second);
     }

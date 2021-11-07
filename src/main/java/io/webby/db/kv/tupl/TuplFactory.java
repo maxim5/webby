@@ -6,6 +6,7 @@ import io.webby.db.codec.Codec;
 import io.webby.db.codec.CodecProvider;
 import io.webby.db.kv.impl.BaseKeyValueFactory;
 import io.webby.util.AtomicLazy;
+import io.webby.util.DelayedAccessLazy;
 import io.webby.util.Rethrow;
 import org.cojen.tupl.*;
 import org.jetbrains.annotations.NotNull;
@@ -17,7 +18,7 @@ import java.util.concurrent.TimeUnit;
 import static io.webby.util.Rethrow.rethrow;
 
 public class TuplFactory extends BaseKeyValueFactory {
-    private final AtomicLazy<Database> db = new AtomicLazy<>();
+    private final DelayedAccessLazy<Database> db = AtomicLazy.emptyLazy();
 
     @Inject private Settings settings;
     @Inject private CodecProvider provider;
