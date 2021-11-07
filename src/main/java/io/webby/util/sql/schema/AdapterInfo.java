@@ -18,7 +18,7 @@ import static io.webby.util.reflect.EasyClasspath.*;
 import static io.webby.util.sql.schema.InvalidSqlModelException.failIf;
 
 public class AdapterInfo {
-    public static final String CREATE = "createInstance";
+    public static final String CREATE_INSTANCE = "createInstance";
     public static final String FILL_VALUES = "fillArrayValues";
     public static final String NEW_ARRAY = "toNewValuesArray";
 
@@ -45,7 +45,7 @@ public class AdapterInfo {
     private static @NotNull String classToStaticRef(@NotNull Class<?> klass) {
         String canonicalName = Naming.shortCanonicalName(klass);
 
-        if (hasMethod(klass, Scope.ALL, method -> isPublicStatic(method) && method.getName().equals(CREATE)) &&
+        if (hasMethod(klass, Scope.ALL, method -> isPublicStatic(method) && method.getName().equals(CREATE_INSTANCE)) &&
             hasMethod(klass, Scope.ALL, method -> isPublicStatic(method) && method.getName().equals(FILL_VALUES)) &&
             hasMethod(klass, Scope.ALL, method -> isPublicStatic(method) && method.getName().equals(NEW_ARRAY))) {
             return canonicalName;
@@ -72,7 +72,7 @@ public class AdapterInfo {
         Parameter[] parameters = getCreationParameters(klass);
         if (parameters.length == 1) {
             JdbcType paramType = JdbcType.findByMatchingNativeType(parameters[0].getType());
-            failIf(paramType == null, "JDBC adapter `%s` has incompatible parameters: %s", CREATE, klass);
+            failIf(paramType == null, "JDBC adapter `%s` has incompatible parameters: %s", CREATE_INSTANCE, klass);
             Column column = new Column(sqlFieldName, new ColumnType(paramType));
             return List.of(column);
         } else {
@@ -91,8 +91,8 @@ public class AdapterInfo {
     }
 
     private static @NotNull Parameter[] getCreationParameters(@NotNull Class<?> adapterClass) {
-        Method method = EasyClasspath.findMethod(adapterClass, Scope.DECLARED, CREATE);
-        failIf(method == null, "JDBC adapter does not implement `%s` method: %s", CREATE, adapterClass);
+        Method method = EasyClasspath.findMethod(adapterClass, Scope.DECLARED, CREATE_INSTANCE);
+        failIf(method == null, "JDBC adapter does not implement `%s` method: %s", CREATE_INSTANCE, adapterClass);
         return method.getParameters();
     }
 }
