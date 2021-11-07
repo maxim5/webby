@@ -1,10 +1,12 @@
 package io.webby.util.collect;
 
+import com.google.errorprone.annotations.Immutable;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.function.Function;
 
+@Immutable
 public class OneOf<U, V> {
     private final U first;
     private final V second;
@@ -16,7 +18,7 @@ public class OneOf<U, V> {
         this.which = which;
     }
 
-    public static <U, V> OneOf<U, V> of(U first, V second) {
+    public static <U, V> @NotNull OneOf<U, V> of(U first, V second) {
         assert first == null ^ second == null : "Exactly one must be non-null: first=%s second=%s".formatted(first, second);
         if (first != null) {
             return ofFirst(first);
@@ -55,15 +57,19 @@ public class OneOf<U, V> {
         return second;
     }
 
+    public <T, S> @NotNull OneOf<T, S> map(@NotNull Function<U, T> convertFirst, @NotNull Function<V, S> convertSecond) {
+        return mapToObj(first -> ofFirst(convertFirst.apply(first)), second -> ofSecond(convertSecond.apply(second)));
+    }
+
     public <T> @NotNull OneOf<T, V> mapFirst(@NotNull Function<U, T> convert) {
-        return fromEither(first -> ofFirst(convert.apply(first)), OneOf::ofSecond);
+        return map(convert, second -> second);
     }
 
     public <T> @NotNull OneOf<U, T> mapSecond(@NotNull Function<V, T> convert) {
-        return fromEither(OneOf::ofFirst, second -> ofSecond(convert.apply(second)));
+        return map(first -> first, convert);
     }
 
-    public <T> @NotNull T fromEither(@NotNull Function<U, T> fromFirst, @NotNull Function<V, T> fromSecond) {
+    public <T> @NotNull T mapToObj(@NotNull Function<U, T> fromFirst, @NotNull Function<V, T> fromSecond) {
         return hasFirst() ? fromFirst.apply(first) : fromSecond.apply(second);
     }
 

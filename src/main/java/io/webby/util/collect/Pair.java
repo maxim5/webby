@@ -1,37 +1,59 @@
 package io.webby.util.collect;
 
-import java.util.Map;
+import com.google.errorprone.annotations.Immutable;
+import org.jetbrains.annotations.NotNull;
 
-public record Pair<T, U>(T first, U second) implements Map.Entry<T, U> {
-    public static <T, U> Pair<T, U> of(T first, U second) {
+import java.util.Map;
+import java.util.function.BiFunction;
+import java.util.function.Function;
+
+@Immutable
+public record Pair<U, V>(U first, V second) implements Map.Entry<U, V> {
+    public static <U, V> @NotNull Pair<U, V> of(U first, V second) {
         return new Pair<>(first, second);
     }
 
-    public static <T, U> Pair<T, U> of(Map.Entry<T, U> entry) {
+    public static <U, V> @NotNull Pair<U, V> of(@NotNull Map.Entry<U, V> entry) {
         return new Pair<>(entry.getKey(), entry.getValue());
     }
 
-    public static <T> Pair<T, T> of(T[] array) {
+    public static <T> @NotNull Pair<T, T> of(@NotNull T[] array) {
         assert array.length == 2 : "Invalid array to create a pair from: length=%d".formatted(array.length);
         return new Pair<>(array[0], array[1]);
     }
 
-    public Pair<U, T> swap() {
+    public @NotNull Pair<V, U> swap() {
         return of(second, first);
     }
 
+    public <T, S> @NotNull Pair<T, S> map(@NotNull Function<U, T> convertFirst, @NotNull Function<V, S> convertSecond) {
+        return of(convertFirst.apply(first), convertSecond.apply(second));
+    }
+
+    public <T> @NotNull Pair<T, V> mapFirst(@NotNull Function<U, T> convert) {
+        return map(convert, second -> second);
+    }
+
+    public <T> @NotNull Pair<U, T> mapSecond(@NotNull Function<V, T> convert) {
+        return map(first -> first, convert);
+    }
+
+    public <T> @NotNull T mapToObj(@NotNull BiFunction<U, V, T> convert) {
+        return convert.apply(first, second);
+    }
+
     @Override
-    public T getKey() {
+    public U getKey() {
         return first;
     }
 
     @Override
-    public U getValue() {
+    public V getValue() {
         return second;
     }
 
     @Override
-    public U setValue(U value) {
+    public V setValue(V value) {
         throw new UnsupportedOperationException("Pair is immutable");
     }
 

@@ -39,7 +39,7 @@ public class AdapterInfo {
     }
 
     public @NotNull String staticRef() {
-        return staticClassRef.lazyGet(() -> oneOf.fromEither(AdapterInfo::classToStaticRef, AdapterInfo::signatureStaticRef));
+        return staticClassRef.lazyGet(() -> oneOf.mapToObj(AdapterInfo::classToStaticRef, AdapterInfo::signatureStaticRef));
     }
 
     private static @NotNull String classToStaticRef(@NotNull Class<?> klass) {
@@ -64,7 +64,7 @@ public class AdapterInfo {
     }
 
     public @NotNull List<Column> adapterColumns(@NotNull String fieldName) {
-        return oneOf.fromEither(klass -> classToAdapterColumns(klass, fieldName), pojo -> pojoToColumns(pojo, fieldName));
+        return oneOf.mapToObj(klass -> classToAdapterColumns(klass, fieldName), pojo -> pojoToColumns(pojo, fieldName));
     }
 
     private static @NotNull List<Column> classToAdapterColumns(@NotNull Class<?> klass, @NotNull String fieldName) {
