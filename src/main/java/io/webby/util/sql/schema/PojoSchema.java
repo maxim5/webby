@@ -7,11 +7,16 @@ import org.jetbrains.annotations.NotNull;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.Stack;
 import java.util.function.Consumer;
-import java.util.stream.Collectors;
 
 public record PojoSchema(@NotNull Class<?> pojoType, @NotNull ImmutableList<PojoField> fields) implements WithColumns {
+    public @NotNull PojoSchema reattachedTo(@NotNull PojoParent parent) {
+        ImmutableList<PojoField> reattachedFields = fields().stream()
+                .map(field -> field.reattachedTo(parent))
+                .collect(ImmutableList.toImmutableList());
+        return new PojoSchema(pojoType, reattachedFields);
+    }
+
     public @NotNull String adapterName() {
         return ModelAdaptersLocator.defaultAdapterName(pojoType);
     }
@@ -20,33 +25,26 @@ public record PojoSchema(@NotNull Class<?> pojoType, @NotNull ImmutableList<Pojo
         return pojoType.isEnum();
     }
 
-    public void iterateAllFields(@NotNull Consumer<Stack<PojoField>> consumer) {
-        iterate(new Stack<>(), consumer);
-    }
-
-    private void iterate(@NotNull Stack<PojoField> context, Consumer<Stack<PojoField>> consumer) {
-        for (PojoField field : fields) {
-            context.push(field);
-            consumer.accept(context);
+    public void iterateAllFields(@NotNull Consumer<PojoField> consumer) {
+        for (PojoField field : fields()) {
+            consumer.accept(field);
             if (field.hasPojo()) {
-                field.pojoOrDie().iterate(context, consumer);
+                field.pojoOrDie().iterateAllFields(consumer);
             }
-            context.pop();
         }
     }
 
     public @NotNull Map<PojoField, Column> columnsPerFields() {
         Map<PojoField, Column> result = new LinkedHashMap<>();
-        iterateAllFields(fieldsPath -> {
-            PojoField peek = fieldsPath.peek();
-            if (peek.isNativelySupported()) {
-                String pathName = fieldsPath.stream().map(PojoField::javaName).map(Naming::camelToSnake).collect(Collectors.joining("_"));
-                JdbcType type = peek.jdbcTypeOrDie();
-                Column column = new Column(pathName, new ColumnType(type));
-                assert !result.containsKey(peek) :
+        iterateAllFields(field -> {
+            if (field.isNativelySupported()) {
+                String sqlName = field.fullSqlName();
+                JdbcType type = field.jdbcTypeOrDie();
+                Column column = new Column(sqlName, new ColumnType(type));
+                assert !result.containsKey(field) :
                         "Internal error. Several columns for one field: `%s` of `%s`: %s, %s"
-                        .formatted(peek, pojoType(), column, result.get(peek));
-                result.put(peek, column);
+                        .formatted(field, pojoType(), column, result.get(field));
+                result.put(field, column);
             }
         });
         return result;

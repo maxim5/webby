@@ -2,9 +2,6 @@ package io.webby.util.sql.codegen;
 
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
-import com.google.mu.util.stream.BiStream;
-import io.webby.util.EasyClasspath;
-import io.webby.util.EasyClasspath.Scope;
 import io.webby.util.EasyIterables;
 import io.webby.util.EasyObjects;
 import io.webby.util.sql.schema.*;
@@ -15,7 +12,6 @@ import org.jetbrains.annotations.VisibleForTesting;
 import java.lang.reflect.Field;
 import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;
-import java.lang.reflect.Parameter;
 import java.util.*;
 import java.util.function.Function;
 
@@ -94,53 +90,37 @@ public class ModelSchemaFactory {
     private @NotNull FieldInference inferFieldSchema(@NotNull Field field) {
         String fieldName = field.getName();
         Class<?> fieldType = field.getType();
-        String sqlFieldName = Naming.camelToSnake(fieldName);
 
         JdbcType jdbcType = JdbcType.findByMatchingNativeType(fieldType);
         if (jdbcType != null) {
-            return FieldInference.ofNativeColumn(new Column(sqlFieldName, new ColumnType(jdbcType)));
+            return FieldInference.ofNativeColumn(new Column(Naming.camelToSnake(fieldName), new ColumnType(jdbcType)));
         }
 
         Class<?> adapterClass = adaptersLocator.locateAdapterClass(fieldType);
         if (adapterClass != null) {
-            Parameter[] parameters = getCreationParameters(adapterClass);
-            if (parameters.length == 1) {
-                JdbcType paramType = JdbcType.findByMatchingNativeType(parameters[0].getType());
-                failIf(paramType == null, "JDBC adapter `%s` has incompatible parameters: %s", AdapterInfo.CREATE, adapterClass);
-                Column column = new Column(sqlFieldName, new ColumnType(paramType));
-                return FieldInference.ofSingleColumn(column, AdapterInfo.ofClass(adapterClass));
-            } else {
-                List<Column> columns = BiStream.from(Arrays.stream(parameters),
-                                                     Parameter::getName,
-                                                     param -> JdbcType.findByMatchingNativeType(param.getType()))
-                        .mapKeys(name -> "%s_%s".formatted(sqlFieldName, Naming.camelToSnake(name)))
-                        .mapValues(ColumnType::new)
-                        .mapToObj(Column::new)
-                        .toList();
-                return FieldInference.ofMultiColumns(columns, AdapterInfo.ofClass(adapterClass));
-            }
+            AdapterInfo adapterInfo = AdapterInfo.ofClass(adapterClass);
+            List<Column> columns = adapterInfo.adapterColumns(fieldName);
+            return FieldInference.ofColumns(columns, adapterInfo);
         }
 
         validateFieldForPojo(field);
 
-        PojoSchema pojoSchema = buildSchemaForPojoField(fieldType);
-        List<Column> columns = pojoSchema.columns().stream()
-                .map(column -> column.renamed("%s_%s".formatted(sqlFieldName, column.sqlName())))
-                .toList();
-        if (columns.size() == 1) {
-            return FieldInference.ofSingleColumn(columns.get(0), AdapterInfo.ofSignature(pojoSchema));
-        } else {
-            return FieldInference.ofMultiColumns(columns, AdapterInfo.ofSignature(pojoSchema));
-        }
+        PojoSchema pojo = buildSchemaForPojoField(fieldType).reattachedTo(PojoParent.ofTerminal(fieldName));
+        return FieldInference.ofColumns(pojo.columns(), AdapterInfo.ofSignature(pojo));
     }
 
-    private static record FieldInference(@Nullable Column singleColumn,
-                                         @Nullable ImmutableList<Column> multiColumns,
-                                         @Nullable AdapterInfo adapterInfo,
-                                         @Nullable TableSchema foreignTable) {
+    private record FieldInference(@Nullable Column singleColumn,
+                                  @Nullable ImmutableList<Column> multiColumns,
+                                  @Nullable AdapterInfo adapterInfo,
+                                  @Nullable TableSchema foreignTable) {
         public static FieldInference ofNativeColumn(@NotNull Column column) {
             return new FieldInference(column, null, null, null);
         }
+
+        public static FieldInference ofColumns(@NotNull List<Column> columns, @NotNull AdapterInfo adapterInfo) {
+            return columns.size() == 1 ? ofSingleColumn(columns.get(0), adapterInfo) : ofMultiColumns(columns, adapterInfo);
+        }
+
         public static FieldInference ofSingleColumn(@NotNull Column column, @NotNull AdapterInfo adapterInfo) {
             return new FieldInference(column, null, adapterInfo, null);
         }
@@ -154,13 +134,6 @@ public class ModelSchemaFactory {
         }
     }
 
-    @VisibleForTesting
-    static @NotNull Parameter[] getCreationParameters(@NotNull Class<?> adapterClass) {
-        Method method = EasyClasspath.findMethod(adapterClass, Scope.DECLARED, AdapterInfo.CREATE);
-        failIf(method == null, "JDBC adapter does not implement `%s` method: %s", AdapterInfo.CREATE, adapterClass);
-        return method.getParameters();
-    }
-
     private @NotNull PojoSchema buildSchemaForPojoField(@NotNull Class<?> type) {
         return pojos.computeIfAbsent(type, k -> {
             // adaptersLocator.locateAdapterClass(type);
@@ -172,18 +145,19 @@ public class ModelSchemaFactory {
             ImmutableList<PojoField> pojoFields = Arrays.stream(type.getDeclaredFields())
                     .filter(field -> !Modifier.isStatic(field.getModifiers()))
                     .map(field -> {
-                validateFieldForPojo(field);
-                Method getter = findGetterMethodOrDie(field);
+                        validateFieldForPojo(field);
+                        Method getter = findGetterMethodOrDie(field);
+                        ModelField modelField = ModelField.of(field, getter);
 
-                Class<?> subFieldType = field.getType();
-                JdbcType jdbcType = JdbcType.findByMatchingNativeType(subFieldType);
-                if (jdbcType != null) {
-                    return PojoField.ofNative(field, getter, jdbcType);
-                } else {
-                    PojoSchema subField = buildSchemaForPojoField(subFieldType);
-                    return PojoField.ofSubPojo(field, getter, subField);
-                }
-            }).collect(ImmutableList.toImmutableList());
+                        Class<?> subFieldType = field.getType();
+                        JdbcType jdbcType = JdbcType.findByMatchingNativeType(subFieldType);
+                        if (jdbcType != null) {
+                            return PojoField.ofNative(modelField, jdbcType);
+                        } else {
+                            PojoSchema subPojo = buildSchemaForPojoField(subFieldType);
+                            return PojoField.ofSubPojo(modelField, subPojo);
+                        }
+                    }).collect(ImmutableList.toImmutableList());
             return new PojoSchema(type, pojoFields);
         });
     }
