@@ -11,11 +11,11 @@ import static java.util.Objects.requireNonNull;
 public class AtomicLazy<T> implements DelayedInitLazy<T>, DelayedAccessLazy<T> {
     private final AtomicReference<T> ref;
 
-    protected AtomicLazy(@Nullable T initValue) {
+    public AtomicLazy(@Nullable T initValue) {
         ref = new AtomicReference<>(initValue);
     }
 
-    protected AtomicLazy() {
+    public AtomicLazy() {
         this(null);
     }
 
@@ -33,7 +33,7 @@ public class AtomicLazy<T> implements DelayedInitLazy<T>, DelayedAccessLazy<T> {
 
     @Override
     public boolean isInitialized() {
-        return ref.get() == null;
+        return ref.get() != null;
     }
 
     @Override
