@@ -4,6 +4,7 @@ import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
 import io.webby.util.base.EasyObjects;
 import io.webby.util.collect.EasyIterables;
+import io.webby.util.lazy.AtomicLazyList;
 import io.webby.util.sql.codegen.ModelAdaptersLocator;
 import io.webby.util.sql.codegen.ModelClassInput;
 import org.jetbrains.annotations.NotNull;
@@ -55,16 +56,16 @@ public class ModelSchemaFactory {
     @NotNull TableSchema buildShallowTable(@NotNull ModelClassInput input) {
         String sqlName = Naming.camelToSnake(input.modelName());
         String javaName = "%sTable".formatted(input.modelName());
-        return new TableSchema(sqlName, javaName, input.modelName(), input.modelClass(), new ArrayList<>());
+        return new TableSchema(sqlName, javaName, input.modelName(), input.modelClass(), AtomicLazyList.ofUninitializedList());
     }
 
     @VisibleForTesting
     void completeTable(@NotNull ModelClassInput input, @NotNull TableSchema schema) {
-        List<TableField> fields = schema.fields();
-        Arrays.stream(input.modelClass().getDeclaredFields())
+        ImmutableList<TableField> fields = Arrays.stream(input.modelClass().getDeclaredFields())
                 .filter(field -> !Modifier.isStatic(field.getModifiers()))
                 .map(field -> buildTableField(field, input.modelName()))
-                .forEach(fields::add);
+                .collect(ImmutableList.toImmutableList());
+        schema.initializeOrDie(fields);
     }
 
     @VisibleForTesting
