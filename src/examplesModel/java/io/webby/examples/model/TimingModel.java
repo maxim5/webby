@@ -12,6 +12,11 @@ public record TimingModel(Timestamp id,
                           LocalDate localDate,
                           LocalTime localTime,
                           LocalDateTime localDateTime,
-                          ZonedDateTime zonedDateTime
+                          ZonedDateTime zonedDateTime,
+                          OffsetTime offsetTime,
+                          OffsetDateTime offsetDateTime,
+                          Duration duration,
+                          Period period,
+                          ZoneOffset zoneOffset
                           /*DateTime googleDateTime*/) {
 }
