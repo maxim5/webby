@@ -15,6 +15,7 @@ import java.lang.reflect.Field;
 import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;
 import java.util.*;
+import java.util.concurrent.ConcurrentHashMap;
 import java.util.function.Function;
 
 import static io.webby.util.sql.schema.InvalidSqlModelException.failIf;
@@ -24,8 +25,8 @@ public class ModelSchemaFactory {
     private final ModelAdaptersLocator adaptersLocator;
 
     private final Iterable<ModelClassInput> inputs;
-    private final Map<ModelClassInput, TableSchema> tables = new HashMap<>();
-    private final Map<Class<?>, PojoSchema> pojos = new HashMap<>();
+    private final Map<ModelClassInput, TableSchema> tables = new ConcurrentHashMap<>();
+    private final Map<Class<?>, PojoSchema> pojos = new ConcurrentHashMap<>();
 
     public ModelSchemaFactory(@NotNull ModelAdaptersLocator adaptersLocator, @NotNull Iterable<ModelClassInput> inputs) {
         this.adaptersLocator = adaptersLocator;

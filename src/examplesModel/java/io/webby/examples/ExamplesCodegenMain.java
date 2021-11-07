@@ -38,7 +38,8 @@ public class ExamplesCodegenMain {
             new ModelClassInput(WrappersModel.class),
 
             new ModelClassInput(EnumModel.class),
-            new ModelClassInput(NestedModel.class)
+            new ModelClassInput(NestedModel.class),
+            new ModelClassInput(DeepNestedModel.class)
         );
 
         TimeIt.timeItOrDie(() -> {
