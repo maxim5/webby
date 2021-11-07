@@ -34,7 +34,7 @@ import io.webby.url.impl.EndpointOptions;
 import io.webby.url.impl.EndpointView;
 import io.webby.url.impl.RouteEndpoint;
 import io.webby.url.view.Renderer;
-import io.webby.util.Pair;
+import io.webby.util.collect.Pair;
 import io.webby.util.Rethrow.Consumers;
 import io.webby.util.Rethrow.Guava;
 import io.webby.util.func.ThrowConsumer;

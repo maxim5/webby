@@ -17,7 +17,7 @@ import io.webby.db.kv.mapdb.MapDbImpl;
 import io.webby.db.kv.paldb.PalDbFactory;
 import io.webby.db.kv.paldb.PalDbImpl;
 import io.webby.testing.Testing;
-import io.webby.util.Pair;
+import io.webby.util.collect.Pair;
 import org.jetbrains.annotations.NotNull;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Test;

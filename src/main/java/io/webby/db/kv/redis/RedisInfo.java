@@ -1,7 +1,7 @@
 package io.webby.db.kv.redis;
 
 import com.google.common.collect.ImmutableMap;
-import io.webby.util.Pair;
+import io.webby.util.collect.Pair;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.Map;

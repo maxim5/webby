@@ -5,7 +5,7 @@ import com.google.mu.util.stream.BiStream;
 import io.webby.db.codec.Codec;
 import io.webby.db.kv.KeyValueDb;
 import io.webby.db.kv.impl.ByteArrayDb;
-import io.webby.util.EasyIterables;
+import io.webby.util.collect.EasyIterables;
 import io.webby.util.EasyPrimitives.BoolFlag;
 import io.webby.util.Rethrow.Consumers;
 import io.webby.util.func.ThrowConsumer;

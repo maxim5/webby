@@ -1,4 +1,4 @@
-package io.webby.util;
+package io.webby.util.collect;
 
 import com.google.common.collect.ImmutableMap;
 import org.jetbrains.annotations.NotNull;

@@ -2,7 +2,7 @@ package io.webby.util.sql.codegen;
 
 import com.google.common.collect.Iterables;
 import com.google.common.collect.Streams;
-import io.webby.util.EasyMaps;
+import io.webby.util.collect.EasyMaps;
 import io.webby.util.func.ObjIntBiFunction;
 import io.webby.util.sql.api.*;
 import io.webby.util.sql.schema.*;

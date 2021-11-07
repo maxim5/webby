@@ -1,8 +1,8 @@
 package io.webby.util.sql.schema;
 
 import com.google.common.collect.Streams;
-import io.webby.util.OneOf;
-import io.webby.util.Pair;
+import io.webby.util.collect.OneOf;
+import io.webby.util.collect.Pair;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.Collections;

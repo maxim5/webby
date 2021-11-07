@@ -9,8 +9,8 @@ import io.webby.app.Settings;
 import io.webby.common.InjectorHelper;
 import io.webby.url.annotate.Marshal;
 import io.webby.util.EasyClasspath;
-import io.webby.util.EasyMaps;
-import io.webby.util.Pair;
+import io.webby.util.collect.EasyMaps;
+import io.webby.util.collect.Pair;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.VisibleForTesting;
 

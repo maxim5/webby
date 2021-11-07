@@ -1,6 +1,6 @@
 package io.webby.util.sql.codegen;
 
-import io.webby.util.EasyMaps;
+import io.webby.util.collect.EasyMaps;
 import io.webby.util.sql.adapter.JdbcAdapt;
 import io.webby.util.sql.adapter.JdbcArrayAdapter;
 import io.webby.util.sql.adapter.JdbcSingleValueAdapter;

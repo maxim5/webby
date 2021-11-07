@@ -2,7 +2,7 @@ package io.webby.util.sql.schema;
 
 import com.google.common.collect.ImmutableMap;
 import com.google.common.primitives.Primitives;
-import io.webby.util.EasyMaps;
+import io.webby.util.collect.EasyMaps;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 

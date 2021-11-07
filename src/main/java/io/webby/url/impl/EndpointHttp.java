@@ -1,6 +1,6 @@
 package io.webby.url.impl;
 
-import io.webby.util.Pair;
+import io.webby.util.collect.Pair;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.ArrayList;

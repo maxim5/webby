@@ -2,7 +2,7 @@ package io.webby.util.sql.schema;
 
 import io.webby.util.lazy.AtomicLazy;
 import io.webby.util.lazy.DelayedInitLazy;
-import io.webby.util.OneOf;
+import io.webby.util.collect.OneOf;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.Optional;

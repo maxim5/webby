@@ -4,7 +4,7 @@ import com.google.mu.util.stream.BiStream;
 import io.webby.util.lazy.AtomicLazy;
 import io.webby.util.lazy.DelayedAccessLazy;
 import io.webby.util.EasyClasspath;
-import io.webby.util.OneOf;
+import io.webby.util.collect.OneOf;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 

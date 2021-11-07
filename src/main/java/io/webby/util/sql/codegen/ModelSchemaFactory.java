@@ -2,7 +2,7 @@ package io.webby.util.sql.codegen;
 
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
-import io.webby.util.EasyIterables;
+import io.webby.util.collect.EasyIterables;
 import io.webby.util.EasyObjects;
 import io.webby.util.sql.schema.*;
 import org.jetbrains.annotations.NotNull;

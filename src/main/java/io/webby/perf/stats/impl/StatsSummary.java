@@ -7,7 +7,7 @@ import io.webby.app.Settings;
 import io.webby.netty.HttpConst;
 import io.webby.perf.stats.Stat;
 import io.webby.util.lazy.LazyBoolean;
-import io.webby.util.Pair;
+import io.webby.util.collect.Pair;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.ArrayList;

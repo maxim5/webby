@@ -1,4 +1,4 @@
-package io.webby.util;
+package io.webby.util.collect;
 
 import java.util.Map;
 

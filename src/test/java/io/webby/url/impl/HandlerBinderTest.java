@@ -7,7 +7,7 @@ import io.webby.testing.Testing;
 import io.webby.url.annotate.GET;
 import io.webby.url.caller.Caller;
 import io.webby.util.EasyClasspath.Scope;
-import io.webby.util.Pair;
+import io.webby.util.collect.Pair;
 import org.jetbrains.annotations.NotNull;
 import org.junit.jupiter.api.Test;
 

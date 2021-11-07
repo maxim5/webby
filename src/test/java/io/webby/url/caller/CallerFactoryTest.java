@@ -32,7 +32,7 @@ import java.util.function.LongFunction;
 
 import static io.webby.testing.FakeRequests.getEx;
 import static io.webby.testing.FakeRequests.postEx;
-import static io.webby.util.EasyMaps.asMap;
+import static io.webby.util.collect.EasyMaps.asMap;
 import static org.junit.jupiter.api.Assertions.*;
 
 @SuppressWarnings("unused")
