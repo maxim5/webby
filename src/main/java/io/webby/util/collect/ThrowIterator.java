@@ -1,8 +1,10 @@
-package io.webby.util;
+package io.webby.util.collect;
+
+import io.webby.util.base.Rethrow;
 
 import java.util.Iterator;
 
-import static io.webby.util.Rethrow.*;
+import static io.webby.util.base.Rethrow.*;
 
 public interface ThrowIterator<T, E extends Throwable> extends Iterator<T> {
     boolean hasNextThrow() throws E;

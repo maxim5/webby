@@ -15,7 +15,7 @@ import io.webby.app.AppLifetime;
 import io.webby.app.AppMaintenance;
 import io.webby.app.Settings;
 import io.webby.common.Lifetime;
-import io.webby.util.AnyLog;
+import io.webby.util.log.AnyLog;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.logging.Level;

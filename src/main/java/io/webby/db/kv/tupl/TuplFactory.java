@@ -7,7 +7,7 @@ import io.webby.db.codec.CodecProvider;
 import io.webby.db.kv.impl.BaseKeyValueFactory;
 import io.webby.util.lazy.AtomicLazy;
 import io.webby.util.lazy.DelayedAccessLazy;
-import io.webby.util.Rethrow;
+import io.webby.util.base.Rethrow;
 import org.cojen.tupl.*;
 import org.jetbrains.annotations.NotNull;
 
@@ -15,7 +15,7 @@ import java.io.IOException;
 import java.nio.file.Path;
 import java.util.concurrent.TimeUnit;
 
-import static io.webby.util.Rethrow.rethrow;
+import static io.webby.util.base.Rethrow.rethrow;
 
 public class TuplFactory extends BaseKeyValueFactory {
     private final DelayedAccessLazy<Database> db = AtomicLazy.emptyLazy();

@@ -5,7 +5,7 @@ import io.webby.auth.session.Session;
 import io.webby.auth.user.DefaultUser;
 import io.webby.common.ClasspathScanner;
 import io.webby.examples.model.*;
-import io.webby.util.TimeIt;
+import io.webby.util.base.TimeIt;
 import io.webby.util.sql.codegen.*;
 import io.webby.util.sql.schema.AdapterSchema;
 import io.webby.util.sql.schema.JavaNameHolder;

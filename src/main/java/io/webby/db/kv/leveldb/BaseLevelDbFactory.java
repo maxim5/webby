@@ -5,7 +5,7 @@ import io.webby.app.Settings;
 import io.webby.db.codec.Codec;
 import io.webby.db.codec.CodecProvider;
 import io.webby.db.kv.impl.BaseKeyValueFactory;
-import io.webby.util.Rethrow;
+import io.webby.util.base.Rethrow;
 import org.iq80.leveldb.DB;
 import org.iq80.leveldb.DBFactory;
 import org.iq80.leveldb.Options;

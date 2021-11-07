@@ -17,7 +17,7 @@ import java.nio.file.Path;
 import java.util.*;
 import java.util.function.BiPredicate;
 
-import static io.webby.util.EasyCast.castAny;
+import static io.webby.util.base.EasyCast.castAny;
 
 public final class AppSettings implements Settings {
     private boolean devMode = true;

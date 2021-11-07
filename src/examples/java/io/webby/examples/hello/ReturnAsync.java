@@ -12,7 +12,7 @@ import java.io.OutputStream;
 import java.util.concurrent.*;
 import java.util.function.Consumer;
 
-import static io.webby.util.Rethrow.Consumers.rethrow;
+import static io.webby.util.base.Rethrow.Consumers.rethrow;
 
 @Singleton
 public class ReturnAsync {

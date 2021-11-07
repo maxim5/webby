@@ -35,8 +35,8 @@ import io.webby.url.impl.EndpointView;
 import io.webby.url.impl.RouteEndpoint;
 import io.webby.url.view.Renderer;
 import io.webby.util.collect.Pair;
-import io.webby.util.Rethrow.Consumers;
-import io.webby.util.Rethrow.Guava;
+import io.webby.util.base.Rethrow.Consumers;
+import io.webby.util.base.Rethrow.Guava;
 import io.webby.util.func.ThrowConsumer;
 import org.checkerframework.checker.nullness.qual.Nullable;
 import org.jetbrains.annotations.NotNull;
@@ -50,7 +50,7 @@ import java.util.function.Consumer;
 import java.util.function.Function;
 import java.util.logging.Level;
 
-import static io.webby.util.EasyCast.castAny;
+import static io.webby.util.base.EasyCast.castAny;
 
 public class NettyHttpHandler extends SimpleChannelInboundHandler<FullHttpRequest> {
     private static final FluentLogger log = FluentLogger.forEnclosingClass();

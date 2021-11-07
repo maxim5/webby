@@ -11,7 +11,7 @@ import org.jetbrains.annotations.NotNull;
 
 import java.nio.file.Path;
 
-import static io.webby.util.Rethrow.Suppliers.runRethrow;
+import static io.webby.util.base.Rethrow.Suppliers.runRethrow;
 
 public class HaloDbFactory extends BaseKeyValueFactory {
     @Inject private Settings settings;

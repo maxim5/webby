@@ -21,7 +21,7 @@ import java.util.List;
 import java.util.logging.Level;
 
 import static io.webby.url.view.EasyRender.castMapOrFail;
-import static io.webby.util.EasyCast.castAny;
+import static io.webby.util.base.EasyCast.castAny;
 
 public class PebbleRenderer implements Renderer<PebbleTemplate> {
     private static final FluentLogger log = FluentLogger.forEnclosingClass();

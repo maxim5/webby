@@ -15,7 +15,7 @@ import java.util.function.Function;
 import java.util.function.Supplier;
 import java.util.logging.Level;
 
-import static io.webby.util.EasyCast.castAny;
+import static io.webby.util.base.EasyCast.castAny;
 
 public class InjectorHelper {
     private static final FluentLogger log = FluentLogger.forEnclosingClass();

@@ -2,7 +2,7 @@ package io.webby.db.codec;
 
 import io.webby.perf.stats.CodecStatsListener;
 import io.webby.perf.stats.Stat;
-import io.webby.util.EasyPrimitives.IntCounter;
+import io.webby.util.base.EasyPrimitives.IntCounter;
 import org.jetbrains.annotations.NotNull;
 
 import java.io.IOException;

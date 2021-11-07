@@ -2,7 +2,7 @@ package io.webby.common;
 
 import com.google.common.flogger.FluentLogger;
 import com.google.common.reflect.ClassPath;
-import io.webby.util.TimeIt;
+import io.webby.util.base.TimeIt;
 import org.jetbrains.annotations.NotNull;
 
 import java.lang.annotation.Annotation;
@@ -12,7 +12,7 @@ import java.util.function.Predicate;
 import java.util.logging.Level;
 import java.util.stream.Collectors;
 
-import static io.webby.util.Rethrow.Suppliers.rethrow;
+import static io.webby.util.base.Rethrow.Suppliers.rethrow;
 
 @SuppressWarnings("UnstableApiUsage")
 public class ClasspathScanner {

@@ -7,7 +7,7 @@ import io.webby.db.kv.KeyValueFactory;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
-import static io.webby.util.EasyCast.castAny;
+import static io.webby.util.base.EasyCast.castAny;
 
 public class UserManager {
     private final KeyValueDb<Long, User> db;

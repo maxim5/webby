@@ -1,6 +1,6 @@
 package io.webby.util.sql.codegen;
 
-import io.webby.util.EasyClasspath;
+import io.webby.util.reflect.EasyClasspath;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import org.junit.jupiter.api.Test;

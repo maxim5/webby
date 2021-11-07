@@ -10,8 +10,8 @@ import org.jetbrains.annotations.NotNull;
 import java.io.*;
 import java.nio.charset.Charset;
 
-import static io.webby.util.EasyCast.castAny;
-import static io.webby.util.Rethrow.rethrow;
+import static io.webby.util.base.EasyCast.castAny;
+import static io.webby.util.base.Rethrow.rethrow;
 
 public record ProtobufMarshaller(@NotNull Charset charset) implements Marshaller {
     @Inject

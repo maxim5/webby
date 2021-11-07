@@ -1,6 +1,6 @@
 package io.webby.util.sql.api;
 
-import io.webby.util.Rethrow;
+import io.webby.util.base.Rethrow;
 import org.jetbrains.annotations.NotNull;
 
 import java.io.Closeable;

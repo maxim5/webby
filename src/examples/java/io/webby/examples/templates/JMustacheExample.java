@@ -6,7 +6,7 @@ import io.webby.url.annotate.GET;
 import io.webby.url.annotate.Render;
 import io.webby.url.annotate.Serve;
 import io.webby.url.annotate.View;
-import io.webby.util.Rethrow;
+import io.webby.util.base.Rethrow;
 import org.jetbrains.annotations.NotNull;
 
 import java.io.FileNotFoundException;

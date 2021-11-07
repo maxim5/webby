@@ -8,7 +8,7 @@ import io.webby.app.AppConfigException;
 import io.webby.app.Settings;
 import io.webby.common.InjectorHelper;
 import io.webby.url.annotate.Marshal;
-import io.webby.util.EasyClasspath;
+import io.webby.util.reflect.EasyClasspath;
 import io.webby.util.collect.EasyMaps;
 import io.webby.util.collect.Pair;
 import org.jetbrains.annotations.NotNull;
@@ -17,7 +17,7 @@ import org.jetbrains.annotations.VisibleForTesting;
 import java.util.logging.Level;
 
 import static io.webby.netty.marshal.MarshallerFactory.SupportedJsonLibrary.*;
-import static io.webby.util.EasyCast.castAny;
+import static io.webby.util.base.EasyCast.castAny;
 
 public class MarshallerFactory implements Provider<Json> {
     private static final FluentLogger log = FluentLogger.forEnclosingClass();

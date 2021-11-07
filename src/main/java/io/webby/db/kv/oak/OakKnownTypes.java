@@ -11,7 +11,7 @@ import org.jetbrains.annotations.Nullable;
 import java.util.Map;
 
 import static com.yahoo.oak.common.OakCommonBuildersFactory.*;
-import static io.webby.util.EasyCast.castAny;
+import static io.webby.util.base.EasyCast.castAny;
 
 public class OakKnownTypes {
     private static final Map<Class<?>, OakRecord<?>> map = ImmutableMap.of(

@@ -21,7 +21,7 @@ import java.nio.file.Path;
 import java.time.Duration;
 import java.util.logging.Level;
 
-import static io.webby.util.Rethrow.Functions.rethrow;
+import static io.webby.util.base.Rethrow.Functions.rethrow;
 
 public class FreeMarkerRenderer implements Renderer<Template> {
     private static final FluentLogger log = FluentLogger.forEnclosingClass();

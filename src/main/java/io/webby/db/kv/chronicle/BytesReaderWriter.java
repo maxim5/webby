@@ -1,7 +1,7 @@
 package io.webby.db.kv.chronicle;
 
 import io.webby.db.codec.Codec;
-import io.webby.util.Rethrow;
+import io.webby.util.base.Rethrow;
 import net.openhft.chronicle.bytes.Bytes;
 import net.openhft.chronicle.hash.serialization.BytesReader;
 import net.openhft.chronicle.hash.serialization.BytesWriter;

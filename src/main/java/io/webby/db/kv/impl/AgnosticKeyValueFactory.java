@@ -22,7 +22,7 @@ import io.webby.db.kv.swaydb.SwayDbFactory;
 import io.webby.db.kv.tupl.TuplFactory;
 import org.jetbrains.annotations.NotNull;
 
-import static io.webby.util.EasyCast.castAny;
+import static io.webby.util.base.EasyCast.castAny;
 
 public class AgnosticKeyValueFactory implements KeyValueFactory {
     private final InjectorHelper helper;

@@ -4,7 +4,7 @@ import org.jetbrains.annotations.NotNull;
 
 import java.io.*;
 
-import static io.webby.util.Rethrow.rethrow;
+import static io.webby.util.base.Rethrow.rethrow;
 
 public interface TextMarshaller {
     void writeChars(@NotNull Writer writer, @NotNull Object instance) throws IOException;

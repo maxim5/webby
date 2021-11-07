@@ -22,7 +22,7 @@ import java.nio.charset.Charset;
 import java.util.List;
 import java.util.Map;
 
-import static io.webby.util.EasyCast.castAny;
+import static io.webby.util.base.EasyCast.castAny;
 
 public class DefaultHttpRequestEx extends DefaultFullHttpRequest implements MutableHttpRequestEx {
     private final DelayedAccessLazy<QueryParams> params = AtomicLazy.emptyLazy();

@@ -1,6 +1,7 @@
-package io.webby.util;
+package io.webby.util.io;
 
 import com.google.common.io.Closeables;
+import io.webby.util.base.Rethrow;
 import org.jetbrains.annotations.Nullable;
 
 import java.io.Closeable;

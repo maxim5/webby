@@ -12,7 +12,7 @@ import java.nio.charset.Charset;
 import java.util.Arrays;
 import java.util.List;
 
-import static io.webby.util.EasyCast.castAny;
+import static io.webby.util.base.EasyCast.castAny;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
 public class TestingBytes {

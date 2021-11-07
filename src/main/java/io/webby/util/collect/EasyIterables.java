@@ -9,7 +9,7 @@ import java.util.Optional;
 import java.util.stream.Stream;
 import java.util.stream.StreamSupport;
 
-import static io.webby.util.EasyCast.castAny;
+import static io.webby.util.base.EasyCast.castAny;
 
 public class EasyIterables {
     public static <E> @NotNull List<E> asList(@NotNull Iterable<? extends E> items) {

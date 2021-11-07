@@ -24,7 +24,7 @@ import java.util.function.Consumer;
 import java.util.function.LongConsumer;
 import java.util.logging.Level;
 
-import static io.webby.util.Rethrow.Suppliers.rethrow;
+import static io.webby.util.base.Rethrow.Suppliers.rethrow;
 
 public class ChronicleFactory extends BaseKeyValueFactory {
     private static final FluentLogger log = FluentLogger.forEnclosingClass();

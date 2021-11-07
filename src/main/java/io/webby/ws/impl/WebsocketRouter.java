@@ -2,7 +2,7 @@ package io.webby.ws.impl;
 
 import com.google.common.flogger.FluentLogger;
 import com.google.inject.Inject;
-import io.webby.util.TimeIt;
+import io.webby.util.base.TimeIt;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import org.jetbrains.annotations.VisibleForTesting;

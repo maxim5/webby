@@ -20,7 +20,7 @@ import java.nio.charset.Charset;
 import java.util.Map;
 
 import static io.webby.db.codec.Codecs.*;
-import static io.webby.util.EasyCast.castAny;
+import static io.webby.util.base.EasyCast.castAny;
 
 // Scan for codecs
 public class CodecProvider {

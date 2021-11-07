@@ -7,8 +7,8 @@ import com.google.mu.util.stream.BiStream;
 import io.webby.db.codec.Codec;
 import io.webby.db.kv.KeyValueDb;
 import io.webby.db.kv.impl.ByteArrayDb;
-import io.webby.util.EasyPrimitives.IntCounter;
-import io.webby.util.Rethrow.Consumers;
+import io.webby.util.base.EasyPrimitives.IntCounter;
+import io.webby.util.base.Rethrow.Consumers;
 import io.webby.util.func.ThrowConsumer;
 import io.webby.util.func.ThrowFunction;
 import io.webby.util.func.ThrowPredicate;
@@ -21,7 +21,7 @@ import java.util.function.BiConsumer;
 import java.util.function.Function;
 import java.util.stream.Stream;
 
-import static io.webby.util.Rethrow.rethrow;
+import static io.webby.util.base.Rethrow.rethrow;
 
 public class RocksDbImpl<K, V> extends ByteArrayDb<K, V> implements KeyValueDb<K, V> {
     private static final FlushOptions FLUSH_OPTIONS = new FlushOptions();

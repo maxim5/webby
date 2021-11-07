@@ -4,7 +4,7 @@ import com.google.common.flogger.FluentLogger;
 import com.google.inject.Inject;
 import com.google.inject.Provider;
 import io.routekit.Router;
-import io.webby.util.TimeIt;
+import io.webby.util.base.TimeIt;
 import io.webby.ws.impl.WebsocketAgentBinder;
 import org.jetbrains.annotations.NotNull;
 

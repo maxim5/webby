@@ -15,7 +15,7 @@ import java.util.Map;
 import java.util.function.Supplier;
 
 import static io.webby.app.AppConfigException.assure;
-import static io.webby.util.EasyCast.castAny;
+import static io.webby.util.base.EasyCast.castAny;
 
 public abstract class BaseKeyValueFactory implements InternalKeyValueFactory, Closeable {
     protected final Map<String, KeyValueDb<?, ?>> cache = new HashMap<>();

@@ -1,4 +1,4 @@
-package io.webby.util;
+package io.webby.util.base;
 
 import java.util.Arrays;
 

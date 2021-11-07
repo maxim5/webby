@@ -3,7 +3,7 @@ package io.webby.util.sql.schema;
 import com.google.mu.util.stream.BiStream;
 import io.webby.util.lazy.AtomicLazy;
 import io.webby.util.lazy.DelayedAccessLazy;
-import io.webby.util.EasyClasspath;
+import io.webby.util.reflect.EasyClasspath;
 import io.webby.util.collect.OneOf;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
@@ -14,7 +14,7 @@ import java.lang.reflect.Parameter;
 import java.util.Arrays;
 import java.util.List;
 
-import static io.webby.util.EasyClasspath.*;
+import static io.webby.util.reflect.EasyClasspath.*;
 import static io.webby.util.sql.schema.InvalidSqlModelException.failIf;
 
 public class AdapterInfo {

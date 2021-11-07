@@ -8,7 +8,7 @@ import org.jetbrains.annotations.Nullable;
 
 import java.util.concurrent.atomic.AtomicReference;
 
-import static io.webby.util.EasyCast.castAny;
+import static io.webby.util.base.EasyCast.castAny;
 
 public class TestingModules {
     public static <T> @NotNull Module instance(@NotNull Class<? super T> klass, @NotNull T instance) {

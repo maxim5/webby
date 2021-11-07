@@ -2,7 +2,7 @@ package io.webby.netty.request;
 
 import io.netty.handler.codec.http.cookie.DefaultCookie;
 import io.webby.testing.Testing;
-import io.webby.util.EasyPrimitives.IntCounter;
+import io.webby.util.base.EasyPrimitives.IntCounter;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 

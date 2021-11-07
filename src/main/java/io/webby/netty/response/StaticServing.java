@@ -8,7 +8,7 @@ import io.netty.handler.codec.http.*;
 import io.webby.app.Settings;
 import io.webby.common.InjectorHelper;
 import io.webby.netty.HttpConst;
-import io.webby.util.Rethrow;
+import io.webby.util.base.Rethrow;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import org.jetbrains.annotations.VisibleForTesting;
@@ -25,7 +25,7 @@ import java.util.List;
 import java.util.function.Consumer;
 import java.util.logging.Level;
 
-import static io.webby.util.EasyObjects.firstNonNull;
+import static io.webby.util.base.EasyObjects.firstNonNull;
 
 public class StaticServing {
     private static final FluentLogger log = FluentLogger.forEnclosingClass();

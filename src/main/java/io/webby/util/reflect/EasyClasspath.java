@@ -1,4 +1,4 @@
-package io.webby.util;
+package io.webby.util.reflect;
 
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;

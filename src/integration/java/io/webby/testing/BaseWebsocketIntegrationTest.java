@@ -14,7 +14,7 @@ import io.webby.app.AppSettings;
 import io.webby.netty.NettyWebsocketHandler;
 import io.webby.url.annotate.FrameType;
 import io.webby.url.annotate.Marshal;
-import io.webby.util.Rethrow;
+import io.webby.util.base.Rethrow;
 import io.webby.ws.context.ClientInfo;
 import io.webby.ws.impl.AgentEndpoint;
 import io.webby.ws.impl.WebsocketRouter;
@@ -26,7 +26,7 @@ import java.util.ArrayDeque;
 import java.util.Queue;
 import java.util.function.Consumer;
 
-import static io.webby.util.EasyCast.castAny;
+import static io.webby.util.base.EasyCast.castAny;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 
 public class BaseWebsocketIntegrationTest extends BaseChannelTest {

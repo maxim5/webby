@@ -1,7 +1,8 @@
-package io.webby.util;
+package io.webby.util.log;
 
 import com.google.errorprone.annotations.CanIgnoreReturnValue;
-import io.webby.util.EasyClasspath.Scope;
+import io.webby.util.reflect.EasyClasspath;
+import io.webby.util.reflect.EasyClasspath.Scope;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 

@@ -16,7 +16,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 
-import static io.webby.util.EasyCast.castAny;
+import static io.webby.util.base.EasyCast.castAny;
 
 public record MoshiMarshaller(@NotNull Moshi moshi, @NotNull Charset charset) implements Json {
     @Inject

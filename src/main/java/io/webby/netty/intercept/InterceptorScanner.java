@@ -15,7 +15,7 @@ import java.util.List;
 import java.util.function.BiPredicate;
 import java.util.stream.Stream;
 
-import static io.webby.util.EasyCast.castAny;
+import static io.webby.util.base.EasyCast.castAny;
 
 public class InterceptorScanner {
     private static final BiPredicate<String, String> DEFAULTS_FILTER =
