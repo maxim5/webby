@@ -5,6 +5,7 @@ import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.function.Function;
+import java.util.function.ToIntFunction;
 
 @Immutable
 public class OneOf<U, V> {
@@ -71,6 +72,10 @@ public class OneOf<U, V> {
 
     public <T> @NotNull T mapToObj(@NotNull Function<U, T> fromFirst, @NotNull Function<V, T> fromSecond) {
         return hasFirst() ? fromFirst.apply(first) : fromSecond.apply(second);
+    }
+
+    public int mapToInt(@NotNull ToIntFunction<U> fromFirst, @NotNull ToIntFunction<V> fromSecond) {
+        return hasFirst() ? fromFirst.applyAsInt(first) : fromSecond.applyAsInt(second);
     }
 
     @Override

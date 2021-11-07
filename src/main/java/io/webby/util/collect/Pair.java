@@ -6,6 +6,7 @@ import org.jetbrains.annotations.NotNull;
 import java.util.Map;
 import java.util.function.BiFunction;
 import java.util.function.Function;
+import java.util.function.ToIntBiFunction;
 
 @Immutable
 public record Pair<U, V>(U first, V second) implements Map.Entry<U, V> {
@@ -40,6 +41,10 @@ public record Pair<U, V>(U first, V second) implements Map.Entry<U, V> {
 
     public <T> @NotNull T mapToObj(@NotNull BiFunction<U, V, T> convert) {
         return convert.apply(first, second);
+    }
+
+    public int mapToInt(@NotNull ToIntBiFunction<U, V> convert) {
+        return convert.applyAsInt(first, second);
     }
 
     @Override
