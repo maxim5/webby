@@ -70,6 +70,8 @@ public class ModelTableCodegen extends BaseCodegen {
 
         fromRow();
 
+        meta();
+
         appendLine("}");
     }
 
@@ -80,7 +82,9 @@ public class ModelTableCodegen extends BaseCodegen {
                 .collect(Collectors.toList());
 
         List<String> classesToImport = Streams.concat(
-            Stream.of(pickBaseTableClass(), QueryRunner.class, QueryException.class, ResultSetIterator.class).map(FQN::of),
+            Stream.of(pickBaseTableClass(),
+                      QueryRunner.class, QueryException.class,
+                      ResultSetIterator.class, TableMeta.class).map(FQN::of),
             customClasses.stream().map(FQN::of),
             customClasses.stream().map(adaptersLocator::locateAdapterFqn)
         ).filter(fqn -> !isSkippablePackage(fqn.packageName())).map(FQN::importName).sorted().distinct().toList();
@@ -399,5 +403,29 @@ public class ModelTableCodegen extends BaseCodegen {
             String getter = column.type().jdbcType().getterMethod();
             return "result.%s(%d)".formatted(getter, columnIndex);
         }
+    }
+
+    private void meta() throws IOException {
+        Map<String, String> context = Map.of(
+            "$column_strings", joinWithPattern(table.columns(), "\"%s\"")
+        );
+
+        appendCode("""
+        public static final TableMeta META = new TableMeta() {
+            @Override
+            public @Nonnull String sqlTableName() {
+                return "$table_sql";
+            }
+            @Override
+            public @Nonnull List<String> sqlColumns() {
+                return List.of($column_strings);
+            }
+        };
+        
+        @Override
+        public @Nonnull TableMeta meta() {
+            return META;
+        }
+        """, EasyMaps.merge(mainContext, context));
     }
 }
