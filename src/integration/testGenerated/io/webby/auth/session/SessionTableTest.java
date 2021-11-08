@@ -27,6 +27,7 @@ public class SessionTableTest extends BaseModelKeyTableTest<Long, Session, Sessi
 
     @Override
     protected @NotNull Session createEntity(@NotNull Long key, int version) {
-        return new Session(key, 1, Instant.now().truncatedTo(ChronoUnit.MILLIS), String.valueOf(version), "127.0.0.1");
+        Instant created = Instant.now().truncatedTo(ChronoUnit.MILLIS);
+        return new Session(key, 1, created, String.valueOf(version), version == 0 ? "127.0.0.1" : null);
     }
 }
