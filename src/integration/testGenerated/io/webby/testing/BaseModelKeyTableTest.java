@@ -1,7 +1,7 @@
 package io.webby.testing;
 
-import io.webby.util.sql.api.SqlDebug;
 import io.webby.util.sql.api.QueryRunner;
+import io.webby.util.sql.api.SqlDebug;
 import io.webby.util.sql.api.TableObj;
 import org.jetbrains.annotations.NotNull;
 import org.junit.jupiter.api.AfterEach;
@@ -95,6 +95,18 @@ public abstract class BaseModelKeyTableTest<K, E, T extends TableObj<K, E>> {
         assertEquals(entity, table.getByPkOrNull(keys[0]));
         assertNull(table.getByPkOrNull(keys[1]));
         assertThat(table.fetchAll()).containsExactly(entity);
+    }
+
+    @Test
+    public void update_missing_entity() {
+        assumeKeys(2);
+        E entity = createEntity(keys[0]);
+        assertEquals(0, table.updateByPk(entity));
+
+        assertEquals(0, table.count());
+        assertTrue(table.isEmpty());
+        assertNull(table.getByPkOrNull(keys[0]));
+        assertThat(table.fetchAll()).isEmpty();
     }
 
     protected @NotNull E createEntity(@NotNull K key) {
