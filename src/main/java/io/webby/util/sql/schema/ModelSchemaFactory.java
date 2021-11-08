@@ -197,7 +197,9 @@ public class ModelSchemaFactory {
 
         return EasyObjects.firstNonNull(List.of(
             () -> eligibleMethods.get(fieldName),
-            () -> eligibleMethods.get("get%s".formatted(Naming.camelLowerToUpper(fieldName))),
+            () -> eligibleMethods.get("%s%s".formatted(
+                    fieldType == boolean.class ? "is" : "get",
+                    Naming.camelLowerToUpper(fieldName))),
             () -> EasyIterables.getOnlyItem(eligibleMethods.values().stream().filter(method -> {
                     String name = method.getName().toLowerCase();
                     return name.startsWith("get") && name.contains(fieldName.toLowerCase());
