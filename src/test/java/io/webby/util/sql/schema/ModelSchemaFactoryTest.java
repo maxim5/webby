@@ -51,14 +51,20 @@ public class ModelSchemaFactoryTest {
     }
 
     @Test
-    public void findGetterMethod_pojo_getters_boolean() {
+    public void findGetterMethod_pojo_boolean() {
         class FooPojo {
             private boolean enabled;
+            private boolean disabled;
+            private boolean off;
 
             public boolean isEnabled() { return enabled; }
+            public boolean disabled() { return disabled; }
+            public boolean getOff() { return off; }
         }
 
         assertMethod(findGetterMethod(FooPojo.class, "enabled"), "isEnabled");
+        assertMethod(findGetterMethod(FooPojo.class, "disabled"), "disabled");
+        assertMethod(findGetterMethod(FooPojo.class, "off"), "getOff");
     }
 
     @Test
