@@ -15,18 +15,31 @@ import java.util.stream.Collectors;
 
 public class ColumnJoins {
     public static final String EQ_QUESTION = "%s=?";
+
     public static final Collector<CharSequence, ?, String> COMMA_JOINER = Collectors.joining(", ");
     public static final Collector<CharSequence, ?, String> LINE_JOINER = Collectors.joining("\n");
+    public static final Collector<CharSequence, ?, String> AND_JOINER = Collectors.joining(" AND ");
 
     public static @NotNull String joinWithComma(@NotNull Iterable<Column> columns) {
         return Streams.stream(columns).map(Column::sqlName).collect(COMMA_JOINER);
     }
 
     public static @NotNull String joinWithPattern(@NotNull Iterable<Column> columns, @NotNull String pattern) {
-        return Streams.stream(columns).map(Column::sqlName).map(pattern::formatted).collect(COMMA_JOINER);
+        return joinWithPattern(columns, pattern, COMMA_JOINER);
     }
 
-    public static @NotNull String joinWithTransform(@NotNull Iterable<Column> columns, @NotNull Function<Column, String> transform) {
+    public static @NotNull String joinForWhere(@NotNull Iterable<Column> columns) {
+        return joinWithPattern(columns, EQ_QUESTION, AND_JOINER);
+    }
+
+    public static @NotNull String joinWithPattern(@NotNull Iterable<Column> columns,
+                                                  @NotNull String pattern,
+                                                  @NotNull Collector<CharSequence, ?, String> collector) {
+        return Streams.stream(columns).map(Column::sqlName).map(pattern::formatted).collect(collector);
+    }
+
+    public static @NotNull String joinWithTransform(@NotNull Iterable<Column> columns,
+                                                    @NotNull Function<Column, String> transform) {
         return Streams.stream(columns).map(transform).collect(COMMA_JOINER);
     }
 

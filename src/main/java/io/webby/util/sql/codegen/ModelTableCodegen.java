@@ -46,8 +46,7 @@ public class ModelTableCodegen extends BaseCodegen {
         this.pkContext = primaryKeyField == null ? Map.of() : EasyMaps.asMap(
             "$pk_type", Naming.shortCanonicalName(primaryKeyField.javaType()),
             "$pk_annotation", primaryKeyField.javaType().isPrimitive() ? "" : "@Nonnull ",
-            "$pk_name", primaryKeyField.javaName(),
-            "$pk_sql", ((SimpleTableField) primaryKeyField).column().sqlName()
+            "$pk_name", primaryKeyField.javaName()
         );
     }
 
@@ -176,14 +175,14 @@ public class ModelTableCodegen extends BaseCodegen {
 
         List<Column> primaryColumns = table.columns(TableField::isPrimaryKey);
         Map<String, String> context = EasyMaps.asMap(
-            "$pk_cols_assign", joinWithPattern(primaryColumns, EQ_QUESTION),
+            "$pk_cols_where", joinForWhere(primaryColumns),
             "$pk_object", toKeyObject(requireNonNull(table.primaryKeyField()), "$pk_name")
         );
 
         appendCode("""
         @Override
         public @Nullable $ModelClass getByPkOrNull($pk_annotation$pk_type $pk_name) {
-            String query = "SELECT $all_columns FROM $table_sql WHERE $pk_cols_assign";
+            String query = "SELECT $all_columns FROM $table_sql WHERE $pk_cols_where";
             try (ResultSet result = runner.runQuery(query, $pk_object)) {
                 return result.next() ? fromRow(result) : null;
             } catch (SQLException e) {
@@ -285,14 +284,14 @@ public class ModelTableCodegen extends BaseCodegen {
         List<Column> primary = table.columns(TableField::isPrimaryKey);
         List<Column> nonPrimary = table.columns(Predicate.not(TableField::isPrimaryKey));
         Map<String, String> context = EasyMaps.asMap(
-            "$pk_cols_assign", joinWithPattern(primary, EQ_QUESTION),
+            "$pk_cols_where", joinForWhere(primary),
             "$npk_cols_assign", joinWithPattern(nonPrimary, EQ_QUESTION)
         );
 
         appendCode("""
         @Override
         public int updateByPk(@Nonnull $ModelClass $model_param) {
-           String query = "UPDATE $table_sql SET $npk_cols_assign WHERE $pk_cols_assign";
+           String query = "UPDATE $table_sql SET $npk_cols_assign WHERE $pk_cols_where";
            try {
                return runner.runUpdate(query, valuesForUpdate($model_param));
            } catch (SQLException e) {
