@@ -1,17 +1,32 @@
 package io.webby.util.sql.schema;
 
-import io.webby.util.reflect.EasyClasspath;
+import io.webby.util.reflect.EasyMembers;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import org.junit.jupiter.api.Test;
 
+import java.io.Serializable;
 import java.lang.reflect.Field;
 import java.lang.reflect.Method;
+import java.util.List;
 
+import static com.google.common.truth.Truth.assertThat;
 import static org.junit.jupiter.api.Assertions.*;
 
-@SuppressWarnings("unused")
-public class ModelSchemaFactoryTest {
+@SuppressWarnings({"unused", "FieldCanBeLocal"})
+public class JavaClassAnalyzerTest {
+    @Test
+    public void getAllFieldsOrdered_class_implements_interface() {
+        assertFields(JavaClassAnalyzer.getAllFieldsOrdered(FooClassInterface.class), "i");
+    }
+
+    static class FooClassInterface implements Serializable {
+        private int i;
+        public FooClassInterface(int i) {
+            this.i = i;
+        }
+    }
+
     @Test
     public void findGetterMethod_record_plain() {
         record FooRecord(int i, long l, String s) {}
@@ -112,10 +127,14 @@ public class ModelSchemaFactoryTest {
         assertNull(findGetterMethod(FooPojo.class, "baz"));
     }
 
+    private static void assertFields(@NotNull List<Field> fields, @NotNull String ... names) {
+        assertThat(fields.stream().map(Field::getName).toList()).containsExactlyElementsIn(names);
+    }
+
     private static @Nullable Method findGetterMethod(@NotNull Class<?> klass, @NotNull String name) {
-        Field field = EasyClasspath.findField(klass, EasyClasspath.Scope.DECLARED, name);
+        Field field = EasyMembers.findField(klass, name);
         assertNotNull(field);
-        return ModelSchemaFactory.findGetterMethod(field);
+        return JavaClassAnalyzer.findGetterMethod(field);
     }
 
     private static void assertMethod(@Nullable Method method, @NotNull String name) {

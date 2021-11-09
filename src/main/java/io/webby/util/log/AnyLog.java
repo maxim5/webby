@@ -1,8 +1,8 @@
 package io.webby.util.log;
 
 import com.google.errorprone.annotations.CanIgnoreReturnValue;
-import io.webby.util.reflect.EasyClasspath;
-import io.webby.util.reflect.EasyClasspath.Scope;
+import io.webby.util.reflect.EasyMembers;
+import io.webby.util.reflect.EasyMembers.Scope;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
@@ -77,7 +77,7 @@ public final class AnyLog {
     }
 
     private static @Nullable Object callStatic(@NotNull String className, @NotNull String methodName, Object ... args) {
-        Method method = EasyClasspath.findMethod(className, Scope.DECLARED, methodName);
+        Method method = EasyMembers.findMethod(className, Scope.DECLARED, methodName);
         if (method != null) {
             try {
                 method.setAccessible(true);

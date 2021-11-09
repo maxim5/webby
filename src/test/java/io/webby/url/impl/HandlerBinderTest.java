@@ -6,7 +6,7 @@ import io.routekit.SimpleQueryParser;
 import io.webby.testing.Testing;
 import io.webby.url.annotate.GET;
 import io.webby.url.caller.Caller;
-import io.webby.util.reflect.EasyClasspath.Scope;
+import io.webby.util.reflect.EasyMembers.Scope;
 import io.webby.util.collect.Pair;
 import org.jetbrains.annotations.NotNull;
 import org.junit.jupiter.api.Test;
@@ -15,7 +15,7 @@ import java.lang.reflect.Method;
 import java.util.*;
 import java.util.function.BiPredicate;
 
-import static io.webby.util.reflect.EasyClasspath.findMethod;
+import static io.webby.util.reflect.EasyMembers.findMethod;
 import static java.util.Objects.requireNonNull;
 import static org.junit.jupiter.api.Assertions.*;
 

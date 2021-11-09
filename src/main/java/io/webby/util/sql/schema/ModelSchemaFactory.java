@@ -1,9 +1,6 @@
 package io.webby.util.sql.schema;
 
 import com.google.common.collect.ImmutableList;
-import com.google.common.collect.ImmutableMap;
-import io.webby.util.base.EasyObjects;
-import io.webby.util.collect.EasyIterables;
 import io.webby.util.lazy.AtomicLazyList;
 import io.webby.util.sql.codegen.ModelAdaptersLocator;
 import io.webby.util.sql.codegen.ModelClassInput;
@@ -13,10 +10,10 @@ import org.jetbrains.annotations.VisibleForTesting;
 
 import java.lang.reflect.Field;
 import java.lang.reflect.Method;
-import java.lang.reflect.Modifier;
-import java.util.*;
+import java.util.Collection;
+import java.util.List;
+import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
-import java.util.function.Function;
 
 import static io.webby.util.sql.schema.InvalidSqlModelException.failIf;
 import static java.util.Objects.requireNonNull;
@@ -62,8 +59,7 @@ public class ModelSchemaFactory {
 
     @VisibleForTesting
     void completeTable(@NotNull ModelClassInput input, @NotNull TableSchema schema) {
-        ImmutableList<TableField> fields = Arrays.stream(input.modelClass().getDeclaredFields())
-                .filter(field -> !Modifier.isStatic(field.getModifiers()))
+        ImmutableList<TableField> fields = JavaClassAnalyzer.getAllFieldsOrdered(input.modelClass()).stream()
                 .map(field -> buildTableField(field, input.modelName()))
                 .collect(ImmutableList.toImmutableList());
         schema.initializeOrDie(fields);
@@ -71,7 +67,7 @@ public class ModelSchemaFactory {
 
     @VisibleForTesting
     @NotNull TableField buildTableField(@NotNull Field field, @NotNull String modelName) {
-        Method getter = findGetterMethodOrDie(field);
+        Method getter = JavaClassAnalyzer.findGetterMethodOrDie(field);
         boolean isPrimaryKey = isPrimaryKeyField(field.getName(), modelName);
 
         FieldInference inference = inferFieldSchema(field);
@@ -153,58 +149,25 @@ public class ModelSchemaFactory {
             return new PojoSchema(type, ImmutableList.of(PojoFieldNative.ofEnum(type)));
         }
 
-        ImmutableList<PojoField> pojoFields = Arrays.stream(type.getDeclaredFields())
-                .filter(subField -> !Modifier.isStatic(subField.getModifiers()))
-                .map(subField -> {
-                    Method getter = findGetterMethodOrDie(subField);
-                    ModelField modelField = ModelField.of(subField, getter);
+        ImmutableList<PojoField> pojoFields = JavaClassAnalyzer.getAllFieldsOrdered(type).stream().map(subField -> {
+            Method getter = JavaClassAnalyzer.findGetterMethodOrDie(subField);
+            ModelField modelField = ModelField.of(subField, getter);
 
-                    Class<?> subFieldType = subField.getType();
-                    JdbcType jdbcType = JdbcType.findByMatchingNativeType(subFieldType);
-                    if (jdbcType != null) {
-                        return PojoFieldNative.ofNative(modelField, jdbcType);
-                    }
+            Class<?> subFieldType = subField.getType();
+            JdbcType jdbcType = JdbcType.findByMatchingNativeType(subFieldType);
+            if (jdbcType != null) {
+                return PojoFieldNative.ofNative(modelField, jdbcType);
+            }
 
-                    Class<?> adapterClass = adaptersLocator.locateAdapterClass(subFieldType);
-                    if (adapterClass != null) {
-                        return PojoFieldAdapter.ofAdapter(modelField, adapterClass);
-                    }
+            Class<?> adapterClass = adaptersLocator.locateAdapterClass(subFieldType);
+            if (adapterClass != null) {
+                return PojoFieldAdapter.ofAdapter(modelField, adapterClass);
+            }
 
-                    PojoSchema nestedPojo = buildSchemaForPojoField(subField);
-                    return PojoFieldNested.ofNestedPojo(modelField, nestedPojo);
-                }).collect(ImmutableList.toImmutableList());
+            PojoSchema nestedPojo = buildSchemaForPojoField(subField);
+            return PojoFieldNested.ofNestedPojo(modelField, nestedPojo);
+        }).collect(ImmutableList.toImmutableList());
         return new PojoSchema(type, pojoFields);
-    }
-
-    private static @NotNull Method findGetterMethodOrDie(@NotNull Field field) {
-        Method getter = findGetterMethod(field);
-        failIf(getter == null, "Model class `%s` exposes no getter field: %s",
-               field.getDeclaringClass().getSimpleName(), field.getName());
-        return getter;
-    }
-
-    @VisibleForTesting
-    static @Nullable Method findGetterMethod(@NotNull Field field) {
-        Class<?> fieldType = field.getType();
-        String fieldName = field.getName();
-
-        Map<String, Method> eligibleMethods = Arrays.stream(field.getDeclaringClass().getMethods())
-                .filter(method -> method.getReturnType() == fieldType &&
-                                  method.getParameterCount() == 0 &&
-                                  Modifier.isPublic(method.getModifiers()) &&
-                                  !Modifier.isStatic(method.getModifiers()))
-                .collect(ImmutableMap.toImmutableMap(Method::getName, Function.identity()));
-
-        return EasyObjects.firstNonNull(List.of(
-            () -> eligibleMethods.get(fieldName),
-            () -> eligibleMethods.get("%s%s".formatted(
-                    fieldType == boolean.class ? "is" : "get",
-                    Naming.camelLowerToUpper(fieldName))),
-            () -> EasyIterables.getOnlyItem(eligibleMethods.values().stream().filter(method -> {
-                    String name = method.getName().toLowerCase();
-                    return name.startsWith("get") && name.contains(fieldName.toLowerCase());
-                })).orElse(null)
-        ));
     }
 
     private static boolean isPrimaryKeyField(@NotNull String fieldName, @NotNull String modelName) {
@@ -221,5 +184,7 @@ public class ModelSchemaFactory {
                modelClass, typeName, fieldName);
         failIf(Collection.class.isAssignableFrom(fieldType), "Model class `%s` contains a collection field: %s",
                modelClass, fieldName);
+        failIf(fieldType.isArray(), "Model class `%s` contains an array field `%s` without a matching adapter: %s",
+               modelClass, typeName, fieldName);
     }
 }

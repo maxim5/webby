@@ -1,10 +1,9 @@
 package io.webby.util.sql.schema;
 
 import com.google.mu.util.stream.BiStream;
+import io.webby.util.collect.OneOf;
 import io.webby.util.lazy.AtomicLazy;
 import io.webby.util.lazy.DelayedAccessLazy;
-import io.webby.util.reflect.EasyClasspath;
-import io.webby.util.collect.OneOf;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
@@ -14,7 +13,7 @@ import java.lang.reflect.Parameter;
 import java.util.Arrays;
 import java.util.List;
 
-import static io.webby.util.reflect.EasyClasspath.*;
+import static io.webby.util.reflect.EasyMembers.*;
 import static io.webby.util.sql.schema.InvalidSqlModelException.failIf;
 
 public class AdapterInfo {
@@ -51,7 +50,7 @@ public class AdapterInfo {
             return canonicalName;
         }
 
-        Field staticField = findField(klass, Scope.DECLARED, field -> isPublicStatic(field) && field.getType().isAssignableFrom(klass));
+        Field staticField = findField(klass, field -> isPublicStatic(field) && field.getType().isAssignableFrom(klass));
         if (staticField != null) {
             return "%s.%s".formatted(canonicalName, staticField.getName());
         }
@@ -95,7 +94,7 @@ public class AdapterInfo {
     }
 
     private static @NotNull Parameter[] getCreationParameters(@NotNull Class<?> adapterClass) {
-        Method method = EasyClasspath.findMethod(adapterClass, Scope.DECLARED, CREATE_INSTANCE);
+        Method method = findMethod(adapterClass, Scope.DECLARED, CREATE_INSTANCE);
         failIf(method == null, "JDBC adapter does not implement `%s` method: %s", CREATE_INSTANCE, adapterClass);
         return method.getParameters();
     }
