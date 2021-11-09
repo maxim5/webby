@@ -41,7 +41,8 @@ public class ExamplesCodegenMain {
             new ModelClassInput(NestedModel.class),
             new ModelClassInput(DeepNestedModel.class),
             new ModelClassInput(PojoWithAdapterModel.class),
-            new ModelClassInput(NullableModel.class)
+            new ModelClassInput(NullableModel.class),
+            new ModelClassInput(InheritedModel.class)
         );
 
         TimeIt.timeItOrDie(() -> {
