@@ -6,18 +6,13 @@ import org.jetbrains.annotations.Nullable;
 public abstract class TableField implements WithColumns {
     protected final ModelField field;
     protected final boolean primaryKey;
-    protected final TableSchema foreignKey;
     protected final AdapterInfo adapterInfo;
 
     public TableField(@NotNull ModelField field,
                       boolean primaryKey,
-                      @Nullable TableSchema foreignKey,
                       @Nullable AdapterInfo adapterInfo) {
-        assert !primaryKey || foreignKey == null : "Field can't be PK and FK: %s".formatted(foreignKey);
-
         this.field = field;
         this.primaryKey = primaryKey;
-        this.foreignKey = foreignKey;
         this.adapterInfo = adapterInfo;
     }
 
@@ -38,11 +33,7 @@ public abstract class TableField implements WithColumns {
     }
 
     public boolean isForeignKey() {
-        return foreignKey != null;
-    }
-
-    public @Nullable TableSchema getForeignTable() {
-        return foreignKey;
+        return false;
     }
 
     public boolean isNativelySupportedType() {

@@ -2,6 +2,9 @@ package io.webby.util.sql.schema;
 
 import com.google.common.collect.ImmutableList;
 import io.webby.util.lazy.AtomicLazyList;
+import io.webby.util.sql.api.Foreign;
+import io.webby.util.sql.api.ForeignInt;
+import io.webby.util.sql.api.ForeignLong;
 import io.webby.util.sql.codegen.ModelAdaptersLocator;
 import io.webby.util.sql.codegen.ModelClassInput;
 import org.jetbrains.annotations.NotNull;
@@ -10,11 +13,14 @@ import org.jetbrains.annotations.VisibleForTesting;
 
 import java.lang.reflect.Field;
 import java.lang.reflect.Method;
+import java.lang.reflect.ParameterizedType;
+import java.lang.reflect.Type;
 import java.util.Collection;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
+import static io.webby.util.sql.schema.InvalidSqlModelException.assure;
 import static io.webby.util.sql.schema.InvalidSqlModelException.failIf;
 import static java.util.Objects.requireNonNull;
 
@@ -22,7 +28,7 @@ public class ModelSchemaFactory {
     private final ModelAdaptersLocator adaptersLocator;
 
     private final Iterable<ModelClassInput> inputs;
-    private final Map<ModelClassInput, TableSchema> tables = new ConcurrentHashMap<>();
+    private final Map<Class<?>, TableSchema> tables = new ConcurrentHashMap<>();
     private final Map<Class<?>, PojoSchema> pojos = new ConcurrentHashMap<>();
 
     public ModelSchemaFactory(@NotNull ModelAdaptersLocator adaptersLocator, @NotNull Iterable<ModelClassInput> inputs) {
@@ -35,10 +41,10 @@ public class ModelSchemaFactory {
         pojos.clear();
 
         for (ModelClassInput input : inputs) {
-            tables.put(input, buildShallowTable(input));
+            tables.put(input.modelClass(), buildShallowTable(input));
         }
-        for (Map.Entry<ModelClassInput, TableSchema> entry : tables.entrySet()) {
-            completeTable(entry.getKey(), entry.getValue());
+        for (ModelClassInput input : inputs) {
+            completeTable(input, tables.get(input.modelClass()));
         }
     }
 
@@ -71,16 +77,16 @@ public class ModelSchemaFactory {
         boolean isPrimaryKey = isPrimaryKeyField(field.getName(), modelName);
 
         FieldInference inference = inferFieldSchema(field);
-        if (inference.isSingleColumn()) {
-            return new SimpleTableField(ModelField.of(field, getter),
-                                        isPrimaryKey,
-                                        inference.foreignTable,
-                                        inference.adapterInfo(),
-                                        requireNonNull(inference.singleColumn));
+        if (inference.isForeignTable()) {
+            return new ForeignTableField(ModelField.of(field, getter), requireNonNull(inference.foreignTable()));
+        } else if (inference.isSingleColumn()) {
+            return new OneColumnTableField(ModelField.of(field, getter),
+                                           isPrimaryKey,
+                                           inference.adapterInfo(),
+                                           requireNonNull(inference.singleColumn));
         } else {
             return new MultiColumnTableField(ModelField.of(field, getter),
                                              isPrimaryKey,
-                                             inference.foreignTable,
                                              requireNonNull(inference.adapterInfo()),
                                              requireNonNull(inference.multiColumns));
         }
@@ -93,6 +99,18 @@ public class ModelSchemaFactory {
         JdbcType jdbcType = JdbcType.findByMatchingNativeType(fieldType);
         if (jdbcType != null) {
             return FieldInference.ofNativeColumn(new Column(Naming.camelToSnake(fieldName), new ColumnType(jdbcType)));
+        }
+
+        if (Foreign.class.isAssignableFrom(fieldType)) {
+            assure(fieldType == ForeignInt.class || fieldType == ForeignLong.class || fieldType == Foreign.class,
+                   "Invalid foreign key reference: `%s`", fieldType.getSimpleName());
+            Type[] actualTypeArguments = ((ParameterizedType) field.getGenericType()).getActualTypeArguments();
+            Class<?> entityType = (Class<?>) actualTypeArguments[actualTypeArguments.length - 1];
+            TableSchema foreignTable = tables.get(entityType);
+            failIf(foreignTable == null,
+                   "Foreign model `%s` referenced from `%s` model is missing in the input set for table generation",
+                   entityType.getSimpleName(), fieldType.getSimpleName());
+            return FieldInference.ofForeignKey(foreignTable);
         }
 
         Class<?> adapterClass = adaptersLocator.locateAdapterClass(fieldType);
@@ -124,6 +142,14 @@ public class ModelSchemaFactory {
 
         public static FieldInference ofMultiColumns(@NotNull List<Column> columns, @NotNull AdapterInfo adapterInfo) {
             return new FieldInference(null, ImmutableList.copyOf(columns), adapterInfo, null);
+        }
+
+        public static FieldInference ofForeignKey(@NotNull TableSchema foreignTable) {
+            return new FieldInference(null, null, null, foreignTable);
+        }
+
+        public boolean isForeignTable() {
+            return foreignTable != null;
         }
 
         public boolean isSingleColumn() {

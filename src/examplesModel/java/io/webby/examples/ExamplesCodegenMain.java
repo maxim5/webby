@@ -44,7 +44,12 @@ public class ExamplesCodegenMain {
             new ModelClassInput(NullableModel.class),
             new ModelClassInput(InheritedModel.class),
             new ModelClassInput(ComplexIdModel.class),
-            new ModelClassInput(AtomicModel.class)
+            new ModelClassInput(AtomicModel.class),
+
+            // new ModelClassInput(ForeignKeyModel.class),
+            new ModelClassInput(ForeignKeyModel.InnerInt.class),
+            new ModelClassInput(ForeignKeyModel.InnerLong.class),
+            new ModelClassInput(ForeignKeyModel.InnerString.class)
         );
 
         TimeIt.timeItOrDie(() -> {

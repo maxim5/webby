@@ -214,6 +214,23 @@ public class ModelTableCodegen extends BaseCodegen {
         }
     }
 
+    // getByPkFollowReferences
+    private void selectQuery() throws IOException {
+        Map<String, String> context = EasyMaps.asMap(
+
+        );
+
+        appendCode("""
+        private static @Nonnull String selectQuery(@NotNull FollowReferences follow) {
+            switch (follow) {
+                case NO_FOLLOW: return "SELECT $all_columns FROM $table_sql";
+                case ONE_LEVEL: return "SELECT $all_columns FROM $table_sql";
+                case ALL: return "SELECT $all_columns FROM $table_sql";
+            }
+        }
+        """, EasyMaps.merge(context, mainContext));
+    }
+
     private void iterator() throws IOException {
         appendCode("""
         @Override
@@ -363,6 +380,10 @@ public class ModelTableCodegen extends BaseCodegen {
 
         appendCode("""
         public static @Nonnull $ModelClass fromRow(@Nonnull ResultSet result) throws SQLException {
+          return fromRow(result, 0);
+        }
+        
+        public static @Nonnull $ModelClass fromRow(@Nonnull ResultSet result, int start) throws SQLException {
         $fields_assignments
             return new $ModelClass($model_fields);
         }\n
@@ -387,11 +408,11 @@ public class ModelTableCodegen extends BaseCodegen {
 
         private @NotNull String createExpr(@NotNull TableField field) {
             if (field.isNativelySupportedType()) {
-                assert field instanceof SimpleTableField;
-                return resultSetGetterExpr(((SimpleTableField) field).column(), ++columnIndex);
+                assert field instanceof OneColumnTableField : "Native field is not one column: %s".formatted(field);
+                return resultSetGetterExpr(((OneColumnTableField) field).column(), ++columnIndex);
             } else {
                 String staticRef = requireNonNull(field.adapterInfo()).staticRef();
-                String params = field instanceof SimpleTableField simpleField ?
+                String params = field instanceof OneColumnTableField simpleField ?
                         resultSetGetterExpr(simpleField.column(), ++columnIndex) :
                         joinWithTransform(field.columns(), column -> resultSetGetterExpr(column, ++columnIndex));
                 return "%s.createInstance(%s)".formatted(staticRef, params);
@@ -400,7 +421,7 @@ public class ModelTableCodegen extends BaseCodegen {
 
         private static @NotNull String resultSetGetterExpr(@NotNull Column column, int columnIndex) {
             String getter = column.type().jdbcType().getterMethod();
-            return "result.%s(%d)".formatted(getter, columnIndex);
+            return "result.%s(start+%d)".formatted(getter, columnIndex);
         }
     }
 

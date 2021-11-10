@@ -6,15 +6,14 @@ import org.jetbrains.annotations.Nullable;
 import java.util.Collections;
 import java.util.List;
 
-public class SimpleTableField extends TableField {
+public class OneColumnTableField extends TableField {
     private final Column column;
 
-    public SimpleTableField(@NotNull ModelField field,
-                            boolean primaryKey,
-                            @Nullable TableSchema foreignKey,
-                            @Nullable AdapterInfo adapterInfo,
-                            @NotNull Column column) {
-        super(field, primaryKey, foreignKey, adapterInfo);
+    public OneColumnTableField(@NotNull ModelField field,
+                               boolean primaryKey,
+                               @Nullable AdapterInfo adapterInfo,
+                               @NotNull Column column) {
+        super(field, primaryKey, adapterInfo);
         this.column = column;
     }
 
