@@ -46,10 +46,10 @@ public class ExamplesCodegenMain {
             new ModelClassInput(ComplexIdModel.class),
             new ModelClassInput(AtomicModel.class),
 
-            // new ModelClassInput(ForeignKeyModel.class),
             new ModelClassInput(ForeignKeyModel.InnerInt.class),
             new ModelClassInput(ForeignKeyModel.InnerLong.class),
             new ModelClassInput(ForeignKeyModel.InnerString.class)
+            // new ModelClassInput(ForeignKeyModel.class)
         );
 
         TimeIt.timeItOrDie(() -> {

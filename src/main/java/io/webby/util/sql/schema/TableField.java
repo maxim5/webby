@@ -1,7 +1,10 @@
 package io.webby.util.sql.schema;
 
+import io.webby.util.sql.api.FollowReferences;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
+
+import java.util.List;
 
 public abstract class TableField implements WithColumns {
     protected final ModelField field;
@@ -46,5 +49,9 @@ public abstract class TableField implements WithColumns {
 
     public @Nullable AdapterInfo adapterInfo() {
         return adapterInfo;
+    }
+
+    public @NotNull List<Column> columns(@NotNull FollowReferences follow) {
+        return columns();
     }
 }

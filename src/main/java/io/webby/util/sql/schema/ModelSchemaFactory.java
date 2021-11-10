@@ -1,6 +1,7 @@
 package io.webby.util.sql.schema;
 
 import com.google.common.collect.ImmutableList;
+import io.webby.util.collect.Pair;
 import io.webby.util.lazy.AtomicLazyList;
 import io.webby.util.sql.api.Foreign;
 import io.webby.util.sql.api.ForeignInt;
@@ -78,17 +79,19 @@ public class ModelSchemaFactory {
 
         FieldInference inference = inferFieldSchema(field);
         if (inference.isForeignTable()) {
-            return new ForeignTableField(ModelField.of(field, getter), requireNonNull(inference.foreignTable()));
+            return new ForeignTableField(ModelField.of(field, getter),
+                                         requireNonNull(inference.foreignTable()),
+                                         requireNonNull(inference.singleColumn()));
         } else if (inference.isSingleColumn()) {
             return new OneColumnTableField(ModelField.of(field, getter),
                                            isPrimaryKey,
                                            inference.adapterInfo(),
-                                           requireNonNull(inference.singleColumn));
+                                           requireNonNull(inference.singleColumn()));
         } else {
             return new MultiColumnTableField(ModelField.of(field, getter),
                                              isPrimaryKey,
                                              requireNonNull(inference.adapterInfo()),
-                                             requireNonNull(inference.multiColumns));
+                                             requireNonNull(inference.multiColumns()));
         }
     }
 
@@ -101,16 +104,10 @@ public class ModelSchemaFactory {
             return FieldInference.ofNativeColumn(new Column(Naming.camelToSnake(fieldName), new ColumnType(jdbcType)));
         }
 
-        if (Foreign.class.isAssignableFrom(fieldType)) {
-            assure(fieldType == ForeignInt.class || fieldType == ForeignLong.class || fieldType == Foreign.class,
-                   "Invalid foreign key reference: `%s`", fieldType.getSimpleName());
-            Type[] actualTypeArguments = ((ParameterizedType) field.getGenericType()).getActualTypeArguments();
-            Class<?> entityType = (Class<?>) actualTypeArguments[actualTypeArguments.length - 1];
-            TableSchema foreignTable = tables.get(entityType);
-            failIf(foreignTable == null,
-                   "Foreign model `%s` referenced from `%s` model is missing in the input set for table generation",
-                   entityType.getSimpleName(), fieldType.getSimpleName());
-            return FieldInference.ofForeignKey(foreignTable);
+        Pair<TableSchema, JdbcType> foreignTableInfo = findForeignTableInfo(field);
+        if (foreignTableInfo != null) {
+            Column column = new Column(Naming.camelToSnake(fieldName) + "_id", new ColumnType(foreignTableInfo.second()));
+            return FieldInference.ofForeignKey(column, foreignTableInfo.first());
         }
 
         Class<?> adapterClass = adaptersLocator.locateAdapterClass(fieldType);
@@ -144,8 +141,8 @@ public class ModelSchemaFactory {
             return new FieldInference(null, ImmutableList.copyOf(columns), adapterInfo, null);
         }
 
-        public static FieldInference ofForeignKey(@NotNull TableSchema foreignTable) {
-            return new FieldInference(null, null, null, foreignTable);
+        public static FieldInference ofForeignKey(@NotNull Column column, @NotNull TableSchema foreignTable) {
+            return new FieldInference(column, null, null, foreignTable);
         }
 
         public boolean isForeignTable() {
@@ -155,6 +152,44 @@ public class ModelSchemaFactory {
         public boolean isSingleColumn() {
             return singleColumn != null;
         }
+    }
+
+    private @Nullable Pair<TableSchema, JdbcType> findForeignTableInfo(@NotNull Field field) {
+        Class<?> fieldType = field.getType();
+        if (!Foreign.class.isAssignableFrom(fieldType)) {
+            return null;
+        }
+
+        assure(fieldType == ForeignInt.class || fieldType == ForeignLong.class || fieldType == Foreign.class,
+               "Invalid foreign key reference type: `%s`. Supported types: Foreign, ForeignInt, ForeignLong",
+               fieldType.getSimpleName());
+        Type[] actualTypeArguments = ((ParameterizedType) field.getGenericType()).getActualTypeArguments();
+        Class<?> keyType =
+                fieldType == ForeignInt.class ?
+                        int.class :
+                fieldType == ForeignLong.class ?
+                        long.class :
+                        (Class<?>) actualTypeArguments[0];
+        Class<?> entityType = (Class<?>) actualTypeArguments[actualTypeArguments.length - 1];
+
+        TableSchema foreignTable = tables.get(entityType);
+        failIf(foreignTable == null,
+               "Foreign model `%s` referenced from `%s` model is missing in the input set for table generation",
+               entityType.getSimpleName(), fieldType.getSimpleName());
+        assure(foreignTable.hasPrimaryKeyField(),
+               "Foreign model `%s` does not have a primary key. Expected key type: `%s`",
+               entityType.getSimpleName(), keyType);
+        Class<?> primaryKeyType = requireNonNull(foreignTable.primaryKeyField()).javaType();
+        assure(primaryKeyType == keyType,
+               "Foreign model `%s` primary key `%s` does match the foreign key",
+               entityType.getSimpleName(), primaryKeyType, keyType);
+
+        JdbcType jdbcType = JdbcType.findByMatchingNativeType(primaryKeyType);
+        failIf(jdbcType == null,
+               "Foreign model `%s` primary key `%s` must be natively supported type (i.e., primitive or String)",
+               entityType.getSimpleName(), primaryKeyType, keyType);
+
+        return Pair.of(foreignTable, jdbcType);
     }
 
     private @NotNull PojoSchema buildSchemaForPojoField(@NotNull Field field) {

@@ -2,6 +2,7 @@ package io.webby.util.sql.schema;
 
 import com.google.common.collect.ImmutableList;
 import io.webby.util.lazy.AtomicLazyList;
+import io.webby.util.sql.api.FollowReferences;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
@@ -35,6 +36,10 @@ public record TableSchema(@NotNull String sqlName,
 
     public @NotNull List<Column> columns(@NotNull Predicate<TableField> fieldsFilter) {
         return fields().stream().filter(fieldsFilter).map(WithColumns::columns).flatMap(List::stream).toList();
+    }
+
+    public @NotNull List<Column> columns(@NotNull FollowReferences follow) {
+        return fields().stream().flatMap(field -> field.columns(follow).stream()).toList();
     }
 
     /*package*/ void initializeOrDie(@NotNull ImmutableList<TableField> fields) {
