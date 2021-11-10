@@ -13,6 +13,10 @@ public interface TableObj<K, E> extends BaseTable<E> {
 
     @NotNull Optional<E> getOptionalByPk(@NotNull K key);
 
+    default @Nullable E getByPkOrNull(@NotNull K key, @NotNull FollowReferences follow) {
+        return getByPkOrNull(key);  // TODO: temp
+    }
+
     @CanIgnoreReturnValue
     int updateByPk(@NotNull E entity);
 }

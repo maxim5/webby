@@ -26,4 +26,13 @@ public interface TableLong<E> extends TableObj<Long, E> {
     default @NotNull Optional<E> getOptionalByPk(@NotNull Long key) {
         return getOptionalByPk(key.longValue());
     }
+
+    @Override
+    default @Nullable E getByPkOrNull(@NotNull Long key, @NotNull FollowReferences follow) {
+        return getByPkOrNull(key.longValue(), follow);
+    }
+
+    default @Nullable E getByPkOrNull(long key, @NotNull FollowReferences follow) {
+        return getByPkOrNull(key); // TODO: temp
+    }
 }

@@ -26,4 +26,13 @@ public interface TableInt<E> extends TableObj<Integer, E> {
     default @NotNull Optional<E> getOptionalByPk(@NotNull Integer key) {
         return getOptionalByPk(key.intValue());
     }
+
+    @Override
+    default @Nullable E getByPkOrNull(@NotNull Integer key, @NotNull FollowReferences follow) {
+        return getByPkOrNull(key.intValue(), follow);
+    }
+
+    default @Nullable E getByPkOrNull(int key, @NotNull FollowReferences follow) {
+        return getByPkOrNull(key); // TODO: temp
+    }
 }
