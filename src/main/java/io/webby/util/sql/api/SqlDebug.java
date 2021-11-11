@@ -3,7 +3,9 @@ package io.webby.util.sql.api;
 import com.google.common.base.Strings;
 import com.google.common.collect.Lists;
 import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 
+import java.sql.Connection;
 import java.sql.ResultSet;
 import java.sql.ResultSetMetaData;
 import java.sql.SQLException;
@@ -42,7 +44,7 @@ public class SqlDebug {
         int columnCount = metaData.getColumnCount();
         List<RowValue> values = new ArrayList<>(columnCount);
         for (int i = 1; i <= columnCount; i++) {
-            values.add(new RowValue(metaData.getColumnName(i), row.getString(i)));
+            values.add(new RowValue(metaData.getColumnName(i), Strings.nullToEmpty(row.getString(i))));
         }
         return new Row(values);
     }
@@ -105,4 +107,22 @@ public class SqlDebug {
     }
 
     public record RowValue(@NotNull String name, @NotNull String value) {}
+
+    public static class DebugRunner extends QueryRunner {
+        public DebugRunner(@NotNull Connection connection) {
+            super(connection);
+        }
+
+        public void update(@NotNull String query, @Nullable Object @NotNull ... params) throws Exception {
+            System.out.println("> " + query);
+            System.out.println(runUpdate(query, params));
+            System.out.println();
+        }
+
+        public void query(@NotNull String query, @Nullable Object @NotNull ... params) throws Exception {
+            System.out.println("> " + query);
+            System.out.println(SqlDebug.toDebugString(runQuery(query, params)));
+            System.out.println();
+        }
+    }
 }
