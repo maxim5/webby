@@ -17,9 +17,9 @@ import java.lang.reflect.Method;
 import java.lang.reflect.ParameterizedType;
 import java.lang.reflect.Type;
 import java.util.Collection;
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.concurrent.ConcurrentHashMap;
 
 import static io.webby.util.sql.schema.InvalidSqlModelException.assure;
 import static io.webby.util.sql.schema.InvalidSqlModelException.failIf;
@@ -29,8 +29,8 @@ public class ModelSchemaFactory {
     private final ModelAdaptersLocator adaptersLocator;
 
     private final Iterable<ModelClassInput> inputs;
-    private final Map<Class<?>, TableSchema> tables = new ConcurrentHashMap<>();
-    private final Map<Class<?>, PojoSchema> pojos = new ConcurrentHashMap<>();
+    private final Map<Class<?>, TableSchema> tables = new LinkedHashMap<>();
+    private final Map<Class<?>, PojoSchema> pojos = new LinkedHashMap<>();
 
     public ModelSchemaFactory(@NotNull ModelAdaptersLocator adaptersLocator, @NotNull Iterable<ModelClassInput> inputs) {
         this.adaptersLocator = adaptersLocator;
@@ -59,7 +59,7 @@ public class ModelSchemaFactory {
 
     @VisibleForTesting
     @NotNull TableSchema buildShallowTable(@NotNull ModelClassInput input) {
-        String sqlName = Naming.camelToSnake(input.modelName());
+        String sqlName = Naming.camelToSnake(input.modelName()).replace("__", "_");  // TODO: unify sql name generation
         String javaName = "%sTable".formatted(input.modelName());
         return new TableSchema(sqlName, javaName, input.modelName(), input.modelClass(), AtomicLazyList.ofUninitializedList());
     }

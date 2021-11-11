@@ -5,7 +5,7 @@ import org.jetbrains.annotations.NotNull;
 
 import java.util.List;
 
-public class ForeignTableField extends TableField {
+public class ForeignTableField extends TableField implements WithPrefixedColumns {
     private final TableSchema foreignTable;
     private final Column foreignKeyColumn;
 
@@ -31,9 +31,9 @@ public class ForeignTableField extends TableField {
     }
 
     @Override
-    public @NotNull List<Column> columns(@NotNull FollowReferences follow) {
+    public @NotNull List<PrefixedColumn> columns(@NotNull FollowReferences follow) {
         return switch (follow) {
-            case NO_FOLLOW -> List.of(foreignKeyColumn);
+            case NO_FOLLOW -> List.of(foreignKeyColumn.prefixed(foreignTable.sqlName()));
             case ONE_LEVEL -> foreignTable.columns(FollowReferences.NO_FOLLOW);
             case ALL -> foreignTable.columns(FollowReferences.ALL);
         };
