@@ -190,16 +190,6 @@ public class ModelTableCodegen extends BaseCodegen {
             } catch (SQLException e) {
                 throw new QueryException("$table_sql.getByPkOrNull() failed", query, $pk_name, e);
             }
-        }
-        
-        @Override
-        public @Nonnull $ModelClass getByPkOrDie($pk_annotation$pk_type $pk_name) {
-            return Objects.requireNonNull(getByPkOrNull($pk_name), "$table_sql not found by PK: $pk_name=" + $pk_name);
-        }
-        
-        @Override
-        public @Nonnull Optional<$ModelClass> getOptionalByPk($pk_annotation$pk_type $pk_name) {
-            return Optional.ofNullable(getByPkOrNull($pk_name));
         }\n
         """, EasyMaps.merge(context, mainContext, pkContext));
     }

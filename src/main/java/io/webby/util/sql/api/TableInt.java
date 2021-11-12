@@ -3,24 +3,33 @@ package io.webby.util.sql.api;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
+import java.util.Objects;
 import java.util.Optional;
 
 public interface TableInt<E> extends TableObj<Integer, E> {
     @Nullable E getByPkOrNull(int key);
+
+    default @NotNull E getByPkOrDie(int key) {
+        return Objects.requireNonNull(getByPkOrNull(key), "Entity not found by PK=" + key);
+    }
+
+    default @NotNull Optional<E> getOptionalByPk(int key) {
+        return Optional.ofNullable(getByPkOrNull(key));
+    }
+
+    default @Nullable E getByPkOrNull(int key, @NotNull FollowReferences follow) {
+        return getByPkOrNull(key); // TODO: temp
+    }
 
     @Override
     default @Nullable E getByPkOrNull(@NotNull Integer key) {
         return getByPkOrNull(key.intValue());
     }
 
-    @NotNull E getByPkOrDie(int key);
-
     @Override
     default @NotNull E getByPkOrDie(@NotNull Integer key) {
         return getByPkOrDie(key.intValue());
     }
-
-    @NotNull Optional<E> getOptionalByPk(int key);
 
     @Override
     default @NotNull Optional<E> getOptionalByPk(@NotNull Integer key) {
@@ -30,9 +39,5 @@ public interface TableInt<E> extends TableObj<Integer, E> {
     @Override
     default @Nullable E getByPkOrNull(@NotNull Integer key, @NotNull FollowReferences follow) {
         return getByPkOrNull(key.intValue(), follow);
-    }
-
-    default @Nullable E getByPkOrNull(int key, @NotNull FollowReferences follow) {
-        return getByPkOrNull(key); // TODO: temp
     }
 }
