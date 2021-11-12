@@ -10,6 +10,7 @@ import org.jetbrains.annotations.NotNull;
 
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
 import java.util.function.Predicate;
@@ -58,6 +59,7 @@ public class ModelTableCodegen extends BaseCodegen {
         count();
         // isEmpty();
 
+        selectConstants();
         getByPk();
         iterator();
 
@@ -82,7 +84,7 @@ public class ModelTableCodegen extends BaseCodegen {
         List<String> classesToImport = Streams.concat(
             Stream.of(pickBaseTableClass(),
                       QueryRunner.class, QueryException.class,
-                      ResultSetIterator.class, TableMeta.class).map(FQN::of),
+                      ResultSetIterator.class, FollowReferences.class, TableMeta.class).map(FQN::of),
             customClasses.stream().map(FQN::of),
             customClasses.stream().map(adaptersLocator::locateAdapterFqn)
         ).filter(fqn -> !isSkippablePackage(fqn.packageName())).map(FQN::importName).sorted().distinct().toList();
@@ -167,24 +169,36 @@ public class ModelTableCodegen extends BaseCodegen {
         """);
     }
 
+    private void selectConstants() throws IOException {
+        String constants = Arrays.stream(FollowReferences.values())
+                .map(follow -> new SelectMaker(table).make(follow))
+                .map(snippet -> new Snippet().withLines(snippet))
+                .map(query -> JavaSupport.wrapAsStringLiteral(query).join(INDENT))
+                .collect(Collectors.joining(",\n", INDENT, ""));
+
+        appendCode("""
+        private static final String[] SELECT_ENTITY = {
+        $constants
+        };\n
+        """, EasyMaps.asMap("$constants", constants));
+    }
+
     private void getByPk() throws IOException {
         if (!table.hasPrimaryKeyField()) {
             return;
         }
 
         List<Column> primaryColumns = table.columns(TableField::isPrimaryKey);
-        Snippet query = new Snippet()
-                .withLines(new SelectMaker(table).make(FollowReferences.NO_FOLLOW))
-                .withLines(WhereMaker.makeForAnd(primaryColumns));
+        Snippet where = new Snippet().withLines(WhereMaker.makeForAnd(primaryColumns));
         Map<String, String> context = EasyMaps.asMap(
-            "$sql_query_literal", JavaSupport.wrapAsStringLiteral(query).join(INDENT2),
+            "$sql_where_literal", JavaSupport.wrapAsStringLiteral(where).join(INDENT2),
             "$pk_object", toKeyObject(requireNonNull(table.primaryKeyField()), "$pk_name")
         );
 
         appendCode("""
         @Override
-        public @Nullable $ModelClass getByPkOrNull($pk_annotation$pk_type $pk_name) {
-            String query = $sql_query_literal;
+        public @Nullable $ModelClass getByPkOrNull($pk_annotation$pk_type $pk_name, @Nonnull FollowReferences follow) {
+            String query = SELECT_ENTITY[follow.ordinal()] + $sql_where_literal;
             try (ResultSet result = runner.runQuery(query, $pk_object)) {
                 return result.next() ? fromRow(result) : null;
             } catch (SQLException e) {
@@ -204,23 +218,6 @@ public class ModelTableCodegen extends BaseCodegen {
         } else {
             return "%s.toNewValuesArray(%s)".formatted(adapterInfo.staticRef(), paramName);
         }
-    }
-
-    // getByPkFollowReferences
-    private void selectQuery() throws IOException {
-        Map<String, String> context = EasyMaps.asMap(
-
-        );
-
-        appendCode("""
-        private static @Nonnull String selectQuery(@NotNull FollowReferences follow) {
-            switch (follow) {
-                case NO_FOLLOW: return "SELECT $all_columns FROM $table_sql";
-                case ONE_LEVEL: return "SELECT $all_columns FROM $table_sql";
-                case ALL: return "SELECT $all_columns FROM $table_sql";
-            }
-        }
-        """, EasyMaps.merge(context, mainContext));
     }
 
     private void iterator() throws IOException {

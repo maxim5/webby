@@ -7,7 +7,11 @@ import java.util.Objects;
 import java.util.Optional;
 
 public interface TableInt<E> extends TableObj<Integer, E> {
-    @Nullable E getByPkOrNull(int key);
+    @Nullable E getByPkOrNull(int key, @NotNull FollowReferences follow);
+
+    default @Nullable E getByPkOrNull(int key) {
+        return getByPkOrNull(key, FollowReferences.NO_FOLLOW);
+    }
 
     default @NotNull E getByPkOrDie(int key) {
         return Objects.requireNonNull(getByPkOrNull(key), "Entity not found by PK=" + key);
@@ -15,10 +19,6 @@ public interface TableInt<E> extends TableObj<Integer, E> {
 
     default @NotNull Optional<E> getOptionalByPk(int key) {
         return Optional.ofNullable(getByPkOrNull(key));
-    }
-
-    default @Nullable E getByPkOrNull(int key, @NotNull FollowReferences follow) {
-        return getByPkOrNull(key); // TODO: temp
     }
 
     @Override
