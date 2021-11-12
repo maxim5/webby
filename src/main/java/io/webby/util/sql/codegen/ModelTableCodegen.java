@@ -12,12 +12,11 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
-import java.util.Set;
 import java.util.function.Predicate;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
-import static io.webby.util.sql.schema.ColumnJoins.*;
+import static io.webby.util.sql.codegen.ColumnJoins.*;
 import static java.util.Objects.requireNonNull;
 
 @SuppressWarnings("UnnecessaryStringEscape")
@@ -174,15 +173,18 @@ public class ModelTableCodegen extends BaseCodegen {
         }
 
         List<Column> primaryColumns = table.columns(TableField::isPrimaryKey);
+        Snippet query = new Snippet()
+                .withLines(new SelectMaker(table).make(FollowReferences.NO_FOLLOW))
+                .withLines(WhereMaker.makeForAnd(primaryColumns));
         Map<String, String> context = EasyMaps.asMap(
-            "$pk_cols_where", joinForWhere(primaryColumns),
+            "$sql_query_literal", JavaSupport.wrapAsStringLiteral(query).join(INDENT2),
             "$pk_object", toKeyObject(requireNonNull(table.primaryKeyField()), "$pk_name")
         );
 
         appendCode("""
         @Override
         public @Nullable $ModelClass getByPkOrNull($pk_annotation$pk_type $pk_name) {
-            String query = "SELECT $all_columns FROM $table_sql WHERE $pk_cols_where";
+            String query = $sql_query_literal;
             try (ResultSet result = runner.runQuery(query, $pk_object)) {
                 return result.next() ? fromRow(result) : null;
             } catch (SQLException e) {
@@ -276,10 +278,10 @@ public class ModelTableCodegen extends BaseCodegen {
     }
 
     private void valuesForInsert() throws IOException {
-        List<FieldArrayConversion> conversions = zipWithColumnIndex(table.fields(), FieldArrayConversion::new);
+        List<FieldArrayConversionMaker> conversions = zipWithColumnIndex(table.fields(), FieldArrayConversionMaker::new);
         Map<String, String> context = Map.of(
-            "$array_init", conversions.stream().flatMap(FieldArrayConversion::initLines).collect(linesJoiner(INDENT2)),
-            "$array_convert", conversions.stream().map(FieldArrayConversion::fillValuesLine).collect(linesJoiner(INDENT, true))
+            "$array_init", conversions.stream().flatMap(FieldArrayConversionMaker::initLines).collect(linesJoiner(INDENT2)),
+            "$array_convert", conversions.stream().map(FieldArrayConversionMaker::fillValuesLine).collect(linesJoiner(INDENT, true))
         );
 
         appendCode("""
@@ -298,17 +300,19 @@ public class ModelTableCodegen extends BaseCodegen {
             return;
         }
 
-        List<Column> primary = table.columns(TableField::isPrimaryKey);
-        List<Column> nonPrimary = table.columns(Predicate.not(TableField::isPrimaryKey));
+        List<Column> primaryColumns = table.columns(TableField::isPrimaryKey);
+        List<Column> nonPrimaryColumns = table.columns(Predicate.not(TableField::isPrimaryKey));
+        Snippet query = new Snippet()
+                .withLines(UpdateMaker.make(table, nonPrimaryColumns))
+                .withLines(WhereMaker.makeForAnd(primaryColumns));
         Map<String, String> context = EasyMaps.asMap(
-            "$pk_cols_where", joinForWhere(primary),
-            "$npk_cols_assign", joinWithPattern(nonPrimary, EQ_QUESTION)
+            "$sql_query_literal", JavaSupport.wrapAsStringLiteral(query).join(INDENT2)
         );
 
         appendCode("""
         @Override
         public int updateByPk(@Nonnull $ModelClass $model_param) {
-           String query = "UPDATE $table_sql SET $npk_cols_assign WHERE $pk_cols_where";
+           String query = $sql_query_literal;
            try {
                return runner.runUpdate(query, valuesForUpdate($model_param));
            } catch (SQLException e) {
@@ -327,10 +331,10 @@ public class ModelTableCodegen extends BaseCodegen {
         List<TableField> nonPrimary = table.fields().stream().filter(Predicate.not(TableField::isPrimaryKey)).toList();
         Iterable<TableField> fields = Iterables.concat(nonPrimary, primary);
 
-        List<FieldArrayConversion> conversions = zipWithColumnIndex(fields, FieldArrayConversion::new);
+        List<FieldArrayConversionMaker> conversions = zipWithColumnIndex(fields, FieldArrayConversionMaker::new);
         Map<String, String> context = Map.of(
-            "$array_init", conversions.stream().flatMap(FieldArrayConversion::initLines).collect(linesJoiner(INDENT2)),
-            "$array_convert", conversions.stream().map(FieldArrayConversion::fillValuesLine).collect(linesJoiner(INDENT, true))
+            "$array_init", conversions.stream().flatMap(FieldArrayConversionMaker::initLines).collect(linesJoiner(INDENT2)),
+            "$array_convert", conversions.stream().map(FieldArrayConversionMaker::fillValuesLine).collect(linesJoiner(INDENT, true))
         );
 
         appendCode("""
@@ -342,23 +346,6 @@ public class ModelTableCodegen extends BaseCodegen {
             return array;
         }\n
         """, EasyMaps.merge(context, mainContext));
-    }
-
-    private record FieldArrayConversion(@NotNull TableField field, int columnIndex) {
-        public @NotNull Stream<String> initLines() {
-            if (!field.isNativelySupportedType()) {
-                return Stream.generate(() -> "null,").limit(field.columnsNumber());
-            }
-            return Stream.of("$model_param.%s(),".formatted(field.javaGetter()));
-        }
-
-        public @NotNull String fillValuesLine() {
-            if (field.isNativelySupportedType()) {
-                return "";
-            }
-            return "%s.fillArrayValues($model_param.%s(), array, %d);"
-                    .formatted(requireNonNull(field.adapterInfo()).staticRef(), field.javaGetter(), columnIndex);
-        }
     }
 
     private static <T> @NotNull List<T> zipWithColumnIndex(@NotNull Iterable<TableField> fields,
@@ -374,7 +361,7 @@ public class ModelTableCodegen extends BaseCodegen {
 
     private void fromRow() throws IOException {
         Map<String, String> context = Map.of(
-            "$fields_assignments", new ResultSetConversionGenerator().generateAssignments(table),
+            "$fields_assignments", new ResultSetConversionMaker().make(table),
             "$model_fields", table.fields().stream().map(TableField::javaName).collect(COMMA_JOINER)
         );
 
@@ -388,41 +375,6 @@ public class ModelTableCodegen extends BaseCodegen {
             return new $ModelClass($model_fields);
         }\n
         """, EasyMaps.merge(mainContext, context));
-    }
-
-    private static class ResultSetConversionGenerator {
-        private static final Set<Class<?>> FULL_NAME_CLASSES = Set.of(java.util.Date.class, java.sql.Date.class);
-        private int columnIndex = 0;
-
-        public @NotNull String generateAssignments(@NotNull TableSchema table) {
-            return table.fields().stream().map(this::assignFieldLine).collect(linesJoiner(INDENT));
-        }
-
-        private @NotNull String assignFieldLine(@NotNull TableField field) {
-            Class<?> fieldType = field.javaType();
-            String fieldClassName = FULL_NAME_CLASSES.contains(fieldType) ?
-                    fieldType.getName() :
-                    Naming.shortCanonicalName(fieldType);
-            return "%s %s = %s;".formatted(fieldClassName, field.javaName(), createExpr(field));
-        }
-
-        private @NotNull String createExpr(@NotNull TableField field) {
-            if (field.isNativelySupportedType()) {
-                assert field instanceof OneColumnTableField : "Native field is not one column: %s".formatted(field);
-                return resultSetGetterExpr(((OneColumnTableField) field).column(), ++columnIndex);
-            } else {
-                String staticRef = requireNonNull(field.adapterInfo()).staticRef();
-                String params = field instanceof OneColumnTableField simpleField ?
-                        resultSetGetterExpr(simpleField.column(), ++columnIndex) :
-                        joinWithTransform(field.columns(), column -> resultSetGetterExpr(column, ++columnIndex));
-                return "%s.createInstance(%s)".formatted(staticRef, params);
-            }
-        }
-
-        private static @NotNull String resultSetGetterExpr(@NotNull Column column, int columnIndex) {
-            String getter = column.type().jdbcType().getterMethod();
-            return "result.%s(start+%d)".formatted(getter, columnIndex);
-        }
     }
 
     private void meta() throws IOException {

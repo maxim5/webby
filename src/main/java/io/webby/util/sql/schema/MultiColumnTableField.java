@@ -6,11 +6,12 @@ import org.jetbrains.annotations.NotNull;
 public class MultiColumnTableField extends TableField {
     private final ImmutableList<Column> columns;
 
-    public MultiColumnTableField(@NotNull ModelField field,
+    public MultiColumnTableField(@NotNull TableSchema parent,
+                                 @NotNull ModelField field,
                                  boolean primaryKey,
                                  @NotNull AdapterInfo adapterInfo,
                                  @NotNull ImmutableList<Column> columns) {
-        super(field, primaryKey, adapterInfo);
+        super(parent, field, primaryKey, adapterInfo);
         this.columns = columns;
     }
 

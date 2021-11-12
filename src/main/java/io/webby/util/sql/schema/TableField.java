@@ -1,19 +1,29 @@
 package io.webby.util.sql.schema;
 
+import io.webby.util.sql.api.FollowReferences;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
-public abstract class TableField implements WithColumns {
+import java.util.List;
+
+public abstract class TableField implements WithColumns, WithPrefixedColumns {
+    protected final TableSchema parent;
     protected final ModelField field;
     protected final boolean primaryKey;
     protected final AdapterInfo adapterInfo;
 
-    public TableField(@NotNull ModelField field,
+    public TableField(@NotNull TableSchema parent,
+                      @NotNull ModelField field,
                       boolean primaryKey,
                       @Nullable AdapterInfo adapterInfo) {
+        this.parent = parent;
         this.field = field;
         this.primaryKey = primaryKey;
         this.adapterInfo = adapterInfo;
+    }
+
+    public @NotNull TableSchema parent() {
+        return parent;
     }
 
     public @NotNull String javaName() {
@@ -46,5 +56,10 @@ public abstract class TableField implements WithColumns {
 
     public @Nullable AdapterInfo adapterInfo() {
         return adapterInfo;
+    }
+
+    @Override
+    public @NotNull List<PrefixedColumn> columns(@NotNull FollowReferences follow) {
+        return columns().stream().map(column -> column.prefixed(parent.sqlName())).toList();
     }
 }

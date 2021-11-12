@@ -1,6 +1,7 @@
-package io.webby.util.sql.schema;
+package io.webby.util.sql.codegen;
 
 import com.google.common.collect.Streams;
+import io.webby.util.sql.schema.Column;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.Collections;
@@ -18,7 +19,6 @@ public class ColumnJoins {
 
     public static final Collector<CharSequence, ?, String> COMMA_JOINER = Collectors.joining(", ");
     public static final Collector<CharSequence, ?, String> LINE_JOINER = Collectors.joining("\n");
-    public static final Collector<CharSequence, ?, String> AND_JOINER = Collectors.joining(" AND ");
 
     public static @NotNull String joinWithComma(@NotNull Iterable<Column> columns) {
         return Streams.stream(columns).map(Column::sqlName).collect(COMMA_JOINER);
@@ -26,10 +26,6 @@ public class ColumnJoins {
 
     public static @NotNull String joinWithPattern(@NotNull Iterable<Column> columns, @NotNull String pattern) {
         return joinWithPattern(columns, pattern, COMMA_JOINER);
-    }
-
-    public static @NotNull String joinForWhere(@NotNull Iterable<Column> columns) {
-        return joinWithPattern(columns, EQ_QUESTION, AND_JOINER);
     }
 
     public static @NotNull String joinWithPattern(@NotNull Iterable<Column> columns,

@@ -8,6 +8,10 @@ import org.jetbrains.annotations.Nullable;
 
 import java.util.List;
 import java.util.function.Predicate;
+import java.util.stream.Stream;
+
+import static io.webby.util.sql.api.FollowReferences.ALL;
+import static io.webby.util.sql.api.FollowReferences.ONE_LEVEL;
 
 public record TableSchema(@NotNull String sqlName,
                           @NotNull String javaName,
@@ -35,6 +39,16 @@ public record TableSchema(@NotNull String sqlName,
         return fields().stream().anyMatch(TableField::isForeignKey);
     }
 
+    public @NotNull List<ForeignTableField> foreignFields(@NotNull FollowReferences follow) {
+        return switch (follow) {
+            case NO_FOLLOW -> List.of();
+            case ONE_LEVEL -> fields().stream().filter(TableField::isForeignKey).map(field -> (ForeignTableField) field).toList();
+            case ALL -> foreignFields(ONE_LEVEL).stream()
+                    .flatMap(field -> Stream.concat(Stream.of(field), field.getForeignTable().foreignFields(ALL).stream()))
+                    .toList();
+        };
+    }
+
     @Override
     public @NotNull List<Column> columns() {
         return columns(tableField -> true);
@@ -46,12 +60,7 @@ public record TableSchema(@NotNull String sqlName,
 
     @Override
     public @NotNull List<PrefixedColumn> columns(@NotNull FollowReferences follow) {
-        return fields().stream().flatMap(field -> {
-            if (field instanceof WithPrefixedColumns withPrefixedColumnsField && follow != FollowReferences.NO_FOLLOW) {
-                return withPrefixedColumnsField.columns(follow).stream();
-            }
-            return field.columns().stream().map(column -> column.prefixed(sqlName));
-        }).toList();
+        return fields().stream().flatMap(field -> field.columns(follow).stream()).toList();
     }
 
     /*package*/ void initializeOrDie(@NotNull ImmutableList<TableField> fields) {

@@ -9,11 +9,12 @@ import java.util.List;
 public class OneColumnTableField extends TableField {
     private final Column column;
 
-    public OneColumnTableField(@NotNull ModelField field,
+    public OneColumnTableField(@NotNull TableSchema parent,
+                               @NotNull ModelField field,
                                boolean primaryKey,
                                @Nullable AdapterInfo adapterInfo,
                                @NotNull Column column) {
-        super(field, primaryKey, adapterInfo);
+        super(parent, field, primaryKey, adapterInfo);
         this.column = column;
     }
 

@@ -1,6 +1,7 @@
 package io.webby.util.sql.schema;
 
 import com.google.common.collect.ImmutableList;
+import com.google.common.collect.ImmutableMap;
 import io.webby.util.collect.Pair;
 import io.webby.util.lazy.AtomicLazyList;
 import io.webby.util.sql.api.Foreign;
@@ -49,6 +50,14 @@ public class ModelSchemaFactory {
         }
     }
 
+    public @NotNull TableSchema getTableSchemaOrDie(@NotNull Class<?> model) {
+        return requireNonNull(tables.get(model));
+    }
+
+    public @NotNull ImmutableMap<Class<?>, TableSchema> getAllTables() {
+        return ImmutableMap.copyOf(tables);
+    }
+
     public @NotNull Collection<TableSchema> getTableSchemas() {
         return tables.values();
     }
@@ -67,28 +76,31 @@ public class ModelSchemaFactory {
     @VisibleForTesting
     void completeTable(@NotNull ModelClassInput input, @NotNull TableSchema schema) {
         ImmutableList<TableField> fields = JavaClassAnalyzer.getAllFieldsOrdered(input.modelClass()).stream()
-                .map(field -> buildTableField(field, input.modelName()))
+                .map(field -> buildTableField(schema, field, input.modelName()))
                 .collect(ImmutableList.toImmutableList());
         schema.initializeOrDie(fields);
     }
 
     @VisibleForTesting
-    @NotNull TableField buildTableField(@NotNull Field field, @NotNull String modelName) {
+    @NotNull TableField buildTableField(@NotNull TableSchema schema, @NotNull Field field, @NotNull String modelName) {
         Method getter = JavaClassAnalyzer.findGetterMethodOrDie(field);
         boolean isPrimaryKey = isPrimaryKeyField(field.getName(), modelName);
 
         FieldInference inference = inferFieldSchema(field);
         if (inference.isForeignTable()) {
-            return new ForeignTableField(ModelField.of(field, getter),
+            return new ForeignTableField(schema,
+                                         ModelField.of(field, getter),
                                          requireNonNull(inference.foreignTable()),
                                          requireNonNull(inference.singleColumn()));
         } else if (inference.isSingleColumn()) {
-            return new OneColumnTableField(ModelField.of(field, getter),
+            return new OneColumnTableField(schema,
+                                           ModelField.of(field, getter),
                                            isPrimaryKey,
                                            inference.adapterInfo(),
                                            requireNonNull(inference.singleColumn()));
         } else {
-            return new MultiColumnTableField(ModelField.of(field, getter),
+            return new MultiColumnTableField(schema,
+                                             ModelField.of(field, getter),
                                              isPrimaryKey,
                                              requireNonNull(inference.adapterInfo()),
                                              requireNonNull(inference.multiColumns()));

@@ -11,8 +11,7 @@ public record PrefixedColumn(@NotNull Column column, @NotNull String prefix) {
         return column.type();
     }
 
-    @Override
-    public String toString() {
+    public @NotNull String sqlPrefixedName() {
         return "%s.%s".formatted(prefix, sqlName());
     }
 }
