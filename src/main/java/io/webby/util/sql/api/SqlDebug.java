@@ -114,13 +114,13 @@ public class SqlDebug {
         }
 
         public void update(@NotNull String query, @Nullable Object @NotNull ... params) throws Exception {
-            System.out.println("> " + query);
+            System.out.println(">>> " + query.trim());
             System.out.println(runUpdate(query, params));
             System.out.println();
         }
 
         public void query(@NotNull String query, @Nullable Object @NotNull ... params) throws Exception {
-            System.out.println("> " + query);
+            System.out.println(">>> " + query.trim());
             System.out.println(SqlDebug.toDebugString(runQuery(query, params)));
             System.out.println();
         }
