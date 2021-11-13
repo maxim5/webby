@@ -16,6 +16,7 @@ import java.util.stream.Stream;
 
 public class DebugSql {
     public static final SqlTableFormatter FORMATTER = SqlTableFormatter.of(true, '|', '-', 1);
+    public static final SqlTableFormatter UTF_FORMATTER = SqlTableFormatter.of(true, '\u2502', '\u2014', 1);
 
     public static @NotNull ResultSetIterator<Row> iterateRows(@NotNull ResultSet resultSet) {
         return new ResultSetIterator<>(resultSet, DebugSql::toDebugRow);
