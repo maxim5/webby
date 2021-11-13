@@ -174,7 +174,7 @@ public class ModelTableCodegen extends BaseCodegen {
                 .map(follow -> new SelectMaker(table).make(follow))
                 .map(snippet -> new Snippet().withLines(snippet))
                 .map(query -> JavaSupport.wrapAsStringLiteral(query).join(INDENT))
-                .collect(Collectors.joining(",\n", INDENT, ""));
+                .collect(Collectors.joining(",\n" + INDENT, INDENT, ""));
 
         appendCode("""
         private static final String[] SELECT_ENTITY = {
