@@ -155,12 +155,20 @@ public class ModelTableCodegen extends BaseCodegen {
     }
 
     private void withFollowOnRead() throws IOException {
-        appendCode("""
-        @Override
-        public @Nonnull $TableClass withReferenceFollowOnRead(@Nonnull ReadFollow follow) {
-            return this.follow == follow ? this : new $TableClass(connection, follow);
-        }\n
-        """, mainContext);
+        String code = (table.hasForeignKeyField()) ?
+                """
+                @Override
+                public @Nonnull $TableClass withReferenceFollowOnRead(@Nonnull ReadFollow follow) {
+                    return this.follow == follow ? this : new $TableClass(connection, follow);
+                }\n
+                """ :
+                """
+                @Override
+                public @Nonnull $TableClass withReferenceFollowOnRead(@Nonnull ReadFollow follow) {
+                    return this;
+                }\n
+                """;
+        appendCode(code, mainContext);
     }
 
     private void count() throws IOException {
