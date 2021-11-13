@@ -1,5 +1,6 @@
 package io.webby.util.collect;
 
+import com.google.common.collect.Streams;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.ArrayList;
@@ -20,6 +21,10 @@ public class EasyIterables {
                         ? new ArrayList<>(collection)
                         : StreamSupport.stream(items.spliterator(), false).toList()
         );
+    }
+
+    public static <E> @NotNull List<E> concat(@NotNull Iterable<E> first, @NotNull Iterable<E> second) {
+        return Stream.concat(Streams.stream(first), Streams.stream(second)).toList();
     }
 
     public static <E> long estimateSize(@NotNull Iterable<E> items, int def) {

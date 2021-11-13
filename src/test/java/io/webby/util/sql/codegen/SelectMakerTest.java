@@ -30,7 +30,7 @@ public class SelectMakerTest {
                     FROM song
                     """,
                     """
-                    SELECT user.user_id, user.name
+                    SELECT song.author_id, user.user_id, user.name
                     FROM song
                     LEFT JOIN user ON song.author_id = user.user_id
                     """);
@@ -51,12 +51,12 @@ public class SelectMakerTest {
                     FROM single
                     """,
                     """
-                    SELECT song.song_id, song.author_id
+                    SELECT single.hit_song_id, song.song_id, song.author_id
                     FROM single
                     LEFT JOIN song ON single.hit_song_id = song.song_id
                     """,
                     """
-                    SELECT song.song_id, user.user_id, user.name
+                    SELECT single.hit_song_id, song.song_id, song.author_id, user.user_id, user.name
                     FROM single
                     LEFT JOIN song ON single.hit_song_id = song.song_id
                     LEFT JOIN user ON song.author_id = user.user_id

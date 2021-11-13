@@ -3,6 +3,7 @@ package io.webby.util.sql.api;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
+import java.util.Objects;
 import java.util.concurrent.atomic.AtomicReference;
 
 public final class ForeignLong<E> implements Foreign<Long, E> {
@@ -44,5 +45,20 @@ public final class ForeignLong<E> implements Foreign<Long, E> {
     @Override
     public void setEntityUnconditionally(@NotNull E entity) {
         this.entity.set(entity);
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        return o instanceof ForeignLong<?> that && id == that.id && Objects.equals(entity.get(), that.entity.get());
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(id, entity.get());
+    }
+
+    @Override
+    public String toString() {
+        return "ForeignLong{id=%d, entity=%s}".formatted(id, entity);
     }
 }
