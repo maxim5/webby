@@ -1,7 +1,7 @@
 package io.webby.util.sql.codegen;
 
 import io.webby.testing.Testing;
-import io.webby.util.sql.api.FollowReferences;
+import io.webby.util.sql.api.ReadFollow;
 import io.webby.util.sql.api.ForeignInt;
 import io.webby.util.sql.schema.ModelSchemaFactory;
 import io.webby.util.sql.schema.TableSchema;
@@ -73,9 +73,9 @@ public class SelectMakerTest {
     private static void assertMaker(@NotNull SelectMaker selectMaker,
                                     @NotNull String expectedNoFollow,
                                     @NotNull String expectedOneLevel,
-                                    @NotNull String expectedAll) {
-        assertEquals(expectedNoFollow.strip(), selectMaker.make(FollowReferences.NO_FOLLOW).join().strip());
-        assertEquals(expectedOneLevel.strip(), selectMaker.make(FollowReferences.ONE_LEVEL).join().strip());
-        assertEquals(expectedAll.strip(), selectMaker.make(FollowReferences.ALL).join().strip());
+                                    @NotNull String expectedFollowAll) {
+        assertEquals(expectedNoFollow.strip(), selectMaker.make(ReadFollow.NO_FOLLOW).join().strip());
+        assertEquals(expectedOneLevel.strip(), selectMaker.make(ReadFollow.ONE_LEVEL).join().strip());
+        assertEquals(expectedFollowAll.strip(), selectMaker.make(ReadFollow.FOLLOW_ALL).join().strip());
     }
 }

@@ -84,7 +84,7 @@ public class ModelTableCodegen extends BaseCodegen {
         List<String> classesToImport = Streams.concat(
             Stream.of(pickBaseTableClass(),
                       QueryRunner.class, QueryException.class,
-                      ResultSetIterator.class, FollowReferences.class, TableMeta.class).map(FQN::of),
+                      ResultSetIterator.class, ReadFollow.class, TableMeta.class).map(FQN::of),
             customClasses.stream().map(FQN::of),
             customClasses.stream().map(adaptersLocator::locateAdapterFqn)
         ).filter(fqn -> !isSkippablePackage(fqn.packageName())).map(FQN::importName).sorted().distinct().toList();
@@ -170,7 +170,7 @@ public class ModelTableCodegen extends BaseCodegen {
     }
 
     private void selectConstants() throws IOException {
-        String constants = Arrays.stream(FollowReferences.values())
+        String constants = Arrays.stream(ReadFollow.values())
                 .map(follow -> new SelectMaker(table).make(follow))
                 .map(snippet -> new Snippet().withLines(snippet))
                 .map(query -> JavaSupport.wrapAsStringLiteral(query).join(INDENT))

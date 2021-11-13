@@ -1,6 +1,6 @@
 package io.webby.util.sql.schema;
 
-import io.webby.util.sql.api.FollowReferences;
+import io.webby.util.sql.api.ReadFollow;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
@@ -59,7 +59,7 @@ public abstract class TableField implements WithColumns, WithPrefixedColumns {
     }
 
     @Override
-    public @NotNull List<PrefixedColumn> columns(@NotNull FollowReferences follow) {
+    public @NotNull List<PrefixedColumn> columns(@NotNull ReadFollow follow) {
         return columns().stream().map(column -> column.prefixed(parent.sqlName())).toList();
     }
 }

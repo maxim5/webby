@@ -1,6 +1,6 @@
 package io.webby.util.sql.schema;
 
-import io.webby.util.sql.api.FollowReferences;
+import io.webby.util.sql.api.ReadFollow;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.List;
@@ -32,11 +32,11 @@ public class ForeignTableField extends TableField {
     }
 
     @Override
-    public @NotNull List<PrefixedColumn> columns(@NotNull FollowReferences follow) {
+    public @NotNull List<PrefixedColumn> columns(@NotNull ReadFollow follow) {
         return switch (follow) {
             case NO_FOLLOW -> List.of(foreignKeyColumn.prefixed(parent.sqlName()));
-            case ONE_LEVEL -> foreignTable.columns(FollowReferences.NO_FOLLOW);
-            case ALL -> foreignTable.columns(FollowReferences.ALL);
+            case ONE_LEVEL -> foreignTable.columns(ReadFollow.NO_FOLLOW);
+            case FOLLOW_ALL -> foreignTable.columns(ReadFollow.FOLLOW_ALL);
         };
     }
 

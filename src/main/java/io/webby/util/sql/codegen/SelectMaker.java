@@ -1,6 +1,6 @@
 package io.webby.util.sql.codegen;
 
-import io.webby.util.sql.api.FollowReferences;
+import io.webby.util.sql.api.ReadFollow;
 import io.webby.util.sql.schema.ForeignTableField;
 import io.webby.util.sql.schema.OneColumnTableField;
 import io.webby.util.sql.schema.PrefixedColumn;
@@ -18,9 +18,9 @@ class SelectMaker {
         this.table = table;
     }
 
-    public @NotNull Snippet make(@NotNull FollowReferences follow) {
+    public @NotNull Snippet make(@NotNull ReadFollow follow) {
         Function<PrefixedColumn, String> toSqlName =
-                follow == FollowReferences.NO_FOLLOW ?
+                follow == ReadFollow.NO_FOLLOW ?
                         PrefixedColumn::sqlName :
                         PrefixedColumn::sqlPrefixedName;
 

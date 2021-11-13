@@ -1,7 +1,7 @@
 package io.webby.util.sql.api;
 
-public enum FollowReferences {
+public enum ReadFollow {
     NO_FOLLOW,
     ONE_LEVEL,
-    ALL
+    FOLLOW_ALL
 }

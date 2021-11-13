@@ -7,10 +7,10 @@ import java.util.Objects;
 import java.util.Optional;
 
 public interface TableInt<E> extends TableObj<Integer, E> {
-    @Nullable E getByPkOrNull(int key, @NotNull FollowReferences follow);
+    @Nullable E getByPkOrNull(int key, @NotNull ReadFollow follow);
 
     default @Nullable E getByPkOrNull(int key) {
-        return getByPkOrNull(key, FollowReferences.NO_FOLLOW);
+        return getByPkOrNull(key, ReadFollow.NO_FOLLOW);
     }
 
     default @NotNull E getByPkOrDie(int key) {
@@ -37,7 +37,7 @@ public interface TableInt<E> extends TableObj<Integer, E> {
     }
 
     @Override
-    default @Nullable E getByPkOrNull(@NotNull Integer key, @NotNull FollowReferences follow) {
+    default @Nullable E getByPkOrNull(@NotNull Integer key, @NotNull ReadFollow follow) {
         return getByPkOrNull(key.intValue(), follow);
     }
 }

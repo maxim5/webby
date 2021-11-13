@@ -8,10 +8,10 @@ import java.util.Objects;
 import java.util.Optional;
 
 public interface TableObj<K, E> extends BaseTable<E> {
-    @Nullable E getByPkOrNull(@NotNull K key, @NotNull FollowReferences follow);
+    @Nullable E getByPkOrNull(@NotNull K key, @NotNull ReadFollow follow);
 
     default @Nullable E getByPkOrNull(@NotNull K key) {
-        return getByPkOrNull(key, FollowReferences.NO_FOLLOW);
+        return getByPkOrNull(key, ReadFollow.NO_FOLLOW);
     }
 
     default @NotNull E getByPkOrDie(@NotNull K key) {
