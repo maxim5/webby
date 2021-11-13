@@ -7,6 +7,7 @@ import io.webby.util.lazy.AtomicLazyList;
 import io.webby.util.sql.api.Foreign;
 import io.webby.util.sql.api.ForeignInt;
 import io.webby.util.sql.api.ForeignLong;
+import io.webby.util.sql.api.ForeignObj;
 import io.webby.util.sql.codegen.ModelAdaptersLocator;
 import io.webby.util.sql.codegen.ModelClassInput;
 import org.jetbrains.annotations.NotNull;
@@ -172,8 +173,9 @@ public class ModelSchemaFactory {
             return null;
         }
 
-        assure(fieldType == ForeignInt.class || fieldType == ForeignLong.class || fieldType == Foreign.class,
-               "Invalid foreign key reference type: `%s`. Supported types: Foreign, ForeignInt, ForeignLong",
+        assure(fieldType == Foreign.class || fieldType == ForeignInt.class ||
+               fieldType == ForeignLong.class || fieldType == ForeignObj.class,
+               "Invalid foreign key reference type: `%s`. Supported types: Foreign, ForeignInt, ForeignLong, ForeignObj",
                fieldType.getSimpleName());
         Type[] actualTypeArguments = ((ParameterizedType) field.getGenericType()).getActualTypeArguments();
         Class<?> keyType =

@@ -3,13 +3,11 @@ package io.webby.util.sql.codegen;
 import com.google.common.collect.Iterables;
 import com.google.common.collect.Streams;
 import io.webby.util.collect.EasyMaps;
-import io.webby.util.func.ObjIntBiFunction;
 import io.webby.util.sql.api.*;
 import io.webby.util.sql.schema.*;
 import org.jetbrains.annotations.NotNull;
 
 import java.io.IOException;
-import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
@@ -80,15 +78,21 @@ public class ModelTableCodegen extends BaseCodegen {
     private void imports() throws IOException {
         List<Class<?>> customClasses = table.fields().stream()
                 .filter(TableField::isCustomSupportType)
+                .filter(Predicate.not(TableField::isForeignKey))
                 .map(TableField::javaType)
                 .collect(Collectors.toList());
+
+        List<Class<?>> foreignClasses = table.hasForeignKeyField() ?
+                List.of(Foreign.class, ForeignInt.class, ForeignLong.class, ForeignObj.class) :
+                List.of();
 
         List<String> classesToImport = Streams.concat(
             Stream.of(pickBaseTableClass(),
                       QueryRunner.class, QueryException.class,
                       ResultSetIterator.class, ReadFollow.class, TableMeta.class).map(FQN::of),
             customClasses.stream().map(FQN::of),
-            customClasses.stream().map(adaptersLocator::locateAdapterFqn)
+            customClasses.stream().map(adaptersLocator::locateAdapterFqn),
+            foreignClasses.stream().map(FQN::of)
         ).filter(fqn -> !isSkippablePackage(fqn.packageName())).map(FQN::importName).sorted().distinct().toList();
 
         Map<String, String> context = Map.of(
@@ -225,7 +229,7 @@ public class ModelTableCodegen extends BaseCodegen {
         public @Nullable $ModelClass getByPkOrNull($pk_annotation$pk_type $pk_name) {
             String query = SELECT_ENTITY_ALL[follow.ordinal()] + $sql_where_literal;
             try (ResultSet result = runner.runQuery(query, $pk_object)) {
-                return result.next() ? fromRow(result) : null;
+                return result.next() ? fromRow(result, follow, 0) : null;
             } catch (SQLException e) {
                 throw new QueryException("$table_sql.getByPkOrNull() failed", query, $pk_name, e);
             }
@@ -252,7 +256,7 @@ public class ModelTableCodegen extends BaseCodegen {
             String query = SELECT_ENTITY_ALL[follow.ordinal()];
             try (ResultSet result = runner.runQuery(query)) {
                 while (result.next()) {
-                    consumer.accept(fromRow(result));
+                    consumer.accept(fromRow(result, follow, 0));
                 }
             } catch (SQLException e) {
                 throw new QueryException("$table_sql.forEach() failed", query, e);
@@ -263,7 +267,7 @@ public class ModelTableCodegen extends BaseCodegen {
         public @Nonnull ResultSetIterator<$ModelClass> iterator() {
             String query = SELECT_ENTITY_ALL[follow.ordinal()];
             try {
-                return new ResultSetIterator<>(runner.runQuery(query), $TableClass::fromRow);
+                return new ResultSetIterator<>(runner.runQuery(query), result -> fromRow(result, follow, 0));
             } catch (SQLException e) {
                 throw new QueryException("$table_sql.iterator() failed", query, e);
             }
@@ -360,17 +364,14 @@ public class ModelTableCodegen extends BaseCodegen {
     }
 
     private void fromRow() throws IOException {
+        ResultSetConversionMaker maker = new ResultSetConversionMaker("result", "follow", "start");
         Map<String, String> context = Map.of(
-            "$fields_assignments", new ResultSetConversionMaker().make(table),
+            "$fields_assignments", maker.make(table).join(linesJoiner(INDENT)),
             "$model_fields", table.fields().stream().map(TableField::javaName).collect(COMMA_JOINER)
         );
 
         appendCode("""
-        public static @Nonnull $ModelClass fromRow(@Nonnull ResultSet result) throws SQLException {
-          return fromRow(result, 0);
-        }
-        
-        public static @Nonnull $ModelClass fromRow(@Nonnull ResultSet result, int start) throws SQLException {
+        public static @Nonnull $ModelClass fromRow(@Nonnull ResultSet result, @Nonnull ReadFollow follow, int start) throws SQLException {
         $fields_assignments
             return new $ModelClass($model_fields);
         }\n

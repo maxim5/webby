@@ -48,14 +48,20 @@ class ValuesArrayMaker {
         }
 
         public @NotNull Stream<String> initLines() {
-            if (!field.isNativelySupportedType()) {
-                return Stream.generate(() -> "null,").limit(field.columnsNumber());
+            if (field.isNativelySupportedType()) {
+                return Stream.of("%s.%s(),".formatted(param, field.javaGetter()));
             }
-            return Stream.of("%s.%s(),".formatted(param, field.javaGetter()));
+            if (field.isForeignKey()) {
+                return Stream.of("%s.%s().getFk(),".formatted(param, field.javaGetter()));
+            }
+            return Stream.generate(() -> "null,").limit(field.columnsNumber());
         }
 
         public @NotNull String fillValuesLine() {
             if (field.isNativelySupportedType()) {
+                return "";
+            }
+            if (field.isForeignKey()) {
                 return "";
             }
             return "%s.fillArrayValues(%s.%s(), array, %d);"
