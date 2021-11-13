@@ -18,6 +18,7 @@ import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 import static io.webby.util.sql.codegen.ColumnJoins.*;
+import static io.webby.util.sql.codegen.JavaSupport.wrapAsStringLiteral;
 import static java.util.Objects.requireNonNull;
 
 @SuppressWarnings("UnnecessaryStringEscape")
@@ -197,7 +198,7 @@ public class ModelTableCodegen extends BaseCodegen {
         String constants = Arrays.stream(ReadFollow.values())
                 .map(follow -> new SelectMaker(table).make(follow))
                 .map(snippet -> new Snippet().withLines(snippet))
-                .map(query -> JavaSupport.wrapAsStringLiteral(query).join(INDENT))
+                .map(query -> wrapAsStringLiteral(query, INDENT))
                 .collect(Collectors.joining(",\n" + INDENT, INDENT, ""));
 
         appendCode("""
@@ -215,7 +216,7 @@ public class ModelTableCodegen extends BaseCodegen {
         List<Column> primaryColumns = table.columns(TableField::isPrimaryKey);
         Snippet where = new Snippet().withLines(WhereMaker.makeForAnd(primaryColumns));
         Map<String, String> context = EasyMaps.asMap(
-            "$sql_where_literal", JavaSupport.wrapAsStringLiteral(where).join(INDENT2),
+            "$sql_where_literal", wrapAsStringLiteral(where, INDENT2),
             "$pk_object", toKeyObject(requireNonNull(table.primaryKeyField()), "$pk_name")
         );
 
@@ -273,7 +274,7 @@ public class ModelTableCodegen extends BaseCodegen {
     private void insert() throws IOException {
         Snippet query = InsertMaker.makeAll(table);
         Map<String, String> context = Map.of(
-            "$sql_query_literal", JavaSupport.wrapAsStringLiteral(query).join(INDENT2)
+            "$sql_query_literal", wrapAsStringLiteral(query, INDENT2)
         );
         
         appendCode("""
@@ -318,7 +319,7 @@ public class ModelTableCodegen extends BaseCodegen {
                 .withLines(UpdateMaker.make(table, nonPrimaryColumns))
                 .withLines(WhereMaker.makeForAnd(primaryColumns));
         Map<String, String> context = EasyMaps.asMap(
-            "$sql_query_literal", JavaSupport.wrapAsStringLiteral(query).join(INDENT2)
+            "$sql_query_literal", wrapAsStringLiteral(query, INDENT2)
         );
 
         appendCode("""

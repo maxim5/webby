@@ -13,4 +13,8 @@ class JavaSupport {
                     .withLine("\"\"\"");
         }
     }
+
+    public static @NotNull String wrapAsStringLiteral(@NotNull Snippet snippet, @NotNull String indent) {
+        return wrapAsStringLiteral(snippet).join(indent);
+    }
 }
