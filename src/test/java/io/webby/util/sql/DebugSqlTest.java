@@ -1,8 +1,8 @@
 package io.webby.util.sql;
 
-import io.webby.util.sql.api.SqlDebug;
-import io.webby.util.sql.api.SqlDebug.Row;
-import io.webby.util.sql.api.SqlDebug.RowValue;
+import io.webby.util.sql.api.DebugSql;
+import io.webby.util.sql.api.DebugSql.Row;
+import io.webby.util.sql.api.DebugSql.RowValue;
 import org.jetbrains.annotations.NotNull;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
@@ -10,18 +10,26 @@ import org.junit.jupiter.api.Test;
 import java.util.List;
 
 // TODO: Support multi-line values?
-@SuppressWarnings("UnnecessaryStringEscape")
-public class SqlDebugTest {
+public class DebugSqlTest {
+    @Test
+    public void formatIntoTableString_no_rows() {
+        List<Row> rows = List.of();
+        String table = DebugSql.FORMATTER.formatIntoTableString(rows);
+        Assertions.assertEquals("<empty>", table);
+    }
+
     @Test
     public void formatIntoTableString_one_cell_short_value() {
         List<Row> rows = List.of(
             row(value("foo", "1"))
         );
-        String table = SqlDebug.FORMATTER.formatIntoTableString(rows);
+        String table = DebugSql.FORMATTER.formatIntoTableString(rows);
         Assertions.assertEquals("""
-         foo \n\
-        -----
-         1   \
+        -------
+        | foo |
+        -------
+        | 1   |
+        -------\
         """, table);
     }
 
@@ -30,11 +38,13 @@ public class SqlDebugTest {
         List<Row> rows = List.of(
             row(value("foo", "123456789"))
         );
-        String table = SqlDebug.FORMATTER.formatIntoTableString(rows);
+        String table = DebugSql.FORMATTER.formatIntoTableString(rows);
         Assertions.assertEquals("""
-         foo       \n\
-        -----------
-         123456789 \
+        -------------
+        | foo       |
+        -------------
+        | 123456789 |
+        -------------\
         """, table);
     }
 
@@ -43,11 +53,28 @@ public class SqlDebugTest {
         List<Row> rows = List.of(
             row(value("foo", ""))
         );
-        String table = SqlDebug.FORMATTER.formatIntoTableString(rows);
+        String table = DebugSql.FORMATTER.formatIntoTableString(rows);
         Assertions.assertEquals("""
-         foo \n\
-        -----
-             \
+        -------
+        | foo |
+        -------
+        |     |
+        -------\
+        """, table);
+    }
+
+    @Test
+    public void formatIntoTableString_one_cell_empty_value_empty_header() {
+        List<Row> rows = List.of(
+            row(value("", ""))
+        );
+        String table = DebugSql.FORMATTER.formatIntoTableString(rows);
+        Assertions.assertEquals("""
+        ----
+        |  |
+        ----
+        |  |
+        ----\
         """, table);
     }
 
@@ -56,11 +83,13 @@ public class SqlDebugTest {
         List<Row> rows = List.of(
             row(value("foo", "1"), value("bar", "123456"))
         );
-        String table = SqlDebug.FORMATTER.formatIntoTableString(rows);
+        String table = DebugSql.FORMATTER.formatIntoTableString(rows);
         Assertions.assertEquals("""
-         foo | bar    \n\
-        --------------
-         1   | 123456 \
+        ----------------
+        | foo | bar    |
+        ----------------
+        | 1   | 123456 |
+        ----------------\
         """, table);
     }
 
@@ -70,12 +99,15 @@ public class SqlDebugTest {
             row(value("foo", "12")),
             row(value("foo", "1234"))
         );
-        String table = SqlDebug.FORMATTER.formatIntoTableString(rows);
+        String table = DebugSql.FORMATTER.formatIntoTableString(rows);
         Assertions.assertEquals("""
-         foo  \n\
-        ------
-         12   \n\
-         1234 \
+        --------
+        | foo  |
+        --------
+        | 12   |
+        --------
+        | 1234 |
+        --------\
         """, table);
     }
 
@@ -85,12 +117,15 @@ public class SqlDebugTest {
             row(value("foo", "12"), value("bar", "12345"), value("baz", "")),
             row(value("foo", "1234"), value("bar", "123"), value("baz", "12"))
         );
-        String table = SqlDebug.FORMATTER.formatIntoTableString(rows);
+        String table = DebugSql.FORMATTER.formatIntoTableString(rows);
         Assertions.assertEquals("""
-         foo  | bar   | baz \n\
-        --------------------
-         12   | 12345 |     \n\
-         1234 | 123   | 12  \
+        ----------------------
+        | foo  | bar   | baz |
+        ----------------------
+        | 12   | 12345 |     |
+        ----------------------
+        | 1234 | 123   | 12  |
+        ----------------------\
         """, table);
     }
 

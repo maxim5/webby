@@ -9,18 +9,16 @@ import java.sql.Connection;
 import java.sql.ResultSet;
 import java.sql.ResultSetMetaData;
 import java.sql.SQLException;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.List;
-import java.util.Optional;
+import java.util.*;
 import java.util.function.Function;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
-public class SqlDebug {
-    public static final SqlTableFormatter FORMATTER = new SqlTableFormatter(" ", " | ", " ", true, '-');
+public class DebugSql {
+    public static final SqlTableFormatter FORMATTER = SqlTableFormatter.of(true, '|', '-', 1);
 
     public static @NotNull ResultSetIterator<Row> iterateRows(@NotNull ResultSet resultSet) {
-        return new ResultSetIterator<>(resultSet, SqlDebug::toDebugRow);
+        return new ResultSetIterator<>(resultSet, DebugSql::toDebugRow);
     }
 
     public static @NotNull List<Row> toDebugRows(@NotNull ResultSet resultSet) {
@@ -44,22 +42,31 @@ public class SqlDebug {
         int columnCount = metaData.getColumnCount();
         List<RowValue> values = new ArrayList<>(columnCount);
         for (int i = 1; i <= columnCount; i++) {
-            values.add(new RowValue(metaData.getColumnName(i), Strings.nullToEmpty(row.getString(i))));
+            values.add(new RowValue(metaData.getColumnName(i), String.valueOf(row.getString(i))));
         }
         return new Row(values);
     }
 
-    public record SqlTableFormatter(@NotNull String prefix,
-                                    @NotNull String delim,
-                                    @NotNull String suffix,
-                                    boolean withHeader,
-                                    char headerSeparator) {
+    public record SqlTableFormatter(boolean withHeader,
+                                    @NotNull String cellPrefix,
+                                    @NotNull String cellDelim,
+                                    @NotNull String cellSuffix,
+                                    @NotNull String rowDelim) {
+        public static @NotNull SqlTableFormatter of(boolean withHeader, char columnDelim, char rowDelim, int padding) {
+            return new SqlTableFormatter(
+                withHeader,
+                Strings.padEnd(String.valueOf(columnDelim), padding + 1, ' '),
+                Strings.padStart(Strings.padEnd(String.valueOf(columnDelim), padding + 1, ' '), 2 * padding + 1, ' '),
+                Strings.padStart(String.valueOf(columnDelim), padding + 1, ' '),
+                String.valueOf(rowDelim)
+            );
+        }
+
         public @NotNull String formatIntoTableString(@NotNull List<Row> rows) {
             if (rows.isEmpty()) {
                 return "<empty>";
             }
 
-            int n = rows.size();
             int m = rows.get(0).values().size();
             int[] width = new int[m];
             for (Row row : rows) {
@@ -73,21 +80,26 @@ public class SqlDebug {
                 }
             }
 
-            List<String> lines = new ArrayList<>(n);
+            String horizontal = Strings.repeat(
+                rowDelim,
+                Arrays.stream(width).sum() + cellDelim.length() * (m - 1) + cellPrefix.length() + cellSuffix.length()
+            );
+            StringJoiner joiner = new StringJoiner("\n");
+            joiner.add(horizontal);
             if (withHeader) {
-                lines.add(formatLine(rows.get(0), RowValue::name, width));
-                lines.add(Strings.repeat(String.valueOf(headerSeparator),
-                                         Arrays.stream(width).sum() + delim.length() * (m - 1) +
-                                         prefix.length() + suffix.length()));
+                formatRow(rows.get(0), RowValue::name, width).forEach(joiner::add);
+                joiner.add(horizontal);
             }
             for (Row row : rows) {
-                lines.add(formatLine(row, RowValue::value, width));
+                formatRow(row, RowValue::value, width).forEach(joiner::add);
+                joiner.add(horizontal);
             }
-            return String.join("\n", lines);
+            return joiner.toString();
         }
 
-        @NotNull
-        private String formatLine(@NotNull Row row, @NotNull Function<RowValue, String> valueCapture, int @NotNull [] width) {
+        private @NotNull Stream<String> formatRow(@NotNull Row row,
+                                                  @NotNull Function<RowValue, String> valueCapture,
+                                                  int @NotNull [] width) {
             List<RowValue> values = row.values();
             int m = values.size();
             List<String> line = new ArrayList<>(m);
@@ -96,7 +108,7 @@ public class SqlDebug {
                 String cell = Strings.padEnd(cellValue, width[j], ' ');
                 line.add(cell);
             }
-            return line.stream().collect(Collectors.joining(delim, prefix, suffix));
+            return Stream.of(line.stream().collect(Collectors.joining(cellDelim, cellPrefix, cellSuffix)));
         }
     }
 
@@ -121,7 +133,7 @@ public class SqlDebug {
 
         public void query(@NotNull String query, @Nullable Object @NotNull ... params) throws Exception {
             System.out.println(">>> " + query.trim());
-            System.out.println(SqlDebug.toDebugString(runQuery(query, params)));
+            System.out.println(DebugSql.toDebugString(runQuery(query, params)));
             System.out.println();
         }
     }

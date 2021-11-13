@@ -1,7 +1,7 @@
 package io.webby.testing;
 
 import io.webby.util.sql.api.QueryRunner;
-import io.webby.util.sql.api.SqlDebug;
+import io.webby.util.sql.api.DebugSql;
 import io.webby.util.sql.api.TableObj;
 import org.jetbrains.annotations.NotNull;
 import org.junit.jupiter.api.AfterEach;
@@ -123,12 +123,12 @@ public abstract class BaseModelKeyTableTest<K, E, T extends TableObj<K, E>> {
 
     protected List<String> parseColumnNamesFromDb(@NotNull String name) throws SQLException {
         ResultSet resultSet = new QueryRunner(connection).runQuery("SELECT sql FROM sqlite_master WHERE name=?", name);
-        List<SqlDebug.Row> rows = SqlDebug.toDebugRows(resultSet);
+        List<DebugSql.Row> rows = DebugSql.toDebugRows(resultSet);
         assertFalse(rows.isEmpty(), "SQL table not found in DB: %s".formatted(name));
         assertThat(rows).hasSize(1);
 
         String sql = rows.get(0).findValue("sql")
-                .map(SqlDebug.RowValue::value)
+                .map(DebugSql.RowValue::value)
                 .orElseThrow()
                 .replaceAll("\\s+", " ")
                 .replaceFirst(".*\\((.*?)\\)", "$1");
