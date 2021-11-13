@@ -19,6 +19,10 @@ class Snippet {
         return withLine(linePart1 + linePart2);
     }
 
+    public @NotNull Snippet withLine(@NotNull String linePart1, @NotNull String linePart2, @NotNull String linePart3) {
+        return withLine(linePart1 + linePart2 + linePart3);
+    }
+
     public @NotNull Snippet withLine(@NotNull String @NotNull ... lineParts) {
         return withLine(String.join("", lineParts));
     }

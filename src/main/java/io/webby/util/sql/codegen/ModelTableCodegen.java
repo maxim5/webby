@@ -271,19 +271,19 @@ public class ModelTableCodegen extends BaseCodegen {
     }
 
     private void insert() throws IOException {
+        Snippet query = InsertMaker.makeAll(table);
         Map<String, String> context = Map.of(
-            "$all_columns", joinWithComma(table.columns()),
-            "$placeholders", Stream.generate(() -> "?").limit(table.columnsNumber()).collect(COMMA_JOINER)
+            "$sql_query_literal", JavaSupport.wrapAsStringLiteral(query).join(INDENT2)
         );
         
         appendCode("""
         @Override
         public int insert(@Nonnull $ModelClass $model_param) {
-           String query = "INSERT INTO $table_sql($all_columns) VALUES($placeholders)";
+           String query = $sql_query_literal;
            try {
                return runner.runUpdate(query, valuesForInsert($model_param));
            } catch (SQLException e) {
-               throw new QueryException("$table_sql.insert() failed", query, $model_param, e);
+               throw new QueryException("Failed to insert entity into $TableClass", query, $model_param, e);
            }
         }\n
         """, EasyMaps.merge(mainContext, context));
@@ -328,7 +328,7 @@ public class ModelTableCodegen extends BaseCodegen {
            try {
                return runner.runUpdate(query, valuesForUpdate($model_param));
            } catch (SQLException e) {
-               throw new QueryException("$table_sql.insert() failed", query, $model_param, e);
+               throw new QueryException("Failed to update entity in $TableClass by PK", query, $model_param, e);
            }
         }\n
         """, EasyMaps.merge(mainContext, pkContext, context));
