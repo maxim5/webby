@@ -7,6 +7,8 @@ import org.jetbrains.annotations.NotNull;
 import java.util.List;
 
 public interface BaseTable<E> extends Iterable<E> {
+    @NotNull BaseTable<E> withReferenceFollowOnRead(@NotNull ReadFollow follow);
+
     int count();
 
     default boolean isEmpty() {

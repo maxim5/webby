@@ -8,11 +8,10 @@ import java.util.Objects;
 import java.util.Optional;
 
 public interface TableObj<K, E> extends BaseTable<E> {
-    @Nullable E getByPkOrNull(@NotNull K key, @NotNull ReadFollow follow);
+    @Override
+    @NotNull TableObj<K, E> withReferenceFollowOnRead(@NotNull ReadFollow follow);
 
-    default @Nullable E getByPkOrNull(@NotNull K key) {
-        return getByPkOrNull(key, ReadFollow.NO_FOLLOW);
-    }
+    @Nullable E getByPkOrNull(@NotNull K key);
 
     default @NotNull E getByPkOrDie(@NotNull K key) {
         return Objects.requireNonNull(getByPkOrNull(key), "Entity not found by PK=" + key);

@@ -38,8 +38,7 @@ public class ModelTableCodegen extends BaseCodegen {
             "$TableClass", table.javaName(),
             "$table_sql", table.sqlName(),
             "$ModelClass", Naming.shortCanonicalName(table.modelClass()),
-            "$model_param", table.modelName().toLowerCase(),
-            "$all_columns", joinWithComma(table.columns())
+            "$model_param", table.modelName().toLowerCase()
         );
 
         TableField primaryKeyField = table.primaryKeyField();
@@ -55,11 +54,13 @@ public class ModelTableCodegen extends BaseCodegen {
 
         classDef();
         constructor();
+        withFollowOnRead();
 
         count();
         // isEmpty();
 
         selectConstants();
+
         getByPk();
         iterator();
 
@@ -139,10 +140,25 @@ public class ModelTableCodegen extends BaseCodegen {
         appendCode("""
         protected final Connection connection;
         protected final QueryRunner runner;
+        protected final ReadFollow follow;
     
-        public $TableClass(@Nonnull Connection connection) {
+        public $TableClass(@Nonnull Connection connection, @Nonnull ReadFollow follow) {
             this.connection = connection;
             this.runner = new QueryRunner(connection);
+            this.follow = follow;
+        }
+        
+        public $TableClass(@Nonnull Connection connection) {
+            this(connection, ReadFollow.NO_FOLLOW);
+        }\n
+        """, mainContext);
+    }
+
+    private void withFollowOnRead() throws IOException {
+        appendCode("""
+        @Override
+        public @Nonnull $TableClass withReferenceFollowOnRead(@Nonnull ReadFollow follow) {
+            return this.follow == follow ? this : new $TableClass(connection, follow);
         }\n
         """, mainContext);
     }
@@ -177,7 +193,7 @@ public class ModelTableCodegen extends BaseCodegen {
                 .collect(Collectors.joining(",\n" + INDENT, INDENT, ""));
 
         appendCode("""
-        private static final String[] SELECT_ENTITY = {
+        private static final String[] SELECT_ENTITY_ALL = {
         $constants
         };\n
         """, EasyMaps.asMap("$constants", constants));
@@ -197,8 +213,8 @@ public class ModelTableCodegen extends BaseCodegen {
 
         appendCode("""
         @Override
-        public @Nullable $ModelClass getByPkOrNull($pk_annotation$pk_type $pk_name, @Nonnull FollowReferences follow) {
-            String query = SELECT_ENTITY[follow.ordinal()] + $sql_where_literal;
+        public @Nullable $ModelClass getByPkOrNull($pk_annotation$pk_type $pk_name) {
+            String query = SELECT_ENTITY_ALL[follow.ordinal()] + $sql_where_literal;
             try (ResultSet result = runner.runQuery(query, $pk_object)) {
                 return result.next() ? fromRow(result) : null;
             } catch (SQLException e) {
@@ -224,7 +240,7 @@ public class ModelTableCodegen extends BaseCodegen {
         appendCode("""
         @Override
         public void forEach(@Nonnull Consumer<? super $ModelClass> consumer) {
-            String query = "SELECT $all_columns FROM $table_sql";
+            String query = SELECT_ENTITY_ALL[follow.ordinal()];
             try (ResultSet result = runner.runQuery(query)) {
                 while (result.next()) {
                     consumer.accept(fromRow(result));
@@ -236,7 +252,7 @@ public class ModelTableCodegen extends BaseCodegen {
     
         @Override
         public @Nonnull ResultSetIterator<$ModelClass> iterator() {
-            String query = "SELECT $all_columns FROM $table_sql";
+            String query = SELECT_ENTITY_ALL[follow.ordinal()];
             try {
                 return new ResultSetIterator<>(runner.runQuery(query), $TableClass::fromRow);
             } catch (SQLException e) {
@@ -248,6 +264,7 @@ public class ModelTableCodegen extends BaseCodegen {
 
     private void insert() throws IOException {
         Map<String, String> context = Map.of(
+            "$all_columns", joinWithComma(table.columns()),
             "$placeholders", Stream.generate(() -> "?").limit(table.columnsNumber()).collect(COMMA_JOINER)
         );
         
