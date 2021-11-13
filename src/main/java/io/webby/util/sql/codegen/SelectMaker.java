@@ -35,7 +35,7 @@ class SelectMaker {
         return new Snippet()
                 .withFormattedLine("SELECT %s", String.join(", ", columns))
                 .withFormattedLine("FROM %s", table)
-                .withLines(joins.stream().map(join -> "LEFT JOIN %s ON %s".formatted(join.table, join.on)).toList());
+                .withLines(joins.stream().map(join -> "LEFT JOIN %s ON %s".formatted(join.table, join.on)));
     }
 
     @VisibleForTesting

@@ -156,18 +156,18 @@ public class ModelTableCodegen extends BaseCodegen {
 
     private void withFollowOnRead() throws IOException {
         String code = (table.hasForeignKeyField()) ?
-                """
-                @Override
-                public @Nonnull $TableClass withReferenceFollowOnRead(@Nonnull ReadFollow follow) {
-                    return this.follow == follow ? this : new $TableClass(connection, follow);
-                }\n
-                """ :
-                """
-                @Override
-                public @Nonnull $TableClass withReferenceFollowOnRead(@Nonnull ReadFollow follow) {
-                    return this;
-                }\n
-                """;
+            """
+            @Override
+            public @Nonnull $TableClass withReferenceFollowOnRead(@Nonnull ReadFollow follow) {
+                return this.follow == follow ? this : new $TableClass(connection, follow);
+            }\n
+            """ :
+            """
+            @Override
+            public @Nonnull $TableClass withReferenceFollowOnRead(@Nonnull ReadFollow follow) {
+                return this;
+            }\n
+            """;
         appendCode(code, mainContext);
     }
 
@@ -290,10 +290,10 @@ public class ModelTableCodegen extends BaseCodegen {
     }
 
     private void valuesForInsert() throws IOException {
-        List<FieldArrayConversionMaker> conversions = zipWithColumnIndex(table.fields(), FieldArrayConversionMaker::new);
+        ValuesArrayMaker maker = new ValuesArrayMaker("$model_param", table.fields());
         Map<String, String> context = Map.of(
-            "$array_init", conversions.stream().flatMap(FieldArrayConversionMaker::initLines).collect(linesJoiner(INDENT2)),
-            "$array_convert", conversions.stream().map(FieldArrayConversionMaker::fillValuesLine).collect(linesJoiner(INDENT, true))
+            "$array_init", maker.makeInitValues().join(linesJoiner(INDENT2)),
+            "$array_convert", maker.makeConvertValues().join(linesJoiner(INDENT, true))
         );
 
         appendCode("""
@@ -341,12 +341,10 @@ public class ModelTableCodegen extends BaseCodegen {
 
         List<TableField> primary = table.fields().stream().filter(TableField::isPrimaryKey).toList();
         List<TableField> nonPrimary = table.fields().stream().filter(Predicate.not(TableField::isPrimaryKey)).toList();
-        Iterable<TableField> fields = Iterables.concat(nonPrimary, primary);
-
-        List<FieldArrayConversionMaker> conversions = zipWithColumnIndex(fields, FieldArrayConversionMaker::new);
+        ValuesArrayMaker maker = new ValuesArrayMaker("$model_param", Iterables.concat(nonPrimary, primary));
         Map<String, String> context = Map.of(
-            "$array_init", conversions.stream().flatMap(FieldArrayConversionMaker::initLines).collect(linesJoiner(INDENT2)),
-            "$array_convert", conversions.stream().map(FieldArrayConversionMaker::fillValuesLine).collect(linesJoiner(INDENT, true))
+            "$array_init", maker.makeInitValues().join(linesJoiner(INDENT2)),
+            "$array_convert", maker.makeConvertValues().join(linesJoiner(INDENT, true))
         );
 
         appendCode("""
@@ -358,17 +356,6 @@ public class ModelTableCodegen extends BaseCodegen {
             return array;
         }\n
         """, EasyMaps.merge(context, mainContext));
-    }
-
-    private static <T> @NotNull List<T> zipWithColumnIndex(@NotNull Iterable<TableField> fields,
-                                                           @NotNull ObjIntBiFunction<TableField, T> converter) {
-        ArrayList<T> result = new ArrayList<>();
-        int columnIndex = 0;
-        for (TableField field : fields) {
-            result.add(converter.apply(field, columnIndex));
-            columnIndex += field.columnsNumber();
-        }
-        return result;
     }
 
     private void fromRow() throws IOException {

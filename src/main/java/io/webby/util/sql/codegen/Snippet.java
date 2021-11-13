@@ -5,7 +5,9 @@ import org.jetbrains.annotations.NotNull;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
+import java.util.stream.Collector;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 class Snippet {
     private final List<String> lines = new ArrayList<>();
@@ -36,6 +38,11 @@ class Snippet {
         return this;
     }
 
+    public @NotNull Snippet withLines(@NotNull Stream<String> lines) {
+        lines.forEach(this.lines::add);
+        return this;
+    }
+
     public @NotNull Snippet withLines(@NotNull Snippet snippet) {
         return withLines(snippet.lines);
     }
@@ -53,7 +60,11 @@ class Snippet {
     }
 
     public @NotNull String join(@NotNull String indent) {
-        return lines.stream().collect(Collectors.joining("\n" + indent, "", ""));
+        return join(Collectors.joining("\n" + indent, "", ""));
+    }
+
+    public @NotNull String join(@NotNull Collector<CharSequence, ?, String> collector) {
+        return lines.stream().collect(collector);
     }
 
     @Override
