@@ -14,7 +14,7 @@ import java.util.function.Supplier;
 import java.util.stream.Collector;
 import java.util.stream.Collectors;
 
-public class ColumnJoins {
+class ColumnJoins {
     public static final String EQ_QUESTION = "%s=?";
 
     public static final Collector<CharSequence, ?, String> COMMA_JOINER = Collectors.joining(", ");
