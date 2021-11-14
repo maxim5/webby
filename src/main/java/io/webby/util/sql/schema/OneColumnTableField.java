@@ -1,11 +1,13 @@
 package io.webby.util.sql.schema;
 
+import com.google.errorprone.annotations.Immutable;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.Collections;
 import java.util.List;
 
+@Immutable
 public class OneColumnTableField extends TableField {
     private final Column column;
 

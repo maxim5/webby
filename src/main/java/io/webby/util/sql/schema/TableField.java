@@ -1,11 +1,13 @@
 package io.webby.util.sql.schema;
 
+import com.google.errorprone.annotations.Immutable;
 import io.webby.util.sql.api.ReadFollow;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.List;
 
+@Immutable
 public abstract class TableField implements WithColumns, WithPrefixedColumns {
     protected final TableSchema parent;
     protected final ModelField field;

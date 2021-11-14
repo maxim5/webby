@@ -1,8 +1,10 @@
 package io.webby.util.sql.schema;
 
 import com.google.common.collect.ImmutableList;
+import com.google.errorprone.annotations.Immutable;
 import org.jetbrains.annotations.NotNull;
 
+@Immutable
 public class MultiColumnTableField extends TableField {
     private final ImmutableList<Column> columns;
 

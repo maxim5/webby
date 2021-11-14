@@ -1,6 +1,7 @@
 package io.webby.util.sql.schema;
 
 import com.google.common.collect.ImmutableList;
+import com.google.errorprone.annotations.Immutable;
 import io.webby.util.lazy.AtomicLazyList;
 import io.webby.util.sql.api.ReadFollow;
 import org.jetbrains.annotations.NotNull;
@@ -13,6 +14,7 @@ import java.util.stream.Stream;
 import static io.webby.util.sql.api.ReadFollow.FOLLOW_ALL;
 import static io.webby.util.sql.api.ReadFollow.FOLLOW_ONE_LEVEL;
 
+@Immutable
 public record TableSchema(@NotNull String sqlName,
                           @NotNull String javaName,
                           @NotNull String modelName,
@@ -39,6 +41,7 @@ public record TableSchema(@NotNull String sqlName,
         return fields().stream().anyMatch(TableField::isForeignKey);
     }
 
+    // TODO: lazy cache
     public @NotNull List<ForeignTableField> foreignFields(@NotNull ReadFollow follow) {
         return switch (follow) {
             case NO_FOLLOW -> List.of();
