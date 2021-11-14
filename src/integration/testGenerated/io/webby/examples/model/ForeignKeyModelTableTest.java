@@ -1,6 +1,6 @@
 package io.webby.examples.model;
 
-import io.webby.testing.BaseModelKeyTableTest;
+import io.webby.testing.BaseModelForeignKeyTableTest;
 import io.webby.util.sql.api.ForeignInt;
 import io.webby.util.sql.api.ForeignLong;
 import io.webby.util.sql.api.ForeignObj;
@@ -10,7 +10,7 @@ import java.sql.Connection;
 
 import static io.webby.testing.TestingUtil.array;
 
-public class ForeignKeyModelTableTest extends BaseModelKeyTableTest<Long, ForeignKeyModel, ForeignKeyModelTable> {
+public class ForeignKeyModelTableTest extends BaseModelForeignKeyTableTest<Long, ForeignKeyModel, ForeignKeyModelTable> {
     @Override
     protected void setUp(@NotNull Connection connection) throws Exception {
         connection.createStatement().executeUpdate("""
@@ -46,5 +46,29 @@ public class ForeignKeyModelTableTest extends BaseModelKeyTableTest<Long, Foreig
     @Override
     protected @NotNull ForeignKeyModel createEntity(@NotNull Long key, int version) {
         return new ForeignKeyModel(key, ForeignInt.ofId(version), ForeignLong.ofId(777), ForeignObj.ofId("foo"));
+    }
+
+    @Override
+    protected @NotNull ForeignKeyModel enrichOneLevel(@NotNull ForeignKeyModel model) {
+        ForeignKeyModel.InnerInt fkInt = new ForeignKeyModel.InnerInt(model.innerInt().getIntId(), 123);
+        new FKIntTable(connection).insert(fkInt);
+
+        ForeignKeyModel.InnerLong fkLong = new ForeignKeyModel.InnerLong(model.innerLong().getLongId(), 456);
+        new FKLongTable(connection).insert(fkLong);
+
+        ForeignKeyModel.InnerString fkString = new ForeignKeyModel.InnerString(model.innerString().getFk(), "foobar");
+        new FKStringTable(connection).insert(fkString);
+
+        return new ForeignKeyModel(
+            model.id(),
+            ForeignInt.ofEntity(fkInt.id(), fkInt),
+            ForeignLong.ofEntity(fkLong.id(), fkLong),
+            ForeignObj.ofEntity(fkString.id(), fkString)
+        );
+    }
+
+    @Override
+    protected @NotNull ForeignKeyModel enrichAllLevels(@NotNull ForeignKeyModel model) {
+        return enrichOneLevel(model);
     }
 }

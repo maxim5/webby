@@ -3,6 +3,9 @@ package io.webby.util.sql.codegen;
 import org.jetbrains.annotations.NotNull;
 
 class JavaSupport {
+    public static final String INDENT = "    ";
+    public static final String INDENT2 = "        ";
+
     public static @NotNull Snippet wrapAsStringLiteral(@NotNull Snippet snippet) {
         if (snippet.linesNumber() <= 1) {
             return new Snippet().withFormattedLine("\"%s\"", snippet.join());

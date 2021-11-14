@@ -10,7 +10,9 @@ import java.util.Arrays;
 import java.util.Set;
 import java.util.stream.Stream;
 
+import static io.webby.util.sql.api.ReadFollow.*;
 import static io.webby.util.sql.codegen.ColumnJoins.joinWithTransform;
+import static io.webby.util.sql.codegen.JavaSupport.INDENT;
 import static java.util.Objects.requireNonNull;
 
 class ResultSetConversionMaker {
@@ -58,17 +60,18 @@ class ResultSetConversionMaker {
                 String fkParam = resultSetGetterExpr(field.foreignKeyColumn());
                 String params;
                 String factoryMethod;
-                if (follow == ReadFollow.NO_FOLLOW) {
+                if (follow == NO_FOLLOW) {
                     params = fkParam;
                     factoryMethod = "ofId";
                 } else {
-                    params = "%s, %s.fromRow(%s, %s.%s, %s)".formatted(
+                    int columnsNumber = field.columnsNumber(follow) - 1;  // exclude FK columns
+                    params = "%s, %s.fromRow(%s, %s.%s, (%s += %d) - %d)".formatted(
                         fkParam,
                         field.getForeignTable().javaName(),
                         resultSetParam,
                         ReadFollow.class.getSimpleName(),
-                        follow == ReadFollow.ONE_LEVEL ? ReadFollow.NO_FOLLOW : ReadFollow.FOLLOW_ALL,
-                        indexParam
+                        follow == FOLLOW_ONE_LEVEL ? NO_FOLLOW : FOLLOW_ALL,
+                        indexParam, columnsNumber, columnsNumber
                     );
                     factoryMethod = "ofEntity";
                 }
@@ -77,8 +80,8 @@ class ResultSetConversionMaker {
             });
         return new Snippet()
                 .withFormattedLine("switch (%s) {", followParam)
-                .withLines(cases.map(line -> BaseCodegen.INDENT + line))
-                .withLine("}").join(BaseCodegen.INDENT);
+                .withLines(cases.map(line -> INDENT + line))
+                .withLine("}").join(INDENT);
     }
 
     private @NotNull String resultSetGetterExpr(@NotNull Column column) {

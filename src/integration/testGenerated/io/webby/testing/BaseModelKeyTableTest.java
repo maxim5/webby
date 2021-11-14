@@ -115,7 +115,7 @@ public abstract class BaseModelKeyTableTest<K, E, T extends TableObj<K, E>> {
 
     protected abstract @NotNull E createEntity(@NotNull K key, int version);
 
-    private void assumeKeys(int minimumNum) {
+    protected void assumeKeys(int minimumNum) {
         assertNotNull(keys);
         assumeTrue(keys.length >= minimumNum,
                    "Can't run the test because not enough keys available: %s".formatted(Arrays.toString(keys)));

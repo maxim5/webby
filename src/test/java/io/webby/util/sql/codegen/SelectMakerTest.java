@@ -1,7 +1,6 @@
 package io.webby.util.sql.codegen;
 
 import io.webby.testing.Testing;
-import io.webby.util.sql.api.ReadFollow;
 import io.webby.util.sql.api.ForeignInt;
 import io.webby.util.sql.schema.ModelSchemaFactory;
 import io.webby.util.sql.schema.TableSchema;
@@ -11,6 +10,7 @@ import org.junit.jupiter.api.Test;
 import java.util.Arrays;
 import java.util.Map;
 
+import static io.webby.util.sql.api.ReadFollow.*;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
 public class SelectMakerTest {
@@ -83,8 +83,8 @@ public class SelectMakerTest {
                                     @NotNull String expectedNoFollow,
                                     @NotNull String expectedOneLevel,
                                     @NotNull String expectedFollowAll) {
-        assertEquals(expectedNoFollow.strip(), selectMaker.make(ReadFollow.NO_FOLLOW).join().strip());
-        assertEquals(expectedOneLevel.strip(), selectMaker.make(ReadFollow.ONE_LEVEL).join().strip());
-        assertEquals(expectedFollowAll.strip(), selectMaker.make(ReadFollow.FOLLOW_ALL).join().strip());
+        assertEquals(expectedNoFollow.strip(), selectMaker.make(NO_FOLLOW).join().strip());
+        assertEquals(expectedOneLevel.strip(), selectMaker.make(FOLLOW_ONE_LEVEL).join().strip());
+        assertEquals(expectedFollowAll.strip(), selectMaker.make(FOLLOW_ALL).join().strip());
     }
 }

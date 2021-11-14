@@ -6,6 +6,9 @@ import org.jetbrains.annotations.NotNull;
 
 import java.util.List;
 
+import static io.webby.util.sql.api.ReadFollow.FOLLOW_ALL;
+import static io.webby.util.sql.api.ReadFollow.NO_FOLLOW;
+
 public class ForeignTableField extends TableField {
     private final TableSchema foreignTable;
     private final Column foreignKeyColumn;
@@ -37,8 +40,8 @@ public class ForeignTableField extends TableField {
         List<PrefixedColumn> fkColumns = List.of(foreignKeyColumn.prefixed(parent.sqlName()));
         return switch (follow) {
             case NO_FOLLOW -> fkColumns;
-            case ONE_LEVEL -> EasyIterables.concat(fkColumns, foreignTable.columns(ReadFollow.NO_FOLLOW));
-            case FOLLOW_ALL -> EasyIterables.concat(fkColumns, foreignTable.columns(ReadFollow.FOLLOW_ALL));
+            case FOLLOW_ONE_LEVEL -> EasyIterables.concat(fkColumns, foreignTable.columns(NO_FOLLOW));
+            case FOLLOW_ALL -> EasyIterables.concat(fkColumns, foreignTable.columns(FOLLOW_ALL));
         };
     }
 

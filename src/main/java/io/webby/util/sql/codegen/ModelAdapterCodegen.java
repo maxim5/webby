@@ -16,6 +16,7 @@ import java.util.Map;
 import java.util.stream.Stream;
 
 import static io.webby.util.sql.codegen.ColumnJoins.*;
+import static io.webby.util.sql.codegen.JavaSupport.*;
 
 @SuppressWarnings("UnnecessaryStringEscape")
 public class ModelAdapterCodegen extends BaseCodegen {

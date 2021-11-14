@@ -4,7 +4,10 @@ import com.google.common.collect.Iterables;
 import com.google.common.collect.Streams;
 import io.webby.util.collect.EasyMaps;
 import io.webby.util.sql.api.*;
-import io.webby.util.sql.schema.*;
+import io.webby.util.sql.schema.AdapterInfo;
+import io.webby.util.sql.schema.Naming;
+import io.webby.util.sql.schema.TableField;
+import io.webby.util.sql.schema.TableSchema;
 import org.jetbrains.annotations.NotNull;
 
 import java.io.IOException;
@@ -16,7 +19,7 @@ import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 import static io.webby.util.sql.codegen.ColumnJoins.*;
-import static io.webby.util.sql.codegen.JavaSupport.wrapAsStringLiteral;
+import static io.webby.util.sql.codegen.JavaSupport.*;
 import static java.util.Objects.requireNonNull;
 
 @SuppressWarnings("UnnecessaryStringEscape")
@@ -217,8 +220,7 @@ public class ModelTableCodegen extends BaseCodegen {
             return;
         }
 
-        List<Column> primaryColumns = table.columns(TableField::isPrimaryKey);
-        Snippet where = new Snippet().withLines(WhereMaker.makeForAnd(primaryColumns));
+        Snippet where = new Snippet().withLines(WhereMaker.makeForPrimaryColumns(table));
         Map<String, String> context = EasyMaps.asMap(
             "$sql_where_literal", wrapAsStringLiteral(where, INDENT2),
             "$pk_object", toKeyObject(requireNonNull(table.primaryKeyField()), "$pk_name")
@@ -317,11 +319,9 @@ public class ModelTableCodegen extends BaseCodegen {
             return;
         }
 
-        List<Column> primaryColumns = table.columns(TableField::isPrimaryKey);
-        List<Column> nonPrimaryColumns = table.columns(Predicate.not(TableField::isPrimaryKey));
         Snippet query = new Snippet()
-                .withLines(UpdateMaker.make(table, nonPrimaryColumns))
-                .withLines(WhereMaker.makeForAnd(primaryColumns));
+                .withLines(UpdateMaker.make(table, table.columns(Predicate.not(TableField::isPrimaryKey))))
+                .withLines(WhereMaker.makeForPrimaryColumns(table));
         Map<String, String> context = EasyMaps.asMap(
             "$sql_query_literal", wrapAsStringLiteral(query, INDENT2)
         );

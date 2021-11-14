@@ -62,4 +62,14 @@ public abstract class TableField implements WithColumns, WithPrefixedColumns {
     public @NotNull List<PrefixedColumn> columns(@NotNull ReadFollow follow) {
         return columns().stream().map(column -> column.prefixed(parent.sqlName())).toList();
     }
+
+    @Override
+    public String toString() {
+        return "%s(%s::%s, primary:%s)".formatted(
+                getClass().getSimpleName(),
+                parent.javaName(),
+                field.name(),
+                primaryKey
+        );
+    }
 }

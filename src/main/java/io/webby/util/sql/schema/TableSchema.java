@@ -11,7 +11,7 @@ import java.util.function.Predicate;
 import java.util.stream.Stream;
 
 import static io.webby.util.sql.api.ReadFollow.FOLLOW_ALL;
-import static io.webby.util.sql.api.ReadFollow.ONE_LEVEL;
+import static io.webby.util.sql.api.ReadFollow.FOLLOW_ONE_LEVEL;
 
 public record TableSchema(@NotNull String sqlName,
                           @NotNull String javaName,
@@ -42,8 +42,8 @@ public record TableSchema(@NotNull String sqlName,
     public @NotNull List<ForeignTableField> foreignFields(@NotNull ReadFollow follow) {
         return switch (follow) {
             case NO_FOLLOW -> List.of();
-            case ONE_LEVEL -> fields().stream().filter(TableField::isForeignKey).map(field -> (ForeignTableField) field).toList();
-            case FOLLOW_ALL -> foreignFields(ONE_LEVEL).stream()
+            case FOLLOW_ONE_LEVEL -> fields().stream().filter(TableField::isForeignKey).map(field -> (ForeignTableField) field).toList();
+            case FOLLOW_ALL -> foreignFields(FOLLOW_ONE_LEVEL).stream()
                     .flatMap(field -> Stream.concat(Stream.of(field), field.getForeignTable().foreignFields(FOLLOW_ALL).stream()))
                     .toList();
         };
@@ -60,7 +60,11 @@ public record TableSchema(@NotNull String sqlName,
 
     @Override
     public @NotNull List<PrefixedColumn> columns(@NotNull ReadFollow follow) {
-        return fields().stream().flatMap(field -> field.columns(follow).stream()).toList();
+        return columns(follow, tableField -> true);
+    }
+
+    public @NotNull List<PrefixedColumn> columns(@NotNull ReadFollow follow, @NotNull Predicate<TableField> fieldsFilter) {
+        return fields().stream().filter(fieldsFilter).flatMap(field -> field.columns(follow).stream()).toList();
     }
 
     /*package*/ void initializeOrDie(@NotNull ImmutableList<TableField> fields) {

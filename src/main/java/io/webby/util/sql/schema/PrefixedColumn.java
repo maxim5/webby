@@ -14,4 +14,9 @@ public record PrefixedColumn(@NotNull Column column, @NotNull String prefix) {
     public @NotNull String sqlPrefixedName() {
         return "%s.%s".formatted(prefix, sqlName());
     }
+
+    @Override
+    public String toString() {
+        return "PrefixedColumn(%s::%s/%s)".formatted(prefix, sqlName(), type());
+    }
 }

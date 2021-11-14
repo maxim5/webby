@@ -6,11 +6,10 @@ import java.io.IOException;
 import java.util.Map;
 import java.util.stream.Stream;
 
+import static io.webby.util.sql.codegen.JavaSupport.INDENT;
+
 @SuppressWarnings("UnusedReturnValue")
 public abstract class BaseCodegen {
-    protected static final String INDENT = "    ";
-    protected static final String INDENT2 = "        ";
-
     protected final Appendable writer;
 
     protected BaseCodegen(@NotNull Appendable writer) {
