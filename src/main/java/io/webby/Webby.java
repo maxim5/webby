@@ -19,6 +19,7 @@ import io.webby.netty.NettyBootstrap;
 import io.webby.netty.NettyModule;
 import io.webby.perf.PerfModule;
 import io.webby.url.UrlModule;
+import io.webby.util.UtilModule;
 import io.webby.ws.WebsocketModule;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
@@ -57,6 +58,7 @@ public class Webby {
             new NettyModule(),
             new PerfModule(),
             new UrlModule(),
+            new UtilModule(),
             new WebsocketModule()
         );
     }

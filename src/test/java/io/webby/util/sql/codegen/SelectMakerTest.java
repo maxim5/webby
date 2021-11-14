@@ -1,9 +1,9 @@
 package io.webby.util.sql.codegen;
 
-import io.webby.testing.Testing;
 import io.webby.util.sql.api.ForeignInt;
 import io.webby.util.sql.schema.ModelSchemaFactory;
 import io.webby.util.sql.schema.TableSchema;
+import io.webby.util.sql.testing.FakeModelAdaptersLocator;
 import org.jetbrains.annotations.NotNull;
 import org.junit.jupiter.api.Test;
 
@@ -14,7 +14,7 @@ import static io.webby.util.sql.api.ReadFollow.*;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
 public class SelectMakerTest {
-    private final ModelAdaptersLocator locator = Testing.testStartupNoHandlers().getInstance(ModelAdaptersLocator.class);
+    private final ModelAdaptersLocator locator = new FakeModelAdaptersLocator();
 
     @Test
     public void one_level() {

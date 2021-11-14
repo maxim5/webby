@@ -1,8 +1,8 @@
 package io.webby.util.sql.codegen;
 
-import io.webby.testing.Testing;
 import io.webby.util.sql.schema.InvalidSqlModelException;
 import io.webby.util.sql.schema.ModelSchemaFactory;
+import io.webby.util.sql.testing.FakeModelAdaptersLocator;
 import org.jetbrains.annotations.NotNull;
 import org.junit.jupiter.api.Test;
 
@@ -15,7 +15,7 @@ import java.util.Set;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 
 public class ModelTableCodegenTest {
-    private final ModelAdaptersLocator locator = Testing.testStartupNoHandlers().getInstance(ModelAdaptersLocator.class);
+    private final ModelAdaptersLocator locator = new FakeModelAdaptersLocator();
 
     @Test
     public void invalid_list_field() {

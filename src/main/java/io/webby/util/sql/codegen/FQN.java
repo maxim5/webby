@@ -3,7 +3,7 @@ package io.webby.util.sql.codegen;
 import io.webby.util.sql.schema.Naming;
 import org.jetbrains.annotations.NotNull;
 
-record FQN(@NotNull String packageName, @NotNull String className) {
+public record FQN(@NotNull String packageName, @NotNull String className) {
     public static @NotNull FQN of(@NotNull Class<?> klass) {
         return new FQN(klass.getPackageName(), Naming.shortCanonicalName(klass));
     }

@@ -25,7 +25,7 @@ public class ExamplesCodegenMain {
     private static final FluentLogger log = FluentLogger.forEnclosingClass();
     private static final String DESTINATION_DIRECTORY = "src/examples/generated/sql";
 
-    private static final ModelAdaptersLocator locator = new ModelAdaptersLocator(new ClasspathScanner());
+    private static final ModelAdaptersLocator locator = new ModelAdaptersLocatorImpl(new ClasspathScanner());
 
     public static void main(String[] args) throws Exception {
         List<ModelClassInput> inputs = List.of(
