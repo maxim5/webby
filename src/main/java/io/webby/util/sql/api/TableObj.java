@@ -25,4 +25,7 @@ public interface TableObj<K, E> extends BaseTable<E> {
 
     @CanIgnoreReturnValue
     int updateByPk(@NotNull E entity);
+
+    @CanIgnoreReturnValue
+    int deleteByPk(@NotNull K key);
 }

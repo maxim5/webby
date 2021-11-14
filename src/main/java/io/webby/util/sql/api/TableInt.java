@@ -1,5 +1,6 @@
 package io.webby.util.sql.api;
 
+import com.google.errorprone.annotations.CanIgnoreReturnValue;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
@@ -39,5 +40,13 @@ public interface TableInt<E> extends TableObj<Integer, E> {
 
     default @NotNull Integer keyOf(@NotNull E entity) {
         return intKeyOf(entity);
+    }
+
+    @CanIgnoreReturnValue
+    int deleteByPk(int key) ;
+
+    @CanIgnoreReturnValue
+    default int deleteByPk(@NotNull Integer key) {
+        return deleteByPk(key.intValue());
     }
 }

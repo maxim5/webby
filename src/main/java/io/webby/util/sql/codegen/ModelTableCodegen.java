@@ -66,8 +66,9 @@ public class ModelTableCodegen extends BaseCodegen {
 
         insert();
         valuesForInsert();
-        update();
+        updateByPk();
         valuesForUpdate();
+        deleteByPk();
 
         fromRow();
 
@@ -331,7 +332,7 @@ public class ModelTableCodegen extends BaseCodegen {
         """, EasyMaps.merge(context, mainContext));
     }
 
-    private void update() throws IOException {
+    private void updateByPk() throws IOException {
         if (!table.hasPrimaryKeyField()) {
             return;
         }
@@ -378,6 +379,32 @@ public class ModelTableCodegen extends BaseCodegen {
             return array;
         }\n
         """, EasyMaps.merge(context, mainContext));
+    }
+
+    private void deleteByPk() throws IOException {
+        if (!table.hasPrimaryKeyField()) {
+            return;
+        }
+
+        Snippet query = new Snippet()
+                .withLines(DeleteMaker.make(table))
+                .withLines(WhereMaker.makeForPrimaryColumns(table));
+        Map<String, String> context = EasyMaps.asMap(
+            "$sql_query_literal", wrapAsStringLiteral(query, INDENT2),
+            "$pk_object", toKeyObject(requireNonNull(table.primaryKeyField()), "$pk_name")
+        );
+
+        appendCode("""
+        @Override
+        public int deleteByPk($pk_annotation$pk_type $pk_name) {
+            String query = $sql_query_literal;
+            try {
+               return runner.runUpdate(query, $pk_object);
+           } catch (SQLException e) {
+               throw new QueryException("Failed to delete entity in $TableClass by PK", query, $pk_name, e);
+           }
+        }\n
+        """, EasyMaps.merge(context, mainContext, pkContext));
     }
 
     private void fromRow() throws IOException {

@@ -56,6 +56,13 @@ public abstract class BaseModelKeyTableTest<K, E, T extends TableObj<K, E>> {
     }
 
     @Test
+    public void key_of_entity() {
+        assumeKeys(1);
+        E entity = createEntity(keys[0]);
+        assertEquals(keys[0], table.keyOf(entity));
+    }
+
+    @Test
     public void insert_entity() {
         assumeKeys(2);
         E entity = createEntity(keys[0]);
@@ -99,7 +106,7 @@ public abstract class BaseModelKeyTableTest<K, E, T extends TableObj<K, E>> {
 
     @Test
     public void update_missing_entity() {
-        assumeKeys(2);
+        assumeKeys(1);
         E entity = createEntity(keys[0]);
         assertEquals(0, table.updateByPk(entity));
 
@@ -110,10 +117,26 @@ public abstract class BaseModelKeyTableTest<K, E, T extends TableObj<K, E>> {
     }
 
     @Test
-    public void key_of_entity() {
+    public void delete_entity() {
         assumeKeys(1);
-        E entity = createEntity(keys[0]);
-        assertEquals(keys[0], table.keyOf(entity));
+        table.insert(createEntity(keys[0], 0));
+        assertEquals(1, table.deleteByPk(keys[0]));
+
+        assertEquals(0, table.count());
+        assertTrue(table.isEmpty());
+        assertNull(table.getByPkOrNull(keys[0]));
+        assertThat(table.fetchAll()).isEmpty();
+    }
+
+    @Test
+    public void delete_missing_entity() {
+        assumeKeys(1);
+        assertEquals(0, table.deleteByPk(keys[0]));
+
+        assertEquals(0, table.count());
+        assertTrue(table.isEmpty());
+        assertNull(table.getByPkOrNull(keys[0]));
+        assertThat(table.fetchAll()).isEmpty();
     }
 
     protected @NotNull E createEntity(@NotNull K key) {
