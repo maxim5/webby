@@ -109,6 +109,13 @@ public abstract class BaseModelKeyTableTest<K, E, T extends TableObj<K, E>> {
         assertThat(table.fetchAll()).isEmpty();
     }
 
+    @Test
+    public void key_of_entity() {
+        assumeKeys(1);
+        E entity = createEntity(keys[0]);
+        assertEquals(keys[0], table.keyOf(entity));
+    }
+
     protected @NotNull E createEntity(@NotNull K key) {
         return createEntity(key, 0);
     }

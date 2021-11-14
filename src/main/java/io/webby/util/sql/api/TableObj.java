@@ -21,6 +21,8 @@ public interface TableObj<K, E> extends BaseTable<E> {
         return Optional.ofNullable(getByPkOrNull(key));
     }
 
+    @NotNull K keyOf(@NotNull E entity);
+
     @CanIgnoreReturnValue
     int updateByPk(@NotNull E entity);
 }

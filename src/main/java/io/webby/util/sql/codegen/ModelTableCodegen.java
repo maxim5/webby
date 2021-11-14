@@ -61,6 +61,7 @@ public class ModelTableCodegen extends BaseCodegen {
         selectConstants();
 
         getByPk();
+        keyOf();
         iterator();
 
         insert();
@@ -246,6 +247,25 @@ public class ModelTableCodegen extends BaseCodegen {
         } else {
             return "%s.toNewValuesArray(%s)".formatted(adapterInfo.staticRef(), paramName);
         }
+    }
+
+    private void keyOf() throws IOException {
+        if (!table.hasPrimaryKeyField()) {
+            return;
+        }
+
+        TableField primaryKey = requireNonNull(table.primaryKeyField());
+        Map<String, String> context = EasyMaps.asMap(
+            "$KeyOfMethod", primaryKey.javaType() == int.class ? "intKeyOf" : primaryKey.javaType() == long.class ? "longKeyOf" : "keyOf",
+            "$pk_getter", primaryKey.javaGetter()
+        );
+
+        appendCode("""
+        @Override
+        public $pk_annotation$pk_type $KeyOfMethod(@Nonnull $ModelClass $model_param) {
+            return $model_param.$pk_getter();
+        }\n
+       """, EasyMaps.merge(context, mainContext, pkContext));
     }
 
     private void iterator() throws IOException {

@@ -34,4 +34,10 @@ public interface TableInt<E> extends TableObj<Integer, E> {
     default @NotNull Optional<E> getOptionalByPk(@NotNull Integer key) {
         return getOptionalByPk(key.intValue());
     }
+
+    int intKeyOf(@NotNull E entity);
+
+    default @NotNull Integer keyOf(@NotNull E entity) {
+        return intKeyOf(entity);
+    }
 }

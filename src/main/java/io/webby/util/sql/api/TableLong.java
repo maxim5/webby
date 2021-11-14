@@ -34,4 +34,10 @@ public interface TableLong<E> extends TableObj<Long, E> {
     default @NotNull Optional<E> getOptionalByPk(@NotNull Long key) {
         return getOptionalByPk(key.longValue());
     }
+
+    long longKeyOf(@NotNull E entity);
+
+    default @NotNull Long keyOf(@NotNull E entity) {
+        return longKeyOf(entity);
+    }
 }
