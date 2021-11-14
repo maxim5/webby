@@ -10,7 +10,7 @@ import java.util.List;
 import java.util.stream.Collector;
 import java.util.stream.Collectors;
 
-import static io.webby.util.sql.codegen.ColumnJoins.EQ_QUESTION;
+import static io.webby.util.sql.codegen.SqlSupport.EQ_QUESTION;
 
 class WhereMaker {
     public static final Collector<CharSequence, ?, String> AND_JOINER = Collectors.joining(" AND ");

@@ -16,7 +16,7 @@ import java.util.Map;
 import java.util.stream.Stream;
 
 import static io.webby.util.sql.codegen.ColumnJoins.*;
-import static io.webby.util.sql.codegen.JavaSupport.*;
+import static io.webby.util.sql.codegen.JavaSupport.INDENT1;
 
 @SuppressWarnings("UnnecessaryStringEscape")
 public class ModelAdapterCodegen extends BaseCodegen {
@@ -153,7 +153,7 @@ public class ModelAdapterCodegen extends BaseCodegen {
             } else if (field instanceof PojoFieldNested fieldNested) {
                 fieldConstructor(fieldNested.pojo(), nativeFieldsColumns, builder);
             } else if (field instanceof PojoFieldAdapter fieldAdapter) {
-                String params = joinWithComma(fieldAdapter.columns());
+                String params = fieldAdapter.columns().stream().map(Column::sqlName).collect(COMMA_JOINER);
                 builder.append("%s.createInstance(%s)".formatted(fieldAdapter.adapterInfo().staticRef(), params));
             } else {
                 throw new IllegalStateException("Internal error. Unrecognized field: " + field);
@@ -203,7 +203,7 @@ public class ModelAdapterCodegen extends BaseCodegen {
         }
 
         Map<String, String> context = Map.of(
-            "$assignments", pojoAssignmentLines(pojo).stream().collect(linesJoiner(INDENT))
+            "$assignments", pojoAssignmentLines(pojo).stream().collect(linesJoiner(INDENT1))
         );
 
         appendCode("""

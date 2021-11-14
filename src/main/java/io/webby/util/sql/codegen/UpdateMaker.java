@@ -6,7 +6,8 @@ import org.jetbrains.annotations.NotNull;
 
 import java.util.List;
 
-import static io.webby.util.sql.codegen.ColumnJoins.*;
+import static io.webby.util.sql.codegen.ColumnJoins.COMMA_JOINER;
+import static io.webby.util.sql.codegen.SqlSupport.EQ_QUESTION;
 
 class UpdateMaker {
     public static @NotNull Snippet make(@NotNull TableSchema table, @NotNull List<Column> columns) {

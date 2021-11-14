@@ -4,10 +4,7 @@ import com.google.common.collect.Iterables;
 import com.google.common.collect.Streams;
 import io.webby.util.collect.EasyMaps;
 import io.webby.util.sql.api.*;
-import io.webby.util.sql.schema.AdapterInfo;
-import io.webby.util.sql.schema.Naming;
-import io.webby.util.sql.schema.TableField;
-import io.webby.util.sql.schema.TableSchema;
+import io.webby.util.sql.schema.*;
 import org.jetbrains.annotations.NotNull;
 
 import java.io.IOException;
@@ -205,8 +202,8 @@ public class ModelTableCodegen extends BaseCodegen {
         String constants = Arrays.stream(ReadFollow.values())
                 .map(follow -> new SelectMaker(table).make(follow))
                 .map(snippet -> new Snippet().withLines(snippet))
-                .map(query -> wrapAsStringLiteral(query, INDENT))
-                .collect(Collectors.joining(",\n" + INDENT, INDENT, ""));
+                .map(query -> wrapAsStringLiteral(query, INDENT1))
+                .collect(Collectors.joining(",\n" + INDENT1, INDENT1, ""));
 
         appendCode("""
         private static final String[] SELECT_ENTITY_ALL = {
@@ -300,7 +297,7 @@ public class ModelTableCodegen extends BaseCodegen {
         ValuesArrayMaker maker = new ValuesArrayMaker("$model_param", table.fields());
         Map<String, String> context = Map.of(
             "$array_init", maker.makeInitValues().join(linesJoiner(INDENT2)),
-            "$array_convert", maker.makeConvertValues().join(linesJoiner(INDENT, true))
+            "$array_convert", maker.makeConvertValues().join(linesJoiner(INDENT1, true))
         );
 
         appendCode("""
@@ -349,7 +346,7 @@ public class ModelTableCodegen extends BaseCodegen {
         ValuesArrayMaker maker = new ValuesArrayMaker("$model_param", Iterables.concat(nonPrimary, primary));
         Map<String, String> context = Map.of(
             "$array_init", maker.makeInitValues().join(linesJoiner(INDENT2)),
-            "$array_convert", maker.makeConvertValues().join(linesJoiner(INDENT, true))
+            "$array_convert", maker.makeConvertValues().join(linesJoiner(INDENT1, true))
         );
 
         appendCode("""
@@ -366,7 +363,7 @@ public class ModelTableCodegen extends BaseCodegen {
     private void fromRow() throws IOException {
         ResultSetConversionMaker maker = new ResultSetConversionMaker("result", "follow", "start");
         Map<String, String> context = Map.of(
-            "$fields_assignments", maker.make(table).join(linesJoiner(INDENT)),
+            "$fields_assignments", maker.make(table).join(linesJoiner(INDENT1)),
             "$model_fields", table.fields().stream().map(TableField::javaName).collect(COMMA_JOINER)
         );
 
@@ -380,7 +377,7 @@ public class ModelTableCodegen extends BaseCodegen {
 
     private void meta() throws IOException {
         Map<String, String> context = Map.of(
-            "$column_strings", joinWithPattern(table.columns(), "\"%s\"")
+            "$column_strings", table.columns().stream().map(Column::sqlName).map("\"%s\""::formatted).collect(COMMA_JOINER)
         );
 
         appendCode("""

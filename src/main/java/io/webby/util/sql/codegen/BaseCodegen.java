@@ -6,7 +6,7 @@ import java.io.IOException;
 import java.util.Map;
 import java.util.stream.Stream;
 
-import static io.webby.util.sql.codegen.JavaSupport.INDENT;
+import static io.webby.util.sql.codegen.JavaSupport.INDENT1;
 
 @SuppressWarnings("UnusedReturnValue")
 public abstract class BaseCodegen {
@@ -23,7 +23,7 @@ public abstract class BaseCodegen {
 
     private BaseCodegen indent(int level) throws IOException {
         for (int i = 0; i < level; i++) {
-            writer.append(INDENT);
+            writer.append(INDENT1);
         }
         return this;
     }

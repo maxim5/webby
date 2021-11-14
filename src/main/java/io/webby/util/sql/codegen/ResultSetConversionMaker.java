@@ -11,8 +11,8 @@ import java.util.Set;
 import java.util.stream.Stream;
 
 import static io.webby.util.sql.api.ReadFollow.*;
-import static io.webby.util.sql.codegen.ColumnJoins.joinWithTransform;
-import static io.webby.util.sql.codegen.JavaSupport.INDENT;
+import static io.webby.util.sql.codegen.ColumnJoins.COMMA_JOINER;
+import static io.webby.util.sql.codegen.JavaSupport.INDENT1;
 import static java.util.Objects.requireNonNull;
 
 class ResultSetConversionMaker {
@@ -49,7 +49,7 @@ class ResultSetConversionMaker {
             return resultSetGetterExpr(((OneColumnTableField) field).column());
         } else {
             String staticRef = requireNonNull(field.adapterInfo()).staticRef();
-            String params = joinWithTransform(field.columns(), this::resultSetGetterExpr);
+            String params = field.columns().stream().map(this::resultSetGetterExpr).collect(COMMA_JOINER);
             return "%s.createInstance(%s)".formatted(staticRef, params);
         }
     }
@@ -80,8 +80,8 @@ class ResultSetConversionMaker {
             });
         return new Snippet()
                 .withFormattedLine("switch (%s) {", followParam)
-                .withLines(cases.map(line -> INDENT + line))
-                .withLine("}").join(INDENT);
+                .withLines(cases.map(line -> INDENT1 + line))
+                .withLine("}").join(INDENT1);
     }
 
     private @NotNull String resultSetGetterExpr(@NotNull Column column) {
