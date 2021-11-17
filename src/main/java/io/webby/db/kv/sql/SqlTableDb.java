@@ -9,6 +9,7 @@ import java.util.AbstractMap;
 import java.util.Collection;
 import java.util.Map;
 import java.util.Set;
+import java.util.function.BiConsumer;
 import java.util.stream.Collectors;
 
 public class SqlTableDb<K, V> implements KeyValueDb<K, V> {
@@ -36,6 +37,11 @@ public class SqlTableDb<K, V> implements KeyValueDb<K, V> {
     @Override
     public boolean containsValue(@NotNull V value) {
         return value.equals(get(table.keyOf(value)));
+    }
+
+    @Override
+    public void forEach(@NotNull BiConsumer<? super K, ? super V> action) {
+        table.forEach(value -> action.accept(table.keyOf(value), value));
     }
 
     @Override
@@ -79,8 +85,10 @@ public class SqlTableDb<K, V> implements KeyValueDb<K, V> {
     }
 
     @Override
-    public void flush() {}
+    public void flush() {
+    }
 
     @Override
-    public void close() {}
+    public void close() {
+    }
 }
