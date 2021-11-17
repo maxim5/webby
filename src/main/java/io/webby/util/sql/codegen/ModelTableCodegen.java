@@ -72,6 +72,7 @@ public class ModelTableCodegen extends BaseCodegen {
 
         fromRow();
 
+        internalMeta();
         meta();
 
         appendLine("}");
@@ -420,6 +421,18 @@ public class ModelTableCodegen extends BaseCodegen {
             return new $ModelClass($model_fields);
         }\n
         """, EasyMaps.merge(mainContext, context));
+    }
+
+    private void internalMeta() throws IOException {
+        Map<String, String> context = Map.of(
+            "$KeyClass", table.hasPrimaryKeyField() ? "$pk_type.class" : "null"
+        );
+
+        appendCode("""
+        public static final Class<?> KEY_CLASS = $KeyClass;
+        public static final Class<?> ENTITY_CLASS = $ModelClass.class;
+        public static final Function<Connection, $TableClass> INSTANTIATE = $TableClass::new;\n
+        """, EasyMaps.merge(mainContext, context, pkContext));
     }
 
     private void meta() throws IOException {
