@@ -9,7 +9,7 @@ import java.util.function.Supplier;
 import static java.util.Objects.requireNonNull;
 
 public class AtomicLazy<T> implements DelayedInitLazy<T>, DelayedAccessLazy<T> {
-    private final AtomicReference<T> ref;
+    protected final AtomicReference<T> ref;
 
     public AtomicLazy(@Nullable T initValue) {
         ref = new AtomicReference<>(initValue);
