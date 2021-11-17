@@ -37,7 +37,9 @@ public final class AppSettings implements Settings {
     private Charset charset = Charset.defaultCharset();
 
     private final BiPredicate<String, String> excludeImplFilter =
-            (pkg, __) -> !pkg.startsWith(Packages.RENDER_IMPL) && !pkg.startsWith(Packages.DB_IMPL);
+            (pkg, __) -> !pkg.startsWith(Packages.RENDER_IMPL) &&
+                         !pkg.startsWith(Packages.DB_KV_IMPL) &&
+                         !pkg.startsWith(Packages.DB_SQL_IMPL);
     private BiPredicate<String, String> handlerFilter = null;
     private BiPredicate<String, String> interceptorFilter = null;
 

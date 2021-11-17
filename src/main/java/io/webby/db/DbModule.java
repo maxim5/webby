@@ -1,10 +1,10 @@
 package io.webby.db;
 
 import com.google.inject.AbstractModule;
+import io.webby.db.codec.CodecProvider;
+import io.webby.db.kv.KeyValueFactory;
 import io.webby.db.kv.etcd.EtcdSettings;
 import io.webby.db.kv.impl.AgnosticKeyValueFactory;
-import io.webby.db.kv.KeyValueFactory;
-import io.webby.db.codec.CodecProvider;
 import io.webby.db.kv.redis.RedisSettings;
 
 public class DbModule extends AbstractModule {
@@ -16,5 +16,9 @@ public class DbModule extends AbstractModule {
 
         bind(EtcdSettings.class).asEagerSingleton();
         bind(RedisSettings.class).asEagerSingleton();
+
+        // SQL classes must be lazy singletons
+        // https://github.com/google/guice/issues/357
+        // SqlDbModule?
     }
 }
