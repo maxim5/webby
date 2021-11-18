@@ -19,7 +19,8 @@ import static io.webby.util.base.Rethrow.Suppliers.rethrow;
 public class ClasspathScanner {
     private static final FluentLogger log = FluentLogger.forEnclosingClass();
 
-    private final ClassPath classPath = rethrow(() -> ClassPath.from(ClassLoader.getSystemClassLoader())).get();
+    // TODO: temporary static to speed up tests
+    private static final ClassPath classPath = rethrow(() -> ClassPath.from(ClassLoader.getSystemClassLoader())).get();
 
     public @NotNull Set<? extends Class<?>> getAnnotatedClasses(@NotNull ClassFilter classInfoFilter,
                                                                 @NotNull Class<? extends Annotation> annotation) {
