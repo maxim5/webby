@@ -1,11 +1,11 @@
 package io.webby.util.sql.testing;
 
 import io.webby.util.sql.codegen.FQN;
-import io.webby.util.sql.codegen.ModelAdaptersLocator;
+import io.webby.util.sql.codegen.ModelAdaptersScanner;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
-public class FakeModelAdaptersLocator implements ModelAdaptersLocator {
+public class FakeModelAdaptersScanner implements ModelAdaptersScanner {
     @Override
     public @Nullable Class<?> locateAdapterClass(@NotNull Class<?> model) {
         return null;

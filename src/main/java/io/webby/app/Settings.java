@@ -6,15 +6,12 @@ import io.webby.url.annotate.FrameType;
 import io.webby.url.annotate.Marshal;
 import io.webby.url.annotate.Render;
 import org.jetbrains.annotations.NotNull;
-import org.jetbrains.annotations.Nullable;
 
 import java.nio.charset.Charset;
 import java.nio.file.Path;
 import java.util.List;
-import java.util.Optional;
-import java.util.function.BiPredicate;
 
-public interface Settings {
+public interface Settings extends SettingsFilters, SettingsProps {
     boolean isDevMode();
 
     boolean isProdMode();
@@ -37,10 +34,6 @@ public interface Settings {
 
     @NotNull Charset charset();
 
-    @NotNull BiPredicate<String, String> handlerFilter();
-
-    @NotNull BiPredicate<String, String> interceptorFilter();
-
     @NotNull QueryParser urlParser();
 
     @NotNull String defaultApiVersion();
@@ -56,32 +49,4 @@ public interface Settings {
     @NotNull FrameType defaultFrameType();
 
     @NotNull StorageType storageType();
-
-    @Nullable String getProperty(@NotNull String key);
-
-    @NotNull String getProperty(@NotNull String key, @NotNull String def);
-
-    @NotNull String getProperty(@NotNull String key, @NotNull Object def);
-
-    default @NotNull Optional<String> getOptionalProperty(@NotNull String key) {
-        return Optional.ofNullable(getProperty(key));
-    }
-
-    int getIntProperty(@NotNull String key, int def);
-
-    long getLongProperty(@NotNull String key, long def);
-
-    byte getByteProperty(@NotNull String key, int def);
-
-    float getFloatProperty(@NotNull String key, float def);
-
-    double getDoubleProperty(@NotNull String key, double def);
-
-    boolean getBoolProperty(@NotNull String key);
-
-    boolean getBoolProperty(@NotNull String key, boolean def);
-
-    <T extends Enum<T>> @NotNull T getEnumProperty(@NotNull String key, @NotNull T def);
-
-    @NotNull List<Path> getViewPaths(@NotNull String key);
 }

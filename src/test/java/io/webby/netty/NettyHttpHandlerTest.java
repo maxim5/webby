@@ -8,7 +8,7 @@ import org.junit.jupiter.api.Test;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
 public class NettyHttpHandlerTest {
-    private final Injector injector = Testing.testStartupNoHandlers();
+    private final Injector injector = Testing.testStartup();
     private final NettyHttpHandler handler = injector.getInstance(NettyHttpHandler.class);
 
     @Test

@@ -8,7 +8,7 @@ import io.webby.util.sql.api.Foreign;
 import io.webby.util.sql.api.ForeignInt;
 import io.webby.util.sql.api.ForeignLong;
 import io.webby.util.sql.api.ForeignObj;
-import io.webby.util.sql.codegen.ModelAdaptersLocator;
+import io.webby.util.sql.codegen.ModelAdaptersScanner;
 import io.webby.util.sql.codegen.ModelClassInput;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
@@ -28,13 +28,13 @@ import static io.webby.util.sql.schema.InvalidSqlModelException.failIf;
 import static java.util.Objects.requireNonNull;
 
 public class ModelSchemaFactory {
-    private final ModelAdaptersLocator adaptersLocator;
+    private final ModelAdaptersScanner adaptersLocator;
 
     private final Iterable<ModelClassInput> inputs;
     private final Map<Class<?>, TableSchema> tables = new LinkedHashMap<>();
     private final Map<Class<?>, PojoSchema> pojos = new LinkedHashMap<>();
 
-    public ModelSchemaFactory(@NotNull ModelAdaptersLocator adaptersLocator, @NotNull Iterable<ModelClassInput> inputs) {
+    public ModelSchemaFactory(@NotNull ModelAdaptersScanner adaptersLocator, @NotNull Iterable<ModelClassInput> inputs) {
         this.adaptersLocator = adaptersLocator;
         this.inputs = inputs;
     }

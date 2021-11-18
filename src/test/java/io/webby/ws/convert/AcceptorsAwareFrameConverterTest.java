@@ -200,7 +200,7 @@ public class AcceptorsAwareFrameConverterTest {
     private static @NotNull AcceptorsAwareFrameConverter setupConverter(@NotNull Marshal marshal,
                                                                         @NotNull FrameType supportedType,
                                                                         @NotNull Acceptor ... acceptors) {
-        Injector injector = Testing.testStartupNoHandlers();
+        Injector injector = Testing.testStartup();
 
         AtomicInteger requestIdCounter = new AtomicInteger();
         FrameMetadata metadata = new FrameMetadata() {

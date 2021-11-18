@@ -1,11 +1,11 @@
 package io.webby.util;
 
 import com.google.inject.AbstractModule;
-import io.webby.util.sql.codegen.ModelAdaptersLocator;
-import io.webby.util.sql.codegen.ModelAdaptersLocatorImpl;
+import io.webby.util.sql.codegen.ModelAdaptersScanner;
+import io.webby.util.sql.codegen.ModelAdaptersScannerImpl;
 
 public class UtilModule extends AbstractModule {
     public void configure() {
-        bind(ModelAdaptersLocator.class).to(ModelAdaptersLocatorImpl.class).asEagerSingleton();
+        bind(ModelAdaptersScanner.class).to(ModelAdaptersScannerImpl.class).asEagerSingleton();
     }
 }

@@ -11,6 +11,7 @@ import com.google.inject.util.Modules;
 import io.webby.app.AppConfigException;
 import io.webby.app.AppModule;
 import io.webby.app.AppSettings;
+import io.webby.app.ClassFilter;
 import io.webby.auth.AuthModule;
 import io.webby.common.CommonModule;
 import io.webby.db.DbModule;
@@ -72,8 +73,10 @@ public class Webby {
         validateProfileMode(settings);
         validateSafeMode(settings);
         validateStorageType(settings);
-        validateHandlerFilter(settings);
-        validateInterceptorFilter(settings);
+
+        validateFilter(settings.modelFilter(), "models");
+        validateFilter(settings.handlerFilter(), "handlers");
+        validateFilter(settings.interceptorFilter(), "interceptors");
     }
 
     private static void validateSecurityKey(byte @NotNull [] securityKey) {
@@ -146,50 +149,33 @@ public class Webby {
         }
     }
 
-    private static void validateHandlerFilter(@NotNull AppSettings settings) {
-        if (!settings.isHandlerFilterSet()) {
+    private static void validateFilter(@NotNull ClassFilter classFilter, @NotNull String filterName) {
+        if (!classFilter.isSet()) {
             String className = getCallerClassName();
             if (className != null) {
                 log.at(Level.FINER).log("Caller class name: %s", className);
                 int dot = className.lastIndexOf('.');
                 if (dot > 0) {
                     String packageName = className.substring(0, dot);
-                    settings.setHandlerPackageOnly(packageName);
-                    log.at(Level.INFO).log("Using package `%s` for classpath scanning (handlers)", packageName);
+                    classFilter.setPackageOnly(packageName);
+                    log.at(Level.INFO).log("Using package `%s` for classpath scanning [%s]", packageName, filterName);
                     return;
                 }
             }
 
-            settings.setHandlerFilter((pkg, cls) -> true);
-            log.at(Level.WARNING).log("Failed to determine enclosing package for classpath scanning. " +
-                    "Using the whole classpath (can cause a delay and errors in loading classes)");
-        }
-    }
-
-    private static void validateInterceptorFilter(@NotNull AppSettings settings) {
-        if (!settings.isInterceptorFilterSet()) {
-            String className = getCallerClassName();
-            if (className != null) {
-                log.at(Level.FINER).log("Caller class name: %s", className);
-                int dot = className.lastIndexOf('.');
-                if (dot > 0) {
-                    String packageName = className.substring(0, dot);
-                    settings.setInterceptorPackageOnly(packageName);
-                    log.at(Level.INFO).log("Using package `%s` for classpath scanning (interceptors)", packageName);
-                    return;
-                }
-            }
-
-            settings.setInterceptorFilter((pkg, cls) -> true);
-            log.at(Level.WARNING).log("Failed to determine enclosing package for classpath scanning. " +
-                    "Using the whole classpath (can cause a delay and errors in loading classes)");
+            classFilter.setWholeClasspath();
+            log.at(Level.WARNING).log(
+                "Failed to determine enclosing package for classpath scanning [%s]. " +
+                "Using the whole classpath. This may cause noticeable delays and errors in loading classes.",
+                filterName
+            );
         }
     }
 
     private static @Nullable String getCallerClassName() {
         // `mainModule` is the earliest possible external call. The trace counts right now:
         //  - getCallerClassName     0
-        //  - validateHandlerFilter  1
+        //  - validateFilter         1
         //  - validateSettings       2
         //  - mainModule             3
         StackTraceElement caller = CallerFinder.findCallerOf(Webby.class, 3);

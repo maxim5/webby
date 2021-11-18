@@ -25,16 +25,12 @@ public class Testing {
     public static final String DEFAULT_WEB_PATH = "src/test/resources";
     public static final String DEFAULT_VIEW_PATH = "src/test/resources";
 
-    public static @NotNull Injector testStartupNoHandlers(@NotNull Module... modules) {
-        return testStartup(settings -> settings.setInterceptorFilter((pkg, cls) -> false), modules);
+    public static @NotNull Injector testStartup(@NotNull Module... modules) {
+        return testStartup(settings -> {}, modules);
     }
 
-    public static @NotNull Injector testStartup(@NotNull Class<?> klass, @NotNull Module... modules) {
-        return testStartup(settings -> settings.setHandlerClassOnly(klass), modules);
-    }
-
-    public static @NotNull Injector testStartup(@NotNull String packageName, @NotNull Module... modules) {
-        return testStartup(settings -> settings.setHandlerPackageOnly(packageName), modules);
+    public static @NotNull Injector testStartup(@NotNull Consumer<AppSettings> consumer) {
+        return testStartup(consumer, new Module[0]);
     }
 
     public static @NotNull Injector testStartup(@NotNull Consumer<AppSettings> consumer, @NotNull Module... modules) {
@@ -44,7 +40,9 @@ public class Testing {
         settings.setSecurityKey("12345678901234567890123456789012");
         settings.setWebPath(DEFAULT_WEB_PATH);
         settings.setViewPath(DEFAULT_VIEW_PATH);
-        settings.setHandlerFilter((pkg, cls) -> false);
+        settings.modelFilter().setPredicateUnsafe((pkg, cls) -> false);
+        settings.handlerFilter().setPredicateUnsafe((pkg, cls) -> false);
+        settings.interceptorFilter().setPredicateUnsafe((pkg, cls) -> false);
         settings.setStorageType(StorageType.JAVA_MAP);
         consumer.accept(settings);
         return testStartup(settings, modules);

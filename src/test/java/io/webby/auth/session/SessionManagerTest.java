@@ -8,7 +8,7 @@ import static io.webby.testing.FakeRequests.getEx;
 import static org.junit.jupiter.api.Assertions.*;
 
 public class SessionManagerTest {
-    private final SessionManager manager = Testing.testStartupNoHandlers().getInstance(SessionManager.class);
+    private final SessionManager manager = Testing.testStartup().getInstance(SessionManager.class);
 
     @Test
     public void encode_decode_session_id() {

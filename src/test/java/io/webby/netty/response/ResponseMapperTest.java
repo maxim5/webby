@@ -21,7 +21,7 @@ import static io.webby.testing.TestingBytes.assertByteBuf;
 import static org.junit.jupiter.api.Assertions.*;
 
 public class ResponseMapperTest {
-    private final ResponseMapper mapper = Testing.testStartupNoHandlers().getInstance(ResponseMapper.class);
+    private final ResponseMapper mapper = Testing.testStartup().getInstance(ResponseMapper.class);
 
     @Test
     public void lookup_or_map_byte_buffer() {

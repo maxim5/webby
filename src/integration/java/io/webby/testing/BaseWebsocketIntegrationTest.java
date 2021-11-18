@@ -39,7 +39,7 @@ public class BaseWebsocketIntegrationTest extends BaseChannelTest {
                                                        @NotNull Module... modules) {
         Injector injector = Testing.testStartup(
                 DEFAULT_SETTINGS
-                        .andThen(settings -> settings.setHandlerClassOnly(klass))
+                        .andThen(settings -> settings.handlerFilter().setSingleClassOnly(klass))
                         .andThen(consumer),
                 modules
         );

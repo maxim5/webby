@@ -22,7 +22,7 @@ import static org.junit.jupiter.api.Assertions.*;
 public class HandlerBinderTest {
     @Test
     public void getEndpoints_simple_handler() throws Exception {
-        HandlerBinder binder = Testing.testStartupNoHandlers().getInstance(HandlerBinder.class);
+        HandlerBinder binder = Testing.testStartup().getInstance(HandlerBinder.class);
         Map<String, RouteEndpoint> endpoints = getEndpoints(binder, SimpleHandler.class);
 
         SingleRouteEndpoint foo = assertSingleRoute(endpoints.get("/foo"), HttpMethod.GET, true);

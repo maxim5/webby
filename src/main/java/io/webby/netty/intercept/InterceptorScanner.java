@@ -3,6 +3,7 @@ package io.webby.netty.intercept;
 import com.google.common.collect.Streams;
 import com.google.inject.Inject;
 import com.google.inject.Injector;
+import io.webby.app.ClassFilter;
 import io.webby.app.Settings;
 import io.webby.common.ClasspathScanner;
 import io.webby.common.Packages;
@@ -12,14 +13,14 @@ import org.jetbrains.annotations.NotNull;
 import java.util.Arrays;
 import java.util.Comparator;
 import java.util.List;
-import java.util.function.BiPredicate;
 import java.util.stream.Stream;
 
 import static io.webby.util.base.EasyCast.castAny;
 
 public class InterceptorScanner {
-    private static final BiPredicate<String, String> DEFAULTS_FILTER =
-            (pkg, cls) -> pkg.startsWith(Packages.INTERCEPTORS) && cls.contains("Interceptor");
+    private static final ClassFilter DEFAULTS_FILTER = new ClassFilter(
+        (pkg, cls) -> pkg.startsWith(Packages.INTERCEPTORS) && cls.contains("Interceptor")
+    );
 
     @Inject private Settings settings;
     @Inject private ClasspathScanner scanner;

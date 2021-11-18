@@ -10,7 +10,7 @@ import static io.webby.testing.AssertResponse.ICON_MIME_TYPES;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
 public class StaticServingTest {
-    private final StaticServing serving = Testing.testStartupNoHandlers().getInstance(StaticServing.class);
+    private final StaticServing serving = Testing.testStartup().getInstance(StaticServing.class);
 
     @Test
     public void guessContentType_simple() {

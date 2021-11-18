@@ -23,7 +23,7 @@ import static com.google.common.truth.Truth.assertThat;
 import static org.junit.jupiter.api.Assertions.*;
 
 public class ProtobufMarshallerIntegrationTest {
-    private final ProtobufMarshaller marshaller = Testing.testStartupNoHandlers().getInstance(ProtobufMarshaller.class);
+    private final ProtobufMarshaller marshaller = Testing.testStartup().getInstance(ProtobufMarshaller.class);
 
     private static final Map<Class<? extends Message>, Message> TEST_MESSAGES = Stream.of(
         Status.newBuilder()

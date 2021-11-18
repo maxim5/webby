@@ -3,17 +3,18 @@ package io.webby.db.sql;
 import com.google.common.primitives.Primitives;
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
+import io.webby.app.Settings;
 import io.webby.common.ClasspathScanner;
 import io.webby.util.sql.api.BaseTable;
 import io.webby.util.sql.api.TableObj;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
+import org.jetbrains.annotations.VisibleForTesting;
 
 import java.sql.Connection;
 import java.util.LinkedHashMap;
 import java.util.Map;
 import java.util.Set;
-import java.util.function.BiPredicate;
 import java.util.function.Function;
 
 import static io.webby.util.base.EasyCast.castAny;
@@ -24,9 +25,13 @@ public class TableManager {
     private final Map<Class<?>, EntityTable> tableMap;
 
     @Inject
-    public TableManager(@NotNull ConnectionPool pool, @NotNull ClasspathScanner scanner) throws Exception {
+    public TableManager(@NotNull Settings settings,
+                        @NotNull ConnectionPool pool,
+                        @NotNull ClasspathScanner scanner) throws Exception {
         this.pool = pool;
-        this.tableMap = scanTableClasses(scanner);
+
+        Set<? extends Class<?>> tableClasses = scanner.getDerivedClasses(settings.modelFilter(), BaseTable.class);
+        this.tableMap = buildTableMap(tableClasses);
     }
 
     public <E> @NotNull BaseTable<E> getBaseTable(@NotNull Class<E> entity) {
@@ -44,11 +49,8 @@ public class TableManager {
         return castAny(entityTable.instantiate.apply(pool.getConnection()));
     }
 
-    @Inject
-    private static Map<Class<?>, EntityTable> scanTableClasses(@NotNull ClasspathScanner scanner) throws Exception {
-        BiPredicate<String, String> filter = (pkg, cls) -> pkg.startsWith("io.webby"); // TODO: temp, use settings filter
-        Set<? extends Class<?>> tableClasses = scanner.getDerivedClasses(filter, BaseTable.class);
-
+    @VisibleForTesting
+    static Map<Class<?>, EntityTable> buildTableMap(@NotNull Iterable<? extends Class<?>> tableClasses) throws Exception {
         Map<Class<?>, EntityTable> result = new LinkedHashMap<>();
         for (Class<?> tableClass : tableClasses) {
             Class<?> key = (Class<?>) tableClass.getField("KEY_CLASS").get(null);

@@ -2,6 +2,7 @@ package io.webby.common;
 
 import com.google.common.flogger.FluentLogger;
 import com.google.common.reflect.ClassPath;
+import io.webby.app.ClassFilter;
 import io.webby.util.base.TimeIt;
 import org.jetbrains.annotations.NotNull;
 
@@ -20,12 +21,12 @@ public class ClasspathScanner {
 
     private final ClassPath classPath = rethrow(() -> ClassPath.from(ClassLoader.getSystemClassLoader())).get();
 
-    public @NotNull Set<? extends Class<?>> getAnnotatedClasses(@NotNull BiPredicate<String, String> classInfoFilter,
+    public @NotNull Set<? extends Class<?>> getAnnotatedClasses(@NotNull ClassFilter classInfoFilter,
                                                                 @NotNull Class<? extends Annotation> annotation) {
         return getMatchingClasses(classInfoFilter, hasAnnotation(annotation), annotation.getSimpleName());
     }
 
-    public @NotNull Set<? extends Class<?>> getDerivedClasses(@NotNull BiPredicate<String, String> classInfoFilter,
+    public @NotNull Set<? extends Class<?>> getDerivedClasses(@NotNull ClassFilter classInfoFilter,
                                                               @NotNull Class<?> superClass) {
         return getMatchingClasses(classInfoFilter, isDerived(superClass), superClass.getSimpleName());
     }
@@ -40,11 +41,12 @@ public class ClasspathScanner {
         return isAssignableFrom.and(isInterface.negate());
     }
 
-    public @NotNull Set<? extends Class<?>> getMatchingClasses(@NotNull BiPredicate<String, String> classInfoFilter,
+    public @NotNull Set<? extends Class<?>> getMatchingClasses(@NotNull ClassFilter classInfoFilter,
                                                                @NotNull Predicate<Class<?>> classFilter,
                                                                @NotNull String description) {
+        assert classInfoFilter.isSet() : "Class info filter is unset";
         return TimeIt.timeIt(
-            () -> scan(classInfoFilter, classFilter),
+            () -> scan(classInfoFilter.predicateOrDefault(), classFilter),
             (result, millis) -> log.at(Level.INFO).log("Found %d %s classes in %d ms", result.size(), description, millis)
         );
     }

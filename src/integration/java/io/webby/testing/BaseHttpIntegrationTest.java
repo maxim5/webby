@@ -28,7 +28,7 @@ public abstract class BaseHttpIntegrationTest extends BaseChannelTest {
                                                   @NotNull Module... modules) {
         Injector injector = Testing.testStartup(
                 DEFAULT_SETTINGS
-                        .andThen(settings -> settings.setHandlerClassOnly(klass))
+                        .andThen(settings -> settings.handlerFilter().setSingleClassOnly(klass))
                         .andThen(consumer),
                 // Make sure the initialized handler will be the same instance in tests as in endpoints
                 TestingUtil.appendVarArg(TestingModules.singleton(klass), modules)

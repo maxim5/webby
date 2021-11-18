@@ -18,7 +18,7 @@ import static io.webby.testing.TestingBytes.assertBytes;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
 public class CodecProviderTest {
-    protected final CodecProvider provider = Testing.testStartupNoHandlers().getInstance(CodecProvider.class);
+    protected final CodecProvider provider = Testing.testStartup().getInstance(CodecProvider.class);
 
     @Test
     public void codecs_roundtrip() throws Exception {

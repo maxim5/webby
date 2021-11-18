@@ -1,6 +1,7 @@
 package io.webby.examples;
 
 import com.google.common.flogger.FluentLogger;
+import io.webby.app.AppSettings;
 import io.webby.auth.session.Session;
 import io.webby.auth.user.DefaultUser;
 import io.webby.common.ClasspathScanner;
@@ -25,7 +26,7 @@ public class ExamplesCodegenMain {
     private static final FluentLogger log = FluentLogger.forEnclosingClass();
     private static final String DESTINATION_DIRECTORY = "src/examples/generated/sql";
 
-    private static final ModelAdaptersLocator locator = new ModelAdaptersLocatorImpl(new ClasspathScanner());
+    private static final ModelAdaptersScanner locator = new ModelAdaptersScannerImpl(new AppSettings(), new ClasspathScanner());
 
     public static void main(String[] args) throws Exception {
         List<ModelClassInput> inputs = List.of(

@@ -21,13 +21,13 @@ import static java.util.Objects.requireNonNull;
 
 @SuppressWarnings("UnnecessaryStringEscape")
 public class ModelTableCodegen extends BaseCodegen {
-    private final ModelAdaptersLocator adaptersLocator;
+    private final ModelAdaptersScanner adaptersLocator;
     private final TableSchema table;
 
     private final Map<String, String> mainContext;
     private final Map<String, String> pkContext;
 
-    public ModelTableCodegen(@NotNull ModelAdaptersLocator adaptersLocator,
+    public ModelTableCodegen(@NotNull ModelAdaptersScanner adaptersLocator,
                              @NotNull TableSchema table, @NotNull Appendable writer) {
         super(writer);
         this.adaptersLocator = adaptersLocator;

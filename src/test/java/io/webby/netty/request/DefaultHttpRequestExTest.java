@@ -17,7 +17,7 @@ import static org.junit.jupiter.api.Assertions.assertThrows;
 public class DefaultHttpRequestExTest {
     @BeforeEach
     void setUp() {
-        Testing.testStartupNoHandlers();
+        Testing.testStartup();
     }
 
     @Test

@@ -17,7 +17,7 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNull;
 
 public class InterceptorsTest {
-    private final Interceptors interceptors = Testing.testStartupNoHandlers().getInstance(Interceptors.class);
+    private final Interceptors interceptors = Testing.testStartup().getInstance(Interceptors.class);
 
     @Test
     public void createRequest_get_json_content_standard_gson() {
@@ -36,7 +36,7 @@ public class InterceptorsTest {
     public void createRequest_get_json_content_custom_gson() {
         Module module = TestingModules.provided(Gson.class,
                 () -> new Gson().newBuilder().setFieldNamingPolicy(FieldNamingPolicy.LOWER_CASE_WITH_DASHES).create());
-        Interceptors interceptors = Testing.testStartupNoHandlers(module).getInstance(Interceptors.class);
+        Interceptors interceptors = Testing.testStartup(module).getInstance(Interceptors.class);
 
         Object content1 = Map.of("foo-bar", "bar");
         Object content2 = Map.of("fooBar", "bar");

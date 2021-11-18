@@ -38,7 +38,7 @@ import static org.junit.jupiter.api.Assertions.*;
 @SuppressWarnings("unused")
 public class CallerFactoryTest {
     private static final String URL = "/dummy/CallerFactoryTest";
-    private final CallerFactory factory = Testing.testStartupNoHandlers().getInstance(CallerFactory.class);
+    private final CallerFactory factory = Testing.testStartup().getInstance(CallerFactory.class);
 
     @Test
     public void types() {
