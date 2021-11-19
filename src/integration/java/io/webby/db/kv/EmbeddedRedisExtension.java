@@ -10,16 +10,24 @@ import java.util.logging.Level;
 
 public class EmbeddedRedisExtension implements BeforeAllCallback, AfterAllCallback {
     private static final FluentLogger log = FluentLogger.forEnclosingClass();
-    public static final int PORT = 6379;
+    public static final int DEFAULT_PORT = 6379;
 
-    // See
-    // https://github.com/kstyrc/embedded-redis/issues/52
-    // https://stackoverflow.com/questions/30233543/error-when-open-redis-server
-    private final RedisServer redisServer = RedisServer.builder().port(PORT).setting("maxheap 512M").build();
+    private final RedisServer redisServer;
+
+    public EmbeddedRedisExtension(int port) {
+        // See
+        // https://github.com/kstyrc/embedded-redis/issues/52
+        // https://stackoverflow.com/questions/30233543/error-when-open-redis-server
+        redisServer = RedisServer.builder().port(port).setting("maxheap 512M").build();
+    }
+
+    public EmbeddedRedisExtension() {
+        this(DEFAULT_PORT);
+    }
 
     @Override
     public void beforeAll(ExtensionContext context) {
-        log.at(Level.INFO).log("Starting embedded Redis server at %d...", PORT);
+        log.at(Level.INFO).log("Starting embedded Redis server at %d...", DEFAULT_PORT);
         redisServer.start();
     }
 
@@ -27,5 +35,9 @@ public class EmbeddedRedisExtension implements BeforeAllCallback, AfterAllCallba
     public void afterAll(ExtensionContext context) {
         log.at(Level.INFO).log("Stopping embedded Redis...");
         redisServer.stop();
+    }
+
+    public int getPort() {
+        return redisServer.ports().get(0);
     }
 }

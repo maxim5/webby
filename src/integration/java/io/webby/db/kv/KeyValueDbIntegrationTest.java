@@ -23,7 +23,6 @@ import io.webby.util.collect.Pair;
 import org.jetbrains.annotations.NotNull;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Test;
-import org.junit.jupiter.api.extension.ExtendWith;
 import org.junit.jupiter.api.extension.RegisterExtension;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.EnumSource;
@@ -39,9 +38,9 @@ import static io.webby.testing.FakeRequests.postEx;
 import static io.webby.testing.TestingUtil.array;
 import static org.junit.jupiter.api.Assertions.*;
 
-@ExtendWith(EmbeddedRedisExtension.class)
 public class KeyValueDbIntegrationTest {
     @RegisterExtension private final static TempDirectoryExtension TEMP_DIRECTORY = new TempDirectoryExtension();
+    @RegisterExtension private final static EmbeddedRedisExtension REDIS = new EmbeddedRedisExtension();
 
     private static final String SQL_URL = SqlSettings.SQLITE_IN_MEMORY;
     private static final String SQL_SCHEMA = """
@@ -372,9 +371,7 @@ public class KeyValueDbIntegrationTest {
         Path tempDir = TEMP_DIRECTORY.getCurrentTempDir();
 
         AppSettings settings = Testing.defaultAppSettings();
-
         settings.modelFilter().setPackageOnly("io.webby");  // TODO: infer from DefaultUser and Session
-
         settings.storageSettings().enableKeyValueStorage(storageType).setKeyValueStoragePath(tempDir);
         settings.storageSettings().enableSqlStorage(new SqlSettings(SQL_URL));
         settings.setProfileMode(false);  // not testing TrackingDbAdapter by default
@@ -387,7 +384,7 @@ public class KeyValueDbIntegrationTest {
         settings.setProperty("db.swaydb.segment.size.bytes", 64 << 10);
         settings.setProperty("db.swaydb.appendix.flush.checkpoint.size.bytes", 1 << 10);
 
-        settings.setProperty("db.redis.port", EmbeddedRedisExtension.PORT);
+        settings.setProperty("db.redis.port", REDIS.getPort());
 
         ConnectionPool connectionPool = new ConnectionPool() {
             @Override
