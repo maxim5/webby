@@ -24,15 +24,7 @@ public class Testing {
     public static final String DEFAULT_WEB_PATH = "src/test/resources";
     public static final String DEFAULT_VIEW_PATH = "src/test/resources";
 
-    public static @NotNull Injector testStartup(@NotNull Module... modules) {
-        return testStartup(settings -> {}, modules);
-    }
-
-    public static @NotNull Injector testStartup(@NotNull Consumer<AppSettings> consumer) {
-        return testStartup(consumer, new Module[0]);
-    }
-
-    public static @NotNull Injector testStartup(@NotNull Consumer<AppSettings> consumer, @NotNull Module... modules) {
+    public static @NotNull AppSettings defaultAppSettings() {
         AppSettings settings = new AppSettings();
         settings.setDevMode(true);
         settings.setCharset(TestingBytes.CHARSET);
@@ -45,6 +37,23 @@ public class Testing {
         settings.storageSettings()
                 .disableKeyValueStorage()
                 .disableSqlStorage();
+        return settings;
+    }
+
+    public static @NotNull Injector testStartup() {
+        return testStartup(defaultAppSettings());
+    }
+
+    public static @NotNull Injector testStartup(@NotNull Module module) {
+        return testStartup(defaultAppSettings(), module);
+    }
+
+    public static @NotNull Injector testStartup(@NotNull Consumer<AppSettings> consumer) {
+        return testStartup(consumer, new Module[0]);
+    }
+
+    public static @NotNull Injector testStartup(@NotNull Consumer<AppSettings> consumer, @NotNull Module... modules) {
+        AppSettings settings = defaultAppSettings();
         consumer.accept(settings);
         return testStartup(settings, modules);
     }

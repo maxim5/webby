@@ -10,6 +10,7 @@ import io.webby.common.Lifetime;
 import io.webby.util.base.Rethrow;
 import io.webby.util.lazy.ResettableAtomicLazy;
 import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.VisibleForTesting;
 
 import java.sql.Connection;
 import java.sql.SQLException;
@@ -25,10 +26,15 @@ public class ConnectionPool {
     @Inject
     public ConnectionPool(@NotNull Settings settings, @NotNull Lifetime lifetime) {
         HikariConfig config = new HikariConfig();
-        config.setJdbcUrl("jdbc:sqlite:%s".formatted(":memory:"));  // TODO: use props from settings + toString()
+        config.setJdbcUrl(settings.storageSettings().sqlSettingsOrDie().url());
         dataSource = new HikariDataSource(config);
         lifetime.onTerminate(dataSource);
         initializeStatic(this);
+    }
+
+    @VisibleForTesting
+    protected ConnectionPool() {
+        dataSource = new HikariDataSource();
     }
 
     public @NotNull Connection getConnection() {
@@ -37,6 +43,11 @@ public class ConnectionPool {
         } catch (SQLException e) {
             return Rethrow.rethrow(e);
         }
+    }
+
+    @Override
+    public String toString() {
+        return "ConnectionPool{url=%s}".formatted(dataSource.getJdbcUrl());
     }
 
     public static @NotNull ConnectionPool unsafePool() {

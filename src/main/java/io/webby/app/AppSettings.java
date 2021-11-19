@@ -46,7 +46,7 @@ public final class AppSettings implements Settings {
     private Render defaultRender = Render.JTE;
     private FrameType defaultFrameType = FrameType.FROM_CLIENT;
 
-    private final StorageSettings storageSettings = new StorageSettings();
+    private final StorageSettings storageSettings = new StorageSettings(this);
 
     private final Map<String, String> properties = new HashMap<>();
 

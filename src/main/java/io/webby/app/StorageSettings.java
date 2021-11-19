@@ -2,17 +2,26 @@ package io.webby.app;
 
 import com.google.errorprone.annotations.CanIgnoreReturnValue;
 import io.webby.db.kv.StorageType;
+import io.webby.db.sql.SqlSettings;
 import org.jetbrains.annotations.NotNull;
 
 import java.nio.file.Path;
 
+import static java.util.Objects.requireNonNull;
+
 @CanIgnoreReturnValue
 public class StorageSettings {
+    private final Settings settings;
+
     private boolean keyValueStorageEnabled = true;
     private Path storagePath = Path.of("storage");
     private StorageType keyValueStorageType = null;
 
-    private boolean sqlStorageEnabled = false;
+    private SqlSettings sqlSettings = null;
+
+    public StorageSettings(@NotNull Settings settings) {
+        this.settings = settings;
+    }
 
     public boolean isKeyValueStorageEnabled() {
         return keyValueStorageEnabled;
@@ -56,16 +65,20 @@ public class StorageSettings {
     }
 
     public boolean isSqlStorageEnabled() {
-        return sqlStorageEnabled;
+        return sqlSettings != null;
     }
 
     public @NotNull StorageSettings disableSqlStorage() {
-        sqlStorageEnabled = false;
+        sqlSettings = null;
         return this;
     }
 
-    public @NotNull StorageSettings enableSqlStorage() {
-        sqlStorageEnabled = true;
+    public @NotNull StorageSettings enableSqlStorage(@NotNull SqlSettings sqlSettings) {
+        this.sqlSettings = sqlSettings;
         return this;
+    }
+
+    public @NotNull SqlSettings sqlSettingsOrDie() {
+        return requireNonNull(sqlSettings, "SQL storage not enabled: did you call `settings.enableSqlStorage()`?");
     }
 }

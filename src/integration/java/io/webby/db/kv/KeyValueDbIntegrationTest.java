@@ -5,6 +5,7 @@ import com.google.common.flogger.FluentLogger;
 import com.google.common.io.MoreFiles;
 import com.google.common.io.RecursiveDeleteOption;
 import com.google.inject.Injector;
+import io.webby.app.AppSettings;
 import io.webby.auth.session.Session;
 import io.webby.auth.session.SessionManager;
 import io.webby.auth.user.DefaultUser;
@@ -16,18 +17,24 @@ import io.webby.db.kv.mapdb.MapDbFactory;
 import io.webby.db.kv.mapdb.MapDbImpl;
 import io.webby.db.kv.paldb.PalDbFactory;
 import io.webby.db.kv.paldb.PalDbImpl;
+import io.webby.db.sql.ConnectionPool;
+import io.webby.db.sql.SqlSettings;
 import io.webby.testing.Testing;
+import io.webby.testing.TestingModules;
 import io.webby.util.collect.Pair;
 import org.jetbrains.annotations.NotNull;
 import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
+import org.junit.jupiter.api.extension.RegisterExtension;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.EnumSource;
 
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.sql.Connection;
 import java.util.*;
 import java.util.logging.Level;
 import java.util.stream.Stream;
@@ -43,6 +50,24 @@ import static org.junit.jupiter.api.Assumptions.assumeTrue;
 public class KeyValueDbIntegrationTest {
     private static final FluentLogger log = FluentLogger.forEnclosingClass();
     private static final StorageType testOnly = null;
+
+    private static final String SQL_URL = SqlSettings.SQLITE_IN_MEMORY;
+    private static final String SQL_SCHEMA = """
+        CREATE TABLE IF NOT EXISTS user (
+            user_id INTEGER PRIMARY KEY,
+            access_level INTEGER
+        );
+        CREATE TABLE IF NOT EXISTS session (
+            session_id INTEGER PRIMARY KEY,
+            user_id INTEGER,
+            created INTEGER,
+            user_agent TEXT,
+            ip_address TEXT
+        );
+    """;
+
+    @RegisterExtension
+    protected final static SqlDbSetupExtension SQL_DB = new SqlDbSetupExtension(SQL_URL, SQL_SCHEMA);
 
     @ParameterizedTest
     @EnumSource(StorageType.class)
@@ -250,7 +275,7 @@ public class KeyValueDbIntegrationTest {
         Path tempDir = createTempDirectory(storageType);
         KeyValueFactory dbFactory = setupFactory(storageType, tempDir);
 
-        try (KeyValueDb<Integer, Session> db = dbFactory.getDb("my-session", Integer.class, Session.class)) {
+        try (KeyValueDb<Integer, Session> db = dbFactory.getDb("my-sessions", Integer.class, Session.class)) {
             runMultiTest(db, Integer.MIN_VALUE, Integer.MAX_VALUE,
                          Session.fromRequest(123, getEx("/foo")), Session.fromRequest(321, postEx("/bar")));
         }
@@ -293,10 +318,14 @@ public class KeyValueDbIntegrationTest {
         cleanUp(tempDir);
     }
 
+    @BeforeAll
+    static void beforeAll() {
+        cleanUpAtExit();
+    }
+
     @AfterEach
     public void tearDown() {
         Testing.Internals.terminate();
-        cleanUpAtExit();
     }
 
     private static <K, V> void runMultiTest(@NotNull KeyValueDb<K, V> db,
@@ -380,22 +409,33 @@ public class KeyValueDbIntegrationTest {
     }
 
     private @NotNull Injector setup(@NotNull StorageType storageType, @NotNull Path tempDir) {
-        return Testing.testStartup(settings -> {
-            settings.storageSettings().enableKeyValueStorage(storageType).setKeyValueStoragePath(tempDir);
-            settings.setProfileMode(false);  // not testing TrackingDbAdapter by default
+        AppSettings settings = Testing.defaultAppSettings();
 
-            settings.setProperty("db.chronicle.default.size", 64);
-            settings.setProperty("db.lmdb-java.max.map.size.bytes", 64 << 10);
-            settings.setProperty("db.lmdb-jni.max.map.size.bytes", 64 << 10);
+        settings.modelFilter().setPackageOnly("io.webby");  // TODO: infer from DefaultUser and Session
 
-            settings.setProperty("db.swaydb.init.map.size.bytes", 64 << 10);
-            settings.setProperty("db.swaydb.segment.size.bytes", 64 << 10);
-            settings.setProperty("db.swaydb.appendix.flush.checkpoint.size.bytes", 1 << 10);
+        settings.storageSettings().enableKeyValueStorage(storageType).setKeyValueStoragePath(tempDir);
+        settings.storageSettings().enableSqlStorage(new SqlSettings(SQL_URL));
+        settings.setProfileMode(false);  // not testing TrackingDbAdapter by default
 
-            settings.setProperty("db.redis.port", EmbeddedRedisExtension.PORT);
+        settings.setProperty("db.chronicle.default.size", 64);
+        settings.setProperty("db.lmdb-java.max.map.size.bytes", 64 << 10);
+        settings.setProperty("db.lmdb-jni.max.map.size.bytes", 64 << 10);
 
-            log.at(Level.INFO).log("[Test] Temp storage path: %s", tempDir);
-        });
+        settings.setProperty("db.swaydb.init.map.size.bytes", 64 << 10);
+        settings.setProperty("db.swaydb.segment.size.bytes", 64 << 10);
+        settings.setProperty("db.swaydb.appendix.flush.checkpoint.size.bytes", 1 << 10);
+
+        settings.setProperty("db.redis.port", EmbeddedRedisExtension.PORT);
+
+        log.at(Level.INFO).log("[Test] Temp storage path: %s", tempDir);
+
+        ConnectionPool connectionPool = new ConnectionPool() {
+            @Override
+            public @NotNull Connection getConnection() {
+                return SQL_DB.getConnection();
+            }
+        };
+        return Testing.testStartup(settings, TestingModules.instance(ConnectionPool.class, connectionPool));
     }
 
     private @NotNull Path createTempDirectory(@NotNull StorageType storageType) throws IOException {
@@ -409,7 +449,7 @@ public class KeyValueDbIntegrationTest {
     }
 
     private static final boolean CLEAN_UP_IF_SUCCESSFUL = true;
-    private static final ArrayList<Path> TO_CLEAN = new ArrayList<>(32);
+    private static final ArrayList<Path> TO_CLEAN = new ArrayList<>(1024);
 
     private static void cleanUp(@NotNull Path path) {
         if (CLEAN_UP_IF_SUCCESSFUL) {
@@ -419,6 +459,7 @@ public class KeyValueDbIntegrationTest {
 
     @SuppressWarnings("UnstableApiUsage")
     private static void deleteAll(@NotNull Path path) {
+        log.at(Level.FINE).log("Cleaning-up temp path %s", path);
         try {
             MoreFiles.deleteRecursively(path, RecursiveDeleteOption.ALLOW_INSECURE);
         } catch (Exception e) {

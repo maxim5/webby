@@ -1,6 +1,5 @@
 package io.webby;
 
-import com.google.common.collect.Iterables;
 import com.google.common.flogger.FluentLogger;
 import com.google.common.flogger.util.CallerFinder;
 import com.google.inject.Guice;
@@ -43,8 +42,7 @@ public class Webby {
     public static @NotNull Injector initGuice(@NotNull AppSettings settings, @NotNull Module ... modules) {
         log.at(Level.INFO).log("Initializing Webby Guice module");
         Stage stage = (settings.isDevMode()) ? Stage.DEVELOPMENT : Stage.PRODUCTION;
-        Iterable<Module> iterable = Iterables.concat(List.of(mainModule(settings)), List.of(modules));
-        return Guice.createInjector(stage, iterable);
+        return Guice.createInjector(stage, Modules.override(mainModule(settings)).with(modules));
     }
 
     public static @NotNull Module mainModule(@NotNull AppSettings settings) throws AppConfigException {
@@ -114,8 +112,8 @@ public class Webby {
             }
         } else {
             if (storageType == StorageType.SQL_DB) {
-                log.at(Level.WARNING).log("SQL disabled while key-value storage type is set to %s. Enabling", storageType);
-                storageSettings.enableSqlStorage();
+                log.at(Level.WARNING).log("SQL disabled. Ignoring the configured type: %s", storageType);
+                storageSettings.setKeyValueStorageType(StorageType.JAVA_MAP);
             }
         }
     }

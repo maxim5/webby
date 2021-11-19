@@ -5,6 +5,7 @@ import com.google.inject.Injector;
 import io.webby.Webby;
 import io.webby.app.AppSettings;
 import io.webby.db.kv.StorageType;
+import io.webby.db.sql.SqlSettings;
 import io.webby.examples.templates.JteExample;
 import io.webby.netty.NettyBootstrap;
 
@@ -29,8 +30,8 @@ public class Main {
         settings.setProperty("jte.view.paths", "out/examples/resources/web/jte");
         settings.setProperty("pebble.view.paths", "out/examples/resources/web/pebble");
         settings.setProperty("db.mapdb.checksum.enabled", false);
-        settings.storageSettings().setKeyValueStorageType(StorageType.MAP_DB);
-        settings.storageSettings().setKeyValueStoragePath(".data/mapdb");
+        settings.storageSettings().enableKeyValueStorage(StorageType.MAP_DB).setKeyValueStoragePath(".data/mapdb")
+                .enableSqlStorage(SqlSettings.inMemoryNotForProduction());
 
         Injector injector = Webby.initGuice(settings);
         NettyBootstrap startup = injector.getInstance(NettyBootstrap.class);

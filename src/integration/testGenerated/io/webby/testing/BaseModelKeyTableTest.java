@@ -1,5 +1,6 @@
 package io.webby.testing;
 
+import io.webby.db.sql.SqlSettings;
 import io.webby.util.sql.api.QueryRunner;
 import io.webby.util.sql.api.DebugSql;
 import io.webby.util.sql.api.TableObj;
@@ -20,7 +21,7 @@ import static org.junit.jupiter.api.Assertions.*;
 import static org.junit.jupiter.api.Assumptions.assumeTrue;
 
 public abstract class BaseModelKeyTableTest<K, E, T extends TableObj<K, E>> {
-    private static final String URL = "jdbc:sqlite:%s".formatted(":memory:");
+    private static final String URL = SqlSettings.SQLITE_IN_MEMORY;
 
     protected Connection connection;
     protected T table;
