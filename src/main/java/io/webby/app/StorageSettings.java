@@ -10,7 +10,7 @@ import java.nio.file.Path;
 public class StorageSettings {
     private boolean keyValueStorageEnabled = true;
     private Path storagePath = Path.of("storage");
-    private StorageType storageType = StorageType.JAVA_MAP;
+    private StorageType keyValueStorageType = null;
 
     private boolean sqlStorageEnabled = false;
 
@@ -28,7 +28,7 @@ public class StorageSettings {
         return setKeyValueStorageType(storageType);
     }
 
-    public @NotNull Path storagePath() {
+    public @NotNull Path keyValueStoragePath() {
         return storagePath;
     }
 
@@ -42,12 +42,16 @@ public class StorageSettings {
         return this;
     }
 
-    public @NotNull StorageType storageType() {
-        return storageType;
+    public boolean isKeyValueStorageSet() {
+        return keyValueStorageType != null;
+    }
+
+    public @NotNull StorageType keyValueStorageTypeOrDefault() {
+        return keyValueStorageType != null ? keyValueStorageType : StorageType.JAVA_MAP;
     }
 
     public @NotNull StorageSettings setKeyValueStorageType(@NotNull StorageType storageType) {
-        this.storageType = storageType;
+        this.keyValueStorageType = storageType;
         return this;
     }
 

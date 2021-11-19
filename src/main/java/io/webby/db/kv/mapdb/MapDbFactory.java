@@ -52,7 +52,7 @@ public class MapDbFactory extends BaseKeyValueFactory {
 
     private @NotNull DB createDefaultMapDB(@NotNull Settings settings) {
         // Consider options: hash or tree
-        Path storagePath = settings.storageSettings().storagePath();
+        Path storagePath = settings.storageSettings().keyValueStoragePath();
         String filename = settings.getProperty("db.mapdb.filename", "mapdb.data");
         boolean checksumEnabled = settings.getBoolProperty("db.mapdb.checksum.enabled", true);
         boolean concurrencyEnabled = settings.getBoolProperty("db.mapdb.concurrency.enabled", true);

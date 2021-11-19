@@ -76,33 +76,40 @@ public class Webby {
     }
 
     private static void validateStorageSettings(@NotNull Settings settings, @NotNull StorageSettings storageSettings) {
-        StorageType storageType = storageSettings.storageType();
-        boolean isDefault = storageType == StorageType.JAVA_MAP;
-        boolean isPersisted = storageType != StorageType.JAVA_MAP;
+        StorageType storageType = storageSettings.keyValueStorageTypeOrDefault();
 
         if (storageSettings.isKeyValueStorageEnabled()) {
-            if (isDefault && settings.isProdMode()) {
-                log.at(Level.WARNING).log("Configured non-persistent key-value storage in production: %s", storageType);
+            if (!storageSettings.isKeyValueStorageSet()) {
+                log.at(Level.WARNING).log("Key-value storage type is not set, using default: %s", storageType);
+                // TODO: infer from classpath
             }
-            if (isPersisted) {
-                validateDirectory(storageSettings.storagePath(), "storage path", true);
+
+            if (storageType.isPersisted()) {
+                validateDirectory(storageSettings.keyValueStoragePath(), "storage path", true);
+            } else {
+                if (settings.isProdMode()) {
+                    log.at(Level.WARNING).log("Configured non-persistent key-value storage in production: %s", storageType);
+                }
             }
         } else {
-            if (!isDefault) {
-                log.at(Level.WARNING).log("Key-value storage disabled. Ignoring the type: %s", storageType);
+            if (storageSettings.isKeyValueStorageSet()) {
+                log.at(Level.WARNING).log("Key-value storage disabled. Ignoring the configured type: %s", storageType);
                 storageSettings.setKeyValueStorageType(StorageType.JAVA_MAP);
+            } else {
+                log.at(Level.WARNING).log("Key-value storage disabled");
             }
         }
 
         if (storageSettings.isSqlStorageEnabled()) {
-            if (isDefault) {
-                // if (settings.isProdMode()) {
-                //     log.at(Level.WARNING).log("Configured non-persistent SQL storage in production: %s", storageType);
-                // }
-                // storageSettings.setKeyValueStorageType(StorageType.SQL);
+            if (!storageSettings.isKeyValueStorageSet()) {
+                storageSettings.setKeyValueStorageType(StorageType.SQL_DB);
+                log.at(Level.WARNING).log("Key-value storage type not configured. Using %s", storageType);
             }
         } else {
-            // check if StorageType.SQL?
+            if (storageType == StorageType.SQL_DB) {
+                log.at(Level.WARNING).log("SQL disabled while key-value storage type is set to %s. Enabling", storageType);
+                storageSettings.enableSqlStorage();
+            }
         }
     }
 

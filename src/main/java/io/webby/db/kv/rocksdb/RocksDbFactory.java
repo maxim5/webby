@@ -21,7 +21,7 @@ public class RocksDbFactory extends BaseKeyValueFactory {
     @Override
     public @NotNull <K, V> RocksDbImpl<K, V> getInternalDb(@NotNull String name, @NotNull Class<K> key, @NotNull Class<V> value) {
         return cacheIfAbsent(name, () -> {
-            Path storagePath = settings.storageSettings().storagePath();
+            Path storagePath = settings.storageSettings().keyValueStoragePath();
             String filename = settings.getProperty("db.rocksdb.filename.pattern", "rocksdb-%s");
             boolean createIfMissing = settings.getBoolProperty("db.rocksdb.create.if.missing", true);
             boolean paranoidChecks = settings.getBoolProperty("db.rocksdb.paranoid.checks", false);

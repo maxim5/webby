@@ -18,6 +18,7 @@ import io.webby.db.kv.oak.OakFactory;
 import io.webby.db.kv.paldb.PalDbFactory;
 import io.webby.db.kv.redis.JedisDbFactory;
 import io.webby.db.kv.rocksdb.RocksDbFactory;
+import io.webby.db.kv.sql.SqlTableDbFactory;
 import io.webby.db.kv.swaydb.SwayDbFactory;
 import io.webby.db.kv.tupl.TuplFactory;
 import org.jetbrains.annotations.NotNull;
@@ -31,7 +32,7 @@ public class AgnosticKeyValueFactory implements KeyValueFactory {
     @Inject
     public AgnosticKeyValueFactory(@NotNull Settings settings, @NotNull InjectorHelper helper) {
         this.helper = helper;
-        delegate = pickFactory(settings.storageSettings().storageType());
+        delegate = pickFactory(settings.storageSettings().keyValueStorageTypeOrDefault());
     }
 
     @Override
@@ -63,6 +64,7 @@ public class AgnosticKeyValueFactory implements KeyValueFactory {
             case PAL_DB -> PalDbFactory.class;
             case ROCKS_DB -> RocksDbFactory.class;
             case SWAY_DB -> SwayDbFactory.class;
+            case SQL_DB -> SqlTableDbFactory.class;
             case TUPL -> TuplFactory.class;
         };
         return castAny(helper.lazySingleton(factoryClass));
