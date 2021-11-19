@@ -56,7 +56,7 @@ public class KeyValueDbIntegrationTest {
             ip_address TEXT
         );
     """;
-    @RegisterExtension protected final static SqlDbSetupExtension SQL_DB = new SqlDbSetupExtension(SQL_URL, SQL_SCHEMA);
+    @RegisterExtension private final static SqlDbSetupExtension SQL_DB = new SqlDbSetupExtension(SQL_URL, SQL_SCHEMA);
 
     @ParameterizedTest
     @EnumSource(StorageType.class)
@@ -371,7 +371,7 @@ public class KeyValueDbIntegrationTest {
         Path tempDir = TEMP_DIRECTORY.getCurrentTempDir();
 
         AppSettings settings = Testing.defaultAppSettings();
-        settings.modelFilter().setPackageOnly("io.webby");  // TODO: infer from DefaultUser and Session
+        settings.modelFilter().setCommonPackageOf(List.of(Session.class, DefaultUser.class));
         settings.storageSettings().enableKeyValueStorage(storageType).setKeyValueStoragePath(tempDir);
         settings.storageSettings().enableSqlStorage(new SqlSettings(SQL_URL));
         settings.setProfileMode(false);  // not testing TrackingDbAdapter by default

@@ -1,8 +1,10 @@
 package io.webby.app;
 
+import com.google.common.base.Strings;
 import io.webby.common.Packages;
 import org.jetbrains.annotations.NotNull;
 
+import java.util.List;
 import java.util.function.BiPredicate;
 
 public final class ClassFilter {
@@ -45,6 +47,10 @@ public final class ClassFilter {
         setPredicate(onlyClass(klass));
     }
 
+    public void setCommonPackageOf(@NotNull List<Class<?>> classes) {
+        setPackageOnly(getCommonPackage(classes));
+    }
+
     public void setPredicateUnsafe(@NotNull BiPredicate<String, String> predicate) {
         this.predicate = predicate;
     }
@@ -63,5 +69,9 @@ public final class ClassFilter {
 
     private static @NotNull BiPredicate<String, String> allInPackage(@NotNull String packageName) {
         return (pkg, cls) -> pkg.startsWith(packageName);
+    }
+
+    private static @NotNull String getCommonPackage(@NotNull List<Class<?>> classes) {
+        return classes.stream().map(Class::getPackageName).reduce(Strings::commonPrefix).orElse("");
     }
 }
