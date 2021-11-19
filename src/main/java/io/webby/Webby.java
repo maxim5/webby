@@ -13,6 +13,7 @@ import io.webby.auth.AuthModule;
 import io.webby.common.CommonModule;
 import io.webby.db.DbModule;
 import io.webby.db.kv.StorageType;
+import io.webby.db.kv.impl.KeyValueStorageTypeDetector;
 import io.webby.netty.NettyBootstrap;
 import io.webby.netty.NettyModule;
 import io.webby.perf.PerfModule;
@@ -80,8 +81,14 @@ public class Webby {
 
         if (storageSettings.isKeyValueStorageEnabled()) {
             if (!storageSettings.isKeyValueStorageSet()) {
-                log.at(Level.WARNING).log("Key-value storage type is not set, using default: %s", storageType);
-                // TODO: infer from classpath
+                StorageType autoStorageType = KeyValueStorageTypeDetector.autoDetectStorageTypeFromClasspath();
+                if (autoStorageType != null) {
+                    storageSettings.setKeyValueStorageType(autoStorageType);
+                    storageType = autoStorageType;
+                    log.at(Level.WARNING).log("Key-value storage type is not set, using type from classpath: %s", storageType);
+                } else {
+                    log.at(Level.WARNING).log("Key-value storage type is not set, using default: %s", storageType);
+                }
             }
 
             if (storageType.isPersisted()) {
