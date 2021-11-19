@@ -16,9 +16,7 @@ import io.webby.db.kv.paldb.PalDbFactory;
 import io.webby.db.kv.paldb.PalDbImpl;
 import io.webby.db.sql.ConnectionPool;
 import io.webby.db.sql.SqlSettings;
-import io.webby.testing.TempDirectoryExtension;
-import io.webby.testing.Testing;
-import io.webby.testing.TestingModules;
+import io.webby.testing.*;
 import io.webby.util.collect.Pair;
 import org.jetbrains.annotations.NotNull;
 import org.junit.jupiter.api.AfterEach;
@@ -39,6 +37,7 @@ import static io.webby.testing.TestingUtil.array;
 import static org.junit.jupiter.api.Assertions.*;
 
 public class KeyValueDbIntegrationTest {
+    @RegisterExtension private final static CloseAllExtension CLOSE_ALL = new CloseAllExtension();
     @RegisterExtension private final static TempDirectoryExtension TEMP_DIRECTORY = new TempDirectoryExtension();
     @RegisterExtension private final static EmbeddedRedisExtension REDIS = new EmbeddedRedisExtension();
 
@@ -385,6 +384,11 @@ public class KeyValueDbIntegrationTest {
         settings.setProperty("db.swaydb.appendix.flush.checkpoint.size.bytes", 1 << 10);
 
         settings.setProperty("db.redis.port", REDIS.getPort());
+
+        if (storageType == StorageType.SQL_DB) {
+            AutoCloseable mockedClock = Mocking.withMockedClock();
+            CLOSE_ALL.addCloseable(mockedClock);
+        }
 
         ConnectionPool connectionPool = new ConnectionPool() {
             @Override
