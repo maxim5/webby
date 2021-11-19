@@ -40,5 +40,9 @@ public class Playground {
             LEFT JOIN song ON single.song_id = song.id
             LEFT JOIN user ON song.author_id = user.user_id;
         """);
+
+        main.update("CREATE TABLE blob (blob_id BLOB PRIMARY KEY, blob_value BLOB)");
+        main.update("INSERT INTO blob(blob_id, blob_value) VALUES(?, ?)", "foo".getBytes(), "bar".getBytes());
+        main.query("SELECT * FROM blob");
     }
 }
