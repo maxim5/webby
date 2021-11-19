@@ -45,7 +45,7 @@ public class TempDirectoryExtension implements BeforeAllCallback, BeforeEachCall
         String className = context.getRequiredTestClass().getSimpleName();
         String testName = context.getRequiredTestMethod().getName();
 
-        Object[] arguments = JunitExtensions.extractInvocationArguments(context);
+        Object[] arguments = JUnitExtensions.extractInvocationArguments(context);
         String format = arguments == null || arguments.length == 0 ?
             "%s.%s.".formatted(className, testName) :
             "%s.%s_%s.".formatted(className, testName, Arrays.stream(arguments).map(Object::toString).collect(Collectors.joining("_")));

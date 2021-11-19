@@ -11,7 +11,7 @@ import java.lang.reflect.Method;
 
 import static io.webby.util.base.EasyCast.castAny;
 
-public class JunitExtensions {
+public class JUnitExtensions {
     // A workaround while arguments aren't passed through the public API
     // https://github.com/junit-team/junit5/issues/1139
     public static @Nullable Object[] extractInvocationArguments(@NotNull ExtensionContext context) {
