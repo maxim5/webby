@@ -13,7 +13,7 @@ public class KeyValueStorageTypeDetector {
     private static final FluentLogger log = FluentLogger.forEnclosingClass();
 
     private static final List<Pair<StorageType, String>> AUTO_TYPES = List.of(
-        Pair.of(StorageType.CHRONICLE_MAP, "net.openhft.chronicle.map.ChronicleMap"),
+        Pair.of(StorageType.CHRONICLE_MAP, "net.openhft.chronicle.map.ChronicleMapBuilder"),
         Pair.of(StorageType.HALO_DB, "com.oath.halodb.HaloDB"),
         Pair.of(StorageType.LEVEL_DB_IQ80, "org.iq80.leveldb.impl.Iq80DBFactory"),
         Pair.of(StorageType.LEVEL_DB_JNI, "org.fusesource.leveldbjni.JniDBFactory"),
