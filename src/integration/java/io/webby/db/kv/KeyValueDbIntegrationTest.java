@@ -16,6 +16,7 @@ import io.webby.db.kv.paldb.PalDbFactory;
 import io.webby.db.kv.paldb.PalDbImpl;
 import io.webby.db.sql.ConnectionPool;
 import io.webby.db.sql.SqlSettings;
+import io.webby.testing.TempDirectoryExtension;
 import io.webby.testing.Testing;
 import io.webby.testing.TestingModules;
 import io.webby.util.collect.Pair;

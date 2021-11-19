@@ -1,9 +1,8 @@
-package io.webby.db.kv;
+package io.webby.testing;
 
 import com.google.common.flogger.FluentLogger;
 import com.google.common.io.MoreFiles;
 import com.google.common.io.RecursiveDeleteOption;
-import io.webby.testing.JunitExtensions;
 import org.jetbrains.annotations.NotNull;
 import org.junit.jupiter.api.extension.*;
 
@@ -36,7 +35,9 @@ public class TempDirectoryExtension implements BeforeAllCallback, BeforeEachCall
 
     @Override
     public void beforeAll(ExtensionContext context) {
-        cleanUpAtExit();
+        if (cleanUp) {
+            cleanUpAtExit();
+        }
     }
 
     @Override
@@ -50,7 +51,7 @@ public class TempDirectoryExtension implements BeforeAllCallback, BeforeEachCall
             "%s.%s_%s.".formatted(className, testName, Arrays.stream(arguments).map(Object::toString).collect(Collectors.joining("_")));
 
         currentTempDir = Files.createTempDirectory(format);
-        log.at(Level.INFO).log("[Test] Temp storage path for this test: %s", currentTempDir);
+        log.at(Level.INFO).log("Temp storage path for this test: %s", currentTempDir);
     }
 
     @Override
@@ -65,6 +66,7 @@ public class TempDirectoryExtension implements BeforeAllCallback, BeforeEachCall
     private void cleanUp(@NotNull Path path, boolean isSuccess) {
         if (cleanUp && (!onlySuccessful || isSuccess)) {
             pathsToClean.add(path);
+            log.at(Level.FINE).log("Adding path to clean-up: %s", path);
         }
     }
 
