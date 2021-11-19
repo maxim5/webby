@@ -5,7 +5,6 @@ import com.google.inject.Module;
 import io.webby.Webby;
 import io.webby.app.AppLifetime;
 import io.webby.app.AppSettings;
-import io.webby.db.kv.StorageType;
 import io.webby.netty.marshal.Json;
 import org.apache.logging.log4j.Level;
 import org.apache.logging.log4j.LogManager;
@@ -43,7 +42,9 @@ public class Testing {
         settings.modelFilter().setPredicateUnsafe((pkg, cls) -> false);
         settings.handlerFilter().setPredicateUnsafe((pkg, cls) -> false);
         settings.interceptorFilter().setPredicateUnsafe((pkg, cls) -> false);
-        settings.setStorageType(StorageType.JAVA_MAP);
+        settings.storageSettings()
+                .disableKeyValueStorage()
+                .disableSqlStorage();
         consumer.accept(settings);
         return testStartup(settings, modules);
     }

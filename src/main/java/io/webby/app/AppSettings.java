@@ -3,7 +3,6 @@ package io.webby.app;
 import com.google.errorprone.annotations.CanIgnoreReturnValue;
 import io.routekit.QueryParser;
 import io.routekit.SimpleQueryParser;
-import io.webby.db.kv.StorageType;
 import io.webby.url.annotate.FrameType;
 import io.webby.url.annotate.Marshal;
 import io.webby.url.annotate.Render;
@@ -31,7 +30,7 @@ public final class AppSettings implements Settings {
 
     private Path webPath = Path.of("web");
     private List<Path> viewPaths = List.of(Path.of("web"));
-    private Path storagePath = Path.of("storage");
+
     private Charset charset = Charset.defaultCharset();
 
     private final ClassFilter modelFilter = new ClassFilter();
@@ -47,7 +46,7 @@ public final class AppSettings implements Settings {
     private Render defaultRender = Render.JTE;
     private FrameType defaultFrameType = FrameType.FROM_CLIENT;
 
-    private StorageType storageType = StorageType.MAP_DB;
+    private final StorageSettings storageSettings = new StorageSettings();
 
     private final Map<String, String> properties = new HashMap<>();
 
@@ -164,19 +163,6 @@ public final class AppSettings implements Settings {
     }
 
     @Override
-    public @NotNull Path storagePath() {
-        return storagePath;
-    }
-
-    public void setStoragePath(@NotNull Path storagePath) {
-        this.storagePath = storagePath;
-    }
-
-    public void setStoragePath(@NotNull String storagePath) {
-        this.storagePath = Path.of(storagePath);
-    }
-
-    @Override
     public @NotNull Charset charset() {
         return charset;
     }
@@ -264,12 +250,8 @@ public final class AppSettings implements Settings {
     }
 
     @Override
-    public @NotNull StorageType storageType() {
-        return storageType;
-    }
-
-    public void setStorageType(@NotNull StorageType storageType) {
-        this.storageType = storageType;
+    public @NotNull StorageSettings storageSettings() {
+        return storageSettings;
     }
 
     @CanIgnoreReturnValue

@@ -381,8 +381,7 @@ public class KeyValueDbIntegrationTest {
 
     private @NotNull Injector setup(@NotNull StorageType storageType, @NotNull Path tempDir) {
         return Testing.testStartup(settings -> {
-            settings.setStorageType(storageType);
-            settings.setStoragePath(tempDir);
+            settings.storageSettings().enableKeyValueStorage(storageType).setKeyValueStoragePath(tempDir);
             settings.setProfileMode(false);  // not testing TrackingDbAdapter by default
 
             settings.setProperty("db.chronicle.default.size", 64);

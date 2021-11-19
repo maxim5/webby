@@ -40,7 +40,7 @@ public class TuplFactory extends BaseKeyValueFactory {
     }
 
     private @NotNull DatabaseConfig getDatabaseConfig() {
-        Path storagePath = settings.storagePath();
+        Path storagePath = settings.storageSettings().storagePath();
         String filename = settings.getProperty("db.tupl.filename", "tupl.data");
         long cacheMinSize = settings.getLongProperty("db.tupl.cache.min.bytes", 1 << 16);
         long cacheMaxSize = settings.getLongProperty("db.tupl.cache.max.bytes", 10 << 20);

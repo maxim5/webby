@@ -1,7 +1,6 @@
 package io.webby.app;
 
 import io.routekit.QueryParser;
-import io.webby.db.kv.StorageType;
 import io.webby.url.annotate.FrameType;
 import io.webby.url.annotate.Marshal;
 import io.webby.url.annotate.Render;
@@ -30,8 +29,6 @@ public interface Settings extends SettingsFilters, SettingsProps {
 
     @NotNull List<Path> viewPaths();
 
-    @NotNull Path storagePath();
-
     @NotNull Charset charset();
 
     @NotNull QueryParser urlParser();
@@ -48,5 +45,5 @@ public interface Settings extends SettingsFilters, SettingsProps {
 
     @NotNull FrameType defaultFrameType();
 
-    @NotNull StorageType storageType();
+    @NotNull StorageSettings storageSettings();
 }

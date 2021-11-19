@@ -4,6 +4,7 @@ import com.google.common.flogger.FluentLogger;
 import com.google.inject.Injector;
 import io.webby.Webby;
 import io.webby.app.AppSettings;
+import io.webby.db.kv.StorageType;
 import io.webby.examples.templates.JteExample;
 import io.webby.netty.NettyBootstrap;
 
@@ -23,12 +24,13 @@ public class Main {
         settings.setSecurityKey("12345678901234567890123456789012");
         settings.setWebPath("out/examples/resources/web");
         settings.setViewPath("out/examples/resources/web");
-        settings.setStoragePath(".data/mapdb");
         settings.setDevMode(true);
         settings.setProperty("jte.class.directory", JteExample.CLASS_DIR);
         settings.setProperty("jte.view.paths", "out/examples/resources/web/jte");
         settings.setProperty("pebble.view.paths", "out/examples/resources/web/pebble");
         settings.setProperty("db.mapdb.checksum.enabled", false);
+        settings.storageSettings().setKeyValueStorageType(StorageType.MAP_DB);
+        settings.storageSettings().setKeyValueStoragePath(".data/mapdb");
 
         Injector injector = Webby.initGuice(settings);
         NettyBootstrap startup = injector.getInstance(NettyBootstrap.class);

@@ -30,7 +30,7 @@ public abstract class BaseLevelDbFactory extends BaseKeyValueFactory {
     @Override
     public @NotNull <K, V> LevelDbImpl<K, V> getInternalDb(@NotNull String name, @NotNull Class<K> key, @NotNull Class<V> value) {
         return cacheIfAbsent(name, () -> {
-            Path storagePath = settings.storagePath();
+            Path storagePath = settings.storageSettings().storagePath();
             String filename = settings.getProperty("db.leveldb.filename.pattern", "leveldb-%s");
             boolean createIfMissing = settings.getBoolProperty("db.leveldb.create.if.missing", true);
             boolean paranoidChecks = settings.getBoolProperty("db.leveldb.paranoid.checks", false);

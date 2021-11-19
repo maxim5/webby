@@ -8,10 +8,7 @@ import com.google.inject.Injector;
 import com.google.inject.Module;
 import com.google.inject.Stage;
 import com.google.inject.util.Modules;
-import io.webby.app.AppConfigException;
-import io.webby.app.AppModule;
-import io.webby.app.AppSettings;
-import io.webby.app.ClassFilter;
+import io.webby.app.*;
 import io.webby.auth.AuthModule;
 import io.webby.common.CommonModule;
 import io.webby.db.DbModule;
@@ -68,15 +65,45 @@ public class Webby {
         validateSecurityKey(settings.securityKey());
         validateWebPath(settings.webPath());
         validateViewPaths(settings.viewPaths());
-        validateStoragePath(settings.storagePath());
         validateHotReload(settings);
         validateProfileMode(settings);
         validateSafeMode(settings);
-        validateStorageType(settings);
+        validateStorageSettings(settings, settings.storageSettings());
 
         validateFilter(settings.modelFilter(), "models");
         validateFilter(settings.handlerFilter(), "handlers");
         validateFilter(settings.interceptorFilter(), "interceptors");
+    }
+
+    private static void validateStorageSettings(@NotNull Settings settings, @NotNull StorageSettings storageSettings) {
+        StorageType storageType = storageSettings.storageType();
+        boolean isDefault = storageType == StorageType.JAVA_MAP;
+        boolean isPersisted = storageType != StorageType.JAVA_MAP;
+
+        if (storageSettings.isKeyValueStorageEnabled()) {
+            if (isDefault && settings.isProdMode()) {
+                log.at(Level.WARNING).log("Configured non-persistent key-value storage in production: %s", storageType);
+            }
+            if (isPersisted) {
+                validateDirectory(storageSettings.storagePath(), "storage path", true);
+            }
+        } else {
+            if (!isDefault) {
+                log.at(Level.WARNING).log("Key-value storage disabled. Ignoring the type: %s", storageType);
+                storageSettings.setKeyValueStorageType(StorageType.JAVA_MAP);
+            }
+        }
+
+        if (storageSettings.isSqlStorageEnabled()) {
+            if (isDefault) {
+                // if (settings.isProdMode()) {
+                //     log.at(Level.WARNING).log("Configured non-persistent SQL storage in production: %s", storageType);
+                // }
+                // storageSettings.setKeyValueStorageType(StorageType.SQL);
+            }
+        } else {
+            // check if StorageType.SQL?
+        }
     }
 
     private static void validateSecurityKey(byte @NotNull [] securityKey) {
@@ -93,10 +120,6 @@ public class Webby {
     private static void validateViewPaths(@Nullable List<Path> viewPaths) {
         failIf(isNullOrEmpty(viewPaths), "Invalid settings: view paths are not set");
         viewPaths.forEach(viewPath -> validateDirectory(viewPath, "view path", false));
-    }
-
-    private static void validateStoragePath(@Nullable Path storagePath) {
-        validateDirectory(storagePath, "storage path", true);
     }
 
     private static void validateDirectory(@Nullable Path path, @NotNull String name, boolean autoCreate) {
@@ -140,12 +163,6 @@ public class Webby {
             if (settings.isSafeMode() && settings.isProdMode()) {
                 log.at(Level.WARNING).log("Configured safe mode in production");
             }
-        }
-    }
-
-    private static void validateStorageType(@NotNull AppSettings settings) {
-        if (settings.storageType() == StorageType.JAVA_MAP && settings.isProdMode()) {
-            log.at(Level.WARNING).log("Configured non-persistent storage in production: %s", settings.storageType());
         }
     }
 

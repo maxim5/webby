@@ -42,7 +42,7 @@ public class LmdbJniDbFactory extends BaseKeyValueFactory {
     }
 
     private @NotNull Env createDefaultEnv(@NotNull Settings settings) {
-        Path storagePath = settings.storagePath();
+        Path storagePath = settings.storageSettings().storagePath();
         long maxMapSize = settings.getLongProperty("db.lmdb-jni.max.map.size.bytes", 64 << 20);
         int maxMapsNum = settings.getIntProperty("db.lmdb-jni.max.maps.num", 32);
 

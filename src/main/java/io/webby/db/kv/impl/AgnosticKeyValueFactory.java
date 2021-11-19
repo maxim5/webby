@@ -31,7 +31,7 @@ public class AgnosticKeyValueFactory implements KeyValueFactory {
     @Inject
     public AgnosticKeyValueFactory(@NotNull Settings settings, @NotNull InjectorHelper helper) {
         this.helper = helper;
-        delegate = pickFactory(settings.storageType());
+        delegate = pickFactory(settings.storageSettings().storageType());
     }
 
     @Override

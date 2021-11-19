@@ -35,7 +35,7 @@ public class ChronicleFactory extends BaseKeyValueFactory {
     @Override
     public @NotNull <K, V> ChronicleDb<K, V> getInternalDb(@NotNull String name, @NotNull Class<K> key, @NotNull Class<V> value) {
         return cacheIfAbsent(name, rethrow(() -> {
-            Path storagePath = settings.storagePath();
+            Path storagePath = settings.storageSettings().storagePath();
             String filename = settings.getProperty("db.chronicle.filename.pattern", "chronicle-%s.data");
             boolean putReturnsNull = settings.getBoolProperty("db.chronicle.put.return.null", false);
             boolean removeReturnsNull = settings.getBoolProperty("db.chronicle.remove.return.null", false);

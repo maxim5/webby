@@ -23,7 +23,7 @@ public class HaloDbFactory extends BaseKeyValueFactory {
             Codec<K> keyCodec = provider.getCodecOrDie(key);
             Codec<V> valueCodec = provider.getCodecOrDie(value);
 
-            Path storagePath = settings.storagePath();
+            Path storagePath = settings.storageSettings().storagePath();
             HaloDBOptions options = getOptions();
             if (keyCodec.size().isFixed()) {
                 options.setFixedKeySize(keyCodec.size().numBytes());
