@@ -31,12 +31,7 @@ public class BlobTableDb<V, K> extends ByteArrayDb<K, V> implements KeyValueDb<K
 
     @Override
     public int size() {
-        return table.count();  // TODO: filter namespace
-    }
-
-    @Override
-    public boolean isEmpty() {
-        return table.isEmpty();
+        return (int) fetchAllFromNamespace().count();  // TODO: filter namespace
     }
 
     @Override
@@ -112,6 +107,7 @@ public class BlobTableDb<V, K> extends ByteArrayDb<K, V> implements KeyValueDb<K
         return table.fetchAll().stream().filter(blob -> startsWith(blob.id(), namespace));
     }
 
+    // TODO: https://github.com/patrickfav/bytes-java
     private static boolean startsWith(byte[] bytes, byte[] prefix) {
         return Bytes.indexOf(bytes, prefix) == 0;
     }
