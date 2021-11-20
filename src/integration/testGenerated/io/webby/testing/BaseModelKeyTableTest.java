@@ -1,8 +1,8 @@
 package io.webby.testing;
 
 import io.webby.db.sql.SqlSettings;
-import io.webby.util.sql.api.QueryRunner;
 import io.webby.util.sql.api.DebugSql;
+import io.webby.util.sql.api.QueryRunner;
 import io.webby.util.sql.api.TableObj;
 import org.jetbrains.annotations.NotNull;
 import org.junit.jupiter.api.AfterEach;
@@ -26,6 +26,7 @@ public abstract class BaseModelKeyTableTest<K, E, T extends TableObj<K, E>> {
     protected Connection connection;
     protected T table;
     protected K[] keys;
+    protected K[] maliciousKeys;
 
     @BeforeEach
     void setUp() throws Exception {
@@ -167,6 +168,43 @@ public abstract class BaseModelKeyTableTest<K, E, T extends TableObj<K, E>> {
         assertThat(table.fetchAll()).isEmpty();
     }
 
+    @Test
+    public void sql_injection() {
+        assumeKeys(1);
+        assumeMaliciousKeys();
+
+        K ok = keys[0];
+        E entityOk = createEntity(ok);
+        table.insert(entityOk);
+
+        for (K input : maliciousKeys) {
+            assertNull(table.getByPkOrNull(input));
+            assertNotNull(table.getByPkOrNull(ok));
+            assertEquals(1, table.count());
+            assertThat(table.fetchAll()).containsExactly(entityOk);
+
+            E badEntity = createEntity(input, 0);
+            assertEquals(1, table.insert(badEntity));
+            assertNotNull(table.getByPkOrNull(input));
+            assertNotNull(table.getByPkOrNull(ok));
+            assertEquals(2, table.count());
+            assertThat(table.fetchAll()).containsExactly(entityOk, badEntity);
+
+            badEntity = createEntity(input, 1);
+            assertEquals(1, table.updateByPk(badEntity));
+            assertNotNull(table.getByPkOrNull(input));
+            assertNotNull(table.getByPkOrNull(ok));
+            assertEquals(2, table.count());
+            assertThat(table.fetchAll()).containsExactly(entityOk, badEntity);
+
+            assertEquals(1, table.deleteByPk(input));
+            assertNull(table.getByPkOrNull(input));
+            assertNotNull(table.getByPkOrNull(ok));
+            assertEquals(1, table.count());
+            assertThat(table.fetchAll()).containsExactly(entityOk);
+        }
+    }
+
     protected @NotNull E createEntity(@NotNull K key) {
         return createEntity(key, 0);
     }
@@ -177,6 +215,11 @@ public abstract class BaseModelKeyTableTest<K, E, T extends TableObj<K, E>> {
         assertNotNull(keys);
         assumeTrue(keys.length >= minimumNum,
                    "Can't run the test because not enough keys available: %s".formatted(Arrays.toString(keys)));
+    }
+
+    protected void assumeMaliciousKeys() {
+        assumeTrue(maliciousKeys != null && maliciousKeys.length > 0,
+                   "Can't run the test because malicious keys aren't available: %s".formatted(Arrays.toString(maliciousKeys)));
     }
 
     protected List<String> parseColumnNamesFromDb(@NotNull String name) throws SQLException {

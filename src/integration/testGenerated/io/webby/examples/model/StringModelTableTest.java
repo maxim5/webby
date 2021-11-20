@@ -20,6 +20,7 @@ public class StringModelTableTest extends BaseModelKeyTableTest<String, StringMo
             )
         """);
         keys = array("foo", "bar");
+        maliciousKeys = SqlInjection.MALICIOUS_STRING_INPUTS;
         table = new StringModelTable(connection);
     }
 

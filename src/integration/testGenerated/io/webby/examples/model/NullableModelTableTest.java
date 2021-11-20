@@ -20,6 +20,7 @@ public class NullableModelTableTest extends BaseModelKeyTableTest<String, Nullab
             )
         """);
         keys = array("foo", "");
+        maliciousKeys = SqlInjection.MALICIOUS_STRING_INPUTS;
         table = new NullableModelTable(connection);
     }
 
