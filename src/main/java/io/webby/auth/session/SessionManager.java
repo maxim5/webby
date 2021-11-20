@@ -42,7 +42,7 @@ public class SessionManager {
         decipher.init(Cipher.DECRYPT_MODE, key);
 
         generator = LongIdGenerator.securePositiveRandom(SecureRandom.getInstance("SHA1PRNG"));
-        db = factory.getDb("sessions", Long.class, Session.class);
+        db = factory.getDb("session", Long.class, Session.class);
     }
 
     public @NotNull Session getOrCreateSession(@NotNull HttpRequestEx request, @Nullable Cookie cookie) {

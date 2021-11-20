@@ -6,6 +6,7 @@ import com.google.inject.Singleton;
 import io.webby.app.Settings;
 import io.webby.common.ClasspathScanner;
 import io.webby.util.sql.api.BaseTable;
+import io.webby.util.sql.api.TableMeta;
 import io.webby.util.sql.api.TableObj;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
@@ -34,16 +35,25 @@ public class TableManager {
         this.tableMap = buildTableMap(tableClasses);
     }
 
-    public <E> @NotNull BaseTable<E> getBaseTable(@NotNull Class<E> entity) {
+    public <E> @NotNull BaseTable<E> getMatchingBaseTableOrDie(@NotNull String name, @NotNull Class<E> entity) {
         EntityTable entityTable = tableMap.get(entity);
         assert entityTable != null : "Entity table not found for: entity=%s".formatted(entity);
+        assert entityTable.sqlName.equals(name) :
+                "Entity table name does not match: sql-name=%s name=%s".formatted(entityTable.sqlName, name);
         assert entityTable.key == null : "Key class mismatch: table-key=%s entity=%s".formatted(entityTable.key, entity);
         return castAny(entityTable.instantiate.apply(pool.getConnection()));
     }
 
-    public <K, E> @NotNull TableObj<K, E> getTable(@NotNull Class<K> key, @NotNull Class<E> entity) {
+    public <K, E> boolean hasMatchingTable(@NotNull String name, @NotNull Class<K> key, @NotNull Class<E> entity) {
+        EntityTable entityTable = tableMap.get(entity);
+        return entityTable != null && entityTable.sqlName.equals(name) && entityTable.wrappedKey() == Primitives.wrap(key);
+    }
+
+    public <K, E> @NotNull TableObj<K, E> getMatchingTableOrDie(@NotNull String name, @NotNull Class<K> key, @NotNull Class<E> entity) {
         EntityTable entityTable = tableMap.get(entity);
         assert entityTable != null : "Entity table not found for: entity=%s".formatted(entity);
+        assert entityTable.sqlName.equals(name) :
+                "Entity table name does not match: sql-name=%s name=%s".formatted(entityTable.sqlName, name);
         assert entityTable.wrappedKey() == Primitives.wrap(key) :
                 "Key class mismatch: table-key=%s provided-key=%s entity=%s".formatted(entityTable.key, key, entity);
         return castAny(entityTable.instantiate.apply(pool.getConnection()));
@@ -53,15 +63,18 @@ public class TableManager {
     static Map<Class<?>, EntityTable> buildTableMap(@NotNull Iterable<? extends Class<?>> tableClasses) throws Exception {
         Map<Class<?>, EntityTable> result = new LinkedHashMap<>();
         for (Class<?> tableClass : tableClasses) {
+            TableMeta meta = castAny(tableClass.getField("META").get(null));
             Class<?> key = (Class<?>) tableClass.getField("KEY_CLASS").get(null);
             Class<?> entity = (Class<?>) tableClass.getField("ENTITY_CLASS").get(null);
             Function<Connection, ?> instantiate = castAny(tableClass.getField("INSTANTIATE").get(null));
-            result.put(entity, new EntityTable(key, instantiate));
+            result.put(entity, new EntityTable(meta.sqlTableName(), key, instantiate));
         }
         return result;
     }
 
-    private record EntityTable(@Nullable Class<?> key, @NotNull Function<Connection, ?> instantiate) {
+    private record EntityTable(@NotNull String sqlName,
+                               @Nullable Class<?> key,
+                               @NotNull Function<Connection, ?> instantiate) {
         public @Nullable Class<?> wrappedKey() {
             return key != null ? Primitives.wrap(key) : null;
         }

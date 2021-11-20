@@ -14,6 +14,7 @@ import io.webby.db.kv.mapdb.MapDbFactory;
 import io.webby.db.kv.mapdb.MapDbImpl;
 import io.webby.db.kv.paldb.PalDbFactory;
 import io.webby.db.kv.paldb.PalDbImpl;
+import io.webby.db.model.BlobKv;
 import io.webby.db.sql.ConnectionPool;
 import io.webby.db.sql.SqlSettings;
 import io.webby.testing.*;
@@ -53,6 +54,10 @@ public class KeyValueDbIntegrationTest {
             created INTEGER,
             user_agent TEXT,
             ip_address TEXT
+        );
+        CREATE TABLE blob_kv (
+            id BLOB PRIMARY KEY,
+            value BLOB
         );
     """;
     @RegisterExtension private final static SqlDbSetupExtension SQL_DB = new SqlDbSetupExtension(SQL_URL, SQL_SCHEMA);
@@ -237,7 +242,7 @@ public class KeyValueDbIntegrationTest {
         Session existingSession = sessionManager.getSessionOrNull(cookie);
         assertEquals(newSession, existingSession);
 
-        try (KeyValueDb<Long, Session> db = dbFactory.getDb("sessions", Long.class, Session.class)) {
+        try (KeyValueDb<Long, Session> db = dbFactory.getDb("session", Long.class, Session.class)) {
             assertEqualsTo(db, Map.of(newSession.sessionId(), newSession));
         }
     }
@@ -370,7 +375,7 @@ public class KeyValueDbIntegrationTest {
         Path tempDir = TEMP_DIRECTORY.getCurrentTempDir();
 
         AppSettings settings = Testing.defaultAppSettings();
-        settings.modelFilter().setCommonPackageOf(List.of(Session.class, DefaultUser.class));
+        settings.modelFilter().setCommonPackageOf(List.of(Session.class, DefaultUser.class, BlobKv.class));
         settings.storageSettings().enableKeyValueStorage(storageType).setKeyValueStoragePath(tempDir);
         settings.storageSettings().enableSqlStorage(new SqlSettings(SQL_URL));
         settings.setProfileMode(false);  // not testing TrackingDbAdapter by default

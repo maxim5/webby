@@ -16,7 +16,7 @@ public class UserManager {
     public UserManager(@NotNull Settings settings,
                        @NotNull UserFactory userFactory,
                        @NotNull KeyValueFactory dbFactory) {
-        db = castAny(dbFactory.getDb("users", Long.class, userFactory.getUserClass()));
+        db = castAny(dbFactory.getDb("user", Long.class, userFactory.getUserClass()));
     }
 
     public @Nullable User findById(long id) {
