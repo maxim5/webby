@@ -1,8 +1,8 @@
 package io.webby.examples.model;
 
 import io.webby.testing.ForeignKeyTableTest;
-import io.webby.testing.PrimaryKeyTableTest;
 import io.webby.testing.SqliteTableTest;
+import io.webby.testing.TableLongTest;
 import io.webby.util.sql.api.ForeignInt;
 import io.webby.util.sql.api.ForeignLong;
 import io.webby.util.sql.api.ForeignObj;
@@ -10,11 +10,9 @@ import org.jetbrains.annotations.NotNull;
 
 import java.sql.Connection;
 
-import static io.webby.testing.TestingUtil.array;
-
 public class ForeignKeyModelTableTest
         extends SqliteTableTest<Long, ForeignKeyModel, ForeignKeyModelTable>
-        implements PrimaryKeyTableTest<Long, ForeignKeyModel, ForeignKeyModelTable>,
+        implements TableLongTest<ForeignKeyModel, ForeignKeyModelTable>,
                    ForeignKeyTableTest<Long, ForeignKeyModel, ForeignKeyModelTable> {
     @Override
     protected void setUp(@NotNull Connection connection) throws Exception {
@@ -42,13 +40,13 @@ public class ForeignKeyModelTableTest
     }
 
     @Override
-    public @NotNull Long[] keys() {
-        return array(1L, 2L);
+    public @NotNull ForeignKeyModel createEntity(@NotNull Long key, int version) {
+        return new ForeignKeyModel(key, ForeignInt.ofId(version), ForeignLong.ofId(777), ForeignObj.ofId("foo"));
     }
 
     @Override
-    public @NotNull ForeignKeyModel createEntity(@NotNull Long key, int version) {
-        return new ForeignKeyModel(key, ForeignInt.ofId(version), ForeignLong.ofId(777), ForeignObj.ofId("foo"));
+    public @NotNull ForeignKeyModel copyEntityWithId(@NotNull ForeignKeyModel entity, long autoId) {
+        return new ForeignKeyModel(autoId, entity.innerInt(), entity.innerLong(), entity.innerString());
     }
 
     @Override

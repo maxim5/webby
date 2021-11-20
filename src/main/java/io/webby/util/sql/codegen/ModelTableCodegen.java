@@ -66,6 +66,9 @@ public class ModelTableCodegen extends BaseCodegen {
 
         insert();
         valuesForInsert();
+        insertAutoIncPk();
+        valuesForInsertAutoIncPk();
+
         updateByPk();
         valuesForUpdate();
         deleteByPk();
@@ -324,6 +327,56 @@ public class ModelTableCodegen extends BaseCodegen {
 
         appendCode("""
         protected static @Nonnull Object[] valuesForInsert(@Nonnull $ModelClass $model_param) {
+            Object[] array = {
+        $array_init
+            };
+        $array_convert
+            return array;
+        }\n
+        """, EasyMaps.merge(context, mainContext));
+    }
+
+    private void insertAutoIncPk() throws IOException {
+        TableField field = table.primaryKeyField();
+        Class<?> javaType = field != null ? field.javaType() : null;
+        if (javaType != int.class && javaType != long.class) {
+            return;
+        }
+
+        Snippet query = InsertMaker.make(table, table.columns(Predicate.not(TableField::isPrimaryKey)));
+        Map<String, String> context = Map.of(
+            "$sql_query_literal", wrapAsStringLiteral(query, INDENT2)
+        );
+
+        appendCode("""
+        @Override
+        public $pk_type insertAutoIncPk(@Nonnull $ModelClass $model_param) {
+           String query = $sql_query_literal;
+           try {
+               return ($pk_type) runner.runAutoIncUpdate(query, valuesForInsertAutoIncPk($model_param)).lastId();
+           } catch (SQLException e) {
+               throw new QueryException("Failed to insert new entity into $TableClass", query, $model_param, e);
+           }
+        }\n
+        """, EasyMaps.merge(mainContext, pkContext, context));
+    }
+
+    private void valuesForInsertAutoIncPk() throws IOException {
+        TableField field = table.primaryKeyField();
+        Class<?> javaType = field != null ? field.javaType() : null;
+        if (javaType != int.class && javaType != long.class) {
+            return;
+        }
+
+        List<TableField> nonPrimary = table.fields().stream().filter(Predicate.not(TableField::isPrimaryKey)).toList();
+        ValuesArrayMaker maker = new ValuesArrayMaker("$model_param", nonPrimary);
+        Map<String, String> context = Map.of(
+            "$array_init", maker.makeInitValues().join(linesJoiner(INDENT2)),
+            "$array_convert", maker.makeConvertValues().join(linesJoiner(INDENT1, true))
+        );
+
+        appendCode("""
+        protected static @Nonnull Object[] valuesForInsertAutoIncPk(@Nonnull $ModelClass $model_param) {
             Object[] array = {
         $array_init
             };

@@ -1,16 +1,14 @@
 package io.webby.examples.model;
 
-import io.webby.testing.PrimaryKeyTableTest;
 import io.webby.testing.SqliteTableTest;
+import io.webby.testing.TableIntTest;
 import org.jetbrains.annotations.NotNull;
 
 import java.sql.Connection;
 
-import static io.webby.testing.TestingUtil.array;
-
 public class PojoWithAdapterModelTableTest
         extends SqliteTableTest<Integer, PojoWithAdapterModel, PojoWithAdapterModelTable>
-        implements PrimaryKeyTableTest<Integer, PojoWithAdapterModel, PojoWithAdapterModelTable> {
+        implements TableIntTest<PojoWithAdapterModel, PojoWithAdapterModelTable> {
     @Override
     protected void setUp(@NotNull Connection connection) throws Exception {
         connection.createStatement().executeUpdate("""
@@ -24,12 +22,12 @@ public class PojoWithAdapterModelTableTest
     }
 
     @Override
-    public @NotNull Integer[] keys() {
-        return array(1, 2);
+    public @NotNull PojoWithAdapterModel createEntity(@NotNull Integer key, int version) {
+        return new PojoWithAdapterModel(key, new PojoWithAdapterModel.Pojo(version, String.valueOf(version).toCharArray()));
     }
 
     @Override
-    public @NotNull PojoWithAdapterModel createEntity(@NotNull Integer key, int version) {
-        return new PojoWithAdapterModel(key, new PojoWithAdapterModel.Pojo(version, String.valueOf(version).toCharArray()));
+    public @NotNull PojoWithAdapterModel copyEntityWithId(@NotNull PojoWithAdapterModel entity, int autoId) {
+        return new PojoWithAdapterModel(autoId, entity.pojo());
     }
 }

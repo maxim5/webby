@@ -1,16 +1,14 @@
 package io.webby.examples.model;
 
-import io.webby.testing.PrimaryKeyTableTest;
 import io.webby.testing.SqliteTableTest;
+import io.webby.testing.TableIntTest;
 import org.jetbrains.annotations.NotNull;
 
 import java.sql.Connection;
 
-import static io.webby.testing.TestingUtil.array;
-
 public class InheritedModelTableTest
         extends SqliteTableTest<Integer, InheritedModel, InheritedModelTable>
-        implements PrimaryKeyTableTest<Integer, InheritedModel, InheritedModelTable> {
+        implements TableIntTest<InheritedModel, InheritedModelTable> {
     @Override
     protected void setUp(@NotNull Connection connection) throws Exception {
         connection.createStatement().executeUpdate("""
@@ -25,12 +23,12 @@ public class InheritedModelTableTest
     }
 
     @Override
-    public @NotNull Integer[] keys() {
-        return array(1, 2);
+    public @NotNull InheritedModel createEntity(@NotNull Integer key, int version) {
+        return new InheritedModel(String.valueOf(version), version, key, version == 0);
     }
 
     @Override
-    public @NotNull InheritedModel createEntity(@NotNull Integer key, int version) {
-        return new InheritedModel(String.valueOf(version), version, key, version == 0);
+    public @NotNull InheritedModel copyEntityWithId(@NotNull InheritedModel entity, int autoId) {
+        return new InheritedModel(entity.getStr(), entity.getIntValue(), autoId, entity.isBoolValue());
     }
 }

@@ -36,6 +36,8 @@ public interface TableLong<E> extends TableObj<Long, E> {
         return getOptionalByPk(key.longValue());
     }
 
+    long insertAutoIncPk(@NotNull E entity);
+
     long longKeyOf(@NotNull E entity);
 
     default @NotNull Long keyOf(@NotNull E entity) {

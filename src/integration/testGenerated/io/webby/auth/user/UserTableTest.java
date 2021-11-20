@@ -1,16 +1,14 @@
 package io.webby.auth.user;
 
-import io.webby.testing.PrimaryKeyTableTest;
 import io.webby.testing.SqliteTableTest;
+import io.webby.testing.TableLongTest;
 import org.jetbrains.annotations.NotNull;
 
 import java.sql.Connection;
 
-import static io.webby.testing.TestingUtil.array;
-
 public class UserTableTest
         extends SqliteTableTest<Long, DefaultUser, UserTable>
-        implements PrimaryKeyTableTest<Long, DefaultUser, UserTable> {
+        implements TableLongTest<DefaultUser, UserTable> {
     @Override
     protected void setUp(@NotNull Connection connection) throws Exception {
         connection.createStatement().executeUpdate("""
@@ -23,12 +21,12 @@ public class UserTableTest
     }
 
     @Override
-    public @NotNull Long[] keys() {
-        return array(1L, 2L);
+    public @NotNull DefaultUser createEntity(@NotNull Long key, int version) {
+        return new DefaultUser(key, new UserAccess(version + 1));
     }
 
     @Override
-    public @NotNull DefaultUser createEntity(@NotNull Long key, int version) {
-        return new DefaultUser(key, new UserAccess(version + 1));
+    public @NotNull DefaultUser copyEntityWithId(@NotNull DefaultUser user, long autoId) {
+        return new DefaultUser(autoId, user.access());
     }
 }

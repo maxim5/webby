@@ -36,6 +36,8 @@ public interface TableInt<E> extends TableObj<Integer, E> {
         return getOptionalByPk(key.intValue());
     }
 
+    int insertAutoIncPk(@NotNull E entity);
+
     int intKeyOf(@NotNull E entity);
 
     default @NotNull Integer keyOf(@NotNull E entity) {
