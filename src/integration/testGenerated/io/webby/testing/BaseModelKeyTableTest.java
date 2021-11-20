@@ -118,6 +118,33 @@ public abstract class BaseModelKeyTableTest<K, E, T extends TableObj<K, E>> {
     }
 
     @Test
+    public void update_or_insert_new_entity() {
+        assumeKeys(2);
+        E entity = createEntity(keys[0]);
+        assertEquals(1, table.updateByPkOrInsert(entity));
+
+        assertEquals(1, table.count());
+        assertFalse(table.isEmpty());
+        assertEquals(entity, table.getByPkOrNull(keys[0]));
+        assertNull(table.getByPkOrNull(keys[1]));
+        assertThat(table.fetchAll()).containsExactly(entity);
+    }
+
+    @Test
+    public void update_or_insert_existing_entity() {
+        assumeKeys(2);
+        table.insert(createEntity(keys[0], 0));
+        E entity = createEntity(keys[0], 1);
+        assertEquals(1, table.updateByPkOrInsert(entity));
+
+        assertEquals(1, table.count());
+        assertFalse(table.isEmpty());
+        assertEquals(entity, table.getByPkOrNull(keys[0]));
+        assertNull(table.getByPkOrNull(keys[1]));
+        assertThat(table.fetchAll()).containsExactly(entity);
+    }
+
+    @Test
     public void delete_entity() {
         assumeKeys(1);
         table.insert(createEntity(keys[0], 0));
