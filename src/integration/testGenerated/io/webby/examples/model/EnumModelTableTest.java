@@ -1,13 +1,16 @@
 package io.webby.examples.model;
 
-import io.webby.testing.BaseModelKeyTableTest;
+import io.webby.testing.PrimaryKeyTableTest;
+import io.webby.testing.SqliteTableTest;
 import org.jetbrains.annotations.NotNull;
 
 import java.sql.Connection;
 
 import static io.webby.testing.TestingUtil.array;
 
-public class EnumModelTableTest extends BaseModelKeyTableTest<EnumModel.Foo, EnumModel, EnumModelTable> {
+public class EnumModelTableTest
+        extends SqliteTableTest<EnumModel.Foo, EnumModel, EnumModelTable>
+        implements PrimaryKeyTableTest<EnumModel.Foo, EnumModel, EnumModelTable> {
     @Override
     protected void setUp(@NotNull Connection connection) throws Exception {
         connection.createStatement().executeUpdate("""
@@ -18,12 +21,16 @@ public class EnumModelTableTest extends BaseModelKeyTableTest<EnumModel.Foo, Enu
                 nested_s TEXT
             )
         """);
-        keys = array(EnumModel.Foo.FIRST, EnumModel.Foo.SECOND);
         table = new EnumModelTable(connection);
     }
 
     @Override
-    protected @NotNull EnumModel createEntity(EnumModel.@NotNull Foo key, int version) {
+    public @NotNull EnumModel.Foo[] keys() {
+        return array(EnumModel.Foo.FIRST, EnumModel.Foo.SECOND);
+    }
+
+    @Override
+    public @NotNull EnumModel createEntity(EnumModel.@NotNull Foo key, int version) {
         return new EnumModel(key, EnumModel.Foo.FIRST, new EnumModel.Nested(EnumModel.Foo.SECOND, String.valueOf(version)));
     }
 }

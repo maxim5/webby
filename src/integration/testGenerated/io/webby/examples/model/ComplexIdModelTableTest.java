@@ -1,13 +1,16 @@
 package io.webby.examples.model;
 
-import io.webby.testing.BaseModelKeyTableTest;
+import io.webby.testing.PrimaryKeyTableTest;
+import io.webby.testing.SqliteTableTest;
 import org.jetbrains.annotations.NotNull;
 
 import java.sql.Connection;
 
 import static io.webby.testing.TestingUtil.array;
 
-public class ComplexIdModelTableTest extends BaseModelKeyTableTest<ComplexIdModel.Key, ComplexIdModel, ComplexIdModelTable> {
+public class ComplexIdModelTableTest
+        extends SqliteTableTest<ComplexIdModel.Key, ComplexIdModel, ComplexIdModelTable>
+        implements PrimaryKeyTableTest<ComplexIdModel.Key, ComplexIdModel, ComplexIdModelTable> {
     @Override
     protected void setUp(@NotNull Connection connection) throws Exception {
         connection.createStatement().executeUpdate("""
@@ -18,12 +21,16 @@ public class ComplexIdModelTableTest extends BaseModelKeyTableTest<ComplexIdMode
                 a INTEGER
             )
         """);
-        keys = array(new ComplexIdModel.Key(1, 1, "1"), new ComplexIdModel.Key(2, 2, "2"));
         table = new ComplexIdModelTable(connection);
     }
 
     @Override
-    protected @NotNull ComplexIdModel createEntity(ComplexIdModel.@NotNull Key key, int version) {
+    public @NotNull ComplexIdModel.Key[] keys() {
+        return array(new ComplexIdModel.Key(1, 1, "1"), new ComplexIdModel.Key(2, 2, "2"));
+    }
+
+    @Override
+    public @NotNull ComplexIdModel createEntity(ComplexIdModel.@NotNull Key key, int version) {
         return new ComplexIdModel(key, version);
     }
 }

@@ -17,6 +17,10 @@ public class SqlDbSetupExtension implements BeforeAllCallback, AfterAllCallback,
     private final String schema;
     private Savepoint savepoint;
 
+    public SqlDbSetupExtension(@NotNull String url) {
+        this(url, "");
+    }
+
     public SqlDbSetupExtension(@NotNull String url, @NotNull String schema) {
         this.connection = Rethrow.Suppliers.rethrow(() -> DriverManager.getConnection(url)).get();
         this.schema = schema;
@@ -25,8 +29,10 @@ public class SqlDbSetupExtension implements BeforeAllCallback, AfterAllCallback,
 
     @Override
     public void beforeAll(ExtensionContext context) throws Exception {
-        connection.createStatement().executeUpdate(schema);
-        log.at(Level.INFO).log("SQL schema applied:\n%s", schema);
+        if (schema.length() > 0) {
+            connection.createStatement().executeUpdate(schema);
+            log.at(Level.INFO).log("SQL schema applied:\n%s", schema);
+        }
     }
 
     @Override

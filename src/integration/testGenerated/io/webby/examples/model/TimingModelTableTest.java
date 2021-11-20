@@ -1,6 +1,7 @@
 package io.webby.examples.model;
 
-import io.webby.testing.BaseModelKeyTableTest;
+import io.webby.testing.PrimaryKeyTableTest;
+import io.webby.testing.SqliteTableTest;
 import org.jetbrains.annotations.NotNull;
 
 import java.sql.Connection;
@@ -11,7 +12,9 @@ import java.time.temporal.ChronoUnit;
 
 import static io.webby.testing.TestingUtil.array;
 
-public class TimingModelTableTest extends BaseModelKeyTableTest<Timestamp, TimingModel, TimingModelTable> {
+public class TimingModelTableTest
+        extends SqliteTableTest<Timestamp, TimingModel, TimingModelTable>
+        implements PrimaryKeyTableTest<Timestamp, TimingModel, TimingModelTable> {
     @Override
     protected void setUp(@NotNull Connection connection) throws Exception {
         connection.createStatement().executeUpdate("""
@@ -36,12 +39,16 @@ public class TimingModelTableTest extends BaseModelKeyTableTest<Timestamp, Timin
             )
         """);
         // TODO: fix sql names
-        keys = array(Timestamp.valueOf("2000-01-01 00:00:00"), Timestamp.valueOf("2020-01-01 00:00:00"));
         table = new TimingModelTable(connection);
     }
 
     @Override
-    protected @NotNull TimingModel createEntity(@NotNull Timestamp key, int version) {
+    public @NotNull Timestamp[] keys() {
+        return array(Timestamp.valueOf("2000-01-01 00:00:00"), Timestamp.valueOf("2020-01-01 00:00:00"));
+    }
+
+    @Override
+    public @NotNull TimingModel createEntity(@NotNull Timestamp key, int version) {
         Instant instant = Instant.now().truncatedTo(ChronoUnit.MILLIS).minus(version, ChronoUnit.MINUTES);
         LocalDate localDate = LocalDate.ofInstant(instant.truncatedTo(ChronoUnit.SECONDS), ZoneId.systemDefault());
         LocalTime localTime = LocalTime.ofInstant(instant.truncatedTo(ChronoUnit.SECONDS), ZoneId.systemDefault());
