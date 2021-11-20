@@ -22,8 +22,8 @@ public class SqlTableDbFactory extends BaseKeyValueFactory {
                 return new SqlTableDb<>(table);
             }
 
-            if (tableManager.hasMatchingTable(BlobKv.NAME, byte[].class, BlobKv.class)) {
-                TableObj<byte[], BlobKv> blobTable = tableManager.getMatchingTableOrDie(BlobKv.NAME, byte[].class, BlobKv.class);
+            if (tableManager.hasMatchingTable(BlobKv.DB_NAME, byte[].class, BlobKv.class)) {
+                TableObj<byte[], BlobKv> blobTable = tableManager.getMatchingTableOrDie(BlobKv.DB_NAME, byte[].class, BlobKv.class);
                 Codec<K> keyCodec = codecProvider.getCodecOrDie(key);
                 Codec<V> valueCodec = codecProvider.getCodecOrDie(value);
                 return new BlobTableDb<>(blobTable, name, keyCodec, valueCodec);

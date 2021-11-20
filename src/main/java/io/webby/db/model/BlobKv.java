@@ -6,7 +6,7 @@ import org.jetbrains.annotations.Nullable;
 import java.util.Arrays;
 
 public record BlobKv(byte @NotNull [] id, byte @Nullable [] value) {
-    public static final String NAME = "blob_kv";
+    public static final String DB_NAME = "blob_kv";
 
     @Override
     public boolean equals(Object o) {

@@ -48,6 +48,11 @@ public class Playground {
         main.update("INSERT INTO blob(blob_id, blob_value) VALUES(?, ?)", "x".getBytes(), "y".getBytes());
         main.query("SELECT * FROM blob");
 
+        // https://stackoverflow.com/questions/8892973/how-to-get-last-insert-id-in-sqlite
+        main.query("SELECT last_insert_rowid()");
+        // main.query("SELECT LAST_INSERT_ID()");
+        // main.query("SELECT SCOPE_IDENTITY()");
+
         // https://stackoverflow.com/questions/24011247/fast-search-on-a-blob-starting-bytes-in-sqlite
         // https://stackoverflow.com/questions/3746756/search-for-value-within-blob-column-in-mysql
         main.query("SELECT * FROM blob WHERE hex(blob_id) LIKE '66%'");
