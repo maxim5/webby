@@ -11,11 +11,11 @@ import org.jetbrains.annotations.Nullable;
 
 import java.util.List;
 import java.util.Map;
-import java.util.Objects;
 import java.util.Set;
 import java.util.stream.Stream;
 
 import static io.webby.util.base.EasyCast.castAny;
+import static java.util.Objects.requireNonNull;
 
 public class QueryParams {
     private final String path;
@@ -152,7 +152,7 @@ public class QueryParams {
     }
 
     public <T> @NotNull T getConvertedOrDie(@NotNull String name) throws ConversionError {
-        String value = Objects.requireNonNull(getOrNull(name), () -> "Param `%s` is not query: %s".formatted(name, keys()));
+        String value = requireNonNull(getOrNull(name), () -> "Param `%s` is not query: %s".formatted(name, keys()));
         Constraint<?> constraint = constraints.get(name);
         return castAny(constraint.applyWithName(name, new CharArray(value)));
     }

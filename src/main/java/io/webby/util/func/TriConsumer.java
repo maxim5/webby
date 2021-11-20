@@ -1,6 +1,6 @@
 package io.webby.util.func;
 
-import java.util.Objects;
+import static java.util.Objects.requireNonNull;
 
 /**
  * Represents an operation that accepts two input arguments and returns no result.
@@ -41,7 +41,7 @@ public interface TriConsumer<T, U, V> {
      * @throws NullPointerException if {@code after} is null
      */
     default TriConsumer<T, U, V> andThen(TriConsumer<? super T, ? super U, ? super V> after) {
-        Objects.requireNonNull(after);
+        requireNonNull(after);
 
         return (l, r, s) -> {
             accept(l, r, s);

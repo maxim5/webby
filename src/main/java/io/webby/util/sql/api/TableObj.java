@@ -4,8 +4,9 @@ import com.google.errorprone.annotations.CanIgnoreReturnValue;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
-import java.util.Objects;
 import java.util.Optional;
+
+import static java.util.Objects.requireNonNull;
 
 public interface TableObj<K, E> extends BaseTable<E> {
     @Override
@@ -14,7 +15,7 @@ public interface TableObj<K, E> extends BaseTable<E> {
     @Nullable E getByPkOrNull(@NotNull K key);
 
     default @NotNull E getByPkOrDie(@NotNull K key) {
-        return Objects.requireNonNull(getByPkOrNull(key), "Entity not found by PK=" + key);
+        return requireNonNull(getByPkOrNull(key), "Entity not found by PK=" + key);
     }
 
     default @NotNull Optional<E> getOptionalByPk(@NotNull K key) {

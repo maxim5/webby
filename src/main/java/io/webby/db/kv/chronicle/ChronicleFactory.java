@@ -19,12 +19,12 @@ import org.jetbrains.annotations.Nullable;
 
 import java.io.File;
 import java.nio.file.Path;
-import java.util.Objects;
 import java.util.function.Consumer;
 import java.util.function.LongConsumer;
 import java.util.logging.Level;
 
 import static io.webby.util.base.Rethrow.Suppliers.rethrow;
+import static java.util.Objects.requireNonNull;
 
 public class ChronicleFactory extends BaseKeyValueFactory {
     private static final FluentLogger log = FluentLogger.forEnclosingClass();
@@ -105,7 +105,7 @@ public class ChronicleFactory extends BaseKeyValueFactory {
             return CodecSize.fixed(constantSize);
         }
 
-        return Objects.requireNonNull(codec).size();
+        return requireNonNull(codec).size();
     }
 
     private static <T> boolean isDefaultReader(@NotNull SizedReader<T> reader) {

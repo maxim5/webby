@@ -17,6 +17,7 @@ import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
 
 import static io.webby.util.base.Rethrow.rethrow;
+import static java.util.Objects.requireNonNull;
 
 public record DslJsonMarshaller(@NotNull DslJson<Object> json, @NotNull Charset charset) implements Json, Marshaller {
     @Inject
@@ -36,13 +37,13 @@ public record DslJsonMarshaller(@NotNull DslJson<Object> json, @NotNull Charset 
 
     @Override
     public <T> @NotNull T readBytes(@NotNull InputStream input, @NotNull Class<T> klass) throws IOException {
-        return Objects.requireNonNull(json.deserialize(klass, input));
+        return requireNonNull(json.deserialize(klass, input));
     }
 
     @Override
     public <T> @NotNull T readBytes(byte @NotNull [] bytes, @NotNull Class<T> klass) {
         try {
-            return Objects.requireNonNull(json.deserialize(klass, bytes, bytes.length));
+            return requireNonNull(json.deserialize(klass, bytes, bytes.length));
         } catch (IOException e) {
             return rethrow(e);
         }

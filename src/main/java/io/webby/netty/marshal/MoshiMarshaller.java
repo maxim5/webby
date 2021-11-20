@@ -14,9 +14,9 @@ import java.nio.charset.Charset;
 import java.util.Collection;
 import java.util.List;
 import java.util.Map;
-import java.util.Objects;
 
 import static io.webby.util.base.EasyCast.castAny;
+import static java.util.Objects.requireNonNull;
 
 public record MoshiMarshaller(@NotNull Moshi moshi, @NotNull Charset charset) implements Json {
     @Inject
@@ -47,13 +47,13 @@ public record MoshiMarshaller(@NotNull Moshi moshi, @NotNull Charset charset) im
     @Override
     public <T> @NotNull T readChars(@NotNull Reader reader, @NotNull Class<T> klass) throws IOException {
         String json = CharStreams.toString(reader);
-        return Objects.requireNonNull(moshi.adapter(klass).fromJson(json));
+        return requireNonNull(moshi.adapter(klass).fromJson(json));
     }
 
     @Override
     public <T> @NotNull T readBytes(@NotNull InputStream input, @NotNull Class<T> klass) throws IOException {
         try (BufferedSource buffer = Okio.buffer(Okio.source(input))) {
-            return Objects.requireNonNull(moshi.adapter(klass).fromJson(buffer));
+            return requireNonNull(moshi.adapter(klass).fromJson(buffer));
         }
     }
 
