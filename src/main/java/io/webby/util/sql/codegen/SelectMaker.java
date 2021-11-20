@@ -1,10 +1,10 @@
 package io.webby.util.sql.codegen;
 
 import io.webby.util.sql.api.ReadFollow;
-import io.webby.util.sql.schema.ForeignTableField;
-import io.webby.util.sql.schema.OneColumnTableField;
-import io.webby.util.sql.schema.PrefixedColumn;
-import io.webby.util.sql.schema.TableSchema;
+import io.webby.util.sql.arch.ForeignTableField;
+import io.webby.util.sql.arch.OneColumnTableField;
+import io.webby.util.sql.arch.PrefixedColumn;
+import io.webby.util.sql.arch.TableArch;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.VisibleForTesting;
 
@@ -12,9 +12,9 @@ import java.util.List;
 import java.util.function.Function;
 
 class SelectMaker {
-    private final TableSchema table;
+    private final TableArch table;
 
-    public SelectMaker(@NotNull TableSchema table) {
+    public SelectMaker(@NotNull TableArch table) {
         this.table = table;
     }
 
@@ -41,7 +41,7 @@ class SelectMaker {
     @VisibleForTesting
     record LeftJoin(@NotNull String table, @NotNull String on) {
         public static @NotNull LeftJoin from(@NotNull ForeignTableField field) {
-            TableSchema foreignTable = field.getForeignTable();
+            TableArch foreignTable = field.getForeignTable();
             String on = "%s.%s = %s.%s".formatted(field.parent().sqlName(),
                                                   field.foreignKeyColumn().sqlName(),
                                                   foreignTable.sqlName(),

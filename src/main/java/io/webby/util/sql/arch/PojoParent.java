@@ -1,4 +1,4 @@
-package io.webby.util.sql.schema;
+package io.webby.util.sql.arch;
 
 import com.google.errorprone.annotations.Immutable;
 import io.webby.util.lazy.AtomicLazy;

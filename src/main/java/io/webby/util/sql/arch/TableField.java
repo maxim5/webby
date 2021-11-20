@@ -1,4 +1,4 @@
-package io.webby.util.sql.schema;
+package io.webby.util.sql.arch;
 
 import com.google.errorprone.annotations.Immutable;
 import io.webby.util.sql.api.ReadFollow;
@@ -9,12 +9,12 @@ import java.util.List;
 
 @Immutable
 public abstract class TableField implements WithColumns, WithPrefixedColumns {
-    protected final TableSchema parent;
+    protected final TableArch parent;
     protected final ModelField field;
     protected final boolean primaryKey;
     protected final AdapterInfo adapterInfo;
 
-    public TableField(@NotNull TableSchema parent,
+    public TableField(@NotNull TableArch parent,
                       @NotNull ModelField field,
                       boolean primaryKey,
                       @Nullable AdapterInfo adapterInfo) {
@@ -24,7 +24,7 @@ public abstract class TableField implements WithColumns, WithPrefixedColumns {
         this.adapterInfo = adapterInfo;
     }
 
-    public @NotNull TableSchema parent() {
+    public @NotNull TableArch parent() {
         return parent;
     }
 

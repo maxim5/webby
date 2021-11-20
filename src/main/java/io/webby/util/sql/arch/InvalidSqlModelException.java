@@ -1,4 +1,4 @@
-package io.webby.util.sql.schema;
+package io.webby.util.sql.arch;
 
 import io.webby.app.AppConfigException;
 import org.jetbrains.annotations.NotNull;

@@ -1,4 +1,4 @@
-package io.webby.util.sql.schema;
+package io.webby.util.sql.arch;
 
 import com.google.common.collect.ImmutableList;
 import io.webby.util.lazy.AtomicLazy;
@@ -11,12 +11,12 @@ import java.util.List;
 import java.util.Objects;
 import java.util.function.Consumer;
 
-public final class PojoSchema implements WithColumns {
+public final class PojoArch implements WithColumns {
     private final @NotNull Class<?> pojoType;
     private final @NotNull ImmutableList<PojoField> fields;
     private final DelayedAccessLazy<List<Column>> columnsRef = AtomicLazy.emptyLazy();
 
-    public PojoSchema(@NotNull Class<?> pojoType, @NotNull ImmutableList<PojoField> fields) {
+    public PojoArch(@NotNull Class<?> pojoType, @NotNull ImmutableList<PojoField> fields) {
         this.pojoType = pojoType;
         this.fields = fields;
     }
@@ -65,16 +65,16 @@ public final class PojoSchema implements WithColumns {
         });
     }
 
-    public @NotNull PojoSchema reattachedTo(@NotNull PojoParent parent) {
+    public @NotNull PojoArch reattachedTo(@NotNull PojoParent parent) {
         ImmutableList<PojoField> reattachedFields = fields.stream()
                 .map(field -> field.reattachedTo(parent))
                 .collect(ImmutableList.toImmutableList());
-        return new PojoSchema(pojoType, reattachedFields);
+        return new PojoArch(pojoType, reattachedFields);
     }
 
     @Override
     public boolean equals(Object obj) {
-        return obj instanceof PojoSchema that &&
+        return obj instanceof PojoArch that &&
                Objects.equals(this.pojoType, that.pojoType) && Objects.equals(this.fields, that.fields);
     }
 
@@ -85,6 +85,6 @@ public final class PojoSchema implements WithColumns {
 
     @Override
     public String toString() {
-        return "PojoSchema[type=%s, fields=%s]".formatted(pojoType, fields);
+        return "PojoArch[type=%s, fields=%s]".formatted(pojoType, fields);
     }
 }

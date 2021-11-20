@@ -1,4 +1,4 @@
-package io.webby.util.sql.schema;
+package io.webby.util.sql.arch;
 
 import com.google.errorprone.annotations.Immutable;
 import org.jetbrains.annotations.NotNull;
@@ -7,18 +7,18 @@ import java.util.Objects;
 
 @Immutable
 public class PojoFieldNested extends PojoField {
-    private final PojoSchema pojo;
+    private final PojoArch pojo;
 
-    protected PojoFieldNested(@NotNull PojoParent parent, @NotNull ModelField field, @NotNull PojoSchema pojo) {
+    protected PojoFieldNested(@NotNull PojoParent parent, @NotNull ModelField field, @NotNull PojoArch pojo) {
         super(parent, field);
         this.pojo = pojo;
     }
 
-    public static @NotNull PojoField ofNestedPojo(@NotNull ModelField field, @NotNull PojoSchema pojo) {
+    public static @NotNull PojoField ofNestedPojo(@NotNull ModelField field, @NotNull PojoArch pojo) {
         return newReattachedSubPojo(PojoParent.DETACHED, field, pojo);
     }
 
-    public @NotNull PojoSchema pojo() {
+    public @NotNull PojoArch pojo() {
         return pojo;
     }
 
@@ -34,9 +34,9 @@ public class PojoFieldNested extends PojoField {
 
     private static @NotNull PojoField newReattachedSubPojo(@NotNull PojoParent parent,
                                                            @NotNull ModelField field,
-                                                           @NotNull PojoSchema pojo) {
+                                                           @NotNull PojoArch pojo) {
         PojoParent thisParent = PojoParent.ofUninitializedField();
-        PojoSchema copy = pojo.reattachedTo(thisParent);
+        PojoArch copy = pojo.reattachedTo(thisParent);
         PojoField thisField = new PojoFieldNested(parent, field, copy);
         thisParent.initializeOrDie(thisField);
         return thisField;

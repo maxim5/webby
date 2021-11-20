@@ -1,4 +1,4 @@
-package io.webby.util.sql.schema;
+package io.webby.util.sql.arch;
 
 import com.google.common.collect.ImmutableList;
 import com.google.errorprone.annotations.Immutable;
@@ -8,7 +8,7 @@ import org.jetbrains.annotations.NotNull;
 public class MultiColumnTableField extends TableField {
     private final ImmutableList<Column> columns;
 
-    public MultiColumnTableField(@NotNull TableSchema parent,
+    public MultiColumnTableField(@NotNull TableArch parent,
                                  @NotNull ModelField field,
                                  boolean primaryKey,
                                  @NotNull AdapterInfo adapterInfo,

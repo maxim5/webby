@@ -1,8 +1,8 @@
 package io.webby.util.sql.codegen;
 
 import io.webby.util.sql.api.ForeignInt;
-import io.webby.util.sql.schema.ModelSchemaFactory;
-import io.webby.util.sql.schema.TableSchema;
+import io.webby.util.sql.arch.ArchFactory;
+import io.webby.util.sql.arch.TableArch;
 import io.webby.util.sql.testing.FakeModelAdaptersScanner;
 import org.jetbrains.annotations.NotNull;
 import org.junit.jupiter.api.Test;
@@ -21,8 +21,8 @@ public class SelectMakerTest {
         record User(int userId, String name) {}
         record Song(ForeignInt<User> author) {}
 
-        Map<Class<?>, TableSchema> schemaMap = buildSchema(User.class, Song.class);
-        SelectMaker selectMaker = new SelectMaker(schemaMap.get(Song.class));
+        Map<Class<?>, TableArch> archMap = buildArch(User.class, Song.class);
+        SelectMaker selectMaker = new SelectMaker(archMap.get(Song.class));
 
         assertMaker(selectMaker,
                     """
@@ -42,8 +42,8 @@ public class SelectMakerTest {
         record Song(int songId, ForeignInt<User> author) {}
         record Single(ForeignInt<Song> hitSong) {}
 
-        Map<Class<?>, TableSchema> schemaMap = buildSchema(User.class, Song.class, Single.class);
-        SelectMaker selectMaker = new SelectMaker(schemaMap.get(Single.class));
+        Map<Class<?>, TableArch> archMap = buildArch(User.class, Song.class, Single.class);
+        SelectMaker selectMaker = new SelectMaker(archMap.get(Single.class));
 
         assertMaker(selectMaker,
                     """
@@ -63,8 +63,8 @@ public class SelectMakerTest {
                     """);
     }
 
-    private @NotNull Map<Class<?>, TableSchema> buildSchema(@NotNull Class<?> @NotNull ...  models) {
-        ModelSchemaFactory factory = new ModelSchemaFactory(locator, Arrays.stream(models).map(ModelClassInput::new).toList());
+    private @NotNull Map<Class<?>, TableArch> buildArch(@NotNull Class<?> @NotNull ...  models) {
+        ArchFactory factory = new ArchFactory(locator, Arrays.stream(models).map(ModelInput::new).toList());
         factory.build();
         return factory.getAllTables();
     }

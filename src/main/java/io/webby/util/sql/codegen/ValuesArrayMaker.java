@@ -1,7 +1,7 @@
 package io.webby.util.sql.codegen;
 
 import io.webby.util.func.ObjIntBiFunction;
-import io.webby.util.sql.schema.TableField;
+import io.webby.util.sql.arch.TableField;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.ArrayList;

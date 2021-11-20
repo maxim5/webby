@@ -3,7 +3,7 @@ package io.webby.util.sql.codegen;
 import io.webby.util.sql.api.Foreign;
 import io.webby.util.sql.api.ForeignObj;
 import io.webby.util.sql.api.ReadFollow;
-import io.webby.util.sql.schema.*;
+import io.webby.util.sql.arch.*;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.Arrays;
@@ -28,7 +28,7 @@ class ResultSetConversionMaker {
         this.indexParam = indexParam;
     }
 
-    public @NotNull Snippet make(@NotNull TableSchema table) {
+    public @NotNull Snippet make(@NotNull TableArch table) {
         return new Snippet().withLines(table.fields().stream().map(this::assignFieldLine));
     }
 

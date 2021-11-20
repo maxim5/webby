@@ -1,4 +1,4 @@
-package io.webby.util.sql.schema;
+package io.webby.util.sql.arch;
 
 import com.google.errorprone.annotations.Immutable;
 import io.webby.util.collect.EasyIterables;
@@ -12,12 +12,12 @@ import static io.webby.util.sql.api.ReadFollow.NO_FOLLOW;
 
 @Immutable
 public class ForeignTableField extends TableField {
-    private final TableSchema foreignTable;
+    private final TableArch foreignTable;
     private final Column foreignKeyColumn;
 
-    public ForeignTableField(@NotNull TableSchema parent,
+    public ForeignTableField(@NotNull TableArch parent,
                              @NotNull ModelField field,
-                             @NotNull TableSchema foreignTable,
+                             @NotNull TableArch foreignTable,
                              @NotNull Column foreignKeyColumn) {
         super(parent, field, false, null);
         this.foreignTable = foreignTable;
@@ -33,7 +33,7 @@ public class ForeignTableField extends TableField {
         return foreignTable != null;
     }
 
-    public @NotNull TableSchema getForeignTable() {
+    public @NotNull TableArch getForeignTable() {
         return foreignTable;
     }
 

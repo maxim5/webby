@@ -4,7 +4,7 @@ import com.google.common.collect.Iterables;
 import com.google.common.collect.Streams;
 import io.webby.util.collect.EasyMaps;
 import io.webby.util.sql.api.*;
-import io.webby.util.sql.schema.*;
+import io.webby.util.sql.arch.*;
 import org.jetbrains.annotations.NotNull;
 
 import java.io.IOException;
@@ -22,13 +22,13 @@ import static java.util.Objects.requireNonNull;
 @SuppressWarnings("UnnecessaryStringEscape")
 public class ModelTableCodegen extends BaseCodegen {
     private final ModelAdaptersScanner adaptersLocator;
-    private final TableSchema table;
+    private final TableArch table;
 
     private final Map<String, String> mainContext;
     private final Map<String, String> pkContext;
 
     public ModelTableCodegen(@NotNull ModelAdaptersScanner adaptersLocator,
-                             @NotNull TableSchema table, @NotNull Appendable writer) {
+                             @NotNull TableArch table, @NotNull Appendable writer) {
         super(writer);
         this.adaptersLocator = adaptersLocator;
         this.table = table;

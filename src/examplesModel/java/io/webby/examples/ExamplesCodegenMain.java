@@ -9,10 +9,10 @@ import io.webby.db.model.BlobKv;
 import io.webby.examples.model.*;
 import io.webby.util.base.TimeIt;
 import io.webby.util.sql.codegen.*;
-import io.webby.util.sql.schema.AdapterSchema;
-import io.webby.util.sql.schema.JavaNameHolder;
-import io.webby.util.sql.schema.ModelSchemaFactory;
-import io.webby.util.sql.schema.TableSchema;
+import io.webby.util.sql.arch.AdapterArch;
+import io.webby.util.sql.arch.JavaNameHolder;
+import io.webby.util.sql.arch.ArchFactory;
+import io.webby.util.sql.arch.TableArch;
 import org.jetbrains.annotations.NotNull;
 
 import java.io.File;
@@ -30,59 +30,59 @@ public class ExamplesCodegenMain {
     private static final ModelAdaptersScanner locator = new ModelAdaptersScanner(new AppSettings(), new ClasspathScanner());
 
     public static void main(String[] args) throws Exception {
-        List<ModelClassInput> inputs = List.of(
-            new ModelClassInput(DefaultUser.class, "User"),
-            new ModelClassInput(Session.class),
-            new ModelClassInput(BlobKv.class),
+        List<ModelInput> inputs = List.of(
+            new ModelInput(DefaultUser.class, "User"),
+            new ModelInput(Session.class),
+            new ModelInput(BlobKv.class),
 
-            new ModelClassInput(PrimitiveModel.class),
-            new ModelClassInput(StringModel.class),
-            new ModelClassInput(TimingModel.class),
-            new ModelClassInput(WrappersModel.class),
+            new ModelInput(PrimitiveModel.class),
+            new ModelInput(StringModel.class),
+            new ModelInput(TimingModel.class),
+            new ModelInput(WrappersModel.class),
 
-            new ModelClassInput(EnumModel.class),
-            new ModelClassInput(NestedModel.class),
-            new ModelClassInput(DeepNestedModel.class),
-            new ModelClassInput(PojoWithAdapterModel.class),
-            new ModelClassInput(NullableModel.class),
-            new ModelClassInput(InheritedModel.class),
-            new ModelClassInput(ComplexIdModel.class),
-            new ModelClassInput(AtomicModel.class),
+            new ModelInput(EnumModel.class),
+            new ModelInput(NestedModel.class),
+            new ModelInput(DeepNestedModel.class),
+            new ModelInput(PojoWithAdapterModel.class),
+            new ModelInput(NullableModel.class),
+            new ModelInput(InheritedModel.class),
+            new ModelInput(ComplexIdModel.class),
+            new ModelInput(AtomicModel.class),
 
-            new ModelClassInput(ForeignKeyModel.InnerInt.class, "FKInt"),
-            new ModelClassInput(ForeignKeyModel.InnerLong.class, "FKLong"),
-            new ModelClassInput(ForeignKeyModel.InnerString.class, "FKString"),
-            new ModelClassInput(ForeignKeyModel.class)
+            new ModelInput(ForeignKeyModel.InnerInt.class, "FKInt"),
+            new ModelInput(ForeignKeyModel.InnerLong.class, "FKLong"),
+            new ModelInput(ForeignKeyModel.InnerString.class, "FKString"),
+            new ModelInput(ForeignKeyModel.class)
         );
 
         TimeIt.timeItOrDie(() -> {
-            ModelSchemaFactory factory = new ModelSchemaFactory(locator, inputs);
+            ArchFactory factory = new ArchFactory(locator, inputs);
             factory.build();
 
-            for (AdapterSchema adapterSchema : factory.getAdapterSchemas()) {
-                runGenerate(adapterSchema);
+            for (AdapterArch adapterArch : factory.getAdapterArches()) {
+                runGenerate(adapterArch);
             }
-            for (TableSchema tableSchema : factory.getTableSchemas()) {
-                runGenerate(tableSchema);
+            for (TableArch tableArch : factory.getTableArches()) {
+                runGenerate(tableArch);
             }
             return factory;
-        }, (schema, millis) -> {
-            int adapters = schema.getAdapterSchemas().size();
-            int tables = schema.getTableSchemas().size();
+        }, (factory, millis) -> {
+            int adapters = factory.getAdapterArches().size();
+            int tables = factory.getTableArches().size();
             log.at(Level.INFO).log("Generated %d adapters and %d tables in %d millis", adapters, tables, millis);
         });
     }
 
-    private static void runGenerate(@NotNull AdapterSchema adapterSchema) throws IOException {
-        try (FileWriter writer = new FileWriter(getDestinationFile(adapterSchema))) {
-            ModelAdapterCodegen generator = new ModelAdapterCodegen(adapterSchema, writer);
+    private static void runGenerate(@NotNull AdapterArch adapter) throws IOException {
+        try (FileWriter writer = new FileWriter(getDestinationFile(adapter))) {
+            ModelAdapterCodegen generator = new ModelAdapterCodegen(adapter, writer);
             generator.generateJava();
         }
     }
 
-    private static void runGenerate(@NotNull TableSchema tableSchema) throws IOException {
-        try (FileWriter writer = new FileWriter(getDestinationFile(tableSchema))) {
-            ModelTableCodegen generator = new ModelTableCodegen(locator, tableSchema, writer);
+    private static void runGenerate(@NotNull TableArch table) throws IOException {
+        try (FileWriter writer = new FileWriter(getDestinationFile(table))) {
+            ModelTableCodegen generator = new ModelTableCodegen(locator, table, writer);
             generator.generateJava();
         }
     }

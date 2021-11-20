@@ -1,4 +1,4 @@
-package io.webby.util.sql.schema;
+package io.webby.util.sql.arch;
 
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
@@ -9,7 +9,7 @@ import io.webby.util.sql.api.ForeignInt;
 import io.webby.util.sql.api.ForeignLong;
 import io.webby.util.sql.api.ForeignObj;
 import io.webby.util.sql.codegen.ModelAdaptersScanner;
-import io.webby.util.sql.codegen.ModelClassInput;
+import io.webby.util.sql.codegen.ModelInput;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import org.jetbrains.annotations.VisibleForTesting;
@@ -23,18 +23,18 @@ import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 
-import static io.webby.util.sql.schema.InvalidSqlModelException.assure;
-import static io.webby.util.sql.schema.InvalidSqlModelException.failIf;
+import static io.webby.util.sql.arch.InvalidSqlModelException.assure;
+import static io.webby.util.sql.arch.InvalidSqlModelException.failIf;
 import static java.util.Objects.requireNonNull;
 
-public class ModelSchemaFactory {
+public class ArchFactory {
     private final ModelAdaptersScanner adaptersLocator;
 
-    private final Iterable<ModelClassInput> inputs;
-    private final Map<Class<?>, TableSchema> tables = new LinkedHashMap<>();
-    private final Map<Class<?>, PojoSchema> pojos = new LinkedHashMap<>();
+    private final Iterable<ModelInput> inputs;
+    private final Map<Class<?>, TableArch> tables = new LinkedHashMap<>();
+    private final Map<Class<?>, PojoArch> pojos = new LinkedHashMap<>();
 
-    public ModelSchemaFactory(@NotNull ModelAdaptersScanner adaptersLocator, @NotNull Iterable<ModelClassInput> inputs) {
+    public ArchFactory(@NotNull ModelAdaptersScanner adaptersLocator, @NotNull Iterable<ModelInput> inputs) {
         this.adaptersLocator = adaptersLocator;
         this.inputs = inputs;
     }
@@ -43,64 +43,60 @@ public class ModelSchemaFactory {
         tables.clear();
         pojos.clear();
 
-        for (ModelClassInput input : inputs) {
+        for (ModelInput input : inputs) {
             tables.put(input.modelClass(), buildShallowTable(input));
         }
-        for (ModelClassInput input : inputs) {
+        for (ModelInput input : inputs) {
             completeTable(input, tables.get(input.modelClass()));
         }
     }
 
-    public @NotNull TableSchema getTableSchemaOrDie(@NotNull Class<?> model) {
-        return requireNonNull(tables.get(model));
-    }
-
-    public @NotNull ImmutableMap<Class<?>, TableSchema> getAllTables() {
+    public @NotNull ImmutableMap<Class<?>, TableArch> getAllTables() {
         return ImmutableMap.copyOf(tables);
     }
 
-    public @NotNull Collection<TableSchema> getTableSchemas() {
+    public @NotNull Collection<TableArch> getTableArches() {
         return tables.values();
     }
 
-    public @NotNull Collection<AdapterSchema> getAdapterSchemas() {
-        return pojos.values().stream().map(AdapterSchema::new).toList();
+    public @NotNull Collection<AdapterArch> getAdapterArches() {
+        return pojos.values().stream().map(AdapterArch::new).toList();
     }
 
     @VisibleForTesting
-    @NotNull TableSchema buildShallowTable(@NotNull ModelClassInput input) {
+    @NotNull TableArch buildShallowTable(@NotNull ModelInput input) {
         String sqlName = Naming.camelToSnake(input.modelName()).replace("__", "_");  // TODO: unify sql name generation
         String javaName = "%sTable".formatted(input.modelName());
-        return new TableSchema(sqlName, javaName, input.modelName(), input.modelClass(), AtomicLazyList.ofUninitializedList());
+        return new TableArch(sqlName, javaName, input.modelName(), input.modelClass(), AtomicLazyList.ofUninitializedList());
     }
 
     @VisibleForTesting
-    void completeTable(@NotNull ModelClassInput input, @NotNull TableSchema schema) {
+    void completeTable(@NotNull ModelInput input, @NotNull TableArch table) {
         ImmutableList<TableField> fields = JavaClassAnalyzer.getAllFieldsOrdered(input.modelClass()).stream()
-                .map(field -> buildTableField(schema, field, input.modelName()))
+                .map(field -> buildTableField(table, field, input.modelName()))
                 .collect(ImmutableList.toImmutableList());
-        schema.initializeOrDie(fields);
+        table.initializeOrDie(fields);
     }
 
     @VisibleForTesting
-    @NotNull TableField buildTableField(@NotNull TableSchema schema, @NotNull Field field, @NotNull String modelName) {
+    @NotNull TableField buildTableField(@NotNull TableArch table, @NotNull Field field, @NotNull String modelName) {
         Method getter = JavaClassAnalyzer.findGetterMethodOrDie(field);
         boolean isPrimaryKey = isPrimaryKeyField(field.getName(), modelName);
 
-        FieldInference inference = inferFieldSchema(field);
+        FieldInference inference = inferFieldArch(field);
         if (inference.isForeignTable()) {
-            return new ForeignTableField(schema,
+            return new ForeignTableField(table,
                                          ModelField.of(field, getter),
                                          requireNonNull(inference.foreignTable()),
                                          requireNonNull(inference.singleColumn()));
         } else if (inference.isSingleColumn()) {
-            return new OneColumnTableField(schema,
+            return new OneColumnTableField(table,
                                            ModelField.of(field, getter),
                                            isPrimaryKey,
                                            inference.adapterInfo(),
                                            requireNonNull(inference.singleColumn()));
         } else {
-            return new MultiColumnTableField(schema,
+            return new MultiColumnTableField(table,
                                              ModelField.of(field, getter),
                                              isPrimaryKey,
                                              requireNonNull(inference.adapterInfo()),
@@ -108,7 +104,7 @@ public class ModelSchemaFactory {
         }
     }
 
-    private @NotNull FieldInference inferFieldSchema(@NotNull Field field) {
+    private @NotNull FieldInference inferFieldArch(@NotNull Field field) {
         String fieldName = field.getName();
         Class<?> fieldType = field.getType();
 
@@ -117,7 +113,7 @@ public class ModelSchemaFactory {
             return FieldInference.ofNativeColumn(new Column(Naming.camelToSnake(fieldName), new ColumnType(jdbcType)));
         }
 
-        Pair<TableSchema, JdbcType> foreignTableInfo = findForeignTableInfo(field);
+        Pair<TableArch, JdbcType> foreignTableInfo = findForeignTableInfo(field);
         if (foreignTableInfo != null) {
             Column column = new Column(Naming.camelToSnake(fieldName) + "_id", new ColumnType(foreignTableInfo.second()));
             return FieldInference.ofForeignKey(column, foreignTableInfo.first());
@@ -130,14 +126,14 @@ public class ModelSchemaFactory {
             return FieldInference.ofColumns(columns, adapterInfo);
         }
 
-        PojoSchema pojo = buildSchemaForPojoField(field).reattachedTo(PojoParent.ofTerminal(fieldName));
+        PojoArch pojo = buildArchForPojoField(field).reattachedTo(PojoParent.ofTerminal(fieldName));
         return FieldInference.ofColumns(pojo.columns(), AdapterInfo.ofSignature(pojo));
     }
 
     private record FieldInference(@Nullable Column singleColumn,
                                   @Nullable ImmutableList<Column> multiColumns,
                                   @Nullable AdapterInfo adapterInfo,
-                                  @Nullable TableSchema foreignTable) {
+                                  @Nullable TableArch foreignTable) {
         public static FieldInference ofNativeColumn(@NotNull Column column) {
             return new FieldInference(column, null, null, null);
         }
@@ -154,7 +150,7 @@ public class ModelSchemaFactory {
             return new FieldInference(null, ImmutableList.copyOf(columns), adapterInfo, null);
         }
 
-        public static FieldInference ofForeignKey(@NotNull Column column, @NotNull TableSchema foreignTable) {
+        public static FieldInference ofForeignKey(@NotNull Column column, @NotNull TableArch foreignTable) {
             return new FieldInference(column, null, null, foreignTable);
         }
 
@@ -167,7 +163,7 @@ public class ModelSchemaFactory {
         }
     }
 
-    private @Nullable Pair<TableSchema, JdbcType> findForeignTableInfo(@NotNull Field field) {
+    private @Nullable Pair<TableArch, JdbcType> findForeignTableInfo(@NotNull Field field) {
         Class<?> fieldType = field.getType();
         if (!Foreign.class.isAssignableFrom(fieldType)) {
             return null;
@@ -186,7 +182,7 @@ public class ModelSchemaFactory {
                         (Class<?>) actualTypeArguments[0];
         Class<?> entityType = (Class<?>) actualTypeArguments[actualTypeArguments.length - 1];
 
-        TableSchema foreignTable = tables.get(entityType);
+        TableArch foreignTable = tables.get(entityType);
         failIf(foreignTable == null,
                "Foreign model `%s` referenced from `%s` model is missing in the input set for table generation",
                entityType.getSimpleName(), fieldType.getSimpleName());
@@ -206,22 +202,22 @@ public class ModelSchemaFactory {
         return Pair.of(foreignTable, jdbcType);
     }
 
-    private @NotNull PojoSchema buildSchemaForPojoField(@NotNull Field field) {
+    private @NotNull PojoArch buildArchForPojoField(@NotNull Field field) {
         Class<?> type = field.getType();
-        PojoSchema pojo = pojos.get(type);
+        PojoArch pojo = pojos.get(type);
         if (pojo == null) {
-            pojo = buildSchemaForPojoFieldImpl(field);
+            pojo = buildArchForPojoFieldImpl(field);
             pojos.put(type, pojo);
         }
         return pojo;
     }
 
-    private @NotNull PojoSchema buildSchemaForPojoFieldImpl(@NotNull Field field) {
+    private @NotNull PojoArch buildArchForPojoFieldImpl(@NotNull Field field) {
         validateFieldForPojo(field);
         Class<?> type = field.getType();
 
         if (type.isEnum()) {
-            return new PojoSchema(type, ImmutableList.of(PojoFieldNative.ofEnum(type)));
+            return new PojoArch(type, ImmutableList.of(PojoFieldNative.ofEnum(type)));
         }
 
         ImmutableList<PojoField> pojoFields = JavaClassAnalyzer.getAllFieldsOrdered(type).stream().map(subField -> {
@@ -239,10 +235,10 @@ public class ModelSchemaFactory {
                 return PojoFieldAdapter.ofAdapter(modelField, adapterClass);
             }
 
-            PojoSchema nestedPojo = buildSchemaForPojoField(subField);
+            PojoArch nestedPojo = buildArchForPojoField(subField);
             return PojoFieldNested.ofNestedPojo(modelField, nestedPojo);
         }).collect(ImmutableList.toImmutableList());
-        return new PojoSchema(type, pojoFields);
+        return new PojoArch(type, pojoFields);
     }
 
     private static boolean isPrimaryKeyField(@NotNull String fieldName, @NotNull String modelName) {

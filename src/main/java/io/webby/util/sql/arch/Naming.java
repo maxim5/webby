@@ -1,4 +1,4 @@
-package io.webby.util.sql.schema;
+package io.webby.util.sql.arch;
 
 import com.google.common.base.CaseFormat;
 import org.jetbrains.annotations.NotNull;

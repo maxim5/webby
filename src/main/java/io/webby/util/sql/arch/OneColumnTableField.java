@@ -1,4 +1,4 @@
-package io.webby.util.sql.schema;
+package io.webby.util.sql.arch;
 
 import com.google.errorprone.annotations.Immutable;
 import org.jetbrains.annotations.NotNull;
@@ -11,7 +11,7 @@ import java.util.List;
 public class OneColumnTableField extends TableField {
     private final Column column;
 
-    public OneColumnTableField(@NotNull TableSchema parent,
+    public OneColumnTableField(@NotNull TableArch parent,
                                @NotNull ModelField field,
                                boolean primaryKey,
                                @Nullable AdapterInfo adapterInfo,

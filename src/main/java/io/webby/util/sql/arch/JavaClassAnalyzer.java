@@ -1,4 +1,4 @@
-package io.webby.util.sql.schema;
+package io.webby.util.sql.arch;
 
 import com.google.common.collect.ImmutableMap;
 import com.google.common.flogger.FluentLogger;
@@ -20,7 +20,7 @@ import java.util.logging.Level;
 import java.util.stream.Collectors;
 
 import static io.webby.util.reflect.EasyMembers.*;
-import static io.webby.util.sql.schema.InvalidSqlModelException.failIf;
+import static io.webby.util.sql.arch.InvalidSqlModelException.failIf;
 
 class JavaClassAnalyzer {
     private static final FluentLogger log = FluentLogger.forEnclosingClass();

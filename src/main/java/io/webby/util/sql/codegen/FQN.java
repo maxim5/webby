@@ -1,6 +1,6 @@
 package io.webby.util.sql.codegen;
 
-import io.webby.util.sql.schema.Naming;
+import io.webby.util.sql.arch.Naming;
 import org.jetbrains.annotations.NotNull;
 
 public record FQN(@NotNull String packageName, @NotNull String className) {

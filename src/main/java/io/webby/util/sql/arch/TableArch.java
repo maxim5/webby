@@ -1,4 +1,4 @@
-package io.webby.util.sql.schema;
+package io.webby.util.sql.arch;
 
 import com.google.common.collect.ImmutableList;
 import com.google.errorprone.annotations.Immutable;
@@ -15,11 +15,11 @@ import static io.webby.util.sql.api.ReadFollow.FOLLOW_ALL;
 import static io.webby.util.sql.api.ReadFollow.FOLLOW_ONE_LEVEL;
 
 @Immutable
-public record TableSchema(@NotNull String sqlName,
-                          @NotNull String javaName,
-                          @NotNull String modelName,
-                          @NotNull Class<?> modelClass,
-                          @NotNull AtomicLazyList<TableField> fieldsRef) implements JavaNameHolder, WithColumns, WithPrefixedColumns {
+public record TableArch(@NotNull String sqlName,
+                        @NotNull String javaName,
+                        @NotNull String modelName,
+                        @NotNull Class<?> modelClass,
+                        @NotNull AtomicLazyList<TableField> fieldsRef) implements JavaNameHolder, WithColumns, WithPrefixedColumns {
     public @NotNull ImmutableList<TableField> fields() {
         return fieldsRef.getOrDie();
     }

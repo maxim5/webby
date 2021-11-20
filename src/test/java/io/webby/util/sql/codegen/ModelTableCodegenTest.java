@@ -1,7 +1,7 @@
 package io.webby.util.sql.codegen;
 
-import io.webby.util.sql.schema.InvalidSqlModelException;
-import io.webby.util.sql.schema.ModelSchemaFactory;
+import io.webby.util.sql.arch.InvalidSqlModelException;
+import io.webby.util.sql.arch.ArchFactory;
 import io.webby.util.sql.testing.FakeModelAdaptersScanner;
 import org.jetbrains.annotations.NotNull;
 import org.junit.jupiter.api.Test;
@@ -43,8 +43,8 @@ public class ModelTableCodegenTest {
 
     private void assertInvalidModel(@NotNull Class<?> ... models) {
         assertThrows(InvalidSqlModelException.class, () -> {
-            List<ModelClassInput> inputs = Arrays.stream(models).map(ModelClassInput::new).toList();
-            ModelSchemaFactory factory = new ModelSchemaFactory(locator, inputs);
+            List<ModelInput> inputs = Arrays.stream(models).map(ModelInput::new).toList();
+            ArchFactory factory = new ArchFactory(locator, inputs);
             factory.build();
         });
     }

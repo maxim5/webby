@@ -5,7 +5,7 @@ import io.webby.util.collect.EasyMaps;
 import io.webby.util.sql.adapter.JdbcAdapt;
 import io.webby.util.sql.adapter.JdbcArrayAdapter;
 import io.webby.util.sql.adapter.JdbcSingleValueAdapter;
-import io.webby.util.sql.schema.*;
+import io.webby.util.sql.arch.*;
 import org.jetbrains.annotations.NotNull;
 
 import java.io.IOException;
@@ -20,16 +20,16 @@ import static io.webby.util.sql.codegen.JavaSupport.INDENT1;
 
 @SuppressWarnings("UnnecessaryStringEscape")
 public class ModelAdapterCodegen extends BaseCodegen {
-    private final AdapterSchema adapter;
+    private final AdapterArch adapter;
     private final Map<String, String> mainContext;
 
-    public ModelAdapterCodegen(@NotNull AdapterSchema adapter, @NotNull Appendable writer) {
+    public ModelAdapterCodegen(@NotNull AdapterArch adapter, @NotNull Appendable writer) {
         super(writer);
         this.adapter = adapter;
 
         this.mainContext = EasyMaps.asMap(
             "$AdapterClass", adapter.javaName(),
-            "$ModelClass", Naming.shortCanonicalName(adapter.pojoSchema().pojoType())
+            "$ModelClass", Naming.shortCanonicalName(adapter.pojoArch().pojoType())
         );
     }
 
@@ -67,12 +67,12 @@ public class ModelAdapterCodegen extends BaseCodegen {
     }
 
     private @NotNull Class<?> getBaseClass() {
-        return adapter.pojoSchema().columnsNumber() == 1 ? JdbcSingleValueAdapter.class : JdbcArrayAdapter.class;
+        return adapter.pojoArch().columnsNumber() == 1 ? JdbcSingleValueAdapter.class : JdbcArrayAdapter.class;
     }
 
     private @NotNull List<Class<?>> getNestedAdapters() {
         ArrayList<Class<?>> result = new ArrayList<>();
-        adapter.pojoSchema().iterateAllFields(field -> {
+        adapter.pojoArch().iterateAllFields(field -> {
             if (field instanceof PojoFieldAdapter fieldAdapter) {
                 result.add(fieldAdapter.adapterClass());
             }
@@ -103,7 +103,7 @@ public class ModelAdapterCodegen extends BaseCodegen {
     }
 
     private void createInstance() throws IOException {
-        PojoSchema pojo = adapter.pojoSchema();
+        PojoArch pojo = adapter.pojoArch();
         Map<String, String> context = Map.of(
             "$params", pojo.columns().stream().map(ModelAdapterCodegen::columnToParam).collect(COMMA_JOINER),
             "$constructor", fieldConstructor(pojo, nativeFieldsColumnIndex(pojo), new StringBuilder())
@@ -122,7 +122,7 @@ public class ModelAdapterCodegen extends BaseCodegen {
         return "%s %s".formatted(nativeType.getSimpleName(), sqlName);
     }
 
-    private static @NotNull Map<PojoField, Column> nativeFieldsColumnIndex(@NotNull PojoSchema pojo) {
+    private static @NotNull Map<PojoField, Column> nativeFieldsColumnIndex(@NotNull PojoArch pojo) {
         Map<PojoField, Column> result = new LinkedHashMap<>();
         pojo.iterateAllFields(field -> {
             if (field instanceof PojoFieldNative fieldNative) {
@@ -135,7 +135,7 @@ public class ModelAdapterCodegen extends BaseCodegen {
         return result;
     }
 
-    private static @NotNull String fieldConstructor(@NotNull PojoSchema pojo,
+    private static @NotNull String fieldConstructor(@NotNull PojoArch pojo,
                                                     @NotNull Map<PojoField, Column> nativeFieldsColumns,
                                                     @NotNull StringBuilder builder) {
         String canonicalName = Naming.shortCanonicalName(pojo.pojoType());
@@ -165,7 +165,7 @@ public class ModelAdapterCodegen extends BaseCodegen {
     }
 
     private void toValueObject() throws IOException {
-        PojoSchema pojo = adapter.pojoSchema();
+        PojoArch pojo = adapter.pojoArch();
         if (pojo.columnsNumber() != 1) {
             return;
         }
@@ -182,7 +182,7 @@ public class ModelAdapterCodegen extends BaseCodegen {
         """, EasyMaps.merge(context, mainContext));
     }
 
-    private static @NotNull String pojoSingleGetter(@NotNull PojoSchema pojo) {
+    private static @NotNull String pojoSingleGetter(@NotNull PojoArch pojo) {
         List<PojoField> fields = pojo.fields();
         assert fields.size() == 1 : "Expected a single pojo field, but found: %s".formatted(fields);
 
@@ -197,7 +197,7 @@ public class ModelAdapterCodegen extends BaseCodegen {
     }
 
     private void fillArrayValues() throws IOException {
-        PojoSchema pojo = adapter.pojoSchema();
+        PojoArch pojo = adapter.pojoArch();
         if (pojo.columnsNumber() == 1) {
             return;
         }
@@ -214,7 +214,7 @@ public class ModelAdapterCodegen extends BaseCodegen {
         """, EasyMaps.merge(mainContext, context));
     }
 
-    private static @NotNull List<String> pojoAssignmentLines(@NotNull PojoSchema pojo) {
+    private static @NotNull List<String> pojoAssignmentLines(@NotNull PojoArch pojo) {
         ArrayList<String> result = new ArrayList<>();
         int index = 0;
         for (PojoField field : pojo.fields()) {
@@ -234,7 +234,7 @@ public class ModelAdapterCodegen extends BaseCodegen {
     }
 
     private void toNewValuesArray() throws IOException {
-        int columnsNumber = adapter.pojoSchema().columnsNumber();
+        int columnsNumber = adapter.pojoArch().columnsNumber();
         if (columnsNumber == 1) {
             return;
         }
