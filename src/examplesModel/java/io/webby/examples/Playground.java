@@ -1,5 +1,6 @@
 package io.webby.examples;
 
+import com.google.common.io.BaseEncoding;
 import io.webby.util.sql.api.DebugSql.DebugRunner;
 
 import java.sql.Connection;
@@ -43,6 +44,15 @@ public class Playground {
 
         main.update("CREATE TABLE blob (blob_id BLOB PRIMARY KEY, blob_value BLOB)");
         main.update("INSERT INTO blob(blob_id, blob_value) VALUES(?, ?)", "foo".getBytes(), "bar".getBytes());
+        main.update("INSERT INTO blob(blob_id, blob_value) VALUES(?, ?)", "for".getBytes(), "baz".getBytes());
+        main.update("INSERT INTO blob(blob_id, blob_value) VALUES(?, ?)", "x".getBytes(), "y".getBytes());
         main.query("SELECT * FROM blob");
+
+        // https://stackoverflow.com/questions/24011247/fast-search-on-a-blob-starting-bytes-in-sqlite
+        // https://stackoverflow.com/questions/3746756/search-for-value-within-blob-column-in-mysql
+        main.query("SELECT * FROM blob WHERE hex(blob_id) LIKE '66%'");
+        main.query("SELECT * FROM blob WHERE hex(blob_id) LIKE '666f6f%'");
+
+        System.out.println(BaseEncoding.base16().lowerCase().encode("foo".getBytes()));
     }
 }
