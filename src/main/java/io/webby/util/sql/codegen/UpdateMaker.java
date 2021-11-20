@@ -6,7 +6,7 @@ import org.jetbrains.annotations.NotNull;
 
 import java.util.List;
 
-import static io.webby.util.sql.codegen.ColumnJoins.COMMA_JOINER;
+import static io.webby.util.sql.codegen.Joining.COMMA_JOINER;
 import static io.webby.util.sql.codegen.SqlSupport.EQ_QUESTION;
 
 class UpdateMaker {

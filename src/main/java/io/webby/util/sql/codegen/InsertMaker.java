@@ -7,7 +7,7 @@ import org.jetbrains.annotations.NotNull;
 import java.util.List;
 import java.util.stream.Stream;
 
-import static io.webby.util.sql.codegen.ColumnJoins.COMMA_JOINER;
+import static io.webby.util.sql.codegen.Joining.COMMA_JOINER;
 
 class InsertMaker {
     public static @NotNull Snippet makeAll(@NotNull TableSchema table) {

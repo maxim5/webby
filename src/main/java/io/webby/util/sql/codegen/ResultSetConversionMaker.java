@@ -11,7 +11,7 @@ import java.util.Set;
 import java.util.stream.Stream;
 
 import static io.webby.util.sql.api.ReadFollow.*;
-import static io.webby.util.sql.codegen.ColumnJoins.COMMA_JOINER;
+import static io.webby.util.sql.codegen.Joining.COMMA_JOINER;
 import static io.webby.util.sql.codegen.JavaSupport.INDENT1;
 import static java.util.Objects.requireNonNull;
 

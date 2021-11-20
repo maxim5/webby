@@ -15,7 +15,7 @@ import java.util.function.Predicate;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
-import static io.webby.util.sql.codegen.ColumnJoins.*;
+import static io.webby.util.sql.codegen.Joining.*;
 import static io.webby.util.sql.codegen.JavaSupport.*;
 import static java.util.Objects.requireNonNull;
 

@@ -3,7 +3,7 @@ package io.webby.util.sql.schema;
 import com.google.common.collect.ImmutableList;
 import io.webby.util.lazy.AtomicLazy;
 import io.webby.util.lazy.DelayedAccessLazy;
-import io.webby.util.sql.codegen.ModelAdaptersScannerImpl;
+import io.webby.util.sql.codegen.ModelAdaptersScanner;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.ArrayList;
@@ -30,7 +30,7 @@ public final class PojoSchema implements WithColumns {
     }
 
     public @NotNull String adapterName() {
-        return ModelAdaptersScannerImpl.defaultAdapterName(pojoType);  // TODO: refactor?
+        return ModelAdaptersScanner.defaultAdapterName(pojoType);  // TODO: refactor?
     }
 
     public boolean isEnum() {

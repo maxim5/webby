@@ -15,7 +15,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.stream.Stream;
 
-import static io.webby.util.sql.codegen.ColumnJoins.*;
+import static io.webby.util.sql.codegen.Joining.*;
 import static io.webby.util.sql.codegen.JavaSupport.INDENT1;
 
 @SuppressWarnings("UnnecessaryStringEscape")
