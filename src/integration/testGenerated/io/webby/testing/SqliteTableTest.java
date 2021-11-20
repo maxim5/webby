@@ -1,7 +1,7 @@
 package io.webby.testing;
 
-import io.webby.db.kv.SqlDbSetupExtension;
 import io.webby.db.sql.SqlSettings;
+import io.webby.testing.ext.SqlDbSetupExtension;
 import io.webby.util.sql.api.DebugSql;
 import io.webby.util.sql.api.QueryRunner;
 import io.webby.util.sql.api.TableObj;

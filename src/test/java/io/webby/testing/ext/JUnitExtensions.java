@@ -1,4 +1,4 @@
-package io.webby.testing;
+package io.webby.testing.ext;
 
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;

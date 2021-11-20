@@ -1,4 +1,4 @@
-package io.webby.testing;
+package io.webby.testing.ext;
 
 import com.google.common.flogger.FluentLogger;
 import com.google.common.io.MoreFiles;

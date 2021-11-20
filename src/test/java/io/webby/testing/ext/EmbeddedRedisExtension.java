@@ -1,4 +1,4 @@
-package io.webby.db.kv;
+package io.webby.testing.ext;
 
 import com.google.common.flogger.FluentLogger;
 import org.junit.jupiter.api.extension.AfterAllCallback;
