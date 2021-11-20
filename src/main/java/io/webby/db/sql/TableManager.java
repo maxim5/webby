@@ -35,7 +35,7 @@ public class TableManager {
         this.tableMap = buildTableMap(tableClasses);
     }
 
-    public <E> @NotNull BaseTable<E> getMatchingBaseTableOrDie(@NotNull String name, @NotNull Class<E> entity) {
+    public <E> @NotNull BaseTable<E> getMatchingBaseTableOrDie(@NotNull String name, @NotNull Class<? extends E> entity) {
         EntityTable entityTable = tableMap.get(entity);
         assert entityTable != null : "Entity table not found for: entity=%s".formatted(entity);
         assert entityTable.sqlName.equals(name) :
@@ -44,12 +44,16 @@ public class TableManager {
         return castAny(entityTable.instantiate.apply(pool.getConnection()));
     }
 
-    public <K, E> boolean hasMatchingTable(@NotNull String name, @NotNull Class<K> key, @NotNull Class<E> entity) {
+    public <K, E> boolean hasMatchingTable(@NotNull String name,
+                                           @NotNull Class<K> key,
+                                           @NotNull Class<? extends E> entity) {
         EntityTable entityTable = tableMap.get(entity);
         return entityTable != null && entityTable.sqlName.equals(name) && entityTable.wrappedKey() == Primitives.wrap(key);
     }
 
-    public <K, E> @NotNull TableObj<K, E> getMatchingTableOrDie(@NotNull String name, @NotNull Class<K> key, @NotNull Class<E> entity) {
+    public <K, E> @NotNull TableObj<K, E> getMatchingTableOrDie(@NotNull String name,
+                                                                @NotNull Class<K> key,
+                                                                @NotNull Class<? extends E> entity) {
         EntityTable entityTable = tableMap.get(entity);
         assert entityTable != null : "Entity table not found for: entity=%s".formatted(entity);
         assert entityTable.sqlName.equals(name) :

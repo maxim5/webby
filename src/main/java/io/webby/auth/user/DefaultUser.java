@@ -5,10 +5,11 @@ import org.jetbrains.annotations.NotNull;
 import java.util.Objects;
 
 public class DefaultUser implements User {
-    private final long userId;
+    private long userId;
     private final UserAccess access;
 
     public DefaultUser(long userId, @NotNull UserAccess access) {
+        assert userId == AUTO_ID || userId > 0: "Invalid userId=%d".formatted(userId);
         this.userId = userId;
         this.access = access;
     }
@@ -31,5 +32,19 @@ public class DefaultUser implements User {
     @Override
     public int hashCode() {
         return Objects.hash(userId, access);
+    }
+
+    @Override
+    public String toString() {
+        return "DefaultUser{%d: access=%s}".formatted(userId, access);
+    }
+
+    public void resetIdToAuto() {
+        userId = AUTO_ID;
+    }
+
+    public void setIfAutoIdOrDie(long newId) {
+        assert userId == AUTO_ID : "Failed to set auto-inc id to user: %s".formatted(this);
+        userId = newId;
     }
 }

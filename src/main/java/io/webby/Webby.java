@@ -49,7 +49,7 @@ public class Webby {
         validateSettings(settings);
         return Modules.combine(
             new AppModule(settings),
-            new AuthModule(),
+            new AuthModule(settings),
             new CommonModule(),
             new DbModule(),
             new NettyModule(),

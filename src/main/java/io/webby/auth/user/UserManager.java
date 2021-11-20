@@ -1,33 +1,30 @@
 package io.webby.auth.user;
 
+import com.google.common.flogger.FluentLogger;
 import com.google.inject.Inject;
-import io.webby.app.Settings;
-import io.webby.db.kv.KeyValueDb;
-import io.webby.db.kv.KeyValueFactory;
+import io.webby.util.sql.api.ForeignLong;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
-import static io.webby.util.base.EasyCast.castAny;
-
 public class UserManager {
-    private final KeyValueDb<Long, User> db;
+    private static final FluentLogger log = FluentLogger.forEnclosingClass();
+    private final UserStorage userStorage;
 
     @Inject
-    public UserManager(@NotNull Settings settings,
-                       @NotNull UserFactory userFactory,
-                       @NotNull KeyValueFactory dbFactory) {
-        db = castAny(dbFactory.getDb("user", Long.class, userFactory.getUserClass()));
+    public UserManager(@NotNull UserStorage userStorage) {
+        this.userStorage = userStorage;
     }
 
-    public @Nullable User findById(long id) {
-        return db.get(id);
+    public @Nullable User findByUserId(long userId) {
+        return userStorage.findByUserId(userId);
     }
 
-    /*package*/ boolean tryInsert(@NotNull User user) {
-        return db.putIfAbsent(user.userId(), user) == null;
+    public @Nullable User findByUserId(@NotNull ForeignLong<User> foreignId) {
+        return foreignId.hasEntity() ? foreignId.getEntity() : findByUserId(foreignId.getLongId());
     }
 
-    /*package*/ long getMaxId() {
-        return db.longSize();
+    public long createUserAutoId(@NotNull User user) {
+        assert user.isAutoId() : "User is not auto-id: %s".formatted(user);
+        return userStorage.createUserAutoId(user);
     }
 }

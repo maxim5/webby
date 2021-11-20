@@ -130,7 +130,7 @@ public class NettyDispatcher extends ChannelInboundHandlerAdapter {
             default -> null;  // throw?
         };
         Session session = sessionManager.getSessionOrNull(sessionId);  // throw?
-        User user = session != null ? userManager.findById(session.userId()) : null;  // throw?
+        User user = session != null ? userManager.findByUserId(session.userId()) : null;  // throw?
 
         return new ClientInfo(Optional.ofNullable(version),
                               Optional.ofNullable(preferredType),
