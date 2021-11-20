@@ -5,6 +5,7 @@ import io.webby.app.AppSettings;
 import io.webby.auth.session.Session;
 import io.webby.auth.user.DefaultUser;
 import io.webby.common.ClasspathScanner;
+import io.webby.db.model.BlobKv;
 import io.webby.examples.model.*;
 import io.webby.util.base.TimeIt;
 import io.webby.util.sql.codegen.*;
@@ -32,6 +33,7 @@ public class ExamplesCodegenMain {
         List<ModelClassInput> inputs = List.of(
             new ModelClassInput(DefaultUser.class, "User"),
             new ModelClassInput(Session.class),
+            new ModelClassInput(BlobKv.class),
 
             new ModelClassInput(PrimitiveModel.class),
             new ModelClassInput(StringModel.class),
