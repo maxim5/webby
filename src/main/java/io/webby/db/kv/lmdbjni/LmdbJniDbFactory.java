@@ -18,8 +18,7 @@ import java.nio.file.Path;
 public class LmdbJniDbFactory extends BaseKeyValueFactory {
     private final Env env;
 
-    @Inject
-    private CodecProvider codecProvider;
+    @Inject private CodecProvider codecProvider;
 
     @Inject
     public LmdbJniDbFactory(@NotNull InjectorHelper helper) {
