@@ -27,5 +27,14 @@ public interface TableObj<K, E> extends BaseTable<E> {
     int updateByPk(@NotNull E entity);
 
     @CanIgnoreReturnValue
+    default int updateByPkOrInsert(@NotNull E entity) {
+        int updated = updateByPk(entity);
+        if (updated == 0) {
+            return insert(entity);
+        }
+        return updated;
+    }
+
+    @CanIgnoreReturnValue
     int deleteByPk(@NotNull K key);
 }

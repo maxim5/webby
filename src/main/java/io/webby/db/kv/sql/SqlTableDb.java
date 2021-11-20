@@ -69,10 +69,7 @@ public class SqlTableDb<K, V> implements KeyValueDb<K, V> {
     @Override
     public void set(@NotNull K key, @NotNull V value) {
         assert key.equals(table.keyOf(value)) : "Inconsistent key=`%s` and value=`%s`".formatted(key, value);
-        // TODO: upsert
-        if (table.updateByPk(value) == 0) {
-            table.insert(value);
-        }
+        table.updateByPkOrInsert(value);
     }
 
     @Override
