@@ -10,7 +10,7 @@ import java.util.function.BiPredicate;
 public final class ClassFilter {
     private static final BiPredicate<String, String> EXCLUDE_IMPLEMENTATION_PACKAGES =
             (pkg, __) -> !pkg.startsWith(Packages.RENDER_IMPL) &&
-                         !pkg.startsWith(Packages.DB_KV_IMPL) &&
+                         !pkg.startsWith(Packages.DB_KV_IMPL + ".") &&  // the dot means subpackages
                          !pkg.startsWith(Packages.DB_SQL_IMPL);
 
     private BiPredicate<String, String> predicate;
