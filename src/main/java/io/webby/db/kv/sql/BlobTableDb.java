@@ -6,24 +6,24 @@ import io.webby.db.kv.KeyValueDb;
 import io.webby.db.kv.impl.ByteArrayDb;
 import io.webby.db.model.BlobKv;
 import io.webby.util.sql.api.TableObj;
+import io.webby.util.sql.api.query.Compare;
 import io.webby.util.sql.api.query.Func;
 import io.webby.util.sql.api.query.HardcodedStringTerm;
 import io.webby.util.sql.api.query.Where;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
-import java.util.AbstractMap;
-import java.util.Collection;
-import java.util.Map;
-import java.util.Set;
+import java.util.*;
 import java.util.stream.Collectors;
 
+import static io.webby.util.sql.api.query.CompareType.EQ;
 import static io.webby.util.sql.api.query.Shortcuts.like;
 import static io.webby.util.sql.api.query.Shortcuts.literal;
 
 public class BlobTableDb<V, K> extends ByteArrayDb<K, V> implements KeyValueDb<K, V> {
-    // Hardcoding the column name to avoid a dep on the generated BlobKvTable from the core...
+    // Hardcoding the table columns to avoid a dep on the generated BlobKvTable from the core...
     private static final HardcodedStringTerm ID_COLUMN = new HardcodedStringTerm("id");
+    private static final HardcodedStringTerm VALUE_COLUMN = new HardcodedStringTerm("value");
 
     private final TableObj<byte[], BlobKv> table;
     private final byte[] namespace;
@@ -45,10 +45,6 @@ public class BlobTableDb<V, K> extends ByteArrayDb<K, V> implements KeyValueDb<K
         };
     }
 
-    private static @NotNull String hex(byte[] bytes) {
-        return BaseEncoding.base16().lowerCase().encode(bytes);
-    }
-
     @Override
     public int size() {
         return table.count(whereNamespace);
@@ -62,7 +58,17 @@ public class BlobTableDb<V, K> extends ByteArrayDb<K, V> implements KeyValueDb<K
 
     @Override
     public boolean containsValue(@NotNull V value) {
-        return values().contains(value);  // TODO: selectByValue
+        Compare compare = switch (table.engine()) {
+            // Use the "?" arg to avoid query overflow
+            case SQLite -> EQ.compare(Func.HEX.of(VALUE_COLUMN), literal(hex(fromValue(value))));
+            case MySQL -> null; // EQ.compare(VALUE_COLUMN, blob(fromValue(value)));
+            default -> throw new UnsupportedOperationException("containsValue() not implemented for SQL engine:" + table.engine());
+        };
+
+        if (compare != null) {
+            return table.count(Where.and(whereNamespace, compare)) > 0;
+        }
+        return table.fetchMatching(whereNamespace).stream().map(BlobKv::value).anyMatch(value::equals);
     }
 
     @Override
@@ -121,5 +127,9 @@ public class BlobTableDb<V, K> extends ByteArrayDb<K, V> implements KeyValueDb<K
     @Override
     protected @NotNull K asKeyNotNull(byte @NotNull [] bytes) {
         return keyCodec.readFromBytes(namespace.length, bytes);
+    }
+
+    private static @NotNull String hex(byte @NotNull [] bytes) {
+        return BaseEncoding.base16().encode(bytes);  // uppercase necessary for Sqlite
     }
 }

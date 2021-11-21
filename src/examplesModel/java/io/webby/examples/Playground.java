@@ -47,6 +47,7 @@ public class Playground {
         main.update("INSERT INTO blob(blob_id, blob_value) VALUES(?, ?)", "for".getBytes(), "baz".getBytes());
         main.update("INSERT INTO blob(blob_id, blob_value) VALUES(?, ?)", "x".getBytes(), "y".getBytes());
         main.query("SELECT * FROM blob");
+        main.query("SELECT hex(blob_id), hex(blob_value) FROM blob");
 
         // https://stackoverflow.com/questions/8892973/how-to-get-last-insert-id-in-sqlite
         main.query("SELECT last_insert_rowid()");
