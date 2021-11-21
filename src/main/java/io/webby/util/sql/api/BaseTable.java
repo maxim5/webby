@@ -2,6 +2,7 @@ package io.webby.util.sql.api;
 
 import com.google.common.collect.Lists;
 import com.google.errorprone.annotations.CanIgnoreReturnValue;
+import com.google.errorprone.annotations.MustBeClosed;
 import io.webby.util.sql.api.query.Where;
 import org.jetbrains.annotations.NotNull;
 
@@ -21,8 +22,10 @@ public interface BaseTable<E> extends Iterable<E> {
     }
 
     @Override
+    @MustBeClosed
     @NotNull ResultSetIterator<E> iterator();
 
+    @MustBeClosed
     @NotNull ResultSetIterator<E> iterator(@NotNull Where where);
 
     default @NotNull List<E> fetchAll() {
