@@ -4,6 +4,7 @@ import com.google.common.collect.Iterables;
 import com.google.common.collect.Streams;
 import io.webby.util.collect.EasyMaps;
 import io.webby.util.sql.api.*;
+import io.webby.util.sql.api.query.TermType;
 import io.webby.util.sql.api.query.Where;
 import io.webby.util.sql.arch.*;
 import org.jetbrains.annotations.NotNull;
@@ -77,6 +78,7 @@ public class ModelTableCodegen extends BaseCodegen {
         fromRow();
 
         internalMeta();
+        metaColumns();
         meta();
 
         appendLine("}");
@@ -96,6 +98,7 @@ public class ModelTableCodegen extends BaseCodegen {
         List<String> classesToImport = Streams.concat(
             Stream.of(pickBaseTableClass(),
                       QueryRunner.class, QueryException.class, Where.class,
+                      io.webby.util.sql.api.query.Column.class, TermType.class,
                       ResultSetIterator.class, ReadFollow.class, TableMeta.class).map(FQN::of),
             customClasses.stream().map(FQN::of),
             customClasses.stream().map(adaptersScanner::locateAdapterFqn),
@@ -507,6 +510,27 @@ public class ModelTableCodegen extends BaseCodegen {
         public static final Class<?> ENTITY_CLASS = $ModelClass.class;
         public static final Function<Connection, $TableClass> INSTANTIATE = $TableClass::new;\n
         """, EasyMaps.merge(mainContext, context, pkContext));
+    }
+
+    private void metaColumns() throws IOException {
+        Map<String, String> context = Map.of(
+            "$own_enum_values", ColumnEnumMaker.make(table.columns(ReadFollow.NO_FOLLOW)).join(Collectors.joining(",\n" + INDENT1))
+        );
+
+        appendCode("""
+        public enum OwnColumn implements Column {
+            $own_enum_values;
+            
+            private final TermType type;
+            OwnColumn(TermType type) {
+                this.type = type;
+            }
+            @Override
+            public @Nonnull TermType type() {
+                return type;
+            }
+        }\n
+        """, EasyMaps.merge(mainContext, context));
     }
 
     private void meta() throws IOException {

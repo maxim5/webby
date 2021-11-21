@@ -6,6 +6,7 @@ public enum TermType {
     NUMBER,
     STRING,
     BOOL,
+    TIME,
     WILDCARD;
 
     public static boolean match(@NotNull TermType first, @NotNull TermType second) {
