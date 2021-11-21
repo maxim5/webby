@@ -54,9 +54,10 @@ public class ModelTableCodegen extends BaseCodegen {
         imports();
 
         classDef();
-        constructor();
+        constructors();
         withFollowOnRead();
 
+        engine();
         count();
         // isEmpty();
 
@@ -97,9 +98,9 @@ public class ModelTableCodegen extends BaseCodegen {
 
         List<String> classesToImport = Streams.concat(
             Stream.of(pickBaseTableClass(),
-                      QueryRunner.class, QueryException.class, Where.class,
-                      io.webby.util.sql.api.query.Column.class, TermType.class,
-                      ResultSetIterator.class, ReadFollow.class, TableMeta.class).map(FQN::of),
+                      QueryRunner.class, QueryException.class, Engine.class, ReadFollow.class,
+                      Where.class, io.webby.util.sql.api.query.Column.class, TermType.class,
+                      ResultSetIterator.class, TableMeta.class).map(FQN::of),
             customClasses.stream().map(FQN::of),
             customClasses.stream().map(adaptersScanner::locateAdapterFqn),
             foreignClasses.stream().map(FQN::of)
@@ -151,14 +152,16 @@ public class ModelTableCodegen extends BaseCodegen {
         return TableObj.class;
     }
 
-    private void constructor() throws IOException {
+    private void constructors() throws IOException {
         appendCode("""
         protected final Connection connection;
+        protected final Engine engine;
         protected final QueryRunner runner;
         protected final ReadFollow follow;
     
         public $TableClass(@Nonnull Connection connection, @Nonnull ReadFollow follow) {
             this.connection = connection;
+            this.engine = Engine.safeFrom(connection);
             this.runner = new QueryRunner(connection);
             this.follow = follow;
         }
@@ -184,6 +187,15 @@ public class ModelTableCodegen extends BaseCodegen {
             }\n
             """;
         appendCode(code, mainContext);
+    }
+
+    private void engine() throws IOException {
+        appendCode("""
+        @Override
+        public @Nonnull Engine engine() {
+            return engine;
+        }\n
+        """);
     }
 
     private void count() throws IOException {

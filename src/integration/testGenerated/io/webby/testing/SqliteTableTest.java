@@ -3,10 +3,12 @@ package io.webby.testing;
 import io.webby.db.sql.SqlSettings;
 import io.webby.testing.ext.SqlDbSetupExtension;
 import io.webby.util.sql.api.DebugSql;
+import io.webby.util.sql.api.Engine;
 import io.webby.util.sql.api.QueryRunner;
 import io.webby.util.sql.api.TableObj;
 import org.jetbrains.annotations.NotNull;
 import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.RegisterExtension;
 
 import java.sql.Connection;
@@ -16,6 +18,7 @@ import java.util.Arrays;
 import java.util.List;
 
 import static com.google.common.truth.Truth.assertThat;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 
 public abstract class SqliteTableTest<K, E, T extends TableObj<K, E>> implements BaseTableTest<E, T> {
@@ -34,6 +37,11 @@ public abstract class SqliteTableTest<K, E, T extends TableObj<K, E>> implements
     }
 
     protected abstract void setUp(@NotNull Connection connection) throws Exception;
+
+    @Test
+    public void engine() {
+        assertEquals(Engine.SQLite, table.engine());
+    }
 
     public List<String> parseColumnNamesFromDb(@NotNull String name) throws SQLException {
         ResultSet resultSet = new QueryRunner(connection()).runQuery("SELECT sql FROM sqlite_master WHERE name=?", name);

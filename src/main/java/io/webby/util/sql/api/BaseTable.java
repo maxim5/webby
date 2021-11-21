@@ -10,6 +10,8 @@ import java.util.List;
 public interface BaseTable<E> extends Iterable<E> {
     @NotNull BaseTable<E> withReferenceFollowOnRead(@NotNull ReadFollow follow);
 
+    @NotNull Engine engine();
+
     int count();
 
     int count(@NotNull Where where);
