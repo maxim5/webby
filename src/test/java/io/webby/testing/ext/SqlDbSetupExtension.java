@@ -1,6 +1,10 @@
 package io.webby.testing.ext;
 
 import com.google.common.flogger.FluentLogger;
+import com.google.inject.Module;
+import io.webby.db.sql.ConnectionPool;
+import io.webby.db.sql.SqlSettings;
+import io.webby.testing.TestingModules;
 import io.webby.util.base.Rethrow;
 import org.jetbrains.annotations.NotNull;
 import org.junit.jupiter.api.extension.*;
@@ -13,6 +17,7 @@ import java.util.logging.Level;
 public class SqlDbSetupExtension implements BeforeAllCallback, AfterAllCallback, BeforeEachCallback, AfterEachCallback {
     private static final FluentLogger log = FluentLogger.forEnclosingClass();
 
+    private final String url;
     private final Connection connection;
     private final String schema;
     private Savepoint savepoint;
@@ -22,6 +27,7 @@ public class SqlDbSetupExtension implements BeforeAllCallback, AfterAllCallback,
     }
 
     public SqlDbSetupExtension(@NotNull String url, @NotNull String schema) {
+        this.url = url;
         this.connection = Rethrow.Suppliers.rethrow(() -> DriverManager.getConnection(url)).get();
         this.schema = schema;
         log.at(Level.FINE).log("SQL connection open: %s", url);
@@ -52,7 +58,28 @@ public class SqlDbSetupExtension implements BeforeAllCallback, AfterAllCallback,
         connection.rollback(savepoint);
     }
 
+    public @NotNull String getUrl() {
+        return url;
+    }
+
+    public @NotNull SqlSettings getSettings() {
+        return new SqlSettings(url);
+    }
+
     public @NotNull Connection getConnection() {
         return connection;
+    }
+
+    public @NotNull ConnectionPool fakeConnectionPool() {
+        return new ConnectionPool() {
+            @Override
+            public @NotNull Connection getConnection() {
+                return connection;
+            }
+        };
+    }
+
+    public @NotNull Module fakeConnectionPoolModule() {
+        return TestingModules.instance(ConnectionPool.class, fakeConnectionPool());
     }
 }

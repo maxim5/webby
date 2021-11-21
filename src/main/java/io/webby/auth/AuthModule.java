@@ -5,6 +5,7 @@ import io.webby.app.AppSettings;
 import io.webby.auth.session.SessionInterceptor;
 import io.webby.auth.session.SessionManager;
 import io.webby.auth.user.KeyValueUserStorage;
+import io.webby.auth.user.SqlUserStorage;
 import io.webby.auth.user.UserManager;
 import io.webby.auth.user.UserStorage;
 import org.jetbrains.annotations.NotNull;
@@ -22,7 +23,8 @@ public class AuthModule extends AbstractModule {
         bind(SessionInterceptor.class).asEagerSingleton();
         bind(SessionManager.class).asEagerSingleton();
 
+        boolean isSqlEnabled = settings.storageSettings().isSqlStorageEnabled();
         bind(UserManager.class).asEagerSingleton();
-        bind(UserStorage.class).to(KeyValueUserStorage.class).asEagerSingleton();
+        bind(UserStorage.class).to(isSqlEnabled ? SqlUserStorage.class : KeyValueUserStorage.class).asEagerSingleton();
     }
 }

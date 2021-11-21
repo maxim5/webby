@@ -15,9 +15,8 @@ import io.webby.db.kv.mapdb.MapDbImpl;
 import io.webby.db.kv.paldb.PalDbFactory;
 import io.webby.db.kv.paldb.PalDbImpl;
 import io.webby.db.model.BlobKv;
-import io.webby.db.sql.ConnectionPool;
-import io.webby.db.sql.SqlSettings;
-import io.webby.testing.*;
+import io.webby.testing.Mocking;
+import io.webby.testing.Testing;
 import io.webby.testing.ext.CloseAllExtension;
 import io.webby.testing.ext.EmbeddedRedisExtension;
 import io.webby.testing.ext.SqlDbSetupExtension;
@@ -30,12 +29,11 @@ import org.junit.jupiter.api.extension.RegisterExtension;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.EnumSource;
 
-import java.nio.file.Path;
-import java.sql.Connection;
 import java.util.*;
 import java.util.stream.Stream;
 
 import static com.google.common.truth.Truth.assertThat;
+import static io.webby.db.sql.SqlSettings.SQLITE_IN_MEMORY;
 import static io.webby.testing.FakeRequests.getEx;
 import static io.webby.testing.FakeRequests.postEx;
 import static io.webby.testing.TestingUtil.array;
@@ -46,8 +44,7 @@ public class KeyValueDbIntegrationTest {
     @RegisterExtension private final static TempDirectoryExtension TEMP_DIRECTORY = new TempDirectoryExtension();
     @RegisterExtension private final static EmbeddedRedisExtension REDIS = new EmbeddedRedisExtension();
 
-    private static final String SQL_URL = SqlSettings.SQLITE_IN_MEMORY;
-    private static final String SQL_SCHEMA = """
+    @RegisterExtension private final static SqlDbSetupExtension SQL_DB = new SqlDbSetupExtension(SQLITE_IN_MEMORY, """
         CREATE TABLE IF NOT EXISTS user (
             user_id INTEGER PRIMARY KEY,
             access_level INTEGER
@@ -59,12 +56,11 @@ public class KeyValueDbIntegrationTest {
             user_agent TEXT,
             ip_address TEXT
         );
-        CREATE TABLE blob_kv (
+        CREATE TABLE IF NOT EXISTS blob_kv (
             id BLOB PRIMARY KEY,
             value BLOB
         );
-    """;
-    @RegisterExtension private final static SqlDbSetupExtension SQL_DB = new SqlDbSetupExtension(SQL_URL, SQL_SCHEMA);
+    """);
 
     @ParameterizedTest
     @EnumSource(StorageType.class)
@@ -371,17 +367,17 @@ public class KeyValueDbIntegrationTest {
         }
     }
 
-    private @NotNull KeyValueFactory setupFactory(@NotNull StorageType storageType) {
+    private static @NotNull KeyValueFactory setupFactory(@NotNull StorageType storageType) {
         return setup(storageType).getInstance(KeyValueFactory.class);
     }
 
-    private @NotNull Injector setup(@NotNull StorageType storageType) {
-        Path tempDir = TEMP_DIRECTORY.getCurrentTempDir();
-
+    private static @NotNull Injector setup(@NotNull StorageType storageType) {
         AppSettings settings = Testing.defaultAppSettings();
-        settings.modelFilter().setCommonPackageOf(List.of(Session.class, DefaultUser.class, BlobKv.class));
-        settings.storageSettings().enableKeyValueStorage(storageType).setKeyValueStoragePath(tempDir);
-        settings.storageSettings().enableSqlStorage(new SqlSettings(SQL_URL));
+        settings.modelFilter().setCommonPackageOf(Session.class, DefaultUser.class, BlobKv.class);
+        settings.storageSettings()
+                .enableKeyValueStorage(storageType)
+                .setKeyValueStoragePath(TEMP_DIRECTORY.getCurrentTempDir())
+                .enableSqlStorage(SQL_DB.getSettings());
         settings.setProfileMode(false);  // not testing TrackingDbAdapter by default
 
         settings.setProperty("db.chronicle.default.size", 64);
@@ -399,12 +395,6 @@ public class KeyValueDbIntegrationTest {
             CLOSE_ALL.addCloseable(mockedClock);
         }
 
-        ConnectionPool connectionPool = new ConnectionPool() {
-            @Override
-            public @NotNull Connection getConnection() {
-                return SQL_DB.getConnection();
-            }
-        };
-        return Testing.testStartup(settings, TestingModules.instance(ConnectionPool.class, connectionPool));
+        return Testing.testStartup(settings, SQL_DB.fakeConnectionPoolModule());
     }
 }

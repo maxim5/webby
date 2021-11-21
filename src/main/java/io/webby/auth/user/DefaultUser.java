@@ -26,7 +26,7 @@ public class DefaultUser implements User {
 
     @Override
     public boolean equals(Object o) {
-        return o instanceof User that && userId == that.userId() && Objects.equals(access, that.access());
+        return o instanceof User that && userId == that.userId() && access.equals(that.access());
     }
 
     @Override

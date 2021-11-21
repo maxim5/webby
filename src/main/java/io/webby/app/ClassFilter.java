@@ -51,6 +51,10 @@ public final class ClassFilter {
         setPackageOnly(getCommonPackage(classes));
     }
 
+    public void setCommonPackageOf(@NotNull Class<?> @NotNull... classes) {
+        setCommonPackageOf(List.of(classes));
+    }
+
     public void setPredicateUnsafe(@NotNull BiPredicate<String, String> predicate) {
         this.predicate = predicate;
     }
