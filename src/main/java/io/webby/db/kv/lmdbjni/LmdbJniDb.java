@@ -77,7 +77,7 @@ public class LmdbJniDb <K, V> extends ByteArrayDb<K, V> implements KeyValueDb<K,
 
     @Override
     public @NotNull Iterable<K> keys() {
-        return KeyValueDb.super.keys();
+        return iterate(iterator -> streamOf(iterator).map(Entry::getKey).map(this::asKey).toList());
     }
 
     @Override

@@ -33,7 +33,7 @@ public class BaseChannelTest {
         }
     }
 
-    protected static Consumer<AppSettings> DEFAULT_SETTINGS = settings -> {
+    protected static final Consumer<AppSettings> DEFAULT_SETTINGS = settings -> {
         settings.setWebPath(EXAMPLES_WEB_PATH);
         settings.setViewPath(EXAMPLES_VIEW_PATH);
     };
