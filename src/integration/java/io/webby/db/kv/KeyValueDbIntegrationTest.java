@@ -6,6 +6,7 @@ import io.webby.app.AppSettings;
 import io.webby.auth.session.Session;
 import io.webby.auth.session.SessionManager;
 import io.webby.auth.user.DefaultUser;
+import io.webby.auth.user.User;
 import io.webby.auth.user.UserAccess;
 import io.webby.db.kv.chronicle.ChronicleDb;
 import io.webby.db.kv.chronicle.ChronicleFactory;
@@ -242,25 +243,48 @@ public class KeyValueDbIntegrationTest {
         Session existingSession = sessionManager.getSessionOrNull(cookie);
         assertEquals(newSession, existingSession);
 
-        try (KeyValueDb<Long, Session> db = dbFactory.getDb("session", Long.class, Session.class)) {
+        try (KeyValueDb<Long, Session> db = dbFactory.getDb(Session.DB_NAME, Long.class, Session.class)) {
             assertEqualsTo(db, Map.of(newSession.sessionId(), newSession));
         }
     }
 
     @ParameterizedTest
     @EnumSource(StorageType.class)
-    public void multi_session(StorageType storageType) {
+    public void multi_session_sql_compatible(StorageType storageType) {
         KeyValueFactory dbFactory = setupFactory(storageType);
 
-        try (KeyValueDb<Integer, Session> db = dbFactory.getDb("my-sessions", Integer.class, Session.class)) {
-            runMultiTest(db, Integer.MIN_VALUE, Integer.MAX_VALUE,
-                         Session.fromRequest(123, getEx("/foo")), Session.fromRequest(321, postEx("/bar")));
+        try (KeyValueDb<Long, Session> db = dbFactory.getDb(Session.DB_NAME, Long.class, Session.class)) {
+            runMultiTest(db, 123L, Session.fromRequest(123, getEx("/foo")));
         }
     }
 
     @ParameterizedTest
     @EnumSource(StorageType.class)
-    public void multi_default_user(StorageType storageType) {
+    public void multi_session_forced_key_value(StorageType storageType) {
+        KeyValueFactory dbFactory = setupFactory(storageType);
+
+        try (KeyValueDb<Integer, Session> db = dbFactory.getDb("my-sessions", Integer.class, Session.class)) {
+            runMultiTest(db,
+                         Integer.MIN_VALUE,
+                         Integer.MAX_VALUE,
+                         Session.fromRequest(Integer.MIN_VALUE, getEx("/foo")),
+                         Session.fromRequest(Integer.MAX_VALUE, postEx("/bar")));
+        }
+    }
+
+    @ParameterizedTest
+    @EnumSource(StorageType.class)
+    public void multi_default_user_sql_compatible(StorageType storageType) {
+        KeyValueFactory dbFactory = setupFactory(storageType);
+
+        try (KeyValueDb<Long, DefaultUser> db = dbFactory.getDb(User.DB_NAME, Long.class, DefaultUser.class)) {
+            runMultiTest(db, 777L, new DefaultUser(777, UserAccess.Simple));
+        }
+    }
+
+    @ParameterizedTest
+    @EnumSource(StorageType.class)
+    public void multi_default_user_forced_key_value(StorageType storageType) {
         KeyValueFactory dbFactory = setupFactory(storageType);
 
         try (KeyValueDb<Long, DefaultUser> db = dbFactory.getDb("my-users", Long.class, DefaultUser.class)) {
@@ -289,6 +313,35 @@ public class KeyValueDbIntegrationTest {
     @AfterEach
     public void tearDown() {
         Testing.Internals.terminate();
+    }
+
+    private static <K, V> void runMultiTest(@NotNull KeyValueDb<K, V> db, @NotNull K key,  @NotNull V value) {
+        assertEqualsTo(db, Map.of());
+        assertNotContainsAnyOf(db, Map.of(key, value));
+
+        assertNull(db.put(key, value));
+        assertEqualsTo(db, Map.of(key, value));
+
+        assertEquals(value, db.remove(key));
+        assertEqualsTo(db, Map.of());
+
+        assertNull(db.putIfPresent(key, value));
+        assertEqualsTo(db, Map.of());
+
+        assertNull(db.putIfAbsent(key, value));
+        assertEqualsTo(db, Map.of(key, value));
+
+        assertEquals(value, db.putIfPresent(key, value));
+        assertEqualsTo(db, Map.of(key, value));
+
+        assertEquals(value, db.putIfAbsent(key, value));
+        assertEqualsTo(db, Map.of(key, value));
+
+        db.putAll(Map.of(key, value));
+        assertEqualsTo(db, Map.of(key, value));
+
+        db.removeAll(List.of(key));
+        assertEqualsTo(db, Map.of());
     }
 
     private static <K, V> void runMultiTest(@NotNull KeyValueDb<K, V> db,
