@@ -24,20 +24,20 @@ public class SqlDbSetupExtension implements BeforeAllCallback, AfterAllCallback,
     public SqlDbSetupExtension(@NotNull String url, @NotNull String schema) {
         this.connection = Rethrow.Suppliers.rethrow(() -> DriverManager.getConnection(url)).get();
         this.schema = schema;
-        log.at(Level.INFO).log("SQL connection open: %s", url);
+        log.at(Level.FINE).log("SQL connection open: %s", url);
     }
 
     @Override
     public void beforeAll(ExtensionContext context) throws Exception {
         if (schema.length() > 0) {
             connection.createStatement().executeUpdate(schema);
-            log.at(Level.INFO).log("SQL schema applied:\n%s", schema);
+            log.at(Level.FINE).log("SQL schema applied:\n%s", schema);
         }
     }
 
     @Override
     public void afterAll(ExtensionContext context) throws Exception {
-        log.at(Level.INFO).log("SQL connection close");
+        log.at(Level.FINE).log("SQL connection close");
         connection.close();
     }
 
