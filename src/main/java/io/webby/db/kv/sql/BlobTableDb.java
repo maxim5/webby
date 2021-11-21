@@ -1,11 +1,14 @@
 package io.webby.db.kv.sql;
 
-import com.google.common.primitives.Bytes;
+import com.google.common.io.BaseEncoding;
 import io.webby.db.codec.Codec;
 import io.webby.db.kv.KeyValueDb;
 import io.webby.db.kv.impl.ByteArrayDb;
 import io.webby.db.model.BlobKv;
 import io.webby.util.sql.api.TableObj;
+import io.webby.util.sql.api.query.Func;
+import io.webby.util.sql.api.query.HardcodedStringTerm;
+import io.webby.util.sql.api.query.Where;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
@@ -14,24 +17,41 @@ import java.util.Collection;
 import java.util.Map;
 import java.util.Set;
 import java.util.stream.Collectors;
-import java.util.stream.Stream;
+
+import static io.webby.util.sql.api.query.Shortcuts.like;
+import static io.webby.util.sql.api.query.Shortcuts.literal;
 
 public class BlobTableDb<V, K> extends ByteArrayDb<K, V> implements KeyValueDb<K, V> {
+    // Hardcoding the column name to avoid a dep on the generated BlobKvTable from the core...
+    private static final HardcodedStringTerm ID_COLUMN = new HardcodedStringTerm("id");
+
     private final TableObj<byte[], BlobKv> table;
     private final byte[] namespace;
+    private final Where whereNamespace;
 
     public BlobTableDb(@NotNull TableObj<byte[], BlobKv> table,
-                       @NotNull String namespace,
+                       @NotNull String name,
                        @NotNull Codec<K> keyCodec,
                        @NotNull Codec<V> valueCodec) {
         super(keyCodec, valueCodec);
         this.table = table;
-        this.namespace = "%s:".formatted(namespace).getBytes();
+
+        String namespace = "%s:".formatted(name);
+        this.namespace = namespace.getBytes();
+        this.whereNamespace = switch (table.engine()) {
+            case SQLite -> Where.of(like(Func.HEX.of(ID_COLUMN), literal(hex(this.namespace) + "%")));
+            case MySQL -> Where.of(like(ID_COLUMN, literal(namespace + "%")));
+            default -> throw new UnsupportedOperationException("BlobTableDb not implemented for SQL engine: " + table.engine());
+        };
+    }
+
+    private static @NotNull String hex(byte[] bytes) {
+        return BaseEncoding.base16().lowerCase().encode(bytes);
     }
 
     @Override
     public int size() {
-        return (int) fetchAllFromNamespace().count();  // TODO: filter namespace
+        return table.count(whereNamespace);
     }
 
     @Override
@@ -47,22 +67,22 @@ public class BlobTableDb<V, K> extends ByteArrayDb<K, V> implements KeyValueDb<K
 
     @Override
     public @NotNull Iterable<K> keys() {
-        return fetchAllFromNamespace().map(BlobKv::id).map(this::asKey).toList();
+        return table.fetchMatching(whereNamespace).stream().map(BlobKv::id).map(this::asKey).toList();
     }
 
     @Override
     public @NotNull Set<K> keySet() {
-        return fetchAllFromNamespace().map(BlobKv::id).map(this::asKey).collect(Collectors.toSet());
+        return table.fetchMatching(whereNamespace).stream().map(BlobKv::id).map(this::asKey).collect(Collectors.toSet());
     }
 
     @Override
     public @NotNull Collection<V> values() {
-        return fetchAllFromNamespace().map(BlobKv::value).map(this::asValue).toList();
+        return table.fetchMatching(whereNamespace).stream().map(BlobKv::value).map(this::asValue).toList();
     }
 
     @Override
     public @NotNull Set<Map.Entry<K, V>> entrySet() {
-        return fetchAllFromNamespace()
+        return table.fetchMatching(whereNamespace).stream()
                 .map(entity -> new AbstractMap.SimpleEntry<>(asKey(entity.id()), asValue(entity.value())))
                 .collect(Collectors.toSet());
     }
@@ -101,14 +121,5 @@ public class BlobTableDb<V, K> extends ByteArrayDb<K, V> implements KeyValueDb<K
     @Override
     protected @NotNull K asKeyNotNull(byte @NotNull [] bytes) {
         return keyCodec.readFromBytes(namespace.length, bytes);
-    }
-
-    private @NotNull Stream<BlobKv> fetchAllFromNamespace() {
-        return table.fetchAll().stream().filter(blob -> startsWith(blob.id(), namespace));
-    }
-
-    // TODO: https://github.com/patrickfav/bytes-java
-    private static boolean startsWith(byte[] bytes, byte[] prefix) {
-        return Bytes.indexOf(bytes, prefix) == 0;
     }
 }
