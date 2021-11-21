@@ -4,6 +4,7 @@ import com.google.common.collect.Iterables;
 import com.google.common.collect.Streams;
 import io.webby.util.collect.EasyMaps;
 import io.webby.util.sql.api.*;
+import io.webby.util.sql.api.query.Where;
 import io.webby.util.sql.arch.*;
 import org.jetbrains.annotations.NotNull;
 
@@ -94,7 +95,7 @@ public class ModelTableCodegen extends BaseCodegen {
 
         List<String> classesToImport = Streams.concat(
             Stream.of(pickBaseTableClass(),
-                      QueryRunner.class, QueryException.class,
+                      QueryRunner.class, QueryException.class, Where.class,
                       ResultSetIterator.class, ReadFollow.class, TableMeta.class).map(FQN::of),
             customClasses.stream().map(FQN::of),
             customClasses.stream().map(adaptersScanner::locateAdapterFqn),
@@ -190,7 +191,17 @@ public class ModelTableCodegen extends BaseCodegen {
             try (ResultSet result = runner.runQuery(query)) {
                 return result.getInt(1);
             } catch (SQLException e) {
-                throw new QueryException("$table_sql.count() failed", query, e);
+                throw new QueryException("Failed to count in $TableClass", query, e);
+            }
+        }
+        
+        @Override
+        public int count(@Nonnull Where where) {
+            String query = "SELECT COUNT(*) FROM $table_sql\\n" + where.repr();
+            try (ResultSet result = runner.runQuery(query)) {
+                return result.getInt(1);
+            } catch (SQLException e) {
+                throw new QueryException("Failed to count in $TableClass", query, e);
             }
         }\n
         """, mainContext);
@@ -283,7 +294,7 @@ public class ModelTableCodegen extends BaseCodegen {
                     consumer.accept(fromRow(result, follow, 0));
                 }
             } catch (SQLException e) {
-                throw new QueryException("$table_sql.forEach() failed", query, e);
+                throw new QueryException("Failed to iterate over $TableClass", query, e);
             }
         }
     
@@ -293,7 +304,17 @@ public class ModelTableCodegen extends BaseCodegen {
             try {
                 return new ResultSetIterator<>(runner.runQuery(query), result -> fromRow(result, follow, 0));
             } catch (SQLException e) {
-                throw new QueryException("$table_sql.iterator() failed", query, e);
+                throw new QueryException("Failed to iterate over $TableClass", query, e);
+            }
+        }
+
+        @Override
+        public @Nonnull ResultSetIterator<$ModelClass> iterator(@Nonnull Where where) {
+            String query = SELECT_ENTITY_ALL[follow.ordinal()] + "\\n" + where.repr();
+            try {
+                return new ResultSetIterator<>(runner.runQuery(query), result -> fromRow(result, follow, 0));
+            } catch (SQLException e) {
+                throw new QueryException("Failed to iterate over $TableClass", query, e);
             }
         }\n
         """, mainContext);
