@@ -48,7 +48,7 @@ class ResultSetConversionMaker {
             assert field instanceof OneColumnTableField : "Native field is not one column: %s".formatted(field);
             return resultSetGetterExpr(((OneColumnTableField) field).column());
         } else {
-            String staticRef = requireNonNull(field.adapterInfo()).staticRef();
+            String staticRef = requireNonNull(field.adapterApi()).staticRef();
             String params = field.columns().stream().map(this::resultSetGetterExpr).collect(COMMA_JOINER);
             return "%s.createInstance(%s)".formatted(staticRef, params);
         }

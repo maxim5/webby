@@ -38,7 +38,7 @@ public class PojoFieldNative extends PojoField {
     }
 
     @Override
-    public @NotNull AdapterInfo adapterInfo() {
+    public @NotNull AdapterApi adapterInfo() {
         throw new IllegalStateException("Internal error. Native field does not have an adapter: " + this);
     }
 

@@ -23,8 +23,8 @@ public class PojoFieldNested extends PojoField {
     }
 
     @Override
-    public @NotNull AdapterInfo adapterInfo() {
-        return AdapterInfo.ofSignature(pojo());
+    public @NotNull AdapterApi adapterInfo() {
+        return AdapterApi.ofSignature(pojo());
     }
 
     @Override

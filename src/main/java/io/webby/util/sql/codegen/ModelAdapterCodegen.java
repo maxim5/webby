@@ -191,7 +191,7 @@ public class ModelAdapterCodegen extends BaseCodegen {
         if (field.isNativelySupported()) {
             return getter;
         } else {
-            AdapterInfo info = field.adapterInfo();
+            AdapterApi info = field.adapterInfo();
             return "%s.toValueObject(%s);".formatted(info.staticRef(), getter);
         }
     }
@@ -225,7 +225,7 @@ public class ModelAdapterCodegen extends BaseCodegen {
                 result.add("array[%s] = %s;".formatted(arrayIndex, getter));
                 index++;
             } else {
-                AdapterInfo info = field.adapterInfo();
+                AdapterApi info = field.adapterInfo();
                 result.add("%s.fillArrayValues(%s, array, %s);".formatted(info.staticRef(), getter, arrayIndex));
                 index += info.adapterColumnsNumber();
             }

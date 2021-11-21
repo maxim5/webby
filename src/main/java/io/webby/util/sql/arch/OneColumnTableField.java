@@ -14,9 +14,9 @@ public class OneColumnTableField extends TableField {
     public OneColumnTableField(@NotNull TableArch parent,
                                @NotNull ModelField field,
                                boolean primaryKey,
-                               @Nullable AdapterInfo adapterInfo,
+                               @Nullable AdapterApi adapterApi,
                                @NotNull Column column) {
-        super(parent, field, primaryKey, adapterInfo);
+        super(parent, field, primaryKey, adapterApi);
         this.column = column;
     }
 

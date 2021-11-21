@@ -65,7 +65,7 @@ class ValuesArrayMaker {
                 return "";
             }
             return "%s.fillArrayValues(%s.%s(), array, %d);"
-                    .formatted(requireNonNull(field.adapterInfo()).staticRef(), param, field.javaGetter(), columnIndex);
+                    .formatted(requireNonNull(field.adapterApi()).staticRef(), param, field.javaGetter(), columnIndex);
         }
     }
 }

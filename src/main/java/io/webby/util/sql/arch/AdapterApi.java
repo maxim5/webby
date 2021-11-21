@@ -16,7 +16,7 @@ import java.util.List;
 import static io.webby.util.reflect.EasyMembers.*;
 import static io.webby.util.sql.arch.InvalidSqlModelException.failIf;
 
-public class AdapterInfo {
+public class AdapterApi {
     public static final String CREATE_INSTANCE = "createInstance";
     public static final String FILL_VALUES = "fillArrayValues";
     public static final String NEW_ARRAY = "toNewValuesArray";
@@ -25,20 +25,20 @@ public class AdapterInfo {
 
     private final DelayedAccessLazy<String> staticClassRef = AtomicLazy.emptyLazy();
 
-    private AdapterInfo(@NotNull OneOf<Class<?>, PojoArch> oneOf) {
+    private AdapterApi(@NotNull OneOf<Class<?>, PojoArch> oneOf) {
         this.oneOf = oneOf;
     }
 
-    public static @Nullable AdapterInfo ofClass(@Nullable Class<?> adapterClass) {
-        return adapterClass != null ? new AdapterInfo(OneOf.ofFirst(adapterClass)) : null;
+    public static @Nullable AdapterApi ofClass(@Nullable Class<?> adapterClass) {
+        return adapterClass != null ? new AdapterApi(OneOf.ofFirst(adapterClass)) : null;
     }
 
-    public static @NotNull AdapterInfo ofSignature(@NotNull PojoArch pojoArch) {
-        return new AdapterInfo(OneOf.ofSecond(pojoArch));
+    public static @NotNull AdapterApi ofSignature(@NotNull PojoArch pojoArch) {
+        return new AdapterApi(OneOf.ofSecond(pojoArch));
     }
 
     public @NotNull String staticRef() {
-        return staticClassRef.lazyGet(() -> oneOf.mapToObj(AdapterInfo::classToStaticRef, AdapterInfo::signatureStaticRef));
+        return staticClassRef.lazyGet(() -> oneOf.mapToObj(AdapterApi::classToStaticRef, AdapterApi::signatureStaticRef));
     }
 
     private static @NotNull String classToStaticRef(@NotNull Class<?> klass) {

@@ -11,9 +11,9 @@ public class MultiColumnTableField extends TableField {
     public MultiColumnTableField(@NotNull TableArch parent,
                                  @NotNull ModelField field,
                                  boolean primaryKey,
-                                 @NotNull AdapterInfo adapterInfo,
+                                 @NotNull AdapterApi adapterApi,
                                  @NotNull ImmutableList<Column> columns) {
-        super(parent, field, primaryKey, adapterInfo);
+        super(parent, field, primaryKey, adapterApi);
         this.columns = columns;
     }
 

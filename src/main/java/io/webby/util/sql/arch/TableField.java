@@ -12,16 +12,16 @@ public abstract class TableField implements WithColumns, WithPrefixedColumns {
     protected final TableArch parent;
     protected final ModelField field;
     protected final boolean primaryKey;
-    protected final AdapterInfo adapterInfo;
+    protected final AdapterApi adapterApi;
 
     public TableField(@NotNull TableArch parent,
                       @NotNull ModelField field,
                       boolean primaryKey,
-                      @Nullable AdapterInfo adapterInfo) {
+                      @Nullable AdapterApi adapterApi) {
         this.parent = parent;
         this.field = field;
         this.primaryKey = primaryKey;
-        this.adapterInfo = adapterInfo;
+        this.adapterApi = adapterApi;
     }
 
     public @NotNull TableArch parent() {
@@ -49,15 +49,15 @@ public abstract class TableField implements WithColumns, WithPrefixedColumns {
     }
 
     public boolean isNativelySupportedType() {
-        return adapterInfo == null;
+        return adapterApi == null;
     }
 
     public boolean isCustomSupportType() {
         return !isNativelySupportedType();
     }
 
-    public @Nullable AdapterInfo adapterInfo() {
-        return adapterInfo;
+    public @Nullable AdapterApi adapterApi() {
+        return adapterApi;
     }
 
     @Override

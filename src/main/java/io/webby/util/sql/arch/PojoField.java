@@ -61,7 +61,7 @@ public abstract class PojoField {
         return false;
     }
 
-    public abstract @NotNull AdapterInfo adapterInfo();
+    public abstract @NotNull AdapterApi adapterInfo();
 
     public abstract @NotNull PojoField reattachedTo(@NotNull PojoParent parent);
 

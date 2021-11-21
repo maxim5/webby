@@ -10,12 +10,12 @@ import java.util.Objects;
 @Immutable
 public class PojoFieldAdapter extends PojoField {
     private final Class<?> adapter;
-    private final AdapterInfo adapterInfo;
+    private final AdapterApi adapterApi;
     private final AtomicLazy<List<Column>> columnsRef = new AtomicLazy<>();
 
     protected PojoFieldAdapter(@NotNull PojoParent parent, @NotNull ModelField field, @NotNull Class<?> adapter) {
         super(parent, field);
-        this.adapterInfo = AdapterInfo.ofClass(adapter);
+        this.adapterApi = AdapterApi.ofClass(adapter);
         this.adapter = adapter;
     }
 
@@ -28,12 +28,12 @@ public class PojoFieldAdapter extends PojoField {
     }
 
     @Override
-    public @NotNull AdapterInfo adapterInfo() {
-        return adapterInfo;
+    public @NotNull AdapterApi adapterInfo() {
+        return adapterApi;
     }
 
     public @NotNull List<Column> columns() {
-        return columnsRef.lazyGet(() -> adapterInfo.adapterColumns(fullSqlName()));
+        return columnsRef.lazyGet(() -> adapterApi.adapterColumns(fullSqlName()));
     }
 
     @Override
@@ -43,16 +43,16 @@ public class PojoFieldAdapter extends PojoField {
 
     @Override
     public boolean equals(Object obj) {
-        return obj instanceof PojoFieldAdapter that && super.equals(obj) && Objects.equals(this.adapterInfo, that.adapterInfo);
+        return obj instanceof PojoFieldAdapter that && super.equals(obj) && Objects.equals(this.adapterApi, that.adapterApi);
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(super.hashCode(), adapterInfo);
+        return Objects.hash(super.hashCode(), adapterApi);
     }
 
     @Override
     public String toString() {
-        return "PojoFieldAdapter[parent=%s, field=%s, adapter=%s]".formatted(parent, field, adapterInfo);
+        return "PojoFieldAdapter[parent=%s, field=%s, adapter=%s]".formatted(parent, field, adapterApi);
     }
 }

@@ -28,14 +28,14 @@ import static io.webby.util.sql.arch.InvalidSqlModelException.failIf;
 import static java.util.Objects.requireNonNull;
 
 public class ArchFactory {
-    private final ModelAdaptersScanner adaptersLocator;
+    private final ModelAdaptersScanner adaptersScanner;
 
     private final Iterable<ModelInput> inputs;
     private final Map<Class<?>, TableArch> tables = new LinkedHashMap<>();
     private final Map<Class<?>, PojoArch> pojos = new LinkedHashMap<>();
 
-    public ArchFactory(@NotNull ModelAdaptersScanner adaptersLocator, @NotNull Iterable<ModelInput> inputs) {
-        this.adaptersLocator = adaptersLocator;
+    public ArchFactory(@NotNull ModelAdaptersScanner scanner, @NotNull Iterable<ModelInput> inputs) {
+        this.adaptersScanner = scanner;
         this.inputs = inputs;
     }
 
@@ -93,13 +93,13 @@ public class ArchFactory {
             return new OneColumnTableField(table,
                                            ModelField.of(field, getter),
                                            isPrimaryKey,
-                                           inference.adapterInfo(),
+                                           inference.adapterApi(),
                                            requireNonNull(inference.singleColumn()));
         } else {
             return new MultiColumnTableField(table,
                                              ModelField.of(field, getter),
                                              isPrimaryKey,
-                                             requireNonNull(inference.adapterInfo()),
+                                             requireNonNull(inference.adapterApi()),
                                              requireNonNull(inference.multiColumns()));
         }
     }
@@ -119,35 +119,35 @@ public class ArchFactory {
             return FieldInference.ofForeignKey(column, foreignTableInfo.first());
         }
 
-        Class<?> adapterClass = adaptersLocator.locateAdapterClass(fieldType);
+        Class<?> adapterClass = adaptersScanner.locateAdapterClass(fieldType);
         if (adapterClass != null) {
-            AdapterInfo adapterInfo = AdapterInfo.ofClass(adapterClass);
-            List<Column> columns = adapterInfo.adapterColumns(fieldName);
-            return FieldInference.ofColumns(columns, adapterInfo);
+            AdapterApi adapterApi = AdapterApi.ofClass(adapterClass);
+            List<Column> columns = adapterApi.adapterColumns(fieldName);
+            return FieldInference.ofColumns(columns, adapterApi);
         }
 
         PojoArch pojo = buildArchForPojoField(field).reattachedTo(PojoParent.ofTerminal(fieldName));
-        return FieldInference.ofColumns(pojo.columns(), AdapterInfo.ofSignature(pojo));
+        return FieldInference.ofColumns(pojo.columns(), AdapterApi.ofSignature(pojo));
     }
 
     private record FieldInference(@Nullable Column singleColumn,
                                   @Nullable ImmutableList<Column> multiColumns,
-                                  @Nullable AdapterInfo adapterInfo,
+                                  @Nullable AdapterApi adapterApi,
                                   @Nullable TableArch foreignTable) {
         public static FieldInference ofNativeColumn(@NotNull Column column) {
             return new FieldInference(column, null, null, null);
         }
 
-        public static FieldInference ofColumns(@NotNull List<Column> columns, @NotNull AdapterInfo adapterInfo) {
-            return columns.size() == 1 ? ofSingleColumn(columns.get(0), adapterInfo) : ofMultiColumns(columns, adapterInfo);
+        public static FieldInference ofColumns(@NotNull List<Column> columns, @NotNull AdapterApi adapterApi) {
+            return columns.size() == 1 ? ofSingleColumn(columns.get(0), adapterApi) : ofMultiColumns(columns, adapterApi);
         }
 
-        public static FieldInference ofSingleColumn(@NotNull Column column, @NotNull AdapterInfo adapterInfo) {
-            return new FieldInference(column, null, adapterInfo, null);
+        public static FieldInference ofSingleColumn(@NotNull Column column, @NotNull AdapterApi adapterApi) {
+            return new FieldInference(column, null, adapterApi, null);
         }
 
-        public static FieldInference ofMultiColumns(@NotNull List<Column> columns, @NotNull AdapterInfo adapterInfo) {
-            return new FieldInference(null, ImmutableList.copyOf(columns), adapterInfo, null);
+        public static FieldInference ofMultiColumns(@NotNull List<Column> columns, @NotNull AdapterApi adapterApi) {
+            return new FieldInference(null, ImmutableList.copyOf(columns), adapterApi, null);
         }
 
         public static FieldInference ofForeignKey(@NotNull Column column, @NotNull TableArch foreignTable) {
@@ -230,7 +230,7 @@ public class ArchFactory {
                 return PojoFieldNative.ofNative(modelField, jdbcType);
             }
 
-            Class<?> adapterClass = adaptersLocator.locateAdapterClass(subFieldType);
+            Class<?> adapterClass = adaptersScanner.locateAdapterClass(subFieldType);
             if (adapterClass != null) {
                 return PojoFieldAdapter.ofAdapter(modelField, adapterClass);
             }

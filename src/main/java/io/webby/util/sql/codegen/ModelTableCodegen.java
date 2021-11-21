@@ -21,16 +21,16 @@ import static java.util.Objects.requireNonNull;
 
 @SuppressWarnings("UnnecessaryStringEscape")
 public class ModelTableCodegen extends BaseCodegen {
-    private final ModelAdaptersScanner adaptersLocator;
+    private final ModelAdaptersScanner adaptersScanner;
     private final TableArch table;
 
     private final Map<String, String> mainContext;
     private final Map<String, String> pkContext;
 
-    public ModelTableCodegen(@NotNull ModelAdaptersScanner adaptersLocator,
+    public ModelTableCodegen(@NotNull ModelAdaptersScanner adaptersScanner,
                              @NotNull TableArch table, @NotNull Appendable writer) {
         super(writer);
-        this.adaptersLocator = adaptersLocator;
+        this.adaptersScanner = adaptersScanner;
         this.table = table;
 
         this.mainContext = EasyMaps.asMap(
@@ -97,7 +97,7 @@ public class ModelTableCodegen extends BaseCodegen {
                       QueryRunner.class, QueryException.class,
                       ResultSetIterator.class, ReadFollow.class, TableMeta.class).map(FQN::of),
             customClasses.stream().map(FQN::of),
-            customClasses.stream().map(adaptersLocator::locateAdapterFqn),
+            customClasses.stream().map(adaptersScanner::locateAdapterFqn),
             foreignClasses.stream().map(FQN::of)
         ).filter(fqn -> !isSkippablePackage(fqn.packageName())).map(FQN::importName).sorted().distinct().toList();
 
@@ -246,11 +246,11 @@ public class ModelTableCodegen extends BaseCodegen {
         if (field.isNativelySupportedType()) {
             return paramName;
         }
-        AdapterInfo adapterInfo = requireNonNull(field.adapterInfo());
+        AdapterApi adapterApi = requireNonNull(field.adapterApi());
         if (field.columnsNumber() == 1) {
-            return "%s.toValueObject(%s)".formatted(adapterInfo.staticRef(), paramName);
+            return "%s.toValueObject(%s)".formatted(adapterApi.staticRef(), paramName);
         } else {
-            return "%s.toNewValuesArray(%s)".formatted(adapterInfo.staticRef(), paramName);
+            return "%s.toNewValuesArray(%s)".formatted(adapterApi.staticRef(), paramName);
         }
     }
 
