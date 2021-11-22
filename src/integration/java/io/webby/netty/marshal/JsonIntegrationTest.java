@@ -1,6 +1,6 @@
 package io.webby.netty.marshal;
 
-import io.webby.auth.session.Session;
+import io.webby.auth.session.SessionTesting;
 import io.webby.auth.user.DefaultUser;
 import io.webby.auth.user.UserAccess;
 import io.webby.examples.hello.JsonCustom;
@@ -13,7 +13,6 @@ import org.junit.runner.RunWith;
 import org.junit.runners.Parameterized;
 
 import java.io.StringReader;
-import java.time.Instant;
 import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
 
@@ -133,7 +132,7 @@ public class JsonIntegrationTest {
     // @ParameterizedTest
     // @EnumSource(value = MarshallerFactory.SupportedJsonLibrary.class)
     public void roundtrip_session() {
-        assertJsonStringRoundTrip(new Session(123, -1, Instant.now(), "User-Agent", "127.0.0.1"));
+        assertJsonStringRoundTrip(SessionTesting.newSessionNow());
     }
 
     private static void assertJsonRead(String input, Class<?> klass, Object expected) throws Exception {

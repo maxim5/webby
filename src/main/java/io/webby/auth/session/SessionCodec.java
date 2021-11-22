@@ -3,6 +3,7 @@ package io.webby.auth.session;
 import com.google.inject.Inject;
 import io.webby.db.codec.Codec;
 import io.webby.db.codec.CodecSize;
+import io.webby.util.sql.api.ForeignLong;
 import org.jetbrains.annotations.NotNull;
 
 import java.io.IOException;
@@ -46,6 +47,6 @@ public class SessionCodec implements Codec<Session> {
         int nanos = readInt32(input);
         String userAgent = readString(input, charset);
         String ipAddress = readNullableString(input, charset);
-        return new Session(sessionId, userId, Instant.ofEpochSecond(seconds, nanos), userAgent, ipAddress);
+        return new Session(sessionId, ForeignLong.ofId(userId), Instant.ofEpochSecond(seconds, nanos), userAgent, ipAddress);
     }
 }

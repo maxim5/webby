@@ -25,7 +25,7 @@ public class AuthInterceptor implements AdvancedInterceptor {
 
         Session session = request.session();
         if (session.hasUser()) {
-            User user = userManager.findByUserId(session.userId());
+            User user = userManager.findByUserId(session.user());
             request.setNullableAttr(Attributes.User, user);
         }
     }

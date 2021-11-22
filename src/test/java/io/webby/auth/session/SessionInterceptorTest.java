@@ -29,6 +29,6 @@ public class SessionInterceptorTest {
     }
 
     private @NotNull Session newSession(@NotNull Instant instant) {
-        return new Session(123, -1, instant, "User-Agent", "127.0.0.1");
+        return SessionTesting.newSession(instant);
     }
 }
