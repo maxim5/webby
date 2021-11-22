@@ -1,6 +1,7 @@
 package io.webby.auth.session;
 
 import io.netty.handler.codec.http.HttpHeaders;
+import io.webby.auth.user.User;
 import io.webby.db.model.Ids;
 import io.webby.netty.HttpConst;
 import io.webby.netty.request.HttpRequestEx;
@@ -23,5 +24,9 @@ public record Session(long sessionId, long userId, @NotNull Instant created, @No
 
     public boolean hasUser() {
         return userId != NO_USER_ID;
+    }
+
+    public @NotNull Session withUser(@NotNull User user) {
+        return new Session(sessionId, user.userId(), created, userAgent, ipAddress);
     }
 }

@@ -5,6 +5,7 @@ import com.google.common.primitives.Longs;
 import com.google.inject.Inject;
 import io.netty.handler.codec.http.cookie.Cookie;
 import io.webby.app.Settings;
+import io.webby.auth.user.User;
 import io.webby.db.kv.KeyValueDb;
 import io.webby.db.kv.KeyValueFactory;
 import io.webby.db.model.LongIdGenerator;
@@ -75,6 +76,13 @@ public class SessionManager {
         Session session = Session.fromRequest(sessionId, request);
         db.set(sessionId, session);
         return session;
+    }
+
+    public @NotNull Session addUserOrDie(@NotNull Session session, @NotNull User user) {
+        assert !session.hasUser() : "Session already has a user: session=%s user=%s".formatted(session, user);
+        Session newSession = session.withUser(user);
+        db.set(newSession.sessionId(), newSession);
+        return newSession;
     }
 
     public @NotNull String encodeSessionForCookie(@NotNull Session session) {
