@@ -13,8 +13,10 @@ import io.webby.netty.intercept.attr.AttributeOwner;
 import io.webby.netty.intercept.attr.Attributes;
 import io.webby.netty.request.MutableHttpRequestEx;
 import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.VisibleForTesting;
 
 import java.util.List;
+import java.util.concurrent.TimeUnit;
 import java.util.logging.Level;
 
 @AttributeOwner(position = Attributes.Session)
@@ -23,6 +25,9 @@ public class SessionInterceptor implements Interceptor {
 
     private static final String COOKIE_ID = "id";
     private static final int COOKIE_AGE = 2592000;
+
+    private static final long JUST_CREATED_MILLIS = TimeUnit.SECONDS.toMillis(60);
+    private static final long TIME_TO_REFRESH_MILLIS = TimeUnit.DAYS.toMillis(30);
 
     @Inject private SessionManager sessionManager;
 
@@ -42,7 +47,7 @@ public class SessionInterceptor implements Interceptor {
     @Override
     public @NotNull HttpResponse exit(@NotNull MutableHttpRequestEx request, @NotNull HttpResponse response) {
         Session session = request.session();
-        if (session.shouldRefresh()) {
+        if (shouldRefresh(session)) {
             String cookieValue = sessionManager.encodeSessionForCookie(session);
             Cookie cookie = new DefaultCookie(COOKIE_ID, cookieValue);
             cookie.setMaxAge(COOKIE_AGE);
@@ -50,5 +55,12 @@ public class SessionInterceptor implements Interceptor {
             log.at(Level.FINER).log("Response set-cookie: %s", cookie);
         }
         return response;
+    }
+
+    @VisibleForTesting
+    static boolean shouldRefresh(@NotNull Session session) {
+        long createdMillis = session.created().getEpochSecond() * 1000;
+        long now = System.currentTimeMillis();
+        return createdMillis + JUST_CREATED_MILLIS >= now || createdMillis + TIME_TO_REFRESH_MILLIS < now;
     }
 }

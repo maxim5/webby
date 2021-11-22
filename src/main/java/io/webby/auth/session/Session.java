@@ -8,14 +8,11 @@ import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
 import java.time.Instant;
-import java.util.concurrent.TimeUnit;
 
 public record Session(long sessionId, long userId, @NotNull Instant created, @NotNull String userAgent, @Nullable String ipAddress) {
     public static final String DB_NAME = "session";
 
     private static final long NO_USER_ID = Ids.FOREIGN_ENTITY_NOT_EXISTS_LONG;
-    private static final long JUST_CREATED_MILLIS = TimeUnit.SECONDS.toMillis(60);
-    private static final long TIME_TO_REFRESH_MILLIS = TimeUnit.DAYS.toMillis(30);
 
     public static @NotNull Session fromRequest(long sessionId, @NotNull HttpRequestEx request) {
         HttpHeaders headers = request.headers();
@@ -26,11 +23,5 @@ public record Session(long sessionId, long userId, @NotNull Instant created, @No
 
     public boolean hasUser() {
         return userId != NO_USER_ID;
-    }
-
-    public boolean shouldRefresh() {
-        long createdMillis = created.getEpochSecond() * 1000;
-        long now = System.currentTimeMillis();
-        return createdMillis + JUST_CREATED_MILLIS >= now || createdMillis + TIME_TO_REFRESH_MILLIS < now;
     }
 }

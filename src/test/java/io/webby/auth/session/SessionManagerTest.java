@@ -32,13 +32,13 @@ public class SessionManagerTest {
     @Test
     public void getOrCreateSession_null() {
         Session session = manager.getOrCreateSession(getEx("/"), null);
-        assertTrue(session.shouldRefresh());
+        assertFalse(session.hasUser());
     }
 
     @Test
     public void getOrCreateSession_invalid_cookie() {
         Session session = manager.getOrCreateSession(getEx("/"), new DefaultCookie("name", "foo"));
-        assertTrue(session.shouldRefresh());
+        assertFalse(session.hasUser());
     }
 
     @Test
