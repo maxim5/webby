@@ -3,9 +3,9 @@ package io.webby.examples.model;
 import io.webby.testing.ForeignKeyTableTest;
 import io.webby.testing.SqliteTableTest;
 import io.webby.testing.TableLongTest;
-import io.webby.util.sql.api.ForeignInt;
-import io.webby.util.sql.api.ForeignLong;
-import io.webby.util.sql.api.ForeignObj;
+import io.webby.orm.api.ForeignInt;
+import io.webby.orm.api.ForeignLong;
+import io.webby.orm.api.ForeignObj;
 import org.jetbrains.annotations.NotNull;
 
 import java.sql.Connection;

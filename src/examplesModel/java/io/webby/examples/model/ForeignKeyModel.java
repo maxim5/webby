@@ -1,8 +1,8 @@
 package io.webby.examples.model;
 
-import io.webby.util.sql.api.Foreign;
-import io.webby.util.sql.api.ForeignInt;
-import io.webby.util.sql.api.ForeignLong;
+import io.webby.orm.api.Foreign;
+import io.webby.orm.api.ForeignInt;
+import io.webby.orm.api.ForeignLong;
 
 public record ForeignKeyModel(long id,
                               ForeignInt<InnerInt> innerInt,

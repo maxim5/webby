@@ -1,6 +1,6 @@
 package io.webby.testing;
 
-import io.webby.util.sql.api.TableObj;
+import io.webby.orm.api.TableObj;
 import org.jetbrains.annotations.NotNull;
 import org.junit.jupiter.api.Test;
 

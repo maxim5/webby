@@ -1,7 +1,7 @@
 package io.webby.examples;
 
 import com.google.common.io.BaseEncoding;
-import io.webby.util.sql.api.DebugSql.DebugRunner;
+import io.webby.orm.api.DebugSql.DebugRunner;
 
 import java.sql.Connection;
 import java.sql.DriverManager;

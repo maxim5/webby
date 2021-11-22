@@ -2,10 +2,10 @@ package io.webby.testing;
 
 import io.webby.db.sql.SqlSettings;
 import io.webby.testing.ext.SqlDbSetupExtension;
-import io.webby.util.sql.api.DebugSql;
-import io.webby.util.sql.api.Engine;
-import io.webby.util.sql.api.QueryRunner;
-import io.webby.util.sql.api.TableObj;
+import io.webby.orm.api.DebugSql;
+import io.webby.orm.api.Engine;
+import io.webby.orm.api.QueryRunner;
+import io.webby.orm.api.TableObj;
 import org.jetbrains.annotations.NotNull;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;

@@ -1,7 +1,7 @@
 package io.webby.testing;
 
 import io.webby.db.model.IntAutoIdModel;
-import io.webby.util.sql.api.TableInt;
+import io.webby.orm.api.TableInt;
 import org.jetbrains.annotations.NotNull;
 import org.junit.jupiter.api.Test;
 

@@ -5,7 +5,7 @@ import io.webby.auth.user.User;
 import io.webby.db.model.Ids;
 import io.webby.netty.HttpConst;
 import io.webby.netty.request.HttpRequestEx;
-import io.webby.util.sql.api.ForeignLong;
+import io.webby.orm.api.ForeignLong;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 

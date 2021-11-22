@@ -3,7 +3,7 @@ package io.webby.auth.user;
 import com.google.inject.Inject;
 import io.webby.app.Settings;
 import io.webby.db.sql.TableManager;
-import io.webby.util.sql.api.TableLong;
+import io.webby.orm.api.TableLong;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 

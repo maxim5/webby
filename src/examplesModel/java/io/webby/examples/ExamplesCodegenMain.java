@@ -9,11 +9,11 @@ import io.webby.common.ClasspathScanner;
 import io.webby.db.model.BlobKv;
 import io.webby.examples.model.*;
 import io.webby.util.base.TimeIt;
-import io.webby.util.sql.codegen.*;
-import io.webby.util.sql.arch.AdapterArch;
-import io.webby.util.sql.arch.JavaNameHolder;
-import io.webby.util.sql.arch.ArchFactory;
-import io.webby.util.sql.arch.TableArch;
+import io.webby.orm.codegen.*;
+import io.webby.orm.arch.AdapterArch;
+import io.webby.orm.arch.JavaNameHolder;
+import io.webby.orm.arch.ArchFactory;
+import io.webby.orm.arch.TableArch;
 import org.jetbrains.annotations.NotNull;
 
 import java.io.File;

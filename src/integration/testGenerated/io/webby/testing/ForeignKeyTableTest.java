@@ -1,11 +1,11 @@
 package io.webby.testing;
 
-import io.webby.util.sql.api.TableObj;
+import io.webby.orm.api.TableObj;
 import org.jetbrains.annotations.NotNull;
 import org.junit.jupiter.api.Test;
 
 import static com.google.common.truth.Truth.assertThat;
-import static io.webby.util.sql.api.ReadFollow.*;
+import static io.webby.orm.api.ReadFollow.*;
 import static org.junit.jupiter.api.Assertions.*;
 
 public interface ForeignKeyTableTest<K, E, T extends TableObj<K, E>> extends PrimaryKeyTableTest<K, E, T> {

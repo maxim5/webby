@@ -5,20 +5,20 @@ import io.webby.db.codec.Codec;
 import io.webby.db.kv.KeyValueDb;
 import io.webby.db.kv.impl.ByteArrayDb;
 import io.webby.db.model.BlobKv;
-import io.webby.util.sql.api.TableObj;
-import io.webby.util.sql.api.query.Compare;
-import io.webby.util.sql.api.query.Func;
-import io.webby.util.sql.api.query.HardcodedStringTerm;
-import io.webby.util.sql.api.query.Where;
+import io.webby.orm.api.TableObj;
+import io.webby.orm.api.query.Compare;
+import io.webby.orm.api.query.Func;
+import io.webby.orm.api.query.HardcodedStringTerm;
+import io.webby.orm.api.query.Where;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.*;
 import java.util.stream.Collectors;
 
-import static io.webby.util.sql.api.query.CompareType.EQ;
-import static io.webby.util.sql.api.query.Shortcuts.like;
-import static io.webby.util.sql.api.query.Shortcuts.literal;
+import static io.webby.orm.api.query.CompareType.EQ;
+import static io.webby.orm.api.query.Shortcuts.like;
+import static io.webby.orm.api.query.Shortcuts.literal;
 
 public class BlobTableDb<V, K> extends ByteArrayDb<K, V> implements KeyValueDb<K, V> {
     // Hardcoding the table columns to avoid a dep on the generated BlobKvTable from the core...

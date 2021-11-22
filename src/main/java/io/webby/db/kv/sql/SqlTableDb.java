@@ -1,7 +1,7 @@
 package io.webby.db.kv.sql;
 
 import io.webby.db.kv.KeyValueDb;
-import io.webby.util.sql.api.TableObj;
+import io.webby.orm.api.TableObj;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 

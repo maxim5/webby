@@ -2,7 +2,7 @@ package io.webby.auth.user;
 
 import com.google.common.flogger.FluentLogger;
 import com.google.inject.Inject;
-import io.webby.util.sql.api.ForeignLong;
+import io.webby.orm.api.ForeignLong;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 

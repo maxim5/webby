@@ -7,7 +7,7 @@ import io.webby.db.kv.KeyValueDb;
 import io.webby.db.kv.impl.BaseKeyValueFactory;
 import io.webby.db.model.BlobKv;
 import io.webby.db.sql.TableManager;
-import io.webby.util.sql.api.TableObj;
+import io.webby.orm.api.TableObj;
 import org.jetbrains.annotations.NotNull;
 
 public class SqlTableDbFactory extends BaseKeyValueFactory {
