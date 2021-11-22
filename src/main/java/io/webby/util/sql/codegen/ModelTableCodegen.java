@@ -92,9 +92,15 @@ public class ModelTableCodegen extends BaseCodegen {
                 .map(TableField::javaType)
                 .collect(Collectors.toList());
 
-        List<Class<?>> foreignClasses = table.hasForeignKeyField() ?
+        List<Class<?>> foreignKeyClasses = table.hasForeignKeyField() ?
                 List.of(Foreign.class, ForeignInt.class, ForeignLong.class, ForeignObj.class) :
                 List.of();
+        /*List<Class<?>> foreignKeyClasses = table.foreignFields(ReadFollow.FOLLOW_ALL).stream()
+                .map(TableField::javaType)
+                .collect(Collectors.toList());*/
+        List<JavaNameHolder> foreignModelClasses = table.foreignFields(ReadFollow.FOLLOW_ALL).stream()
+                .map(ForeignTableField::getForeignTable)
+                .collect(Collectors.toList());
 
         List<String> classesToImport = Streams.concat(
             Stream.of(pickBaseTableClass(),
@@ -103,7 +109,8 @@ public class ModelTableCodegen extends BaseCodegen {
                       ResultSetIterator.class, TableMeta.class).map(FQN::of),
             customClasses.stream().map(FQN::of),
             customClasses.stream().map(adaptersScanner::locateAdapterFqn),
-            foreignClasses.stream().map(FQN::of)
+            foreignKeyClasses.stream().map(FQN::of),
+            foreignModelClasses.stream().map(FQN::of)
         ).filter(fqn -> !isSkippablePackage(fqn.packageName())).map(FQN::importName).sorted().distinct().toList();
 
         Map<String, String> context = Map.of(

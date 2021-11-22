@@ -44,7 +44,8 @@ public class ArchFactory {
         pojos.clear();
 
         for (ModelInput input : inputs) {
-            tables.put(input.modelClass(), buildShallowTable(input));
+            TableArch table = buildShallowTable(input);
+            input.keys().forEach(key -> assure(tables.put(key, table) == null, "Duplicate input: " + key));
         }
         for (ModelInput input : inputs) {
             completeTable(input, tables.get(input.modelClass()));

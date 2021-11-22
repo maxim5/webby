@@ -4,6 +4,7 @@ import com.google.common.flogger.FluentLogger;
 import io.webby.app.AppSettings;
 import io.webby.auth.session.Session;
 import io.webby.auth.user.DefaultUser;
+import io.webby.auth.user.User;
 import io.webby.common.ClasspathScanner;
 import io.webby.db.model.BlobKv;
 import io.webby.examples.model.*;
@@ -31,7 +32,7 @@ public class ExamplesCodegenMain {
 
     public static void main(String[] args) throws Exception {
         List<ModelInput> inputs = List.of(
-            new ModelInput(DefaultUser.class, "User"),
+            new ModelInput(DefaultUser.class, User.class),
             new ModelInput(Session.class),
             new ModelInput(BlobKv.class),
 
@@ -49,9 +50,9 @@ public class ExamplesCodegenMain {
             new ModelInput(ComplexIdModel.class),
             new ModelInput(AtomicModel.class),
 
-            new ModelInput(ForeignKeyModel.InnerInt.class, "FKInt"),
-            new ModelInput(ForeignKeyModel.InnerLong.class, "FKLong"),
-            new ModelInput(ForeignKeyModel.InnerString.class, "FKString"),
+            new ModelInput(ForeignKeyModel.InnerInt.class, null, "FKInt"),
+            new ModelInput(ForeignKeyModel.InnerLong.class, null, "FKLong"),
+            new ModelInput(ForeignKeyModel.InnerString.class, null, "FKString"),
             new ModelInput(ForeignKeyModel.class)
         );
 
