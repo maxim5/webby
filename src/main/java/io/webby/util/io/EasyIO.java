@@ -26,5 +26,24 @@ public interface EasyIO {
                 Rethrow.rethrow(e);
             }
         }
+
+        static void closeQuietly(@Nullable AutoCloseable closeable) {
+            try {
+                if (closeable != null) {
+                    closeable.close();
+                }
+            } catch (Exception ignore) {
+            }
+        }
+
+        static void closeRethrow(@Nullable AutoCloseable closeable) {
+            try {
+                if (closeable != null) {
+                    closeable.close();
+                }
+            } catch (Exception e) {
+                Rethrow.rethrow(e);
+            }
+        }
     }
 }
