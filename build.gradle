@@ -85,6 +85,7 @@ dependencies {
     compileOnly group: 'redis.clients', name: 'jedis', version: '3.6.3'
 
     // SQLs
+    compileOnly group: 'com.h2database', name: 'h2', version: '1.4.200'
     compileOnly group: 'com.zaxxer', name: 'HikariCP', version: '5.0.0'
     compileOnly group: 'org.xerial', name: 'sqlite-jdbc', version: '3.36.0.3'
 

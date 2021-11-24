@@ -7,6 +7,7 @@ import java.sql.Connection;
 import java.sql.SQLException;
 
 public enum Engine {
+    H2,
     MsSqlServer,
     MySQL,
     Oracle,
@@ -27,12 +28,13 @@ public enum Engine {
     public static @NotNull Engine from(@NotNull Connection connection) throws SQLException {
         String databaseName = connection.getMetaData().getDatabaseProductName();
         return switch (databaseName) {
+            case "H2" -> H2;
             case "Microsoft SQL Server" -> MsSqlServer;
-            case "Sybase Anywhere", "ASE", "Adaptive Server Enterprise" -> Sybase;
+            case "MySQL" -> MySQL;
             case "Oracle" -> Oracle;
             case "PostgreSQL" -> PostgreSQL;
-            case "MySQL" -> MySQL;
             case "SQLite" -> SQLite;
+            case "Sybase Anywhere", "ASE", "Adaptive Server Enterprise" -> Sybase;
             default -> Unknown;
         };
     }
