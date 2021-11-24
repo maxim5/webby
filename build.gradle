@@ -106,6 +106,7 @@ dependencies {
     testImplementation group: 'com.google.flogger', name: 'flogger-log4j2-backend', version: '0.7.1'
     testImplementation group: 'com.squareup.okio', name: 'okio', version: '3.0.0'
     testImplementation group: 'com.j256.simplemagic', name: 'simplemagic', version: '1.16'
+    testImplementation group: 'com.zaxxer', name: 'HikariCP', version: '5.0.0'
     // Integration tests
     testImplementation group: 'io.etcd', name: 'jetcd-test', version: '0.5.11'
     testImplementation group: 'it.ozimov', name: 'embedded-redis', version: '0.7.3'

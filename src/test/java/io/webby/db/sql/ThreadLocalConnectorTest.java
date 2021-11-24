@@ -112,7 +112,9 @@ public class ThreadLocalConnectorTest {
 
     private static void assertSingleThreadAccessAndClosed(@NotNull List<SimpleConnection> connections, int expected) {
         assertEquals(expected, connections.size());
-        assertTrue(connections.stream().allMatch(SimpleConnection::isSingleThreadAccess));
-        assertTrue(connections.stream().allMatch(SimpleConnection::isClosed));
+        assertTrue(connections.stream().allMatch(SimpleConnection::isSingleThreadAccess),
+                   () -> "Not all connections are accessed by only one thread. Connections: %s".formatted(connections));
+        assertTrue(connections.stream().allMatch(SimpleConnection::isClosed),
+                   () -> "Not all connections are closed. Connections: %s".formatted(connections));
     }
 }

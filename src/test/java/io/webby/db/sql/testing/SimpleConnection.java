@@ -34,7 +34,7 @@ public class SimpleConnection extends ConnectionAdapter {
 
     @Override
     public String toString() {
-        return "SimpleConnection{closed=%s}".formatted(closed);
+        return "SimpleConnection{closed=%s, access=%s}".formatted(closed, access);
     }
 
     public boolean isSingleThreadAccess() {
