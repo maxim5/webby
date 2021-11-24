@@ -35,14 +35,17 @@ public class StressUserTableMain {
             """);
         }
         UserTable userTable = new UserTable(pool.getConnection());
-        RandomLongGenerator generator = new RandomLongGenerator(10_000);
-        Init<Long, DefaultUser> init = new Init<>(3_000_000, userTable, generator);
 
-        List<Runnable> workers = List.of(
+        ProgressMonitor progress = new ProgressMonitor();
+        RandomLongGenerator generator = new RandomLongGenerator(100_000);
+        Init<Long, DefaultUser> init = new Init<>(1_000_000, progress, userTable, generator);
+
+        List<Worker> workers = List.of(
             TableWorker.inserter(init, id -> new DefaultUser(id, UserAccess.Simple)),
             TableWorker.updater(init, id -> new DefaultUser(id, UserAccess.Admin)),
             TableWorker.deleter(init),
-            TableWorker.reader(init)
+            TableWorker.reader(init),
+            TableWorker.scanner(init.withSteps(200))
         );
         ExecutorService executor = Executors.newFixedThreadPool(workers.size());
         workers.forEach(executor::execute);

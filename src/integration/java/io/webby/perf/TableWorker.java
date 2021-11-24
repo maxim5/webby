@@ -4,29 +4,32 @@ import com.google.common.flogger.FluentLogger;
 import io.webby.orm.api.TableObj;
 import org.jetbrains.annotations.NotNull;
 
-import java.util.concurrent.atomic.AtomicLong;
+import java.util.List;
 import java.util.function.Function;
 import java.util.function.Supplier;
 import java.util.logging.Level;
 
-public abstract class TableWorker<K, E> implements Runnable {
+public abstract class TableWorker<K, E> implements Worker {
     private static final FluentLogger log = FluentLogger.forEnclosingClass();
 
-    protected final AtomicLong counter = new AtomicLong();
-    protected final long maxCounter;
+    protected final long steps;
+    protected final ProgressMonitor progress;
     protected final TableObj<K, E> table;
     protected final Supplier<K> keyGenerator;
 
     public TableWorker(@NotNull Init<K, E> init) {
-        this.maxCounter = init.maxCounter;
+        this.steps = init.steps;
+        this.progress = init.progress;
         this.table = init.table;
         this.keyGenerator = init.keyGenerator;
     }
 
     @Override
     public void run() {
+        progress.expectTotalSteps(steps);
         try {
-            while (counter.incrementAndGet() < maxCounter) {
+            for (int i = 0; i < steps; i++) {
+                progress.step();
                 K key = keyGenerator.get();
                 execute(key);
             }
@@ -81,9 +84,30 @@ public abstract class TableWorker<K, E> implements Runnable {
         };
     }
 
-    public record Init<K, E>(int maxCounter, @NotNull TableObj<K, E> table, @NotNull Supplier<K> keyGenerator) {
-        public Init<K, E> withMaxCount(int newMaxCounter) {
-            return new Init<>(newMaxCounter, table, keyGenerator);
+    public static <K, E> TableWorker<K, E> scanner(@NotNull Init<K, E> init) {
+        return new TableWorker<>(init) {
+            @Override
+            public void execute(@NotNull K key) {
+                List<E> all = table.fetchAll();
+                log.at(Level.FINE).log("Scanning over %d items", all.size());
+            }
+        };
+    }
+
+    public record Init<K, E>(long steps,
+                             @NotNull ProgressMonitor progress,
+                             @NotNull TableObj<K, E> table,
+                             @NotNull Supplier<K> keyGenerator) {
+        public Init {
+            assert steps >= 0 : "Invalid steps: " + steps;
+        }
+
+        public Init<K, E> withSteps(long newSteps) {
+            return new Init<>(newSteps, progress, table, keyGenerator);
+        }
+
+        public Init<K, E> withSteps(double stepsFactor) {
+            return withSteps((long) (steps * stepsFactor));
         }
     }
 }
