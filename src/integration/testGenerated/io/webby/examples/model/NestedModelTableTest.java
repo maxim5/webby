@@ -1,17 +1,16 @@
 package io.webby.examples.model;
 
+import io.webby.orm.api.Connector;
 import io.webby.testing.SqliteTableTest;
 import io.webby.testing.TableLongTest;
 import org.jetbrains.annotations.NotNull;
-
-import java.sql.Connection;
 
 public class NestedModelTableTest
         extends SqliteTableTest<Long, NestedModel, NestedModelTable>
         implements TableLongTest<NestedModel, NestedModelTable> {
     @Override
-    protected void setUp(@NotNull Connection connection) throws Exception {
-        connection.createStatement().executeUpdate("""
+    protected void setUp(@NotNull Connector connector) throws Exception {
+        connector.runner().runMultiUpdate("""
             CREATE TABLE nested_model (
                 id INTEGER PRIMARY KEY,
                 simple_id INTEGER,
@@ -23,7 +22,7 @@ public class NestedModelTableTest
                 level1_simple_b TEXT
             )
         """);
-        table = new NestedModelTable(connection);
+        table = new NestedModelTable(connector);
     }
 
     @Override

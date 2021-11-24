@@ -57,7 +57,7 @@ public class ModelTableCodegen extends BaseCodegen {
         constructors();
         withFollowOnRead();
 
-        engine();
+        getters();
         count();
 
         selectConstants();
@@ -103,7 +103,7 @@ public class ModelTableCodegen extends BaseCodegen {
 
         List<String> classesToImport = Streams.concat(
             Stream.of(pickBaseTableClass(),
-                      QueryRunner.class, QueryException.class, Engine.class, ReadFollow.class,
+                      Connector.class, QueryRunner.class, QueryException.class, Engine.class, ReadFollow.class,
                       Where.class, io.webby.orm.api.query.Column.class, TermType.class,
                       ResultSetIterator.class, TableMeta.class).map(FQN::of),
             customClasses.stream().map(FQN::of),
@@ -160,20 +160,18 @@ public class ModelTableCodegen extends BaseCodegen {
 
     private void constructors() throws IOException {
         appendCode("""
-        protected final Connection connection;
+        protected final Connector connector;
         protected final Engine engine;
-        protected final QueryRunner runner;
         protected final ReadFollow follow;
     
-        public $TableClass(@Nonnull Connection connection, @Nonnull ReadFollow follow) {
-            this.connection = connection;
-            this.engine = Engine.safeFrom(connection);
-            this.runner = new QueryRunner(connection);
+        public $TableClass(@Nonnull Connector connector, @Nonnull ReadFollow follow) {
+            this.connector = connector;
+            this.engine = Engine.safeFrom(connector.connection());
             this.follow = follow;
         }
         
-        public $TableClass(@Nonnull Connection connection) {
-            this(connection, ReadFollow.NO_FOLLOW);
+        public $TableClass(@Nonnull Connector connector) {
+            this(connector, ReadFollow.NO_FOLLOW);
         }\n
         """, mainContext);
     }
@@ -183,7 +181,7 @@ public class ModelTableCodegen extends BaseCodegen {
             """
             @Override
             public @Nonnull $TableClass withReferenceFollowOnRead(@Nonnull ReadFollow follow) {
-                return this.follow == follow ? this : new $TableClass(connection, follow);
+                return this.follow == follow ? this : new $TableClass(connector, follow);
             }\n
             """ :
             """
@@ -195,11 +193,15 @@ public class ModelTableCodegen extends BaseCodegen {
         appendCode(code, mainContext);
     }
 
-    private void engine() throws IOException {
+    private void getters() throws IOException {
         appendCode("""
         @Override
         public @Nonnull Engine engine() {
             return engine;
+        }
+        
+        public @Nonnull QueryRunner runner() {
+            return connector.runner();
         }\n
         """);
     }
@@ -209,7 +211,7 @@ public class ModelTableCodegen extends BaseCodegen {
         @Override
         public int count() {
             String query = "SELECT COUNT(*) FROM $table_sql";
-            try (PreparedStatement statement = runner.prepareQuery(query);
+            try (PreparedStatement statement = runner().prepareQuery(query);
                  ResultSet result = statement.executeQuery()) {
                 return result.getInt(1);
             } catch (SQLException e) {
@@ -220,7 +222,7 @@ public class ModelTableCodegen extends BaseCodegen {
         @Override
         public int count(@Nonnull Where where) {
             String query = "SELECT COUNT(*) FROM $table_sql\\n" + where.repr();
-            try (PreparedStatement statement = runner.prepareQuery(query);
+            try (PreparedStatement statement = runner().prepareQuery(query);
                  ResultSet result = statement.executeQuery()) {
                 return result.getInt(1);
             } catch (SQLException e) {
@@ -259,7 +261,7 @@ public class ModelTableCodegen extends BaseCodegen {
         @Override
         public @Nullable $ModelClass getByPkOrNull($pk_annotation$pk_type $pk_name) {
             String query = SELECT_ENTITY_ALL[follow.ordinal()] + $sql_where_literal;
-            try (PreparedStatement statement = runner.prepareQuery(query, $pk_object);
+            try (PreparedStatement statement = runner().prepareQuery(query, $pk_object);
                  ResultSet result = statement.executeQuery()) {
                 return result.next() ? fromRow(result, follow, 0) : null;
             } catch (SQLException e) {
@@ -305,7 +307,7 @@ public class ModelTableCodegen extends BaseCodegen {
         @Override
         public void forEach(@Nonnull Consumer<? super $ModelClass> consumer) {
             String query = SELECT_ENTITY_ALL[follow.ordinal()];
-            try (PreparedStatement statement = runner.prepareQuery(query);
+            try (PreparedStatement statement = runner().prepareQuery(query);
                  ResultSet result = statement.executeQuery()) {
                 while (result.next()) {
                     consumer.accept(fromRow(result, follow, 0));
@@ -319,7 +321,7 @@ public class ModelTableCodegen extends BaseCodegen {
         public @Nonnull ResultSetIterator<$ModelClass> iterator() {
             String query = SELECT_ENTITY_ALL[follow.ordinal()];
             try {
-                return new ResultSetIterator<>(runner.prepareQuery(query).executeQuery(), result -> fromRow(result, follow, 0));
+                return new ResultSetIterator<>(runner().prepareQuery(query).executeQuery(), result -> fromRow(result, follow, 0));
             } catch (SQLException e) {
                 throw new QueryException("Failed to iterate over $TableClass", query, e);
             }
@@ -329,7 +331,7 @@ public class ModelTableCodegen extends BaseCodegen {
         public @Nonnull ResultSetIterator<$ModelClass> iterator(@Nonnull Where where) {
             String query = SELECT_ENTITY_ALL[follow.ordinal()] + "\\n" + where.repr();
             try {
-                return new ResultSetIterator<>(runner.prepareQuery(query).executeQuery(), result -> fromRow(result, follow, 0));
+                return new ResultSetIterator<>(runner().prepareQuery(query).executeQuery(), result -> fromRow(result, follow, 0));
             } catch (SQLException e) {
                 throw new QueryException("Failed to iterate over $TableClass", query, e);
             }
@@ -348,7 +350,7 @@ public class ModelTableCodegen extends BaseCodegen {
         public int insert(@Nonnull $ModelClass $model_param) {
            String query = $sql_query_literal;
            try {
-               return runner.runUpdate(query, valuesForInsert($model_param));
+               return runner().runUpdate(query, valuesForInsert($model_param));
            } catch (SQLException e) {
                throw new QueryException("Failed to insert entity into $TableClass", query, $model_param, e);
            }
@@ -391,7 +393,7 @@ public class ModelTableCodegen extends BaseCodegen {
         public $pk_type insertAutoIncPk(@Nonnull $ModelClass $model_param) {
            String query = $sql_query_literal;
            try {
-               return ($pk_type) runner.runAutoIncUpdate(query, valuesForInsertAutoIncPk($model_param)).lastId();
+               return ($pk_type) runner().runAutoIncUpdate(query, valuesForInsertAutoIncPk($model_param)).lastId();
            } catch (SQLException e) {
                throw new QueryException("Failed to insert new entity into $TableClass", query, $model_param, e);
            }
@@ -441,7 +443,7 @@ public class ModelTableCodegen extends BaseCodegen {
         public int updateByPk(@Nonnull $ModelClass $model_param) {
            String query = $sql_query_literal;
            try {
-               return runner.runUpdate(query, valuesForUpdate($model_param));
+               return runner().runUpdate(query, valuesForUpdate($model_param));
            } catch (SQLException e) {
                throw new QueryException("Failed to update entity in $TableClass by PK", query, $model_param, e);
            }
@@ -491,7 +493,7 @@ public class ModelTableCodegen extends BaseCodegen {
         public int deleteByPk($pk_annotation$pk_type $pk_name) {
             String query = $sql_query_literal;
             try {
-               return runner.runUpdate(query, $pk_object);
+               return runner().runUpdate(query, $pk_object);
            } catch (SQLException e) {
                throw new QueryException("Failed to delete entity in $TableClass by PK", query, $pk_name, e);
            }
@@ -522,7 +524,7 @@ public class ModelTableCodegen extends BaseCodegen {
         appendCode("""
         public static final Class<?> KEY_CLASS = $KeyClass;
         public static final Class<?> ENTITY_CLASS = $ModelClass.class;
-        public static final Function<Connection, $TableClass> INSTANTIATE = $TableClass::new;\n
+        public static final Function<Connector, $TableClass> INSTANTIATE = $TableClass::new;\n
         """, EasyMaps.merge(mainContext, context, pkContext));
     }
 

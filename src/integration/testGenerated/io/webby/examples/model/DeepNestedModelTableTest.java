@@ -4,18 +4,17 @@ import io.webby.examples.model.DeepNestedModel.A;
 import io.webby.examples.model.DeepNestedModel.B;
 import io.webby.examples.model.DeepNestedModel.C;
 import io.webby.examples.model.DeepNestedModel.D;
+import io.webby.orm.api.Connector;
 import io.webby.testing.SqliteTableTest;
 import io.webby.testing.TableIntTest;
 import org.jetbrains.annotations.NotNull;
-
-import java.sql.Connection;
 
 public class DeepNestedModelTableTest
         extends SqliteTableTest<Integer, DeepNestedModel, DeepNestedModelTable>
         implements TableIntTest<DeepNestedModel, DeepNestedModelTable> {
     @Override
-    protected void setUp(@NotNull Connection connection) throws Exception {
-        connection.createStatement().executeUpdate("""
+    protected void setUp(@NotNull Connector connector) throws Exception {
+        connector.runner().runMultiUpdate("""
             CREATE TABLE deep_nested_model (
                 id INTEGER PRIMARY KEY,
                 d_id INTEGER,
@@ -29,7 +28,7 @@ public class DeepNestedModelTableTest
                 a_id INTEGER
             )
         """);
-        table = new DeepNestedModelTable(connection);
+        table = new DeepNestedModelTable(connector);
     }
 
     @Override

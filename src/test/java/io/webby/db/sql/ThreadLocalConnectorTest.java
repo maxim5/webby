@@ -4,6 +4,7 @@ import com.google.common.flogger.FluentLogger;
 import io.webby.db.sql.testing.FakeConnectionPool;
 import io.webby.db.sql.testing.SimpleConnection;
 import org.jetbrains.annotations.NotNull;
+import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.ValueSource;
@@ -25,7 +26,12 @@ public class ThreadLocalConnectorTest {
 
     @BeforeEach
     void setUp() {
-        ThreadLocalConnector.cleanupIfNecessary();
+        ThreadLocalConnector.forceCleanUp();
+    }
+
+    @AfterEach
+    void tearDown() {
+        ThreadLocalConnector.forceCleanUp();
     }
 
     @ParameterizedTest

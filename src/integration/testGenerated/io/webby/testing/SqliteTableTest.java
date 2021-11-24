@@ -1,11 +1,8 @@
 package io.webby.testing;
 
 import io.webby.db.sql.SqlSettings;
+import io.webby.orm.api.*;
 import io.webby.testing.ext.SqlDbSetupExtension;
-import io.webby.orm.api.DebugSql;
-import io.webby.orm.api.Engine;
-import io.webby.orm.api.QueryRunner;
-import io.webby.orm.api.TableObj;
 import org.jetbrains.annotations.NotNull;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -34,10 +31,10 @@ public abstract class SqliteTableTest<K, E, T extends TableObj<K, E>> implements
 
     @BeforeEach
     void setUp() throws Exception {
-        setUp(connection());
+        setUp(connector());
     }
 
-    protected abstract void setUp(@NotNull Connection connection) throws Exception;
+    protected abstract void setUp(@NotNull Connector connector) throws Exception;
 
     @Test
     public void engine() {
@@ -45,10 +42,8 @@ public abstract class SqliteTableTest<K, E, T extends TableObj<K, E>> implements
     }
 
     public List<String> parseColumnNamesFromDb(@NotNull String name) throws SQLException {
-        QueryRunner runner = new QueryRunner(connection());
-
         List<DebugSql.Row> rows;
-        try (PreparedStatement statement = runner.prepareQuery("SELECT sql FROM sqlite_master WHERE name=?", name);
+        try (PreparedStatement statement = connector().runner().prepareQuery("SELECT sql FROM sqlite_master WHERE name=?", name);
              ResultSet resultSet = statement.executeQuery()) {
             rows = DebugSql.toDebugRows(resultSet);
         }
@@ -68,7 +63,16 @@ public abstract class SqliteTableTest<K, E, T extends TableObj<K, E>> implements
                 .toList();
     }
 
-    protected @NotNull Connection connection() {
-        return SQL_DB.getConnection();
+    protected @NotNull Connector connector() {
+        return new Connector() {
+            @Override
+            public @NotNull Connection connection() {
+                return SQL_DB.getConnection();
+            }
+            @Override
+            public @NotNull QueryRunner runner() {
+                return new QueryRunner(connection());
+            }
+        };
     }
 }

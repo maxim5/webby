@@ -6,13 +6,13 @@ import com.google.inject.Singleton;
 import io.webby.app.Settings;
 import io.webby.common.ClasspathScanner;
 import io.webby.orm.api.BaseTable;
+import io.webby.orm.api.Connector;
 import io.webby.orm.api.TableMeta;
 import io.webby.orm.api.TableObj;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import org.jetbrains.annotations.VisibleForTesting;
 
-import java.sql.Connection;
 import java.util.LinkedHashMap;
 import java.util.Map;
 import java.util.Set;
@@ -22,17 +22,21 @@ import static io.webby.util.base.EasyCast.castAny;
 
 @Singleton
 public class TableManager {
-    private final ConnectionPool pool;
+    private final Connector connector;
     private final Map<Class<?>, EntityTable> tableMap;
 
     @Inject
     public TableManager(@NotNull Settings settings,
                         @NotNull ConnectionPool pool,
                         @NotNull ClasspathScanner scanner) throws Exception {
-        this.pool = pool;
+        connector = new ThreadLocalConnector(pool, settings.getLongProperty("db.sql.connection.keep.open.millis", 30_000));
 
         Set<? extends Class<?>> tableClasses = scanner.getDerivedClasses(settings.modelFilter(), BaseTable.class);
-        this.tableMap = buildTableMap(tableClasses);
+        tableMap = buildTableMap(tableClasses);
+    }
+
+    public @NotNull Connector connector() {
+        return connector;
     }
 
     public <E> @NotNull BaseTable<E> getMatchingBaseTableOrDie(@NotNull String name, @NotNull Class<? extends E> entity) {
@@ -41,7 +45,7 @@ public class TableManager {
         assert entityTable.sqlName.equals(name) :
                 "Entity table name does not match: sql-name=%s name=%s".formatted(entityTable.sqlName, name);
         assert entityTable.key == null : "Key class mismatch: table-key=%s entity=%s".formatted(entityTable.key, entity);
-        return castAny(entityTable.instantiate.apply(pool.getConnection()));
+        return castAny(entityTable.instantiate.apply(connector));
     }
 
     public <K, E> boolean hasMatchingTable(@NotNull String name,
@@ -60,7 +64,7 @@ public class TableManager {
                 "Entity table name does not match: sql-name=%s name=%s".formatted(entityTable.sqlName, name);
         assert entityTable.wrappedKey() == Primitives.wrap(key) :
                 "Key class mismatch: table-key=%s provided-key=%s entity=%s".formatted(entityTable.key, key, entity);
-        return castAny(entityTable.instantiate.apply(pool.getConnection()));
+        return castAny(entityTable.instantiate.apply(connector));
     }
 
     @VisibleForTesting
@@ -70,7 +74,7 @@ public class TableManager {
             TableMeta meta = castAny(tableClass.getField("META").get(null));
             Class<?> key = (Class<?>) tableClass.getField("KEY_CLASS").get(null);
             Class<?> entity = (Class<?>) tableClass.getField("ENTITY_CLASS").get(null);
-            Function<Connection, ?> instantiate = castAny(tableClass.getField("INSTANTIATE").get(null));
+            Function<Connector, ?> instantiate = castAny(tableClass.getField("INSTANTIATE").get(null));
             result.put(entity, new EntityTable(meta.sqlTableName(), key, instantiate));
         }
         return result;
@@ -78,7 +82,7 @@ public class TableManager {
 
     private record EntityTable(@NotNull String sqlName,
                                @Nullable Class<?> key,
-                               @NotNull Function<Connection, ?> instantiate) {
+                               @NotNull Function<Connector, ?> instantiate) {
         public @Nullable Class<?> wrappedKey() {
             return key != null ? Primitives.wrap(key) : null;
         }

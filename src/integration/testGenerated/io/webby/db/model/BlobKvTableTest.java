@@ -1,11 +1,10 @@
 package io.webby.db.model;
 
 import com.google.common.primitives.Ints;
+import io.webby.orm.api.Connector;
 import io.webby.testing.PrimaryKeyTableTest;
 import io.webby.testing.SqliteTableTest;
 import org.jetbrains.annotations.NotNull;
-
-import java.sql.Connection;
 
 import static io.webby.testing.TestingUtil.array;
 
@@ -13,14 +12,14 @@ public class BlobKvTableTest
         extends SqliteTableTest<byte[], BlobKv, BlobKvTable>
         implements PrimaryKeyTableTest<byte[], BlobKv, BlobKvTable> {
     @Override
-    protected void setUp(@NotNull Connection connection) throws Exception {
-        connection.createStatement().executeUpdate("""
+    protected void setUp(@NotNull Connector connector) throws Exception {
+        connector.runner().runMultiUpdate("""
             CREATE TABLE blob_kv (
                 id BLOB PRIMARY KEY,
                 value BLOB
             )
         """);
-        table = new BlobKvTable(connection);
+        table = new BlobKvTable(connector);
     }
 
     @Override

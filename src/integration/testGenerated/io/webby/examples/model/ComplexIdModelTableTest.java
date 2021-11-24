@@ -1,10 +1,9 @@
 package io.webby.examples.model;
 
+import io.webby.orm.api.Connector;
 import io.webby.testing.PrimaryKeyTableTest;
 import io.webby.testing.SqliteTableTest;
 import org.jetbrains.annotations.NotNull;
-
-import java.sql.Connection;
 
 import static io.webby.testing.TestingUtil.array;
 
@@ -12,8 +11,8 @@ public class ComplexIdModelTableTest
         extends SqliteTableTest<ComplexIdModel.Key, ComplexIdModel, ComplexIdModelTable>
         implements PrimaryKeyTableTest<ComplexIdModel.Key, ComplexIdModel, ComplexIdModelTable> {
     @Override
-    protected void setUp(@NotNull Connection connection) throws Exception {
-        connection.createStatement().executeUpdate("""
+    protected void setUp(@NotNull Connector connector) throws Exception {
+        connector.runner().runMultiUpdate("""
             CREATE TABLE complex_id_model (
                 id_x INTEGER,
                 id_y INTEGER,
@@ -21,7 +20,7 @@ public class ComplexIdModelTableTest
                 a INTEGER
             )
         """);
-        table = new ComplexIdModelTable(connection);
+        table = new ComplexIdModelTable(connector);
     }
 
     @Override

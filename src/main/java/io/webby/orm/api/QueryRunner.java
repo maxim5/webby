@@ -75,6 +75,12 @@ public class QueryRunner {
 
     // Updates
 
+    public int runMultiUpdate(@NotNull String sql) throws SQLException {
+        try (Statement statement = connection.createStatement()) {
+            return statement.executeUpdate(sql);
+        }
+    }
+
     public int runUpdate(@NotNull String sql) throws SQLException {
         try (PreparedStatement statement = connection.prepareStatement(sql)) {
             return statement.executeUpdate();

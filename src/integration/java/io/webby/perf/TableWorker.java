@@ -5,6 +5,7 @@ import io.webby.orm.api.TableObj;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.List;
+import java.util.function.Consumer;
 import java.util.function.Function;
 import java.util.function.Supplier;
 import java.util.logging.Level;
@@ -16,12 +17,14 @@ public abstract class TableWorker<K, E> implements Worker {
     protected final ProgressMonitor progress;
     protected final TableObj<K, E> table;
     protected final Supplier<K> keyGenerator;
+    private final Consumer<Integer> listener;
 
     public TableWorker(@NotNull Init<K, E> init) {
-        this.steps = init.steps;
-        this.progress = init.progress;
-        this.table = init.table;
-        this.keyGenerator = init.keyGenerator;
+        steps = init.steps;
+        progress = init.progress;
+        table = init.table;
+        keyGenerator = init.keyGenerator;
+        listener = init.listener;
     }
 
     @Override
@@ -32,6 +35,7 @@ public abstract class TableWorker<K, E> implements Worker {
                 progress.step();
                 K key = keyGenerator.get();
                 execute(key);
+                listener.accept(i);
             }
         } catch (Throwable throwable) {
             log.at(Level.SEVERE).withCause(throwable).log("TableWorked crashed");
@@ -97,13 +101,14 @@ public abstract class TableWorker<K, E> implements Worker {
     public record Init<K, E>(long steps,
                              @NotNull ProgressMonitor progress,
                              @NotNull TableObj<K, E> table,
-                             @NotNull Supplier<K> keyGenerator) {
+                             @NotNull Supplier<K> keyGenerator,
+                             @NotNull Consumer<Integer> listener) {
         public Init {
             assert steps >= 0 : "Invalid steps: " + steps;
         }
 
         public Init<K, E> withSteps(long newSteps) {
-            return new Init<>(newSteps, progress, table, keyGenerator);
+            return new Init<>(newSteps, progress, table, keyGenerator, listener);
         }
 
         public Init<K, E> withSteps(double stepsFactor) {

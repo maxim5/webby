@@ -1,17 +1,16 @@
 package io.webby.examples.model;
 
+import io.webby.orm.api.Connector;
 import io.webby.testing.SqliteTableTest;
 import io.webby.testing.TableIntTest;
 import org.jetbrains.annotations.NotNull;
-
-import java.sql.Connection;
 
 public class PrimitiveModelTableTest
         extends SqliteTableTest<Integer, PrimitiveModel, PrimitiveModelTable>
         implements TableIntTest<PrimitiveModel, PrimitiveModelTable> {
     @Override
-    protected void setUp(@NotNull Connection connection) throws Exception {
-        connection.createStatement().executeUpdate("""
+    protected void setUp(@NotNull Connector connector) throws Exception {
+        connector.runner().runMultiUpdate("""
             CREATE TABLE primitive_model (
                 id INTEGER PRIMARY KEY,
                 i INTEGER,
@@ -24,7 +23,7 @@ public class PrimitiveModelTableTest
                 bool INTEGER
             )
         """);
-        table = new PrimitiveModelTable(connection);
+        table = new PrimitiveModelTable(connector);
     }
 
     @Override

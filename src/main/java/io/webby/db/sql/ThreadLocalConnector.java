@@ -12,17 +12,17 @@ public class ThreadLocalConnector implements Connector {
     private static final ThreadLocal<ConnectionData> local = new ThreadLocal<>();
 
     private final ConnectionPool pool;
-    private final long keepOpenTimeout;
+    private final long keepOpenTimeoutMillis;
 
-    public ThreadLocalConnector(@NotNull ConnectionPool pool, long keepOpenTimeout) {
+    public ThreadLocalConnector(@NotNull ConnectionPool pool, long keepOpenTimeoutMillis) {
         this.pool = pool;
-        this.keepOpenTimeout = keepOpenTimeout;
+        this.keepOpenTimeoutMillis = keepOpenTimeoutMillis;
     }
 
     @Override
     public @NotNull Connection connection() {
         ConnectionData data = local.get();
-        if (data != null) {
+        if (data != null && data.isOpen()) {
             return data.connection;
         }
         local.set(connectNow());
@@ -32,7 +32,7 @@ public class ThreadLocalConnector implements Connector {
     @Override
     public @NotNull QueryRunner runner() {
         ConnectionData data = local.get();
-        if (data != null) {
+        if (data != null && data.isOpen()) {
             return data.runner;
         }
         local.set(connectNow());
@@ -41,7 +41,7 @@ public class ThreadLocalConnector implements Connector {
 
     public void refreshIfNecessary() {
         ConnectionData data = local.get();
-        if (data != null && now() - data.openedTimestamp > data.keepOpenTimeout) {
+        if (data != null && now() - data.openedEpochMillis > data.keepOpenTimeoutMillis) {
             data.close();
             local.set(connectNow());
         }
@@ -49,7 +49,7 @@ public class ThreadLocalConnector implements Connector {
 
     public static void cleanupIfNecessary() {
         ConnectionData data = local.get();
-        if (data != null && now() - data.openedTimestamp > data.keepOpenTimeout) {
+        if (data != null && now() - data.openedEpochMillis > data.keepOpenTimeoutMillis) {
             data.close();
             local.remove();
         }
@@ -66,8 +66,7 @@ public class ThreadLocalConnector implements Connector {
     private @NotNull ConnectionData connectNow() {
         Connection connection = pool.getConnection();
         QueryRunner runner = new QueryRunner(connection);
-        long openedTimestamp = now();
-        return new ConnectionData(connection, runner, openedTimestamp, keepOpenTimeout);
+        return new ConnectionData(connection, runner, now(), keepOpenTimeoutMillis);
     }
 
     private static long now() {
@@ -75,7 +74,7 @@ public class ThreadLocalConnector implements Connector {
     }
 
     private record ConnectionData(@NotNull Connection connection, @NotNull QueryRunner runner,
-                                  long openedTimestamp, long keepOpenTimeout) {
+                                  long openedEpochMillis, long keepOpenTimeoutMillis) {
         public void close() {
             try {
                 if (!connection.isClosed()) {
@@ -83,6 +82,14 @@ public class ThreadLocalConnector implements Connector {
                 }
             } catch (SQLException e) {
                 Rethrow.rethrow(e);
+            }
+        }
+
+        public boolean isOpen() {
+            try {
+                return !connection.isClosed();
+            } catch (SQLException e) {
+                return Rethrow.rethrow(e);
             }
         }
 

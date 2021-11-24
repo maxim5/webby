@@ -18,9 +18,13 @@ public class RandomLongGenerator implements Supplier<Long> {
         this.maxId = maxId;
     }
 
+    public double random() {
+        return random.nextDouble();
+    }
+
     @Override
     public Long get() {
-        return (long) (random.nextDouble() * maxId);
+        return (long) (random() * maxId);
     }
 
     public long seed() {

@@ -7,45 +7,53 @@ import io.webby.auth.session.Session;
 import io.webby.auth.user.DefaultUser;
 import io.webby.auth.user.UserAccess;
 import io.webby.auth.user.UserTable;
-import io.webby.db.sql.ConnectionPool;
 import io.webby.db.sql.SqlSettings;
+import io.webby.db.sql.TableManager;
+import io.webby.db.sql.ThreadLocalConnector;
 import io.webby.perf.TableWorker.Init;
 import io.webby.testing.Testing;
 
-import java.sql.Connection;
 import java.util.List;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.TimeUnit;
+import java.util.function.Consumer;
 
 public class StressUserTableMain {
+    // private static final String URL = SqlSettings.jdbcUrl(SqlSettings.SQLITE, "file:.data/temp.sqlite.db?mode=memory&cache=shared");
+    private static final String URL = SqlSettings.jdbcUrl(SqlSettings.H2, "file:./.data/temp.h2");
+
     public static void main(String[] args) throws Exception {
         AppSettings settings = Testing.defaultAppSettings();
         settings.modelFilter().setCommonPackageOf(DefaultUser.class, Session.class);
-        settings.storageSettings().enableSqlStorage(SqlSettings.inMemoryNotForProduction());
+        settings.storageSettings().enableSqlStorage(new SqlSettings(URL));
+        settings.setProperty("db.sql.connection.keep.open.millis", 10_000);
         Injector injector = Webby.initGuice(settings);
 
-        ConnectionPool pool = injector.getInstance(ConnectionPool.class);
-        try (Connection connection = pool.getConnection()) {
-            connection.createStatement().executeUpdate("""
-                CREATE TABLE user (
-                    user_id INTEGER PRIMARY KEY,
-                    access_level INTEGER
-                )
-            """);
-        }
-        UserTable userTable = new UserTable(pool.getConnection());
+        TableManager tableManager = injector.getInstance(TableManager.class);
+        tableManager.connector().runner().runMultiUpdate("""
+            CREATE TABLE IF NOT EXISTS user (
+                user_id INTEGER PRIMARY KEY,
+                access_level INTEGER
+            )
+        """);
 
+        UserTable userTable = new UserTable(tableManager.connector());
         ProgressMonitor progress = new ProgressMonitor();
         RandomLongGenerator generator = new RandomLongGenerator(100_000);
-        Init<Long, DefaultUser> init = new Init<>(1_000_000, progress, userTable, generator);
+        Consumer<Integer> randomConnectionCleaner = step -> {
+            if (generator.random() < 1e-4) {
+                ThreadLocalConnector.cleanupIfNecessary();
+            }
+        };
+        Init<Long, DefaultUser> init = new Init<>(10_000_000, progress, userTable, generator, randomConnectionCleaner);
 
         List<Worker> workers = List.of(
             TableWorker.inserter(init, id -> new DefaultUser(id, UserAccess.Simple)),
             TableWorker.updater(init, id -> new DefaultUser(id, UserAccess.Admin)),
             TableWorker.deleter(init),
             TableWorker.reader(init),
-            TableWorker.scanner(init.withSteps(200))
+            TableWorker.scanner(init.withSteps(1000))
         );
         ExecutorService executor = Executors.newFixedThreadPool(workers.size());
         workers.forEach(executor::execute);

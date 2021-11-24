@@ -1,10 +1,9 @@
 package io.webby.examples.model;
 
+import io.webby.orm.api.Connector;
 import io.webby.testing.PrimaryKeyTableTest;
 import io.webby.testing.SqliteTableTest;
 import org.jetbrains.annotations.NotNull;
-
-import java.sql.Connection;
 
 import static io.webby.testing.TestingUtil.array;
 
@@ -12,8 +11,8 @@ public class EnumModelTableTest
         extends SqliteTableTest<EnumModel.Foo, EnumModel, EnumModelTable>
         implements PrimaryKeyTableTest<EnumModel.Foo, EnumModel, EnumModelTable> {
     @Override
-    protected void setUp(@NotNull Connection connection) throws Exception {
-        connection.createStatement().executeUpdate("""
+    protected void setUp(@NotNull Connector connector) throws Exception {
+        connector.runner().runMultiUpdate("""
             CREATE TABLE enum_model (
                 id_ord INTEGER PRIMARY KEY,
                 foo_ord INTEGER,
@@ -21,7 +20,7 @@ public class EnumModelTableTest
                 nested_s TEXT
             )
         """);
-        table = new EnumModelTable(connection);
+        table = new EnumModelTable(connector);
     }
 
     @Override

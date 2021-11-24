@@ -1,5 +1,6 @@
 package io.webby.examples.model;
 
+import io.webby.orm.api.Connector;
 import io.webby.testing.ForeignKeyTableTest;
 import io.webby.testing.SqliteTableTest;
 import io.webby.testing.TableLongTest;
@@ -8,15 +9,13 @@ import io.webby.orm.api.ForeignLong;
 import io.webby.orm.api.ForeignObj;
 import org.jetbrains.annotations.NotNull;
 
-import java.sql.Connection;
-
 public class ForeignKeyModelTableTest
         extends SqliteTableTest<Long, ForeignKeyModel, ForeignKeyModelTable>
         implements TableLongTest<ForeignKeyModel, ForeignKeyModelTable>,
                    ForeignKeyTableTest<Long, ForeignKeyModel, ForeignKeyModelTable> {
     @Override
-    protected void setUp(@NotNull Connection connection) throws Exception {
-        connection.createStatement().executeUpdate("""
+    protected void setUp(@NotNull Connector connector) throws Exception {
+        connector.runner().runMultiUpdate("""
             CREATE TABLE f_k_int (
                 id INTEGER PRIMARY KEY,
                 value INTEGER
@@ -36,7 +35,7 @@ public class ForeignKeyModelTableTest
                 inner_string_id TEXT
             );
         """);
-        table = new ForeignKeyModelTable(connection);
+        table = new ForeignKeyModelTable(connector);
     }
 
     @Override
@@ -52,13 +51,13 @@ public class ForeignKeyModelTableTest
     @Override
     public @NotNull ForeignKeyModel enrichOneLevel(@NotNull ForeignKeyModel model) {
         ForeignKeyModel.InnerInt fkInt = new ForeignKeyModel.InnerInt(model.innerInt().getIntId(), 123);
-        new FKIntTable(connection()).insert(fkInt);
+        new FKIntTable(connector()).insert(fkInt);
 
         ForeignKeyModel.InnerLong fkLong = new ForeignKeyModel.InnerLong(model.innerLong().getLongId(), 456);
-        new FKLongTable(connection()).insert(fkLong);
+        new FKLongTable(connector()).insert(fkLong);
 
         ForeignKeyModel.InnerString fkString = new ForeignKeyModel.InnerString(model.innerString().getFk(), "foobar");
-        new FKStringTable(connection()).insert(fkString);
+        new FKStringTable(connector()).insert(fkString);
 
         return new ForeignKeyModel(
             model.id(),
