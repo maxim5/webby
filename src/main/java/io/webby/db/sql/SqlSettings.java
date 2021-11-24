@@ -4,7 +4,7 @@ import io.webby.orm.api.Engine;
 import org.jetbrains.annotations.NotNull;
 
 public record SqlSettings(@NotNull String url) {
-    public static final String H2_IN_MEMORY = jdbcUrl(Engine.H2, "mem:");
+    public static final String H2_IN_MEMORY = "jdbc:h2:mem:test;DB_CLOSE_DELAY=-1";
     public static final String SQLITE_IN_MEMORY = jdbcUrl(Engine.SQLite, ":memory:");
 
     public static String jdbcUrl(@NotNull Engine engine, @NotNull String file) {

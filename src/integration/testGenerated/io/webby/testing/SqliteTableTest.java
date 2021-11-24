@@ -1,6 +1,5 @@
 package io.webby.testing;
 
-import io.webby.db.sql.SqlSettings;
 import io.webby.orm.api.Connector;
 import io.webby.orm.api.DebugSql;
 import io.webby.orm.api.Engine;
@@ -18,11 +17,12 @@ import java.util.Arrays;
 import java.util.List;
 
 import static com.google.common.truth.Truth.assertThat;
+import static io.webby.db.sql.SqlSettings.SQLITE_IN_MEMORY;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 
 public abstract class SqliteTableTest<K, E, T extends TableObj<K, E>> implements BaseTableTest<E, T> {
-    @RegisterExtension private final SqlDbSetupExtension SQL_DB = new SqlDbSetupExtension(SqlSettings.SQLITE_IN_MEMORY);
+    @RegisterExtension private final SqlDbSetupExtension SQL_DB = new SqlDbSetupExtension(SQLITE_IN_MEMORY);
 
     protected T table;
 

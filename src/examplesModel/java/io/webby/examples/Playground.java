@@ -6,11 +6,11 @@ import io.webby.orm.api.DebugSql.DebugRunner;
 import java.sql.Connection;
 import java.sql.DriverManager;
 
-public class Playground {
-    private static final String URL = "jdbc:sqlite:%s".formatted(":memory:");
+import static io.webby.db.sql.SqlSettings.SQLITE_IN_MEMORY;
 
+public class Playground {
     public static void main(String[] args) throws Exception {
-        Connection connection = DriverManager.getConnection(URL);
+        Connection connection = DriverManager.getConnection(SQLITE_IN_MEMORY);
         DebugRunner main = new DebugRunner(connection);
 
         main.update("CREATE TABLE user (user_id INTEGER PRIMARY KEY AUTOINCREMENT, access_level INTEGER)");

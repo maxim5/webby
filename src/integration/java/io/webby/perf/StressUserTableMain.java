@@ -20,14 +20,16 @@ import java.util.concurrent.Executors;
 import java.util.concurrent.TimeUnit;
 import java.util.function.Consumer;
 
+// Possible URLs:
+// SqlSettings.jdbcUrl(Engine.H2, "file:./.data/temp.h2")
+// SqlSettings.jdbcUrl(SqlSettings.SQLITE, "file:.data/temp.sqlite.db?mode=memory&cache=shared")
 public class StressUserTableMain {
-    // private static final String URL = SqlSettings.jdbcUrl(SqlSettings.SQLITE, "file:.data/temp.sqlite.db?mode=memory&cache=shared");
-    private static final String URL = SqlSettings.jdbcUrl(Engine.H2, "file:./.data/temp.h2");
+    private static final SqlSettings SQL_SETTINGS = SqlSettings.inMemoryNotForProduction(Engine.H2);
 
     public static void main(String[] args) throws Exception {
         AppSettings settings = Testing.defaultAppSettings();
         settings.modelFilter().setCommonPackageOf(DefaultUser.class, Session.class);
-        settings.storageSettings().enableSqlStorage(new SqlSettings(URL));
+        settings.storageSettings().enableSqlStorage(SQL_SETTINGS);
         settings.setProperty("db.sql.connection.keep.open.millis", 10_000);
         Injector injector = Webby.initGuice(settings);
 
