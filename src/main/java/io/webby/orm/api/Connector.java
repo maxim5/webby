@@ -7,5 +7,11 @@ import java.sql.Connection;
 public interface Connector {
     @NotNull Connection connection();
 
-    @NotNull QueryRunner runner();
+    default @NotNull QueryRunner runner() {
+        return new QueryRunner(connection());
+    }
+
+    default @NotNull Engine engine() {
+        return Engine.safeFrom(connection());
+    }
 }

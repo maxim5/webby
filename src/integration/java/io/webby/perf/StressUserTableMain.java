@@ -10,6 +10,7 @@ import io.webby.auth.user.UserTable;
 import io.webby.db.sql.SqlSettings;
 import io.webby.db.sql.TableManager;
 import io.webby.db.sql.ThreadLocalConnector;
+import io.webby.orm.api.Engine;
 import io.webby.perf.TableWorker.Init;
 import io.webby.testing.Testing;
 
@@ -21,7 +22,7 @@ import java.util.function.Consumer;
 
 public class StressUserTableMain {
     // private static final String URL = SqlSettings.jdbcUrl(SqlSettings.SQLITE, "file:.data/temp.sqlite.db?mode=memory&cache=shared");
-    private static final String URL = SqlSettings.jdbcUrl(SqlSettings.H2, "file:./.data/temp.h2");
+    private static final String URL = SqlSettings.jdbcUrl(Engine.H2, "file:./.data/temp.h2");
 
     public static void main(String[] args) throws Exception {
         AppSettings settings = Testing.defaultAppSettings();

@@ -1,14 +1,16 @@
 package io.webby.testing;
 
 import io.webby.db.sql.SqlSettings;
-import io.webby.orm.api.*;
+import io.webby.orm.api.Connector;
+import io.webby.orm.api.DebugSql;
+import io.webby.orm.api.Engine;
+import io.webby.orm.api.TableObj;
 import io.webby.testing.ext.SqlDbSetupExtension;
 import org.jetbrains.annotations.NotNull;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.RegisterExtension;
 
-import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
@@ -64,15 +66,6 @@ public abstract class SqliteTableTest<K, E, T extends TableObj<K, E>> implements
     }
 
     protected @NotNull Connector connector() {
-        return new Connector() {
-            @Override
-            public @NotNull Connection connection() {
-                return SQL_DB.getConnection();
-            }
-            @Override
-            public @NotNull QueryRunner runner() {
-                return new QueryRunner(connection());
-            }
-        };
+        return SQL_DB::getConnection;
     }
 }

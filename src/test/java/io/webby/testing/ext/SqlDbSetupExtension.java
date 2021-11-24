@@ -4,6 +4,7 @@ import com.google.common.flogger.FluentLogger;
 import com.google.inject.Module;
 import io.webby.db.sql.ConnectionPool;
 import io.webby.db.sql.SqlSettings;
+import io.webby.orm.api.Engine;
 import io.webby.testing.TestingModules;
 import io.webby.util.base.Rethrow;
 import org.jetbrains.annotations.NotNull;
@@ -75,6 +76,10 @@ public class SqlDbSetupExtension implements BeforeAllCallback, AfterAllCallback,
             @Override
             public @NotNull Connection getConnection() {
                 return connection;
+            }
+            @Override
+            public @NotNull Engine getEngine() {
+                return parseUrl(url);
             }
         };
     }

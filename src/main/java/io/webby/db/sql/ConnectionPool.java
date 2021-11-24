@@ -7,9 +7,11 @@ import com.zaxxer.hikari.HikariConfig;
 import com.zaxxer.hikari.HikariDataSource;
 import io.webby.app.Settings;
 import io.webby.common.Lifetime;
+import io.webby.orm.api.Engine;
 import io.webby.util.base.Rethrow;
 import io.webby.util.lazy.ResettableAtomicLazy;
 import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 import org.jetbrains.annotations.VisibleForTesting;
 
 import java.sql.Connection;
@@ -43,6 +45,18 @@ public class ConnectionPool {
         } catch (SQLException e) {
             return Rethrow.rethrow(e);
         }
+    }
+
+    public @NotNull Engine getEngine() {
+        return parseUrl(dataSource.getJdbcUrl());
+    }
+
+    protected static @NotNull Engine parseUrl(@Nullable String url) {
+        if (url == null || !url.startsWith("jdbc:")) {
+            return Engine.Unknown;
+        }
+        String[] parts = url.split(":");
+        return parts.length > 1 ? Engine.fromJdbcType(parts[1]) : Engine.Unknown;
     }
 
     @Override

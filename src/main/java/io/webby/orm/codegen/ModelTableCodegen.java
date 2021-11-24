@@ -161,12 +161,10 @@ public class ModelTableCodegen extends BaseCodegen {
     private void constructors() throws IOException {
         appendCode("""
         protected final Connector connector;
-        protected final Engine engine;
         protected final ReadFollow follow;
     
         public $TableClass(@Nonnull Connector connector, @Nonnull ReadFollow follow) {
             this.connector = connector;
-            this.engine = Engine.safeFrom(connector.connection());
             this.follow = follow;
         }
         
@@ -197,7 +195,7 @@ public class ModelTableCodegen extends BaseCodegen {
         appendCode("""
         @Override
         public @Nonnull Engine engine() {
-            return engine;
+            return connector.engine();
         }
         
         public @Nonnull QueryRunner runner() {

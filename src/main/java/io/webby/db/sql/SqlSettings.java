@@ -1,19 +1,22 @@
 package io.webby.db.sql;
 
+import io.webby.orm.api.Engine;
 import org.jetbrains.annotations.NotNull;
 
 public record SqlSettings(@NotNull String url) {
-    public static final String H2 = "h2";
-    public static final String SQLITE = "sqlite";
+    public static final String H2_IN_MEMORY = jdbcUrl(Engine.H2, "mem:");
+    public static final String SQLITE_IN_MEMORY = jdbcUrl(Engine.SQLite, ":memory:");
 
-    public static final String IN_MEMORY = ":memory:";
-    public static final String SQLITE_IN_MEMORY = jdbcUrl(SQLITE, IN_MEMORY);
-
-    public static String jdbcUrl(@NotNull String engine, @NotNull String file) {
-        return "jdbc:%s:%s".formatted(engine, file);
+    public static String jdbcUrl(@NotNull Engine engine, @NotNull String file) {
+        assert engine != Engine.Unknown : "Can't make JDBC url from unknown DB engine";
+        return "jdbc:%s:%s".formatted(engine.jdbcType(), file);
     }
 
-    public static @NotNull SqlSettings inMemoryNotForProduction() {
-        return new SqlSettings(SQLITE_IN_MEMORY);
+    public static @NotNull SqlSettings inMemoryNotForProduction(@NotNull Engine engine) {
+        return switch (engine) {
+            case H2 -> new SqlSettings(H2_IN_MEMORY);
+            case SQLite -> new SqlSettings(SQLITE_IN_MEMORY);
+            default -> throw new IllegalArgumentException("In-memory not supported for DB engine: " + engine);
+        };
     }
 }

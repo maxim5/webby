@@ -1,6 +1,7 @@
 package io.webby.db.sql;
 
 import io.webby.orm.api.Connector;
+import io.webby.orm.api.Engine;
 import io.webby.orm.api.QueryRunner;
 import io.webby.util.base.Rethrow;
 import org.jetbrains.annotations.NotNull;
@@ -37,6 +38,11 @@ public class ThreadLocalConnector implements Connector {
         }
         local.set(connectNow());
         return local.get().runner;
+    }
+
+    @Override
+    public @NotNull Engine engine() {
+        return pool.getEngine();
     }
 
     public void refreshIfNecessary() {
