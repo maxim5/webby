@@ -5,10 +5,7 @@ import com.google.common.collect.Lists;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
-import java.sql.Connection;
-import java.sql.ResultSet;
-import java.sql.ResultSetMetaData;
-import java.sql.SQLException;
+import java.sql.*;
 import java.util.*;
 import java.util.function.Function;
 import java.util.stream.Collectors;
@@ -134,7 +131,10 @@ public class DebugSql {
 
         public void query(@NotNull String query, @Nullable Object @NotNull ... params) throws Exception {
             System.out.println(">>> " + query.trim());
-            System.out.println(DebugSql.toDebugString(runQuery(query, params)));
+            try (PreparedStatement statement = prepareQuery(query, params);
+                 ResultSet result = statement.executeQuery()) {
+                System.out.println(DebugSql.toDebugString(result));
+            }
             System.out.println();
         }
     }

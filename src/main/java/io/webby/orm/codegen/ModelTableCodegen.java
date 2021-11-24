@@ -59,7 +59,6 @@ public class ModelTableCodegen extends BaseCodegen {
 
         engine();
         count();
-        // isEmpty();
 
         selectConstants();
 
@@ -210,7 +209,8 @@ public class ModelTableCodegen extends BaseCodegen {
         @Override
         public int count() {
             String query = "SELECT COUNT(*) FROM $table_sql";
-            try (ResultSet result = runner.runQuery(query)) {
+            try (PreparedStatement statement = runner.prepareQuery(query);
+                 ResultSet result = statement.executeQuery()) {
                 return result.getInt(1);
             } catch (SQLException e) {
                 throw new QueryException("Failed to count in $TableClass", query, e);
@@ -220,21 +220,14 @@ public class ModelTableCodegen extends BaseCodegen {
         @Override
         public int count(@Nonnull Where where) {
             String query = "SELECT COUNT(*) FROM $table_sql\\n" + where.repr();
-            try (ResultSet result = runner.runQuery(query)) {
+            try (PreparedStatement statement = runner.prepareQuery(query);
+                 ResultSet result = statement.executeQuery()) {
                 return result.getInt(1);
             } catch (SQLException e) {
                 throw new QueryException("Failed to count in $TableClass", query, e);
             }
         }\n
         """, mainContext);
-    }
-
-    private void isEmpty() throws IOException {
-        appendCode("""
-        public boolean isEmpty() {
-            return count() == 0;
-        }\n
-        """);
     }
 
     private void selectConstants() throws IOException {
@@ -266,7 +259,8 @@ public class ModelTableCodegen extends BaseCodegen {
         @Override
         public @Nullable $ModelClass getByPkOrNull($pk_annotation$pk_type $pk_name) {
             String query = SELECT_ENTITY_ALL[follow.ordinal()] + $sql_where_literal;
-            try (ResultSet result = runner.runQuery(query, $pk_object)) {
+            try (PreparedStatement statement = runner.prepareQuery(query, $pk_object);
+                 ResultSet result = statement.executeQuery()) {
                 return result.next() ? fromRow(result, follow, 0) : null;
             } catch (SQLException e) {
                 throw new QueryException("$table_sql.getByPkOrNull() failed", query, $pk_name, e);
@@ -311,7 +305,8 @@ public class ModelTableCodegen extends BaseCodegen {
         @Override
         public void forEach(@Nonnull Consumer<? super $ModelClass> consumer) {
             String query = SELECT_ENTITY_ALL[follow.ordinal()];
-            try (ResultSet result = runner.runQuery(query)) {
+            try (PreparedStatement statement = runner.prepareQuery(query);
+                 ResultSet result = statement.executeQuery()) {
                 while (result.next()) {
                     consumer.accept(fromRow(result, follow, 0));
                 }
@@ -324,7 +319,7 @@ public class ModelTableCodegen extends BaseCodegen {
         public @Nonnull ResultSetIterator<$ModelClass> iterator() {
             String query = SELECT_ENTITY_ALL[follow.ordinal()];
             try {
-                return new ResultSetIterator<>(runner.runQuery(query), result -> fromRow(result, follow, 0));
+                return new ResultSetIterator<>(runner.prepareQuery(query).executeQuery(), result -> fromRow(result, follow, 0));
             } catch (SQLException e) {
                 throw new QueryException("Failed to iterate over $TableClass", query, e);
             }
@@ -334,7 +329,7 @@ public class ModelTableCodegen extends BaseCodegen {
         public @Nonnull ResultSetIterator<$ModelClass> iterator(@Nonnull Where where) {
             String query = SELECT_ENTITY_ALL[follow.ordinal()] + "\\n" + where.repr();
             try {
-                return new ResultSetIterator<>(runner.runQuery(query), result -> fromRow(result, follow, 0));
+                return new ResultSetIterator<>(runner.prepareQuery(query).executeQuery(), result -> fromRow(result, follow, 0));
             } catch (SQLException e) {
                 throw new QueryException("Failed to iterate over $TableClass", query, e);
             }

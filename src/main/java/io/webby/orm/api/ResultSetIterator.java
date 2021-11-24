@@ -57,6 +57,7 @@ public class ResultSetIterator<E> implements Iterator<E>, Closeable {
     public void close() {
         try {
             resultSet.close();
+            resultSet.getStatement().close();  // TODO: introduce a flag
         } catch (SQLException e) {
             Rethrow.rethrow(e);
         }

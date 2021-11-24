@@ -12,6 +12,7 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.RegisterExtension;
 
 import java.sql.Connection;
+import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.Arrays;
@@ -44,8 +45,14 @@ public abstract class SqliteTableTest<K, E, T extends TableObj<K, E>> implements
     }
 
     public List<String> parseColumnNamesFromDb(@NotNull String name) throws SQLException {
-        ResultSet resultSet = new QueryRunner(connection()).runQuery("SELECT sql FROM sqlite_master WHERE name=?", name);
-        List<DebugSql.Row> rows = DebugSql.toDebugRows(resultSet);
+        QueryRunner runner = new QueryRunner(connection());
+
+        List<DebugSql.Row> rows;
+        try (PreparedStatement statement = runner.prepareQuery("SELECT sql FROM sqlite_master WHERE name=?", name);
+             ResultSet resultSet = statement.executeQuery()) {
+            rows = DebugSql.toDebugRows(resultSet);
+        }
+
         assertFalse(rows.isEmpty(), "SQL table not found in DB: %s".formatted(name));
         assertThat(rows).hasSize(1);
 
