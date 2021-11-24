@@ -2,9 +2,11 @@ package io.webby.testing;
 
 import com.google.inject.Injector;
 import com.google.inject.Module;
+import com.google.inject.util.Modules;
 import io.webby.Webby;
 import io.webby.app.AppLifetime;
 import io.webby.app.AppSettings;
+import io.webby.common.ClasspathScanner;
 import io.webby.netty.marshal.Json;
 import org.apache.logging.log4j.Level;
 import org.apache.logging.log4j.LogManager;
@@ -63,7 +65,9 @@ public class Testing {
 
         Locale.setDefault(Locale.US);  // any way to remove this?
 
-        return Internals.injector = Webby.initGuice(settings, modules);
+        Module testingClasspathScanner = TestingModules.instance(new ClasspathScanner());
+        Module module = Modules.override(testingClasspathScanner).with(modules);
+        return Internals.injector = Webby.initGuice(settings, module);
     }
 
     public static class Internals {

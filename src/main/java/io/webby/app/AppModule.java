@@ -1,5 +1,6 @@
 package io.webby.app;
 
+import com.google.common.eventbus.EventBus;
 import com.google.inject.AbstractModule;
 import io.webby.common.Lifetime;
 import org.jetbrains.annotations.NotNull;
@@ -20,5 +21,7 @@ public class AppModule extends AbstractModule {
         bind(AppLifetime.class).asEagerSingleton();
         bind(AppMaintenance.class).asEagerSingleton();
         bind(Lifetime.class).toProvider(AppLifetime.class);
+
+        bind(EventBus.class).asEagerSingleton();
     }
 }

@@ -1,5 +1,6 @@
 package io.webby;
 
+import com.google.common.eventbus.EventBus;
 import com.google.common.flogger.FluentLogger;
 import com.google.common.flogger.util.CallerFinder;
 import com.google.inject.Guice;
@@ -10,6 +11,7 @@ import com.google.inject.util.Modules;
 import io.webby.app.*;
 import io.webby.auth.AuthModule;
 import io.webby.common.CommonModule;
+import io.webby.common.GuiceCompleteEvent;
 import io.webby.db.DbModule;
 import io.webby.db.kv.StorageType;
 import io.webby.db.kv.impl.KeyValueStorageTypeDetector;
@@ -41,8 +43,10 @@ public class Webby {
 
     public static @NotNull Injector initGuice(@NotNull AppSettings settings, @NotNull Module ... modules) {
         log.at(Level.INFO).log("Initializing Webby Guice module");
-        Stage stage = (settings.isDevMode()) ? Stage.DEVELOPMENT : Stage.PRODUCTION;
-        return Guice.createInjector(stage, Modules.override(mainModule(settings)).with(modules));
+        Stage stage = settings.isDevMode() ? Stage.DEVELOPMENT : Stage.PRODUCTION;
+        Injector injector = Guice.createInjector(stage, Modules.override(mainModule(settings)).with(modules));
+        injector.getInstance(EventBus.class).post(new GuiceCompleteEvent());
+        return injector;
     }
 
     public static @NotNull Module mainModule(@NotNull AppSettings settings) throws AppConfigException {
