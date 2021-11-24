@@ -22,10 +22,11 @@ public class Main {
         log.at(Level.INFO).log("Bootstrapping server");
 
         AppSettings settings = new AppSettings();
+        settings.setDevMode(true);
         settings.setSecurityKey("12345678901234567890123456789012");
         settings.setWebPath("out/examples/resources/web");
         settings.setViewPath("out/examples/resources/web");
-        settings.setDevMode(true);
+        settings.modelFilter().setPackageOnly("io.webby");  // because this class is in are in `io.webby.examples`
         settings.setProperty("jte.class.directory", JteExample.CLASS_DIR);
         settings.setProperty("jte.view.paths", "out/examples/resources/web/jte");
         settings.setProperty("pebble.view.paths", "out/examples/resources/web/pebble");
