@@ -23,6 +23,11 @@ public class FakeConnectionPool<C extends Connection> extends ConnectionPool {
         return adapter;
     }
 
+    @Override
+    public boolean isRunning() {
+        return true;
+    }
+
     public @NotNull List<C> connections() {
         return connections;
     }

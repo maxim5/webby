@@ -5,6 +5,7 @@ import io.webby.db.kv.StorageType;
 import io.webby.testing.Testing;
 import io.webby.testing.ext.SqlDbSetupExtension;
 import org.jetbrains.annotations.NotNull;
+import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.extension.RegisterExtension;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.EnumSource;
@@ -20,6 +21,11 @@ public class UserManagerIntegrationTest {
             access_level INTEGER
         )
     """);
+
+    @AfterEach
+    public void tearDown() {
+        Testing.Internals.terminate();
+    }
 
     @ParameterizedTest
     @EnumSource(Scenario.class)
@@ -56,7 +62,7 @@ public class UserManagerIntegrationTest {
             case SQL -> settings.storageSettings().enableSqlStorage(SQL_DB.getSettings()).enableKeyValueStorage(StorageType.JAVA_MAP);
             case KEY_VALUE -> settings.storageSettings().enableKeyValueStorage(StorageType.JAVA_MAP);
         }
-        return Testing.testStartup(settings, SQL_DB.fakeConnectionPoolModule()).getInstance(UserManager.class);
+        return Testing.testStartup(settings, SQL_DB.singleConnectionPoolModule()).getInstance(UserManager.class);
     }
 
     private enum Scenario {

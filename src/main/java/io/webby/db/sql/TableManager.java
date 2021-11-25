@@ -1,42 +1,63 @@
 package io.webby.db.sql;
 
+import com.google.common.collect.ImmutableMap;
+import com.google.common.flogger.FluentLogger;
 import com.google.common.primitives.Primitives;
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
 import io.webby.app.Settings;
 import io.webby.common.ClasspathScanner;
+import io.webby.common.Lifetime;
 import io.webby.orm.api.BaseTable;
 import io.webby.orm.api.Connector;
 import io.webby.orm.api.TableMeta;
 import io.webby.orm.api.TableObj;
+import io.webby.util.lazy.ResettableAtomicLazy;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import org.jetbrains.annotations.VisibleForTesting;
 
-import java.util.LinkedHashMap;
-import java.util.Map;
 import java.util.Set;
 import java.util.function.Function;
+import java.util.logging.Level;
 
 import static io.webby.util.base.EasyCast.castAny;
 
 @Singleton
 public class TableManager {
+    private static final FluentLogger log = FluentLogger.forEnclosingClass();
+    private static final ResettableAtomicLazy<TableManager> SHARED_INSTANCE = new ResettableAtomicLazy<>();
+
     private final Connector connector;
-    private final Map<Class<?>, EntityTable> tableMap;
+    private final ImmutableMap<Class<?>, EntityTable> tableMap;
 
     @Inject
     public TableManager(@NotNull Settings settings,
                         @NotNull ConnectionPool pool,
-                        @NotNull ClasspathScanner scanner) throws Exception {
+                        @NotNull ClasspathScanner scanner,
+                        @NotNull Lifetime lifetime) throws Exception {
+        assert pool.isRunning() : "Invalid pool state: %s".formatted(pool);
+
         connector = new ThreadLocalConnector(pool, settings.getLongProperty("db.sql.connection.expiration.millis", 30_000));
 
         Set<? extends Class<?>> tableClasses = scanner.getDerivedClasses(settings.modelFilter(), BaseTable.class);
         tableMap = buildTableMap(tableClasses);
+
+        initializeStatic(this);
+        lifetime.onTerminate(SHARED_INSTANCE::reset);
     }
 
     public @NotNull Connector connector() {
         return connector;
+    }
+
+    public @Nullable BaseTable<?> getTableByNameOrNull(@NotNull String name) {
+        for (EntityTable entityTable : tableMap.values()) {
+            if (entityTable.sqlName.equals(name)) {
+                return castAny(entityTable.instantiate.apply(connector));
+            }
+        }
+        return null;
     }
 
     public <E> @NotNull BaseTable<E> getMatchingBaseTableOrDie(@NotNull String name, @NotNull Class<? extends E> entity) {
@@ -68,8 +89,8 @@ public class TableManager {
     }
 
     @VisibleForTesting
-    static Map<Class<?>, EntityTable> buildTableMap(@NotNull Iterable<? extends Class<?>> tableClasses) throws Exception {
-        Map<Class<?>, EntityTable> result = new LinkedHashMap<>();
+    static ImmutableMap<Class<?>, EntityTable> buildTableMap(@NotNull Iterable<? extends Class<?>> tableClasses) throws Exception {
+        ImmutableMap.Builder<Class<?>, EntityTable> result = new ImmutableMap.Builder<>();
         for (Class<?> tableClass : tableClasses) {
             TableMeta meta = castAny(tableClass.getField("META").get(null));
             Class<?> key = (Class<?>) tableClass.getField("KEY_CLASS").get(null);
@@ -77,7 +98,7 @@ public class TableManager {
             Function<Connector, ?> instantiate = castAny(tableClass.getField("INSTANTIATE").get(null));
             result.put(entity, new EntityTable(meta.sqlTableName(), key, instantiate));
         }
-        return result;
+        return result.buildOrThrow();
     }
 
     private record EntityTable(@NotNull String sqlName,
@@ -85,6 +106,20 @@ public class TableManager {
                                @NotNull Function<Connector, ?> instantiate) {
         public @Nullable Class<?> wrappedKey() {
             return key != null ? Primitives.wrap(key) : null;
+        }
+    }
+
+    public static @NotNull TableManager unsafeSharedInstance() {
+        return SHARED_INSTANCE.getOrDie();
+    }
+
+    private static void initializeStatic(@NotNull TableManager instance) {
+        if (SHARED_INSTANCE.isInitialized()) {
+            log.at(Level.SEVERE).log("Table manager already statically initialized: `%s`. Call Lifetime.terminate() to clean-up",
+                                     instance);
+        } else {
+            SHARED_INSTANCE.initializeOrDie(instance);
+            log.at(Level.INFO).log("Initialized the table manager: `%s`", instance);
         }
     }
 }

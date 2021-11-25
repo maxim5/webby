@@ -448,6 +448,6 @@ public class KeyValueDbIntegrationTest {
             CLOSE_ALL.addCloseable(mockedClock);
         }
 
-        return Testing.testStartup(settings, SQL_DB.fakeConnectionPoolModule());
+        return Testing.testStartup(settings, SQL_DB.singleConnectionPoolModule());
     }
 }

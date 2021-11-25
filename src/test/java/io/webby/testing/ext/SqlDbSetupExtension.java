@@ -71,7 +71,7 @@ public class SqlDbSetupExtension implements BeforeAllCallback, AfterAllCallback,
         return connection;
     }
 
-    public @NotNull ConnectionPool fakeConnectionPool() {
+    public @NotNull ConnectionPool singleConnectionPool() {
         return new ConnectionPool() {
             @Override
             public @NotNull Connection getConnection() {
@@ -81,10 +81,14 @@ public class SqlDbSetupExtension implements BeforeAllCallback, AfterAllCallback,
             public @NotNull Engine getEngine() {
                 return parseUrl(url);
             }
+            @Override
+            public boolean isRunning() {
+                return true;
+            }
         };
     }
 
-    public @NotNull Module fakeConnectionPoolModule() {
-        return TestingModules.instance(ConnectionPool.class, fakeConnectionPool());
+    public @NotNull Module singleConnectionPoolModule() {
+        return TestingModules.instance(ConnectionPool.class, singleConnectionPool());
     }
 }
