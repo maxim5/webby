@@ -7,6 +7,7 @@ import io.netty.channel.ChannelInboundHandlerAdapter;
 import io.netty.handler.codec.http.websocketx.WebSocketFrame;
 import io.netty.handler.codec.http.websocketx.WebSocketServerProtocolHandler;
 import io.netty.util.ReferenceCountUtil;
+import io.webby.db.sql.ThreadLocalConnector;
 import io.webby.netty.ws.FrameMapper;
 import io.webby.netty.ws.errors.WebsocketError;
 import io.webby.ws.context.ClientInfo;
@@ -64,6 +65,7 @@ public class NettyWebsocketHandler extends ChannelInboundHandlerAdapter {
                 log.at(Level.SEVERE).withCause(throwable).log("Unexpected failure: %s", throwable.getMessage());
             } finally {
                 ReferenceCountUtil.release(frame);
+                cleanupWorkingThread();
             }
         } else {
             context.fireChannelRead(message);
@@ -116,5 +118,9 @@ public class NettyWebsocketHandler extends ChannelInboundHandlerAdapter {
                 context.channel().writeAndFlush(outgoing);
             }
         });
+    }
+
+    private static void cleanupWorkingThread() {
+        ThreadLocalConnector.cleanupIfNecessary();
     }
 }

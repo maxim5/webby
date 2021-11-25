@@ -9,17 +9,16 @@ import com.google.common.util.concurrent.ListenableFuture;
 import com.google.errorprone.annotations.CanIgnoreReturnValue;
 import com.google.inject.Inject;
 import io.netty.buffer.Unpooled;
-import io.netty.channel.Channel;
-import io.netty.channel.ChannelFutureListener;
-import io.netty.channel.ChannelHandlerContext;
-import io.netty.channel.SimpleChannelInboundHandler;
+import io.netty.channel.*;
 import io.netty.handler.codec.http.*;
+import io.netty.util.ReferenceCountUtil;
 import io.netty.util.concurrent.EventExecutor;
 import io.routekit.Match;
 import io.routekit.Router;
 import io.routekit.util.CharArray;
 import io.routekit.util.MutableCharArray;
 import io.webby.app.Settings;
+import io.webby.db.sql.ThreadLocalConnector;
 import io.webby.netty.errors.ServeException;
 import io.webby.netty.intercept.Interceptors;
 import io.webby.netty.marshal.Marshaller;
@@ -52,7 +51,7 @@ import java.util.logging.Level;
 
 import static io.webby.util.base.EasyCast.castAny;
 
-public class NettyHttpHandler extends SimpleChannelInboundHandler<FullHttpRequest> {
+public class NettyHttpHandler extends ChannelInboundHandlerAdapter {
     private static final FluentLogger log = FluentLogger.forEnclosingClass();
 
     @Inject private Settings settings;
@@ -85,15 +84,30 @@ public class NettyHttpHandler extends SimpleChannelInboundHandler<FullHttpReques
     }
 
     @Override
-    protected void channelRead0(@NotNull ChannelHandlerContext context, @NotNull FullHttpRequest request) {
+    public void channelRead(@NotNull ChannelHandlerContext context, @NotNull Object message) {
         assert this.context == context : "Context mismatch: %s != %s".formatted(this.context, context);
-        Stopwatch stopwatch = Stopwatch.createStarted();
 
+        if (message instanceof FullHttpRequest request) {
+            try {
+                Stopwatch stopwatch = Stopwatch.createStarted();
+                HttpResponse response = processIncoming(request);
+                long millis = stopwatch.stop().elapsed(TimeUnit.MILLISECONDS);
+                log.at(Level.INFO).log("%s %s: %s (%d ms)", request.method(), request.uri(), response.status(), millis);
+            } finally {
+                ReferenceCountUtil.release(request);
+                cleanupWorkingThread();
+            }
+        } else {
+            context.fireChannelRead(message);
+        }
+    }
+
+    protected @NotNull HttpResponse processIncoming(@NotNull FullHttpRequest request) {
         HttpResponse response;
         try {
             response = handle(request);
         } catch (Throwable throwable) {
-            cleanup();
+            cleanupAfterFailure();
             response = factory.newResponse500("Unexpected failure", throwable);
             log.at(Level.SEVERE).withCause(throwable).log("Unexpected failure: %s", throwable.getMessage());
         }
@@ -108,13 +122,12 @@ public class NettyHttpHandler extends SimpleChannelInboundHandler<FullHttpReques
             channel.writeAndFlush(response);
         }
 
-        long millis = stopwatch.stop().elapsed(TimeUnit.MILLISECONDS);
-        log.at(Level.INFO).log("%s %s: %s (%d ms)", request.method(), request.uri(), response.status(), millis);
+        return response;
     }
 
     @Override
     public void exceptionCaught(@NotNull ChannelHandlerContext context, @NotNull Throwable cause) {
-        cleanup();
+        cleanupAfterFailure();
         context.channel()
                 .writeAndFlush(factory.newResponse500("Unexpected failure", cause))
                 .addListener(ChannelFutureListener.CLOSE);
@@ -149,8 +162,12 @@ public class NettyHttpHandler extends SimpleChannelInboundHandler<FullHttpReques
         }
     }
 
-    private void cleanup() {
+    private void cleanupAfterFailure() {
         interceptors.cleanup();
+    }
+
+    private static void cleanupWorkingThread() {
+        ThreadLocalConnector.cleanupIfNecessary();
     }
 
     private @NotNull HttpResponse call(@NotNull FullHttpRequest request,
