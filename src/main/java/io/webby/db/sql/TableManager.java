@@ -29,7 +29,7 @@ public class TableManager {
     public TableManager(@NotNull Settings settings,
                         @NotNull ConnectionPool pool,
                         @NotNull ClasspathScanner scanner) throws Exception {
-        connector = new ThreadLocalConnector(pool, settings.getLongProperty("db.sql.connection.keep.open.millis", 30_000));
+        connector = new ThreadLocalConnector(pool, settings.getLongProperty("db.sql.connection.expiration.millis", 30_000));
 
         Set<? extends Class<?>> tableClasses = scanner.getDerivedClasses(settings.modelFilter(), BaseTable.class);
         tableMap = buildTableMap(tableClasses);

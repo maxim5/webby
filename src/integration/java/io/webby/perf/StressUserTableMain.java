@@ -30,7 +30,7 @@ public class StressUserTableMain {
         AppSettings settings = Testing.defaultAppSettings();
         settings.modelFilter().setCommonPackageOf(DefaultUser.class, Session.class);
         settings.storageSettings().enableSqlStorage(SQL_SETTINGS);
-        settings.setProperty("db.sql.connection.keep.open.millis", 10_000);
+        settings.setProperty("db.sql.connection.expiration.millis", 10_000);
         Injector injector = Webby.initGuice(settings);
 
         TableManager tableManager = injector.getInstance(TableManager.class);

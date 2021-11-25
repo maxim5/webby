@@ -13,11 +13,11 @@ public class ThreadLocalConnector implements Connector {
     private static final ThreadLocal<ConnectionData> local = new ThreadLocal<>();
 
     private final ConnectionPool pool;
-    private final long keepOpenTimeoutMillis;
+    private final long timeoutToExpireMillis;
 
-    public ThreadLocalConnector(@NotNull ConnectionPool pool, long keepOpenTimeoutMillis) {
+    public ThreadLocalConnector(@NotNull ConnectionPool pool, long timeoutToExpireMillis) {
         this.pool = pool;
-        this.keepOpenTimeoutMillis = keepOpenTimeoutMillis;
+        this.timeoutToExpireMillis = timeoutToExpireMillis;
     }
 
     @Override
@@ -47,7 +47,7 @@ public class ThreadLocalConnector implements Connector {
 
     public void refreshIfNecessary() {
         ConnectionData data = local.get();
-        if (data != null && now() - data.openedEpochMillis > data.keepOpenTimeoutMillis) {
+        if (data != null && now() > data.expireEpochMillis) {
             data.close();
             local.set(connectNow());
         }
@@ -55,7 +55,7 @@ public class ThreadLocalConnector implements Connector {
 
     public static void cleanupIfNecessary() {
         ConnectionData data = local.get();
-        if (data != null && now() - data.openedEpochMillis > data.keepOpenTimeoutMillis) {
+        if (data != null && now() > data.expireEpochMillis) {
             data.close();
             local.remove();
         }
@@ -72,15 +72,14 @@ public class ThreadLocalConnector implements Connector {
     private @NotNull ConnectionData connectNow() {
         Connection connection = pool.getConnection();
         QueryRunner runner = new QueryRunner(connection);
-        return new ConnectionData(connection, runner, now(), keepOpenTimeoutMillis);
+        return new ConnectionData(connection, runner, now() + timeoutToExpireMillis);
     }
 
     private static long now() {
         return System.currentTimeMillis();
     }
 
-    private record ConnectionData(@NotNull Connection connection, @NotNull QueryRunner runner,
-                                  long openedEpochMillis, long keepOpenTimeoutMillis) {
+    private record ConnectionData(@NotNull Connection connection, @NotNull QueryRunner runner, long expireEpochMillis) {
         public void close() {
             try {
                 if (!connection.isClosed()) {
