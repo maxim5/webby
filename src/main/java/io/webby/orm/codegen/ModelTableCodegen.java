@@ -319,7 +319,7 @@ public class ModelTableCodegen extends BaseCodegen {
         public @Nonnull ResultSetIterator<$ModelClass> iterator() {
             String query = SELECT_ENTITY_ALL[follow.ordinal()];
             try {
-                return new ResultSetIterator<>(runner().prepareQuery(query).executeQuery(), result -> fromRow(result, follow, 0));
+                return ResultSetIterator.of(runner().prepareQuery(query).executeQuery(), result -> fromRow(result, follow, 0));
             } catch (SQLException e) {
                 throw new QueryException("Failed to iterate over $TableClass", query, e);
             }
@@ -329,7 +329,7 @@ public class ModelTableCodegen extends BaseCodegen {
         public @Nonnull ResultSetIterator<$ModelClass> iterator(@Nonnull Where where) {
             String query = SELECT_ENTITY_ALL[follow.ordinal()] + "\\n" + where.repr();
             try {
-                return new ResultSetIterator<>(runner().prepareQuery(query).executeQuery(), result -> fromRow(result, follow, 0));
+                return ResultSetIterator.of(runner().prepareQuery(query).executeQuery(), result -> fromRow(result, follow, 0));
             } catch (SQLException e) {
                 throw new QueryException("Failed to iterate over $TableClass", query, e);
             }

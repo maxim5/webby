@@ -1,5 +1,6 @@
 package io.webby.orm.api;
 
+import com.google.errorprone.annotations.MustBeClosed;
 import io.webby.util.base.Rethrow;
 import org.jetbrains.annotations.NotNull;
 
@@ -11,13 +12,20 @@ import java.util.concurrent.atomic.AtomicBoolean;
 
 public class ResultSetIterator<E> implements Iterator<E>, Closeable {
     private final ResultSet resultSet;
+    private final boolean ownsStatement;
     private final Converter<E> converter;
     private final AtomicBoolean nextCalled = new AtomicBoolean();
     private final AtomicBoolean hasNextCached = new AtomicBoolean();
 
-    public ResultSetIterator(@NotNull ResultSet resultSet, @NotNull Converter<E> converter) {
+    public ResultSetIterator(@NotNull ResultSet resultSet, boolean ownsStatement, @NotNull Converter<E> converter) {
         this.resultSet = resultSet;
+        this.ownsStatement = ownsStatement;
         this.converter = converter;
+    }
+
+    @MustBeClosed
+    public static <E> @NotNull ResultSetIterator<E> of(@NotNull ResultSet resultSet, @NotNull Converter<E> converter) {
+        return new ResultSetIterator<>(resultSet, true, converter);
     }
 
     @Override
@@ -56,14 +64,18 @@ public class ResultSetIterator<E> implements Iterator<E>, Closeable {
     @Override
     public void close() {
         try {
+            // Calling the method close on a ResultSet object that is already closed is a no-op.
+            // Calling the method close on a Statement object that is already closed has no effect.
             resultSet.close();
-            resultSet.getStatement().close();  // TODO: introduce a flag
+            if (ownsStatement) {
+                resultSet.getStatement().close();
+            }
         } catch (SQLException e) {
             Rethrow.rethrow(e);
         }
     }
 
     public interface Converter<E> {
-        E convert(ResultSet resultSet) throws SQLException;
+        E convert(@NotNull ResultSet resultSet) throws SQLException;
     }
 }
