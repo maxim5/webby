@@ -35,8 +35,7 @@ public class Main {
         settings.storageSettings().enableKeyValueStorage(StorageType.MAP_DB).setKeyValueStoragePath(".data/mapdb")
                 .enableSqlStorage(SqlSettings.inMemoryNotForProduction(Engine.SQLite));
 
-        Injector injector = Webby.initGuice(settings);
-        NettyBootstrap startup = injector.getInstance(NettyBootstrap.class);
+        NettyBootstrap startup = Webby.nettyBootstrap(settings);
         startup.runLocally(port);
     }
 }

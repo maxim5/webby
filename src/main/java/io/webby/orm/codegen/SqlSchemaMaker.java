@@ -4,10 +4,15 @@ import io.webby.orm.api.BaseTable;
 import io.webby.orm.api.Engine;
 import io.webby.orm.api.TableMeta;
 import io.webby.util.base.Rethrow;
+import io.webby.util.collect.EasyMaps;
 import org.jetbrains.annotations.NotNull;
 
+import java.sql.Date;
+import java.sql.Time;
+import java.sql.Timestamp;
 import java.util.Arrays;
 import java.util.List;
+import java.util.Map;
 import java.util.stream.Collectors;
 
 import static io.webby.util.base.EasyCast.castAny;
@@ -53,17 +58,34 @@ public class SqlSchemaMaker {
                 .collect(Collectors.joining(";\n"));
     }
 
-    private static @NotNull String sqlTypeFor(@NotNull Class<?> columnType, @NotNull Engine engine) {
-        if (engine == Engine.SQLite) {
-            if (columnType == String.class) {
-                return "TEXT";
-            }
-            if (columnType == byte[].class) {
-                return "BLOB";
-            }
-            return "INTEGER";
-        }
+    private static final Map<Class<?>, String> DEFAULT_DATA_TYPES = EasyMaps.asMap(
+        boolean.class, "BOOLEAN",
+        byte.class, "TINYINT",
+        short.class, "SMALLINT",
+        int.class, "INTEGER",
+        long.class, "BIGINT",
+        float.class, "REAL",
+        double.class, "DOUBLE",
+        String.class, "VARCHAR",
+        byte[].class, "BLOB",
+        Time.class, "TIME",
+        Date.class, "DATE",
+        Timestamp.class, "TIMESTAMP"
+    );
 
-        throw new IllegalArgumentException("Engine not supported: " + engine);
+    private static @NotNull String sqlTypeFor(@NotNull Class<?> columnType, @NotNull Engine engine) {
+        return switch (engine) {
+            case H2 -> DEFAULT_DATA_TYPES.get(columnType);
+            case SQLite -> {
+                if (columnType == String.class) {
+                    yield "TEXT";
+                }
+                if (columnType == byte[].class) {
+                    yield "BLOB";
+                }
+                yield "INTEGER";
+            }
+            default -> throw new IllegalArgumentException("Engine not supported for table creation: " + engine);
+        };
     }
 }

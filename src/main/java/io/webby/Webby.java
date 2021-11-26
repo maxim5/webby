@@ -15,6 +15,7 @@ import io.webby.common.GuiceCompleteEvent;
 import io.webby.db.DbModule;
 import io.webby.db.kv.StorageType;
 import io.webby.db.kv.impl.KeyValueStorageTypeDetector;
+import io.webby.db.sql.TableCreator;
 import io.webby.netty.NettyBootstrap;
 import io.webby.netty.NettyModule;
 import io.webby.orm.OrmModule;
@@ -37,8 +38,29 @@ public class Webby {
     private static final FluentLogger log = FluentLogger.forEnclosingClass();
 
     public static @NotNull NettyBootstrap nettyBootstrap(@NotNull AppSettings settings, @NotNull Module ... modules) {
-        Injector injector = initGuice(settings, modules);
+        Injector injector = getReady(settings, modules);
         return injector.getInstance(NettyBootstrap.class);
+    }
+
+    public static @NotNull Injector getReady(@NotNull AppSettings settings, @NotNull Module ... modules) {
+        Injector injector = initGuice(settings, modules);
+        if (settings.isDevMode()) {
+            prepareForDev(settings, injector);
+        } else {
+            prepareForProd(settings, injector);
+        }
+        return injector;
+    }
+
+    private static void prepareForDev(@NotNull AppSettings settings, @NotNull Injector injector) {
+        if (settings.storageSettings().isSqlStorageEnabled()) {
+            TableCreator tableCreator = injector.getInstance(TableCreator.class);
+            tableCreator.createAllTablesIfNotExist();
+        }
+    }
+
+    private static void prepareForProd(@NotNull AppSettings settings, @NotNull Injector injector) {
+        // check tables exist?
     }
 
     public static @NotNull Injector initGuice(@NotNull AppSettings settings, @NotNull Module ... modules) {

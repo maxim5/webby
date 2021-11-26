@@ -67,7 +67,7 @@ public class Testing {
 
         Module testingClasspathScanner = TestingModules.instance(new ClasspathScanner());
         Module module = Modules.override(testingClasspathScanner).with(modules);
-        return Internals.injector = Webby.initGuice(settings, module);
+        return Internals.injector = Webby.getReady(settings, module);
     }
 
     public static class Internals {

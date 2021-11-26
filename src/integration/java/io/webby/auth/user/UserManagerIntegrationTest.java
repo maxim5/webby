@@ -12,12 +12,10 @@ import org.junit.jupiter.params.provider.EnumSource;
 
 import static io.webby.db.model.LongAutoIdModel.AUTO_ID;
 import static io.webby.db.sql.SqlSettings.SQLITE_IN_MEMORY;
-import static io.webby.db.sql.testing.TableHelper.CREATE_USER_TABLE_SQL;
 import static org.junit.jupiter.api.Assertions.*;
 
 public class UserManagerIntegrationTest {
-    @RegisterExtension private final static SqlDbSetupExtension SQL_DB =
-            new SqlDbSetupExtension(SQLITE_IN_MEMORY, CREATE_USER_TABLE_SQL);
+    @RegisterExtension private final static SqlDbSetupExtension SQL_DB = new SqlDbSetupExtension(SQLITE_IN_MEMORY);
 
     @AfterEach
     public void tearDown() {

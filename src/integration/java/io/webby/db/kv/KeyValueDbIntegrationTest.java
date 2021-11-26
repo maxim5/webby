@@ -35,7 +35,6 @@ import java.util.stream.Stream;
 
 import static com.google.common.truth.Truth.assertThat;
 import static io.webby.db.sql.SqlSettings.SQLITE_IN_MEMORY;
-import static io.webby.db.sql.testing.TableHelper.*;
 import static io.webby.testing.FakeRequests.getEx;
 import static io.webby.testing.FakeRequests.postEx;
 import static io.webby.testing.TestingUtil.array;
@@ -45,9 +44,7 @@ public class KeyValueDbIntegrationTest {
     @RegisterExtension private final static CloseAllExtension CLOSE_ALL = new CloseAllExtension();
     @RegisterExtension private final static TempDirectoryExtension TEMP_DIRECTORY = new TempDirectoryExtension();
     @RegisterExtension private final static EmbeddedRedisExtension REDIS = new EmbeddedRedisExtension();
-
-    private static final String SCHEMA = String.join(";\n", CREATE_USER_TABLE_SQL, CREATE_SESSION_TABLE_SQL, CREATE_BLOB_KV_TABLE_SQL);
-    @RegisterExtension private final static SqlDbSetupExtension SQL_DB = new SqlDbSetupExtension(SQLITE_IN_MEMORY, SCHEMA);
+    @RegisterExtension private final static SqlDbSetupExtension SQL_DB = new SqlDbSetupExtension(SQLITE_IN_MEMORY);
 
     @ParameterizedTest
     @EnumSource(StorageType.class)

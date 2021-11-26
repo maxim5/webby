@@ -20,8 +20,6 @@ import java.util.concurrent.Executors;
 import java.util.concurrent.TimeUnit;
 import java.util.function.Consumer;
 
-import static io.webby.db.sql.testing.TableHelper.CREATE_USER_TABLE_SQL;
-
 // Possible URLs:
 // SqlSettings.jdbcUrl(Engine.H2, "file:./.data/temp.h2")
 // SqlSettings.jdbcUrl(SqlSettings.SQLITE, "file:.data/temp.sqlite.db?mode=memory&cache=shared")
@@ -33,11 +31,9 @@ public class StressUserTableMain {
         settings.modelFilter().setCommonPackageOf(DefaultUser.class, Session.class);
         settings.storageSettings().enableSqlStorage(SQL_SETTINGS);
         settings.setProperty("db.sql.connection.expiration.millis", 10_000);
-        Injector injector = Webby.initGuice(settings);
+        Injector injector = Webby.getReady(settings);
 
         TableManager tableManager = injector.getInstance(TableManager.class);
-        tableManager.connector().runner().runMultiUpdate(CREATE_USER_TABLE_SQL);
-
         UserTable userTable = new UserTable(tableManager.connector());
         ProgressMonitor progress = new ProgressMonitor();
         RandomLongGenerator generator = new RandomLongGenerator(100_000);

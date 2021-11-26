@@ -53,7 +53,7 @@ public class TableManager {
 
     public @Nullable BaseTable<?> getTableByNameOrNull(@NotNull String name) {
         for (EntityTable entityTable : tableMap.values()) {
-            if (entityTable.sqlName.equals(name)) {
+            if (entityTable.tableName().equals(name)) {
                 return castAny(entityTable.instantiate.apply(connector));
             }
         }
@@ -63,8 +63,8 @@ public class TableManager {
     public <E> @NotNull BaseTable<E> getMatchingBaseTableOrDie(@NotNull String name, @NotNull Class<? extends E> entity) {
         EntityTable entityTable = tableMap.get(entity);
         assert entityTable != null : "Entity table not found for: entity=%s".formatted(entity);
-        assert entityTable.sqlName.equals(name) :
-                "Entity table name does not match: sql-name=%s name=%s".formatted(entityTable.sqlName, name);
+        assert entityTable.tableName().equals(name) :
+                "Entity table name does not match: sql-name=%s name=%s".formatted(entityTable.tableName(), name);
         assert entityTable.key == null : "Key class mismatch: table-key=%s entity=%s".formatted(entityTable.key, entity);
         return castAny(entityTable.instantiate.apply(connector));
     }
@@ -73,7 +73,7 @@ public class TableManager {
                                            @NotNull Class<K> key,
                                            @NotNull Class<? extends E> entity) {
         EntityTable entityTable = tableMap.get(entity);
-        return entityTable != null && entityTable.sqlName.equals(name) && entityTable.wrappedKey() == Primitives.wrap(key);
+        return entityTable != null && entityTable.tableName().equals(name) && entityTable.wrappedKey() == Primitives.wrap(key);
     }
 
     public <K, E> @NotNull TableObj<K, E> getMatchingTableOrDie(@NotNull String name,
@@ -81,8 +81,8 @@ public class TableManager {
                                                                 @NotNull Class<? extends E> entity) {
         EntityTable entityTable = tableMap.get(entity);
         assert entityTable != null : "Entity table not found for: entity=%s".formatted(entity);
-        assert entityTable.sqlName.equals(name) :
-                "Entity table name does not match: sql-name=%s name=%s".formatted(entityTable.sqlName, name);
+        assert entityTable.tableName().equals(name) :
+                "Entity table name does not match: sql-name=%s name=%s".formatted(entityTable.tableName(), name);
         assert entityTable.wrappedKey() == Primitives.wrap(key) :
                 "Key class mismatch: table-key=%s provided-key=%s entity=%s".formatted(entityTable.key, key, entity);
         return castAny(entityTable.instantiate.apply(connector));
@@ -96,14 +96,26 @@ public class TableManager {
             Class<?> key = (Class<?>) tableClass.getField("KEY_CLASS").get(null);
             Class<?> entity = (Class<?>) tableClass.getField("ENTITY_CLASS").get(null);
             Function<Connector, ?> instantiate = castAny(tableClass.getField("INSTANTIATE").get(null));
-            result.put(entity, new EntityTable(meta.sqlTableName(), key, instantiate));
+            result.put(entity, new EntityTable(meta, key, instantiate));
         }
         return result.buildOrThrow();
     }
 
-    private record EntityTable(@NotNull String sqlName,
+    void iterateRegisteredTables(@NotNull TableInfoConsumer consumer) {
+        tableMap.forEach((entity, entityTable) -> consumer.accept(entityTable.meta(), entityTable.key(), entity));
+    }
+
+    interface TableInfoConsumer {
+        void accept(@NotNull TableMeta meta, @Nullable Class<?> key, @NotNull Class<?> entity);
+    }
+
+    private record EntityTable(@NotNull TableMeta meta,
                                @Nullable Class<?> key,
                                @NotNull Function<Connector, ?> instantiate) {
+        public @NotNull String tableName() {
+            return meta.sqlTableName();
+        }
+
         public @Nullable Class<?> wrappedKey() {
             return key != null ? Primitives.wrap(key) : null;
         }
@@ -119,7 +131,7 @@ public class TableManager {
                                      instance);
         } else {
             SHARED_INSTANCE.initializeOrDie(instance);
-            log.at(Level.INFO).log("Initialized the table manager: `%s`", instance);
+            log.at(Level.FINE).log("Initialized the table manager statically: `%s`", instance);
         }
     }
 }
