@@ -2,11 +2,11 @@ package io.webby.orm.codegen;
 
 import com.google.common.collect.Iterables;
 import com.google.common.collect.Streams;
-import io.webby.util.collect.EasyMaps;
 import io.webby.orm.api.*;
 import io.webby.orm.api.query.TermType;
 import io.webby.orm.api.query.Where;
 import io.webby.orm.arch.*;
+import io.webby.util.collect.EasyMaps;
 import org.jetbrains.annotations.NotNull;
 
 import java.io.IOException;
@@ -17,8 +17,8 @@ import java.util.function.Predicate;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
-import static io.webby.orm.codegen.Joining.*;
 import static io.webby.orm.codegen.JavaSupport.*;
+import static io.webby.orm.codegen.Joining.*;
 import static java.util.Objects.requireNonNull;
 
 @SuppressWarnings("UnnecessaryStringEscape")
@@ -78,8 +78,8 @@ public class ModelTableCodegen extends BaseCodegen {
         fromRow();
 
         internalMeta();
-        metaColumns();
-        meta();
+        columnsEnum();
+        tableMeta();
 
         appendLine("}");
     }
@@ -526,7 +526,7 @@ public class ModelTableCodegen extends BaseCodegen {
         """, EasyMaps.merge(mainContext, context, pkContext));
     }
 
-    private void metaColumns() throws IOException {
+    private void columnsEnum() throws IOException {
         Map<String, String> context = Map.of(
             "$own_enum_values", ColumnEnumMaker.make(table.columns(ReadFollow.NO_FOLLOW)).join(Collectors.joining(",\n" + INDENT1))
         );
@@ -547,9 +547,22 @@ public class ModelTableCodegen extends BaseCodegen {
         """, EasyMaps.merge(mainContext, context));
     }
 
-    private void meta() throws IOException {
+    private void tableMeta() throws IOException {
         Map<String, String> context = Map.of(
-            "$column_strings", table.columns().stream().map(Column::sqlName).map("\"%s\""::formatted).collect(COMMA_JOINER)
+            "$column_meta", table.columnsWithFields().stream().map(pair -> {
+                TableField field = pair.first();
+                boolean primaryKey = field.isPrimaryKey() && field.columnsNumber() == 1;  // SQL doesn't allow multi-PK
+                boolean foreignKey = field.isForeignKey();
+                Column column = pair.second();
+                String sqlName = column.sqlName();
+                Class<?> nativeType = column.type().jdbcType().nativeType();
+                String type = nativeType.isPrimitive() || nativeType == String.class ?
+                                nativeType.getSimpleName() :
+                                nativeType == byte[].class ?
+                                        "byte[]" :
+                                        nativeType.getName();
+                return "new ColumnMeta(\"%s\", %s.class, %s, %s)".formatted(sqlName, type, primaryKey, foreignKey);
+            }).collect(Collectors.joining(",\n" + INDENT3))
         );
 
         appendCode("""
@@ -559,8 +572,10 @@ public class ModelTableCodegen extends BaseCodegen {
                 return "$table_sql";
             }
             @Override
-            public @Nonnull List<String> sqlColumns() {
-                return List.of($column_strings);
+            public @Nonnull List<ColumnMeta> sqlColumns() {
+                return List.of(
+                    $column_meta
+                );
             }
         };
         

@@ -7,5 +7,7 @@ import java.util.List;
 public interface TableMeta {
     @NotNull String sqlTableName();
 
-    @NotNull List<String> sqlColumns();
+    @NotNull List<ColumnMeta> sqlColumns();
+
+    record ColumnMeta(@NotNull String name, @NotNull Class<?> type, boolean isPrimaryKey, boolean isForeignKey) {}
 }

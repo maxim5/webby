@@ -2,6 +2,7 @@ package io.webby.orm.arch;
 
 import com.google.common.collect.ImmutableList;
 import com.google.errorprone.annotations.Immutable;
+import io.webby.util.collect.Pair;
 import io.webby.util.lazy.AtomicLazyList;
 import io.webby.orm.api.ReadFollow;
 import org.jetbrains.annotations.NotNull;
@@ -68,6 +69,10 @@ public record TableArch(@NotNull String sqlName,
 
     public @NotNull List<PrefixedColumn> columns(@NotNull ReadFollow follow, @NotNull Predicate<TableField> fieldsFilter) {
         return fields().stream().filter(fieldsFilter).flatMap(field -> field.columns(follow).stream()).toList();
+    }
+
+    public @NotNull List<Pair<TableField, Column>> columnsWithFields() {
+        return fields().stream().flatMap(field -> field.columns().stream().map(column -> Pair.of(field, column))).toList();
     }
 
     /*package*/ void initializeOrDie(@NotNull ImmutableList<TableField> fields) {

@@ -1,6 +1,7 @@
 package io.webby.testing;
 
 import io.webby.orm.api.BaseTable;
+import io.webby.orm.api.TableMeta;
 import org.jetbrains.annotations.NotNull;
 import org.junit.jupiter.api.Test;
 
@@ -16,7 +17,8 @@ public interface BaseTableTest<E, T extends BaseTable<E>> extends TableTestApi<E
     default void column_names() throws Exception {
         String tableName = table().meta().sqlTableName();
         List<String> expectedColumns = parseColumnNamesFromDb(tableName);
-        assertThat(table().meta().sqlColumns()).containsExactlyElementsIn(expectedColumns);
+        List<String> columnNames = table().meta().sqlColumns().stream().map(TableMeta.ColumnMeta::name).toList();
+        assertThat(columnNames).containsExactlyElementsIn(expectedColumns);
     }
 
     @Test
