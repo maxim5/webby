@@ -6,16 +6,17 @@ import io.webby.testing.Testing;
 import io.webby.testing.ext.SqlDbSetupExtension;
 import org.jetbrains.annotations.NotNull;
 import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.extension.RegisterExtension;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.EnumSource;
 
 import static io.webby.db.model.LongAutoIdModel.AUTO_ID;
-import static io.webby.db.sql.SqlSettings.SQLITE_IN_MEMORY;
 import static org.junit.jupiter.api.Assertions.*;
 
+@Tag("sql")
 public class UserManagerIntegrationTest {
-    @RegisterExtension private final static SqlDbSetupExtension SQL_DB = new SqlDbSetupExtension(SQLITE_IN_MEMORY);
+    @RegisterExtension private final static SqlDbSetupExtension SQL_DB = SqlDbSetupExtension.fromProperties();
 
     @AfterEach
     public void tearDown() {
