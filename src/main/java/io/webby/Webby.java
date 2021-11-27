@@ -15,7 +15,7 @@ import io.webby.common.GuiceCompleteEvent;
 import io.webby.db.DbModule;
 import io.webby.db.kv.StorageType;
 import io.webby.db.kv.impl.KeyValueStorageTypeDetector;
-import io.webby.db.sql.TableCreator;
+import io.webby.db.sql.TableManager;
 import io.webby.netty.NettyBootstrap;
 import io.webby.netty.NettyModule;
 import io.webby.orm.OrmModule;
@@ -54,8 +54,8 @@ public class Webby {
 
     private static void prepareForDev(@NotNull AppSettings settings, @NotNull Injector injector) {
         if (settings.storageSettings().isSqlStorageEnabled()) {
-            TableCreator tableCreator = injector.getInstance(TableCreator.class);
-            tableCreator.createAllTablesIfNotExist();
+            TableManager tableManager = injector.getInstance(TableManager.class);
+            tableManager.createAllTablesIfNotExist();
         }
     }
 

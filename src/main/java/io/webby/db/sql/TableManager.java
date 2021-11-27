@@ -8,26 +8,27 @@ import com.google.inject.Singleton;
 import io.webby.app.Settings;
 import io.webby.common.ClasspathScanner;
 import io.webby.common.Lifetime;
-import io.webby.orm.api.BaseTable;
-import io.webby.orm.api.Connector;
-import io.webby.orm.api.TableMeta;
-import io.webby.orm.api.TableObj;
+import io.webby.orm.api.*;
+import io.webby.orm.codegen.SqlSchemaMaker;
 import io.webby.util.lazy.ResettableAtomicLazy;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import org.jetbrains.annotations.VisibleForTesting;
 
+import java.sql.SQLException;
 import java.util.Set;
 import java.util.function.Function;
 import java.util.logging.Level;
 
 import static io.webby.util.base.EasyCast.castAny;
+import static io.webby.util.base.Rethrow.rethrow;
 
 @Singleton
 public class TableManager {
     private static final FluentLogger log = FluentLogger.forEnclosingClass();
     private static final ResettableAtomicLazy<TableManager> SHARED_INSTANCE = new ResettableAtomicLazy<>();
 
+    private final Settings settings;
     private final Connector connector;
     private final ImmutableMap<Class<?>, EntityTable> tableMap;
 
@@ -36,8 +37,10 @@ public class TableManager {
                         @NotNull ConnectionPool pool,
                         @NotNull ClasspathScanner scanner,
                         @NotNull Lifetime lifetime) throws Exception {
+        assert settings.storageSettings().isSqlStorageEnabled() : "SQL storage is disabled";
         assert pool.isRunning() : "Invalid pool state: %s".formatted(pool);
 
+        this.settings = settings;
         connector = new ThreadLocalConnector(pool, settings.getLongProperty("db.sql.connection.expiration.millis", 30_000));
 
         Set<? extends Class<?>> tableClasses = scanner.getDerivedClasses(settings.modelFilter(), BaseTable.class);
@@ -101,12 +104,21 @@ public class TableManager {
         return result.buildOrThrow();
     }
 
-    void iterateRegisteredTables(@NotNull TableInfoConsumer consumer) {
-        tableMap.forEach((entity, entityTable) -> consumer.accept(entityTable.meta(), entityTable.key(), entity));
-    }
+    public void createAllTablesIfNotExist() {
+        if (settings.isProdMode()) {
+            log.at(Level.WARNING).log("Automatic SQL table creation called in production");
+        }
 
-    interface TableInfoConsumer {
-        void accept(@NotNull TableMeta meta, @Nullable Class<?> key, @NotNull Class<?> entity);
+        Engine engine = connector.engine();
+        try {
+            for (EntityTable entityTable : tableMap.values()) {
+                log.at(Level.FINE).log("Creating SQL table if not exists: `%s`...", entityTable.tableName());
+                String query = SqlSchemaMaker.makeCreateTableQuery(engine, entityTable.meta());
+                connector().runner().runMultiUpdate(query);
+            }
+        } catch (SQLException e) {
+            rethrow(e);
+        }
     }
 
     private record EntityTable(@NotNull TableMeta meta,
