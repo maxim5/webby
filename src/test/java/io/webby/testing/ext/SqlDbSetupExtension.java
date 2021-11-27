@@ -7,6 +7,7 @@ import io.webby.db.sql.SqlSettings;
 import io.webby.orm.api.Engine;
 import io.webby.testing.TestingModules;
 import io.webby.util.base.Rethrow;
+import io.webby.util.base.Rethrow.Runnables;
 import org.jetbrains.annotations.NotNull;
 import org.junit.jupiter.api.extension.AfterAllCallback;
 import org.junit.jupiter.api.extension.AfterEachCallback;
@@ -15,6 +16,7 @@ import org.junit.jupiter.api.extension.ExtensionContext;
 
 import java.sql.Connection;
 import java.sql.DriverManager;
+import java.sql.Savepoint;
 import java.util.logging.Level;
 
 public class SqlDbSetupExtension implements AfterAllCallback, BeforeEachCallback, AfterEachCallback {
@@ -22,11 +24,12 @@ public class SqlDbSetupExtension implements AfterAllCallback, BeforeEachCallback
 
     private final String url;
     private final Connection connection;
+    private Savepoint savepoint;
 
     public SqlDbSetupExtension(@NotNull String url) {
         this.url = url;
         this.connection = Rethrow.Suppliers.rethrow(() -> DriverManager.getConnection(url)).get();
-        log.at(Level.FINE).log("SQL connection open: %s", url);
+        log.at(Level.FINE).log("[SQL] Connection opened: %s", url);
     }
 
     public SqlDbSetupExtension(@NotNull SqlSettings settings) {
@@ -38,7 +41,7 @@ public class SqlDbSetupExtension implements AfterAllCallback, BeforeEachCallback
         if (engineValue != null) {
             Engine engine = Engine.fromJdbcType(engineValue.toLowerCase());
             assert engine != Engine.Unknown : "Failed to detect SQL engine: " + engineValue;
-            log.at(Level.INFO).log("Detected SQL engine: %s", engine);
+            log.at(Level.INFO).log("[SQL] Detected engine: %s", engine);
             SqlSettings settings = SqlSettings.inMemoryNotForProduction(engine);
             return new SqlDbSetupExtension(settings);
         }
@@ -46,22 +49,42 @@ public class SqlDbSetupExtension implements AfterAllCallback, BeforeEachCallback
         if (url != null) {
             return new SqlDbSetupExtension(url);
         }
-        log.at(Level.SEVERE).log("Test SQL properties not found. Using SQLite");
+        log.at(Level.SEVERE).log("[SQL] Test SQL properties not found. Using SQLite");
         return new SqlDbSetupExtension(SqlSettings.SQLITE_IN_MEMORY);
     }
 
     @Override
     public void afterAll(ExtensionContext context) throws Exception {
-        log.at(Level.FINE).log("SQL connection close");
+        log.at(Level.FINE).log("[SQL] Connection close");
         connection.close();
     }
 
     @Override
     public void beforeEach(ExtensionContext context) {
+        savepoint();
     }
 
     @Override
     public void afterEach(ExtensionContext context) {
+        rollback();
+    }
+
+    public void savepoint() {
+        Runnables.runRethrow(() -> {
+            log.at(Level.FINE).log("[SQL] Set savepoint");
+            connection.setAutoCommit(false);
+            savepoint = connection.setSavepoint("save");
+        });
+    }
+
+    public void rollback() {
+        Runnables.runRethrow(() -> {
+            if (savepoint != null) {
+                log.at(Level.FINE).log("[SQL] Rollback to savepoint");
+                connection.rollback(savepoint);
+                savepoint = null;
+            }
+        });
     }
 
     public @NotNull String getUrl() {

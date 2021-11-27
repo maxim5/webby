@@ -61,13 +61,21 @@ public class Testing {
     }
 
     public static @NotNull Injector testStartup(@NotNull AppSettings settings, @NotNull Module... modules) {
+        return testStartup(settings, () -> {}, modules);
+    }
+
+    public static @NotNull Injector testStartup(@NotNull AppSettings settings,
+                                                @NotNull Runnable callback,
+                                                @NotNull Module... modules) {
         Configurator.setAllLevels(LogManager.ROOT_LOGGER_NAME, LOG_VERBOSE ? Level.TRACE : Level.WARN);
 
         Locale.setDefault(Locale.US);  // any way to remove this?
 
         Module testingClasspathScanner = TestingModules.instance(new ClasspathScanner());
         Module module = Modules.override(testingClasspathScanner).with(modules);
-        return Internals.injector = Webby.getReady(settings, module);
+        Internals.injector = Webby.getReady(settings, module);
+        callback.run();
+        return Internals.injector;
     }
 
     public static class Internals {

@@ -24,7 +24,6 @@ import io.webby.testing.ext.SqlDbSetupExtension;
 import io.webby.testing.ext.TempDirectoryExtension;
 import io.webby.util.collect.Pair;
 import org.jetbrains.annotations.NotNull;
-import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.RegisterExtension;
@@ -294,11 +293,6 @@ public class KeyValueDbIntegrationTest {
         assertTrue(palDb.isEmpty());
     }
 
-    @AfterEach
-    public void tearDown() {
-        Testing.Internals.terminate();
-    }
-
     private static <K, V> void runMultiTest(@NotNull KeyValueDb<K, V> db, @NotNull K key,  @NotNull V value) {
         assertEqualsTo(db, Map.of());
         assertNotContainsAnyOf(db, Map.of(key, value));
@@ -432,6 +426,6 @@ public class KeyValueDbIntegrationTest {
             CLOSE_ALL.addCloseable(mockedClock);
         }
 
-        return Testing.testStartup(settings, SQL_DB.singleConnectionPoolModule());
+        return Testing.testStartup(settings, SQL_DB::savepoint, SQL_DB.singleConnectionPoolModule());
     }
 }
