@@ -3,10 +3,12 @@ package io.webby.orm.api;
 import com.google.errorprone.annotations.MustBeClosed;
 import io.webby.util.base.Rethrow;
 import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 
 import java.io.Closeable;
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.sql.Statement;
 import java.util.Iterator;
 import java.util.concurrent.atomic.AtomicBoolean;
 
@@ -66,12 +68,21 @@ public class ResultSetIterator<E> implements Iterator<E>, Closeable {
         try {
             // Calling the method close on a ResultSet object that is already closed is a no-op.
             // Calling the method close on a Statement object that is already closed has no effect.
-            resultSet.close();
-            if (ownsStatement) {
-                resultSet.getStatement().close();
+            Statement statement = ownsStatement ? getStatementOrNull() : null;
+            if (statement != null) {
+                statement.close();
             }
+            resultSet.close();
         } catch (SQLException e) {
             Rethrow.rethrow(e);
+        }
+    }
+
+    private @Nullable Statement getStatementOrNull() {
+        try {
+            return resultSet.getStatement();
+        } catch (SQLException e) {
+            return null;
         }
     }
 
