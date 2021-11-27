@@ -36,9 +36,14 @@ public class SqlSchemaMaker {
         String tableName = meta.sqlTableName();
         List<TableMeta.ColumnMeta> columns = meta.sqlColumns();
         String definitions = columns.stream().map(column -> {
-            String sqlType = sqlTypeFor(column.type(), engine);
+            boolean isPrimaryKey = column.isPrimaryKey();
+            Class<?> columnType = column.type();
+            if (isPrimaryKey && columnType == byte[].class) {  // Exception: BLOB PRIMARY KEY -> VARCHAR PRIMARY KEY
+                columnType = String.class;
+            }
+            String sqlType = sqlTypeFor(columnType, engine);
             String def = "%s %s".formatted(column.name(), sqlType);
-            if (column.isPrimaryKey()) {
+            if (isPrimaryKey) {
                 return def + " PRIMARY KEY";
             }
             return def;
@@ -78,7 +83,7 @@ public class SqlSchemaMaker {
             case H2 -> DEFAULT_DATA_TYPES.get(columnType);
             case SQLite -> {
                 if (columnType == String.class) {
-                    yield "TEXT";
+                    yield "VARCHAR";
                 }
                 if (columnType == byte[].class) {
                     yield "BLOB";

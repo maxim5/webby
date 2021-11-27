@@ -39,8 +39,7 @@ public class BlobTableDb<V, K> extends ByteArrayDb<K, V> implements KeyValueDb<K
         String namespace = "%s:".formatted(name);
         this.namespace = namespace.getBytes();
         this.whereNamespace = switch (table.engine()) {
-            case SQLite -> Where.of(like(Func.HEX.of(ID_COLUMN), literal(hex(this.namespace) + "%")));
-            case MySQL -> Where.of(like(ID_COLUMN, literal(namespace + "%")));
+            case H2, MySQL, SQLite -> Where.of(like(ID_COLUMN, literal(namespace + "%")));
             default -> throw new UnsupportedOperationException("BlobTableDb not implemented for SQL engine: " + table.engine());
         };
     }

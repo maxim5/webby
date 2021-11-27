@@ -34,8 +34,8 @@ public class SqlSchemaMakerTest {
                 session_id INTEGER PRIMARY KEY,
                 user_id INTEGER,
                 created INTEGER,
-                user_agent TEXT,
-                ip_address TEXT
+                user_agent VARCHAR,
+                ip_address VARCHAR
             )
             """);
 
@@ -54,14 +54,14 @@ public class SqlSchemaMakerTest {
     public void create_table_blob_kv() {
         assertThat(makeCreateTableQuery(Engine.SQLite, BlobKvTable.class)).isEqualTo("""
             CREATE TABLE IF NOT EXISTS blob_kv (
-                id BLOB PRIMARY KEY,
+                id VARCHAR PRIMARY KEY,
                 value BLOB
             )
             """);
 
         assertThat(makeCreateTableQuery(Engine.H2, BlobKvTable.class)).isEqualTo("""
             CREATE TABLE IF NOT EXISTS blob_kv (
-                id BLOB PRIMARY KEY,
+                id VARCHAR PRIMARY KEY,
                 value BLOB
             )
             """);

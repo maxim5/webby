@@ -15,7 +15,7 @@ public class BlobKvTableTest
     protected void setUp(@NotNull Connector connector) throws Exception {
         connector.runner().runMultiUpdate("""
             CREATE TABLE blob_kv (
-                id BLOB PRIMARY KEY,
+                id VARCHAR PRIMARY KEY,
                 value BLOB
             )
         """);
