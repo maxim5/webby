@@ -211,7 +211,7 @@ public class ModelTableCodegen extends BaseCodegen {
             String query = "SELECT COUNT(*) FROM $table_sql";
             try (PreparedStatement statement = runner().prepareQuery(query);
                  ResultSet result = statement.executeQuery()) {
-                return result.getInt(1);
+                return result.next() ? result.getInt(1) : 0;
             } catch (SQLException e) {
                 throw new QueryException("Failed to count in $TableClass", query, e);
             }
@@ -222,7 +222,7 @@ public class ModelTableCodegen extends BaseCodegen {
             String query = "SELECT COUNT(*) FROM $table_sql\\n" + where.repr();
             try (PreparedStatement statement = runner().prepareQuery(query);
                  ResultSet result = statement.executeQuery()) {
-                return result.getInt(1);
+                return result.next() ? result.getInt(1) : 0;
             } catch (SQLException e) {
                 throw new QueryException("Failed to count in $TableClass", query, e);
             }
