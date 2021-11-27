@@ -37,14 +37,10 @@ public class SqlSchemaMaker {
         List<TableMeta.ColumnMeta> columns = meta.sqlColumns();
         String definitions = columns.stream().map(column -> {
             boolean isPrimaryKey = column.isPrimaryKey();
-            Class<?> columnType = column.type();
-            if (isPrimaryKey && columnType == byte[].class) {  // Exception: BLOB PRIMARY KEY -> VARCHAR PRIMARY KEY
-                columnType = String.class;
-            }
-            String sqlType = sqlTypeFor(columnType, engine);
+            String sqlType = sqlTypeFor(column, engine);
             String def = "%s %s".formatted(column.name(), sqlType);
             if (isPrimaryKey) {
-                return def + " PRIMARY KEY";
+                return "%s %s %s".formatted(def, "PRIMARY KEY", sqlAutoIncrement(column, engine)).trim();
             }
             return def;
         }).collect(Collectors.joining(",\n    "));
@@ -78,7 +74,11 @@ public class SqlSchemaMaker {
         Timestamp.class, "TIMESTAMP"
     );
 
-    private static @NotNull String sqlTypeFor(@NotNull Class<?> columnType, @NotNull Engine engine) {
+    private static @NotNull String sqlTypeFor(@NotNull TableMeta.ColumnMeta columnMeta, @NotNull Engine engine) {
+        Class<?> columnType = columnMeta.type();
+        if (columnMeta.isPrimaryKey() && columnType == byte[].class) {
+            columnType = String.class;  // Exception: BLOB PRIMARY KEY -> VARCHAR PRIMARY KEY
+        }
         return switch (engine) {
             case H2 -> DEFAULT_DATA_TYPES.get(columnType);
             case SQLite -> {
@@ -92,5 +92,16 @@ public class SqlSchemaMaker {
             }
             default -> throw new IllegalArgumentException("Engine not supported for table creation: " + engine);
         };
+    }
+
+    private static @NotNull String sqlAutoIncrement(@NotNull TableMeta.ColumnMeta columnMeta, @NotNull Engine engine) {
+        if (columnMeta.isPrimaryKey() && (columnMeta.type() == int.class || columnMeta.type() == long.class)) {
+            return switch (engine) {
+                case H2 -> "AUTO_INCREMENT";
+                case SQLite -> "";  // Not recommended by https://www.sqlite.org/autoinc.html
+                default -> throw new IllegalArgumentException("Engine not supported for table creation: " + engine);
+            };
+        }
+        return "";
     }
 }

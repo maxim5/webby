@@ -21,7 +21,7 @@ public class SqlSchemaMakerTest {
 
         assertThat(makeCreateTableQuery(Engine.H2, UserTable.class)).isEqualTo("""
             CREATE TABLE IF NOT EXISTS user (
-                user_id BIGINT PRIMARY KEY,
+                user_id BIGINT PRIMARY KEY AUTO_INCREMENT,
                 access_level INTEGER
             )
             """);
@@ -41,7 +41,7 @@ public class SqlSchemaMakerTest {
 
         assertThat(makeCreateTableQuery(Engine.H2, SessionTable.class)).isEqualTo("""
             CREATE TABLE IF NOT EXISTS session (
-                session_id BIGINT PRIMARY KEY,
+                session_id BIGINT PRIMARY KEY AUTO_INCREMENT,
                 user_id BIGINT,
                 created TIMESTAMP,
                 user_agent VARCHAR,
