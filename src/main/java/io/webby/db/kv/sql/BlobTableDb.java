@@ -13,7 +13,10 @@ import io.webby.orm.api.query.Where;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
-import java.util.*;
+import java.util.AbstractMap;
+import java.util.Collection;
+import java.util.Map;
+import java.util.Set;
 import java.util.stream.Collectors;
 
 import static io.webby.orm.api.query.CompareType.EQ;
@@ -39,7 +42,8 @@ public class BlobTableDb<V, K> extends ByteArrayDb<K, V> implements KeyValueDb<K
         String namespace = "%s:".formatted(name);
         this.namespace = namespace.getBytes();
         this.whereNamespace = switch (table.engine()) {
-            case H2, MySQL, SQLite -> Where.of(like(ID_COLUMN, literal(namespace + "%")));
+            case H2 -> Where.of(like(ID_COLUMN, literal(lowerhex(this.namespace) + "%")));
+            case MySQL, SQLite -> Where.of(like(ID_COLUMN, literal(namespace + "%")));
             default -> throw new UnsupportedOperationException("BlobTableDb not implemented for SQL engine: " + table.engine());
         };
     }
@@ -59,15 +63,15 @@ public class BlobTableDb<V, K> extends ByteArrayDb<K, V> implements KeyValueDb<K
     public boolean containsValue(@NotNull V value) {
         Compare compare = switch (table.engine()) {
             // Use the "?" arg to avoid query overflow
-            case SQLite -> EQ.compare(Func.HEX.of(VALUE_COLUMN), literal(hex(fromValue(value))));
-            case MySQL -> null; // EQ.compare(VALUE_COLUMN, blob(fromValue(value)));
+            case SQLite -> EQ.compare(Func.HEX.of(VALUE_COLUMN), literal(upperhex(fromValue(value))));
+            case MySQL, H2 -> null; // EQ.compare(VALUE_COLUMN, blob(fromValue(value)));
             default -> throw new UnsupportedOperationException("containsValue() not implemented for SQL engine:" + table.engine());
         };
 
         if (compare != null) {
             return table.count(Where.and(whereNamespace, compare)) > 0;
         }
-        return table.fetchMatching(whereNamespace).stream().map(BlobKv::value).anyMatch(value::equals);
+        return table.fetchMatching(whereNamespace).stream().map(BlobKv::value).map(this::asValue).anyMatch(value::equals);
     }
 
     @Override
@@ -118,6 +122,10 @@ public class BlobTableDb<V, K> extends ByteArrayDb<K, V> implements KeyValueDb<K
     public void close() {
     }
 
+    public @NotNull TableObj<byte[], BlobKv> internalTable() {
+        return table;
+    }
+
     @Override
     protected byte @NotNull [] fromKey(@NotNull K key) {
         return keyCodec.writeToBytes(namespace, key);
@@ -128,7 +136,11 @@ public class BlobTableDb<V, K> extends ByteArrayDb<K, V> implements KeyValueDb<K
         return keyCodec.readFromBytes(namespace.length, bytes);
     }
 
-    private static @NotNull String hex(byte @NotNull [] bytes) {
-        return BaseEncoding.base16().encode(bytes);  // uppercase necessary for Sqlite
+    private static @NotNull String upperhex(byte @NotNull [] bytes) {
+        return BaseEncoding.base16().upperCase().encode(bytes);
+    }
+
+    private static @NotNull String lowerhex(byte @NotNull [] bytes) {
+        return BaseEncoding.base16().lowerCase().encode(bytes);
     }
 }
