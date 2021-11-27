@@ -123,13 +123,13 @@ public class DebugSql {
             super(connection);
         }
 
-        public void update(@NotNull String query, @Nullable Object @NotNull ... params) throws Exception {
+        public void update(@NotNull String query, @Nullable Object @NotNull ... params) throws SQLException {
             System.out.println(">>> " + query.trim());
             System.out.println(runUpdate(query, params));
             System.out.println();
         }
 
-        public void query(@NotNull String query, @Nullable Object @NotNull ... params) throws Exception {
+        public void query(@NotNull String query, @Nullable Object @NotNull ... params) throws SQLException {
             System.out.println(">>> " + query.trim());
             try (PreparedStatement statement = prepareQuery(query, params);
                  ResultSet result = statement.executeQuery()) {
