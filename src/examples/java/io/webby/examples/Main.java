@@ -33,7 +33,7 @@ public class Main {
         settings.setProperty("pebble.view.paths", "out/examples/resources/web/pebble");
         settings.setProperty("db.mapdb.checksum.enabled", false);
         settings.storageSettings().enableKeyValueStorage(StorageType.MAP_DB).setKeyValueStoragePath(".data/mapdb")
-                .enableSqlStorage(SqlSettings.inMemoryNotForProduction(Engine.SQLite));
+                .enableSqlStorage(SqlSettings.inMemoryNotForProduction(Engine.H2));
 
         NettyBootstrap startup = Webby.nettyBootstrap(settings);
         startup.runLocally(port);

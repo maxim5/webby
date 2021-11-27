@@ -5,14 +5,84 @@ import io.webby.orm.api.DebugSql.DebugRunner;
 
 import java.sql.Connection;
 import java.sql.DriverManager;
+import java.sql.SQLException;
 
+import static io.webby.db.sql.SqlSettings.H2_IN_MEMORY;
 import static io.webby.db.sql.SqlSettings.SQLITE_IN_MEMORY;
 
+@SuppressWarnings("unused")
 public class Playground {
     public static void main(String[] args) throws Exception {
-        Connection connection = DriverManager.getConnection(SQLITE_IN_MEMORY);
-        DebugRunner main = new DebugRunner(connection);
+        runH2();
+        // runSqlite();
+    }
 
+    private static void runSqlite() throws SQLException {
+        try (Connection connection = DriverManager.getConnection(SQLITE_IN_MEMORY)) {
+            DebugRunner main = new DebugRunner(connection);
+            sqliteTextForBlobPk(main);
+            // sqliteJoins(main);
+            // sqliteBlobPk(main);
+        }
+    }
+
+    private static void runH2() throws SQLException {
+        try (Connection connection = DriverManager.getConnection(H2_IN_MEMORY)) {
+            DebugRunner main = new DebugRunner(connection);
+
+            main.update("CREATE TABLE blob (blob_id VARCHAR PRIMARY KEY, blob_value BLOB)");
+            main.query("SELECT * FROM blob");
+            main.query("SELECT COUNT(*) FROM blob WHERE blob_id LIKE 'foo:%'");
+
+            main.update("INSERT INTO blob(blob_id, blob_value) VALUES(?, ?)", "foo".getBytes(), "bar".getBytes());
+            main.update("INSERT INTO blob(blob_id, blob_value) VALUES(?, ?)", "for".getBytes(), "baz".getBytes());
+            main.update("INSERT INTO blob(blob_id, blob_value) VALUES(?, ?)", "x".getBytes(), "y".getBytes());
+            main.query("SELECT * FROM blob");
+
+            main.query("SELECT * FROM blob WHERE blob_id LIKE '66%'");
+            main.query("SELECT * FROM blob WHERE blob_id LIKE '666f6f%'");
+
+            main.query("SELECT COUNT(*) FROM blob WHERE blob_id LIKE 'foo%'");
+            main.query("SELECT COUNT(*) FROM blob WHERE blob_id LIKE '666F6F%'");
+        }
+    }
+
+    private static void sqliteTextForBlobPk(DebugRunner main) throws SQLException {
+        main.update("CREATE TABLE blob (blob_id VARCHAR PRIMARY KEY, blob_value BLOB)");
+        main.update("INSERT INTO blob(blob_id, blob_value) VALUES(?, ?)", "foo".getBytes(), "bar".getBytes());
+        main.update("INSERT INTO blob(blob_id, blob_value) VALUES(?, ?)", "for".getBytes(), "baz".getBytes());
+        main.update("INSERT INTO blob(blob_id, blob_value) VALUES(?, ?)", "x".getBytes(), "y".getBytes());
+
+        main.query("SELECT * FROM blob");
+        main.query("SELECT blob_id, hex(blob_value) FROM blob");
+        main.query("SELECT hex(blob_id), hex(blob_value) FROM blob");
+
+        main.query("SELECT * FROM blob WHERE hex(blob_id) LIKE '66%'");
+        main.query("SELECT * FROM blob WHERE hex(blob_id) LIKE '666f6f%'");
+    }
+
+    private static void sqliteBlobPk(DebugRunner main) throws SQLException {
+        main.update("CREATE TABLE blob (blob_id BLOB PRIMARY KEY, blob_value BLOB)");
+        main.update("INSERT INTO blob(blob_id, blob_value) VALUES(?, ?)", "foo".getBytes(), "bar".getBytes());
+        main.update("INSERT INTO blob(blob_id, blob_value) VALUES(?, ?)", "for".getBytes(), "baz".getBytes());
+        main.update("INSERT INTO blob(blob_id, blob_value) VALUES(?, ?)", "x".getBytes(), "y".getBytes());
+        main.query("SELECT * FROM blob");
+        main.query("SELECT hex(blob_id), hex(blob_value) FROM blob");
+
+        // https://stackoverflow.com/questions/8892973/how-to-get-last-insert-id-in-sqlite
+        main.query("SELECT last_insert_rowid()");
+        // main.query("SELECT LAST_INSERT_ID()");
+        // main.query("SELECT SCOPE_IDENTITY()");
+
+        // https://stackoverflow.com/questions/24011247/fast-search-on-a-blob-starting-bytes-in-sqlite
+        // https://stackoverflow.com/questions/3746756/search-for-value-within-blob-column-in-mysql
+        main.query("SELECT * FROM blob WHERE hex(blob_id) LIKE '66%'");
+        main.query("SELECT * FROM blob WHERE hex(blob_id) LIKE '666f6f%'");
+
+        System.out.println(BaseEncoding.base16().lowerCase().encode("foo".getBytes()));
+    }
+
+    private static void sqliteJoins(DebugRunner main) throws SQLException {
         main.update("CREATE TABLE user (user_id INTEGER PRIMARY KEY AUTOINCREMENT, access_level INTEGER)");
         main.update("CREATE TABLE song (id INTEGER PRIMARY KEY AUTOINCREMENT, author_id INTEGER, FOREIGN KEY(author_id) REFERENCES user(user_id))");
         main.update("CREATE TABLE single (id INTEGER PRIMARY KEY AUTOINCREMENT, song_id INTEGER, FOREIGN KEY(song_id) REFERENCES song(song_id))");
@@ -41,24 +111,5 @@ public class Playground {
             LEFT JOIN song ON single.song_id = song.id
             LEFT JOIN user ON song.author_id = user.user_id;
         """);
-
-        main.update("CREATE TABLE blob (blob_id BLOB PRIMARY KEY, blob_value BLOB)");
-        main.update("INSERT INTO blob(blob_id, blob_value) VALUES(?, ?)", "foo".getBytes(), "bar".getBytes());
-        main.update("INSERT INTO blob(blob_id, blob_value) VALUES(?, ?)", "for".getBytes(), "baz".getBytes());
-        main.update("INSERT INTO blob(blob_id, blob_value) VALUES(?, ?)", "x".getBytes(), "y".getBytes());
-        main.query("SELECT * FROM blob");
-        main.query("SELECT hex(blob_id), hex(blob_value) FROM blob");
-
-        // https://stackoverflow.com/questions/8892973/how-to-get-last-insert-id-in-sqlite
-        main.query("SELECT last_insert_rowid()");
-        // main.query("SELECT LAST_INSERT_ID()");
-        // main.query("SELECT SCOPE_IDENTITY()");
-
-        // https://stackoverflow.com/questions/24011247/fast-search-on-a-blob-starting-bytes-in-sqlite
-        // https://stackoverflow.com/questions/3746756/search-for-value-within-blob-column-in-mysql
-        main.query("SELECT * FROM blob WHERE hex(blob_id) LIKE '66%'");
-        main.query("SELECT * FROM blob WHERE hex(blob_id) LIKE '666f6f%'");
-
-        System.out.println(BaseEncoding.base16().lowerCase().encode("foo".getBytes()));
     }
 }
