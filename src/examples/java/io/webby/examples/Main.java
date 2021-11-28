@@ -26,8 +26,7 @@ public class Main {
         bootstrap.runLocally(port);
     }
 
-    @NotNull
-    public static AppSettings localSettings() {
+    public static @NotNull AppSettings localSettings() {
         AppSettings settings = new AppSettings();
         settings.setDevMode(true);
         settings.setSecurityKey("12345678901234567890123456789012");
