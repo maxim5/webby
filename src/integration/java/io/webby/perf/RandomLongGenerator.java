@@ -1,33 +1,21 @@
 package io.webby.perf;
 
-import java.util.Random;
 import java.util.function.Supplier;
 
-public class RandomLongGenerator implements Supplier<Long> {
-    private final long seed;
-    private final Random random;
-    private final long maxId;
+public class RandomLongGenerator extends Rand implements Supplier<Long> {
+    private final long max;
 
-    public RandomLongGenerator(long maxId) {
-        this(8682522807148012L ^ System.nanoTime(), maxId);
+    public RandomLongGenerator(long max) {
+        this.max = max;
     }
 
-    public RandomLongGenerator(long seed, long maxId) {
-        this.seed = seed;
-        this.random = new Random(seed);
-        this.maxId = maxId;
-    }
-
-    public double random() {
-        return random.nextDouble();
+    public RandomLongGenerator(long seed, long max) {
+        super(seed);
+        this.max = max;
     }
 
     @Override
     public Long get() {
-        return (long) (random() * maxId);
-    }
-
-    public long seed() {
-        return seed;
+        return (long) (random() * max);
     }
 }

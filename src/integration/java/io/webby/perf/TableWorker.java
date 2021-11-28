@@ -38,11 +38,11 @@ public abstract class TableWorker<K, E> implements Worker {
                 listener.accept(i);
             }
         } catch (Throwable throwable) {
-            log.at(Level.SEVERE).withCause(throwable).log("TableWorked crashed");
+            log.at(Level.SEVERE).withCause(throwable).log("TableWorker crashed");
         }
     }
 
-    public abstract void execute(@NotNull K key);
+    protected abstract void execute(@NotNull K key);
 
     public static <K, E> TableWorker<K, E> inserter(@NotNull Init<K, E> init, @NotNull Function<K, E> create) {
         return new TableWorker<>(init) {

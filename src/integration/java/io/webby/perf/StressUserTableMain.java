@@ -10,31 +10,35 @@ import io.webby.auth.user.UserTable;
 import io.webby.db.sql.SqlSettings;
 import io.webby.db.sql.TableManager;
 import io.webby.db.sql.ThreadLocalConnector;
+import io.webby.orm.api.Connector;
 import io.webby.orm.api.Engine;
 import io.webby.perf.TableWorker.Init;
 import io.webby.testing.Testing;
+import org.jetbrains.annotations.NotNull;
 
 import java.util.List;
-import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
-import java.util.concurrent.TimeUnit;
 import java.util.function.Consumer;
 
-// Possible URLs:
-// SqlSettings.jdbcUrl(Engine.H2, "file:./.data/temp.h2")
-// SqlSettings.jdbcUrl(SqlSettings.SQLITE, "file:.data/temp.sqlite.db?mode=memory&cache=shared")
+import static io.webby.perf.ConcurrentStressing.MEDIUM_WAIT;
+import static io.webby.perf.ConcurrentStressing.execWorkers;
+
 public class StressUserTableMain {
-    private static final SqlSettings SQL_SETTINGS = SqlSettings.inMemoryNotForProduction(Engine.H2);
-
     public static void main(String[] args) throws Exception {
-        AppSettings settings = Testing.defaultAppSettings();
-        settings.modelFilter().setCommonPackageOf(DefaultUser.class, Session.class);
-        settings.storageSettings().enableSqlStorage(SQL_SETTINGS);
-        settings.setProperty("db.sql.connection.expiration.millis", 10_000);
-        Injector injector = Webby.getReady(settings);
+        Connector connector = initConnector();
+        new MemoryMonitor().startDaemon();
 
-        TableManager tableManager = injector.getInstance(TableManager.class);
-        UserTable userTable = new UserTable(tableManager.connector());
+        Init<Long, DefaultUser> init = initWorkers(connector);
+        execWorkers(MEDIUM_WAIT, List.of(
+            TableWorker.inserter(init, id -> new DefaultUser(id, UserAccess.Simple)),
+            TableWorker.updater(init, id -> new DefaultUser(id, UserAccess.Admin)),
+            TableWorker.deleter(init),
+            TableWorker.reader(init),
+            TableWorker.scanner(init.withSteps(0.00001))
+        ));
+    }
+
+    private static @NotNull Init<Long, DefaultUser> initWorkers(@NotNull Connector connector) {
+        UserTable userTable = new UserTable(connector);
         ProgressMonitor progress = new ProgressMonitor();
         RandomLongGenerator generator = new RandomLongGenerator(100_000);
         Consumer<Integer> randomConnectionCleaner = step -> {
@@ -42,21 +46,18 @@ public class StressUserTableMain {
                 ThreadLocalConnector.cleanupIfNecessary();
             }
         };
-        Init<Long, DefaultUser> init = new Init<>(10_000_000, progress, userTable, generator, randomConnectionCleaner);
+        return new Init<>(10_000_000, progress, userTable, generator, randomConnectionCleaner);
+    }
 
-        List<Worker> workers = List.of(
-            TableWorker.inserter(init, id -> new DefaultUser(id, UserAccess.Simple)),
-            TableWorker.updater(init, id -> new DefaultUser(id, UserAccess.Admin)),
-            TableWorker.deleter(init),
-            TableWorker.reader(init),
-            TableWorker.scanner(init.withSteps(1000))
-        );
-        ExecutorService executor = Executors.newFixedThreadPool(workers.size());
-        workers.forEach(executor::execute);
-
-        new MemoryMonitor(1000).startDaemon();
-
-        executor.shutdown();
-        executor.awaitTermination(100, TimeUnit.MILLISECONDS);
+    // More SQL URLs:
+    // SqlSettings.jdbcUrl(Engine.H2, "file:./.data/temp.h2")
+    // SqlSettings.jdbcUrl(SqlSettings.SQLITE, "file:.data/temp.sqlite.db?mode=memory&cache=shared")
+    private static @NotNull Connector initConnector() {
+        AppSettings settings = Testing.defaultAppSettings();
+        settings.modelFilter().setCommonPackageOf(DefaultUser.class, Session.class);
+        settings.storageSettings().enableSqlStorage(SqlSettings.inMemoryNotForProduction(Engine.H2));
+        settings.setProperty("db.sql.connection.expiration.millis", 10_000);
+        Injector injector = Webby.getReady(settings);
+        return injector.getInstance(TableManager.class).connector();
     }
 }

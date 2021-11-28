@@ -18,7 +18,7 @@ public class MemoryMonitor implements Runnable {
     private static final FluentLogger log = FluentLogger.forEnclosingClass();
     private static final long MB = 1 << 20;
 
-    private static final long DEFAULT_SAMPLE_PAUSE_MILLIS = 100L;
+    private static final long DEFAULT_SAMPLE_PAUSE_MILLIS = 1000L;
     private static final int DEFAULT_SAMPLES_TO_KEEP = 1024;
 
     private final AtomicBoolean stop = new AtomicBoolean();
