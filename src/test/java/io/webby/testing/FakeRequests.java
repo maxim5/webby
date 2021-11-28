@@ -2,10 +2,7 @@ package io.webby.testing;
 
 import io.netty.buffer.ByteBuf;
 import io.netty.channel.embedded.EmbeddedChannel;
-import io.netty.handler.codec.http.DefaultFullHttpRequest;
-import io.netty.handler.codec.http.FullHttpRequest;
-import io.netty.handler.codec.http.HttpMethod;
-import io.netty.handler.codec.http.HttpVersion;
+import io.netty.handler.codec.http.*;
 import io.webby.netty.request.DefaultHttpRequestEx;
 import io.webby.netty.request.HttpRequestEx;
 import io.webby.url.convert.Constraint;
@@ -27,9 +24,19 @@ public class FakeRequests {
         return request(HttpMethod.POST, uri, content);
     }
 
-    public static @NotNull FullHttpRequest request(@NotNull HttpMethod method, @NotNull String uri, @Nullable Object content) {
+    public static @NotNull FullHttpRequest request(@NotNull HttpMethod method,
+                                                   @NotNull String uri,
+                                                   @Nullable Object content) {
         ByteBuf byteBuf = TestingBytes.asByteBuf((content instanceof String str) ? str : toJson(content));
         return new DefaultFullHttpRequest(HttpVersion.HTTP_1_1, method, uri, byteBuf);
+    }
+
+    public static @NotNull FullHttpRequest request(@NotNull HttpMethod method,
+                                                   @NotNull String uri,
+                                                   @Nullable Object content,
+                                                   @NotNull HttpHeaders headers) {
+        ByteBuf byteBuf = TestingBytes.asByteBuf((content instanceof String str) ? str : toJson(content));
+        return new DefaultFullHttpRequest(HttpVersion.HTTP_1_1, method, uri, byteBuf, headers, new DefaultHttpHeaders());
     }
 
     public static @NotNull HttpRequestEx getEx(@NotNull String uri) {

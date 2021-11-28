@@ -9,7 +9,11 @@ import com.google.common.util.concurrent.ListenableFuture;
 import com.google.errorprone.annotations.CanIgnoreReturnValue;
 import com.google.inject.Inject;
 import io.netty.buffer.Unpooled;
-import io.netty.channel.*;
+import io.netty.channel.Channel;
+import io.netty.channel.ChannelFutureListener;
+import io.netty.channel.ChannelHandlerContext;
+import io.netty.channel.ChannelInboundHandlerAdapter;
+import io.netty.handler.codec.DecoderResult;
 import io.netty.handler.codec.http.*;
 import io.netty.util.ReferenceCountUtil;
 import io.netty.util.concurrent.EventExecutor;
@@ -33,9 +37,9 @@ import io.webby.url.impl.EndpointOptions;
 import io.webby.url.impl.EndpointView;
 import io.webby.url.impl.RouteEndpoint;
 import io.webby.url.view.Renderer;
-import io.webby.util.collect.Pair;
 import io.webby.util.base.Rethrow.Consumers;
 import io.webby.util.base.Rethrow.Guava;
+import io.webby.util.collect.Pair;
 import io.webby.util.func.ThrowConsumer;
 import org.checkerframework.checker.nullness.qual.Nullable;
 import org.jetbrains.annotations.NotNull;
@@ -136,6 +140,12 @@ public class NettyHttpHandler extends ChannelInboundHandlerAdapter {
 
     @VisibleForTesting
     @NotNull HttpResponse handle(@NotNull FullHttpRequest request) {
+        DecoderResult decoderResult = request.decoderResult();
+        if (decoderResult.isFailure()) {
+            log.at(Level.INFO).log("Failed to decode request: %s", decoderResult);
+            return factory.newResponse400(decoderResult.cause());
+        }
+
         CharArray path = extractPath(request.uri());
         Match<RouteEndpoint> match = router.routeOrNull(path);
         if (match == null) {
