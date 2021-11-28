@@ -5,9 +5,10 @@ import io.webby.util.collect.ArrayTabular;
 import io.webby.util.collect.Tabular;
 import io.webby.util.collect.TabularFormatter;
 import org.jetbrains.annotations.NotNull;
-import org.jetbrains.annotations.Nullable;
 
-import java.sql.*;
+import java.sql.ResultSet;
+import java.sql.ResultSetMetaData;
+import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
@@ -69,25 +70,4 @@ public class DebugSql {
     }
 
     public record RowValue(@NotNull String name, @NotNull String value) {}
-
-    public static class DebugRunner extends QueryRunner {
-        public DebugRunner(@NotNull Connection connection) {
-            super(connection);
-        }
-
-        public void update(@NotNull String query, @Nullable Object @NotNull ... params) throws SQLException {
-            System.out.println(">>> " + query.trim());
-            System.out.println(runUpdate(query, params));
-            System.out.println();
-        }
-
-        public void query(@NotNull String query, @Nullable Object @NotNull ... params) throws SQLException {
-            System.out.println(">>> " + query.trim());
-            try (PreparedStatement statement = prepareQuery(query, params);
-                 ResultSet result = statement.executeQuery()) {
-                System.out.println(DebugSql.toDebugString(result));
-            }
-            System.out.println();
-        }
-    }
 }

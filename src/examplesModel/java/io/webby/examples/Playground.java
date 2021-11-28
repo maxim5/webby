@@ -1,11 +1,12 @@
 package io.webby.examples;
 
 import com.google.common.io.BaseEncoding;
-import io.webby.orm.api.DebugSql.DebugRunner;
+import io.webby.orm.api.DebugSql;
+import io.webby.orm.api.QueryRunner;
+import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 
-import java.sql.Connection;
-import java.sql.DriverManager;
-import java.sql.SQLException;
+import java.sql.*;
 
 import static io.webby.db.sql.SqlSettings.H2_IN_MEMORY;
 import static io.webby.db.sql.SqlSettings.SQLITE_IN_MEMORY;
@@ -19,7 +20,7 @@ public class Playground {
 
     private static void runSqlite() throws SQLException {
         try (Connection connection = DriverManager.getConnection(SQLITE_IN_MEMORY)) {
-            DebugRunner main = new DebugRunner(connection);
+            QueryRepl main = new QueryRepl(connection);
             sqliteTextForBlobPk(main);
             // sqliteJoins(main);
             // sqliteBlobPk(main);
@@ -28,7 +29,7 @@ public class Playground {
 
     private static void runH2() throws SQLException {
         try (Connection connection = DriverManager.getConnection(H2_IN_MEMORY)) {
-            DebugRunner main = new DebugRunner(connection);
+            QueryRepl main = new QueryRepl(connection);
 
             main.update("CREATE TABLE blob (blob_id VARCHAR PRIMARY KEY, blob_value BLOB)");
             main.query("SELECT * FROM blob");
@@ -47,7 +48,7 @@ public class Playground {
         }
     }
 
-    private static void sqliteTextForBlobPk(DebugRunner main) throws SQLException {
+    private static void sqliteTextForBlobPk(QueryRepl main) throws SQLException {
         main.update("CREATE TABLE blob (blob_id VARCHAR PRIMARY KEY, blob_value BLOB)");
         main.update("INSERT INTO blob(blob_id, blob_value) VALUES(?, ?)", "foo".getBytes(), "bar".getBytes());
         main.update("INSERT INTO blob(blob_id, blob_value) VALUES(?, ?)", "for".getBytes(), "baz".getBytes());
@@ -61,7 +62,7 @@ public class Playground {
         main.query("SELECT * FROM blob WHERE hex(blob_id) LIKE '666f6f%'");
     }
 
-    private static void sqliteBlobPk(DebugRunner main) throws SQLException {
+    private static void sqliteBlobPk(QueryRepl main) throws SQLException {
         main.update("CREATE TABLE blob (blob_id BLOB PRIMARY KEY, blob_value BLOB)");
         main.update("INSERT INTO blob(blob_id, blob_value) VALUES(?, ?)", "foo".getBytes(), "bar".getBytes());
         main.update("INSERT INTO blob(blob_id, blob_value) VALUES(?, ?)", "for".getBytes(), "baz".getBytes());
@@ -82,7 +83,7 @@ public class Playground {
         System.out.println(BaseEncoding.base16().lowerCase().encode("foo".getBytes()));
     }
 
-    private static void sqliteJoins(DebugRunner main) throws SQLException {
+    private static void sqliteJoins(QueryRepl main) throws SQLException {
         main.update("CREATE TABLE user (user_id INTEGER PRIMARY KEY AUTOINCREMENT, access_level INTEGER)");
         main.update("CREATE TABLE song (id INTEGER PRIMARY KEY AUTOINCREMENT, author_id INTEGER, FOREIGN KEY(author_id) REFERENCES user(user_id))");
         main.update("CREATE TABLE single (id INTEGER PRIMARY KEY AUTOINCREMENT, song_id INTEGER, FOREIGN KEY(song_id) REFERENCES song(song_id))");
@@ -111,5 +112,29 @@ public class Playground {
             LEFT JOIN song ON single.song_id = song.id
             LEFT JOIN user ON song.author_id = user.user_id;
         """);
+    }
+
+    // REPL
+    public static class QueryRepl {
+        private final QueryRunner runner;
+
+        public QueryRepl(@NotNull Connection connection) {
+            runner = new QueryRunner(connection);
+        }
+
+        public void update(@NotNull String query, @Nullable Object @NotNull ... params) throws SQLException {
+            System.out.println(">>> " + query.trim());
+            System.out.println(runner.runUpdate(query, params));
+            System.out.println();
+        }
+
+        public void query(@NotNull String query, @Nullable Object @NotNull ... params) throws SQLException {
+            System.out.println(">>> " + query.trim());
+            try (PreparedStatement statement = runner.prepareQuery(query, params);
+                 ResultSet result = statement.executeQuery()) {
+                System.out.println(DebugSql.toDebugString(result));
+            }
+            System.out.println();
+        }
     }
 }
