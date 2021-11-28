@@ -37,15 +37,17 @@ public class NettyBootstrap {
     public void runLocally(int port) throws InterruptedException {
         attachShutdownHook();
 
+        int masterThreads = settings.getIntProperty("netty.master.group.threads", 0);
+        int workerThreads = settings.getIntProperty("netty.worker.group.threads", 0);
         int maxContentLength = settings.getIntProperty("netty.content.max.length.bytes", 10 << 20);
         int maxInitLineLength = settings.getIntProperty("netty.max.init.line.length", HttpObjectDecoder.DEFAULT_MAX_INITIAL_LINE_LENGTH);
         int maxHeaderLength = settings.getIntProperty("netty.max.header.length", HttpObjectDecoder.DEFAULT_MAX_HEADER_SIZE);
         int maxChunkLength = settings.getIntProperty("netty.max.chunk.length", HttpObjectDecoder.DEFAULT_MAX_CHUNK_SIZE);
 
-        EventLoopGroup masterGroup = new NioEventLoopGroup();
+        EventLoopGroup masterGroup = new NioEventLoopGroup(masterThreads);
         lifetime.onTerminate(masterGroup::shutdownGracefully);
 
-        EventLoopGroup workerGroup = new NioEventLoopGroup();
+        EventLoopGroup workerGroup = new NioEventLoopGroup(workerThreads);
         lifetime.onTerminate(workerGroup::shutdownGracefully);
 
         try {
