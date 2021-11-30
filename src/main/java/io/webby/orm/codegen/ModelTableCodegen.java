@@ -3,8 +3,8 @@ package io.webby.orm.codegen;
 import com.google.common.collect.Iterables;
 import com.google.common.collect.Streams;
 import io.webby.orm.api.*;
+import io.webby.orm.api.query.Clause;
 import io.webby.orm.api.query.TermType;
-import io.webby.orm.api.query.Where;
 import io.webby.orm.arch.*;
 import io.webby.util.collect.EasyMaps;
 import org.jetbrains.annotations.NotNull;
@@ -104,7 +104,7 @@ public class ModelTableCodegen extends BaseCodegen {
         List<String> classesToImport = Streams.concat(
             Stream.of(pickBaseTableClass(),
                       Connector.class, QueryRunner.class, QueryException.class, Engine.class, ReadFollow.class,
-                      Where.class, io.webby.orm.api.query.Column.class, TermType.class,
+                      Clause.class, io.webby.orm.api.query.Column.class, TermType.class,
                       ResultSetIterator.class, TableMeta.class).map(FQN::of),
             customClasses.stream().map(FQN::of),
             customClasses.stream().map(adaptersScanner::locateAdapterFqn),
@@ -218,8 +218,8 @@ public class ModelTableCodegen extends BaseCodegen {
         }
         
         @Override
-        public int count(@Nonnull Where where) {
-            String query = "SELECT COUNT(*) FROM $table_sql\\n" + where.repr();
+        public int count(@Nonnull Clause clause) {
+            String query = "SELECT COUNT(*) FROM $table_sql\\n" + clause.repr();
             try (PreparedStatement statement = runner().prepareQuery(query);
                  ResultSet result = statement.executeQuery()) {
                 return result.next() ? result.getInt(1) : 0;
@@ -326,8 +326,8 @@ public class ModelTableCodegen extends BaseCodegen {
         }
 
         @Override
-        public @Nonnull ResultSetIterator<$ModelClass> iterator(@Nonnull Where where) {
-            String query = SELECT_ENTITY_ALL[follow.ordinal()] + "\\n" + where.repr();
+        public @Nonnull ResultSetIterator<$ModelClass> iterator(@Nonnull Clause clause) {
+            String query = SELECT_ENTITY_ALL[follow.ordinal()] + "\\n" + clause.repr();
             try {
                 return ResultSetIterator.of(runner().prepareQuery(query).executeQuery(), result -> fromRow(result, follow, 0));
             } catch (SQLException e) {

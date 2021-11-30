@@ -4,7 +4,7 @@ import org.jetbrains.annotations.NotNull;
 
 import java.util.List;
 
-public class Where extends SimpleRepr implements Repr {
+public class Where extends SimpleRepr implements Clause, Repr {
     private final BoolTerm term;
 
     public Where(@NotNull BoolTerm term) {
@@ -42,5 +42,17 @@ public class Where extends SimpleRepr implements Repr {
 
     public static @NotNull Where hardcoded(@NotNull String raw) {
         return new Where(new HardcodedBoolTerm(raw));
+    }
+
+    public @NotNull Where andTerm(@NotNull BoolTerm term) {
+        return Where.and(this, term);
+    }
+
+    public @NotNull Where orTerm(@NotNull BoolTerm term) {
+        return Where.or(this, term);
+    }
+
+    @NotNull BoolTerm term() {
+        return term;
     }
 }

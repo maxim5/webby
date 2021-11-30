@@ -2,27 +2,35 @@ package io.webby.orm.api.query;
 
 import org.jetbrains.annotations.NotNull;
 
-public class ColumnTerm implements Term {
+public class ColumnTerm extends SimpleRepr implements Term {
     private final Column column;
-    private final String repr;
+    private final Term term;
 
-    public ColumnTerm(@NotNull Column column) {
+    public ColumnTerm(@NotNull Column column, @NotNull Term term) {
+        super(term.repr());
         this.column = column;
-        this.repr = "";
+        this.term = term;
+        assert TermType.match(column.type(), term.type());
     }
 
-    @Override
-    public @NotNull String repr() {
-        return repr;
+    public static @NotNull ColumnTerm ofLiteral(@NotNull Column column, @NotNull NumberLiteral literal) {
+        return new ColumnTerm(column, literal);
+    }
+
+    public static @NotNull ColumnTerm ofLiteral(@NotNull Column column, @NotNull StringLiteral literal) {
+        return new ColumnTerm(column, literal);
+    }
+
+    public @NotNull Column column() {
+        return column;
+    }
+
+    public @NotNull Term term() {
+        return term;
     }
 
     @Override
     public @NotNull TermType type() {
         return column.type();
-    }
-
-    @Override
-    public String toString() {
-        return repr;
     }
 }
