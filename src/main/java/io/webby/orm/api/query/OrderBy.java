@@ -7,11 +7,11 @@ import org.jetbrains.annotations.NotNull;
 import java.util.List;
 import java.util.stream.Collectors;
 
-public class OrderBy extends SimpleRepr implements Clause, Repr {
+public class OrderBy extends Unit implements Clause, Representable {
     private final ImmutableList<Term> terms;
 
     public OrderBy(@NotNull List<Term> terms) {
-        super("ORDER BY %s".formatted(terms.stream().map(Repr::repr).collect(Collectors.joining(", "))));
+        super("ORDER BY %s".formatted(joinWithCommas(terms)), flattenArgsOf(terms));
         this.terms = ImmutableList.copyOf(terms);
     }
 
@@ -33,5 +33,9 @@ public class OrderBy extends SimpleRepr implements Clause, Repr {
 
     @NotNull ImmutableList<Term> terms() {
         return terms;
+    }
+
+    private static @NotNull String joinWithCommas(@NotNull List<Term> terms) {
+        return terms.stream().map(Representable::repr).collect(Collectors.joining(", "));
     }
 }

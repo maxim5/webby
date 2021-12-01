@@ -2,12 +2,12 @@ package io.webby.orm.api.query;
 
 import org.jetbrains.annotations.NotNull;
 
-public class ColumnTerm extends SimpleRepr implements Term {
+public class ColumnTerm extends Unit implements Term {
     private final Column column;
     private final Term term;
 
     public ColumnTerm(@NotNull Column column, @NotNull Term term) {
-        super(term.repr());
+        super(term.repr(), term.args());
         this.column = column;
         this.term = term;
         assert TermType.match(column.type(), term.type());

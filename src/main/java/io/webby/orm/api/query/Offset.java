@@ -1,10 +1,12 @@
 package io.webby.orm.api.query;
 
-public class Offset extends SimpleRepr implements Clause, Repr {
+import java.util.List;
+
+public class Offset extends Unit implements Clause, Representable {
     private final int offset;
 
     public Offset(int offset) {
-        super("OFFSET %d".formatted(offset));
+        super("OFFSET ?", List.of(offset));
         this.offset = offset;
     }
 

@@ -20,8 +20,7 @@ import java.util.Set;
 import java.util.stream.Collectors;
 
 import static io.webby.orm.api.query.CompareType.EQ;
-import static io.webby.orm.api.query.Shortcuts.like;
-import static io.webby.orm.api.query.Shortcuts.literal;
+import static io.webby.orm.api.query.Shortcuts.*;
 
 public class BlobTableDb<V, K> extends ByteArrayDb<K, V> implements KeyValueDb<K, V> {
     // Hardcoding the table columns to avoid a dep on the generated BlobKvTable from the core...
@@ -61,10 +60,10 @@ public class BlobTableDb<V, K> extends ByteArrayDb<K, V> implements KeyValueDb<K
 
     @Override
     public boolean containsValue(@NotNull V value) {
+        byte[] bytes = fromValue(value);
         Compare compare = switch (table.engine()) {
-            // Use the "?" arg to avoid query overflow
-            case SQLite -> EQ.compare(Func.HEX.of(VALUE_COLUMN), literal(upperhex(fromValue(value))));
-            case MySQL, H2 -> null; // EQ.compare(VALUE_COLUMN, blob(fromValue(value)));
+            case SQLite -> EQ.compare(Func.HEX.of(VALUE_COLUMN), var(upperhex(bytes)));
+            case MySQL, H2 -> EQ.compare(VALUE_COLUMN, var(bytes));
             default -> throw new UnsupportedOperationException("containsValue() not implemented for SQL engine:" + table.engine());
         };
 

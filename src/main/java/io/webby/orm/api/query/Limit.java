@@ -1,10 +1,12 @@
 package io.webby.orm.api.query;
 
-public class Limit extends SimpleRepr implements Clause, Repr {
+import java.util.List;
+
+public class Limit extends Unit implements Clause, Representable {
     private final int limit;
 
     public Limit(int limit) {
-        super("LIMIT %d".formatted(limit));
+        super("LIMIT ?", List.of(limit));
         this.limit = limit;
     }
 

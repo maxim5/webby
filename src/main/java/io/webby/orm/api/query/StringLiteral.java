@@ -2,7 +2,7 @@ package io.webby.orm.api.query;
 
 import org.jetbrains.annotations.NotNull;
 
-public class StringLiteral extends SimpleRepr implements Term {
+public class StringLiteral extends Unit implements Term {
     public StringLiteral(@NotNull String literal) {
         super("'%s'".formatted(literal));
     }

@@ -4,8 +4,6 @@ import io.webby.orm.api.PageToken;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
-import static java.util.Objects.requireNonNull;
-
 public record Pagination(@Nullable ColumnTerm lastItem, int offset, int limit) {
     public static final int NO_OFFSET = -1;
 
@@ -24,17 +22,7 @@ public record Pagination(@Nullable ColumnTerm lastItem, int offset, int limit) {
 
     public static @NotNull Pagination of(@NotNull PageToken token, @NotNull Column column, int limit) {
         if (token.hasLastItem()) {
-            // TODO: use arg
-            ColumnTerm columnTerm = new ColumnTerm(column, new Term() {
-                @Override
-                public @NotNull String repr() {
-                    return requireNonNull(token.lastItem());
-                }
-                @Override
-                public @NotNull TermType type() {
-                    return TermType.WILDCARD;
-                }
-            });
+            ColumnTerm columnTerm = new ColumnTerm(column, new Variable(token.lastItem(), TermType.WILDCARD));
             return of(columnTerm, limit);
         }
         if (token.hasOffset()) {

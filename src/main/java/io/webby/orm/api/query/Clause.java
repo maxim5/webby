@@ -1,4 +1,4 @@
 package io.webby.orm.api.query;
 
-public interface Clause extends Repr {
+public interface Clause extends ArgsHolder {
 }

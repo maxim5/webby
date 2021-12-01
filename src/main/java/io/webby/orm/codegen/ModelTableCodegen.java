@@ -220,7 +220,7 @@ public class ModelTableCodegen extends BaseCodegen {
         @Override
         public int count(@Nonnull Clause clause) {
             String query = "SELECT COUNT(*) FROM $table_sql\\n" + clause.repr();
-            try (PreparedStatement statement = runner().prepareQuery(query);
+            try (PreparedStatement statement = runner().prepareQuery(query, clause.args());
                  ResultSet result = statement.executeQuery()) {
                 return result.next() ? result.getInt(1) : 0;
             } catch (SQLException e) {
@@ -319,7 +319,8 @@ public class ModelTableCodegen extends BaseCodegen {
         public @Nonnull ResultSetIterator<$ModelClass> iterator() {
             String query = SELECT_ENTITY_ALL[follow.ordinal()];
             try {
-                return ResultSetIterator.of(runner().prepareQuery(query).executeQuery(), result -> fromRow(result, follow, 0));
+                return ResultSetIterator.of(runner().prepareQuery(query).executeQuery(),
+                                            result -> fromRow(result, follow, 0));
             } catch (SQLException e) {
                 throw new QueryException("Failed to iterate over $TableClass", query, e);
             }
@@ -329,7 +330,8 @@ public class ModelTableCodegen extends BaseCodegen {
         public @Nonnull ResultSetIterator<$ModelClass> iterator(@Nonnull Clause clause) {
             String query = SELECT_ENTITY_ALL[follow.ordinal()] + "\\n" + clause.repr();
             try {
-                return ResultSetIterator.of(runner().prepareQuery(query).executeQuery(), result -> fromRow(result, follow, 0));
+                return ResultSetIterator.of(runner().prepareQuery(query, clause.args()).executeQuery(),
+                                            result -> fromRow(result, follow, 0));
             } catch (SQLException e) {
                 throw new QueryException("Failed to iterate over $TableClass", query, e);
             }

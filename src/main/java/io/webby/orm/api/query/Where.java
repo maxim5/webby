@@ -4,11 +4,11 @@ import org.jetbrains.annotations.NotNull;
 
 import java.util.List;
 
-public class Where extends SimpleRepr implements Clause, Repr {
+public class Where extends Unit implements Clause, Representable {
     private final BoolTerm term;
 
     public Where(@NotNull BoolTerm term) {
-        super("WHERE %s".formatted(term.repr()));
+        super("WHERE %s".formatted(term.repr()), term.args());
         this.term = term;
     }
 
