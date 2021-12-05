@@ -17,8 +17,9 @@ public class EmbeddedRedisExtension implements BeforeAllCallback, AfterAllCallba
     public EmbeddedRedisExtension(int port) {
         // See
         // https://github.com/kstyrc/embedded-redis/issues/52
+        // https://github.com/kstyrc/embedded-redis/issues/77
         // https://stackoverflow.com/questions/30233543/error-when-open-redis-server
-        redisServer = RedisServer.builder().port(port).setting("maxheap 512M").build();
+        redisServer = RedisServer.builder().port(port).setting("maxmemory 512M").build();
     }
 
     public EmbeddedRedisExtension() {
