@@ -30,7 +30,7 @@ public class TempDirectoryExtension implements BeforeAllCallback, BeforeEachCall
     }
 
     public TempDirectoryExtension() {
-        this(true, true);
+        this(true, false);
     }
 
     @Override
