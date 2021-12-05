@@ -2,6 +2,7 @@ package io.webby.testing.ext;
 
 import com.google.common.flogger.FluentLogger;
 import com.google.inject.Module;
+import com.google.inject.util.Modules;
 import io.webby.db.sql.ConnectionPool;
 import io.webby.db.sql.SqlSettings;
 import io.webby.orm.api.Engine;
@@ -118,5 +119,9 @@ public class SqlDbSetupExtension implements AfterAllCallback, BeforeEachCallback
 
     public @NotNull Module singleConnectionPoolModule() {
         return TestingModules.instance(ConnectionPool.class, singleConnectionPool());
+    }
+
+    public @NotNull Module combinedTestingModule() {
+        return Modules.combine(singleConnectionPoolModule(), TestingModules.PERSISTENT_DB_CLEANER_MODULE);
     }
 }

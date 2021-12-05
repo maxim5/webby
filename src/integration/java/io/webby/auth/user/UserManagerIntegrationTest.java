@@ -52,8 +52,7 @@ public class UserManagerIntegrationTest {
             case SQL -> settings.storageSettings().enableSqlStorage(SQL_DB.getSettings()).enableKeyValueStorage(StorageType.JAVA_MAP);
             case KEY_VALUE -> settings.storageSettings().enableKeyValueStorage(StorageType.JAVA_MAP);
         }
-        return Testing.testStartup(settings, SQL_DB::savepoint, SQL_DB.singleConnectionPoolModule())
-                .getInstance(UserManager.class);
+        return Testing.testStartup(settings, SQL_DB::savepoint, SQL_DB.combinedTestingModule()).getInstance(UserManager.class);
     }
 
     private enum Scenario {
