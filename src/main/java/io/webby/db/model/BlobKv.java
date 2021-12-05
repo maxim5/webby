@@ -17,4 +17,9 @@ public record BlobKv(byte @NotNull [] id, byte @Nullable [] value) {
     public int hashCode() {
         return 31 * Arrays.hashCode(id) + Arrays.hashCode(value);
     }
+
+    @Override
+    public String toString() {
+        return "BlobKv{id=%s, value=%s}".formatted(Arrays.toString(id), Arrays.toString(value));
+    }
 }
