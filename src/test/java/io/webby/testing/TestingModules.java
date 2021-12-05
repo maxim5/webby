@@ -3,7 +3,7 @@ package io.webby.testing;
 import com.google.inject.Module;
 import com.google.inject.Provider;
 import com.google.inject.util.Modules;
-import io.webby.db.sql.TestingPersistentDbTableCleaner;
+import io.webby.db.sql.testing.TestingPersistentDbTableCleaner;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 

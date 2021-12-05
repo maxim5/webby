@@ -83,6 +83,7 @@ public class SqlSchemaMaker {
         byte[].class, "BLOB",
         Timestamp.class, "TIMESTAMP(3)"
     ));
+    // https://stackoverflow.com/questions/29292353/whats-the-difference-between-varchar-binary-and-varbinary-in-mysql
     private static final Map<Class<?>, String> MYSQL_PK_DATA_TYPES = EasyMaps.merge(MYSQL_DATA_TYPES, EasyMaps.asMap(
         String.class, "VARCHAR(255)",
         byte[].class, "VARBINARY(255)"

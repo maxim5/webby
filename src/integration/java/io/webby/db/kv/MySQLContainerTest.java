@@ -2,6 +2,7 @@ package io.webby.db.kv;
 
 import com.zaxxer.hikari.HikariConfig;
 import com.zaxxer.hikari.HikariDataSource;
+import org.junit.Ignore;
 import org.junit.Test;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -26,6 +27,7 @@ import static org.hamcrest.CoreMatchers.containsString;
 import static org.junit.Assert.*;
 import static org.junit.jupiter.api.Assumptions.assumeFalse;
 
+@Ignore
 public class MySQLContainerTest {
 
     private static final Logger logger = LoggerFactory.getLogger(MySQLContainerTest.class);

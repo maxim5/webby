@@ -1,4 +1,4 @@
-package io.webby.db.sql;
+package io.webby.db.sql.testing;
 
 import com.google.common.eventbus.EventBus;
 import com.google.common.eventbus.Subscribe;
@@ -7,6 +7,7 @@ import com.google.inject.Inject;
 import com.google.inject.Provider;
 import io.webby.app.Settings;
 import io.webby.common.GuiceCompleteEvent;
+import io.webby.db.sql.TableManager;
 import org.jetbrains.annotations.NotNull;
 
 import java.sql.SQLException;
