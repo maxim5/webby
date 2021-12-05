@@ -2,7 +2,7 @@ package io.webby.orm.api.query;
 
 import org.jetbrains.annotations.NotNull;
 
-public enum CompareType implements Repr {
+public enum CompareType implements Representable {
     EQ("="),
     NE("<>"),
     GT(">"),

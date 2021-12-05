@@ -4,7 +4,7 @@ import org.jetbrains.annotations.NotNull;
 
 import java.util.List;
 
-public enum Func implements Repr {
+public enum Func implements Representable {
     HEX("hex", List.of(TermType.STRING), TermType.STRING);
 
     private final String repr;

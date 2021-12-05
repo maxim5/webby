@@ -5,6 +5,7 @@ import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
 import java.sql.*;
+import java.util.List;
 
 public class QueryRunner {
     private final Connection connection;
@@ -69,6 +70,15 @@ public class QueryRunner {
         PreparedStatement prepared = connection.prepareStatement(sql);
         for (int i = 0; i < params.length; i++) {
             prepared.setObject(i + 1, params[i]);
+        }
+        return prepared;
+    }
+
+    @MustBeClosed
+    public @NotNull PreparedStatement prepareQuery(@NotNull String sql, @NotNull List<Object> params) throws SQLException {
+        PreparedStatement prepared = connection.prepareStatement(sql);
+        for (int i = 0; i < params.size(); i++) {
+            prepared.setObject(i + 1, params.get(i));
         }
         return prepared;
     }

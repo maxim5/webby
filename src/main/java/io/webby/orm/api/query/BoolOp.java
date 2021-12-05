@@ -5,12 +5,12 @@ import org.jetbrains.annotations.NotNull;
 
 import java.util.List;
 
-public class BoolOp extends SimpleRepr implements BoolTerm {
+public class BoolOp extends Unit implements BoolTerm {
     private final ImmutableList<BoolTerm> terms;
     private final BoolOpType type;
 
     public BoolOp(@NotNull List<BoolTerm> terms, @NotNull BoolOpType type) {
-        super(composeRepr(terms, type));
+        super(composeRepr(terms, type), flattenArgsOf(terms));
         this.terms = ImmutableList.copyOf(terms);
         this.type = type;
     }
