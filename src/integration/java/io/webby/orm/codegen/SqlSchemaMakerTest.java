@@ -25,6 +25,13 @@ public class SqlSchemaMakerTest {
                 access_level INTEGER
             )
             """);
+
+        assertThat(makeCreateTableQuery(Engine.MySQL, UserTable.class)).isEqualTo("""
+            CREATE TABLE IF NOT EXISTS user (
+                user_id BIGINT PRIMARY KEY AUTO_INCREMENT,
+                access_level INTEGER
+            )
+            """);
     }
 
     @Test
@@ -48,6 +55,16 @@ public class SqlSchemaMakerTest {
                 ip_address VARCHAR
             )
             """);
+
+        assertThat(makeCreateTableQuery(Engine.MySQL, SessionTable.class)).isEqualTo("""
+            CREATE TABLE IF NOT EXISTS session (
+                session_id BIGINT PRIMARY KEY AUTO_INCREMENT,
+                user_id BIGINT,
+                created TIMESTAMP(3),
+                user_agent VARCHAR(4096),
+                ip_address VARCHAR(4096)
+            )
+            """);
     }
 
     @Test
@@ -62,6 +79,13 @@ public class SqlSchemaMakerTest {
         assertThat(makeCreateTableQuery(Engine.H2, BlobKvTable.class)).isEqualTo("""
             CREATE TABLE IF NOT EXISTS blob_kv (
                 id VARCHAR PRIMARY KEY,
+                value BLOB
+            )
+            """);
+
+        assertThat(makeCreateTableQuery(Engine.MySQL, BlobKvTable.class)).isEqualTo("""
+            CREATE TABLE IF NOT EXISTS blob_kv (
+                id VARBINARY(255) PRIMARY KEY,
                 value BLOB
             )
             """);

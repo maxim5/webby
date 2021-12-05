@@ -73,23 +73,36 @@ public class SqlSchemaMaker {
         Date.class, "DATE",
         Timestamp.class, "TIMESTAMP"
     );
-    private static final Map<Class<?>, String> MYSQL_DATA_TYPES = EasyMaps.merge(DEFAULT_DATA_TYPES, EasyMaps.asMap(
-        String.class, "VARCHAR(4096)"
+
+    private static final Map<Class<?>, String> H2_PK_DATA_TYPES = EasyMaps.merge(DEFAULT_DATA_TYPES, EasyMaps.asMap(
+        byte[].class, "VARCHAR"
     ));
+
+    private static final Map<Class<?>, String> MYSQL_DATA_TYPES = EasyMaps.merge(DEFAULT_DATA_TYPES, EasyMaps.asMap(
+        String.class, "VARCHAR(4096)",
+        byte[].class, "BLOB",
+        Timestamp.class, "TIMESTAMP(3)"
+    ));
+    private static final Map<Class<?>, String> MYSQL_PK_DATA_TYPES = EasyMaps.merge(MYSQL_DATA_TYPES, EasyMaps.asMap(
+        String.class, "VARCHAR(255)",
+        byte[].class, "VARBINARY(255)"
+    ));
+
     private static final Map<Class<?>, String> SQLITE_DATA_TYPES = EasyMaps.asMap(
         String.class, "VARCHAR",
         byte[].class, "BLOB"
     );
+    private static final Map<Class<?>, String> SQLITE_PK_DATA_TYPES = EasyMaps.merge(SQLITE_DATA_TYPES, EasyMaps.asMap(
+        byte[].class, "VARCHAR"
+    ));
 
     private static @NotNull String sqlTypeFor(@NotNull TableMeta.ColumnMeta columnMeta, @NotNull Engine engine) {
+        boolean isPrimaryKey = columnMeta.isPrimaryKey();
         Class<?> columnType = columnMeta.type();
-        if (columnMeta.isPrimaryKey() && columnType == byte[].class) {
-            columnType = String.class;  // Exception: BLOB PRIMARY KEY -> VARCHAR PRIMARY KEY
-        }
         return switch (engine) {
-            case H2 -> DEFAULT_DATA_TYPES.get(columnType);
-            case MySQL -> MYSQL_DATA_TYPES.get(columnType);
-            case SQLite -> SQLITE_DATA_TYPES.getOrDefault(columnType, "INTEGER");
+            case H2 -> (isPrimaryKey ? H2_PK_DATA_TYPES : DEFAULT_DATA_TYPES).get(columnType);
+            case MySQL -> (isPrimaryKey ? MYSQL_PK_DATA_TYPES : MYSQL_DATA_TYPES).get(columnType);
+            case SQLite -> (isPrimaryKey ? SQLITE_PK_DATA_TYPES : SQLITE_DATA_TYPES).getOrDefault(columnType, "INTEGER");
             default -> throw new IllegalArgumentException("Engine not supported for table creation: " + engine);
         };
     }
