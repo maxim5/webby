@@ -73,6 +73,13 @@ public class SqlSchemaMaker {
         Date.class, "DATE",
         Timestamp.class, "TIMESTAMP"
     );
+    private static final Map<Class<?>, String> MYSQL_DATA_TYPES = EasyMaps.merge(DEFAULT_DATA_TYPES, EasyMaps.asMap(
+        String.class, "VARCHAR(4096)"
+    ));
+    private static final Map<Class<?>, String> SQLITE_DATA_TYPES = EasyMaps.asMap(
+        String.class, "VARCHAR",
+        byte[].class, "BLOB"
+    );
 
     private static @NotNull String sqlTypeFor(@NotNull TableMeta.ColumnMeta columnMeta, @NotNull Engine engine) {
         Class<?> columnType = columnMeta.type();
@@ -81,15 +88,8 @@ public class SqlSchemaMaker {
         }
         return switch (engine) {
             case H2 -> DEFAULT_DATA_TYPES.get(columnType);
-            case SQLite -> {
-                if (columnType == String.class) {
-                    yield "VARCHAR";
-                }
-                if (columnType == byte[].class) {
-                    yield "BLOB";
-                }
-                yield "INTEGER";
-            }
+            case MySQL -> MYSQL_DATA_TYPES.get(columnType);
+            case SQLite -> SQLITE_DATA_TYPES.getOrDefault(columnType, "INTEGER");
             default -> throw new IllegalArgumentException("Engine not supported for table creation: " + engine);
         };
     }
@@ -97,7 +97,7 @@ public class SqlSchemaMaker {
     private static @NotNull String sqlAutoIncrement(@NotNull TableMeta.ColumnMeta columnMeta, @NotNull Engine engine) {
         if (columnMeta.isPrimaryKey() && (columnMeta.type() == int.class || columnMeta.type() == long.class)) {
             return switch (engine) {
-                case H2 -> "AUTO_INCREMENT";
+                case H2, MySQL -> "AUTO_INCREMENT";
                 case SQLite -> "";  // Not recommended by https://www.sqlite.org/autoinc.html
                 default -> throw new IllegalArgumentException("Engine not supported for table creation: " + engine);
             };

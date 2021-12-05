@@ -87,6 +87,7 @@ dependencies {
     // SQLs
     compileOnly group: 'com.h2database', name: 'h2', version: '1.4.200'
     compileOnly group: 'com.zaxxer', name: 'HikariCP', version: '5.0.0'
+    compileOnly group: 'mysql', name: 'mysql-connector-java', version: '8.0.27'
     compileOnly group: 'org.xerial', name: 'sqlite-jdbc', version: '3.36.0.3'
 
     // MimeType utils
@@ -111,6 +112,8 @@ dependencies {
     // SQLs for Unit tests
     testImplementation group: 'com.h2database', name: 'h2', version: '1.4.200'
     testImplementation group: 'com.zaxxer', name: 'HikariCP', version: '5.0.0'
+    testImplementation group: 'org.testcontainers', name: 'mysql', version: '1.16.2'
+    testImplementation group: 'org.testcontainers', name: 'testcontainers', version: '1.16.2'
     testImplementation group: 'org.xerial', name: 'sqlite-jdbc', version: '3.36.0.3'
     // NoSQLs for Integration tests
     testImplementation group: 'io.etcd', name: 'jetcd-test', version: '0.5.11'

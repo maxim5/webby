@@ -14,8 +14,17 @@ import static io.webby.db.sql.SqlSettings.SQLITE_IN_MEMORY;
 @SuppressWarnings("unused")
 public class Playground {
     public static void main(String[] args) throws Exception {
-        runH2();
+//        runH2();
         // runSqlite();
+        runMysql();
+    }
+
+    private static void runMysql() throws SQLException {
+        try (Connection connection = DriverManager.getConnection("jdbc:mysql://localhost/test?user=test&password=test")) {
+            QueryRepl main = new QueryRepl(connection);
+
+            main.update("CREATE TABLE user (user_id INTEGER PRIMARY KEY AUTO_INCREMENT, access_level INTEGER, val VARCHAR)");
+        }
     }
 
     private static void runSqlite() throws SQLException {

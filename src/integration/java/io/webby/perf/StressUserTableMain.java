@@ -55,7 +55,7 @@ public class StressUserTableMain {
     private static @NotNull Connector initConnector() {
         AppSettings settings = Testing.defaultAppSettings();
         settings.modelFilter().setCommonPackageOf(DefaultUser.class, Session.class);
-        settings.storageSettings().enableSqlStorage(SqlSettings.inMemoryNotForProduction(Engine.H2));
+        settings.storageSettings().enableSqlStorage(new SqlSettings("jdbc:mysql://localhost/test?user=test&password=test"));
         settings.setProperty("db.sql.connection.expiration.millis", 10_000);
         Injector injector = Webby.getReady(settings);
         return injector.getInstance(TableManager.class).connector();
