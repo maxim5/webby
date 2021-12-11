@@ -9,7 +9,7 @@ public class ClauseBuilder {
     private Where where;
     private OrderBy orderBy;
     private Offset offset;
-    private Limit limit;
+    private LimitClause limit;
 
     public @NotNull ClauseBuilder with(@NotNull Where where) {
         this.where = this.where == null ? where : this.where.andTerm(where.term());
@@ -27,7 +27,7 @@ public class ClauseBuilder {
         return this;
     }
 
-    public @NotNull ClauseBuilder with(@NotNull Limit limit) {
+    public @NotNull ClauseBuilder with(@NotNull LimitClause limit) {
         assert this.limit == null : "Duplicate limit specified: existing: %s, updated: %s".formatted(this.limit, limit);
         this.limit = limit;
         return this;

@@ -12,12 +12,12 @@ public class CompositeClause extends Unit implements Clause {
     private final Where where;
     private final OrderBy orderBy;
     private final Offset offset;
-    private final Limit limit;
+    private final LimitClause limit;
 
     public CompositeClause(@Nullable Where where,
                            @Nullable OrderBy orderBy,
                            @Nullable Offset offset,
-                           @Nullable Limit limit) {
+                           @Nullable LimitClause limit) {
         super(joinLines(where, orderBy, offset, limit), flattenArgsOf(Arrays.asList(where, orderBy, offset, limit)));
         this.where = where;
         this.orderBy = orderBy;
@@ -37,7 +37,7 @@ public class CompositeClause extends Unit implements Clause {
         return offset;
     }
 
-    public @Nullable Limit limit() {
+    public @Nullable LimitClause limit() {
         return limit;
     }
 

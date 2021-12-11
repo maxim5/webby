@@ -3,10 +3,7 @@ package io.webby.orm.api;
 import com.google.common.collect.Lists;
 import com.google.errorprone.annotations.CanIgnoreReturnValue;
 import com.google.errorprone.annotations.MustBeClosed;
-import io.webby.orm.api.query.Clause;
-import io.webby.orm.api.query.CompositeClause;
-import io.webby.orm.api.query.Limit;
-import io.webby.orm.api.query.Offset;
+import io.webby.orm.api.query.*;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.List;
@@ -46,7 +43,7 @@ public interface BaseTable<E> extends Iterable<E> {
     default @NotNull Page<E> fetchPage(@NotNull CompositeClause clause) {
         List<E> items = fetchMatching(clause);
         Offset offset = clause.offset();
-        Limit limit = clause.limit();
+        LimitClause limit = clause.limit();
         boolean isFullPage = limit != null && offset != null && items.size() == limit.limitValue();
         if (isFullPage) {
             PageToken pageToken = new PageToken(null, offset.offsetValue() + limit.limitValue());
