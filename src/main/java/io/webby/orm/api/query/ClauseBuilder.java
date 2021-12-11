@@ -1,5 +1,6 @@
 package io.webby.orm.api.query;
 
+import io.webby.orm.api.Engine;
 import org.jetbrains.annotations.NotNull;
 
 import static io.webby.orm.api.query.CompareType.GT;
@@ -33,7 +34,7 @@ public class ClauseBuilder {
         return this;
     }
 
-    public @NotNull ClauseBuilder with(@NotNull Pagination pagination) {
+    public @NotNull ClauseBuilder with(@NotNull Pagination pagination, @NotNull Engine engine) {
         if (pagination.hasLastItem()) {
             ColumnTerm lastItem = requireNonNull(pagination.lastItem());
             with(Where.of(GT.compare(lastItem.column(), lastItem.term())));
@@ -41,7 +42,11 @@ public class ClauseBuilder {
         if (pagination.hasOffset()) {
             with(Offset.of(pagination.offset()));
         }
-        return with(Limit.of(pagination.limit()));
+        switch (engine) {
+            case H2, MySQL, PostgreSQL, SQLite -> with(Limit.of(pagination.limit()));
+            case MsSqlServer, Oracle -> with(FetchOnly.of(pagination.limit()));
+        }
+        return this;
     }
 
     public @NotNull CompositeClause build() {
