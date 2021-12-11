@@ -31,6 +31,7 @@ public class TableManager {
 
     private final Settings settings;
     private final Connector connector;
+    private final Engine engine;
     private final ImmutableMap<Class<?>, EntityTable> tableMap;
 
     @Inject
@@ -43,6 +44,7 @@ public class TableManager {
 
         this.settings = settings;
         connector = new ThreadLocalConnector(pool, settings.getLongProperty("db.sql.connection.expiration.millis", 30_000));
+        engine = pool.getEngine();
 
         Set<? extends Class<?>> tableClasses = scanner.getDerivedClasses(settings.modelFilter(), BaseTable.class);
         tableMap = buildTableMap(tableClasses);
@@ -53,6 +55,10 @@ public class TableManager {
 
     public @NotNull Connector connector() {
         return connector;
+    }
+
+    public @NotNull Engine engine() {
+        return engine;
     }
 
     public @NotNull List<String> allTableNames() {
