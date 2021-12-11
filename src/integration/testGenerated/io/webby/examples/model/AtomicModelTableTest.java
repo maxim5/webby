@@ -6,7 +6,9 @@ import io.webby.testing.SqlDbTableTest;
 import io.webby.testing.TableIntTest;
 import org.jetbrains.annotations.NotNull;
 
+import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicInteger;
+import java.util.concurrent.atomic.AtomicLong;
 
 public class AtomicModelTableTest
         extends SqlDbTableTest<Integer, AtomicModel, AtomicModelTable>
@@ -19,11 +21,11 @@ public class AtomicModelTableTest
 
     @Override
     public @NotNull AtomicModel createEntity(@NotNull Integer key, int version) {
-        return new AtomicModel(key, new AtomicInteger(version));
+        return new AtomicModel(key, new AtomicInteger(version), new AtomicLong(version), new AtomicBoolean(version > 0));
     }
 
     @Override
     public @NotNull AtomicModel copyEntityWithId(@NotNull AtomicModel entity, int autoId) {
-        return new AtomicModel(autoId, entity.i());
+        return new AtomicModel(autoId, entity.i(), entity.l(), entity.b());
     }
 }

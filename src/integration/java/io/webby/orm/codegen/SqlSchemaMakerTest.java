@@ -99,14 +99,27 @@ public class SqlSchemaMakerTest {
         assertThat(makeCreateTableQuery(Engine.SQLite, AtomicModelTable.class)).isEqualTo("""
             CREATE TABLE IF NOT EXISTS atomic_model (
                 id INTEGER PRIMARY KEY,
-                i INTEGER
+                i INTEGER,
+                l INTEGER,
+                b INTEGER
+            )
+            """);
+
+        assertThat(makeCreateTableQuery(Engine.H2, AtomicModelTable.class)).isEqualTo("""
+            CREATE TABLE IF NOT EXISTS atomic_model (
+                id INTEGER PRIMARY KEY AUTO_INCREMENT,
+                i INTEGER,
+                l BIGINT,
+                b BOOLEAN
             )
             """);
 
         assertThat(makeCreateTableQuery(Engine.MySQL, AtomicModelTable.class)).isEqualTo("""
             CREATE TABLE IF NOT EXISTS atomic_model (
                 id INTEGER PRIMARY KEY AUTO_INCREMENT,
-                i INTEGER
+                i INTEGER,
+                l BIGINT,
+                b BOOLEAN
             )
             """);
     }
