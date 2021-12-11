@@ -14,19 +14,17 @@ public interface ForeignKeyTableTest<K, E, T extends TableObj<K, E>> extends Pri
         assumeKeys(1);
         TableObj<K, E> table = table().withReferenceFollowOnRead(NO_FOLLOW);
 
-        assertEquals(0, table.count());
-        assertTrue(table.isEmpty());
+        assertTableCount(0);
         assertNull(table.getByPkOrNull(keys()[0]));
         assertThat(table.fetchAll()).isEmpty();
 
         E shallow = createEntity(keys()[0]);
         assertEquals(1, table.insert(shallow));
+        assertTableCount(1);
         assertEquals(shallow, table.getByPkOrNull(keys()[0]));
         assertThat(table.fetchAll()).containsExactly(shallow);
 
         enrichOneLevel(shallow);
-        assertEquals(1, table.count());
-        assertFalse(table.isEmpty());
         assertEquals(shallow, table.getByPkOrNull(keys()[0]));
         assertThat(table.fetchAll()).containsExactly(shallow);
     }
@@ -36,17 +34,15 @@ public interface ForeignKeyTableTest<K, E, T extends TableObj<K, E>> extends Pri
         assumeKeys(1);
         TableObj<K, E> table = table().withReferenceFollowOnRead(FOLLOW_ONE_LEVEL);
 
-        assertEquals(0, table.count());
-        assertTrue(table.isEmpty());
+        assertTableCount(0);
         assertNull(table.getByPkOrNull(keys()[0]));
         assertThat(table.fetchAll()).isEmpty();
 
         E shallow = createEntity(keys()[0]);
         assertEquals(1, table.insert(shallow));
+        assertTableCount(1);
 
         E rich = enrichOneLevel(shallow);
-        assertEquals(1, table.count());
-        assertFalse(table.isEmpty());
         assertEquals(rich, table.getByPkOrNull(keys()[0]));
         assertThat(table.fetchAll()).containsExactly(rich);
     }
@@ -56,17 +52,15 @@ public interface ForeignKeyTableTest<K, E, T extends TableObj<K, E>> extends Pri
         assumeKeys(1);
         TableObj<K, E> table = table().withReferenceFollowOnRead(FOLLOW_ALL);
 
-        assertEquals(0, table.count());
-        assertTrue(table.isEmpty());
+        assertTableCount(0);
         assertNull(table.getByPkOrNull(keys()[0]));
         assertThat(table.fetchAll()).isEmpty();
 
         E shallow = createEntity(keys()[0]);
         assertEquals(1, table.insert(shallow));
+        assertTableCount(1);
 
         E rich = enrichAllLevels(shallow);
-        assertEquals(1, table.count());
-        assertFalse(table.isEmpty());
         assertEquals(rich, table.getByPkOrNull(keys()[0]));
         assertThat(table.fetchAll()).containsExactly(rich);
     }
