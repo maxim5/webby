@@ -18,7 +18,7 @@ import static org.junit.jupiter.api.Assertions.*;
 
 @Tag("sql")
 public class ResultSetIteratorTest {
-    @RegisterExtension private final SqlDbSetupExtension SQL_DB = SqlDbSetupExtension.fromProperties();
+    @RegisterExtension private static final SqlDbSetupExtension SQL_DB = SqlDbSetupExtension.fromProperties();
 
     @SuppressWarnings("ConstantConditions")
     @Test
