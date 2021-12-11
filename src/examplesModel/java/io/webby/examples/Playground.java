@@ -16,8 +16,8 @@ import static io.webby.db.sql.SqlSettings.*;
 public class Playground {
     public static void main(String[] args) throws Exception {
         // runH2();
-        // runSqlite();
         runMysql();
+        // runSqlite();
     }
 
     private static void runMysql() throws SQLException {
@@ -51,6 +51,8 @@ public class Playground {
 
             main.query("SHOW CREATE TABLE userx");
             main.query("SHOW COLUMNS FROM userx");
+
+            main.query("SELECT EXISTS(SELECT * FROM blobx)");
         }
     }
 
@@ -67,48 +69,52 @@ public class Playground {
         try (Connection connection = connect(H2_IN_MEMORY)) {
             QueryRepl main = new QueryRepl(connection);
 
-            main.update("CREATE TABLE blob (blob_id VARCHAR PRIMARY KEY, blob_value BLOB)");
-            main.query("SELECT * FROM blob");
-            main.query("SELECT COUNT(*) FROM blob WHERE blob_id LIKE 'foo:%'");
+            main.update("CREATE TABLE blobx (blob_id VARCHAR PRIMARY KEY, blob_value BLOB)");
+            main.query("SELECT * FROM blobx");
+            main.query("SELECT COUNT(*) FROM blobx WHERE blob_id LIKE 'foo:%'");
 
-            main.update("INSERT INTO blob(blob_id, blob_value) VALUES(?, ?)", "foo".getBytes(), "bar".getBytes());
-            main.update("INSERT INTO blob(blob_id, blob_value) VALUES(?, ?)", "for".getBytes(), "baz".getBytes());
-            main.update("INSERT INTO blob(blob_id, blob_value) VALUES(?, ?)", "x".getBytes(), "y".getBytes());
-            main.query("SELECT * FROM blob");
+            main.update("INSERT INTO blobx(blob_id, blob_value) VALUES(?, ?)", "foo".getBytes(), "bar".getBytes());
+            main.update("INSERT INTO blobx(blob_id, blob_value) VALUES(?, ?)", "for".getBytes(), "baz".getBytes());
+            main.update("INSERT INTO blobx(blob_id, blob_value) VALUES(?, ?)", "x".getBytes(), "y".getBytes());
+            main.query("SELECT * FROM blobx");
 
-            main.query("SELECT * FROM blob WHERE blob_id LIKE '66%'");
-            main.query("SELECT * FROM blob WHERE blob_id LIKE '666f6f%'");
+            main.query("SELECT * FROM blobx WHERE blob_id LIKE '66%'");
+            main.query("SELECT * FROM blobx WHERE blob_id LIKE '666f6f%'");
 
-            main.query("SELECT COUNT(*) FROM blob WHERE blob_id LIKE 'foo%'");
-            main.query("SELECT COUNT(*) FROM blob WHERE blob_id LIKE '666F6F%'");
+            main.query("SELECT COUNT(*) FROM blobx WHERE blob_id LIKE 'foo%'");
+            main.query("SELECT COUNT(*) FROM blobx WHERE blob_id LIKE '666F6F%'");
 
-            main.query("SHOW COLUMNS FROM blob");
+            main.query("SHOW COLUMNS FROM blobx");
+
+            main.query("SELECT EXISTS(SELECT * FROM blobx)");
         }
     }
 
     private static void sqliteTextForBlobPk(QueryRepl main) throws SQLException {
-        main.update("CREATE TABLE blob (blob_id VARCHAR PRIMARY KEY, blob_value BLOB)");
-        main.update("INSERT INTO blob(blob_id, blob_value) VALUES(?, ?)", "foo".getBytes(), "bar".getBytes());
-        main.update("INSERT INTO blob(blob_id, blob_value) VALUES(?, ?)", "for".getBytes(), "baz".getBytes());
-        main.update("INSERT INTO blob(blob_id, blob_value) VALUES(?, ?)", "x".getBytes(), "y".getBytes());
+        main.update("CREATE TABLE blobx (blob_id VARCHAR PRIMARY KEY, blob_value BLOB)");
+        main.update("INSERT INTO blobx(blob_id, blob_value) VALUES(?, ?)", "foo".getBytes(), "bar".getBytes());
+        main.update("INSERT INTO blobx(blob_id, blob_value) VALUES(?, ?)", "for".getBytes(), "baz".getBytes());
+        main.update("INSERT INTO blobx(blob_id, blob_value) VALUES(?, ?)", "x".getBytes(), "y".getBytes());
 
-        main.query("SELECT * FROM blob");
-        main.query("SELECT blob_id, hex(blob_value) FROM blob");
-        main.query("SELECT hex(blob_id), hex(blob_value) FROM blob");
+        main.query("SELECT * FROM blobx");
+        main.query("SELECT blob_id, hex(blob_value) FROM blobx");
+        main.query("SELECT hex(blob_id), hex(blob_value) FROM blobx");
 
-        main.query("SELECT * FROM blob WHERE hex(blob_id) LIKE '66%'");
-        main.query("SELECT * FROM blob WHERE hex(blob_id) LIKE '666f6f%'");
+        main.query("SELECT * FROM blobx WHERE hex(blob_id) LIKE '66%'");
+        main.query("SELECT * FROM blobx WHERE hex(blob_id) LIKE '666f6f%'");
 
-        main.query("SELECT sql FROM sqlite_master WHERE name=?", "blob");
+        main.query("SELECT sql FROM sqlite_master WHERE name=?", "blobx");
+
+        main.query("SELECT EXISTS(SELECT * FROM blobx)");
     }
 
     private static void sqliteBlobPk(QueryRepl main) throws SQLException {
-        main.update("CREATE TABLE blob (blob_id BLOB PRIMARY KEY, blob_value BLOB)");
-        main.update("INSERT INTO blob(blob_id, blob_value) VALUES(?, ?)", "foo".getBytes(), "bar".getBytes());
-        main.update("INSERT INTO blob(blob_id, blob_value) VALUES(?, ?)", "for".getBytes(), "baz".getBytes());
-        main.update("INSERT INTO blob(blob_id, blob_value) VALUES(?, ?)", "x".getBytes(), "y".getBytes());
-        main.query("SELECT * FROM blob");
-        main.query("SELECT hex(blob_id), hex(blob_value) FROM blob");
+        main.update("CREATE TABLE blobx (blob_id BLOB PRIMARY KEY, blob_value BLOB)");
+        main.update("INSERT INTO blobx(blob_id, blob_value) VALUES(?, ?)", "foo".getBytes(), "bar".getBytes());
+        main.update("INSERT INTO blobx(blob_id, blob_value) VALUES(?, ?)", "for".getBytes(), "baz".getBytes());
+        main.update("INSERT INTO blobx(blob_id, blob_value) VALUES(?, ?)", "x".getBytes(), "y".getBytes());
+        main.query("SELECT * FROM blobx");
+        main.query("SELECT hex(blob_id), hex(blob_value) FROM blobx");
 
         // https://stackoverflow.com/questions/8892973/how-to-get-last-insert-id-in-sqlite
         main.query("SELECT last_insert_rowid()");
@@ -117,8 +123,8 @@ public class Playground {
 
         // https://stackoverflow.com/questions/24011247/fast-search-on-a-blob-starting-bytes-in-sqlite
         // https://stackoverflow.com/questions/3746756/search-for-value-within-blob-column-in-mysql
-        main.query("SELECT * FROM blob WHERE hex(blob_id) LIKE '66%'");
-        main.query("SELECT * FROM blob WHERE hex(blob_id) LIKE '666f6f%'");
+        main.query("SELECT * FROM blobx WHERE hex(blob_id) LIKE '66%'");
+        main.query("SELECT * FROM blobx WHERE hex(blob_id) LIKE '666f6f%'");
 
         System.out.println(BaseEncoding.base16().lowerCase().encode("foo".getBytes()));
     }
