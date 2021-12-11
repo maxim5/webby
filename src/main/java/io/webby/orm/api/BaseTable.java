@@ -52,9 +52,9 @@ public interface BaseTable<E> extends Iterable<E> {
         List<E> items = fetchMatching(clause);
         Offset offset = clause.offset();
         LimitClause limit = clause.limit();
-        boolean isFullPage = limit != null && offset != null && items.size() == limit.limitValue();
+        boolean isFullPage = limit != null && items.size() == limit.limitValue();
         if (isFullPage) {
-            PageToken pageToken = new PageToken(null, offset.offsetValue() + limit.limitValue());
+            PageToken pageToken = new PageToken(null, (offset != null ? offset.offsetValue() : 0) + limit.limitValue());
             return new Page<>(items, pageToken);
         }
         return new Page<>(items, null);

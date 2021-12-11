@@ -6,6 +6,7 @@ import org.jetbrains.annotations.NotNull;
 
 import java.util.Collection;
 import java.util.List;
+import java.util.Objects;
 
 public abstract class Unit implements ArgsHolder {
     private final String repr;
@@ -40,6 +41,6 @@ public abstract class Unit implements ArgsHolder {
     }
 
     protected static @NotNull List<Object> flattenArgsOf(@NotNull Collection<? extends ArgsHolder> holders) {
-        return holders.stream().map(ArgsHolder::args).flatMap(Collection::stream).toList();
+        return holders.stream().filter(Objects::nonNull).map(ArgsHolder::args).flatMap(Collection::stream).toList();
     }
 }

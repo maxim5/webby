@@ -12,12 +12,23 @@ public record Pagination(@Nullable ColumnTerm lastItem, int offset, int limit) {
         assert lastItem != null || offset > 0 || limit > 0 : "One of `lastItem`, `offset` or `limit` must be set";
     }
 
+    public static @NotNull Pagination firstPage(int limit) {
+        return new Pagination(null, NO_OFFSET, limit);
+    }
+
     public static @NotNull Pagination of(int offset, int limit) {
         return new Pagination(null, offset, limit);
     }
 
     public static @NotNull Pagination of(@NotNull ColumnTerm lastItem, int limit) {
         return new Pagination(lastItem, NO_OFFSET, limit);
+    }
+
+    public static @NotNull Pagination of(@NotNull PageToken token, int limit) {
+        if (token.hasOffset()) {
+            return of(token.offset(), limit);
+        }
+        throw new IllegalArgumentException("Invalid token: " + token);
     }
 
     public static @NotNull Pagination of(@NotNull PageToken token, @NotNull Column column, int limit) {

@@ -11,18 +11,18 @@ import java.util.stream.Stream;
 public class CompositeClause extends Unit implements Clause {
     private final Where where;
     private final OrderBy orderBy;
-    private final Offset offset;
     private final LimitClause limit;
+    private final Offset offset;
 
     public CompositeClause(@Nullable Where where,
                            @Nullable OrderBy orderBy,
-                           @Nullable Offset offset,
-                           @Nullable LimitClause limit) {
-        super(joinLines(where, orderBy, offset, limit), flattenArgsOf(Arrays.asList(where, orderBy, offset, limit)));
+                           @Nullable LimitClause limit,
+                           @Nullable Offset offset) {
+        super(joinLines(where, orderBy, limit, offset), flattenArgsOf(Arrays.asList(where, orderBy, limit, offset)));
         this.where = where;
         this.orderBy = orderBy;
-        this.offset = offset;
         this.limit = limit;
+        this.offset = offset;
     }
 
     public @Nullable Where where() {
@@ -33,12 +33,12 @@ public class CompositeClause extends Unit implements Clause {
         return orderBy;
     }
 
-    public @Nullable Offset offset() {
-        return offset;
-    }
-
     public @Nullable LimitClause limit() {
         return limit;
+    }
+
+    public @Nullable Offset offset() {
+        return offset;
     }
 
     private static @NotNull String joinLines(@Nullable Clause @NotNull ... clauses) {

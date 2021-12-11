@@ -248,11 +248,11 @@ public class ModelTableCodegen extends BaseCodegen {
         @Override
         public boolean exists(@Nonnull Where clause) {
             String query = "SELECT EXISTS (SELECT * FROM $table_sql " + clause.repr() + " LIMIT 1)";
-            try (PreparedStatement statement = runner().prepareQuery(query);
+            try (PreparedStatement statement = runner().prepareQuery(query, clause.args());
                  ResultSet result = statement.executeQuery()) {
                 return result.next() && result.getBoolean(1);
             } catch (SQLException e) {
-                throw new QueryException("Failed to check exists in $TableClass", query, e);
+                throw new QueryException("Failed to check exists in $TableClass", query, clause.args(), e);
             }
         }\n
         """, mainContext);
@@ -356,12 +356,12 @@ public class ModelTableCodegen extends BaseCodegen {
 
         @Override
         public @Nonnull ResultSetIterator<$ModelClass> iterator(@Nonnull Clause clause) {
-            String query = SELECT_ENTITY_ALL[follow.ordinal()] + "\\n" + clause.repr();
+            String query = SELECT_ENTITY_ALL[follow.ordinal()] + clause.repr();
             try {
                 return ResultSetIterator.of(runner().prepareQuery(query, clause.args()).executeQuery(),
                                             result -> fromRow(result, follow, 0));
             } catch (SQLException e) {
-                throw new QueryException("Failed to iterate over $TableClass", query, e);
+                throw new QueryException("Failed to iterate over $TableClass", query, clause.args(), e);
             }
         }\n
         """, mainContext);

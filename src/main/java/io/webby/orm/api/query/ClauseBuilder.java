@@ -9,8 +9,8 @@ import static java.util.Objects.requireNonNull;
 public class ClauseBuilder {
     private Where where;
     private OrderBy orderBy;
-    private Offset offset;
     private LimitClause limit;
+    private Offset offset;
 
     public @NotNull ClauseBuilder with(@NotNull Where where) {
         this.where = this.where == null ? where : this.where.andTerm(where.term());
@@ -22,15 +22,15 @@ public class ClauseBuilder {
         return this;
     }
 
-    public @NotNull ClauseBuilder with(@NotNull Offset offset) {
-        assert this.offset == null : "Duplicate offset specified: existing: %s, updated: %s".formatted(this.offset, offset);
-        this.offset = offset;
-        return this;
-    }
-
     public @NotNull ClauseBuilder with(@NotNull LimitClause limit) {
         assert this.limit == null : "Duplicate limit specified: existing: %s, updated: %s".formatted(this.limit, limit);
         this.limit = limit;
+        return this;
+    }
+
+    public @NotNull ClauseBuilder with(@NotNull Offset offset) {
+        assert this.offset == null : "Duplicate offset specified: existing: %s, updated: %s".formatted(this.offset, offset);
+        this.offset = offset;
         return this;
     }
 
@@ -50,6 +50,6 @@ public class ClauseBuilder {
     }
 
     public @NotNull CompositeClause build() {
-        return new CompositeClause(where, orderBy, offset, limit);
+        return new CompositeClause(where, orderBy, limit, offset);
     }
 }
