@@ -51,6 +51,10 @@ public class DebugSql {
             return values.stream().filter(val -> val.name.equals(name)).findFirst();
         }
 
+        public @NotNull RowValue getValueAt(int columnIndex) {
+            return values.get(columnIndex);
+        }
+
         public static @NotNull Tabular<String> toTabular(@NotNull List<Row> rows, boolean withHeader) {
             if (rows.isEmpty()) {
                 return ArrayTabular.of(new String[0][0]);

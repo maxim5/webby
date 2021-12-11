@@ -10,7 +10,6 @@ import org.jetbrains.annotations.NotNull;
 import java.sql.Date;
 import java.sql.Time;
 import java.sql.Timestamp;
-import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
@@ -28,8 +27,8 @@ public class SqlSchemaMaker {
         }
     }
 
-    public static @NotNull String makeCreateTableQuery(@NotNull Engine engine, @NotNull BaseTable<?> table) {
-        return makeCreateTableQuery(engine, table.meta());
+    public static @NotNull String makeCreateTableQuery(@NotNull BaseTable<?> table) {
+        return makeCreateTableQuery(table.engine(), table.meta());
     }
 
     public static @NotNull String makeCreateTableQuery(@NotNull Engine engine, @NotNull TableMeta meta) {
@@ -50,13 +49,6 @@ public class SqlSchemaMaker {
             %s
         )
         """.formatted(tableName, definitions);
-    }
-
-    public static @NotNull String makeCreateTableQuery(@NotNull Engine engine,
-                                                       @NotNull Class<? extends BaseTable<?>> ... tableClasses) {
-        return Arrays.stream(tableClasses)
-                .map(tableClass -> makeCreateTableQuery(engine, tableClasses))
-                .collect(Collectors.joining(";\n"));
     }
 
     private static final Map<Class<?>, String> DEFAULT_DATA_TYPES = EasyMaps.asMap(
@@ -90,6 +82,8 @@ public class SqlSchemaMaker {
     ));
 
     private static final Map<Class<?>, String> SQLITE_DATA_TYPES = EasyMaps.asMap(
+        float.class, "REAL",
+        double.class, "REAL",
         String.class, "VARCHAR",
         byte[].class, "BLOB"
     );
@@ -98,7 +92,7 @@ public class SqlSchemaMaker {
     ));
 
     private static @NotNull String sqlTypeFor(@NotNull TableMeta.ColumnMeta columnMeta, @NotNull Engine engine) {
-        boolean isPrimaryKey = columnMeta.isPrimaryKey();
+        boolean isPrimaryKey = columnMeta.isPrimaryKey() || columnMeta.isForeignKey();
         Class<?> columnType = columnMeta.type();
         return switch (engine) {
             case H2 -> (isPrimaryKey ? H2_PK_DATA_TYPES : DEFAULT_DATA_TYPES).get(columnType);

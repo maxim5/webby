@@ -1,24 +1,18 @@
 package io.webby.examples.model;
 
 import io.webby.orm.api.Connector;
-import io.webby.testing.SqliteTableTest;
+import io.webby.orm.codegen.SqlSchemaMaker;
+import io.webby.testing.SqlDbTableTest;
 import io.webby.testing.TableIntTest;
 import org.jetbrains.annotations.NotNull;
 
 public class InheritedModelTableTest
-        extends SqliteTableTest<Integer, InheritedModel, InheritedModelTable>
+        extends SqlDbTableTest<Integer, InheritedModel, InheritedModelTable>
         implements TableIntTest<InheritedModel, InheritedModelTable> {
     @Override
     protected void setUp(@NotNull Connector connector) throws Exception {
-        connector.runner().runMultiUpdate("""
-            CREATE TABLE inherited_model (
-                str TEXT,
-                int_value INTEGER,
-                inherited_model_id INTEGER PRIMARY KEY,
-                bool_value INTEGER
-            )
-        """);
         table = new InheritedModelTable(connector);
+        connector().runner().runMultiUpdate(SqlSchemaMaker.makeCreateTableQuery(table));
     }
 
     @Override

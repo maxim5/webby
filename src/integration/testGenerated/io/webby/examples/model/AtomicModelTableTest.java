@@ -1,24 +1,20 @@
 package io.webby.examples.model;
 
 import io.webby.orm.api.Connector;
-import io.webby.testing.SqliteTableTest;
+import io.webby.orm.codegen.SqlSchemaMaker;
+import io.webby.testing.SqlDbTableTest;
 import io.webby.testing.TableIntTest;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.concurrent.atomic.AtomicInteger;
 
 public class AtomicModelTableTest
-        extends SqliteTableTest<Integer, AtomicModel, AtomicModelTable>
+        extends SqlDbTableTest<Integer, AtomicModel, AtomicModelTable>
         implements TableIntTest<AtomicModel, AtomicModelTable> {
     @Override
     protected void setUp(@NotNull Connector connector) throws Exception {
-        connector.runner().runMultiUpdate("""
-            CREATE TABLE atomic_model (
-                id INTEGER PRIMARY KEY,
-                i INTEGER
-            )
-        """);
         table = new AtomicModelTable(connector);
+        connector().runner().runMultiUpdate(SqlSchemaMaker.makeCreateTableQuery(table));
     }
 
     @Override

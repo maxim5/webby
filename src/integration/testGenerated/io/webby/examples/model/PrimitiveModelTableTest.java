@@ -1,29 +1,18 @@
 package io.webby.examples.model;
 
 import io.webby.orm.api.Connector;
-import io.webby.testing.SqliteTableTest;
+import io.webby.orm.codegen.SqlSchemaMaker;
+import io.webby.testing.SqlDbTableTest;
 import io.webby.testing.TableIntTest;
 import org.jetbrains.annotations.NotNull;
 
 public class PrimitiveModelTableTest
-        extends SqliteTableTest<Integer, PrimitiveModel, PrimitiveModelTable>
+        extends SqlDbTableTest<Integer, PrimitiveModel, PrimitiveModelTable>
         implements TableIntTest<PrimitiveModel, PrimitiveModelTable> {
     @Override
     protected void setUp(@NotNull Connector connector) throws Exception {
-        connector.runner().runMultiUpdate("""
-            CREATE TABLE primitive_model (
-                id INTEGER PRIMARY KEY,
-                i INTEGER,
-                l INTEGER,
-                b INTEGER,
-                s INTEGER,
-                ch TEXT,
-                f REAL,
-                d REAL,
-                bool INTEGER
-            )
-        """);
         table = new PrimitiveModelTable(connector);
+        connector().runner().runMultiUpdate(SqlSchemaMaker.makeCreateTableQuery(table));
     }
 
     @Override

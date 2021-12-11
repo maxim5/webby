@@ -1,22 +1,18 @@
 package io.webby.auth.user;
 
 import io.webby.orm.api.Connector;
-import io.webby.testing.SqliteTableTest;
+import io.webby.orm.codegen.SqlSchemaMaker;
+import io.webby.testing.SqlDbTableTest;
 import io.webby.testing.TableLongTest;
 import org.jetbrains.annotations.NotNull;
 
 public class UserTableTest
-        extends SqliteTableTest<Long, DefaultUser, UserTable>
+        extends SqlDbTableTest<Long, DefaultUser, UserTable>
         implements TableLongTest<DefaultUser, UserTable> {
     @Override
     protected void setUp(@NotNull Connector connector) throws Exception {
-        connector.runner().runMultiUpdate("""
-            CREATE TABLE user (
-                user_id INTEGER PRIMARY KEY,
-                access_level INTEGER
-            )
-        """);
         table = new UserTable(connector);
+        connector().runner().runMultiUpdate(SqlSchemaMaker.makeCreateTableQuery(table));
     }
 
     @Override

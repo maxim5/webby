@@ -100,6 +100,10 @@ public class SqlDbSetupExtension implements AfterAllCallback, BeforeEachCallback
         return connection;
     }
 
+    public @NotNull Engine getEngine() {
+        return singleConnectionPool().getEngine();
+    }
+
     public @NotNull ConnectionPool singleConnectionPool() {
         return new ConnectionPool() {
             @Override

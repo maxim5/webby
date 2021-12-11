@@ -1,8 +1,10 @@
 package io.webby.examples.model;
 
 import io.webby.orm.api.Connector;
+import io.webby.orm.api.Engine;
+import io.webby.orm.codegen.SqlSchemaMaker;
 import io.webby.testing.PrimaryKeyTableTest;
-import io.webby.testing.SqliteTableTest;
+import io.webby.testing.SqlDbTableTest;
 import org.jetbrains.annotations.NotNull;
 
 import java.sql.Time;
@@ -13,38 +15,19 @@ import java.time.temporal.ChronoUnit;
 import static io.webby.testing.TestingUtil.array;
 
 public class TimingModelTableTest
-        extends SqliteTableTest<Timestamp, TimingModel, TimingModelTable>
+        extends SqlDbTableTest<Timestamp, TimingModel, TimingModelTable>
         implements PrimaryKeyTableTest<Timestamp, TimingModel, TimingModelTable> {
     @Override
     protected void setUp(@NotNull Connector connector) throws Exception {
-        connector.runner().runMultiUpdate("""
-            CREATE TABLE timing_model (
-                id INTEGER PRIMARY KEY,
-                util_date INTEGER,
-                sql_date INTEGER,
-                time INTEGER,
-                instant INTEGER,
-                timestamp INTEGER,
-                local_date INTEGER,
-                local_time INTEGER,
-                local_date_time INTEGER,
-                zoned_date_time INTEGER,
-                offset_time_arg0 INTEGER,
-                offset_time_arg1 INTEGER,
-                offset_date_time_arg0 INTEGER,
-                offset_date_time_arg1 INTEGER,
-                duration INTEGER,
-                period TEXT,
-                zone_offset INTEGER
-            )
-        """);
-        // TODO: fix sql names
         table = new TimingModelTable(connector);
+        connector().runner().runMultiUpdate(SqlSchemaMaker.makeCreateTableQuery(table));
     }
 
     @Override
     public @NotNull Timestamp[] keys() {
-        return array(Timestamp.valueOf("2000-01-01 00:00:00"), Timestamp.valueOf("2020-01-01 00:00:00"));
+        return array(Timestamp.valueOf("2000-01-01 00:00:00"),
+                     Timestamp.valueOf("2010-01-01 00:00:00"),
+                     Timestamp.valueOf("2020-01-01 00:00:00"));
     }
 
     @Override
@@ -53,20 +36,22 @@ public class TimingModelTableTest
         LocalDate localDate = LocalDate.ofInstant(instant.truncatedTo(ChronoUnit.SECONDS), ZoneId.systemDefault());
         LocalTime localTime = LocalTime.ofInstant(instant.truncatedTo(ChronoUnit.SECONDS), ZoneId.systemDefault());
         ZoneOffset zoneOffset = ZoneOffset.UTC;
-        return new TimingModel(key,
-                               java.util.Date.from(instant),
-                               java.sql.Date.valueOf(localDate),
-                               Time.valueOf(localTime),
-                               instant,
-                               Timestamp.from(instant),
-                               localDate,
-                               localTime,
-                               LocalDateTime.of(localDate, localTime),
-                               ZonedDateTime.of(localDate, localTime, ZoneId.systemDefault()),
-                               OffsetTime.of(localTime, zoneOffset),
-                               OffsetDateTime.of(localDate, localTime, zoneOffset),
-                               Duration.ofDays(30),
-                               Period.of(1, 2, 3),
-                               zoneOffset);
+        return new TimingModel(
+            key,
+            connector().engine() == Engine.SQLite ? java.util.Date.from(instant) : java.sql.Date.valueOf(localDate),
+            java.sql.Date.valueOf(localDate),
+            Time.valueOf(localTime),
+            instant,
+            Timestamp.from(instant),
+            localDate,
+            localTime,
+            LocalDateTime.of(localDate, localTime),
+            ZonedDateTime.of(localDate, localTime, ZoneId.systemDefault()),
+            OffsetTime.of(localTime, zoneOffset),
+            OffsetDateTime.of(localDate, localTime, zoneOffset),
+            Duration.ofDays(30),
+            Period.of(1, 2, 3),
+            zoneOffset
+        );
     }
 }
