@@ -46,6 +46,9 @@ public class Playground {
             main.update("INSERT INTO timex(time) VALUES(?)", /*System.currentTimeMillis()*/Timestamp.from(Instant.now()));
             main.query("SELECT * FROM timex");
 
+            main.query("SELECT * FROM blobx LIMIT ?, ?", 1, 1);
+            main.query("SELECT * FROM blobx LIMIT ? OFFSET ?", 1, 1);
+
             main.query("SHOW CREATE TABLE userx");
             main.query("SHOW COLUMNS FROM userx");
         }
