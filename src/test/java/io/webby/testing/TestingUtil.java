@@ -8,7 +8,7 @@ import java.util.Arrays;
 
 public class TestingUtil {
     @SuppressWarnings("unchecked")
-    public static <T> T[] array(T... items) {
+    public static <T> T[] array(@Nullable T @NotNull... items) {
         return items;
     }
 

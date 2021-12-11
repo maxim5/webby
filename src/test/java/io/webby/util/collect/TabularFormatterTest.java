@@ -6,7 +6,6 @@ import static io.webby.testing.TestingUtil.array;
 import static io.webby.util.collect.TabularFormatter.FORMATTER;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
-// TODO: Support multi-line values?
 public class TabularFormatterTest {
     @Test
     public void formatIntoTableString_0x0() {
@@ -52,6 +51,19 @@ public class TabularFormatterTest {
         ----
         |  |
         ----\
+        """, table);
+    }
+
+    @Test
+    public void formatIntoTableString_1x1_null() {
+        Tabular<String> tab = ArrayTabular.of(
+            array((String) null)
+        );
+        String table = FORMATTER.formatIntoTableString(tab);
+        assertEquals("""
+        --------
+        | null |
+        --------\
         """, table);
     }
 
@@ -136,6 +148,22 @@ public class TabularFormatterTest {
     }
 
     @Test
+    public void formatIntoTableString_2x2_null_and_empty() {
+        Tabular<String> tab = ArrayTabular.of(
+            array("",   ""),
+            array(null, null)
+        );
+        String table = FORMATTER.formatIntoTableString(tab);
+        assertEquals("""
+        ---------------
+        |      |      |
+        ---------------
+        | null | null |
+        ---------------\
+        """, table);
+    }
+
+    @Test
     public void formatIntoTableString_3x1() {
         Tabular<String> tab = ArrayTabular.of(
             array("foo"),
@@ -170,6 +198,76 @@ public class TabularFormatterTest {
         ----------------------
         | 1234 | 123   | 12  |
         ----------------------\
+        """, table);
+    }
+
+    @Test
+    public void formatIntoTableString_1x1_multiline_small() {
+        Tabular<String> tab = ArrayTabular.of(
+            array("1\n2")
+        );
+        String table = FORMATTER.formatIntoTableString(tab);
+        assertEquals("""
+        -----
+        | 1 |
+        | 2 |
+        -----\
+        """, table);
+    }
+
+    @Test
+    public void formatIntoTableString_1x1_multiline_medium() {
+        Tabular<String> tab = ArrayTabular.of(
+            array("1\n123\n12")
+        );
+        String table = FORMATTER.formatIntoTableString(tab);
+        assertEquals("""
+        -------
+        | 1   |
+        | 123 |
+        | 12  |
+        -------\
+        """, table);
+    }
+
+    @Test
+    public void formatIntoTableString_1x1_multiline_large() {
+        Tabular<String> tab = ArrayTabular.of(
+            array("""
+                  1234
+                  
+                  1
+                  123
+                  123456789""")
+        );
+        String table = FORMATTER.formatIntoTableString(tab);
+        assertEquals("""
+        -------------
+        | 1234      |
+        |           |
+        | 1         |
+        | 123       |
+        | 123456789 |
+        -------------\
+        """, table);
+    }
+
+    @Test
+    public void formatIntoTableString_2x2_multiline_empty_column() {
+        Tabular<String> tab = ArrayTabular.of(
+            array("foo\nbar", ""),
+            array("baz",   "\n\n\n")
+        );
+        String table = FORMATTER.formatIntoTableString(tab);
+        assertEquals("""
+        ----------
+        | foo |  |
+        | bar |  |
+        ----------
+        | baz |  |
+        |     |  |
+        |     |  |
+        ----------\
         """, table);
     }
 }
