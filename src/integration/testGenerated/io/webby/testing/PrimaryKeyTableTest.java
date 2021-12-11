@@ -16,8 +16,7 @@ public interface PrimaryKeyTableTest<K, E, T extends TableObj<K, E>> extends Bas
     @Test
     default void empty() {
         assumeKeys(1);
-        assertEquals(0, table().count());
-        assertTrue(table().isEmpty());
+        assertTableCount(0);
         assertNull(table().getByPkOrNull(keys()[0]));
         assertThat(table().fetchAll()).isEmpty();
     }
@@ -28,8 +27,7 @@ public interface PrimaryKeyTableTest<K, E, T extends TableObj<K, E>> extends Bas
         E entity = createEntity(keys()[0]);
         assertEquals(1, table().insert(entity));
 
-        assertEquals(1, table().count());
-        assertFalse(table().isEmpty());
+        assertTableCount(1);
         assertEquals(entity, table().getByPkOrNull(keys()[0]));
         assertNull(table().getByPkOrNull(keys()[1]));
         assertThat(table().fetchAll()).containsExactly(entity);
@@ -43,8 +41,7 @@ public interface PrimaryKeyTableTest<K, E, T extends TableObj<K, E>> extends Bas
         E entity2 = createEntity(keys()[1]);
         assertEquals(1, table().insert(entity2));
 
-        assertEquals(2, table().count());
-        assertFalse(table().isEmpty());
+        assertTableCount(2);
         assertEquals(entity1, table().getByPkOrNull(keys()[0]));
         assertEquals(entity2, table().getByPkOrNull(keys()[1]));
         assertThat(table().fetchAll()).containsExactly(entity1, entity2);
@@ -57,8 +54,7 @@ public interface PrimaryKeyTableTest<K, E, T extends TableObj<K, E>> extends Bas
         E entity = createEntity(keys()[0], 1);
         assertEquals(1, table().updateByPk(entity));
 
-        assertEquals(1, table().count());
-        assertFalse(table().isEmpty());
+        assertTableCount(1);
         assertEquals(entity, table().getByPkOrNull(keys()[0]));
         assertNull(table().getByPkOrNull(keys()[1]));
         assertThat(table().fetchAll()).containsExactly(entity);
@@ -70,8 +66,7 @@ public interface PrimaryKeyTableTest<K, E, T extends TableObj<K, E>> extends Bas
         E entity = createEntity(keys()[0]);
         assertEquals(0, table().updateByPk(entity));
 
-        assertEquals(0, table().count());
-        assertTrue(table().isEmpty());
+        assertTableCount(0);
         assertNull(table().getByPkOrNull(keys()[0]));
         assertThat(table().fetchAll()).isEmpty();
     }
@@ -82,8 +77,7 @@ public interface PrimaryKeyTableTest<K, E, T extends TableObj<K, E>> extends Bas
         E entity = createEntity(keys()[0]);
         assertEquals(1, table().updateByPkOrInsert(entity));
 
-        assertEquals(1, table().count());
-        assertFalse(table().isEmpty());
+        assertTableCount(1);
         assertEquals(entity, table().getByPkOrNull(keys()[0]));
         assertNull(table().getByPkOrNull(keys()[1]));
         assertThat(table().fetchAll()).containsExactly(entity);
@@ -96,8 +90,7 @@ public interface PrimaryKeyTableTest<K, E, T extends TableObj<K, E>> extends Bas
         E entity = createEntity(keys()[0], 1);
         assertEquals(1, table().updateByPkOrInsert(entity));
 
-        assertEquals(1, table().count());
-        assertFalse(table().isEmpty());
+        assertTableCount(1);
         assertEquals(entity, table().getByPkOrNull(keys()[0]));
         assertNull(table().getByPkOrNull(keys()[1]));
         assertThat(table().fetchAll()).containsExactly(entity);
@@ -109,8 +102,7 @@ public interface PrimaryKeyTableTest<K, E, T extends TableObj<K, E>> extends Bas
         table().insert(createEntity(keys()[0], 0));
         assertEquals(1, table().deleteByPk(keys()[0]));
 
-        assertEquals(0, table().count());
-        assertTrue(table().isEmpty());
+        assertTableCount(0);
         assertNull(table().getByPkOrNull(keys()[0]));
         assertThat(table().fetchAll()).isEmpty();
     }
@@ -120,8 +112,7 @@ public interface PrimaryKeyTableTest<K, E, T extends TableObj<K, E>> extends Bas
         assumeKeys(1);
         assertEquals(0, table().deleteByPk(keys()[0]));
 
-        assertEquals(0, table().count());
-        assertTrue(table().isEmpty());
+        assertTableCount(0);
         assertNull(table().getByPkOrNull(keys()[0]));
         assertThat(table().fetchAll()).isEmpty();
     }
@@ -135,5 +126,11 @@ public interface PrimaryKeyTableTest<K, E, T extends TableObj<K, E>> extends Bas
     default void assumeKeys(int minimumNum) {
         assumeTrue(keys().length >= minimumNum,
                    "Can't run the test because not enough keys available: %s".formatted(Arrays.toString(keys())));
+    }
+
+    default void assertTableCount(int count) {
+        assertEquals(count, table().count());
+        assertEquals(count == 0, table().isEmpty());
+        assertEquals(count > 0, table().isNotEmpty());
     }
 }

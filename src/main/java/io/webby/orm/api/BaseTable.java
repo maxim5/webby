@@ -18,7 +18,15 @@ public interface BaseTable<E> extends Iterable<E> {
     int count(@NotNull Clause clause);
 
     default boolean isEmpty() {
-        return count() == 0;
+        return !isNotEmpty();
+    }
+
+    default boolean isNotEmpty() {
+        return count() > 0;
+    }
+
+    default boolean exists(@NotNull Where clause) {
+        return count(clause) > 0;
     }
 
     @Override

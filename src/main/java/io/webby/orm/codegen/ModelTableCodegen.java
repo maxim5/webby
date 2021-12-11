@@ -5,6 +5,7 @@ import com.google.common.collect.Streams;
 import io.webby.orm.api.*;
 import io.webby.orm.api.query.Clause;
 import io.webby.orm.api.query.TermType;
+import io.webby.orm.api.query.Where;
 import io.webby.orm.arch.*;
 import io.webby.util.collect.EasyMaps;
 import org.jetbrains.annotations.NotNull;
@@ -59,6 +60,7 @@ public class ModelTableCodegen extends BaseCodegen {
 
         getters();
         count();
+        exists();
 
         selectConstants();
 
@@ -104,7 +106,7 @@ public class ModelTableCodegen extends BaseCodegen {
         List<String> classesToImport = Streams.concat(
             Stream.of(pickBaseTableClass(),
                       Connector.class, QueryRunner.class, QueryException.class, Engine.class, ReadFollow.class,
-                      Clause.class, io.webby.orm.api.query.Column.class, TermType.class,
+                      Clause.class, Where.class, io.webby.orm.api.query.Column.class, TermType.class,
                       ResultSetIterator.class, TableMeta.class).map(FQN::of),
             customClasses.stream().map(FQN::of),
             customClasses.stream().map(adaptersScanner::locateAdapterFqn),
@@ -230,6 +232,32 @@ public class ModelTableCodegen extends BaseCodegen {
         """, mainContext);
     }
 
+    private void exists() throws IOException {
+        appendCode("""
+        @Override
+        public boolean isNotEmpty() {
+            String query = "SELECT EXISTS (SELECT * FROM $table_sql LIMIT 1)";
+            try (PreparedStatement statement = runner().prepareQuery(query);
+                 ResultSet result = statement.executeQuery()) {
+                return result.next() && result.getBoolean(1);
+            } catch (SQLException e) {
+                throw new QueryException("Failed to check exists in $TableClass", query, e);
+            }
+        }
+    
+        @Override
+        public boolean exists(@Nonnull Where clause) {
+            String query = "SELECT EXISTS (SELECT * FROM $table_sql " + clause.repr() + " LIMIT 1)";
+            try (PreparedStatement statement = runner().prepareQuery(query);
+                 ResultSet result = statement.executeQuery()) {
+                return result.next() && result.getBoolean(1);
+            } catch (SQLException e) {
+                throw new QueryException("Failed to check exists in $TableClass", query, e);
+            }
+        }\n
+        """, mainContext);
+    }
+
     private void selectConstants() throws IOException {
         String constants = Arrays.stream(ReadFollow.values())
                 .map(follow -> new SelectMaker(table).make(follow))
@@ -263,7 +291,7 @@ public class ModelTableCodegen extends BaseCodegen {
                  ResultSet result = statement.executeQuery()) {
                 return result.next() ? fromRow(result, follow, 0) : null;
             } catch (SQLException e) {
-                throw new QueryException("$table_sql.getByPkOrNull() failed", query, $pk_name, e);
+                throw new QueryException("Failed to find by PK in $TableClass", query, $pk_name, e);
             }
         }\n
         """, EasyMaps.merge(context, mainContext, pkContext));
