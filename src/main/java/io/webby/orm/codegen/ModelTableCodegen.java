@@ -297,7 +297,7 @@ public class ModelTableCodegen extends BaseCodegen {
         public $pk_annotation$pk_type $KeyOfMethod(@Nonnull $ModelClass $model_param) {
             return $model_param.$pk_getter();
         }\n
-       """, EasyMaps.merge(context, mainContext, pkContext));
+        """, EasyMaps.merge(context, mainContext, pkContext));
     }
 
     private void iterator() throws IOException {
