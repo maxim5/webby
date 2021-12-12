@@ -38,6 +38,6 @@ public class QueryException extends RuntimeException {
     }
 
     private static @NotNull String format(@NotNull String message, @NotNull String query, @NotNull List<Object> args) {
-        return "%s. Query: `%s`. Args: `%s`".formatted(message, query, args);
+        return "%s. Query:\n```\n%s\n```.\nArgs: `%s`".formatted(message, query, args);
     }
 }

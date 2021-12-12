@@ -1,6 +1,6 @@
 package io.webby.examples.model;
 
-class SqlInjection {
+class SqlInjections {
     // See also https://www.netsparker.com/blog/web-security/sql-injection-cheat-sheet/
     public static final String[] MALICIOUS_STRING_INPUTS = new String[]{
         "--",

@@ -1,8 +1,9 @@
 package io.webby.examples.model;
 
 import io.webby.orm.api.Connector;
+import io.webby.orm.codegen.SqlSchemaMaker;
 import io.webby.testing.ForeignKeyTableTest;
-import io.webby.testing.SqliteTableTest;
+import io.webby.testing.SqlDbTableTest;
 import io.webby.testing.TableLongTest;
 import io.webby.orm.api.ForeignInt;
 import io.webby.orm.api.ForeignLong;
@@ -10,37 +11,21 @@ import io.webby.orm.api.ForeignObj;
 import org.jetbrains.annotations.NotNull;
 
 public class ForeignKeyModelTableTest
-        extends SqliteTableTest<Long, ForeignKeyModel, ForeignKeyModelTable>
+        extends SqlDbTableTest<Long, ForeignKeyModel, ForeignKeyModelTable>
         implements TableLongTest<ForeignKeyModel, ForeignKeyModelTable>,
                    ForeignKeyTableTest<Long, ForeignKeyModel, ForeignKeyModelTable> {
     @Override
     protected void setUp(@NotNull Connector connector) throws Exception {
-        connector.runner().runMultiUpdate("""
-            CREATE TABLE f_k_int (
-                id INTEGER PRIMARY KEY,
-                value INTEGER
-            );
-            CREATE TABLE f_k_long (
-                id INTEGER PRIMARY KEY,
-                value INTEGER
-            );
-            CREATE TABLE f_k_string (
-                id TEXT PRIMARY KEY,
-                value TEXT
-            );
-            CREATE TABLE foreign_key_model (
-                id INTEGER PRIMARY KEY,
-                inner_int_id INTEGER,
-                inner_long_id INTEGER,
-                inner_string_id TEXT
-            );
-        """);
         table = new ForeignKeyModelTable(connector);
+        connector().runner().runMultiUpdate(SqlSchemaMaker.makeCreateTableQuery(table.engine(), FKIntTable.class));
+        connector().runner().runMultiUpdate(SqlSchemaMaker.makeCreateTableQuery(table.engine(), FKLongTable.class));
+        connector().runner().runMultiUpdate(SqlSchemaMaker.makeCreateTableQuery(table.engine(), FKStringTable.class));
+        connector().runner().runMultiUpdate(SqlSchemaMaker.makeCreateTableQuery(table.engine(), ForeignKeyModelTable.class));
     }
 
     @Override
     public @NotNull ForeignKeyModel createEntity(@NotNull Long key, int version) {
-        return new ForeignKeyModel(key, ForeignInt.ofId(version), ForeignLong.ofId(777), ForeignObj.ofId("foo"));
+        return new ForeignKeyModel(key, ForeignInt.ofId(version + 1), ForeignLong.ofId(777), ForeignObj.ofId("foo"));
     }
 
     @Override

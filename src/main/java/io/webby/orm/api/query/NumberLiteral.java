@@ -2,7 +2,7 @@ package io.webby.orm.api.query;
 
 import org.jetbrains.annotations.NotNull;
 
-public class NumberLiteral extends SimpleRepr implements Term {
+public class NumberLiteral extends Unit implements Term {
     public NumberLiteral(@NotNull Number num) {
         super(num.toString());
     }

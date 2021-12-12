@@ -12,6 +12,7 @@ public class ProgressMonitor {
     private final AtomicLong total = new AtomicLong();
     private final AtomicLong counter = new AtomicLong();
     private final AtomicLong nextReportTimestamp = new AtomicLong();
+    private final long startMillis = System.currentTimeMillis();
     private final long reportPauseMillis;
 
     public ProgressMonitor(long reportPauseMillis) {
@@ -38,7 +39,8 @@ public class ProgressMonitor {
         long current = nextReportTimestamp.get();
         if (current < now && nextReportTimestamp.compareAndSet(current, now + reportPauseMillis)) {
             long total = this.total.get();
-            log.at(Level.INFO).log("Progress: %4.1f%% -> %d / %d", 100.0 * count / total, count, total);
+            log.at(Level.INFO).log("Progress: %4.1f%% -> %d / %d after %d sec",
+                                   100.0 * count / total, count, total, (now - startMillis) / 1000);
         }
     }
 }

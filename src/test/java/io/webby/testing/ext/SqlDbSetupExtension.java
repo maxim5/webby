@@ -2,6 +2,7 @@ package io.webby.testing.ext;
 
 import com.google.common.flogger.FluentLogger;
 import com.google.inject.Module;
+import com.google.inject.util.Modules;
 import io.webby.db.sql.ConnectionPool;
 import io.webby.db.sql.SqlSettings;
 import io.webby.orm.api.Engine;
@@ -99,6 +100,10 @@ public class SqlDbSetupExtension implements AfterAllCallback, BeforeEachCallback
         return connection;
     }
 
+    public @NotNull Engine getEngine() {
+        return SqlSettings.parseUrl(url);
+    }
+
     public @NotNull ConnectionPool singleConnectionPool() {
         return new ConnectionPool() {
             @Override
@@ -107,7 +112,7 @@ public class SqlDbSetupExtension implements AfterAllCallback, BeforeEachCallback
             }
             @Override
             public @NotNull Engine getEngine() {
-                return parseUrl(url);
+                return SqlSettings.parseUrl(url);
             }
             @Override
             public boolean isRunning() {
@@ -118,5 +123,9 @@ public class SqlDbSetupExtension implements AfterAllCallback, BeforeEachCallback
 
     public @NotNull Module singleConnectionPoolModule() {
         return TestingModules.instance(ConnectionPool.class, singleConnectionPool());
+    }
+
+    public @NotNull Module combinedTestingModule() {
+        return Modules.combine(singleConnectionPoolModule(), TestingModules.PERSISTENT_DB_CLEANER_MODULE);
     }
 }

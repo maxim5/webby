@@ -1,0 +1,17 @@
+package io.webby.orm.api.query;
+
+import org.jetbrains.annotations.NotNull;
+
+public record FakeColumn(@NotNull String name, @NotNull TermType type) implements Column {
+    public static final FakeColumn FOO = of("foo");
+    public static final FakeColumn INT = new FakeColumn("i", TermType.NUMBER);
+    public static final FakeColumn STR = new FakeColumn("s", TermType.STRING);
+
+    public static @NotNull FakeColumn of(@NotNull String name) {
+        return new FakeColumn(name, TermType.WILDCARD);
+    }
+
+    public @NotNull ColumnTerm makeVar(@NotNull String value) {
+        return new ColumnTerm(this, Shortcuts.var(value));
+    }
+}

@@ -41,10 +41,10 @@ import static org.junit.jupiter.api.Assertions.*;
 
 @Tag("sql")
 public class KeyValueDbIntegrationTest {
-    @RegisterExtension private final static CloseAllExtension CLOSE_ALL = new CloseAllExtension();
-    @RegisterExtension private final static TempDirectoryExtension TEMP_DIRECTORY = new TempDirectoryExtension();
-    @RegisterExtension private final static EmbeddedRedisExtension REDIS = new EmbeddedRedisExtension();
-    @RegisterExtension private final static SqlDbSetupExtension SQL_DB = SqlDbSetupExtension.fromProperties();
+    @RegisterExtension private static final CloseAllExtension CLOSE_ALL = new CloseAllExtension();
+    @RegisterExtension private static final TempDirectoryExtension TEMP_DIRECTORY = new TempDirectoryExtension();
+    @RegisterExtension private static final EmbeddedRedisExtension REDIS = new EmbeddedRedisExtension();
+    @RegisterExtension private static final SqlDbSetupExtension SQL_DB = SqlDbSetupExtension.fromProperties();
 
     @ParameterizedTest
     @EnumSource(StorageType.class)
@@ -426,6 +426,6 @@ public class KeyValueDbIntegrationTest {
             CLOSE_ALL.addCloseable(mockedClock);
         }
 
-        return Testing.testStartup(settings, SQL_DB::savepoint, SQL_DB.singleConnectionPoolModule());
+        return Testing.testStartup(settings, SQL_DB::savepoint, SQL_DB.combinedTestingModule());
     }
 }

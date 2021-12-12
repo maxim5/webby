@@ -1,7 +1,8 @@
 package io.webby.auth.session;
 
 import io.webby.orm.api.Connector;
-import io.webby.testing.SqliteTableTest;
+import io.webby.orm.codegen.SqlSchemaMaker;
+import io.webby.testing.SqlDbTableTest;
 import io.webby.testing.TableLongTest;
 import io.webby.orm.api.ForeignLong;
 import org.jetbrains.annotations.NotNull;
@@ -10,20 +11,12 @@ import java.time.Instant;
 import java.time.temporal.ChronoUnit;
 
 public class SessionTableTest
-        extends SqliteTableTest<Long, Session, SessionTable>
+        extends SqlDbTableTest<Long, Session, SessionTable>
         implements TableLongTest<Session, SessionTable> {
     @Override
     protected void setUp(@NotNull Connector connector) throws Exception {
-        connector.runner().runMultiUpdate("""
-            CREATE TABLE session (
-                session_id INTEGER PRIMARY KEY,
-                user_id INTEGER,
-                created INTEGER,
-                user_agent TEXT,
-                ip_address TEXT
-            )
-        """);
         table = new SessionTable(connector);
+        connector().runner().runMultiUpdate(SqlSchemaMaker.makeCreateTableQuery(table));
     }
 
     @Override

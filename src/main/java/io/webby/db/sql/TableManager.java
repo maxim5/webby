@@ -16,6 +16,7 @@ import org.jetbrains.annotations.Nullable;
 import org.jetbrains.annotations.VisibleForTesting;
 
 import java.sql.SQLException;
+import java.util.List;
 import java.util.Set;
 import java.util.function.Function;
 import java.util.logging.Level;
@@ -30,6 +31,7 @@ public class TableManager {
 
     private final Settings settings;
     private final Connector connector;
+    private final Engine engine;
     private final ImmutableMap<Class<?>, EntityTable> tableMap;
 
     @Inject
@@ -42,6 +44,7 @@ public class TableManager {
 
         this.settings = settings;
         connector = new ThreadLocalConnector(pool, settings.getLongProperty("db.sql.connection.expiration.millis", 30_000));
+        engine = pool.getEngine();
 
         Set<? extends Class<?>> tableClasses = scanner.getDerivedClasses(settings.modelFilter(), BaseTable.class);
         tableMap = buildTableMap(tableClasses);
@@ -52,6 +55,14 @@ public class TableManager {
 
     public @NotNull Connector connector() {
         return connector;
+    }
+
+    public @NotNull Engine engine() {
+        return engine;
+    }
+
+    public @NotNull List<String> allTableNames() {
+        return tableMap.values().stream().map(EntityTable::tableName).toList();
     }
 
     public @Nullable BaseTable<?> getTableByNameOrNull(@NotNull String name) {

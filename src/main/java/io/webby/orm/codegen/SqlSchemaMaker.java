@@ -10,7 +10,6 @@ import org.jetbrains.annotations.NotNull;
 import java.sql.Date;
 import java.sql.Time;
 import java.sql.Timestamp;
-import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
@@ -28,8 +27,8 @@ public class SqlSchemaMaker {
         }
     }
 
-    public static @NotNull String makeCreateTableQuery(@NotNull Engine engine, @NotNull BaseTable<?> table) {
-        return makeCreateTableQuery(engine, table.meta());
+    public static @NotNull String makeCreateTableQuery(@NotNull BaseTable<?> table) {
+        return makeCreateTableQuery(table.engine(), table.meta());
     }
 
     public static @NotNull String makeCreateTableQuery(@NotNull Engine engine, @NotNull TableMeta meta) {
@@ -52,13 +51,6 @@ public class SqlSchemaMaker {
         """.formatted(tableName, definitions);
     }
 
-    public static @NotNull String makeCreateTableQuery(@NotNull Engine engine,
-                                                       @NotNull Class<? extends BaseTable<?>> ... tableClasses) {
-        return Arrays.stream(tableClasses)
-                .map(tableClass -> makeCreateTableQuery(engine, tableClasses))
-                .collect(Collectors.joining(";\n"));
-    }
-
     private static final Map<Class<?>, String> DEFAULT_DATA_TYPES = EasyMaps.asMap(
         boolean.class, "BOOLEAN",
         byte.class, "TINYINT",
@@ -74,22 +66,38 @@ public class SqlSchemaMaker {
         Timestamp.class, "TIMESTAMP"
     );
 
+    private static final Map<Class<?>, String> H2_PK_DATA_TYPES = EasyMaps.merge(DEFAULT_DATA_TYPES, EasyMaps.asMap(
+        byte[].class, "VARCHAR"
+    ));
+
+    private static final Map<Class<?>, String> MYSQL_DATA_TYPES = EasyMaps.merge(DEFAULT_DATA_TYPES, EasyMaps.asMap(
+        String.class, "VARCHAR(4096)",
+        byte[].class, "BLOB",
+        Timestamp.class, "TIMESTAMP(3)"
+    ));
+    // https://stackoverflow.com/questions/29292353/whats-the-difference-between-varchar-binary-and-varbinary-in-mysql
+    private static final Map<Class<?>, String> MYSQL_PK_DATA_TYPES = EasyMaps.merge(MYSQL_DATA_TYPES, EasyMaps.asMap(
+        String.class, "VARCHAR(255)",
+        byte[].class, "VARBINARY(255)"
+    ));
+
+    private static final Map<Class<?>, String> SQLITE_DATA_TYPES = EasyMaps.asMap(
+        float.class, "REAL",
+        double.class, "REAL",
+        String.class, "VARCHAR",
+        byte[].class, "BLOB"
+    );
+    private static final Map<Class<?>, String> SQLITE_PK_DATA_TYPES = EasyMaps.merge(SQLITE_DATA_TYPES, EasyMaps.asMap(
+        byte[].class, "VARCHAR"
+    ));
+
     private static @NotNull String sqlTypeFor(@NotNull TableMeta.ColumnMeta columnMeta, @NotNull Engine engine) {
+        boolean isPrimaryKey = columnMeta.isPrimaryKey() || columnMeta.isForeignKey();
         Class<?> columnType = columnMeta.type();
-        if (columnMeta.isPrimaryKey() && columnType == byte[].class) {
-            columnType = String.class;  // Exception: BLOB PRIMARY KEY -> VARCHAR PRIMARY KEY
-        }
         return switch (engine) {
-            case H2 -> DEFAULT_DATA_TYPES.get(columnType);
-            case SQLite -> {
-                if (columnType == String.class) {
-                    yield "VARCHAR";
-                }
-                if (columnType == byte[].class) {
-                    yield "BLOB";
-                }
-                yield "INTEGER";
-            }
+            case H2 -> (isPrimaryKey ? H2_PK_DATA_TYPES : DEFAULT_DATA_TYPES).get(columnType);
+            case MySQL -> (isPrimaryKey ? MYSQL_PK_DATA_TYPES : MYSQL_DATA_TYPES).get(columnType);
+            case SQLite -> (isPrimaryKey ? SQLITE_PK_DATA_TYPES : SQLITE_DATA_TYPES).getOrDefault(columnType, "INTEGER");
             default -> throw new IllegalArgumentException("Engine not supported for table creation: " + engine);
         };
     }
@@ -97,7 +105,7 @@ public class SqlSchemaMaker {
     private static @NotNull String sqlAutoIncrement(@NotNull TableMeta.ColumnMeta columnMeta, @NotNull Engine engine) {
         if (columnMeta.isPrimaryKey() && (columnMeta.type() == int.class || columnMeta.type() == long.class)) {
             return switch (engine) {
-                case H2 -> "AUTO_INCREMENT";
+                case H2, MySQL -> "AUTO_INCREMENT";
                 case SQLite -> "";  // Not recommended by https://www.sqlite.org/autoinc.html
                 default -> throw new IllegalArgumentException("Engine not supported for table creation: " + engine);
             };

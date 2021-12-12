@@ -10,7 +10,10 @@ import java.util.Map;
 import java.util.stream.Collectors;
 
 public enum Engine {
+    Derby("derby"),
     H2("h2"),
+    HyperSQL("hsqldb"),
+    MariaDB("mariadb"),
     MsSqlServer("sqlserver"),
     MySQL("mysql"),
     Oracle("oracle"),
@@ -48,8 +51,11 @@ public enum Engine {
     public static @NotNull Engine fromConnection(@NotNull Connection connection) throws SQLException {
         String databaseName = connection.getMetaData().getDatabaseProductName();
         return switch (databaseName) {
+            case "Apache Derby" -> Derby;
             case "H2" -> H2;
+            case "HSQL Database Engine" -> HyperSQL;
             case "Microsoft SQL Server" -> MsSqlServer;
+            case "MariaDB" -> MariaDB;
             case "MySQL" -> MySQL;
             case "Oracle" -> Oracle;
             case "PostgreSQL" -> PostgreSQL;

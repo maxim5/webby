@@ -1,26 +1,20 @@
 package io.webby.examples.model;
 
 import io.webby.orm.api.Connector;
+import io.webby.orm.codegen.SqlSchemaMaker;
 import io.webby.testing.PrimaryKeyTableTest;
-import io.webby.testing.SqliteTableTest;
+import io.webby.testing.SqlDbTableTest;
 import org.jetbrains.annotations.NotNull;
 
 import static io.webby.testing.TestingUtil.array;
 
 public class EnumModelTableTest
-        extends SqliteTableTest<EnumModel.Foo, EnumModel, EnumModelTable>
+        extends SqlDbTableTest<EnumModel.Foo, EnumModel, EnumModelTable>
         implements PrimaryKeyTableTest<EnumModel.Foo, EnumModel, EnumModelTable> {
     @Override
     protected void setUp(@NotNull Connector connector) throws Exception {
-        connector.runner().runMultiUpdate("""
-            CREATE TABLE enum_model (
-                id_ord INTEGER PRIMARY KEY,
-                foo_ord INTEGER,
-                nested_foo_ord INTEGER,
-                nested_s TEXT
-            )
-        """);
         table = new EnumModelTable(connector);
+        connector().runner().runMultiUpdate(SqlSchemaMaker.makeCreateTableQuery(table));
     }
 
     @Override

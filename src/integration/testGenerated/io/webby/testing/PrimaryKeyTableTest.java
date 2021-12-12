@@ -1,6 +1,12 @@
 package io.webby.testing;
 
+import io.webby.orm.api.Page;
 import io.webby.orm.api.TableObj;
+import io.webby.orm.api.query.ClauseBuilder;
+import io.webby.orm.api.query.CompositeClause;
+import io.webby.orm.api.query.Pagination;
+import io.webby.orm.api.query.Where;
+import io.webby.util.collect.EasyIterables;
 import org.jetbrains.annotations.NotNull;
 import org.junit.jupiter.api.Test;
 
@@ -13,11 +19,11 @@ import static org.junit.jupiter.api.Assumptions.assumeTrue;
 public interface PrimaryKeyTableTest<K, E, T extends TableObj<K, E>> extends BaseTableTest<E, T> {
     @NotNull K[] keys();
 
+    @Override
     @Test
     default void empty() {
         assumeKeys(1);
-        assertEquals(0, table().count());
-        assertTrue(table().isEmpty());
+        assertTableCount(0);
         assertNull(table().getByPkOrNull(keys()[0]));
         assertThat(table().fetchAll()).isEmpty();
     }
@@ -28,8 +34,7 @@ public interface PrimaryKeyTableTest<K, E, T extends TableObj<K, E>> extends Bas
         E entity = createEntity(keys()[0]);
         assertEquals(1, table().insert(entity));
 
-        assertEquals(1, table().count());
-        assertFalse(table().isEmpty());
+        assertTableCount(1);
         assertEquals(entity, table().getByPkOrNull(keys()[0]));
         assertNull(table().getByPkOrNull(keys()[1]));
         assertThat(table().fetchAll()).containsExactly(entity);
@@ -43,8 +48,7 @@ public interface PrimaryKeyTableTest<K, E, T extends TableObj<K, E>> extends Bas
         E entity2 = createEntity(keys()[1]);
         assertEquals(1, table().insert(entity2));
 
-        assertEquals(2, table().count());
-        assertFalse(table().isEmpty());
+        assertTableCount(2);
         assertEquals(entity1, table().getByPkOrNull(keys()[0]));
         assertEquals(entity2, table().getByPkOrNull(keys()[1]));
         assertThat(table().fetchAll()).containsExactly(entity1, entity2);
@@ -57,8 +61,7 @@ public interface PrimaryKeyTableTest<K, E, T extends TableObj<K, E>> extends Bas
         E entity = createEntity(keys()[0], 1);
         assertEquals(1, table().updateByPk(entity));
 
-        assertEquals(1, table().count());
-        assertFalse(table().isEmpty());
+        assertTableCount(1);
         assertEquals(entity, table().getByPkOrNull(keys()[0]));
         assertNull(table().getByPkOrNull(keys()[1]));
         assertThat(table().fetchAll()).containsExactly(entity);
@@ -70,8 +73,7 @@ public interface PrimaryKeyTableTest<K, E, T extends TableObj<K, E>> extends Bas
         E entity = createEntity(keys()[0]);
         assertEquals(0, table().updateByPk(entity));
 
-        assertEquals(0, table().count());
-        assertTrue(table().isEmpty());
+        assertTableCount(0);
         assertNull(table().getByPkOrNull(keys()[0]));
         assertThat(table().fetchAll()).isEmpty();
     }
@@ -82,8 +84,7 @@ public interface PrimaryKeyTableTest<K, E, T extends TableObj<K, E>> extends Bas
         E entity = createEntity(keys()[0]);
         assertEquals(1, table().updateByPkOrInsert(entity));
 
-        assertEquals(1, table().count());
-        assertFalse(table().isEmpty());
+        assertTableCount(1);
         assertEquals(entity, table().getByPkOrNull(keys()[0]));
         assertNull(table().getByPkOrNull(keys()[1]));
         assertThat(table().fetchAll()).containsExactly(entity);
@@ -96,8 +97,7 @@ public interface PrimaryKeyTableTest<K, E, T extends TableObj<K, E>> extends Bas
         E entity = createEntity(keys()[0], 1);
         assertEquals(1, table().updateByPkOrInsert(entity));
 
-        assertEquals(1, table().count());
-        assertFalse(table().isEmpty());
+        assertTableCount(1);
         assertEquals(entity, table().getByPkOrNull(keys()[0]));
         assertNull(table().getByPkOrNull(keys()[1]));
         assertThat(table().fetchAll()).containsExactly(entity);
@@ -109,8 +109,7 @@ public interface PrimaryKeyTableTest<K, E, T extends TableObj<K, E>> extends Bas
         table().insert(createEntity(keys()[0], 0));
         assertEquals(1, table().deleteByPk(keys()[0]));
 
-        assertEquals(0, table().count());
-        assertTrue(table().isEmpty());
+        assertTableCount(0);
         assertNull(table().getByPkOrNull(keys()[0]));
         assertThat(table().fetchAll()).isEmpty();
     }
@@ -120,10 +119,39 @@ public interface PrimaryKeyTableTest<K, E, T extends TableObj<K, E>> extends Bas
         assumeKeys(1);
         assertEquals(0, table().deleteByPk(keys()[0]));
 
-        assertEquals(0, table().count());
-        assertTrue(table().isEmpty());
+        assertTableCount(0);
         assertNull(table().getByPkOrNull(keys()[0]));
         assertThat(table().fetchAll()).isEmpty();
+    }
+
+    @Test
+    default void fetch_page() {
+        assumeKeys(2);
+        E entity1 = createEntity(keys()[0]);
+        assertEquals(1, table().insert(entity1));
+        E entity2 = createEntity(keys()[1]);
+        assertEquals(1, table().insert(entity2));
+
+        CompositeClause firstPageClause = new ClauseBuilder().with(Pagination.firstPage(1), table().engine()).build();
+        Page<E> page1 = table().fetchPage(firstPageClause);
+        assertThat(page1.hasNextPage()).isTrue();
+        assertNotNull(page1.nextToken());
+        assertThat(page1.nextToken().offset()).isEqualTo(1);
+        assertThat(page1.items()).hasSize(1);
+        assertThat(page1.items()).containsAnyOf(entity1, entity2);
+
+        CompositeClause secondPageClause = new ClauseBuilder().with(Pagination.ofOffset(1, 1), table().engine()).build();
+        Page<E> page2 = table().fetchPage(secondPageClause);
+        assertThat(page2.hasNextPage()).isTrue();  // in fact, is false...
+        assertThat(page2.items()).hasSize(1);
+        assertThat(page2.items()).containsAnyOf(entity1, entity2);
+
+        assertThat(EasyIterables.concat(page1.items(), page2.items())).containsExactly(entity1, entity2);
+
+        CompositeClause thirdPageClause = new ClauseBuilder().with(Pagination.ofOffset(2, 1), table().engine()).build();
+        Page<E> page3 = table().fetchPage(thirdPageClause);
+        assertThat(page3.hasNextPage()).isFalse();
+        assertThat(page3.items()).isEmpty();
     }
 
     @NotNull E createEntity(@NotNull K key, int version);
@@ -135,5 +163,17 @@ public interface PrimaryKeyTableTest<K, E, T extends TableObj<K, E>> extends Bas
     default void assumeKeys(int minimumNum) {
         assumeTrue(keys().length >= minimumNum,
                    "Can't run the test because not enough keys available: %s".formatted(Arrays.toString(keys())));
+    }
+
+    default void assertTableCount(int count) {
+        assertEquals(count, table().count());
+        assertEquals(count == 0, table().isEmpty());
+        assertEquals(count > 0, table().isNotEmpty());
+
+        assertEquals(count, table().count(Where.hardcoded("1 = 1")));
+        assertEquals(count > 0, table().exists(Where.hardcoded("1 = 1")));
+
+        assertEquals(0, table().count(Where.hardcoded("0 = 1")));
+        assertFalse(table().exists(Where.hardcoded("0 = 1")));
     }
 }
