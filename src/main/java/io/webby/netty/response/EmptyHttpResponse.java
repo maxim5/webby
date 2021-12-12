@@ -3,11 +3,12 @@ package io.webby.netty.response;
 import io.netty.handler.codec.DecoderResult;
 import io.netty.handler.codec.http.*;
 
-@SuppressWarnings("deprecation")
 public class EmptyHttpResponse implements AsyncResponse, HttpResponse {
+    public static final EmptyHttpResponse INSTANCE = new EmptyHttpResponse();
+
     @Override
     public HttpResponseStatus getStatus() {
-        throw new UnsupportedOperationException("Not implemented");
+        return status();
     }
 
     @Override
@@ -22,12 +23,12 @@ public class EmptyHttpResponse implements AsyncResponse, HttpResponse {
 
     @Override
     public HttpVersion getProtocolVersion() {
-        return HttpVersion.HTTP_1_1;
+        return protocolVersion();
     }
 
     @Override
     public HttpVersion protocolVersion() {
-        throw new UnsupportedOperationException("Not implemented");
+        return HttpVersion.HTTP_1_1;
     }
 
     @Override
@@ -37,7 +38,7 @@ public class EmptyHttpResponse implements AsyncResponse, HttpResponse {
 
     @Override
     public HttpHeaders headers() {
-        return new DefaultHttpHeaders();  // TODO: can avoid this?
+        return IgnoringHttpHeaders.INSTANCE;
     }
 
     @Override

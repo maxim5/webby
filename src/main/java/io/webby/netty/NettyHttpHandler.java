@@ -119,7 +119,7 @@ public class NettyHttpHandler extends ChannelInboundHandlerAdapter {
         if (response instanceof AsyncResponse) {
             if (response instanceof StreamingHttpResponse streaming) {
                 channel.write(streaming).addListener(future -> channel.writeAndFlush(streaming.chunkedContent()));
-            } else if (request instanceof EmptyHttpResponse) {
+            } else if (response instanceof EmptyHttpResponse) {
                 log.at(Level.FINE).log("Response to be handled async");
             }
         } else {
@@ -302,7 +302,7 @@ public class NettyHttpHandler extends ChannelInboundHandlerAdapter {
             }
         }, executor());
 
-        return new EmptyHttpResponse();
+        return EmptyHttpResponse.INSTANCE;
     }
 
     private @NotNull HttpResponse addCallback(@NotNull Consumer<OutputStream> consumer) {
