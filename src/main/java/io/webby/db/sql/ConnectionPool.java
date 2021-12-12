@@ -9,7 +9,6 @@ import io.webby.common.Lifetime;
 import io.webby.orm.api.Engine;
 import io.webby.util.base.Rethrow;
 import org.jetbrains.annotations.NotNull;
-import org.jetbrains.annotations.Nullable;
 import org.jetbrains.annotations.VisibleForTesting;
 
 import java.sql.Connection;
@@ -41,7 +40,7 @@ public class ConnectionPool {
     }
 
     public @NotNull Engine getEngine() {
-        return parseUrl(dataSource.getJdbcUrl());
+        return SqlSettings.parseUrl(dataSource.getJdbcUrl());
     }
 
     public boolean isRunning() {
@@ -51,13 +50,5 @@ public class ConnectionPool {
     @Override
     public String toString() {
         return "ConnectionPool{url=%s}".formatted(dataSource.getJdbcUrl());
-    }
-
-    protected static @NotNull Engine parseUrl(@Nullable String url) {
-        if (url == null || !url.startsWith("jdbc:")) {
-            return Engine.Unknown;
-        }
-        String[] parts = url.split(":");
-        return parts.length > 1 ? Engine.fromJdbcType(parts[1]) : Engine.Unknown;
     }
 }

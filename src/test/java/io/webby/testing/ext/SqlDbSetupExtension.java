@@ -101,7 +101,7 @@ public class SqlDbSetupExtension implements AfterAllCallback, BeforeEachCallback
     }
 
     public @NotNull Engine getEngine() {
-        return singleConnectionPool().getEngine();
+        return SqlSettings.parseUrl(url);
     }
 
     public @NotNull ConnectionPool singleConnectionPool() {
@@ -112,7 +112,7 @@ public class SqlDbSetupExtension implements AfterAllCallback, BeforeEachCallback
             }
             @Override
             public @NotNull Engine getEngine() {
-                return parseUrl(url);
+                return SqlSettings.parseUrl(url);
             }
             @Override
             public boolean isRunning() {

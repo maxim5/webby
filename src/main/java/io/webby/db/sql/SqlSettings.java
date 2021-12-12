@@ -2,6 +2,7 @@ package io.webby.db.sql;
 
 import io.webby.orm.api.Engine;
 import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 
 // More SQL URLs:
 // SqlSettings.jdbcUrl(Engine.H2, "file:./.data/temp.h2")
@@ -26,5 +27,13 @@ public record SqlSettings(@NotNull String url) {
     private static @NotNull String jdbcUrl(@NotNull Engine engine, @NotNull String file) {
         assert engine != Engine.Unknown : "Can't make JDBC url from unknown DB engine";
         return "jdbc:%s:%s".formatted(engine.jdbcType(), file);
+    }
+
+    public static @NotNull Engine parseUrl(@Nullable String url) {
+        if (url == null || !url.startsWith("jdbc:")) {
+            return Engine.Unknown;
+        }
+        String[] parts = url.split(":");
+        return parts.length > 1 ? Engine.fromJdbcType(parts[1]) : Engine.Unknown;
     }
 }

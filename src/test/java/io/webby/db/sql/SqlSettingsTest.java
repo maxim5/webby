@@ -3,10 +3,10 @@ package io.webby.db.sql;
 import io.webby.orm.api.Engine;
 import org.junit.jupiter.api.Test;
 
-import static io.webby.db.sql.ConnectionPool.parseUrl;
+import static io.webby.db.sql.SqlSettings.parseUrl;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
-public class ConnectionPoolTest {
+public class SqlSettingsTest {
     @Test
     public void parseUrl_valid() {
         assertEquals(Engine.Derby, parseUrl("jdbc:derby:target/tmp/derby/hpjp;databaseName=foo;create=true"));
