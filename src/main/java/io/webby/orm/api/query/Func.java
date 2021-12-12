@@ -92,23 +92,23 @@ public enum Func implements Representable {
         return resultType;
     }
 
-    public @NotNull FuncExpr of(@NotNull Term term) {
+    public @NotNull FuncExpr apply(@NotNull Term term) {
         return new FuncExpr(this, term);
     }
 
-    public @NotNull FuncExpr of(@NotNull Term term1, @NotNull Term term2) {
+    public @NotNull FuncExpr apply(@NotNull Term term1, @NotNull Term term2) {
         return new FuncExpr(this, term1, term2);
     }
 
-    public @NotNull FuncExpr of(@NotNull Term term1, @NotNull Term term2, @NotNull Term term3) {
+    public @NotNull FuncExpr apply(@NotNull Term term1, @NotNull Term term2, @NotNull Term term3) {
         return new FuncExpr(this, term1, term2, term3);
     }
 
-    public @NotNull FuncExpr of(@NotNull Term ... terms) {
-        return of(List.of(terms));
+    public @NotNull FuncExpr apply(@NotNull Term ... terms) {
+        return apply(List.of(terms));
     }
 
-    public @NotNull FuncExpr of(@NotNull List<Term> terms) {
+    public @NotNull FuncExpr apply(@NotNull List<Term> terms) {
         return new FuncExpr(this, terms);
     }
 }

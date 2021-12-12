@@ -23,7 +23,7 @@ public class WhereTest {
     public void like_expr() {
         assertEquals("WHERE str LIKE str", Where.of(like(STR_COLUMN, STR_COLUMN)).repr());
         assertEquals("WHERE str LIKE '%'", Where.of(like(STR_COLUMN, literal("%"))).repr());
-        assertEquals("WHERE hex(str) LIKE 'foo%'", Where.of(like(Func.HEX.of(STR_COLUMN), literal("foo%"))).repr());
+        assertEquals("WHERE hex(str) LIKE 'foo%'", Where.of(like(Func.HEX.apply(STR_COLUMN), literal("foo%"))).repr());
     }
 
     private static @NotNull Column newColumn(@NotNull String name, @NotNull TermType type) {

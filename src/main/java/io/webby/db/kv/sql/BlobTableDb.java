@@ -62,7 +62,7 @@ public class BlobTableDb<V, K> extends ByteArrayDb<K, V> implements KeyValueDb<K
     public boolean containsValue(@NotNull V value) {
         byte[] bytes = fromValue(value);
         Compare compare = switch (table.engine()) {
-            case SQLite -> EQ.compare(Func.HEX.of(VALUE_COLUMN), var(upperhex(bytes)));
+            case SQLite -> EQ.compare(Func.HEX.apply(VALUE_COLUMN), var(upperhex(bytes)));
             case MySQL, H2 -> EQ.compare(VALUE_COLUMN, var(bytes));
             default -> throw new UnsupportedOperationException("containsValue() not implemented for SQL engine:" + table.engine());
         };
