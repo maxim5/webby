@@ -1,8 +1,8 @@
 package io.webby.orm.api.query;
 
+import io.webby.orm.api.PageToken;
 import org.junit.jupiter.api.Test;
 
-import static io.webby.orm.api.PageToken.deserializeHumanReadable;
 import static io.webby.orm.api.query.Pagination.*;
 import static io.webby.testing.AssertBasics.assertEmpty;
 import static io.webby.testing.AssertBasics.assertPresent;
@@ -41,13 +41,13 @@ public class PaginationTest {
 
     @Test
     public void optional_chaining() {
-        assertEmpty(deserializeHumanReadable("x").map(token -> ofOffsetIfMatches(token, 5)));
-        assertEmpty(deserializeHumanReadable("1").map(token -> ofOffsetIfMatches(token, 5)));
-        assertPresent(deserializeHumanReadable(":1").map(token -> ofOffsetIfMatches(token, 5)), ofOffset(1, 5));
+        assertEmpty(PageToken.parseHumanToken("x").map(token -> ofOffsetIfMatches(token, 5)));
+        assertEmpty(PageToken.parseHumanToken("1").map(token -> ofOffsetIfMatches(token, 5)));
+        assertPresent(PageToken.parseHumanToken(":1").map(token -> ofOffsetIfMatches(token, 5)), ofOffset(1, 5));
 
-        assertEmpty(deserializeHumanReadable(":1").map(token -> ofColumnIfMatches(token, FakeColumn.FOO, Order.ASC, 5)));
-        assertEmpty(deserializeHumanReadable(":x").map(token -> ofColumnIfMatches(token, FakeColumn.FOO, Order.ASC, 5)));
-        assertPresent(deserializeHumanReadable("x").map(token -> ofColumnIfMatches(token, FakeColumn.FOO, Order.ASC, 5)),
+        assertEmpty(PageToken.parseHumanToken(":1").map(token -> ofColumnIfMatches(token, FakeColumn.FOO, Order.ASC, 5)));
+        assertEmpty(PageToken.parseHumanToken(":x").map(token -> ofColumnIfMatches(token, FakeColumn.FOO, Order.ASC, 5)));
+        assertPresent(PageToken.parseHumanToken("x").map(token -> ofColumnIfMatches(token, FakeColumn.FOO, Order.ASC, 5)),
                       ofColumnAsc(FakeColumn.FOO.makeVar("x"), 5));
     }
 }
