@@ -5,6 +5,8 @@ import org.jetbrains.annotations.Nullable;
 
 import java.util.Optional;
 
+import static java.util.Objects.requireNonNull;
+
 public record PageToken(@Nullable String lastItem, int offset) {
     public static final int NO_OFFSET = -1;
 
@@ -24,19 +26,32 @@ public record PageToken(@Nullable String lastItem, int offset) {
     }
 
     public static @Nullable PageToken deserializeHumanReadableOrNull(@NotNull String token) {
-        if (token.startsWith(":")) {
-            try {
-                int offset = Integer.parseInt(token.substring(1));
-                return new PageToken(null, offset);
-            } catch (NumberFormatException e) {
-                return null;
-            }
-        }
-        return new PageToken(token, NO_OFFSET);
+        return token.startsWith(":") ? parseOffset(token) : new PageToken(token, NO_OFFSET);
     }
 
-    public static @NotNull Optional<PageToken> deserializeHumanReadable(@NotNull String token) {
+    public static @Nullable PageToken deserializeHumanReadableOrNull(@NotNull String token,
+                                                                     @NotNull Preference preference) {
+        return switch (preference) {
+            case PREFER_LAST_ITEM -> new PageToken(token, NO_OFFSET);
+            case PREFER_OFFSET -> token.startsWith(":") ? requireNonNull(parseOffset(token)) : null;
+        };
+    }
+
+    public static Optional<PageToken> deserializeHumanReadable(@NotNull String token) {
         return Optional.ofNullable(deserializeHumanReadableOrNull(token));
+    }
+
+    public static Optional<PageToken> deserializeHumanReadable(@NotNull String token, @NotNull Preference preference) {
+        return Optional.ofNullable(deserializeHumanReadableOrNull(token, preference));
+    }
+
+    private static @Nullable PageToken parseOffset(@NotNull String token) {
+        try {
+            int offset = Integer.parseInt(token.substring(1));
+            return new PageToken(null, offset);
+        } catch (NumberFormatException e) {
+            return null;
+        }
     }
 
     enum Preference {
