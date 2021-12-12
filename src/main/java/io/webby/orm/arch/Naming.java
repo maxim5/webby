@@ -1,6 +1,7 @@
 package io.webby.orm.arch;
 
 import com.google.common.base.CaseFormat;
+import io.webby.util.base.EasyStrings;
 import org.jetbrains.annotations.NotNull;
 
 public class Naming {
@@ -19,33 +20,33 @@ public class Naming {
         return CaseFormat.LOWER_CAMEL.converterTo(CaseFormat.UPPER_CAMEL).convert(s);
     }
 
-    public static @NotNull String generatedSimpleName(@NotNull Class<?> klass) {
-        if (klass.isMemberClass()) {
-            return shortCanonicalName(klass).replace('.', '_');
+    public static @NotNull String generatedSimpleJavaName(@NotNull Class<?> model) {
+        assert !model.isAnonymousClass() : "Invalid model class: %s".formatted(model);
+        if (model.isMemberClass()) {
+            return shortCanonicalJavaName(model).replace('.', '_');
         }
-        return klass.getSimpleName();
+        return model.getSimpleName();
     }
 
-    public static @NotNull String shortCanonicalName(@NotNull Class<?> klass) {
-        if (klass.isMemberClass()) {
-            return cutPrefix(klass.getCanonicalName(), klass.getPackageName(), + 1);
+    public static @NotNull String shortCanonicalJavaName(@NotNull Class<?> type) {
+        assert !type.isAnonymousClass() : "Canonical java name not available for: %s".formatted(type);
+        if (type.isMemberClass()) {
+            String withoutPackage = EasyStrings.removePrefix(type.getCanonicalName(), type.getPackageName());
+            return EasyStrings.removePrefix(withoutPackage, ".");
         }
-        return klass.getSimpleName();
+        return type.getSimpleName();
     }
 
-    public static @NotNull String cutPrefix(@NotNull String big, @NotNull String small) {
-        return cutPrefix(big, small, 0);
+    public static @NotNull String defaultAdapterName(@NotNull Class<?> model) {
+        assert !model.isAnonymousClass() : "Invalid model class: %s".formatted(model);
+        if (model.isMemberClass()) {
+            return "%s_JdbcAdapter".formatted(generatedSimpleJavaName(model));
+        }
+        return "%sJdbcAdapter".formatted(model.getSimpleName());
     }
 
-    public static @NotNull String cutPrefix(@NotNull String big, @NotNull String small, int extraCut) {
-        return big.substring(small.length() + extraCut);
-    }
-
-    public static @NotNull String cutSuffix(@NotNull String big, @NotNull String small) {
-        return cutSuffix(big, small, 0);
-    }
-
-    public static @NotNull String cutSuffix(@NotNull String big, @NotNull String small, int extraCut) {
-        return big.substring(0, big.length() - small.length() - extraCut);
+    public static @NotNull String defaultModelClassName(@NotNull String adapterName) {
+        assert adapterName.endsWith("JdbcAdapter") : "Unexpected adapter name: %s".formatted(adapterName);
+        return EasyStrings.removeSuffix(adapterName, "JdbcAdapter");
     }
 }

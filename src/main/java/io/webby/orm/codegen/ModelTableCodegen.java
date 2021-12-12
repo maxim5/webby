@@ -39,13 +39,13 @@ public class ModelTableCodegen extends BaseCodegen {
         this.mainContext = EasyMaps.asMap(
             "$TableClass", table.javaName(),
             "$table_sql", table.sqlName(),
-            "$ModelClass", Naming.shortCanonicalName(table.modelClass()),
+            "$ModelClass", Naming.shortCanonicalJavaName(table.modelClass()),
             "$model_param", table.modelName().toLowerCase()
         );
 
         TableField primaryKeyField = table.primaryKeyField();
         this.pkContext = primaryKeyField == null ? Map.of() : EasyMaps.asMap(
-            "$pk_type", Naming.shortCanonicalName(primaryKeyField.javaType()),
+            "$pk_type", Naming.shortCanonicalJavaName(primaryKeyField.javaType()),
             "$pk_annotation", primaryKeyField.javaType().isPrimitive() ? "" : "@Nonnull ",
             "$pk_name", primaryKeyField.javaName()
         );
@@ -138,7 +138,7 @@ public class ModelTableCodegen extends BaseCodegen {
     private void classDef() throws IOException {
         Class<?> baseTableClass = pickBaseTableClass();
         Map<String, String> context = Map.of(
-            "$BaseClass", Naming.shortCanonicalName(baseTableClass),
+            "$BaseClass", Naming.shortCanonicalJavaName(baseTableClass),
             "$BaseGenerics", baseTableClass == TableObj.class ? "$pk_type, $ModelClass" : "$ModelClass"
         );
         appendCode(0, "public class $TableClass implements $BaseClass<$BaseGenerics> {",

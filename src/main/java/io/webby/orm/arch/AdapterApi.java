@@ -42,7 +42,7 @@ public class AdapterApi {
     }
 
     private static @NotNull String classToStaticRef(@NotNull Class<?> klass) {
-        String canonicalName = Naming.shortCanonicalName(klass);
+        String canonicalName = Naming.shortCanonicalJavaName(klass);
 
         if (hasMethod(klass, Scope.ALL, method -> isPublicStatic(method) && method.getName().equals(CREATE_INSTANCE)) &&
             hasMethod(klass, Scope.ALL, method -> isPublicStatic(method) && method.getName().equals(FILL_VALUES)) &&

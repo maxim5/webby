@@ -8,11 +8,11 @@ import java.util.List;
 
 public record ModelInput(@NotNull Class<?> modelClass, @Nullable Class<?> modelInterface, @NotNull String modelName) {
     public ModelInput(@NotNull Class<?> modelClass, @NotNull Class<?> modelInterface) {
-        this(modelClass, modelInterface, Naming.generatedSimpleName(modelInterface));
+        this(modelClass, modelInterface, Naming.generatedSimpleJavaName(modelInterface));
     }
 
     public ModelInput(@NotNull Class<?> modelClass) {
-        this(modelClass, null, Naming.generatedSimpleName(modelClass));
+        this(modelClass, null, Naming.generatedSimpleJavaName(modelClass));
     }
 
     public @NotNull Iterable<Class<?>> keys() {

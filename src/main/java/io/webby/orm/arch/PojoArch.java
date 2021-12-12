@@ -30,7 +30,7 @@ public final class PojoArch implements WithColumns {
     }
 
     public @NotNull String adapterName() {
-        return ModelAdaptersScanner.defaultAdapterName(pojoType);  // TODO: refactor?
+        return Naming.defaultAdapterName(pojoType);
     }
 
     public boolean isEnum() {

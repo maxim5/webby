@@ -37,7 +37,7 @@ public class ModelAdaptersScanner {
                     byClass.put(klass, adapter);
                 }
             } else {
-                bySimpleName.put(defaultModelClassName(adapter.getSimpleName()), adapter);
+                bySimpleName.put(Naming.defaultModelClassName(adapter.getSimpleName()), adapter);
             }
         }
         this.byClass = byClass.build();
@@ -50,7 +50,7 @@ public class ModelAdaptersScanner {
     }
 
     public @Nullable Class<?> locateAdapterClass(@NotNull Class<?> model) {
-        return byClass.containsKey(model) ? byClass.get(model) : bySimpleName.get(Naming.generatedSimpleName(model));
+        return byClass.containsKey(model) ? byClass.get(model) : bySimpleName.get(Naming.generatedSimpleJavaName(model));
     }
 
     public @NotNull FQN locateAdapterFqn(@NotNull Class<?> model) {
@@ -58,18 +58,6 @@ public class ModelAdaptersScanner {
         if (klass != null) {
             return FQN.of(klass);
         }
-        return new FQN(model.getPackageName(), defaultAdapterName(model));
-    }
-
-    public static @NotNull String defaultAdapterName(@NotNull Class<?> model) {
-        if (model.isMemberClass()) {
-            return "%s_JdbcAdapter".formatted(Naming.generatedSimpleName(model));
-        }
-        return "%sJdbcAdapter".formatted(model.getSimpleName());
-    }
-
-    public static @NotNull String defaultModelClassName(@NotNull String adapterName) {
-        assert adapterName.endsWith("JdbcAdapter") : "Unexpected adapter name: %s".formatted(adapterName);
-        return Naming.cutSuffix(adapterName, "JdbcAdapter");
+        return new FQN(model.getPackageName(), Naming.defaultAdapterName(model));
     }
 }

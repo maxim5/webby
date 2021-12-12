@@ -36,7 +36,7 @@ class ResultSetConversionMaker {
         Class<?> fieldType = field.javaType();
         String fieldClassName = FULL_NAME_CLASSES.contains(fieldType) ?
                 fieldType.getName() :
-                Naming.shortCanonicalName(fieldType);
+                Naming.shortCanonicalJavaName(fieldType);
         return "%s %s = %s;".formatted(fieldClassName, field.javaName(), fieldCreateExpr(field));
     }
 

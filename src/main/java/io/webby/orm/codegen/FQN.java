@@ -6,7 +6,7 @@ import org.jetbrains.annotations.NotNull;
 
 public record FQN(@NotNull String packageName, @NotNull String className) {
     public static @NotNull FQN of(@NotNull Class<?> klass) {
-        return new FQN(klass.getPackageName(), Naming.shortCanonicalName(klass));
+        return new FQN(klass.getPackageName(), Naming.shortCanonicalJavaName(klass));
     }
 
     public static @NotNull FQN of(@NotNull JavaNameHolder nameHolder) {
