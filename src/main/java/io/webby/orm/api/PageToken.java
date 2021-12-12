@@ -3,6 +3,8 @@ package io.webby.orm.api;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
+import java.util.Optional;
+
 public record PageToken(@Nullable String lastItem, int offset) {
     public static final int NO_OFFSET = -1;
 
@@ -21,7 +23,7 @@ public record PageToken(@Nullable String lastItem, int offset) {
         return ":" + offset;
     }
 
-    public static @Nullable PageToken deserializeHumanReadable(@NotNull String token) {
+    public static @Nullable PageToken deserializeHumanReadableOrNull(@NotNull String token) {
         if (token.startsWith(":")) {
             try {
                 int offset = Integer.parseInt(token.substring(1));
@@ -31,6 +33,10 @@ public record PageToken(@Nullable String lastItem, int offset) {
             }
         }
         return new PageToken(token, NO_OFFSET);
+    }
+
+    public static @NotNull Optional<PageToken> deserializeHumanReadable(@NotNull String token) {
+        return Optional.ofNullable(deserializeHumanReadableOrNull(token));
     }
 
     enum Preference {

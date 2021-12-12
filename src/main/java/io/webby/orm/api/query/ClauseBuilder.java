@@ -4,6 +4,7 @@ import io.webby.orm.api.Engine;
 import org.jetbrains.annotations.NotNull;
 
 import static io.webby.orm.api.query.CompareType.GT;
+import static io.webby.orm.api.query.CompareType.LT;
 import static java.util.Objects.requireNonNull;
 
 public class ClauseBuilder {
@@ -37,7 +38,8 @@ public class ClauseBuilder {
     public @NotNull ClauseBuilder with(@NotNull Pagination pagination, @NotNull Engine engine) {
         if (pagination.hasLastItem()) {
             ColumnTerm lastItem = requireNonNull(pagination.lastItem());
-            with(Where.of(GT.compare(lastItem.column(), lastItem.term())));
+            Order order = requireNonNull(pagination.order());
+            with(Where.of((order == Order.ASC ? GT : LT).compare(lastItem.column(), lastItem.term())));
         }
         if (pagination.hasOffset()) {
             with(Offset.of(pagination.offset()));

@@ -136,10 +136,11 @@ public interface PrimaryKeyTableTest<K, E, T extends TableObj<K, E>> extends Bas
         Page<E> page1 = table().fetchPage(firstPageClause);
         assertThat(page1.hasNextPage()).isTrue();
         assertNotNull(page1.nextToken());
+        assertThat(page1.nextToken().offset()).isEqualTo(1);
         assertThat(page1.items()).hasSize(1);
         assertThat(page1.items()).containsAnyOf(entity1, entity2);
 
-        CompositeClause secondPageClause = new ClauseBuilder().with(Pagination.of(page1.nextToken(), 1), table().engine()).build();
+        CompositeClause secondPageClause = new ClauseBuilder().with(Pagination.ofOffset(1, 1), table().engine()).build();
         Page<E> page2 = table().fetchPage(secondPageClause);
         assertThat(page2.hasNextPage()).isTrue();  // in fact, is false...
         assertThat(page2.items()).hasSize(1);
@@ -147,7 +148,7 @@ public interface PrimaryKeyTableTest<K, E, T extends TableObj<K, E>> extends Bas
 
         assertThat(EasyIterables.concat(page1.items(), page2.items())).containsExactly(entity1, entity2);
 
-        CompositeClause thirdPageClause = new ClauseBuilder().with(Pagination.of(2, 1), table().engine()).build();
+        CompositeClause thirdPageClause = new ClauseBuilder().with(Pagination.ofOffset(2, 1), table().engine()).build();
         Page<E> page3 = table().fetchPage(thirdPageClause);
         assertThat(page3.hasNextPage()).isFalse();
         assertThat(page3.items()).isEmpty();

@@ -4,42 +4,48 @@ import io.webby.orm.api.PageToken;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
-public record Pagination(@Nullable ColumnTerm lastItem, int offset, int limit) {
+public record Pagination(@Nullable ColumnTerm lastItem, @Nullable Order order, int offset, int limit) {
     public static final int NO_OFFSET = -1;
 
     public Pagination {
         assert offset > 0 || offset == NO_OFFSET : "Invalid offset: " + offset;
-        assert lastItem != null || offset > 0 || limit > 0 : "One of `lastItem`, `offset` or `limit` must be set";
+        assert (lastItem != null) == (order != null) : "`lastItem` and `order` must be set together";
+        assert !(lastItem != null && offset > 0) : "Only one of `lastItem`/`order` and `offset` can be set";
+        assert limit > 0 : "Page `limit` must be set: " + limit;
     }
 
     public static @NotNull Pagination firstPage(int limit) {
-        return new Pagination(null, NO_OFFSET, limit);
+        return new Pagination(null, null, NO_OFFSET, limit);
     }
 
-    public static @NotNull Pagination of(int offset, int limit) {
-        return new Pagination(null, offset, limit);
+    public static @NotNull Pagination ofOffset(int offset, int limit) {
+        return new Pagination(null, null, offset > 0 ? offset : NO_OFFSET, limit);
     }
 
-    public static @NotNull Pagination of(@NotNull ColumnTerm lastItem, int limit) {
-        return new Pagination(lastItem, NO_OFFSET, limit);
+    public static @NotNull Pagination ofColumn(@NotNull ColumnTerm lastItem, @NotNull Order order, int limit) {
+        return new Pagination(lastItem, order, NO_OFFSET, limit);
     }
 
-    public static @NotNull Pagination of(@NotNull PageToken token, int limit) {
-        if (token.hasOffset()) {
-            return of(token.offset(), limit);
-        }
-        throw new IllegalArgumentException("Invalid token: " + token);
+    public static @NotNull Pagination ofColumnAsc(@NotNull ColumnTerm lastItem, int limit) {
+        return ofColumn(lastItem, Order.ASC, limit);
     }
 
-    public static @NotNull Pagination of(@NotNull PageToken token, @NotNull Column column, int limit) {
+    public static @NotNull Pagination ofColumnDesc(@NotNull ColumnTerm lastItem, int limit) {
+        return ofColumn(lastItem, Order.DESC, limit);
+    }
+
+    public static @Nullable Pagination ofColumnIfMatches(@NotNull PageToken token,
+                                                         @NotNull Column column, @NotNull Order order,
+                                                         int limit) {
         if (token.hasLastItem()) {
             ColumnTerm columnTerm = new ColumnTerm(column, new Variable(token.lastItem(), TermType.WILDCARD));
-            return of(columnTerm, limit);
+            return ofColumn(columnTerm, order, limit);
         }
-        if (token.hasOffset()) {
-            return of(token.offset(), limit);
-        }
-        throw new IllegalArgumentException("Invalid token: " + token);
+        return null;
+    }
+
+    public static @Nullable Pagination ofOffsetIfMatches(@NotNull PageToken token, int limit) {
+        return token.hasOffset() ? ofOffset(token.offset(), limit) : null;
     }
 
     public boolean hasLastItem() {
