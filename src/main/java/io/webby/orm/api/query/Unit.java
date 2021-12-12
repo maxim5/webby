@@ -36,6 +36,16 @@ public abstract class Unit implements ArgsHolder {
         return repr;
     }
 
+    @Override
+    public boolean equals(Object o) {
+        return o instanceof Unit unit && Objects.equals(repr, unit.repr) && Objects.equals(args, unit.args);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(repr, args);
+    }
+
     protected static @NotNull List<Object> flattenArgsOf(@NotNull ArgsHolder left, @NotNull ArgsHolder right) {
         return EasyIterables.concat(left.args(), right.args());
     }
