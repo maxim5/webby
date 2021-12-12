@@ -2,13 +2,16 @@ package io.webby.perf;
 
 import io.webby.Webby;
 import io.webby.app.AppSettings;
+import io.webby.auth.session.Session;
+import io.webby.auth.user.DefaultUser;
 import io.webby.db.kv.StorageType;
-import io.webby.db.sql.SqlSettings;
 import io.webby.examples.Main;
 import io.webby.netty.NettyBootstrap;
 import io.webby.netty.NettyHttpHandler;
-import io.webby.orm.api.Engine;
+import io.webby.netty.response.HttpResponseFactory;
 import io.webby.perf.HttpWorker.Init;
+import io.webby.testing.TestingModules;
+import io.webby.testing.TestingProps;
 import io.webby.testing.TestingUtil;
 import org.apache.logging.log4j.Level;
 import org.apache.logging.log4j.core.config.Configurator;
@@ -41,18 +44,19 @@ public class StressNettyMain {
 
     private static @NotNull Closeable bootstrapServer() {
         AppSettings settings = Main.localSettings();
-        settings.storageSettings().enableKeyValueStorage(StorageType.SQL_DB)
-                .enableSqlStorage(SqlSettings.inMemoryNotForProduction(Engine.H2));
-        settings.setProfileMode(false);
+        settings.modelFilter().setCommonPackageOf(DefaultUser.class, Session.class);
         settings.handlerFilter().setPackageOnly("io.webby.examples");
-        settings.setProperty("db.sql.connection.expiration.millis", 1_000);
+        settings.storageSettings().enableKeyValueStorage(StorageType.JAVA_MAP).enableSqlStorage(TestingProps.parseSqlSettings());
+        settings.setProfileMode(false);
+        settings.setProperty("db.sql.connection.expiration.millis", 10_000);
         // H2 default max connections = 10!
         // https://stackoverflow.com/questions/27836756/maximum-number-of-connections-possible-with-h2-in-server-mode
-        settings.setProperty("netty.worker.group.threads", 8);
-        NettyBootstrap bootstrap = Webby.nettyBootstrap(settings);
+        // settings.setProperty("netty.worker.group.threads", 8);
+        NettyBootstrap bootstrap = Webby.nettyBootstrap(settings, TestingModules.PERSISTENT_DB_CLEANER_MODULE);
 
         Thread server = new Thread(rethrow(() -> {
             Configurator.setLevel(NettyHttpHandler.class.getName(), Level.WARN);
+            Configurator.setLevel(HttpResponseFactory.class.getName(), Level.WARN);
             bootstrap.runLocally(PORT);
         }));
         server.start();

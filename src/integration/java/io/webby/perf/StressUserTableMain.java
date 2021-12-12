@@ -7,13 +7,13 @@ import io.webby.auth.session.Session;
 import io.webby.auth.user.DefaultUser;
 import io.webby.auth.user.UserAccess;
 import io.webby.auth.user.UserTable;
-import io.webby.db.sql.SqlSettings;
 import io.webby.db.sql.TableManager;
 import io.webby.db.sql.ThreadLocalConnector;
 import io.webby.orm.api.Connector;
 import io.webby.perf.TableWorker.Init;
 import io.webby.testing.Testing;
 import io.webby.testing.TestingModules;
+import io.webby.testing.TestingProps;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.List;
@@ -52,7 +52,7 @@ public class StressUserTableMain {
     private static @NotNull Connector initConnector() {
         AppSettings settings = Testing.defaultAppSettings();
         settings.modelFilter().setCommonPackageOf(DefaultUser.class, Session.class);
-        settings.storageSettings().enableSqlStorage(SqlSettings.MYSQL_TEST);
+        settings.storageSettings().enableSqlStorage(TestingProps.parseSqlSettings());
         settings.setProperty("db.sql.connection.expiration.millis", 10_000);
         Injector injector = Webby.getReady(settings, TestingModules.PERSISTENT_DB_CLEANER_MODULE);
         return injector.getInstance(TableManager.class).connector();
