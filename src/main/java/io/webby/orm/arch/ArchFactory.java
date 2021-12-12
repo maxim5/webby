@@ -66,15 +66,15 @@ public class ArchFactory {
 
     @VisibleForTesting
     @NotNull TableArch buildShallowTable(@NotNull ModelInput input) {
-        String sqlName = Naming.camelToSnake(input.modelName()).replace("__", "_");  // TODO: unify sql name generation
-        String javaName = "%sTable".formatted(input.modelName());
-        return new TableArch(sqlName, javaName, input.modelName(), input.modelClass(), AtomicLazyList.ofUninitializedList());
+        String sqlName = Naming.modelSqlName(input.javaModelName());
+        String javaName = Naming.generatedJavaTableName(input.javaModelName());
+        return new TableArch(sqlName, javaName, input.javaModelName(), input.modelClass(), AtomicLazyList.ofUninitializedList());
     }
 
     @VisibleForTesting
     void completeTable(@NotNull ModelInput input, @NotNull TableArch table) {
         ImmutableList<TableField> fields = JavaClassAnalyzer.getAllFieldsOrdered(input.modelClass()).stream()
-                .map(field -> buildTableField(table, field, input.modelName()))
+                .map(field -> buildTableField(table, field, input.javaModelName()))
                 .collect(ImmutableList.toImmutableList());
         table.initializeOrDie(fields);
     }
@@ -111,12 +111,12 @@ public class ArchFactory {
 
         JdbcType jdbcType = JdbcType.findByMatchingNativeType(fieldType);
         if (jdbcType != null) {
-            return FieldInference.ofNativeColumn(new Column(Naming.camelToSnake(fieldName), new ColumnType(jdbcType)));
+            return FieldInference.ofNativeColumn(new Column(Naming.fieldSqlName(fieldName), new ColumnType(jdbcType)));
         }
 
         Pair<TableArch, JdbcType> foreignTableInfo = findForeignTableInfo(field);
         if (foreignTableInfo != null) {
-            Column column = new Column(Naming.camelToSnake(fieldName) + "_id", new ColumnType(foreignTableInfo.second()));
+            Column column = new Column(Naming.fieldSqlName(fieldName, "id"), new ColumnType(foreignTableInfo.second()));
             return FieldInference.ofForeignKey(column, foreignTableInfo.first());
         }
 

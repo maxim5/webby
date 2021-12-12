@@ -37,7 +37,7 @@ public abstract class PojoField {
         return lazyNameRef.lazyGet(() -> {
             Pair<Optional<String>, List<PojoField>> fullPath = fullPath();
             return Streams.concat(fullPath.first().stream(), fullPath.second().stream().map(PojoField::javaName))
-                    .map(Naming::camelToSnake)
+                    .map(Naming::fieldSqlName)
                     .collect(Collectors.joining("_"));
         });
     }

@@ -6,7 +6,7 @@ import org.jetbrains.annotations.Nullable;
 
 import java.util.List;
 
-public record ModelInput(@NotNull Class<?> modelClass, @Nullable Class<?> modelInterface, @NotNull String modelName) {
+public record ModelInput(@NotNull Class<?> modelClass, @Nullable Class<?> modelInterface, @NotNull String javaModelName) {
     public ModelInput(@NotNull Class<?> modelClass, @NotNull Class<?> modelInterface) {
         this(modelClass, modelInterface, Naming.generatedSimpleJavaName(modelInterface));
     }

@@ -71,18 +71,17 @@ public class AdapterApi {
     }
 
     private static @NotNull List<Column> classToAdapterColumns(@NotNull Class<?> klass, @NotNull String fieldName) {
-        String sqlFieldName = Naming.camelToSnake(fieldName);
         Parameter[] parameters = getCreationParameters(klass);
         if (parameters.length == 1) {
             JdbcType paramType = JdbcType.findByMatchingNativeType(parameters[0].getType());
             failIf(paramType == null, "JDBC adapter `%s` has incompatible parameters: %s", CREATE_INSTANCE, klass);
-            Column column = new Column(sqlFieldName, new ColumnType(paramType));
+            Column column = new Column(Naming.fieldSqlName(fieldName), new ColumnType(paramType));
             return List.of(column);
         } else {
             return BiStream.from(Arrays.stream(parameters),
                                  Parameter::getName,
                                  param -> JdbcType.findByMatchingNativeType(param.getType()))
-                    .mapKeys(name -> "%s_%s".formatted(sqlFieldName, Naming.camelToSnake(name)))
+                    .mapKeys(name -> Naming.fieldSqlName(fieldName, name))
                     .mapValues(ColumnType::new)
                     .mapToObj(Column::new)
                     .toList();
