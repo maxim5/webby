@@ -46,6 +46,10 @@ public enum Func implements Representable {
     SUBSTRING("substring", List.of(STRING, NUMBER, NUMBER), STRING),
     TRANSLATE("translate", List.of(STRING, STRING, STRING), STRING),
 
+    CAST_AS("CAST", "CAST(%s AS %s)", List.of(WILDCARD, STRING), WILDCARD),
+    CAST_AS_INT("CAST", "CAST(%s AS INT)", List.of(WILDCARD), NUMBER),
+    CAST_AS_STR("CAST", "CAST(%s AS VARCHAR)", List.of(WILDCARD), STRING),
+
     CONCAT("concat", List.of(STRING, STRING), STRING),
     CONCAT3("concat", List.of(STRING, STRING, STRING), STRING),
     CONCAT4("concat", List.of(STRING, STRING, STRING, STRING), STRING),

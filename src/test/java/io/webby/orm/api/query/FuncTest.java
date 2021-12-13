@@ -76,6 +76,17 @@ public class FuncTest {
     }
 
     @Test
+    public void cast_as() {
+        assertRepr(Func.CAST_AS.apply(NULL, new HardcodedStringTerm("TEXT")), "CAST(NULL AS TEXT)", WILDCARD);
+        assertRepr(Func.CAST_AS_INT.apply(FakeColumn.FOO), "CAST(foo AS INT)", NUMBER);
+        assertRepr(Func.CAST_AS_INT.apply(FakeColumn.INT), "CAST(i AS INT)", NUMBER);
+        assertRepr(Func.CAST_AS_INT.apply(FakeColumn.STR), "CAST(s AS INT)", NUMBER);
+        assertRepr(Func.CAST_AS_STR.apply(FakeColumn.FOO), "CAST(foo AS VARCHAR)", STRING);
+        assertRepr(Func.CAST_AS_STR.apply(FakeColumn.INT), "CAST(i AS VARCHAR)", STRING);
+        assertRepr(Func.CAST_AS_STR.apply(FakeColumn.STR), "CAST(s AS VARCHAR)", STRING);
+    }
+
+    @Test
     public void coalesce() {
         assertRepr(Func.COALESCE.apply(NULL, num(1)), "coalesce(NULL, 1)", WILDCARD);
         assertRepr(Func.COALESCE3.apply(NULL, num(1), literal("foo")), "coalesce(NULL, 1, 'foo')", WILDCARD);
