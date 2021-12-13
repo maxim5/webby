@@ -26,7 +26,10 @@ public class DebugSql {
     }
 
     public static @NotNull String toDebugString(@NotNull ResultSet resultSet) {
-        List<Row> rows = toDebugRows(resultSet);
+        return toDebugString(toDebugRows(resultSet));
+    }
+
+    public static @NotNull String toDebugString(@NotNull List<Row> rows) {
         return TabularFormatter.FORMATTER.formatIntoTableString(Row.toTabular(rows, true));
     }
 

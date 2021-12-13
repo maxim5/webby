@@ -42,7 +42,7 @@ public class TestingPersistentDbTableCleaner {
             for (String tableName: tableManager.allTableNames()) {
                 log.at(Level.INFO).log("Deleting SQL table if exists: `%s`...", tableName);
                 String query = "DROP TABLE IF EXISTS %s".formatted(tableName);
-                tableManager.connector().runner().runMultiUpdate(query);
+                tableManager.connector().runner().runUpdate(query);
             }
         } catch (SQLException e) {
             rethrow(e);

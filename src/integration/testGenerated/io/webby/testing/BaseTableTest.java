@@ -5,17 +5,14 @@ import io.webby.orm.api.TableMeta;
 import org.jetbrains.annotations.NotNull;
 import org.junit.jupiter.api.Test;
 
-import java.sql.SQLException;
 import java.util.List;
 
 import static com.google.common.truth.Truth.assertThat;
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertFalse;
-import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.junit.jupiter.api.Assertions.*;
 
 public interface BaseTableTest<E, T extends BaseTable<E>> extends TableTestApi<E, T> {
     @Test
-    default void column_names() throws Exception {
+    default void column_names() {
         String tableName = table().meta().sqlTableName();
         List<String> expectedColumns = parseColumnNamesFromDb(tableName);
         List<String> columnNames = table().meta().sqlColumns().stream().map(TableMeta.ColumnMeta::name).toList();
@@ -30,5 +27,5 @@ public interface BaseTableTest<E, T extends BaseTable<E>> extends TableTestApi<E
         assertThat(table().fetchAll()).isEmpty();
     }
 
-    List<String> parseColumnNamesFromDb(@NotNull String name) throws SQLException;
+    List<String> parseColumnNamesFromDb(@NotNull String name);
 }
