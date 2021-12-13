@@ -44,6 +44,7 @@ public enum Func implements Representable {
     LEN("len", List.of(STRING), NUMBER),
     HEX("hex", List.of(STRING), STRING),
     SUBSTRING("substring", List.of(STRING, NUMBER, NUMBER), STRING),
+    TRANSLATE("translate", List.of(STRING, STRING, STRING), STRING),
 
     CONCAT("concat", List.of(STRING, STRING), STRING),
     CONCAT3("concat", List.of(STRING, STRING, STRING), STRING),

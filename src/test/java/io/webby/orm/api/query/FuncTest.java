@@ -60,7 +60,19 @@ public class FuncTest {
         assertRepr(Func.SUBSTRING.apply(FakeColumn.STR, num(1), num(2)), "substring(s, 1, 2)", STRING);
         assertRepr(Func.SUBSTRING.apply(literal("ABC"), num(1), num(3)), "substring('ABC', 1, 3)", STRING);
         assertReprThrows(() -> Func.SUBSTRING.apply(num(0), num(1), num(3)));
+        assertReprThrows(() -> Func.SUBSTRING.apply(FakeColumn.STR, FakeColumn.STR, FakeColumn.STR));
         assertReprThrows(() -> Func.SUBSTRING.apply(literal("ABC")));
         assertReprThrows(() -> Func.SUBSTRING.apply(literal("ABC"), num(0)));
+    }
+
+    @Test
+    public void strings_translate() {
+        assertRepr(Func.TRANSLATE.apply(FakeColumn.STR, literal("x"), literal("y")), "translate(s, 'x', 'y')", STRING);
+        assertRepr(Func.TRANSLATE.apply(literal("X"), FakeColumn.STR, FakeColumn.FOO), "translate('X', s, foo)", STRING);
+        assertReprThrows(() -> Func.TRANSLATE.apply(literal("ABC"), num(1), num(3)));
+        assertReprThrows(() -> Func.TRANSLATE.apply(num(0), num(1), num(3)));
+        assertReprThrows(() -> Func.TRANSLATE.apply(literal("ABC")));
+        assertReprThrows(() -> Func.TRANSLATE.apply(literal("ABC"), num(0)));
+        assertReprThrows(() -> Func.TRANSLATE.apply(literal("ABC"), num(0), num(1)));
     }
 }
