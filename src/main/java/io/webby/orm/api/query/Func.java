@@ -16,8 +16,6 @@ public enum Func implements Representable {
     AVG("avg", List.of(NUMBER), NUMBER),
     MAX("max", List.of(NUMBER), NUMBER),
     MIN("min", List.of(NUMBER), NUMBER),
-    ABS("abs", List.of(NUMBER), NUMBER),
-    SQUARE("square", List.of(NUMBER), NUMBER),
 
     FIRST("first", List.of(WILDCARD), WILDCARD),
     FIRST_NUM("first", List.of(NUMBER), NUMBER),
@@ -26,6 +24,10 @@ public enum Func implements Representable {
     LAST("last", List.of(WILDCARD), WILDCARD),
     LAST_NUM("last", List.of(NUMBER), NUMBER),
     LAST_STR("last", List.of(STRING), STRING),
+
+    ABS("abs", List.of(NUMBER), NUMBER),
+    SQUARE("square", List.of(NUMBER), NUMBER),
+    SQRT("sqrt", List.of(NUMBER), NUMBER),
 
     LOWER("lower", List.of(STRING), STRING),
     LCASE("lcase", List.of(STRING), STRING),
@@ -90,7 +92,7 @@ public enum Func implements Representable {
 
     public @NotNull String format(@NotNull List<Term> terms) {
         assure(matchesInput(terms), "Incompatible function `%s` inputs: `%s`", this, terms);
-        return pattern.formatted(terms.toArray());
+        return pattern.formatted(terms.stream().map(Representable::repr).toArray());
     }
 
     public boolean matchesInput(@NotNull Term term) {
