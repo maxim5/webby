@@ -4,7 +4,10 @@ import com.google.mu.util.stream.BiStream;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.List;
+import java.util.stream.Collectors;
+import java.util.stream.IntStream;
 
+import static io.webby.orm.api.query.InvalidQueryException.assure;
 import static io.webby.orm.api.query.TermType.*;
 
 public enum Func implements Representable {
@@ -51,13 +54,19 @@ public enum Func implements Representable {
     CONCAT_WS5("concat_ws", List.of(STRING, STRING, STRING, STRING, STRING, STRING), STRING);
 
     private final String repr;
+    private final String pattern;
     private final List<TermType> inputTypes;
     private final TermType resultType;
 
-    Func(@NotNull String repr, @NotNull List<TermType> inputTypes, @NotNull TermType resultType) {
+    Func(@NotNull String repr, @NotNull String pattern, @NotNull List<TermType> inputTypes, @NotNull TermType resultType) {
         this.repr = repr;
+        this.pattern = pattern;
         this.inputTypes = inputTypes;
         this.resultType = resultType;
+    }
+
+    Func(@NotNull String repr, @NotNull List<TermType> inputTypes, @NotNull TermType resultType) {
+        this(repr, defaultFuncPattern(repr, inputTypes.size()), inputTypes, resultType);
     }
 
     @Override
@@ -69,19 +78,27 @@ public enum Func implements Representable {
         return inputTypes.size();
     }
 
+    public @NotNull String format(@NotNull Term term) {
+        assure(matchesInput(term), "Incompatible function `%s` input: `%s`", this, term);
+        return pattern.formatted(term.repr());
+    }
+
+    public @NotNull String format(@NotNull Term term1, @NotNull Term term2) {
+        assure(matchesInput(term1, term2), "Incompatible function `%s` inputs: [`%s`, `%s`]", this, term1, term2);
+        return pattern.formatted(term1.repr(), term2.repr());
+    }
+
+    public @NotNull String format(@NotNull List<Term> terms) {
+        assure(matchesInput(terms), "Incompatible function `%s` inputs: `%s`", this, terms);
+        return pattern.formatted(terms.toArray());
+    }
+
     public boolean matchesInput(@NotNull Term term) {
         return arity() == 1 && match(inputTypes.get(0), term.type());
     }
 
     public boolean matchesInput(@NotNull Term term1, @NotNull Term term2) {
         return arity() == 2 && match(inputTypes.get(0), term1.type()) && match(inputTypes.get(1), term2.type());
-    }
-
-    public boolean matchesInput(@NotNull Term term1, @NotNull Term term2, @NotNull Term term3) {
-        return arity() == 3 &&
-               match(inputTypes.get(0), term1.type()) &&
-               match(inputTypes.get(1), term2.type()) &&
-               match(inputTypes.get(2), term3.type());
     }
 
     public boolean matchesInput(@NotNull List<Term> terms) {
@@ -100,15 +117,15 @@ public enum Func implements Representable {
         return new FuncExpr(this, term1, term2);
     }
 
-    public @NotNull FuncExpr apply(@NotNull Term term1, @NotNull Term term2, @NotNull Term term3) {
-        return new FuncExpr(this, term1, term2, term3);
-    }
-
     public @NotNull FuncExpr apply(@NotNull Term ... terms) {
         return apply(List.of(terms));
     }
 
     public @NotNull FuncExpr apply(@NotNull List<Term> terms) {
         return new FuncExpr(this, terms);
+    }
+
+    private static @NotNull String defaultFuncPattern(@NotNull String func, int arity) {
+        return func + IntStream.range(0, arity).mapToObj(i -> "%s").collect(Collectors.joining(", ", "(", ")"));
     }
 }
