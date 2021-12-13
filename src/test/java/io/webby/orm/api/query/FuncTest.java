@@ -4,8 +4,7 @@ import org.junit.jupiter.api.Test;
 
 import static io.webby.orm.api.query.AssertSql.assertRepr;
 import static io.webby.orm.api.query.AssertSql.assertReprThrows;
-import static io.webby.orm.api.query.Shortcuts.literal;
-import static io.webby.orm.api.query.Shortcuts.num;
+import static io.webby.orm.api.query.Shortcuts.*;
 import static io.webby.orm.api.query.TermType.*;
 
 public class FuncTest {
@@ -74,5 +73,13 @@ public class FuncTest {
         assertReprThrows(() -> Func.TRANSLATE.apply(literal("ABC")));
         assertReprThrows(() -> Func.TRANSLATE.apply(literal("ABC"), num(0)));
         assertReprThrows(() -> Func.TRANSLATE.apply(literal("ABC"), num(0), num(1)));
+    }
+
+    @Test
+    public void coalesce() {
+        assertRepr(Func.COALESCE.apply(NULL, num(1)), "coalesce(NULL, 1)", WILDCARD);
+        assertRepr(Func.COALESCE3.apply(NULL, num(1), literal("foo")), "coalesce(NULL, 1, 'foo')", WILDCARD);
+        assertRepr(Func.COALESCE4.apply(NULL, NULL, num(1), FakeColumn.FOO), "coalesce(NULL, NULL, 1, foo)", WILDCARD);
+        assertRepr(Func.COALESCE5.apply(NULL, NULL, num(1), NULL, FakeColumn.FOO), "coalesce(NULL, NULL, 1, NULL, foo)", WILDCARD);
     }
 }

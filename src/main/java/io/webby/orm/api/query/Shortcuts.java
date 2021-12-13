@@ -3,6 +3,10 @@ package io.webby.orm.api.query;
 import org.jetbrains.annotations.NotNull;
 
 public class Shortcuts {
+    public static final Term NULL = new HardcodedTerm("NULL", TermType.WILDCARD);
+    public static final Term ZERO = num(0);
+    public static final Term ONE = num(1);
+
     public static @NotNull NumberLiteral num(@NotNull Number number) {
         return new NumberLiteral(number);
     }

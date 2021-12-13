@@ -54,7 +54,12 @@ public enum Func implements Representable {
     CONCAT_WS("concat_ws", List.of(STRING, STRING, STRING), STRING),
     CONCAT_WS3("concat_ws", List.of(STRING, STRING, STRING, STRING), STRING),
     CONCAT_WS4("concat_ws", List.of(STRING, STRING, STRING, STRING, STRING), STRING),
-    CONCAT_WS5("concat_ws", List.of(STRING, STRING, STRING, STRING, STRING, STRING), STRING);
+    CONCAT_WS5("concat_ws", List.of(STRING, STRING, STRING, STRING, STRING, STRING), STRING),
+
+    COALESCE("coalesce", List.of(WILDCARD, WILDCARD), WILDCARD),
+    COALESCE3("coalesce", List.of(WILDCARD, WILDCARD, WILDCARD), WILDCARD),
+    COALESCE4("coalesce", List.of(WILDCARD, WILDCARD, WILDCARD, WILDCARD), WILDCARD),
+    COALESCE5("coalesce", List.of(WILDCARD, WILDCARD, WILDCARD, WILDCARD, WILDCARD), WILDCARD);
 
     private final String repr;
     private final String pattern;
