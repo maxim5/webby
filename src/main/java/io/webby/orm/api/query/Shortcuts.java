@@ -16,6 +16,10 @@ public class Shortcuts {
         return new StringLiteral(literal);
     }
 
+    public static @NotNull Variable var(@NotNull Number value) {
+        return new Variable(value, TermType.NUMBER);
+    }
+
     public static @NotNull Variable var(@NotNull String value) {
         return new Variable(value, TermType.STRING);
     }

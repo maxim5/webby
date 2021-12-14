@@ -12,10 +12,9 @@ import org.junit.jupiter.api.extension.RegisterExtension;
 import java.util.List;
 
 import static io.webby.orm.api.query.CompareType.EQ;
-import static io.webby.orm.api.query.Shortcuts.STAR;
-import static io.webby.orm.api.query.Shortcuts.literal;
-import static io.webby.orm.testing.AssertSql.assertRepr;
-import static io.webby.orm.testing.AssertSql.assertRows;
+import static io.webby.orm.api.query.CompareType.GT;
+import static io.webby.orm.api.query.Shortcuts.*;
+import static io.webby.orm.testing.AssertSql.*;
 import static io.webby.orm.testing.PersonTableData.*;
 import static io.webby.testing.TestingUtil.array;
 
@@ -52,6 +51,38 @@ public class SqlDbQueryTest {
             FROM person
             WHERE name = 'Bill'
             """);
+        assertNoArgs(query);
+    }
+
+    @Test
+    public void selectWhere_select_arg() {
+        SelectQuery query = SelectWhere.of(SelectFrom.of(PersonColumn.name, GT.compare(PersonColumn.iq, var(125))));
+        assertRows(runQuery(query),
+                   array("Kate", false),
+                   array("Bill", false),
+                   array("Ivan", false),
+                   array("Yuan", true));
+        assertRepr(query, """
+            SELECT name, iq > ?
+            FROM person
+            """);
+        assertArgs(query, 125);
+    }
+
+    @Test
+    public void selectWhere_where_arg() {
+        SelectQuery query = SelectWhere.of(SelectFrom.of(PersonColumn.id, PersonColumn.country),
+                                           Where.and(EQ.compare(Func.LENGTH.apply(PersonColumn.name), var(4)),
+                                                     like(PersonColumn.country, var("%U%"))));
+        assertRows(runQuery(query),
+                   array(2, "US"),
+                   array(3, "RU"));
+        assertRepr(query, """
+            SELECT id, country
+            FROM person
+            WHERE length(name) = ? AND country LIKE ?
+            """);
+        assertArgs(query, 4, "%U%");
     }
 
     @Test
@@ -65,6 +96,7 @@ public class SqlDbQueryTest {
             FROM person
             GROUP BY sex
             """);
+        assertNoArgs(query);
     }
 
     @Test
@@ -80,6 +112,7 @@ public class SqlDbQueryTest {
             FROM person
             GROUP BY sex, name
             """);
+        assertNoArgs(query);
     }
 
     private @NotNull List<DebugSql.Row> runQuery(SelectQuery query) {

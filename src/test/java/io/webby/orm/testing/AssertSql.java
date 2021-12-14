@@ -1,13 +1,11 @@
 package io.webby.orm.testing;
 
 import io.webby.orm.api.debug.DebugSql;
-import io.webby.orm.api.query.InvalidQueryException;
-import io.webby.orm.api.query.Representable;
-import io.webby.orm.api.query.Term;
-import io.webby.orm.api.query.TermType;
+import io.webby.orm.api.query.*;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
+import java.math.BigInteger;
 import java.util.Arrays;
 import java.util.List;
 import java.util.function.Supplier;
@@ -18,7 +16,7 @@ import static org.junit.jupiter.api.Assertions.assertThrows;
 
 public class AssertSql {
     public static void assertRepr(@NotNull Representable repr, @NotNull String expected) {
-        assertEquals(expected.trim(), repr.repr());
+        assertEquals(expected.trim(), repr.repr().trim());
     }
 
     public static void assertRepr(@NotNull Term term, @NotNull String expected, @NotNull TermType expectedType) {
@@ -28,6 +26,14 @@ public class AssertSql {
 
     public static void assertReprThrows(@NotNull Supplier<Representable> repr) {
         assertThrows(InvalidQueryException.class, repr::get);
+    }
+
+    public static void assertArgs(@NotNull ArgsHolder holder, @NotNull Object @Nullable ... expected) {
+        assertThat(holder.args()).containsExactly(expected);
+    }
+
+    public static void assertNoArgs(@NotNull ArgsHolder holder) {
+        assertArgs(holder);
     }
 
     public static void assertRows(@NotNull List<DebugSql.Row> result, @NotNull Object[] ... expected) {
@@ -44,7 +50,8 @@ public class AssertSql {
         if (val instanceof Boolean) {
             return val == Boolean.TRUE ? 1 : 0;
         }
-        if (val instanceof Long number && (long) (number.intValue()) == number) {
+        if (val instanceof Number number && (long) (number.intValue()) == number.longValue() &&
+            (val instanceof Long || val instanceof BigInteger)) {
             return number.intValue();
         }
         return val;
