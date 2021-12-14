@@ -16,4 +16,8 @@ public interface Column extends Term {
     default @NotNull List<Object> args() {
         return List.of();
     }
+
+    default @NotNull DistinctColumn distinct() {
+        return new DistinctColumn(this);
+    }
 }
