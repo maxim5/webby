@@ -1,11 +1,12 @@
 package io.webby.orm.api.query;
 
+import io.webby.orm.testing.FakeColumn;
 import org.junit.jupiter.api.Test;
 
-import static io.webby.orm.api.query.AssertSql.assertRepr;
-import static io.webby.orm.api.query.AssertSql.assertReprThrows;
 import static io.webby.orm.api.query.Shortcuts.*;
 import static io.webby.orm.api.query.TermType.*;
+import static io.webby.orm.testing.AssertSql.assertRepr;
+import static io.webby.orm.testing.AssertSql.assertReprThrows;
 
 public class FuncTest {
     @Test

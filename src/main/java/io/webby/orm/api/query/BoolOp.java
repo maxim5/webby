@@ -5,6 +5,8 @@ import org.jetbrains.annotations.NotNull;
 
 import java.util.List;
 
+import static io.webby.orm.api.query.Units.flattenArgsOf;
+
 public class BoolOp extends Unit implements BoolTerm {
     private final ImmutableList<BoolTerm> terms;
     private final BoolOpType type;

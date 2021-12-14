@@ -6,7 +6,9 @@ import org.jetbrains.annotations.NotNull;
 
 import java.util.Arrays;
 import java.util.List;
-import java.util.stream.Collectors;
+
+import static io.webby.orm.api.query.Units.flattenArgsOf;
+import static io.webby.orm.api.query.Units.joinWithCommas;
 
 public class OrderBy extends Unit implements Clause, Representable {
     private final ImmutableList<OrderTerm> terms;
@@ -46,9 +48,5 @@ public class OrderBy extends Unit implements Clause, Representable {
 
     @NotNull ImmutableList<OrderTerm> terms() {
         return terms;
-    }
-
-    private static @NotNull String joinWithCommas(@NotNull List<? extends Representable> terms) {
-        return terms.stream().map(Representable::repr).collect(Collectors.joining(", "));
     }
 }

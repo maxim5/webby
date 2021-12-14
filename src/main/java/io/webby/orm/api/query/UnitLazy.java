@@ -1,28 +1,26 @@
 package io.webby.orm.api.query;
 
 import com.google.common.collect.ImmutableList;
+import io.webby.util.lazy.AtomicLazy;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.List;
 import java.util.Objects;
 
-public abstract class Unit implements ArgsHolder {
-    private final String repr;
+public abstract class UnitLazy implements ArgsHolder {
+    private final AtomicLazy<String> repr = new AtomicLazy<>();
     private final ImmutableList<Object> args;
 
-    protected Unit(@NotNull String repr) {
-        this(repr, ImmutableList.of());
-    }
-
-    protected Unit(@NotNull String repr, @NotNull List<Object> args) {
-        this.repr = repr;
+    protected UnitLazy(@NotNull List<Object> args) {
         this.args = ImmutableList.copyOf(args);
     }
 
     @Override
     public @NotNull String repr() {
-        return repr;
+        return repr.lazyGet(this::supplyRepr);
     }
+
+    protected abstract @NotNull String supplyRepr();
 
     @Override
     public @NotNull List<Object> args() {
@@ -31,16 +29,16 @@ public abstract class Unit implements ArgsHolder {
 
     @Override
     public String toString() {
-        return repr;
+        return repr();
     }
 
     @Override
     public boolean equals(Object o) {
-        return o instanceof Unit unit && Objects.equals(repr, unit.repr) && Objects.equals(args, unit.args);
+        return o instanceof UnitLazy unit && Objects.equals(repr(), unit.repr()) && Objects.equals(args, unit.args);
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(repr, args);
+        return Objects.hash(repr(), args);
     }
 }

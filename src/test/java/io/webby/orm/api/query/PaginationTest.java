@@ -1,6 +1,7 @@
 package io.webby.orm.api.query;
 
 import io.webby.orm.api.PageToken;
+import io.webby.orm.testing.FakeColumn;
 import org.junit.jupiter.api.Test;
 
 import static io.webby.orm.api.query.Pagination.*;

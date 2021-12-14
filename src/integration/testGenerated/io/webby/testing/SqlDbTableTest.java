@@ -1,7 +1,7 @@
 package io.webby.testing;
 
 import io.webby.orm.api.Connector;
-import io.webby.orm.api.DebugSql;
+import io.webby.orm.api.debug.DebugSql;
 import io.webby.orm.api.TableObj;
 import io.webby.testing.ext.SqlDbSetupExtension;
 import org.jetbrains.annotations.NotNull;
@@ -54,7 +54,7 @@ public abstract class SqlDbTableTest<K, E, T extends TableObj<K, E>> implements 
             }
             case H2, MySQL -> SQL_DB.runQuery("SHOW COLUMNS FROM " + name).stream()
                     .map(row -> row.getValueAt(0))
-                    .map(DebugSql.RowValue::value)
+                    .map(DebugSql.RowValue::strValue)
                     .map(String::toLowerCase)
                     .toList();
             default -> throw new UnsupportedOperationException("Engine not supported: " + SQL_DB.engine());
@@ -65,7 +65,7 @@ public abstract class SqlDbTableTest<K, E, T extends TableObj<K, E>> implements 
         List<DebugSql.Row> rows = SQL_DB.runQuery("SELECT sql FROM sqlite_master WHERE name=?", name);
         assertFalse(rows.isEmpty(), "SQL table not found in DB: %s".formatted(name));
         assertThat(rows).hasSize(1);
-        return rows.get(0).findValue("sql").map(DebugSql.RowValue::value).orElseThrow();
+        return rows.get(0).findValue("sql").map(DebugSql.RowValue::strValue).orElseThrow();
     }
 
     protected @NotNull Connector connector() {

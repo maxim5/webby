@@ -2,7 +2,7 @@ package io.webby.examples;
 
 import com.google.common.io.BaseEncoding;
 import io.webby.db.sql.SqlSettings;
-import io.webby.orm.api.DebugSql;
+import io.webby.orm.api.debug.DebugSql;
 import io.webby.orm.api.QueryRunner;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
@@ -53,6 +53,9 @@ public class Playground {
             main.query("SHOW COLUMNS FROM userx");
 
             main.query("SELECT EXISTS(SELECT * FROM blobx)");
+
+            main.query("SELECT userx.user_id, COUNT(*) from userx GROUP BY userx.user_id");
+            main.query("SELECT userx.user_id AS user_id, COUNT(*) from userx GROUP BY userx.user_id");
         }
     }
 

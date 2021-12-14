@@ -1,6 +1,8 @@
-package io.webby.orm.api.query;
+package io.webby.orm.testing;
 
 import io.webby.orm.api.TableMeta;
+import io.webby.orm.api.query.Column;
+import io.webby.orm.api.query.TermType;
 import org.jetbrains.annotations.NotNull;
 
 import java.sql.Timestamp;
@@ -38,7 +40,7 @@ public class PersonTableData {
         @Override
         public @NotNull List<ColumnMeta> sqlColumns() {
             return List.of(
-                new ColumnMeta("id", int.class, F, false),
+                new ColumnMeta("id", int.class, true, false),
                 new ColumnMeta("name", String.class, false, false),
                 new ColumnMeta("country", String.class, false, false),
                 new ColumnMeta("sex", boolean.class, false, false),
@@ -50,8 +52,8 @@ public class PersonTableData {
         }
     };
 
-    public static final boolean F = true;
-    public static final boolean M = false;
+    public static final boolean FEMALE = true;
+    public static final boolean MALE = false;
 
     public static @NotNull Timestamp parseDate(@NotNull String date) {
         return Timestamp.valueOf(date + " 00:00:00");

@@ -1,29 +1,27 @@
 package io.webby.testing.ext;
 
 import com.google.common.flogger.FluentLogger;
-import com.google.errorprone.annotations.CanIgnoreReturnValue;
 import com.google.inject.Module;
 import com.google.inject.util.Modules;
 import io.webby.db.sql.ConnectionPool;
 import io.webby.db.sql.SqlSettings;
-import io.webby.orm.api.Connector;
-import io.webby.orm.api.DebugSql;
 import io.webby.orm.api.Engine;
+import io.webby.orm.api.debug.DebugRunner;
 import io.webby.testing.TestingModules;
 import io.webby.util.base.Rethrow;
 import io.webby.util.base.Rethrow.Runnables;
 import org.jetbrains.annotations.NotNull;
-import org.jetbrains.annotations.Nullable;
 import org.junit.jupiter.api.extension.AfterAllCallback;
 import org.junit.jupiter.api.extension.AfterEachCallback;
 import org.junit.jupiter.api.extension.BeforeEachCallback;
 import org.junit.jupiter.api.extension.ExtensionContext;
 
-import java.sql.*;
-import java.util.List;
+import java.sql.Connection;
+import java.sql.DriverManager;
+import java.sql.Savepoint;
 import java.util.logging.Level;
 
-public class SqlDbSetupExtension implements AfterAllCallback, BeforeEachCallback, AfterEachCallback, Connector {
+public class SqlDbSetupExtension implements AfterAllCallback, BeforeEachCallback, AfterEachCallback, DebugRunner {
     private static final FluentLogger log = FluentLogger.forEnclosingClass();
 
     private final SqlSettings settings;
@@ -124,27 +122,5 @@ public class SqlDbSetupExtension implements AfterAllCallback, BeforeEachCallback
 
     public @NotNull Module combinedTestingModule() {
         return Modules.combine(singleConnectionPoolModule(), TestingModules.PERSISTENT_DB_CLEANER_MODULE);
-    }
-
-    public @NotNull List<DebugSql.Row> runQuery(@NotNull String query, @Nullable Object @NotNull ... params) {
-        try (PreparedStatement statement = runner().prepareQuery(query, params);
-             ResultSet resultSet = statement.executeQuery()) {
-            return DebugSql.toDebugRows(resultSet);
-        } catch (SQLException e) {
-            return Rethrow.rethrow(e);
-        }
-    }
-
-    public @NotNull String runQueryToString(@NotNull String query, @Nullable Object @NotNull ... params) {
-        return DebugSql.toDebugString(runQuery(query, params));
-    }
-
-    @CanIgnoreReturnValue
-    public int runUpdate(@NotNull String sql, @Nullable Object @NotNull ... params) {
-        try {
-            return runner().runUpdate(sql, params);
-        } catch (SQLException e) {
-            return Rethrow.rethrow(e);
-        }
     }
 }

@@ -4,9 +4,7 @@ import org.jetbrains.annotations.NotNull;
 
 import java.util.List;
 
-public interface Column extends Term {
-    @NotNull String name();
-
+public interface Column extends Named {
     @Override
     default @NotNull String repr() {
         return name();

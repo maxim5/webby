@@ -4,6 +4,8 @@ import org.jetbrains.annotations.NotNull;
 
 import java.util.List;
 
+import static io.webby.orm.api.query.Units.flattenArgsOf;
+
 public class FuncExpr extends Unit implements Term {
     private final Func func;
 
@@ -25,5 +27,9 @@ public class FuncExpr extends Unit implements Term {
     @Override
     public @NotNull TermType type() {
         return func.resultType();
+    }
+
+    public boolean isAggregate() {
+        return func.isAggregate();
     }
 }

@@ -1,10 +1,12 @@
-package io.webby.orm.api;
+package io.webby.orm.api.debug;
 
 import com.google.common.collect.Lists;
+import io.webby.orm.api.ResultSetIterator;
 import io.webby.util.collect.ArrayTabular;
 import io.webby.util.collect.Tabular;
 import io.webby.util.collect.TabularFormatter;
 import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 
 import java.sql.ResultSet;
 import java.sql.ResultSetMetaData;
@@ -44,7 +46,7 @@ public class DebugSql {
         int columnCount = metaData.getColumnCount();
         List<RowValue> values = new ArrayList<>(columnCount);
         for (int i = 1; i <= columnCount; i++) {
-            values.add(new RowValue(metaData.getColumnName(i), String.valueOf(row.getString(i))));
+            values.add(new RowValue(metaData.getColumnName(i), row.getObject(i)));
         }
         return new Row(values);
     }
@@ -66,7 +68,7 @@ public class DebugSql {
             String[][] array = new String[rows.size() + shift][];
             array[0] = withHeader ? rows.get(0).toStringArray(RowValue::name) : null;
             for (int i = 0; i < rows.size(); i++) {
-                array[i + shift] = rows.get(i).toStringArray(RowValue::value);
+                array[i + shift] = rows.get(i).toStringArray(RowValue::strValue);
             }
             return ArrayTabular.of(array);
         }
@@ -76,5 +78,9 @@ public class DebugSql {
         }
     }
 
-    public record RowValue(@NotNull String name, @NotNull String value) {}
+    public record RowValue(@NotNull String name, @Nullable Object value) {
+        public @NotNull String strValue() {
+            return String.valueOf(value);
+        }
+    }
 }

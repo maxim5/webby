@@ -3,7 +3,9 @@ package io.webby.orm.api.query;
 import com.google.mu.util.stream.BiStream;
 import org.jetbrains.annotations.NotNull;
 
+import java.util.EnumSet;
 import java.util.List;
+import java.util.Set;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 
@@ -90,6 +92,10 @@ public enum Func implements Representable {
         return inputTypes.size();
     }
 
+    public boolean isAggregate() {
+        return AGGREGATE_VALUES.contains(this);
+    }
+
     public @NotNull String format(@NotNull Term term) {
         assure(matchesInput(term), "Incompatible function `%s` input: `%s`", this, term);
         return pattern.formatted(term.repr());
@@ -140,4 +146,10 @@ public enum Func implements Representable {
     private static @NotNull String defaultFuncPattern(@NotNull String func, int arity) {
         return func + IntStream.range(0, arity).mapToObj(i -> "%s").collect(Collectors.joining(", ", "(", ")"));
     }
+
+    private static final Set<Func> AGGREGATE_VALUES = EnumSet.of(
+        COUNT, SUM, AVG, MIN, MAX,
+        FIRST, FIRST_NUM, FIRST_STR,
+        LAST, LAST_NUM, LAST_STR
+    );
 }

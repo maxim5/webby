@@ -1,5 +1,9 @@
-package io.webby.orm.api.query;
+package io.webby.orm.testing;
 
+import io.webby.orm.api.query.Column;
+import io.webby.orm.api.query.ColumnTerm;
+import io.webby.orm.api.query.Shortcuts;
+import io.webby.orm.api.query.TermType;
 import org.jetbrains.annotations.NotNull;
 
 public record FakeColumn(@NotNull String name, @NotNull TermType type) implements Column {

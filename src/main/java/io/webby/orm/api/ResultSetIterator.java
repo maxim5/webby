@@ -2,6 +2,7 @@ package io.webby.orm.api;
 
 import com.google.errorprone.annotations.MustBeClosed;
 import io.webby.util.base.Rethrow;
+import io.webby.util.collect.Pair;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
@@ -11,6 +12,8 @@ import java.sql.SQLException;
 import java.sql.Statement;
 import java.util.Iterator;
 import java.util.concurrent.atomic.AtomicBoolean;
+
+import static io.webby.util.base.EasyCast.castAny;
 
 public class ResultSetIterator<E> implements Iterator<E>, Closeable {
     private final ResultSet resultSet;
@@ -88,5 +91,13 @@ public class ResultSetIterator<E> implements Iterator<E>, Closeable {
 
     public interface Converter<E> {
         E convert(@NotNull ResultSet resultSet) throws SQLException;
+    }
+
+    public static <A> @NotNull Converter<A> firstColumn() {
+        return resultSet -> castAny(resultSet.getObject(1));
+    }
+
+    public static <A, B> @NotNull Converter<Pair<A, B>> twoColumns() {
+        return resultSet -> castAny(Pair.of(resultSet.getObject(1), resultSet.getObject(2)));
     }
 }
