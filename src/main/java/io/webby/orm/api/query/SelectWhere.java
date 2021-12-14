@@ -1,33 +1,30 @@
 package io.webby.orm.api.query;
 
 import org.jetbrains.annotations.NotNull;
-import org.jetbrains.annotations.Nullable;
 
 import static io.webby.orm.api.query.Units.flattenArgsOf;
 import static io.webby.orm.api.query.Units.joinWithLines;
 
 public class SelectWhere extends UnitLazy implements SelectQuery {
     private final SelectFrom selectFrom;
-    private final Where where;
-    private final OrderBy orderBy;
+    private final CompositeClause clause;
 
-    public SelectWhere(@NotNull SelectFrom selectFrom, @Nullable Where where, @Nullable OrderBy orderBy) {
-        super(flattenArgsOf(selectFrom, where, orderBy));
+    public SelectWhere(@NotNull SelectFrom selectFrom, @NotNull CompositeClause clause) {
+        super(flattenArgsOf(selectFrom, clause));
         this.selectFrom = selectFrom;
-        this.where = where;
-        this.orderBy = orderBy;
+        this.clause = clause;
     }
 
     public static @NotNull SelectWhere of(@NotNull SelectFrom selectFrom) {
-        return new SelectWhere(selectFrom, null, null);
+        return new SelectWhere(selectFrom, new ClauseBuilder().build());
     }
 
     public static @NotNull SelectWhere of(@NotNull SelectFrom selectFrom, @NotNull Where where) {
-        return new SelectWhere(selectFrom, where, null);
+        return new SelectWhere(selectFrom, new ClauseBuilder().with(where).build());
     }
 
     public static @NotNull SelectWhere of(@NotNull SelectFrom selectFrom, @NotNull Where where, @NotNull OrderBy orderBy) {
-        return new SelectWhere(selectFrom, where, orderBy);
+        return new SelectWhere(selectFrom, new ClauseBuilder().with(where).with(orderBy).build());
     }
 
     @Override
@@ -38,6 +35,6 @@ public class SelectWhere extends UnitLazy implements SelectQuery {
 
     @Override
     protected @NotNull String supplyRepr() {
-        return joinWithLines(selectFrom, where, orderBy);
+        return joinWithLines(selectFrom, clause);
     }
 }
