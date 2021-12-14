@@ -3,7 +3,6 @@ package io.webby.orm.api.query;
 import io.webby.orm.codegen.SqlSchemaMaker;
 import io.webby.testing.ext.SqlDbSetupExtension;
 import org.junit.jupiter.api.BeforeAll;
-import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.RegisterExtension;
@@ -23,7 +22,7 @@ public class SqlDbQueryTest {
     @BeforeAll
     static void beforeAll() {
         SQL_DB.runUpdate("DROP TABLE IF EXISTS person");
-        SQL_DB.runUpdate(SqlSchemaMaker.makeCreateTableQuery(SQL_DB.getEngine(), PERSON_META));
+        SQL_DB.runUpdate(SqlSchemaMaker.makeCreateTableQuery(SQL_DB.engine(), PERSON_META));
 
         List<Object[]> rows = List.of(
             array("Kate", "DE", F, parseDate("1990-01-01"), 110, 160.5, photo(0x1111111)),
@@ -37,13 +36,6 @@ public class SqlDbQueryTest {
                 VALUES (?, ?, ?, ?, ?, ?, ?)
             """, row);
         }
-
-        SQL_DB.savepoint();
-    }
-
-    @BeforeEach
-    void setUp() {
-        SQL_DB.rollback();
     }
 
     @Test

@@ -38,11 +38,11 @@ public abstract class SqlDbTableTest<K, E, T extends TableObj<K, E>> implements 
 
     @Test
     public void engine() {
-        assertEquals(SQL_DB.getEngine(), table.engine());
+        assertEquals(SQL_DB.engine(), table.engine());
     }
 
     public @NotNull List<String> parseColumnNamesFromDb(@NotNull String name) {
-        return switch (connector().engine()) {
+        return switch (SQL_DB.engine()) {
             case SQLite -> {
                 String sql = descTableInSqlite(name)
                         .replaceAll("\\s+", " ")
@@ -57,7 +57,7 @@ public abstract class SqlDbTableTest<K, E, T extends TableObj<K, E>> implements 
                     .map(DebugSql.RowValue::value)
                     .map(String::toLowerCase)
                     .toList();
-            default -> throw new UnsupportedOperationException("Engine not supported: " + connector().engine());
+            default -> throw new UnsupportedOperationException("Engine not supported: " + SQL_DB.engine());
         };
     }
 
@@ -69,6 +69,6 @@ public abstract class SqlDbTableTest<K, E, T extends TableObj<K, E>> implements 
     }
 
     protected @NotNull Connector connector() {
-        return SQL_DB::getConnection;
+        return SQL_DB;
     }
 }

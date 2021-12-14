@@ -23,7 +23,7 @@ public class ResultSetIteratorTest {
     @SuppressWarnings("ConstantConditions")
     @Test
     public void hasNext() throws Exception {
-        try (Statement statement = SQL_DB.getConnection().createStatement()) {
+        try (Statement statement = SQL_DB.connection().createStatement()) {
             try (ResultSet resultSet = statement.executeQuery("SELECT 1, 2")) {
                 try (ResultSetIterator<String> iterator = ResultSetIterator.of(resultSet, this::rowToString)) {
                     assertTrue(iterator.hasNext());
@@ -42,7 +42,7 @@ public class ResultSetIteratorTest {
 
     @Test
     public void statement_closed() throws Exception {
-        try (Statement statement = SQL_DB.getConnection().createStatement()) {
+        try (Statement statement = SQL_DB.connection().createStatement()) {
             try (ResultSet resultSet = statement.executeQuery("SELECT 1, 2, 3")) {
                 try (ResultSetIterator<String> iterator = ResultSetIterator.of(resultSet, this::rowToString)) {
                     assertFalse(resultSet.isClosed());
@@ -57,7 +57,7 @@ public class ResultSetIteratorTest {
 
     @Test
     public void prepared_statement_closed() throws Exception {
-        try (PreparedStatement prepared = SQL_DB.getConnection().prepareStatement("SELECT 1, 2, 3, 4")) {
+        try (PreparedStatement prepared = SQL_DB.connection().prepareStatement("SELECT 1, 2, 3, 4")) {
             try (ResultSet resultSet = prepared.executeQuery()) {
                 try (ResultSetIterator<String> iterator = ResultSetIterator.of(resultSet, this::rowToString)) {
                     assertFalse(resultSet.isClosed());

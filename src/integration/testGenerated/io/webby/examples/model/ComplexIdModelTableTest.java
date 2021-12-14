@@ -14,7 +14,7 @@ public class ComplexIdModelTableTest
     @Override
     protected void setUp(@NotNull Connector connector) throws Exception {
         table = new ComplexIdModelTable(connector);
-        connector().runner().runMultiUpdate(SqlSchemaMaker.makeCreateTableQuery(table));
+        connector().runner().runUpdate(SqlSchemaMaker.makeCreateTableQuery(table));
     }
 
     @Override

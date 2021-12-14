@@ -16,7 +16,7 @@ public class SessionTableTest
     @Override
     protected void setUp(@NotNull Connector connector) throws Exception {
         table = new SessionTable(connector);
-        connector().runner().runMultiUpdate(SqlSchemaMaker.makeCreateTableQuery(table));
+        connector().runner().runUpdate(SqlSchemaMaker.makeCreateTableQuery(table));
     }
 
     @Override

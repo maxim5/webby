@@ -20,7 +20,7 @@ public class TestingProps {
         }
         String url = System.getProperty("test.sql.url");
         if (url != null) {
-            Engine engine = SqlSettings.parseUrl(url);
+            Engine engine = SqlSettings.parseEngineFromUrl(url);
             assert engine != Engine.Unknown : "Failed to detect SQL engine: " + url;
             log.at(Level.INFO).log("[SQL] Inferred engine: %s. Url: %s", engine, url);
             return new SqlSettings(url);

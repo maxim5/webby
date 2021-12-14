@@ -44,7 +44,7 @@ public class TableManager {
 
         this.settings = settings;
         connector = new ThreadLocalConnector(pool, settings.getLongProperty("db.sql.connection.expiration.millis", 30_000));
-        engine = pool.getEngine();
+        engine = pool.engine();
 
         Set<? extends Class<?>> tableClasses = scanner.getDerivedClasses(settings.modelFilter(), BaseTable.class);
         tableMap = buildTableMap(tableClasses);
@@ -125,7 +125,7 @@ public class TableManager {
             for (EntityTable entityTable : tableMap.values()) {
                 log.at(Level.FINE).log("Creating SQL table if not exists: `%s`...", entityTable.tableName());
                 String query = SqlSchemaMaker.makeCreateTableQuery(engine, entityTable.meta());
-                connector().runner().runMultiUpdate(query);
+                connector().runner().runUpdate(query);
             }
         } catch (SQLException e) {
             rethrow(e);

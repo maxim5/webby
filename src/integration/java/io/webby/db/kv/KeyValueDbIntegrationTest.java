@@ -408,7 +408,7 @@ public class KeyValueDbIntegrationTest {
         settings.storageSettings()
                 .enableKeyValueStorage(storageType)
                 .setKeyValueStoragePath(TEMP_DIRECTORY.getCurrentTempDir())
-                .enableSqlStorage(SQL_DB.getSettings());
+                .enableSqlStorage(SQL_DB.settings());
         settings.setProfileMode(false);  // not testing TrackingDbAdapter by default
 
         settings.setProperty("db.chronicle.default.size", 64);

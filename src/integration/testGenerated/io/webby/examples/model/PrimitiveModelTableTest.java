@@ -12,7 +12,7 @@ public class PrimitiveModelTableTest
     @Override
     protected void setUp(@NotNull Connector connector) throws Exception {
         table = new PrimitiveModelTable(connector);
-        connector().runner().runMultiUpdate(SqlSchemaMaker.makeCreateTableQuery(table));
+        connector().runner().runUpdate(SqlSchemaMaker.makeCreateTableQuery(table));
     }
 
     @Override

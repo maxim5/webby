@@ -49,7 +49,7 @@ public class UserManagerIntegrationTest {
         AppSettings settings = Testing.defaultAppSettings();
         settings.modelFilter().setCommonPackageOf(DefaultUser.class);
         switch (scenario) {
-            case SQL -> settings.storageSettings().enableSqlStorage(SQL_DB.getSettings()).enableKeyValueStorage(StorageType.JAVA_MAP);
+            case SQL -> settings.storageSettings().enableSqlStorage(SQL_DB.settings()).enableKeyValueStorage(StorageType.JAVA_MAP);
             case KEY_VALUE -> settings.storageSettings().enableKeyValueStorage(StorageType.JAVA_MAP);
         }
         return Testing.testStartup(settings, SQL_DB::savepoint, SQL_DB.combinedTestingModule()).getInstance(UserManager.class);

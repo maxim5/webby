@@ -16,6 +16,10 @@ public record SqlSettings(@NotNull String url) {
     public static final SqlSettings SQLITE_IN_MEMORY = new SqlSettings(SQLITE_IN_MEMORY_URL);
     public static final SqlSettings MYSQL_TEST = new SqlSettings(MYSQL_TEST_URL);
 
+    public @NotNull Engine engine() {
+        return parseEngineFromUrl(url);
+    }
+
     public static @NotNull SqlSettings inMemoryNotForProduction(@NotNull Engine engine) {
         return switch (engine) {
             case H2 -> H2_IN_MEMORY;
@@ -29,7 +33,7 @@ public record SqlSettings(@NotNull String url) {
         return "jdbc:%s:%s".formatted(engine.jdbcType(), file);
     }
 
-    public static @NotNull Engine parseUrl(@Nullable String url) {
+    public static @NotNull Engine parseEngineFromUrl(@Nullable String url) {
         if (url == null || !url.startsWith("jdbc:")) {
             return Engine.Unknown;
         }

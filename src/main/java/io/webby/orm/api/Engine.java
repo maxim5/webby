@@ -39,7 +39,7 @@ public enum Engine {
         return ENGINE_MAP.getOrDefault(jdbcType, Unknown);
     }
 
-    public static @NotNull Engine safeFrom(@NotNull Connection connection) {
+    public static @NotNull Engine fromConnectionSafe(@NotNull Connection connection) {
         try {
             return fromConnection(connection);
         } catch (SQLException e) {

@@ -12,6 +12,6 @@ public interface Connector {
     }
 
     default @NotNull Engine engine() {
-        return Engine.safeFrom(connection());
+        return Engine.fromConnectionSafe(connection());
     }
 }

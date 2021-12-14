@@ -39,8 +39,8 @@ public class ConnectionPool {
         }
     }
 
-    public @NotNull Engine getEngine() {
-        return SqlSettings.parseUrl(dataSource.getJdbcUrl());
+    public @NotNull Engine engine() {
+        return SqlSettings.parseEngineFromUrl(dataSource.getJdbcUrl());
     }
 
     public boolean isRunning() {

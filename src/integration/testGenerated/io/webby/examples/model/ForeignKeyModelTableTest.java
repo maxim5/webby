@@ -1,13 +1,10 @@
 package io.webby.examples.model;
 
-import io.webby.orm.api.Connector;
+import io.webby.orm.api.*;
 import io.webby.orm.codegen.SqlSchemaMaker;
 import io.webby.testing.ForeignKeyTableTest;
 import io.webby.testing.SqlDbTableTest;
 import io.webby.testing.TableLongTest;
-import io.webby.orm.api.ForeignInt;
-import io.webby.orm.api.ForeignLong;
-import io.webby.orm.api.ForeignObj;
 import org.jetbrains.annotations.NotNull;
 
 public class ForeignKeyModelTableTest
@@ -17,10 +14,10 @@ public class ForeignKeyModelTableTest
     @Override
     protected void setUp(@NotNull Connector connector) throws Exception {
         table = new ForeignKeyModelTable(connector);
-        connector().runner().runMultiUpdate(SqlSchemaMaker.makeCreateTableQuery(table.engine(), FKIntTable.class));
-        connector().runner().runMultiUpdate(SqlSchemaMaker.makeCreateTableQuery(table.engine(), FKLongTable.class));
-        connector().runner().runMultiUpdate(SqlSchemaMaker.makeCreateTableQuery(table.engine(), FKStringTable.class));
-        connector().runner().runMultiUpdate(SqlSchemaMaker.makeCreateTableQuery(table.engine(), ForeignKeyModelTable.class));
+        connector().runner().runUpdate(SqlSchemaMaker.makeCreateTableQuery(table.engine(), FKIntTable.class));
+        connector().runner().runUpdate(SqlSchemaMaker.makeCreateTableQuery(table.engine(), FKLongTable.class));
+        connector().runner().runUpdate(SqlSchemaMaker.makeCreateTableQuery(table.engine(), FKStringTable.class));
+        connector().runner().runUpdate(SqlSchemaMaker.makeCreateTableQuery(table.engine(), ForeignKeyModelTable.class));
     }
 
     @Override

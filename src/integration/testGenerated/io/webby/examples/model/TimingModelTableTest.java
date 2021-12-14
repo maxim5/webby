@@ -20,7 +20,7 @@ public class TimingModelTableTest
     @Override
     protected void setUp(@NotNull Connector connector) throws Exception {
         table = new TimingModelTable(connector);
-        connector().runner().runMultiUpdate(SqlSchemaMaker.makeCreateTableQuery(table));
+        connector().runner().runUpdate(SqlSchemaMaker.makeCreateTableQuery(table));
     }
 
     @Override

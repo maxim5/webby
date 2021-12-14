@@ -6,9 +6,9 @@ import com.google.inject.Module;
 import com.google.inject.util.Modules;
 import io.webby.db.sql.ConnectionPool;
 import io.webby.db.sql.SqlSettings;
+import io.webby.orm.api.Connector;
 import io.webby.orm.api.DebugSql;
 import io.webby.orm.api.Engine;
-import io.webby.orm.api.QueryRunner;
 import io.webby.testing.TestingModules;
 import io.webby.util.base.Rethrow;
 import io.webby.util.base.Rethrow.Runnables;
@@ -23,21 +23,17 @@ import java.sql.*;
 import java.util.List;
 import java.util.logging.Level;
 
-public class SqlDbSetupExtension implements AfterAllCallback, BeforeEachCallback, AfterEachCallback {
+public class SqlDbSetupExtension implements AfterAllCallback, BeforeEachCallback, AfterEachCallback, Connector {
     private static final FluentLogger log = FluentLogger.forEnclosingClass();
 
-    private final String url;
+    private final SqlSettings settings;
     private final Connection connection;
     private Savepoint savepoint;
 
-    public SqlDbSetupExtension(@NotNull String url) {
-        this.url = url;
-        this.connection = Rethrow.Suppliers.rethrow(() -> DriverManager.getConnection(url)).get();
-        log.at(Level.FINE).log("[SQL] Connection opened: %s", url);
-    }
-
     public SqlDbSetupExtension(@NotNull SqlSettings settings) {
-        this(settings.url());
+        this.settings = settings;
+        this.connection = Rethrow.Suppliers.rethrow(() -> DriverManager.getConnection(settings.url())).get();
+        log.at(Level.FINE).log("[SQL] Connection opened: %s", settings.url());
     }
 
     public static @NotNull SqlDbSetupExtension fromProperties() {
@@ -51,7 +47,7 @@ public class SqlDbSetupExtension implements AfterAllCallback, BeforeEachCallback
         }
         String url = System.getProperty("test.sql.url");
         if (url != null) {
-            return new SqlDbSetupExtension(url);
+            return new SqlDbSetupExtension(new SqlSettings(url));
         }
         log.at(Level.SEVERE).log("[SQL] Test SQL properties not found. Using SQLite");
         return new SqlDbSetupExtension(SqlSettings.SQLITE_IN_MEMORY);
@@ -91,24 +87,18 @@ public class SqlDbSetupExtension implements AfterAllCallback, BeforeEachCallback
         });
     }
 
-    public @NotNull String getUrl() {
-        return url;
+    public @NotNull SqlSettings settings() {
+        return settings;
     }
 
-    public @NotNull SqlSettings getSettings() {
-        return new SqlSettings(url);
-    }
-
-    public @NotNull Connection getConnection() {
+    @Override
+    public @NotNull Connection connection() {
         return connection;
     }
 
-    public @NotNull QueryRunner getRunner() {
-        return new QueryRunner(connection);
-    }
-
-    public @NotNull Engine getEngine() {
-        return SqlSettings.parseUrl(url);
+    @Override
+    public @NotNull Engine engine() {
+        return settings.engine();
     }
 
     public @NotNull ConnectionPool singleConnectionPool() {
@@ -118,8 +108,8 @@ public class SqlDbSetupExtension implements AfterAllCallback, BeforeEachCallback
                 return connection;
             }
             @Override
-            public @NotNull Engine getEngine() {
-                return SqlSettings.parseUrl(url);
+            public @NotNull Engine engine() {
+                return settings.engine();
             }
             @Override
             public boolean isRunning() {
@@ -137,7 +127,7 @@ public class SqlDbSetupExtension implements AfterAllCallback, BeforeEachCallback
     }
 
     public @NotNull List<DebugSql.Row> runQuery(@NotNull String query, @Nullable Object @NotNull ... params) {
-        try (PreparedStatement statement = getRunner().prepareQuery(query, params);
+        try (PreparedStatement statement = runner().prepareQuery(query, params);
              ResultSet resultSet = statement.executeQuery()) {
             return DebugSql.toDebugRows(resultSet);
         } catch (SQLException e) {
@@ -152,7 +142,7 @@ public class SqlDbSetupExtension implements AfterAllCallback, BeforeEachCallback
     @CanIgnoreReturnValue
     public int runUpdate(@NotNull String sql, @Nullable Object @NotNull ... params) {
         try {
-            return getRunner().runUpdate(sql, params);
+            return runner().runUpdate(sql, params);
         } catch (SQLException e) {
             return Rethrow.rethrow(e);
         }

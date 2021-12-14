@@ -42,7 +42,7 @@ public class ThreadLocalConnector implements Connector {
 
     @Override
     public @NotNull Engine engine() {
-        return pool.getEngine();
+        return pool.engine();
     }
 
     public void refreshIfNecessary() {
