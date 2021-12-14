@@ -34,6 +34,10 @@ public class SqlDbSetupExtension implements AfterAllCallback, BeforeEachCallback
         log.at(Level.FINE).log("[SQL] Connection opened: %s", settings.url());
     }
 
+    public static @NotNull SqlDbSetupExtension from(@NotNull SqlSettings settings) {
+        return new SqlDbSetupExtension(settings);
+    }
+
     public static @NotNull SqlDbSetupExtension fromProperties() {
         String engineValue = System.getProperty("test.sql.engine");
         if (engineValue != null) {
