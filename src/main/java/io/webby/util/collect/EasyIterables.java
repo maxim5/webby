@@ -34,6 +34,10 @@ public class EasyIterables {
         return result;
     }
 
+    public static <E> @NotNull List<E> concatOne(@NotNull Iterable<E> first, @NotNull E second) {
+        return Stream.concat(Streams.stream(first), Stream.of(second)).toList();
+    }
+
     public static <E> long estimateSize(@NotNull Iterable<E> items, int def) {
         return items instanceof Collection<?> collection
                 ? collection.size()

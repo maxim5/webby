@@ -43,6 +43,14 @@ public class AtomicLazy<T> implements DelayedInitLazy<T>, DelayedAccessLazy<T> {
     }
 
     @Override
+    public void initializeOrCompare(@NotNull T value) {
+        boolean success = ref.compareAndSet(null, value);
+        assert success || ref.get() == value :
+                "Invalid state. %s already initialized with another value: %s. New value: %s"
+                .formatted(getClass().getSimpleName(), ref.get(), value);
+    }
+
+    @Override
     public @NotNull T lazyGet(@NotNull Supplier<T> supplier) {
         return setIfAbsent(ref, supplier);
     }

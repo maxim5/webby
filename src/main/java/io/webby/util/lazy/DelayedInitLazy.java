@@ -7,5 +7,7 @@ public interface DelayedInitLazy<T> {
 
     void initializeOrDie(@NotNull T value);
 
+    void initializeOrCompare(@NotNull T value);
+
     @NotNull T getOrDie();
 }
