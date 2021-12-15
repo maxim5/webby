@@ -46,12 +46,12 @@ public class SelectGroupByBuilder {
         return this;
     }
 
-    public @NotNull SelectGroupByBuilder with(@NotNull Where where) {
+    public @NotNull SelectGroupByBuilder where(@NotNull Where where) {
         filter.with(where);
         return this;
     }
 
-    public @NotNull SelectGroupByBuilder with(@NotNull OrderBy orderBy) {
+    public @NotNull SelectGroupByBuilder orderBy(@NotNull OrderBy orderBy) {
         filter.with(orderBy);
         return this;
     }

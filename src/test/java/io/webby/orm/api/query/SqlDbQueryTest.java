@@ -9,8 +9,7 @@ import org.junit.jupiter.api.extension.RegisterExtension;
 
 import java.util.List;
 
-import static io.webby.orm.api.query.CompareType.EQ;
-import static io.webby.orm.api.query.CompareType.GT;
+import static io.webby.orm.api.query.CompareType.*;
 import static io.webby.orm.api.query.Shortcuts.*;
 import static io.webby.orm.testing.AssertSql.*;
 import static io.webby.orm.testing.PersonTableData.*;
@@ -40,7 +39,7 @@ public class SqlDbQueryTest {
     }
 
     @Test
-    public void selectWhere_id_by_name_const() {
+    public void selectWhere_select_id_by_name_const() {
         SelectQuery query = SelectWhere.from(PERSON_META)
                 .select(PersonColumn.id)
                 .where(Where.of(EQ.compare(PersonColumn.name, literal("Bill"))))
@@ -52,6 +51,53 @@ public class SqlDbQueryTest {
             """);
         assertNoArgs(query);
         assertRows(SQL_DB.runQuery(query), array(2));
+    }
+
+    @Test
+    public void selectWhere_select_sum() {
+        SelectQuery query = SelectWhere.from(PERSON_META)
+                .select(Func.SUM.apply(PersonColumn.height))
+                .build();
+        assertRepr(query, """
+            SELECT sum(height)
+            FROM person
+            """);
+        assertNoArgs(query);
+        assertRows(SQL_DB.runQuery(query), array(662.7));
+    }
+
+    @Test
+    public void selectWhere_select_distinct() {
+        SelectQuery query = SelectWhere.from(PERSON_META)
+                .select(PersonColumn.sex.distinct())
+                .build();
+        assertRepr(query, """
+            SELECT DISTINCT sex
+            FROM person
+            """);
+        assertNoArgs(query);
+        assertRows(SQL_DB.runQuery(query), array(FEMALE), array(MALE));
+    }
+
+    @Test
+    public void selectWhere_order_by_sex_country() {
+        SelectQuery query = SelectWhere.from(PERSON_META)
+                .select(PersonColumn.sex, PersonColumn.country)
+                .where(Where.of(LT.compare(PersonColumn.height, num(200.0))))
+                .orderBy(OrderBy.of(OrderTerm.ofAsc(PersonColumn.sex), OrderTerm.ofDesc(PersonColumn.country)))
+                .build();
+        assertRepr(query, """
+            SELECT sex, country
+            FROM person
+            WHERE height < 200.0
+            ORDER BY sex ASC, country DESC
+            """);
+        assertNoArgs(query);
+        assertOrderedRows(SQL_DB.runQuery(query),
+                          array(MALE, "US"),
+                          array(MALE, "RU"),
+                          array(FEMALE, "DE"),
+                          array(FEMALE, "CN"));
     }
 
     @Test
@@ -107,6 +153,23 @@ public class SqlDbQueryTest {
     }
 
     @Test
+    public void groupBy_one_column_avg() {
+        SelectQuery query = SelectGroupBy.from(PERSON_META)
+                .groupBy(PersonColumn.sex)
+                .aggregate(Func.AVG.apply(PersonColumn.iq))
+                .build();
+        assertRepr(query, """
+            SELECT sex, avg(iq)
+            FROM person
+            GROUP BY sex
+            """);
+        assertNoArgs(query);
+        assertRows(SQL_DB.runQuery(query),
+                   array(FEMALE, 120.0),
+                   array(MALE, 110.0));
+    }
+
+    @Test
     public void groupBy_two_columns_max() {
         SelectQuery query = SelectGroupBy.from(PERSON_META)
                 .groupBy(PersonColumn.sex, PersonColumn.name)
@@ -124,4 +187,26 @@ public class SqlDbQueryTest {
                    array(MALE,   "Ivan", 3),
                    array(FEMALE, "Yuan", 4));
     }
+
+    @Test
+    public void groupBy_where_order_by() {
+        SelectQuery query = SelectGroupBy.from(PERSON_META)
+                .aggregate(Func.COUNT.apply(PersonColumn.id))
+                .where(Where.of(PersonColumn.sex.bool()))
+                .groupBy(PersonColumn.name)
+                .orderBy(OrderBy.of(PersonColumn.id, Order.ASC))
+                .build();
+        assertRepr(query, """
+            SELECT name, count(id)
+            FROM person
+            WHERE sex
+            GROUP BY name
+            ORDER BY id ASC
+            """);
+        assertNoArgs(query);
+        assertOrderedRows(SQL_DB.runQuery(query),
+                          array("Kate", 1),
+                          array("Yuan", 1));
+    }
+
 }

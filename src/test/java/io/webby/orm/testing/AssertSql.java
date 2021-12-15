@@ -5,6 +5,7 @@ import io.webby.orm.api.query.*;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
+import java.math.BigDecimal;
 import java.math.BigInteger;
 import java.util.Arrays;
 import java.util.List;
@@ -37,13 +38,25 @@ public class AssertSql {
     }
 
     public static void assertRows(@NotNull List<DebugSql.Row> result, @NotNull Object[] ... expected) {
+        assertRows(false, result, expected);
+    }
+
+    public static void assertOrderedRows(@NotNull List<DebugSql.Row> result, @NotNull Object[] ... expected) {
+        assertRows(true, result, expected);
+    }
+
+    private static void assertRows(boolean ordered, @NotNull List<DebugSql.Row> result, @NotNull Object[] ... expected) {
         List<List<Object>> values = result.stream()
                 .map(row -> row.values().stream().map(DebugSql.RowValue::value).map(AssertSql::adjust).toList())
                 .toList();
         List<List<Object>> expectedList = Arrays.stream(expected)
                 .map(row -> Arrays.stream(row).map(AssertSql::adjust).toList())
                 .toList();
-        assertThat(values).containsExactlyElementsIn(expectedList);
+        if (ordered) {
+            assertThat(values).containsExactlyElementsIn(expectedList).inOrder();
+        } else {
+            assertThat(values).containsExactlyElementsIn(expectedList);
+        }
     }
 
     private static @Nullable Object adjust(@Nullable Object val) {
@@ -53,6 +66,9 @@ public class AssertSql {
         if (val instanceof Number number && (long) (number.intValue()) == number.longValue() &&
             (val instanceof Long || val instanceof BigInteger)) {
             return number.intValue();
+        }
+        if (val instanceof BigDecimal decimal) {
+            return decimal.doubleValue();
         }
         return val;
     }

@@ -38,7 +38,7 @@ public class SelectWhereBuilder {
         return this;
     }
 
-    public @NotNull SelectWhereBuilder with(@NotNull OrderBy orderBy) {
+    public @NotNull SelectWhereBuilder orderBy(@NotNull OrderBy orderBy) {
         filter.with(orderBy);
         return this;
     }

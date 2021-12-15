@@ -8,4 +8,12 @@ public interface Term extends Representable, ArgsHolder {
     default @NotNull Named namedAs(@NotNull String name) {
         return new NamedAs(this, name);
     }
+
+    default @NotNull BoolWrapper bool() {
+        return new BoolWrapper(this);
+    }
+
+    default @NotNull OrderTerm ordered(@NotNull Order order) {
+        return new OrderTerm(this, order);
+    }
 }
