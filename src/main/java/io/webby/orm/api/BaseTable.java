@@ -17,7 +17,7 @@ public interface BaseTable<E> extends Iterable<E> {
 
     int count();
 
-    int count(@NotNull Clause clause);
+    int count(@NotNull Filter filter);
 
     default boolean isEmpty() {
         return !isNotEmpty();
@@ -27,8 +27,8 @@ public interface BaseTable<E> extends Iterable<E> {
         return count() > 0;
     }
 
-    default boolean exists(@NotNull Where clause) {
-        return count(clause) > 0;
+    default boolean exists(@NotNull Where where) {
+        return count(where) > 0;
     }
 
     @Override
@@ -36,7 +36,7 @@ public interface BaseTable<E> extends Iterable<E> {
     @NotNull ResultSetIterator<E> iterator();
 
     @MustBeClosed
-    @NotNull ResultSetIterator<E> iterator(@NotNull Clause clause);
+    @NotNull ResultSetIterator<E> iterator(@NotNull Filter filter);
 
     default @NotNull List<E> fetchAll() {
         try (ResultSetIterator<E> iterator = iterator()) {
@@ -44,13 +44,13 @@ public interface BaseTable<E> extends Iterable<E> {
         }
     }
 
-    default @NotNull List<E> fetchMatching(@NotNull Clause clause) {
-        try (ResultSetIterator<E> iterator = iterator(clause)) {
+    default @NotNull List<E> fetchMatching(@NotNull Filter filter) {
+        try (ResultSetIterator<E> iterator = iterator(filter)) {
             return Lists.newArrayList(iterator);
         }
     }
 
-    default @NotNull Page<E> fetchPage(@NotNull CompositeClause clause) {
+    default @NotNull Page<E> fetchPage(@NotNull CompositeFilter clause) {
         List<E> items = fetchMatching(clause);
         Offset offset = clause.offset();
         LimitClause limit = clause.limit();

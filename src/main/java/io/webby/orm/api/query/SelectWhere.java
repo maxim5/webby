@@ -9,9 +9,9 @@ import static io.webby.orm.api.query.Units.joinWithLines;
 
 public class SelectWhere extends Unit implements SelectQuery {
     private final SelectFrom selectFrom;
-    private final CompositeClause clause;
+    private final CompositeFilter clause;
 
-    public SelectWhere(@NotNull SelectFrom selectFrom, @NotNull CompositeClause clause) {
+    public SelectWhere(@NotNull SelectFrom selectFrom, @NotNull CompositeFilter clause) {
         super(joinWithLines(selectFrom, clause), flattenArgsOf(selectFrom, clause));
         this.selectFrom = selectFrom;
         this.clause = clause;

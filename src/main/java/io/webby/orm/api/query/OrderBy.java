@@ -10,7 +10,7 @@ import java.util.List;
 import static io.webby.orm.api.query.Units.flattenArgsOf;
 import static io.webby.orm.api.query.Units.joinWithCommas;
 
-public class OrderBy extends Unit implements Clause, Representable {
+public class OrderBy extends Unit implements Filter, Representable {
     private final ImmutableList<OrderTerm> terms;
 
     public OrderBy(@NotNull List<OrderTerm> terms) {

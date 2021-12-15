@@ -2,8 +2,7 @@ package io.webby.testing;
 
 import io.webby.orm.api.Page;
 import io.webby.orm.api.TableObj;
-import io.webby.orm.api.query.ClauseBuilder;
-import io.webby.orm.api.query.CompositeClause;
+import io.webby.orm.api.query.CompositeFilter;
 import io.webby.orm.api.query.Pagination;
 import io.webby.orm.api.query.Where;
 import io.webby.util.collect.EasyIterables;
@@ -132,7 +131,7 @@ public interface PrimaryKeyTableTest<K, E, T extends TableObj<K, E>> extends Bas
         E entity2 = createEntity(keys()[1]);
         assertEquals(1, table().insert(entity2));
 
-        CompositeClause firstPageClause = new ClauseBuilder().with(Pagination.firstPage(1), table().engine()).build();
+        CompositeFilter firstPageClause = CompositeFilter.builder().with(Pagination.firstPage(1), table().engine()).build();
         Page<E> page1 = table().fetchPage(firstPageClause);
         assertThat(page1.hasNextPage()).isTrue();
         assertNotNull(page1.nextToken());
@@ -140,7 +139,7 @@ public interface PrimaryKeyTableTest<K, E, T extends TableObj<K, E>> extends Bas
         assertThat(page1.items()).hasSize(1);
         assertThat(page1.items()).containsAnyOf(entity1, entity2);
 
-        CompositeClause secondPageClause = new ClauseBuilder().with(Pagination.ofOffset(1, 1), table().engine()).build();
+        CompositeFilter secondPageClause = CompositeFilter.builder().with(Pagination.ofOffset(1, 1), table().engine()).build();
         Page<E> page2 = table().fetchPage(secondPageClause);
         assertThat(page2.hasNextPage()).isTrue();  // in fact, is false...
         assertThat(page2.items()).hasSize(1);
@@ -148,7 +147,7 @@ public interface PrimaryKeyTableTest<K, E, T extends TableObj<K, E>> extends Bas
 
         assertThat(EasyIterables.concat(page1.items(), page2.items())).containsExactly(entity1, entity2);
 
-        CompositeClause thirdPageClause = new ClauseBuilder().with(Pagination.ofOffset(2, 1), table().engine()).build();
+        CompositeFilter thirdPageClause = CompositeFilter.builder().with(Pagination.ofOffset(2, 1), table().engine()).build();
         Page<E> page3 = table().fetchPage(thirdPageClause);
         assertThat(page3.hasNextPage()).isFalse();
         assertThat(page3.items()).isEmpty();

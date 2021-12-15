@@ -4,7 +4,7 @@ import org.jetbrains.annotations.NotNull;
 
 import java.util.List;
 
-public class Where extends Unit implements Clause, Representable {
+public class Where extends Unit implements Filter, Representable {
     private final BoolTerm term;
 
     public Where(@NotNull BoolTerm term) {

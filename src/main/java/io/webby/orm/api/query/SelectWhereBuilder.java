@@ -7,7 +7,7 @@ import org.jetbrains.annotations.NotNull;
 public class SelectWhereBuilder {
     private final String table;
     private final ImmutableList.Builder<Term> terms = ImmutableList.builder();
-    private final ClauseBuilder clause = new ClauseBuilder();
+    private final CompositeFilterBuilder filter = new CompositeFilterBuilder();
 
     public SelectWhereBuilder(@NotNull String table) {
         this.table = table;
@@ -34,31 +34,31 @@ public class SelectWhereBuilder {
     }
 
     public @NotNull SelectWhereBuilder where(@NotNull Where where) {
-        clause.with(where);
+        filter.with(where);
         return this;
     }
 
     public @NotNull SelectWhereBuilder with(@NotNull OrderBy orderBy) {
-        clause.with(orderBy);
+        filter.with(orderBy);
         return this;
     }
 
     public @NotNull SelectWhereBuilder with(@NotNull LimitClause limit) {
-        clause.with(limit);
+        filter.with(limit);
         return this;
     }
 
     public @NotNull SelectWhereBuilder with(@NotNull Offset offset) {
-        clause.with(offset);
+        filter.with(offset);
         return this;
     }
 
     public @NotNull SelectWhereBuilder with(@NotNull Pagination pagination, @NotNull Engine engine) {
-        clause.with(pagination, engine);
+        filter.with(pagination, engine);
         return this;
     }
 
     public @NotNull SelectWhere build() {
-        return new SelectWhere(new SelectFrom(table, terms.build()), clause.build());
+        return new SelectWhere(new SelectFrom(table, terms.build()), filter.build());
     }
 }

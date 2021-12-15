@@ -1,5 +1,6 @@
 package io.webby.orm.api.query;
 
+import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.Arrays;
@@ -7,13 +8,13 @@ import java.util.Arrays;
 import static io.webby.orm.api.query.Units.flattenArgsOf;
 import static io.webby.orm.api.query.Units.joinWithLines;
 
-public class CompositeClause extends Unit implements Clause {
+public class CompositeFilter extends Unit implements Filter {
     private final Where where;
     private final OrderBy orderBy;
     private final LimitClause limit;
     private final Offset offset;
 
-    public CompositeClause(@Nullable Where where,
+    public CompositeFilter(@Nullable Where where,
                            @Nullable OrderBy orderBy,
                            @Nullable LimitClause limit,
                            @Nullable Offset offset) {
@@ -22,6 +23,10 @@ public class CompositeClause extends Unit implements Clause {
         this.orderBy = orderBy;
         this.limit = limit;
         this.offset = offset;
+    }
+
+    public static @NotNull CompositeFilterBuilder builder() {
+        return new CompositeFilterBuilder();
     }
 
     public @Nullable Where where() {

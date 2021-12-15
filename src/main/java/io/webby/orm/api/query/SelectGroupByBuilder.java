@@ -9,7 +9,7 @@ public class SelectGroupByBuilder {
     private final String table;
     private FuncExpr funcExpr = null;
     private final ImmutableList.Builder<Named> terms = ImmutableList.builder();
-    private final ClauseBuilder clause = new ClauseBuilder();
+    private final CompositeFilterBuilder filter = new CompositeFilterBuilder();
 
     public SelectGroupByBuilder(@NotNull String table) {
         this.table = table;
@@ -47,19 +47,19 @@ public class SelectGroupByBuilder {
     }
 
     public @NotNull SelectGroupByBuilder with(@NotNull Where where) {
-        clause.with(where);
+        filter.with(where);
         return this;
     }
 
     public @NotNull SelectGroupByBuilder with(@NotNull OrderBy orderBy) {
-        clause.with(orderBy);
+        filter.with(orderBy);
         return this;
     }
 
     public @NotNull SelectGroupBy build() {
         ImmutableList<Named> groupByTerms = terms.build();
         ImmutableList<Term> allTerms = ImmutableList.<Term>builder().addAll(groupByTerms).add(funcExpr).build();
-        CompositeClause composite = clause.build();
+        CompositeFilter composite = filter.build();
         return new SelectGroupBy(new SelectFrom(table, allTerms), composite.where(), new GroupBy(groupByTerms), composite.orderBy());
     }
 }

@@ -3,7 +3,7 @@ package io.webby.orm.codegen;
 import com.google.common.collect.Iterables;
 import com.google.common.collect.Streams;
 import io.webby.orm.api.*;
-import io.webby.orm.api.query.Clause;
+import io.webby.orm.api.query.Filter;
 import io.webby.orm.api.query.TermType;
 import io.webby.orm.api.query.Where;
 import io.webby.orm.arch.*;
@@ -106,7 +106,7 @@ public class ModelTableCodegen extends BaseCodegen {
         List<String> classesToImport = Streams.concat(
             Stream.of(pickBaseTableClass(),
                       Connector.class, QueryRunner.class, QueryException.class, Engine.class, ReadFollow.class,
-                      Clause.class, Where.class, io.webby.orm.api.query.Column.class, TermType.class,
+                      Filter.class, Where.class, io.webby.orm.api.query.Column.class, TermType.class,
                       ResultSetIterator.class, TableMeta.class).map(FQN::of),
             customClasses.stream().map(FQN::of),
             customClasses.stream().map(adaptersScanner::locateAdapterFqn),
@@ -221,9 +221,9 @@ public class ModelTableCodegen extends BaseCodegen {
         }
         
         @Override
-        public int count(@Nonnull Clause clause) {
-            String query = "SELECT COUNT(*) FROM $table_sql\\n" + clause.repr();
-            try (PreparedStatement statement = runner().prepareQuery(query, clause.args());
+        public int count(@Nonnull Filter filter) {
+            String query = "SELECT COUNT(*) FROM $table_sql\\n" + filter.repr();
+            try (PreparedStatement statement = runner().prepareQuery(query, filter.args());
                  ResultSet result = statement.executeQuery()) {
                 return result.next() ? result.getInt(1) : 0;
             } catch (SQLException e) {
@@ -247,13 +247,13 @@ public class ModelTableCodegen extends BaseCodegen {
         }
     
         @Override
-        public boolean exists(@Nonnull Where clause) {
-            String query = "SELECT EXISTS (SELECT * FROM $table_sql " + clause.repr() + " LIMIT 1)";
-            try (PreparedStatement statement = runner().prepareQuery(query, clause.args());
+        public boolean exists(@Nonnull Where where) {
+            String query = "SELECT EXISTS (SELECT * FROM $table_sql " + where.repr() + " LIMIT 1)";
+            try (PreparedStatement statement = runner().prepareQuery(query, where.args());
                  ResultSet result = statement.executeQuery()) {
                 return result.next() && result.getBoolean(1);
             } catch (SQLException e) {
-                throw new QueryException("Failed to check exists in $TableClass", query, clause.args(), e);
+                throw new QueryException("Failed to check exists in $TableClass", query, where.args(), e);
             }
         }\n
         """, mainContext);
@@ -356,13 +356,13 @@ public class ModelTableCodegen extends BaseCodegen {
         }
 
         @Override
-        public @Nonnull ResultSetIterator<$ModelClass> iterator(@Nonnull Clause clause) {
-            String query = SELECT_ENTITY_ALL[follow.ordinal()] + clause.repr();
+        public @Nonnull ResultSetIterator<$ModelClass> iterator(@Nonnull Filter filter) {
+            String query = SELECT_ENTITY_ALL[follow.ordinal()] + filter.repr();
             try {
-                return ResultSetIterator.of(runner().prepareQuery(query, clause.args()).executeQuery(),
+                return ResultSetIterator.of(runner().prepareQuery(query, filter.args()).executeQuery(),
                                             result -> fromRow(result, follow, 0));
             } catch (SQLException e) {
-                throw new QueryException("Failed to iterate over $TableClass", query, clause.args(), e);
+                throw new QueryException("Failed to iterate over $TableClass", query, filter.args(), e);
             }
         }\n
         """, mainContext);
