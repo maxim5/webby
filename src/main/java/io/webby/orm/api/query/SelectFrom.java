@@ -1,7 +1,6 @@
 package io.webby.orm.api.query;
 
 import com.google.common.collect.ImmutableList;
-import io.webby.util.lazy.AtomicLazy;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.List;
@@ -9,36 +8,23 @@ import java.util.List;
 import static io.webby.orm.api.query.Units.flattenArgsOf;
 import static io.webby.orm.api.query.Units.joinWithCommas;
 
-public class SelectFrom extends UnitLazy {
-    private final ImmutableList<Term> terms;
-    private final AtomicLazy<String> tableRef = new AtomicLazy<>(null);
+public class SelectFrom extends Unit {
+    private static final String PATTERN = """
+        SELECT %s
+        FROM %s""";
 
-    public SelectFrom(@NotNull List<? extends Term> terms) {
-        super(flattenArgsOf(terms));
+    private final ImmutableList<Term> terms;
+
+    public SelectFrom(@NotNull String table, @NotNull List<? extends Term> terms) {
+        super(PATTERN.formatted(joinWithCommas(terms), table), flattenArgsOf(terms));
         this.terms = ImmutableList.copyOf(terms);
     }
 
-    public static @NotNull SelectFrom of(@NotNull Term term) {
-        return new SelectFrom(ImmutableList.of(term));
+    public @NotNull ImmutableList<Term> terms() {
+        return terms;
     }
 
-    public static @NotNull SelectFrom of(@NotNull Term term1, @NotNull Term term2) {
-        return new SelectFrom(ImmutableList.of(term1, term2));
-    }
-
-    public static @NotNull SelectFrom of(@NotNull Term @NotNull ... terms) {
-        return new SelectFrom(ImmutableList.copyOf(terms));
-    }
-
-    public void withTable(@NotNull String tableName) {
-        tableRef.initializeOrCompare(tableName);
-    }
-
-    @Override
-    protected @NotNull String supplyRepr() {
-        return """
-        SELECT %s
-        FROM %s\
-        """.formatted(joinWithCommas(terms), tableRef.getOrDie());
+    public int termsNumber() {
+        return terms.size();
     }
 }

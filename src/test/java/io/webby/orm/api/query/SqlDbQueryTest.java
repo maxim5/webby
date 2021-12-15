@@ -1,9 +1,7 @@
 package io.webby.orm.api.query;
 
-import io.webby.orm.api.debug.DebugSql;
 import io.webby.orm.codegen.SqlSchemaMaker;
 import io.webby.testing.ext.SqlDbSetupExtension;
-import org.jetbrains.annotations.NotNull;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
@@ -43,79 +41,87 @@ public class SqlDbQueryTest {
 
     @Test
     public void selectWhere_id_by_name_const() {
-        SelectQuery query = SelectWhere.of(SelectFrom.of(PersonColumn.id),
-                                           Where.of(EQ.compare(PersonColumn.name, literal("Bill"))));
-        assertRows(runQuery(query), array(2));
+        SelectQuery query = SelectWhere.from(PERSON_META)
+                .select(PersonColumn.id)
+                .where(Where.of(EQ.compare(PersonColumn.name, literal("Bill"))))
+                .build();
         assertRepr(query, """
             SELECT id
             FROM person
             WHERE name = 'Bill'
             """);
         assertNoArgs(query);
+        assertRows(SQL_DB.runQuery(query), array(2));
     }
 
     @Test
     public void selectWhere_select_arg() {
-        SelectQuery query = SelectWhere.of(SelectFrom.of(PersonColumn.name, GT.compare(PersonColumn.iq, var(125))));
-        assertRows(runQuery(query),
-                   array("Kate", false),
-                   array("Bill", false),
-                   array("Ivan", false),
-                   array("Yuan", true));
+        SelectQuery query = SelectWhere.from(PERSON_META)
+                .select(PersonColumn.name, GT.compare(PersonColumn.iq, var(125)))
+                .build();
         assertRepr(query, """
             SELECT name, iq > ?
             FROM person
             """);
         assertArgs(query, 125);
+        assertRows(SQL_DB.runQuery(query),
+                   array("Kate", false),
+                   array("Bill", false),
+                   array("Ivan", false),
+                   array("Yuan", true));
     }
 
     @Test
     public void selectWhere_where_arg() {
-        SelectQuery query = SelectWhere.of(SelectFrom.of(PersonColumn.id, PersonColumn.country),
-                                           Where.and(EQ.compare(Func.LENGTH.apply(PersonColumn.name), var(4)),
-                                                     like(PersonColumn.country, var("%U%"))));
-        assertRows(runQuery(query),
-                   array(2, "US"),
-                   array(3, "RU"));
+        SelectQuery query = SelectWhere.from(PERSON_META)
+                .select(PersonColumn.id, PersonColumn.country)
+                .where(Where.and(EQ.compare(Func.LENGTH.apply(PersonColumn.name), var(4)),
+                                 like(PersonColumn.country, var("%U%"))))
+                .build();
         assertRepr(query, """
             SELECT id, country
             FROM person
             WHERE length(name) = ? AND country LIKE ?
             """);
         assertArgs(query, 4, "%U%");
+        assertRows(SQL_DB.runQuery(query),
+                   array(2, "US"),
+                   array(3, "RU"));
     }
 
     @Test
     public void groupBy_one_column_count() {
-        SelectQuery query = SelectGroupBy.of(PersonColumn.sex, Func.COUNT.apply(STAR));
-        assertRows(runQuery(query),
-                   array(FEMALE, 2),
-                   array(MALE, 2));
+        SelectQuery query = SelectGroupBy.from(PERSON_META)
+                .groupBy(PersonColumn.sex)
+                .aggregate(Func.COUNT.apply(STAR))
+                .build();
         assertRepr(query, """
             SELECT sex, count(*)
             FROM person
             GROUP BY sex
             """);
         assertNoArgs(query);
+        assertRows(SQL_DB.runQuery(query),
+                   array(FEMALE, 2),
+                   array(MALE, 2));
     }
 
     @Test
     public void groupBy_two_columns_max() {
-        SelectQuery query = SelectGroupBy.of(PersonColumn.sex, PersonColumn.name, Func.MAX.apply(PersonColumn.id));
-        assertRows(runQuery(query),
-                   array(FEMALE, "Kate", 1),
-                   array(MALE,   "Bill", 2),
-                   array(MALE,   "Ivan", 3),
-                   array(FEMALE, "Yuan", 4));
+        SelectQuery query = SelectGroupBy.from(PERSON_META)
+                .groupBy(PersonColumn.sex, PersonColumn.name)
+                .aggregate(Func.MAX.apply(PersonColumn.id))
+                .build();
         assertRepr(query, """
             SELECT sex, name, max(id)
             FROM person
             GROUP BY sex, name
             """);
         assertNoArgs(query);
-    }
-
-    private @NotNull List<DebugSql.Row> runQuery(SelectQuery query) {
-        return SQL_DB.runQuery(query.withTable(PERSON_META));
+        assertRows(SQL_DB.runQuery(query),
+                   array(FEMALE, "Kate", 1),
+                   array(MALE,   "Bill", 2),
+                   array(MALE,   "Ivan", 3),
+                   array(FEMALE, "Yuan", 4));
     }
 }

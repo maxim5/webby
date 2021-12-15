@@ -1,64 +1,42 @@
 package io.webby.orm.api.query;
 
-import com.google.common.collect.ImmutableList;
-import io.webby.util.collect.EasyIterables;
+import io.webby.orm.api.BaseTable;
+import io.webby.orm.api.TableMeta;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
-
-import java.util.List;
 
 import static io.webby.orm.api.query.Units.flattenArgsOf;
 import static io.webby.orm.api.query.Units.joinWithLines;
 
-public class SelectGroupBy extends UnitLazy implements SelectQuery {
-    private final ImmutableList<Named> terms;
-    private final FuncExpr aggregate;
-
+public class SelectGroupBy extends Unit implements SelectQuery {
     private final SelectFrom selectFrom;
     private final GroupBy groupBy;
     private final Where where;
     private final OrderBy orderBy;
 
-    public SelectGroupBy(@NotNull List<Named> terms, @NotNull FuncExpr aggregate,
-                         @Nullable Where where, @Nullable OrderBy orderBy) {
-        super(EasyIterables.concat(flattenArgsOf(terms), flattenArgsOf(aggregate, where, orderBy)));
-        assert aggregate.isAggregate() : "Non-aggregate function supplied: %s".formatted(aggregate);
-        this.terms = ImmutableList.copyOf(terms);
-        this.aggregate = aggregate;
-        this.selectFrom = new SelectFrom(ImmutableList.<Term>builder().addAll(terms).add(aggregate).build());
-        this.groupBy = new GroupBy(terms);
+    public SelectGroupBy(@NotNull SelectFrom selectFrom, @Nullable Where where, @NotNull GroupBy groupBy, @Nullable OrderBy orderBy) {
+        super(joinWithLines(selectFrom, where, groupBy, orderBy), flattenArgsOf(selectFrom, where, groupBy, orderBy));
+        this.selectFrom = selectFrom;
+        this.groupBy = groupBy;
         this.where = where;
         this.orderBy = orderBy;
     }
 
-    public SelectGroupBy(@NotNull List<Named> terms, @NotNull FuncExpr aggregate) {
-        this(terms, aggregate, null, null);
+    public static @NotNull SelectGroupByBuilder from(@NotNull String table) {
+        return new SelectGroupByBuilder(table);
     }
 
-    public static @NotNull SelectGroupBy of(@NotNull Named term, @NotNull FuncExpr aggregate) {
-        return new SelectGroupBy(List.of(term), aggregate);
+    public static @NotNull SelectGroupByBuilder from(@NotNull TableMeta meta) {
+        return from(meta.sqlTableName());
     }
 
-    public static @NotNull SelectGroupBy of(@NotNull Named term1, @NotNull Named term2, @NotNull FuncExpr aggregate) {
-        return new SelectGroupBy(List.of(term1, term2), aggregate);
+    public static @NotNull SelectGroupByBuilder from(@NotNull BaseTable<?> table) {
+        return from(table.meta());
     }
 
-    @Override
-    public @NotNull SelectGroupBy withTable(@NotNull String tableName) {
-        selectFrom.withTable(tableName);
-        return this;
-    }
 
     @Override
-    protected @NotNull String supplyRepr() {
-        return joinWithLines(selectFrom, where, groupBy, orderBy);
-    }
-
-    public @NotNull ImmutableList<Named> terms() {
-        return terms;
-    }
-
-    public @NotNull FuncExpr aggregate() {
-        return aggregate;
+    public int columnsNumber() {
+        return selectFrom.termsNumber();
     }
 }
