@@ -200,6 +200,7 @@ public class ModelTableCodegen extends BaseCodegen {
             return connector.engine();
         }
         
+        @Override
         public @Nonnull QueryRunner runner() {
             return connector.runner();
         }\n
@@ -550,6 +551,7 @@ public class ModelTableCodegen extends BaseCodegen {
         );
 
         appendCode("""
+        public static final String NAME = "$table_sql";
         public static final Class<?> KEY_CLASS = $KeyClass;
         public static final Class<?> ENTITY_CLASS = $ModelClass.class;
         public static final Function<Connector, $TableClass> INSTANTIATE = $TableClass::new;\n
