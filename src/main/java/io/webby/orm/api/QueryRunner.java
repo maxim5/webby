@@ -1,6 +1,9 @@
 package io.webby.orm.api;
 
+import com.google.common.collect.Lists;
 import com.google.errorprone.annotations.MustBeClosed;
+import io.webby.orm.api.query.SelectQuery;
+import io.webby.util.func.ThrowConsumer;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
@@ -14,7 +17,39 @@ public class QueryRunner {
         this.connection = connection;
     }
 
-    // Query
+    // Run SelectQuery
+
+    public void run(@NotNull SelectQuery query,
+                    @NotNull ThrowConsumer<ResultSet, SQLException> resultsConsumer) throws SQLException {
+        try (PreparedStatement statement = prepareQuery(query);
+             ResultSet resultSet = statement.executeQuery()) {
+            resultsConsumer.accept(resultSet);
+        }
+    }
+
+    public void forEach(@NotNull SelectQuery query,
+                        @NotNull ThrowConsumer<ResultSet, SQLException> rowConsumer) throws SQLException {
+        run(query, result -> {
+           while (result.next()) {
+                rowConsumer.accept(result);
+            }
+        });
+    }
+
+    @MustBeClosed
+    public <E> @NotNull ResultSetIterator<E> iterate(@NotNull SelectQuery query,
+                                                     @NotNull ResultSetIterator.Converter<E> converter) throws SQLException {
+        return ResultSetIterator.of(prepareQuery(query).executeQuery(), converter);
+    }
+
+    public <E> @NotNull List<E> fetchAll(@NotNull SelectQuery query,
+                                         @NotNull ResultSetIterator.Converter<E> converter) throws SQLException {
+        try (ResultSetIterator<E> iterator = iterate(query, converter)) {
+            return Lists.newArrayList(iterator);
+        }
+    }
+
+    // Prepare Query
 
     @MustBeClosed
     public @NotNull PreparedStatement prepareQuery(@NotNull String sql) throws SQLException {
@@ -83,7 +118,12 @@ public class QueryRunner {
         return prepared;
     }
 
-    // Updates
+    @MustBeClosed
+    public @NotNull PreparedStatement prepareQuery(@NotNull SelectQuery query) throws SQLException {
+        return prepareQuery(query.repr(), query.args());
+    }
+
+    // Run Updates
 
     public int runMultiUpdate(@NotNull String sql) throws SQLException {
         try (Statement statement = connection.createStatement()) {
