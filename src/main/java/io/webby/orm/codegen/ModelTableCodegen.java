@@ -315,10 +315,9 @@ public class ModelTableCodegen extends BaseCodegen {
             return;
         }
 
-        TableField primaryKey = requireNonNull(table.primaryKeyField());
         Map<String, String> context = EasyMaps.asMap(
-            "$KeyOfMethod", primaryKey.javaType() == int.class ? "intKeyOf" : primaryKey.javaType() == long.class ? "longKeyOf" : "keyOf",
-            "$pk_getter", primaryKey.javaGetter()
+            "$KeyOfMethod", table.isPrimaryKeyInt() ? "intKeyOf" : table.isPrimaryKeyLong() ? "longKeyOf" : "keyOf",
+            "$pk_getter", requireNonNull(table.primaryKeyField()).javaGetter()
         );
 
         appendCode("""
@@ -371,20 +370,22 @@ public class ModelTableCodegen extends BaseCodegen {
     private void insert() throws IOException {
         Snippet query = InsertMaker.makeAll(table);
         Map<String, String> context = Map.of(
+            "$model_id_assert", AssertModelIdMaker.makeAssert("$model_param", table).join(),
             "$sql_query_literal", wrapAsStringLiteral(query, INDENT2)
         );
         
         appendCode("""
         @Override
         public int insert(@Nonnull $ModelClass $model_param) {
-           String query = $sql_query_literal;
-           try {
-               return runner().runUpdate(query, valuesForInsert($model_param));
-           } catch (SQLException e) {
-               throw new QueryException("Failed to insert entity into $TableClass", query, $model_param, e);
-           }
+            $model_id_assert
+            String query = $sql_query_literal;
+            try {
+                return runner().runUpdate(query, valuesForInsert($model_param));
+            } catch (SQLException e) {
+                throw new QueryException("Failed to insert entity into $TableClass", query, $model_param, e);
+            }
         }\n
-        """, EasyMaps.merge(mainContext, context));
+        """, EasyMaps.merge(context, mainContext));
     }
 
     private void valuesForInsert() throws IOException {
@@ -406,9 +407,7 @@ public class ModelTableCodegen extends BaseCodegen {
     }
 
     private void insertAutoIncPk() throws IOException {
-        TableField field = table.primaryKeyField();
-        Class<?> javaType = field != null ? field.javaType() : null;
-        if (javaType != int.class && javaType != long.class) {
+        if (!table.isPrimaryKeyInt() && !table.isPrimaryKeyLong()) {
             return;
         }
 
@@ -431,9 +430,7 @@ public class ModelTableCodegen extends BaseCodegen {
     }
 
     private void valuesForInsertAutoIncPk() throws IOException {
-        TableField field = table.primaryKeyField();
-        Class<?> javaType = field != null ? field.javaType() : null;
-        if (javaType != int.class && javaType != long.class) {
+        if (!table.isPrimaryKeyInt() && !table.isPrimaryKeyLong()) {
             return;
         }
 

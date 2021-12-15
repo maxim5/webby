@@ -38,6 +38,16 @@ public record TableArch(@NotNull String sqlName,
         return fields().stream().filter(TableField::isPrimaryKey).findFirst().orElse(null);
     }
 
+    public boolean isPrimaryKeyInt() {
+        TableField field = primaryKeyField();
+        return field != null && field.javaType() == int.class;
+    }
+
+    public boolean isPrimaryKeyLong() {
+        TableField field = primaryKeyField();
+        return field != null && field.javaType() == long.class;
+    }
+
     public boolean hasForeignKeyField() {
         return fields().stream().anyMatch(TableField::isForeignKey);
     }
