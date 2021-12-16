@@ -10,6 +10,7 @@ import org.junit.jupiter.api.extension.RegisterExtension;
 import java.util.List;
 
 import static io.webby.orm.api.query.CompareType.*;
+import static io.webby.orm.api.query.Func.*;
 import static io.webby.orm.api.query.Shortcuts.*;
 import static io.webby.orm.testing.AssertSql.*;
 import static io.webby.orm.testing.PersonTableData.*;
@@ -84,7 +85,7 @@ public class SqlDbQueryTest {
         SelectQuery query = SelectWhere.from(PERSON_META)
                 .select(PersonColumn.sex, PersonColumn.country)
                 .where(Where.of(LT.compare(PersonColumn.height, num(200.0))))
-                .orderBy(OrderBy.of(OrderTerm.ofAsc(PersonColumn.sex), OrderTerm.ofDesc(PersonColumn.country)))
+                .orderBy(OrderBy.of(PersonColumn.sex.ordered(Order.ASC), PersonColumn.country.ordered(Order.DESC)))
                 .build();
         assertRepr(query, """
             SELECT sex, country
@@ -121,7 +122,7 @@ public class SqlDbQueryTest {
     public void selectWhere_where_arg() {
         SelectQuery query = SelectWhere.from(PERSON_META)
                 .select(PersonColumn.id, PersonColumn.country)
-                .where(Where.and(EQ.compare(Func.LENGTH.apply(PersonColumn.name), var(4)),
+                .where(Where.and(EQ.compare(LENGTH.apply(PersonColumn.name), var(4)),
                                  like(PersonColumn.country, var("%U%"))))
                 .build();
         assertRepr(query, """
@@ -139,7 +140,7 @@ public class SqlDbQueryTest {
     public void groupBy_one_column_count() {
         SelectQuery query = SelectGroupBy.from(PERSON_META)
                 .groupBy(PersonColumn.sex)
-                .aggregate(Func.COUNT.apply(STAR))
+                .aggregate(COUNT.apply(STAR))
                 .build();
         assertRepr(query, """
             SELECT sex, count(*)
@@ -156,7 +157,7 @@ public class SqlDbQueryTest {
     public void groupBy_one_column_avg() {
         SelectQuery query = SelectGroupBy.from(PERSON_META)
                 .groupBy(PersonColumn.sex)
-                .aggregate(Func.AVG.apply(PersonColumn.iq))
+                .aggregate(AVG.apply(PersonColumn.iq))
                 .build();
         assertRepr(query, """
             SELECT sex, avg(iq)
@@ -173,7 +174,7 @@ public class SqlDbQueryTest {
     public void groupBy_two_columns_max() {
         SelectQuery query = SelectGroupBy.from(PERSON_META)
                 .groupBy(PersonColumn.sex, PersonColumn.name)
-                .aggregate(Func.MAX.apply(PersonColumn.id))
+                .aggregate(MAX.apply(PersonColumn.id))
                 .build();
         assertRepr(query, """
             SELECT sex, name, max(id)
@@ -191,7 +192,7 @@ public class SqlDbQueryTest {
     @Test
     public void groupBy_where_order_by() {
         SelectQuery query = SelectGroupBy.from(PERSON_META)
-                .aggregate(Func.COUNT.apply(PersonColumn.id))
+                .aggregate(COUNT.apply(PersonColumn.id))
                 .where(Where.of(PersonColumn.sex.bool()))
                 .groupBy(PersonColumn.name)
                 .orderBy(OrderBy.of(PersonColumn.id, Order.ASC))
@@ -208,5 +209,4 @@ public class SqlDbQueryTest {
                           array("Kate", 1),
                           array("Yuan", 1));
     }
-
 }
