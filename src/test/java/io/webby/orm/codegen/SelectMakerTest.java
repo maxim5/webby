@@ -64,7 +64,7 @@ public class SelectMakerTest {
     }
 
     private @NotNull Map<Class<?>, TableArch> buildArch(@NotNull Class<?> @NotNull ...  models) {
-        ArchFactory factory = new ArchFactory(locator, Arrays.stream(models).map(ModelInput::new).toList());
+        ArchFactory factory = new ArchFactory(locator, Arrays.stream(models).map(ModelInput::of).toList());
         factory.build();
         return factory.getAllTables();
     }

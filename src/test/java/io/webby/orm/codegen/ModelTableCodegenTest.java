@@ -43,7 +43,7 @@ public class ModelTableCodegenTest {
 
     private void assertInvalidModel(@NotNull Class<?> ... models) {
         assertThrows(InvalidSqlModelException.class, () -> {
-            List<ModelInput> inputs = Arrays.stream(models).map(ModelInput::new).toList();
+            List<ModelInput> inputs = Arrays.stream(models).map(ModelInput::of).toList();
             ArchFactory factory = new ArchFactory(locator, inputs);
             factory.build();
         });

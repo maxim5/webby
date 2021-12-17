@@ -66,23 +66,21 @@ public class ArchFactory {
 
     @VisibleForTesting
     @NotNull TableArch buildShallowTable(@NotNull ModelInput input) {
-        String sqlName = Naming.modelSqlName(input.javaModelName());
-        String javaName = Naming.generatedJavaTableName(input.javaModelName());
-        return new TableArch(sqlName, javaName, input.javaModelName(), input.modelClass(), AtomicLazyList.ofUninitializedList());
+        return new TableArch(input.sqlName(), input.javaTableName(), input.modelClass(), AtomicLazyList.ofUninitializedList());
     }
 
     @VisibleForTesting
     void completeTable(@NotNull ModelInput input, @NotNull TableArch table) {
         ImmutableList<TableField> fields = JavaClassAnalyzer.getAllFieldsOrdered(input.modelClass()).stream()
-                .map(field -> buildTableField(table, field, input.javaModelName()))
+                .map(field -> buildTableField(table, field, input))
                 .collect(ImmutableList.toImmutableList());
         table.initializeOrDie(fields);
     }
 
     @VisibleForTesting
-    @NotNull TableField buildTableField(@NotNull TableArch table, @NotNull Field field, @NotNull String modelName) {
+    @NotNull TableField buildTableField(@NotNull TableArch table, @NotNull Field field, @NotNull ModelInput input) {
         Method getter = JavaClassAnalyzer.findGetterMethodOrDie(field);
-        boolean isPrimaryKey = isPrimaryKeyField(field.getName(), modelName);
+        boolean isPrimaryKey = isPrimaryKeyField(field.getName(), input);
 
         FieldInference inference = inferFieldArch(field);
         if (inference.isForeignTable()) {
@@ -242,8 +240,10 @@ public class ArchFactory {
         return new PojoArch(type, pojoFields);
     }
 
-    private static boolean isPrimaryKeyField(@NotNull String fieldName, @NotNull String modelName) {
-        return fieldName.equals("id") || fieldName.equals(Naming.camelUpperToLower(modelName) + "Id");
+    private static boolean isPrimaryKeyField(@NotNull String fieldName, @NotNull ModelInput input) {
+        return fieldName.equals("id") ||
+               fieldName.equals(Naming.idJavaName(input.modelClass())) ||
+               (input.modelInterface() != null && fieldName.equals(Naming.idJavaName(input.modelInterface())));
     }
 
     private static void validateFieldForPojo(@NotNull Field field) {

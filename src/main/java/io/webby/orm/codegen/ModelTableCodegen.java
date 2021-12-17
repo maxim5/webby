@@ -40,7 +40,7 @@ public class ModelTableCodegen extends BaseCodegen {
             "$TableClass", table.javaName(),
             "$table_sql", table.sqlName(),
             "$ModelClass", Naming.shortCanonicalJavaName(table.modelClass()),
-            "$model_param", table.modelName().toLowerCase()
+            "$model_param", Naming.variableJavaName(table.modelClass())
         );
 
         TableField primaryKeyField = table.primaryKeyField();

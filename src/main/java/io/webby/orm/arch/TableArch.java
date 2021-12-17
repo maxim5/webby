@@ -18,7 +18,6 @@ import static io.webby.orm.api.ReadFollow.FOLLOW_ONE_LEVEL;
 @Immutable
 public record TableArch(@NotNull String sqlName,
                         @NotNull String javaName,
-                        @NotNull String modelName,
                         @NotNull Class<?> modelClass,
                         @NotNull AtomicLazyList<TableField> fieldsRef) implements JavaNameHolder, WithColumns, WithPrefixedColumns {
     public @NotNull ImmutableList<TableField> fields() {

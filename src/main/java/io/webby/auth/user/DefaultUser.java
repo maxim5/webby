@@ -1,9 +1,11 @@
 package io.webby.auth.user;
 
+import io.webby.orm.api.annotate.Model;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.Objects;
 
+@Model(exposeAs = User.class)
 public class DefaultUser implements User {
     private long userId;
     private final UserAccess access;

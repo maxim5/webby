@@ -43,6 +43,14 @@ public class Naming {
         return type.getSimpleName();
     }
 
+    public static @NotNull String variableJavaName(@NotNull Class<?> type) {
+        return camelUpperToLower(type.getSimpleName());
+    }
+
+    public static @NotNull String idJavaName(@NotNull Class<?> type) {
+        return Naming.camelUpperToLower(type.getSimpleName()) + "Id";
+    }
+
     public static @NotNull String defaultAdapterName(@NotNull Class<?> model) {
         assert !model.isAnonymousClass() : "Invalid model class: %s".formatted(model);
         if (model.isMemberClass()) {
