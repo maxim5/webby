@@ -18,10 +18,7 @@ import java.lang.reflect.Field;
 import java.lang.reflect.Method;
 import java.lang.reflect.ParameterizedType;
 import java.lang.reflect.Type;
-import java.util.Collection;
-import java.util.LinkedHashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 import static io.webby.orm.arch.InvalidSqlModelException.assure;
 import static io.webby.orm.arch.InvalidSqlModelException.failIf;
@@ -105,27 +102,29 @@ public class ArchFactory {
 
     private @NotNull FieldInference inferFieldArch(@NotNull Field field) {
         String fieldName = field.getName();
+        String fieldSqlName = Naming.fieldSqlName(field);
         Class<?> fieldType = field.getType();
 
         JdbcType jdbcType = JdbcType.findByMatchingNativeType(fieldType);
         if (jdbcType != null) {
-            return FieldInference.ofNativeColumn(new Column(Naming.fieldSqlName(fieldName), new ColumnType(jdbcType)));
+            return FieldInference.ofNativeColumn(new Column(fieldSqlName, new ColumnType(jdbcType)));
         }
 
         Pair<TableArch, JdbcType> foreignTableInfo = findForeignTableInfo(field);
         if (foreignTableInfo != null) {
-            Column column = new Column(Naming.fieldSqlName(fieldName, "id"), new ColumnType(foreignTableInfo.second()));
+            String foreignIdSqlName = Naming.annotatedSqlName(field).orElseGet(() -> Naming.concatSqlNames(fieldSqlName, "id"));
+            Column column = new Column(foreignIdSqlName, new ColumnType(foreignTableInfo.second()));
             return FieldInference.ofForeignKey(column, foreignTableInfo.first());
         }
 
         Class<?> adapterClass = adaptersScanner.locateAdapterClass(fieldType);
         if (adapterClass != null) {
             AdapterApi adapterApi = AdapterApi.ofClass(adapterClass);
-            List<Column> columns = adapterApi.adapterColumns(fieldName);
+            List<Column> columns = adapterApi.adapterColumns(fieldSqlName);
             return FieldInference.ofColumns(columns, adapterApi);
         }
 
-        PojoArch pojo = buildArchForPojoField(field).reattachedTo(PojoParent.ofTerminal(fieldName));
+        PojoArch pojo = buildArchForPojoField(field).reattachedTo(PojoParent.ofTerminal(fieldName, fieldSqlName));
         return FieldInference.ofColumns(pojo.columns(), AdapterApi.ofSignature(pojo));
     }
 

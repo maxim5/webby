@@ -1,6 +1,7 @@
 package io.webby.orm.adapter.time;
 
 import io.webby.orm.adapter.JdbcMultiValueAdapter;
+import io.webby.orm.api.annotate.Sql;
 import org.jetbrains.annotations.NotNull;
 
 import java.sql.Time;
@@ -16,7 +17,7 @@ public class OffsetTimeJdbcAdapter implements JdbcMultiValueAdapter<OffsetTime> 
         return 2;
     }
 
-    public OffsetTime createInstance(Time time, int zoneOffsetSeconds) {
+    public OffsetTime createInstance(@Sql("time") Time time, @Sql("zone_offset_seconds") int zoneOffsetSeconds) {
         LocalTime localTime = LocalTimeJdbcAdapter.ADAPTER.createInstance(time);
         ZoneOffset zoneOffset = ZoneOffsetJdbcAdapter.ADAPTER.createInstance(zoneOffsetSeconds);
         return OffsetTime.of(localTime, zoneOffset);

@@ -35,14 +35,12 @@ public abstract class PojoField {
 
     public @NotNull String fullSqlName() {
         return lazyNameRef.lazyGet(() -> {
-            Pair<Optional<String>, List<PojoField>> fullPath = fullPath();
-            return Streams.concat(fullPath.first().stream(), fullPath.second().stream().map(PojoField::javaName))
-                    .map(Naming::fieldSqlName)
-                    .collect(Collectors.joining("_"));
+            Pair<Optional<String>, List<String>> fullPath = fullSqlPath();
+            return Streams.concat(fullPath.first().stream(), fullPath.second().stream()).collect(Collectors.joining("_"));
         });
     }
 
-    private @NotNull Pair<Optional<String>, List<PojoField>> fullPath() {
+    private @NotNull Pair<Optional<String>, List<String>> fullSqlPath() {
         LinkedList<PojoField> parentFields = new LinkedList<>();
         PojoField current = this;
         while (true) {
@@ -50,7 +48,8 @@ public abstract class PojoField {
             PojoParent parent = current.parent;
             if (parent.isTerminal()) {
                 Collections.reverse(parentFields);
-                return Pair.of(parent.terminalFieldNameOrDie(), parentFields);
+                return Pair.of(parent.terminalSqlNameOrDie(),
+                               parentFields.stream().map(field -> field.field.sqlName()).toList());
             } else {
                 current = parent.pojoFieldOrDie();
             }

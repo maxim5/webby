@@ -14,14 +14,15 @@ import static java.util.Objects.requireNonNull;
 public class PojoParent {
     public static final PojoParent DETACHED = new PojoParent(OneOf.ofFirst(Optional.empty()));
 
-    private final OneOf<Optional<String>, DelayedInitLazy<PojoField>> parent;
+    private final OneOf<Optional<TerminalData>, DelayedInitLazy<PojoField>> parent;
 
-    private PojoParent(@NotNull OneOf<Optional<String>, DelayedInitLazy<PojoField>> parent) {
+    private PojoParent(@NotNull OneOf<Optional<TerminalData>, DelayedInitLazy<PojoField>> parent) {
         this.parent = parent;
     }
 
-    public static @NotNull PojoParent ofTerminal(@NotNull String fieldName) {
-        return new PojoParent(OneOf.ofFirst(Optional.of(fieldName)));
+    public static @NotNull PojoParent ofTerminal(@NotNull String fieldName, @NotNull String sqlName) {
+        TerminalData data = new TerminalData(fieldName, sqlName);
+        return new PojoParent(OneOf.ofFirst(Optional.of(data)));
     }
 
     /*package*/ static @NotNull PojoParent ofUninitializedField() {
@@ -37,8 +38,8 @@ public class PojoParent {
         return parent.hasFirst();
     }
 
-    public @NotNull Optional<String> terminalFieldNameOrDie() {
-        return requireNonNull(parent.first());
+    public @NotNull Optional<String> terminalSqlNameOrDie() {
+        return requireNonNull(parent.first()).map(TerminalData::sqlName);
     }
 
     public @NotNull PojoField pojoFieldOrDie() {
@@ -49,4 +50,6 @@ public class PojoParent {
     public String toString() {
         return "PojoParent%s".formatted(parent);
     }
+
+    private record TerminalData(@NotNull String fieldName, @NotNull String sqlName) {}
 }

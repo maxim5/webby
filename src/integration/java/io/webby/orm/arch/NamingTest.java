@@ -42,13 +42,6 @@ public class NamingTest {
 
         assertEquals("foo_bar", Naming.fieldSqlName("foo_bar"));
         assertEquals("foo_bar", Naming.fieldSqlName("foo__bar"));
-
-        assertEquals("foo_bar", Naming.fieldSqlName("Foo", "Bar"));
-        assertEquals("foo_bar", Naming.fieldSqlName("foo", "bar"));
-        assertEquals("foo_bar", Naming.fieldSqlName("_foo_", "_Bar_"));
-
-        assertEquals("foo_", Naming.fieldSqlName("Foo", ""));
-        assertEquals("foo_", Naming.fieldSqlName("Foo", "_"));
     }
 
     @Test
@@ -65,6 +58,17 @@ public class NamingTest {
 
         assertEquals("foo_bar", Naming.modelSqlName("foo_bar"));
         assertEquals("foo_bar", Naming.modelSqlName("foo__bar"));
+    }
+
+    @Test
+    public void concatSqlNames_simple() {
+        assertEquals("foo_bar", Naming.concatSqlNames("foo", "bar"));
+        assertEquals("foo_bar", Naming.concatSqlNames("foo_", "_bar"));
+        assertEquals("foo_bar", Naming.concatSqlNames("_foo_", "_bar_"));
+        assertEquals("foo_", Naming.concatSqlNames("foo", ""));
+        assertEquals("foo_", Naming.concatSqlNames("foo", "_"));
+        assertEquals("_bar", Naming.concatSqlNames("", "bar"));
+        assertEquals("_bar", Naming.concatSqlNames("_", "bar"));
     }
 
     @Test

@@ -409,7 +409,6 @@ public class SqlSchemaMakerTest {
             """);
     }
 
-    // TODO: fix sql names
     @Test
     public void create_table_timing_model() {
         assertThat(makeCreateTableQuery(Engine.SQLite, TimingModelTable.class)).isEqualTo("""
@@ -424,10 +423,10 @@ public class SqlSchemaMakerTest {
                 local_time INTEGER,
                 local_date_time INTEGER,
                 zoned_date_time INTEGER,
-                offset_time_arg0 INTEGER,
-                offset_time_arg1 INTEGER,
-                offset_date_time_arg0 INTEGER,
-                offset_date_time_arg1 INTEGER,
+                offset_time_time INTEGER,
+                offset_time_zone_offset_seconds INTEGER,
+                offset_date_time_timestamp INTEGER,
+                offset_date_time_zone_offset_seconds INTEGER,
                 duration INTEGER,
                 period VARCHAR,
                 zone_offset INTEGER
@@ -446,10 +445,10 @@ public class SqlSchemaMakerTest {
                 local_time TIME,
                 local_date_time TIMESTAMP,
                 zoned_date_time TIMESTAMP,
-                offset_time_arg0 TIME,
-                offset_time_arg1 INTEGER,
-                offset_date_time_arg0 TIMESTAMP,
-                offset_date_time_arg1 INTEGER,
+                offset_time_time TIME,
+                offset_time_zone_offset_seconds INTEGER,
+                offset_date_time_timestamp TIMESTAMP,
+                offset_date_time_zone_offset_seconds INTEGER,
                 duration BIGINT,
                 period VARCHAR,
                 zone_offset INTEGER
@@ -468,10 +467,10 @@ public class SqlSchemaMakerTest {
                 local_time TIME,
                 local_date_time TIMESTAMP(3),
                 zoned_date_time TIMESTAMP(3),
-                offset_time_arg0 TIME,
-                offset_time_arg1 INTEGER,
-                offset_date_time_arg0 TIMESTAMP(3),
-                offset_date_time_arg1 INTEGER,
+                offset_time_time TIME,
+                offset_time_zone_offset_seconds INTEGER,
+                offset_date_time_timestamp TIMESTAMP(3),
+                offset_date_time_zone_offset_seconds INTEGER,
                 duration BIGINT,
                 period VARCHAR(4096),
                 zone_offset INTEGER

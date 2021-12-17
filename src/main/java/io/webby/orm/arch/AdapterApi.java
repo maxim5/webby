@@ -62,26 +62,26 @@ public class AdapterApi {
         return "%s.ADAPTER".formatted(pojoArch.adapterName());
     }
 
-    public @NotNull List<Column> adapterColumns(@NotNull String fieldName) {
-        return oneOf.mapToObj(klass -> classToAdapterColumns(klass, fieldName), pojo -> pojoToColumns(pojo, fieldName));
+    public @NotNull List<Column> adapterColumns(@NotNull String fieldSqlName) {
+        return oneOf.mapToObj(klass -> classToAdapterColumns(klass, fieldSqlName), pojo -> pojoToColumns(pojo, fieldSqlName));
     }
 
     public int adapterColumnsNumber() {
         return oneOf.mapToInt(klass -> getCreationParameters(klass).length, WithColumns::columnsNumber);
     }
 
-    private static @NotNull List<Column> classToAdapterColumns(@NotNull Class<?> klass, @NotNull String fieldName) {
+    private static @NotNull List<Column> classToAdapterColumns(@NotNull Class<?> klass, @NotNull String fieldSqlName) {
         Parameter[] parameters = getCreationParameters(klass);
         if (parameters.length == 1) {
             JdbcType paramType = JdbcType.findByMatchingNativeType(parameters[0].getType());
             failIf(paramType == null, "JDBC adapter `%s` has incompatible parameters: %s", CREATE_INSTANCE, klass);
-            Column column = new Column(Naming.fieldSqlName(fieldName), new ColumnType(paramType));
+            Column column = new Column(fieldSqlName, new ColumnType(paramType));
             return List.of(column);
         } else {
             return BiStream.from(Arrays.stream(parameters),
-                                 Parameter::getName,
+                                 param -> param,
                                  param -> JdbcType.findByMatchingNativeType(param.getType()))
-                    .mapKeys(name -> Naming.fieldSqlName(fieldName, name))
+                    .mapKeys(param -> Naming.concatSqlNames(fieldSqlName, Naming.fieldSqlName(param)))
                     .mapValues(ColumnType::new)
                     .mapToObj(Column::new)
                     .toList();
@@ -89,7 +89,7 @@ public class AdapterApi {
     }
 
     private static @NotNull List<Column> pojoToColumns(@NotNull PojoArch pojo, @NotNull String fieldName) {
-        return pojo.reattachedTo(PojoParent.ofTerminal(fieldName)).columns();
+        return pojo.reattachedTo(PojoParent.ofTerminal(fieldName, Naming.fieldSqlName(fieldName))).columns();
     }
 
     private static @NotNull Parameter[] getCreationParameters(@NotNull Class<?> adapterClass) {
