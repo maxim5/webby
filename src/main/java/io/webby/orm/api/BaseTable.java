@@ -7,6 +7,7 @@ import io.webby.orm.api.query.*;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.List;
+import java.util.function.Consumer;
 
 public interface BaseTable<E> extends Iterable<E> {
     @NotNull Engine engine();
@@ -37,6 +38,19 @@ public interface BaseTable<E> extends Iterable<E> {
 
     @MustBeClosed
     @NotNull ResultSetIterator<E> iterator(@NotNull Filter filter);
+
+    @Override
+    default void forEach(@NotNull Consumer<? super E> action) {
+        try (ResultSetIterator<E> iterator = iterator()) {
+            iterator.forEachRemaining(action);
+        }
+    }
+
+    default void forEach(@NotNull Filter filter, @NotNull Consumer<? super E> action) {
+        try (ResultSetIterator<E> iterator = iterator(filter)) {
+            iterator.forEachRemaining(action);
+        }
+    }
 
     default @NotNull List<E> fetchAll() {
         try (ResultSetIterator<E> iterator = iterator()) {
