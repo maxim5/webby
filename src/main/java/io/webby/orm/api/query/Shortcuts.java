@@ -5,6 +5,10 @@ import org.jetbrains.annotations.NotNull;
 public class Shortcuts {
     public static final Term NULL = new HardcodedTerm("NULL", TermType.WILDCARD);
     public static final Term STAR = new HardcodedTerm("*", TermType.WILDCARD);
+
+    public static final BoolTerm TRUE = new HardcodedBoolTerm("TRUE");
+    public static final BoolTerm FALSE = new HardcodedBoolTerm("FALSE");
+
     public static final Term ZERO = num(0);
     public static final Term ONE = num(1);
 

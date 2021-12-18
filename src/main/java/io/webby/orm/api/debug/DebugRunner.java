@@ -1,7 +1,10 @@
 package io.webby.orm.api.debug;
 
 import com.google.errorprone.annotations.CanIgnoreReturnValue;
+import io.webby.orm.api.BaseTable;
 import io.webby.orm.api.Connector;
+import io.webby.orm.api.Engine;
+import io.webby.orm.api.QueryRunner;
 import io.webby.orm.api.query.SelectQuery;
 import io.webby.util.base.Rethrow;
 import org.jetbrains.annotations.NotNull;
@@ -50,5 +53,26 @@ public interface DebugRunner extends Connector {
 
     static @NotNull DebugRunner of(@NotNull Connection connection) {
         return () -> connection;
+    }
+
+    static @NotNull DebugRunner of(@NotNull QueryRunner runner) {
+        return new DebugRunner() {
+            @Override
+            public @NotNull QueryRunner runner() {
+                return runner;
+            }
+            @Override
+            public @NotNull Connection connection() {
+                throw new UnsupportedOperationException("Connection is unknown. Provided runner: " + runner);
+            }
+            @Override
+            public @NotNull Engine engine() {
+                return Engine.Unknown;
+            }
+        };
+    }
+
+    static @NotNull DebugRunner of(@NotNull BaseTable<?> table) {
+        return of(table.runner());
     }
 }
