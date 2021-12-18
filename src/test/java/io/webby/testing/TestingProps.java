@@ -5,12 +5,26 @@ import io.webby.db.sql.SqlSettings;
 import io.webby.orm.api.Engine;
 import org.jetbrains.annotations.NotNull;
 
+import java.util.function.Predicate;
 import java.util.logging.Level;
+
+import static org.junit.Assume.assumeTrue;
 
 public class TestingProps {
     private static final FluentLogger log = FluentLogger.forEnclosingClass();
 
-    public static @NotNull SqlSettings parseSqlSettings() {
+    public static void assumePropIfSet(@NotNull String name, @NotNull String expected) {
+        assumePropIfSet(name, expected::equals);
+    }
+
+    public static void assumePropIfSet(@NotNull String name, @NotNull Predicate<String> condition) {
+        String value = System.getProperty(name);
+        assumeTrue("Skipping the test because the property is set and does not match test assumption. " +
+                   "Provided prop: %s=`%s`".formatted(name, value),
+                   value == null || condition.test(value));
+    }
+
+    public static @NotNull SqlSettings propsSqlSettings() {
         String engineValue = System.getProperty("test.sql.engine");
         if (engineValue != null) {
             Engine engine = Engine.fromJdbcType(engineValue.toLowerCase());
