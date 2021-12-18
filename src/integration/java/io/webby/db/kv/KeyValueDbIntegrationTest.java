@@ -18,6 +18,7 @@ import io.webby.db.kv.paldb.PalDbImpl;
 import io.webby.db.model.BlobKv;
 import io.webby.testing.Mocking;
 import io.webby.testing.Testing;
+import io.webby.testing.TestingProps;
 import io.webby.testing.ext.CloseAllExtension;
 import io.webby.testing.ext.EmbeddedRedisExtension;
 import io.webby.testing.ext.SqlDbSetupExtension;
@@ -403,6 +404,8 @@ public class KeyValueDbIntegrationTest {
     }
 
     private static @NotNull Injector setup(@NotNull StorageType storageType) {
+        TestingProps.assumePropIfSet("test.kv.only_type", storageType.name());
+
         AppSettings settings = Testing.defaultAppSettings();
         settings.modelFilter().setCommonPackageOf(Session.class, DefaultUser.class, BlobKv.class);
         settings.storageSettings()
