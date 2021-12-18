@@ -77,7 +77,9 @@ public class ModelTableCodegen extends BaseCodegen {
         valuesForUpdateByPk();
         updateWhere();
         valuesForUpdateWhere();
+
         deleteByPk();
+        deleteWhere();
 
         fromRow();
 
@@ -470,10 +472,10 @@ public class ModelTableCodegen extends BaseCodegen {
             try {
                 return runner().runUpdate(query, args);
             } catch (SQLException e) {
-                throw new QueryException("Failed to update entity in $TableClass by a filter", query, args, e);
+                throw new QueryException("Failed to update entities in $TableClass by a filter", query, args, e);
             }
         }\n
-        """, EasyMaps.merge(mainContext, pkContext, context));
+        """, EasyMaps.merge(mainContext, context));
     }
 
     private void valuesForUpdateWhere() throws IOException {
@@ -580,6 +582,26 @@ public class ModelTableCodegen extends BaseCodegen {
            }
         }\n
         """, EasyMaps.merge(context, mainContext, pkContext));
+    }
+
+    private void deleteWhere() throws IOException {
+        Snippet query = new Snippet().withLines(DeleteMaker.make(table));
+        Map<String, String> context = EasyMaps.asMap(
+            "$sql_query_literal", wrapAsTextBlock(query, INDENT2),
+            "$pk_object", toKeyObject(requireNonNull(table.primaryKeyField()), "$pk_name")
+        );
+
+        appendCode("""
+        @Override
+        public int deleteWhere(@Nonnull Where where) {
+            String query = $sql_query_literal + where.repr();
+            try {
+               return runner().runUpdate(query, where.args());
+           } catch (SQLException e) {
+               throw new QueryException("Failed to delete entities in $TableClass by a filter", query, where.args(), e);
+           }
+        }\n
+        """, EasyMaps.merge(context, mainContext));
     }
 
     private void fromRow() throws IOException {

@@ -82,5 +82,8 @@ public interface BaseTable<E> extends Iterable<E> {
     @CanIgnoreReturnValue
     int updateWhere(@NotNull E entity, @NotNull Where where);
 
+    @CanIgnoreReturnValue
+    int deleteWhere(@NotNull Where where);
+
     @NotNull TableMeta meta();
 }

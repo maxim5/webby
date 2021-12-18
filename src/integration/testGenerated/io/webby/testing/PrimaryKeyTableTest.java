@@ -155,6 +155,29 @@ public interface PrimaryKeyTableTest<K, E, T extends TableObj<K, E>> extends Bas
         assertThat(table().fetchAll()).isEmpty();
     }
 
+        @Test
+    default void delete_where_true() {
+        assumeKeys(1);
+        table().insert(createEntity(keys()[0], 0));
+        assertEquals(1, table().deleteWhere(Where.of(Shortcuts.TRUE)));
+
+        assertTableCount(0);
+        assertNull(table().getByPkOrNull(keys()[0]));
+        assertThat(table().fetchAll()).isEmpty();
+    }
+
+    @Test
+    default void delete_where_false() {
+        assumeKeys(1);
+        E entity = createEntity(keys()[0], 0);
+        table().insert(entity);
+        assertEquals(0, table().deleteWhere(Where.of(Shortcuts.FALSE)));
+
+        assertTableCount(1);
+        assertEquals(entity, table().getByPkOrNull(keys()[0]));
+        assertThat(table().fetchAll()).containsExactly(entity);
+    }
+
     @Test
     default void fetch_page() {
         assumeKeys(2);
