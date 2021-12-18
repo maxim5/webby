@@ -89,9 +89,9 @@ public class QueryRunner {
 
     @MustBeClosed
     public @NotNull PreparedStatement prepareQuery(@NotNull String sql,
-                                                   @NotNull Object param1,
-                                                   @NotNull Object param2,
-                                                   @NotNull Object param3) throws SQLException {
+                                                   @Nullable Object param1,
+                                                   @Nullable Object param2,
+                                                   @Nullable Object param3) throws SQLException {
         PreparedStatement prepared = connection.prepareStatement(sql);
         prepared.setObject(1, param1);
         prepared.setObject(2, param2);
@@ -138,30 +138,25 @@ public class QueryRunner {
     }
 
     public int runUpdate(@NotNull String sql, @Nullable Object param) throws SQLException {
-        try (PreparedStatement prepared = connection.prepareStatement(sql)) {
-            prepared.setObject(1, param);
+        try (PreparedStatement prepared = prepareQuery(sql, param)) {
             return prepared.executeUpdate();
         }
     }
 
     public int runUpdate(@NotNull String sql, int param) throws SQLException {
-        try (PreparedStatement prepared = connection.prepareStatement(sql)) {
-            prepared.setInt(1, param);
+        try (PreparedStatement prepared = prepareQuery(sql, param)) {
             return prepared.executeUpdate();
         }
     }
 
     public int runUpdate(@NotNull String sql, long param) throws SQLException {
-        try (PreparedStatement prepared = connection.prepareStatement(sql)) {
-            prepared.setLong(1, param);
+        try (PreparedStatement prepared = prepareQuery(sql, param)) {
             return prepared.executeUpdate();
         }
     }
 
     public int runUpdate(@NotNull String sql, @Nullable Object param1, @Nullable Object param2) throws SQLException {
-        try (PreparedStatement prepared = connection.prepareStatement(sql)) {
-            prepared.setObject(1, param1);
-            prepared.setObject(2, param2);
+        try (PreparedStatement prepared = prepareQuery(sql, param1, param2)) {
             return prepared.executeUpdate();
         }
     }
@@ -170,19 +165,19 @@ public class QueryRunner {
                          @Nullable Object param1,
                          @Nullable Object param2,
                          @Nullable Object param3) throws SQLException {
-        try (PreparedStatement prepared = connection.prepareStatement(sql)) {
-            prepared.setObject(1, param1);
-            prepared.setObject(2, param2);
-            prepared.setObject(3, param3);
+        try (PreparedStatement prepared = prepareQuery(sql, param1, param2, param3)) {
             return prepared.executeUpdate();
         }
     }
 
     public int runUpdate(@NotNull String sql, @Nullable Object @NotNull ... params) throws SQLException {
-        try (PreparedStatement prepared = connection.prepareStatement(sql)) {
-            for (int i = 0; i < params.length; i++) {
-                prepared.setObject(i + 1, params[i]);
-            }
+        try (PreparedStatement prepared = prepareQuery(sql, params)) {
+            return prepared.executeUpdate();
+        }
+    }
+
+    public int runUpdate(@NotNull String sql, @NotNull List<Object> params) throws SQLException {
+        try (PreparedStatement prepared = prepareQuery(sql, params)) {
             return prepared.executeUpdate();
         }
     }
