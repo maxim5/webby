@@ -8,12 +8,12 @@ public class Shortcuts {
     public static final Term ZERO = num(0);
     public static final Term ONE = num(1);
 
-    public static @NotNull NumberLiteral num(@NotNull Number number) {
-        return new NumberLiteral(number);
+    public static @NotNull NumberLiteral num(@NotNull Number value) {
+        return new NumberLiteral(value);
     }
 
-    public static @NotNull StringLiteral literal(@NotNull String literal) {
-        return new StringLiteral(literal);
+    public static @NotNull StringLiteral literal(@NotNull String value) {
+        return new StringLiteral(value);
     }
 
     public static @NotNull Variable var(@NotNull Number value) {
