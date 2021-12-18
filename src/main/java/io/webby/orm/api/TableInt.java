@@ -46,7 +46,7 @@ public interface TableInt<E> extends TableObj<Integer, E> {
     }
 
     @CanIgnoreReturnValue
-    int deleteByPk(int key) ;
+    int deleteByPk(int key);
 
     @CanIgnoreReturnValue
     default int deleteByPk(@NotNull Integer key) {

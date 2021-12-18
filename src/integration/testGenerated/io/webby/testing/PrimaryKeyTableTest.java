@@ -1,9 +1,11 @@
 package io.webby.testing;
 
 import io.webby.orm.api.Page;
+import io.webby.orm.api.TableMeta;
 import io.webby.orm.api.TableObj;
 import io.webby.orm.api.query.CompositeFilter;
 import io.webby.orm.api.query.Pagination;
+import io.webby.orm.api.query.Shortcuts;
 import io.webby.orm.api.query.Where;
 import io.webby.util.collect.EasyIterables;
 import org.jetbrains.annotations.NotNull;
@@ -54,7 +56,7 @@ public interface PrimaryKeyTableTest<K, E, T extends TableObj<K, E>> extends Bas
     }
 
     @Test
-    default void update_entity() {
+    default void update_by_pk() {
         assumeKeys(2);
         table().insert(createEntity(keys()[0], 0));
         E entity = createEntity(keys()[0], 1);
@@ -67,7 +69,7 @@ public interface PrimaryKeyTableTest<K, E, T extends TableObj<K, E>> extends Bas
     }
 
     @Test
-    default void update_missing_entity() {
+    default void update_by_pk_missing_entity() {
         assumeKeys(1);
         E entity = createEntity(keys()[0]);
         assertEquals(0, table().updateByPk(entity));
@@ -78,7 +80,7 @@ public interface PrimaryKeyTableTest<K, E, T extends TableObj<K, E>> extends Bas
     }
 
     @Test
-    default void update_or_insert_new_entity() {
+    default void update_by_pk_or_insert_new_entity() {
         assumeKeys(2);
         E entity = createEntity(keys()[0]);
         assertEquals(1, table().updateByPkOrInsert(entity));
@@ -90,7 +92,7 @@ public interface PrimaryKeyTableTest<K, E, T extends TableObj<K, E>> extends Bas
     }
 
     @Test
-    default void update_or_insert_existing_entity() {
+    default void update_by_pk_or_insert_existing_entity() {
         assumeKeys(2);
         table().insert(createEntity(keys()[0], 0));
         E entity = createEntity(keys()[0], 1);
@@ -103,7 +105,37 @@ public interface PrimaryKeyTableTest<K, E, T extends TableObj<K, E>> extends Bas
     }
 
     @Test
-    default void delete_entity() {
+    default void update_where_true() {
+        assumeKeys(2);
+        E entity = createEntity(keys()[0], 0);
+        table().insert(entity);
+
+        E newEntity = createEntity(keys()[0], 1);
+        assertEquals(1, table().updateWhere(newEntity, Where.of(Shortcuts.TRUE)));
+
+        assertTableCount(1);
+        assertEquals(newEntity, table().getByPkOrNull(keys()[0]));
+        assertNull(table().getByPkOrNull(keys()[1]));
+        assertThat(table().fetchAll()).containsExactly(newEntity);
+    }
+
+    @Test
+    default void update_where_false() {
+        assumeKeys(2);
+        E entity = createEntity(keys()[0], 0);
+        table().insert(entity);
+
+        E newEntity = createEntity(keys()[0], 1);
+        assertEquals(0, table().updateWhere(newEntity, Where.of(Shortcuts.FALSE)));
+
+        assertTableCount(1);
+        assertEquals(entity, table().getByPkOrNull(keys()[0]));
+        assertNull(table().getByPkOrNull(keys()[1]));
+        assertThat(table().fetchAll()).containsExactly(entity);
+    }
+
+    @Test
+    default void delete_by_pk() {
         assumeKeys(1);
         table().insert(createEntity(keys()[0], 0));
         assertEquals(1, table().deleteByPk(keys()[0]));
@@ -114,7 +146,7 @@ public interface PrimaryKeyTableTest<K, E, T extends TableObj<K, E>> extends Bas
     }
 
     @Test
-    default void delete_missing_entity() {
+    default void delete_by_pk_missing_entity() {
         assumeKeys(1);
         assertEquals(0, table().deleteByPk(keys()[0]));
 
@@ -174,5 +206,12 @@ public interface PrimaryKeyTableTest<K, E, T extends TableObj<K, E>> extends Bas
 
         assertEquals(0, table().count(Where.hardcoded("0 = 1")));
         assertFalse(table().exists(Where.hardcoded("0 = 1")));
+    }
+
+    default @NotNull String findPkColumnOrDie() {
+        return table().meta().sqlColumns().stream()
+                .filter(TableMeta.ColumnMeta::isPrimaryKey)
+                .map(TableMeta.ColumnMeta::name)
+                .findFirst().orElseThrow();
     }
 }

@@ -74,7 +74,9 @@ public class ModelTableCodegen extends BaseCodegen {
         valuesForInsertAutoIncPk();
 
         updateByPk();
-        valuesForUpdate();
+        valuesForUpdateByPk();
+        updateWhere();
+        valuesForUpdateWhere();
         deleteByPk();
 
         fromRow();
@@ -421,9 +423,9 @@ public class ModelTableCodegen extends BaseCodegen {
         public $pk_type insertAutoIncPk(@Nonnull $ModelClass $model_param) {
            String query = $sql_query_literal;
            try {
-               return ($pk_type) runner().runAutoIncUpdate(query, valuesForInsertAutoIncPk($model_param)).lastId();
+                return ($pk_type) runner().runAutoIncUpdate(query, valuesForInsertAutoIncPk($model_param)).lastId();
            } catch (SQLException e) {
-               throw new QueryException("Failed to insert new entity into $TableClass", query, $model_param, e);
+                throw new QueryException("Failed to insert new entity into $TableClass", query, $model_param, e);
            }
         }\n
         """, EasyMaps.merge(mainContext, pkContext, context));
@@ -452,6 +454,59 @@ public class ModelTableCodegen extends BaseCodegen {
         """, EasyMaps.merge(context, mainContext));
     }
 
+    private void updateWhere() throws IOException {
+        Snippet query = new Snippet()
+                .withLines(UpdateMaker.make(table, table.columns(Predicate.not(TableField::isPrimaryKey))));
+
+        Map<String, String> context = EasyMaps.asMap(
+            "$sql_query_literal", wrapAsStringLiteral(query, INDENT2)
+        );
+
+        appendCode("""
+        @Override
+        public int updateWhere(@Nonnull $ModelClass $model_param, @Nonnull Where where) {
+            String query = $sql_query_literal + where.repr();
+            List<Object> args = valuesForUpdateWhere($model_param, where);
+            try {
+                return runner().runUpdate(query, args);
+            } catch (SQLException e) {
+                throw new QueryException("Failed to update entity in $TableClass by a filter", query, args, e);
+            }
+        }\n
+        """, EasyMaps.merge(mainContext, pkContext, context));
+    }
+
+    private void valuesForUpdateWhere() throws IOException {
+        List<TableField> nonPrimary = table.fields().stream().filter(Predicate.not(TableField::isPrimaryKey)).toList();
+        ValuesArrayMaker maker = new ValuesArrayMaker("$model_param", nonPrimary);
+        Map<String, String> context = Map.of(
+            "$array_init", maker.makeInitValues().join(linesJoiner(INDENT2)),
+            "$array_convert", maker.makeConvertValues().join(linesJoiner(INDENT1, true))
+        );
+
+        appendCode("""
+        protected static @Nonnull List<Object> valuesForUpdateWhere(@Nonnull $ModelClass $model_param, @Nonnull Where where) {
+            Object[] values = valuesForUpdateWhere($model_param);
+            List<Object> whereArgs = where.args();
+            if (whereArgs.isEmpty()) {
+                return Arrays.asList(values);
+            }
+            List<Object> result = new ArrayList<>(values.length + whereArgs.size());
+            result.addAll(Arrays.asList(values));
+            result.addAll(whereArgs);
+            return result;
+        }
+        
+        protected static @Nonnull Object[] valuesForUpdateWhere(@Nonnull $ModelClass $model_param) {
+            Object[] array = {
+        $array_init
+            };
+        $array_convert
+            return array;
+        }\n
+        """, EasyMaps.merge(context, mainContext));
+    }
+
     private void updateByPk() throws IOException {
         if (!table.hasPrimaryKeyField()) {
             return;
@@ -467,17 +522,17 @@ public class ModelTableCodegen extends BaseCodegen {
         appendCode("""
         @Override
         public int updateByPk(@Nonnull $ModelClass $model_param) {
-           String query = $sql_query_literal;
-           try {
-               return runner().runUpdate(query, valuesForUpdate($model_param));
-           } catch (SQLException e) {
-               throw new QueryException("Failed to update entity in $TableClass by PK", query, $model_param, e);
-           }
+            String query = $sql_query_literal;
+            try {
+                return runner().runUpdate(query, valuesForUpdateByPk($model_param));
+            } catch (SQLException e) {
+                throw new QueryException("Failed to update entity in $TableClass by PK", query, $model_param, e);
+            }
         }\n
         """, EasyMaps.merge(mainContext, pkContext, context));
     }
 
-    private void valuesForUpdate() throws IOException {
+    private void valuesForUpdateByPk() throws IOException {
         if (!table.hasPrimaryKeyField()) {
             return;
         }
@@ -491,7 +546,7 @@ public class ModelTableCodegen extends BaseCodegen {
         );
 
         appendCode("""
-        protected static @Nonnull Object[] valuesForUpdate(@Nonnull $ModelClass $model_param) {
+        protected static @Nonnull Object[] valuesForUpdateByPk(@Nonnull $ModelClass $model_param) {
             Object[] array = {
         $array_init
             };

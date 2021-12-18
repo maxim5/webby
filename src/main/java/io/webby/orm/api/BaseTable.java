@@ -77,7 +77,10 @@ public interface BaseTable<E> extends Iterable<E> {
     }
 
     @CanIgnoreReturnValue
-    int insert(@NotNull E item);
+    int insert(@NotNull E entity);
+
+    @CanIgnoreReturnValue
+    int updateWhere(@NotNull E entity, @NotNull Where where);
 
     @NotNull TableMeta meta();
 }

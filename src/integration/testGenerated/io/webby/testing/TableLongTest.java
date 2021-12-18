@@ -2,6 +2,10 @@ package io.webby.testing;
 
 import io.webby.db.model.LongAutoIdModel;
 import io.webby.orm.api.TableLong;
+import io.webby.orm.api.query.CompareType;
+import io.webby.orm.api.query.HardcodedNumericTerm;
+import io.webby.orm.api.query.Shortcuts;
+import io.webby.orm.api.query.Where;
 import org.jetbrains.annotations.NotNull;
 import org.junit.jupiter.api.Test;
 
@@ -62,6 +66,21 @@ public interface TableLongTest<E, T extends TableLong<E>> extends PrimaryKeyTabl
         for (Map.Entry<Long, E> entry : entities.entrySet()) {
             assertEquals(entry.getValue(), table().getByPkOrNull(entry.getKey()));
         }
+    }
+
+    @Test
+    default void update_where_equals_variable() {
+        assumeKeys(2);
+        table().insert(createEntity(keys()[0], 0));
+
+        E entity = createEntity(keys()[0], 1);
+        Where where = Where.of(CompareType.EQ.compare(new HardcodedNumericTerm(findPkColumnOrDie()), Shortcuts.var(keys()[0])));
+        assertEquals(1, table().updateWhere(entity, where));
+
+        assertTableCount(1);
+        assertEquals(entity, table().getByPkOrNull(keys()[0]));
+        assertNull(table().getByPkOrNull(keys()[1]));
+        assertThat(table().fetchAll()).containsExactly(entity);
     }
 
     @NotNull E copyEntityWithId(@NotNull E entity, long autoId);
