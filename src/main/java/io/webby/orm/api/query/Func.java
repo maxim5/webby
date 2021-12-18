@@ -39,6 +39,8 @@ public enum Func implements Representable {
     TRIM("trim", List.of(STRING), STRING),
     LTRIM("ltrim", List.of(STRING), STRING),
     RTRIM("rtrim", List.of(STRING), STRING),
+    LPAD("lpad", List.of(STRING, NUMBER, STRING), STRING),
+    RPAD("rpad", List.of(STRING, NUMBER, STRING), STRING),
 
     ASCII("ascii", List.of(STRING), NUMBER),
     CHAR("char", List.of(NUMBER), STRING),
@@ -49,17 +51,25 @@ public enum Func implements Representable {
     RIGHT("right", List.of(STRING, NUMBER), STRING),
     SUBSTR("substr", List.of(STRING, NUMBER, NUMBER), STRING),
     SUBSTRING("substring", List.of(STRING, NUMBER, NUMBER), STRING),
+    MID("mid", List.of(STRING, NUMBER, NUMBER), STRING),
+
     FIND_IN_SET("find_in_set", List.of(STRING, STRING), NUMBER),
-    LOCATE("locate", List.of(STRING, STRING), STRING),
-    LOCATE_FROM("locate", List.of(STRING, STRING, NUMBER), STRING),
+    LOCATE("locate", List.of(STRING, STRING), NUMBER),
+    LOCATE_FROM("locate", List.of(STRING, STRING, NUMBER), NUMBER),
+    POSITION("position", "position(%s IN %s)", List.of(STRING, STRING), NUMBER),
     INSTR("instr", List.of(STRING, STRING), NUMBER),
+
     INSERT("insert", List.of(STRING, NUMBER, NUMBER, STRING), STRING),
     TRANSLATE("translate", List.of(STRING, STRING, STRING), STRING),
+    REPLACE("replace", List.of(STRING, STRING, STRING), STRING),
+    REPEAT("repeat", List.of(STRING, NUMBER), STRING),
+    REVERSE("reverse", List.of(STRING), STRING),
 
     LEN("len", List.of(STRING), NUMBER),
     LENGTH("length", List.of(STRING), NUMBER),
     CHAR_LEN("char_len", List.of(STRING), NUMBER),
     CHAR_LENGTH("char_length", List.of(STRING), NUMBER),
+    STRCMP("format", List.of(STRING, STRING), NUMBER),
     FORMAT("format", List.of(NUMBER, NUMBER), STRING),
 
     CAST_AS("CAST", "CAST(%s AS %s)", List.of(WILDCARD, STRING), WILDCARD),
@@ -75,6 +85,11 @@ public enum Func implements Representable {
     CONCAT_WS3("concat_ws", List.of(STRING, STRING, STRING, STRING), STRING),
     CONCAT_WS4("concat_ws", List.of(STRING, STRING, STRING, STRING, STRING), STRING),
     CONCAT_WS5("concat_ws", List.of(STRING, STRING, STRING, STRING, STRING, STRING), STRING),
+
+    ISNULL("isnull", List.of(WILDCARD), BOOL),
+    IFNULL("ifnull", List.of(WILDCARD, WILDCARD), WILDCARD),
+    IFNULL_NUM("ifnull", List.of(NUMBER, NUMBER), NUMBER),
+    IFNULL_STR("ifnull", List.of(STRING, STRING), STRING),
 
     COALESCE("coalesce", List.of(WILDCARD, WILDCARD), WILDCARD),
     COALESCE3("coalesce", List.of(WILDCARD, WILDCARD, WILDCARD), WILDCARD),
