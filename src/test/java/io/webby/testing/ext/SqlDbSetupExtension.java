@@ -8,6 +8,7 @@ import io.webby.db.sql.SqlSettings;
 import io.webby.orm.api.Engine;
 import io.webby.orm.api.debug.DebugRunner;
 import io.webby.testing.TestingModules;
+import io.webby.testing.TestingProps;
 import io.webby.util.base.Rethrow;
 import io.webby.util.base.Rethrow.Runnables;
 import org.jetbrains.annotations.NotNull;
@@ -39,20 +40,7 @@ public class SqlDbSetupExtension implements AfterAllCallback, BeforeEachCallback
     }
 
     public static @NotNull SqlDbSetupExtension fromProperties() {
-        String engineValue = System.getProperty("test.sql.engine");
-        if (engineValue != null) {
-            Engine engine = Engine.fromJdbcType(engineValue.toLowerCase());
-            assert engine != Engine.Unknown : "Failed to detect SQL engine: " + engineValue;
-            log.at(Level.INFO).log("[SQL] Detected engine: %s", engine);
-            SqlSettings settings = SqlSettings.inMemoryNotForProduction(engine);
-            return new SqlDbSetupExtension(settings);
-        }
-        String url = System.getProperty("test.sql.url");
-        if (url != null) {
-            return new SqlDbSetupExtension(new SqlSettings(url));
-        }
-        log.at(Level.SEVERE).log("[SQL] Test SQL properties not found. Using SQLite");
-        return new SqlDbSetupExtension(SqlSettings.SQLITE_IN_MEMORY);
+        return from(TestingProps.propsSqlSettings());
     }
 
     @Override

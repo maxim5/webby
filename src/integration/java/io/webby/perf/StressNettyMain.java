@@ -46,7 +46,7 @@ public class StressNettyMain {
         AppSettings settings = Main.localSettings();
         settings.modelFilter().setCommonPackageOf(DefaultUser.class, Session.class);
         settings.handlerFilter().setPackageOnly("io.webby.examples");
-        settings.storageSettings().enableKeyValueStorage(StorageType.JAVA_MAP).enableSqlStorage(TestingProps.parseSqlSettings());
+        settings.storageSettings().enableKeyValueStorage(StorageType.JAVA_MAP).enableSqlStorage(TestingProps.propsSqlSettings());
         settings.setProfileMode(false);
         settings.setProperty("db.sql.connection.expiration.millis", 10_000);
         // H2 default max connections = 10!
