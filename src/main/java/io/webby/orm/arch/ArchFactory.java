@@ -2,14 +2,13 @@ package io.webby.orm.arch;
 
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
-import io.webby.util.collect.Pair;
-import io.webby.util.lazy.AtomicLazyList;
 import io.webby.orm.api.Foreign;
 import io.webby.orm.api.ForeignInt;
 import io.webby.orm.api.ForeignLong;
 import io.webby.orm.api.ForeignObj;
 import io.webby.orm.codegen.ModelAdaptersScanner;
 import io.webby.orm.codegen.ModelInput;
+import io.webby.util.collect.Pair;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import org.jetbrains.annotations.VisibleForTesting;
@@ -18,7 +17,10 @@ import java.lang.reflect.Field;
 import java.lang.reflect.Method;
 import java.lang.reflect.ParameterizedType;
 import java.lang.reflect.Type;
-import java.util.*;
+import java.util.Collection;
+import java.util.LinkedHashMap;
+import java.util.List;
+import java.util.Map;
 
 import static io.webby.orm.arch.InvalidSqlModelException.assure;
 import static io.webby.orm.arch.InvalidSqlModelException.failIf;
@@ -63,7 +65,7 @@ public class ArchFactory {
 
     @VisibleForTesting
     @NotNull TableArch buildShallowTable(@NotNull ModelInput input) {
-        return new TableArch(input.sqlName(), input.javaTableName(), input.modelClass(), AtomicLazyList.ofUninitializedList());
+        return new TableArch(input.sqlName(), input.javaTableName(), input.modelClass());
     }
 
     @VisibleForTesting
