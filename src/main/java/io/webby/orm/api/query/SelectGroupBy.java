@@ -9,17 +9,13 @@ import static io.webby.orm.api.query.Units.flattenArgsOf;
 import static io.webby.orm.api.query.Units.joinWithLines;
 
 public class SelectGroupBy extends Unit implements SelectQuery {
-    private final SelectFrom selectFrom;
-    private final GroupBy groupBy;
-    private final Where where;
-    private final OrderBy orderBy;
+    private final int columnsNumber;
 
-    public SelectGroupBy(@NotNull SelectFrom selectFrom, @Nullable Where where, @NotNull GroupBy groupBy, @Nullable OrderBy orderBy) {
-        super(joinWithLines(selectFrom, where, groupBy, orderBy), flattenArgsOf(selectFrom, where, groupBy, orderBy));
-        this.selectFrom = selectFrom;
-        this.groupBy = groupBy;
-        this.where = where;
-        this.orderBy = orderBy;
+    public SelectGroupBy(@NotNull SelectFrom selectFrom, @Nullable Where where,
+                         @NotNull GroupBy groupBy, @Nullable Having having, @Nullable OrderBy orderBy) {
+        super(joinWithLines(selectFrom, where, groupBy, having, orderBy),
+              flattenArgsOf(selectFrom, where, groupBy, having, orderBy));
+        columnsNumber = selectFrom.termsNumber();
     }
 
     public static @NotNull SelectGroupByBuilder from(@NotNull String table) {
@@ -34,9 +30,8 @@ public class SelectGroupBy extends Unit implements SelectQuery {
         return from(table.meta());
     }
 
-
     @Override
     public int columnsNumber() {
-        return selectFrom.termsNumber();
+        return columnsNumber;
     }
 }

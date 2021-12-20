@@ -209,4 +209,25 @@ public class SqlDbQueryTest {
                           array("Kate", 1),
                           array("Yuan", 1));
     }
+
+    @Test
+    public void groupBy_having() {
+        SelectQuery query = SelectGroupBy.from(PERSON_META)
+                .aggregate(COUNT.apply(PersonColumn.id))
+                .groupBy(PersonColumn.country)
+                .having(Having.of(GT.compare(COUNT.apply(PersonColumn.id), ZERO)))
+                .build();
+        assertRepr(query, """
+            SELECT country, count(id)
+            FROM person
+            GROUP BY country
+            HAVING count(id) > 0
+            """);
+        assertNoArgs(query);
+        assertRows(SQL_DB.runQuery(query),
+                   array("CN", 1),
+                   array("DE", 1),
+                   array("RU", 1),
+                   array("US", 1));
+    }
 }

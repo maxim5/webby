@@ -8,13 +8,11 @@ import static io.webby.orm.api.query.Units.flattenArgsOf;
 import static io.webby.orm.api.query.Units.joinWithLines;
 
 public class SelectWhere extends Unit implements SelectQuery {
-    private final SelectFrom selectFrom;
-    private final CompositeFilter clause;
+    private final int columnsNumber;
 
     public SelectWhere(@NotNull SelectFrom selectFrom, @NotNull CompositeFilter clause) {
         super(joinWithLines(selectFrom, clause), flattenArgsOf(selectFrom, clause));
-        this.selectFrom = selectFrom;
-        this.clause = clause;
+        columnsNumber = selectFrom.termsNumber();
     }
 
     public static @NotNull SelectWhereBuilder from(@NotNull String table) {
@@ -31,6 +29,6 @@ public class SelectWhere extends Unit implements SelectQuery {
 
     @Override
     public int columnsNumber() {
-        return selectFrom.termsNumber();
+        return columnsNumber;
     }
 }
