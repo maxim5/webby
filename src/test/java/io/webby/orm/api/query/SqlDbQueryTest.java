@@ -1,5 +1,6 @@
 package io.webby.orm.api.query;
 
+import io.webby.orm.api.Engine;
 import io.webby.orm.codegen.SqlSchemaMaker;
 import io.webby.testing.ext.SqlDbSetupExtension;
 import org.junit.jupiter.api.BeforeAll;
@@ -15,6 +16,7 @@ import static io.webby.orm.api.query.Shortcuts.*;
 import static io.webby.orm.testing.AssertSql.*;
 import static io.webby.orm.testing.PersonTableData.*;
 import static io.webby.testing.TestingUtil.array;
+import static org.junit.jupiter.api.Assumptions.assumeTrue;
 
 @Tag("sql")
 public class SqlDbQueryTest {
@@ -155,6 +157,7 @@ public class SqlDbQueryTest {
 
     @Test
     public void groupBy_one_column_avg() {
+        assumeTrue(SQL_DB.engine() != Engine.H2, "Not working in H2 (AVG is integer by default)");
         SelectQuery query = SelectGroupBy.from(PERSON_META)
                 .groupBy(PersonColumn.sex)
                 .aggregate(AVG.apply(PersonColumn.iq))
