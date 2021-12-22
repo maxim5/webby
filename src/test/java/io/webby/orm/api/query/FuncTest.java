@@ -86,12 +86,12 @@ public class FuncTest {
     @Test
     public void cast_as() {
         assertRepr(Func.CAST_AS.apply(NULL, new HardcodedStringTerm("TEXT")), "CAST(NULL AS TEXT)", WILDCARD);
-        assertRepr(Func.CAST_AS_INT.apply(FakeColumn.FOO), "CAST(foo AS INT)", NUMBER);
-        assertRepr(Func.CAST_AS_INT.apply(FakeColumn.INT), "CAST(i AS INT)", NUMBER);
-        assertRepr(Func.CAST_AS_INT.apply(FakeColumn.STR), "CAST(s AS INT)", NUMBER);
-        assertRepr(Func.CAST_AS_STR.apply(FakeColumn.FOO), "CAST(foo AS VARCHAR)", STRING);
-        assertRepr(Func.CAST_AS_STR.apply(FakeColumn.INT), "CAST(i AS VARCHAR)", STRING);
-        assertRepr(Func.CAST_AS_STR.apply(FakeColumn.STR), "CAST(s AS VARCHAR)", STRING);
+        assertRepr(Func.CAST_AS_SIGNED.apply(FakeColumn.FOO), "CAST(foo AS SIGNED)", NUMBER);
+        assertRepr(Func.CAST_AS_SIGNED.apply(FakeColumn.INT), "CAST(i AS SIGNED)", NUMBER);
+        assertRepr(Func.CAST_AS_SIGNED.apply(FakeColumn.STR), "CAST(s AS SIGNED)", NUMBER);
+        assertRepr(Func.CAST_AS_CHAR.apply(FakeColumn.FOO), "CAST(foo AS CHAR)", STRING);
+        assertRepr(Func.CAST_AS_CHAR.apply(FakeColumn.INT), "CAST(i AS CHAR)", STRING);
+        assertRepr(Func.CAST_AS_CHAR.apply(FakeColumn.STR), "CAST(s AS CHAR)", STRING);
     }
 
     @Test

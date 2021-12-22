@@ -16,7 +16,7 @@ import static io.webby.orm.api.query.Shortcuts.*;
 import static io.webby.orm.testing.AssertSql.*;
 import static io.webby.orm.testing.PersonTableData.*;
 import static io.webby.testing.TestingUtil.array;
-import static org.junit.jupiter.api.Assumptions.assumeTrue;
+import static org.junit.jupiter.api.Assumptions.assumeFalse;
 
 @Tag("sql")
 public class SqlDbQueryTest {
@@ -59,7 +59,7 @@ public class SqlDbQueryTest {
     @Test
     public void selectWhere_select_sum() {
         SelectQuery query = SelectWhere.from(PERSON_META)
-                .select(Func.SUM.apply(PersonColumn.height))
+                .select(SUM.apply(PersonColumn.height))
                 .build();
         assertRepr(query, """
             SELECT sum(height)
@@ -171,6 +171,59 @@ public class SqlDbQueryTest {
     }
 
     @Test
+    public void selectWhere_ifNull() {
+        SelectQuery query = SelectWhere.from(PERSON_META)
+                .select(PersonColumn.id, IFNULL_STR.apply(PersonColumn.country, literal("??")))
+                .build();
+        assertRepr(query, """
+            SELECT id, ifnull(country, '??')
+            FROM person
+            """);
+        assertNoArgs(query);
+        assertRows(SQL_DB.runQuery(query),
+                   array(1, "DE"),
+                   array(2, "US"),
+                   array(3, "RU"),
+                   array(4, "CN"));
+    }
+
+    @Test
+    public void selectWhere_cast_to_integer() {
+        assumeFalse(SQL_DB.engine() == Engine.H2, "Not working in H2 (blob cast doesn't work)");
+        SelectQuery query = SelectWhere.from(PERSON_META)
+                .select(PersonColumn.id, CAST_AS_SIGNED.apply(PersonColumn.photo))
+                .build();
+        assertRepr(query, """
+            SELECT id, CAST(photo AS SIGNED)
+            FROM person
+            """);
+        assertNoArgs(query);
+        assertRows(SQL_DB.runQuery(query),
+                   array(1, 1111111),
+                   array(2, 2222222),
+                   array(3, 3333333),
+                   array(4, 4444444));
+    }
+
+    @Test
+    public void selectWhere_cast_to_string() {
+        assumeFalse(SQL_DB.engine() == Engine.H2, "Not working in H2 (blob cast doesn't work)");
+        SelectQuery query = SelectWhere.from(PERSON_META)
+                .select(PersonColumn.id, CAST_AS_CHAR.apply(PersonColumn.photo))
+                .build();
+        assertRepr(query, """
+            SELECT id, CAST(photo AS CHAR)
+            FROM person
+            """);
+        assertNoArgs(query);
+        assertRows(SQL_DB.runQuery(query),
+                   array(1, "1111111"),
+                   array(2, "2222222"),
+                   array(3, "3333333"),
+                   array(4, "4444444"));
+    }
+
+    @Test
     public void groupBy_one_column_count() {
         SelectQuery query = SelectGroupBy.from(PERSON_META)
                 .groupBy(PersonColumn.sex)
@@ -189,7 +242,7 @@ public class SqlDbQueryTest {
 
     @Test
     public void groupBy_one_column_avg() {
-        assumeTrue(SQL_DB.engine() != Engine.H2, "Not working in H2 (AVG is integer by default)");
+        assumeFalse(SQL_DB.engine() == Engine.H2, "Not working in H2 (AVG is integer by default)");
         SelectQuery query = SelectGroupBy.from(PERSON_META)
                 .groupBy(PersonColumn.sex)
                 .aggregate(AVG.apply(PersonColumn.iq))
