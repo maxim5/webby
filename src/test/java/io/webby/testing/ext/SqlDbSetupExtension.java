@@ -5,6 +5,7 @@ import com.google.inject.Module;
 import com.google.inject.util.Modules;
 import io.webby.db.sql.ConnectionPool;
 import io.webby.db.sql.SqlSettings;
+import io.webby.orm.api.Connector;
 import io.webby.orm.api.Engine;
 import io.webby.orm.api.debug.DebugRunner;
 import io.webby.testing.TestingModules;
@@ -22,7 +23,7 @@ import java.sql.DriverManager;
 import java.sql.Savepoint;
 import java.util.logging.Level;
 
-public class SqlDbSetupExtension implements AfterAllCallback, BeforeEachCallback, AfterEachCallback, DebugRunner {
+public class SqlDbSetupExtension implements AfterAllCallback, BeforeEachCallback, AfterEachCallback, Connector, DebugRunner {
     private static final FluentLogger log = FluentLogger.forEnclosingClass();
 
     private final SqlSettings settings;

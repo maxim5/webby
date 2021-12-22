@@ -25,7 +25,7 @@ import static io.webby.util.base.EasyCast.castAny;
 import static io.webby.util.base.Rethrow.rethrow;
 
 @Singleton
-public class TableManager {
+public class TableManager implements WithEngine {
     private static final FluentLogger log = FluentLogger.forEnclosingClass();
     private static final ResettableAtomicLazy<TableManager> SHARED_INSTANCE = new ResettableAtomicLazy<>();
 
@@ -57,6 +57,7 @@ public class TableManager {
         return connector;
     }
 
+    @Override
     public @NotNull Engine engine() {
         return engine;
     }

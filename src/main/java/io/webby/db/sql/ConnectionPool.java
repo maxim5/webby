@@ -7,6 +7,7 @@ import com.zaxxer.hikari.HikariDataSource;
 import io.webby.app.Settings;
 import io.webby.common.Lifetime;
 import io.webby.orm.api.Engine;
+import io.webby.orm.api.WithEngine;
 import io.webby.util.base.Rethrow;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.VisibleForTesting;
@@ -15,7 +16,7 @@ import java.sql.Connection;
 import java.sql.SQLException;
 
 @Singleton
-public class ConnectionPool {
+public class ConnectionPool implements WithEngine {
     private final HikariDataSource dataSource;
 
     @Inject
@@ -39,6 +40,7 @@ public class ConnectionPool {
         }
     }
 
+    @Override
     public @NotNull Engine engine() {
         return SqlSettings.parseEngineFromUrl(dataSource.getJdbcUrl());
     }

@@ -1,10 +1,7 @@
 package io.webby.orm.api.debug;
 
 import com.google.errorprone.annotations.CanIgnoreReturnValue;
-import io.webby.orm.api.BaseTable;
-import io.webby.orm.api.Connector;
-import io.webby.orm.api.Engine;
-import io.webby.orm.api.QueryRunner;
+import io.webby.orm.api.*;
 import io.webby.orm.api.query.SelectQuery;
 import io.webby.util.base.Rethrow;
 import org.jetbrains.annotations.NotNull;
@@ -16,7 +13,7 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.List;
 
-public interface DebugRunner extends Connector {
+public interface DebugRunner extends WithRunner {
     default @NotNull List<DebugSql.Row> runQuery(@NotNull String query, @Nullable Object @NotNull ... params) {
         try (PreparedStatement statement = runner().prepareQuery(query, params);
              ResultSet resultSet = statement.executeQuery()) {
@@ -48,28 +45,15 @@ public interface DebugRunner extends Connector {
     }
 
     static @NotNull DebugRunner of(@NotNull Connector connector) {
-        return connector::connection;
+        return connector::runner;
     }
 
     static @NotNull DebugRunner of(@NotNull Connection connection) {
-        return () -> connection;
+        return () -> new QueryRunner(connection);
     }
 
     static @NotNull DebugRunner of(@NotNull QueryRunner runner) {
-        return new DebugRunner() {
-            @Override
-            public @NotNull QueryRunner runner() {
-                return runner;
-            }
-            @Override
-            public @NotNull Connection connection() {
-                throw new UnsupportedOperationException("Connection is unknown. Provided runner: " + runner);
-            }
-            @Override
-            public @NotNull Engine engine() {
-                return Engine.Unknown;
-            }
-        };
+        return () -> runner;
     }
 
     static @NotNull DebugRunner of(@NotNull BaseTable<?> table) {

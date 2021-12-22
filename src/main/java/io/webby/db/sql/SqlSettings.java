@@ -1,13 +1,14 @@
 package io.webby.db.sql;
 
 import io.webby.orm.api.Engine;
+import io.webby.orm.api.WithEngine;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
 // More SQL URLs:
 // SqlSettings.jdbcUrl(Engine.H2, "file:./.data/temp.h2")
 // SqlSettings.jdbcUrl(SqlSettings.SQLITE, "file:.data/temp.sqlite.db?mode=memory&cache=shared")
-public record SqlSettings(@NotNull String url) {
+public record SqlSettings(@NotNull String url) implements WithEngine {
     private static final String H2_IN_MEMORY_URL = "jdbc:h2:mem:test;DB_CLOSE_DELAY=-1";
     private static final String SQLITE_IN_MEMORY_URL = "jdbc:sqlite::memory:";
     private static final String MYSQL_TEST_URL = "jdbc:mysql://localhost/test?user=test&password=test";
@@ -16,6 +17,7 @@ public record SqlSettings(@NotNull String url) {
     public static final SqlSettings SQLITE_IN_MEMORY = new SqlSettings(SQLITE_IN_MEMORY_URL);
     public static final SqlSettings MYSQL_TEST = new SqlSettings(MYSQL_TEST_URL);
 
+    @Override
     public @NotNull Engine engine() {
         return parseEngineFromUrl(url);
     }
