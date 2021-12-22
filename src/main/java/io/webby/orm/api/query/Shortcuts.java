@@ -41,4 +41,8 @@ public class Shortcuts {
     public static @NotNull Like like(@NotNull Term lhs, @NotNull Term rhs) {
         return new Like(lhs, rhs);
     }
+
+    public static @NotNull Between between(@NotNull Term term, @NotNull Term left, @NotNull Term right) {
+        return new Between(term, left, right);
+    }
 }

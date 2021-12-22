@@ -154,6 +154,23 @@ public class SqlDbQueryTest {
     }
 
     @Test
+    public void selectWhere_date_between() {
+        SelectQuery query = SelectWhere.from(PERSON_META)
+                .select(PersonColumn.id, PersonColumn.country)
+                .where(Where.of(between(PersonColumn.birthday, var(parseDate("1985-01-01")), var(parseDate("2000-01-01")))))
+                .build();
+        assertRepr(query, """
+            SELECT id, country
+            FROM person
+            WHERE birthday BETWEEN ? AND ?
+            """);
+        assertArgs(query, parseDate("1985-01-01"), parseDate("2000-01-01"));
+        assertRows(SQL_DB.runQuery(query),
+                   array(1, "DE"),
+                   array(3, "RU"));
+    }
+
+    @Test
     public void groupBy_one_column_count() {
         SelectQuery query = SelectGroupBy.from(PERSON_META)
                 .groupBy(PersonColumn.sex)
