@@ -10,7 +10,6 @@ import io.webby.orm.api.Engine;
 import io.webby.orm.api.debug.DebugRunner;
 import io.webby.testing.TestingModules;
 import io.webby.testing.TestingProps;
-import io.webby.util.base.Rethrow;
 import io.webby.util.base.Rethrow.Runnables;
 import org.jetbrains.annotations.NotNull;
 import org.junit.jupiter.api.extension.AfterAllCallback;
@@ -19,7 +18,6 @@ import org.junit.jupiter.api.extension.BeforeEachCallback;
 import org.junit.jupiter.api.extension.ExtensionContext;
 
 import java.sql.Connection;
-import java.sql.DriverManager;
 import java.sql.Savepoint;
 import java.util.logging.Level;
 
@@ -32,7 +30,7 @@ public class SqlDbSetupExtension implements AfterAllCallback, BeforeEachCallback
 
     public SqlDbSetupExtension(@NotNull SqlSettings settings) {
         this.settings = settings;
-        this.connection = Rethrow.Suppliers.rethrow(() -> DriverManager.getConnection(settings.url())).get();
+        this.connection = SqlSettings.connect(settings);
         log.at(Level.FINE).log("[SQL] Connection opened: %s", settings.url());
     }
 

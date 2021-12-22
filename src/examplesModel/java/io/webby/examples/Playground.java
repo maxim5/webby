@@ -1,9 +1,8 @@
 package io.webby.examples;
 
 import com.google.common.io.BaseEncoding;
-import io.webby.db.sql.SqlSettings;
-import io.webby.orm.api.debug.DebugSql;
 import io.webby.orm.api.QueryRunner;
+import io.webby.orm.api.debug.DebugSql;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
@@ -185,9 +184,5 @@ public class Playground {
             }
             System.out.println();
         }
-    }
-
-    private static Connection connect(SqlSettings settings) throws SQLException {
-        return DriverManager.getConnection(settings.url());
     }
 }
