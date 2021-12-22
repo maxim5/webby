@@ -139,6 +139,21 @@ public class SqlDbQueryTest {
     }
 
     @Test
+    public void selectWhere_date_comparison() {
+        SelectQuery query = SelectWhere.from(PERSON_META)
+                .select(PersonColumn.id, PersonColumn.country)
+                .where(Where.of(LT.compare(PersonColumn.birthday, var(parseDate("1985-01-01")))))
+                .build();
+        assertRepr(query, """
+            SELECT id, country
+            FROM person
+            WHERE birthday < ?
+            """);
+        assertArgs(query, parseDate("1985-01-01"));
+        assertRows(SQL_DB.runQuery(query), array(2, "US"));
+    }
+
+    @Test
     public void groupBy_one_column_count() {
         SelectQuery query = SelectGroupBy.from(PERSON_META)
                 .groupBy(PersonColumn.sex)

@@ -1,6 +1,7 @@
 package io.webby.orm.api.query;
 
 import io.webby.orm.testing.FakeColumn;
+import io.webby.orm.testing.PersonTableData.PersonColumn;
 import org.junit.jupiter.api.Test;
 
 import static io.webby.orm.api.query.Shortcuts.*;
@@ -74,6 +75,12 @@ public class FuncTest {
         assertReprThrows(() -> Func.TRANSLATE.apply(literal("ABC")));
         assertReprThrows(() -> Func.TRANSLATE.apply(literal("ABC"), num(0)));
         assertReprThrows(() -> Func.TRANSLATE.apply(literal("ABC"), num(0), num(1)));
+    }
+
+    @Test
+    public void string_length() {
+        assertRepr(Func.LENGTH.apply(FakeColumn.STR), "length(s)", NUMBER);
+        assertReprThrows(() -> Func.LENGTH.apply(PersonColumn.birthday));
     }
 
     @Test

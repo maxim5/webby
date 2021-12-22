@@ -2,6 +2,8 @@ package io.webby.orm.api.query;
 
 import org.jetbrains.annotations.NotNull;
 
+import java.sql.Timestamp;
+
 public class Shortcuts {
     public static final Term NULL = new HardcodedTerm("NULL", TermType.WILDCARD);
     public static final Term STAR = new HardcodedTerm("*", TermType.WILDCARD);
@@ -30,6 +32,10 @@ public class Shortcuts {
 
     public static @NotNull Variable var(byte @NotNull[] value) {
         return new Variable(value, TermType.STRING);
+    }
+
+    public static @NotNull Variable var(@NotNull Timestamp timestamp) {
+        return new Variable(timestamp, TermType.TIME);
     }
 
     public static @NotNull Like like(@NotNull Term lhs, @NotNull Term rhs) {
