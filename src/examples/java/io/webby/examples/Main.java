@@ -3,6 +3,7 @@ package io.webby.examples;
 import com.google.common.flogger.FluentLogger;
 import io.webby.Webby;
 import io.webby.app.AppSettings;
+import io.webby.db.kv.KeyValueSettings;
 import io.webby.db.kv.StorageType;
 import io.webby.db.sql.SqlSettings;
 import io.webby.examples.templates.JteExample;
@@ -37,8 +38,9 @@ public class Main {
         settings.setProperty("jte.view.paths", "out/examples/resources/web/jte");
         settings.setProperty("pebble.view.paths", "out/examples/resources/web/pebble");
         settings.setProperty("db.mapdb.checksum.enabled", false);
-        settings.storageSettings().enableKeyValueStorage(StorageType.MAP_DB).setKeyValueStoragePath(".data/mapdb")
-                .enableSqlStorage(SqlSettings.inMemoryNotForProduction(Engine.H2));
+        settings.storageSettings()
+                .enableKeyValue(KeyValueSettings.of(StorageType.MAP_DB, ".data/mapdb"))
+                .enableSql(SqlSettings.inMemoryNotForProduction(Engine.H2));
         return settings;
     }
 }

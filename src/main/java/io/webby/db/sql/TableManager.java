@@ -39,7 +39,7 @@ public class TableManager implements WithEngine {
                         @NotNull ConnectionPool pool,
                         @NotNull ClasspathScanner scanner,
                         @NotNull Lifetime lifetime) throws Exception {
-        assert settings.storageSettings().isSqlStorageEnabled() : "SQL storage is disabled";
+        assert settings.storageSettings().isSqlEnabled() : "SQL storage is disabled";
         assert pool.isRunning() : "Invalid pool state: %s".formatted(pool);
 
         this.settings = settings;

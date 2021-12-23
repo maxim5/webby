@@ -20,7 +20,7 @@ public class PalDbFactory extends BaseKeyValueFactory {
     @Override
     public @NotNull <K, V> PalDbImpl<K, V> getInternalDb(@NotNull String name, @NotNull Class<K> key, @NotNull Class<V> value) {
         return cacheIfAbsent(name, () -> {
-            Path storagePath = settings.storageSettings().keyValueStoragePath();
+            Path storagePath = settings.storageSettings().keyValueSettingsOrDie().path();
             String filename = settings.getProperty("db.paldb.filename.pattern", "paldb-%s");
 
             String path = storagePath.resolve(formatFileName(filename, name)).toString();

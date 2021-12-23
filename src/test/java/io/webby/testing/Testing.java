@@ -37,8 +37,8 @@ public class Testing {
         settings.handlerFilter().setPredicateUnsafe((pkg, cls) -> false);
         settings.interceptorFilter().setPredicateUnsafe((pkg, cls) -> false);
         settings.storageSettings()
-                .disableKeyValueStorage()
-                .disableSqlStorage();
+                .disableKeyValue()
+                .disableSql();
         return settings;
     }
 

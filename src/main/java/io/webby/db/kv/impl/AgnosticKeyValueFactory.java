@@ -2,9 +2,11 @@ package io.webby.db.kv.impl;
 
 import com.google.inject.Inject;
 import io.webby.app.Settings;
+import io.webby.app.StorageSettings;
 import io.webby.common.InjectorHelper;
 import io.webby.db.kv.KeyValueDb;
 import io.webby.db.kv.KeyValueFactory;
+import io.webby.db.kv.KeyValueSettings;
 import io.webby.db.kv.StorageType;
 import io.webby.db.kv.chronicle.ChronicleFactory;
 import io.webby.db.kv.halodb.HaloDbFactory;
@@ -32,7 +34,7 @@ public class AgnosticKeyValueFactory implements KeyValueFactory {
     @Inject
     public AgnosticKeyValueFactory(@NotNull Settings settings, @NotNull InjectorHelper helper) {
         this.helper = helper;
-        delegate = pickFactory(settings.storageSettings().keyValueStorageTypeOrDefault());
+        delegate = pickFactory(getStorageType(settings.storageSettings()));
     }
 
     @Override
@@ -47,6 +49,10 @@ public class AgnosticKeyValueFactory implements KeyValueFactory {
 
     public <F extends InternalKeyValueFactory> @NotNull F getInternalFactory(@NotNull StorageType storageType) {
         return castAny(pickFactory(storageType));
+    }
+
+    private static @NotNull StorageType getStorageType(@NotNull StorageSettings storage) {
+        return storage.isKeyValueEnabled() ? storage.keyValueSettingsOrDie().type() : KeyValueSettings.DEFAULT_TYPE;
     }
 
     private @NotNull InternalKeyValueFactory pickFactory(@NotNull StorageType storageType) {

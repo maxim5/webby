@@ -15,9 +15,5 @@ public enum StorageType {
     ROCKS_DB,
     SQL_DB,
     SWAY_DB,
-    TUPL;
-
-    public boolean isPersisted() {
-        return this != JAVA_MAP && this != SQL_DB;
-    }
+    TUPL
 }

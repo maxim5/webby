@@ -13,6 +13,7 @@ import io.webby.auth.AuthModule;
 import io.webby.common.CommonModule;
 import io.webby.common.GuiceCompleteEvent;
 import io.webby.db.DbModule;
+import io.webby.db.kv.KeyValueSettings;
 import io.webby.db.kv.StorageType;
 import io.webby.db.kv.impl.KeyValueStorageTypeDetector;
 import io.webby.db.sql.TableManager;
@@ -53,7 +54,7 @@ public class Webby {
     }
 
     private static void prepareForDev(@NotNull AppSettings settings, @NotNull Injector injector) {
-        if (settings.storageSettings().isSqlStorageEnabled()) {
+        if (settings.storageSettings().isSqlEnabled()) {
             TableManager tableManager = injector.getInstance(TableManager.class);
             tableManager.createAllTablesIfNotExist();
         }
@@ -101,45 +102,62 @@ public class Webby {
     }
 
     private static void validateStorageSettings(@NotNull Settings settings, @NotNull StorageSettings storageSettings) {
-        StorageType storageType = storageSettings.keyValueStorageTypeOrDefault();
+        new StorageValidator(settings, storageSettings).validate();
+    }
 
-        if (storageSettings.isKeyValueStorageEnabled()) {
-            if (!storageSettings.isKeyValueStorageSet()) {
-                StorageType autoStorageType = KeyValueStorageTypeDetector.autoDetectStorageTypeFromClasspath();
-                if (autoStorageType != null) {
-                    storageSettings.setKeyValueStorageType(autoStorageType);
-                    storageType = autoStorageType;
-                    log.at(Level.WARNING).log("Key-value storage type is not set, using type from classpath: %s", storageType);
-                } else {
-                    log.at(Level.WARNING).log("Key-value storage type is not set, using default: %s", storageType);
-                }
-            }
-
-            if (storageType.isPersisted()) {
-                validateDirectory(storageSettings.keyValueStoragePath(), "storage path", true);
-            } else {
-                if (settings.isProdMode()) {
-                    log.at(Level.WARNING).log("Configured non-persistent key-value storage in production: %s", storageType);
-                }
-            }
-        } else {
-            if (storageSettings.isKeyValueStorageSet()) {
-                log.at(Level.WARNING).log("Key-value storage disabled. Ignoring the configured type: %s", storageType);
-                storageSettings.setKeyValueStorageType(StorageType.JAVA_MAP);
-            } else {
-                log.at(Level.WARNING).log("Key-value storage disabled");
+    private record StorageValidator(@NotNull Settings settings, @NotNull StorageSettings storageSettings) {
+        public void validate() {
+            if (storageSettings.isKeyValueEnabled()) {
+                validateKeyValues();
             }
         }
 
-        if (storageSettings.isSqlStorageEnabled()) {
-            if (!storageSettings.isKeyValueStorageSet()) {
-                storageSettings.setKeyValueStorageType(StorageType.SQL_DB);
-                log.at(Level.WARNING).log("Key-value storage type not configured. Using %s", storageType);
+        private void validateKeyValues() {
+            if (kvSettings() == KeyValueSettings.AUTO_DETECT) {
+                failIf(settings.isProdMode(), "Auto-detect can't be used in production. Set the storage type explicitly");
+                StorageType autoStorageType = KeyValueStorageTypeDetector.autoDetectStorageTypeFromClasspath();
+                if (autoStorageType != null) {
+                    updateKvType(autoStorageType);
+                    log.at(Level.WARNING).log("Key-value storage auto-detect configured, " +
+                                              "using type from classpath: %s", currentType());
+                } else if (storageSettings.isSqlEnabled()) {
+                    updateKvType(StorageType.SQL_DB);
+                    log.at(Level.WARNING).log("Key-value storage auto-detect configured. Using %s", currentType());
+                } else {
+                    updateKvType(KeyValueSettings.DEFAULT_TYPE);
+                    log.at(Level.WARNING).log("Key-value storage auto-detect configured, " +
+                                              "using default: %s", currentType());
+                }
             }
-        } else {
-            if (storageType == StorageType.SQL_DB) {
-                log.at(Level.WARNING).log("SQL disabled. Ignoring the configured type: %s", storageType);
-                storageSettings.setKeyValueStorageType(StorageType.JAVA_MAP);
+
+            if (currentType() == StorageType.JAVA_MAP && settings.isProdMode()) {
+                log.at(Level.WARNING).log("Configured in-memory key-value storage in production: %s", currentType());
+            }
+            if (currentType() == StorageType.SQL_DB && settings.isProdMode()) {
+                log.at(Level.WARNING).log("Configured inefficient key-value storage in production: %s", currentType());
+            }
+            if (currentType() != StorageType.JAVA_MAP && currentType() != StorageType.SQL_DB) {
+                validateDirectory(kvSettings().path(), "storage path", settings.isDevMode());
+            }
+
+            if (currentType() == StorageType.SQL_DB && !storageSettings.isSqlEnabled()) {
+                log.at(Level.WARNING).log("SQL disabled. Ignoring the configured type: %s. " +
+                                          "Using default instead", currentType());
+                updateKvType(KeyValueSettings.DEFAULT_TYPE);
+            }
+        }
+
+        private @NotNull KeyValueSettings kvSettings() {
+            return storageSettings.keyValueSettingsOrDie();
+        }
+
+        private @NotNull StorageType currentType() {
+            return kvSettings().type();
+        }
+
+        private void updateKvType(@NotNull StorageType storageType) {
+            if (storageSettings.isKeyValueEnabled()) {
+                storageSettings.enableKeyValue(storageSettings.keyValueSettingsOrDie().with(storageType));
             }
         }
     }

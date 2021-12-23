@@ -4,6 +4,7 @@ import io.webby.Webby;
 import io.webby.app.AppSettings;
 import io.webby.auth.session.Session;
 import io.webby.auth.user.DefaultUser;
+import io.webby.db.kv.KeyValueSettings;
 import io.webby.db.kv.StorageType;
 import io.webby.examples.Main;
 import io.webby.netty.NettyBootstrap;
@@ -12,6 +13,7 @@ import io.webby.netty.response.HttpResponseFactory;
 import io.webby.perf.HttpWorker.Init;
 import io.webby.testing.TestingModules;
 import io.webby.testing.TestingProps;
+import io.webby.testing.TestingStorage;
 import io.webby.testing.TestingUtil;
 import org.apache.logging.log4j.Level;
 import org.apache.logging.log4j.core.config.Configurator;
@@ -46,7 +48,9 @@ public class StressNettyMain {
         AppSettings settings = Main.localSettings();
         settings.modelFilter().setCommonPackageOf(DefaultUser.class, Session.class);
         settings.handlerFilter().setPackageOnly("io.webby.examples");
-        settings.storageSettings().enableKeyValueStorage(StorageType.JAVA_MAP).enableSqlStorage(TestingProps.propsSqlSettings());
+        settings.storageSettings()
+                .enableKeyValue(TestingStorage.KEY_VALUE_DEFAULT)
+                .enableSql(TestingProps.propsSqlSettings());
         settings.setProfileMode(false);
         settings.setProperty("db.sql.connection.expiration.millis", 10_000);
         // H2 default max connections = 10!

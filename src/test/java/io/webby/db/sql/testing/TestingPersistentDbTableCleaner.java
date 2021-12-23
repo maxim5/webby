@@ -23,7 +23,7 @@ public class TestingPersistentDbTableCleaner {
     public TestingPersistentDbTableCleaner(@NotNull Settings settings,
                                            @NotNull EventBus eventBus,
                                            @NotNull Provider<TableManager> tableManagerProvider) {
-        if (settings.storageSettings().isSqlStorageEnabled()) {
+        if (settings.storageSettings().isSqlEnabled()) {
             tableManager = tableManagerProvider.get();
             eventBus.register(this);
         } else {

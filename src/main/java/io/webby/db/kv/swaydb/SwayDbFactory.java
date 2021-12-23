@@ -21,7 +21,7 @@ public class SwayDbFactory extends BaseKeyValueFactory {
     @Override
     public @NotNull <K, V> SwayDb<K, V> getInternalDb(@NotNull String name, @NotNull Class<K> key, @NotNull Class<V> value) {
         return cacheIfAbsent(name, () -> {
-            Path storagePath = settings.storageSettings().keyValueStoragePath();
+            Path storagePath = settings.storageSettings().keyValueSettingsOrDie().path();
             String filename = settings.getProperty("db.swaydb.filename.pattern", "swaydb-%s");
             int mapSize = settings.getIntProperty("db.swaydb.init.map.size.bytes", 4 << 20);
             int minSegmentSize = settings.getIntProperty("db.swaydb.segment.size.bytes", 2 << 20);

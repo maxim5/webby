@@ -1,8 +1,8 @@
 package io.webby.auth.user;
 
 import io.webby.app.AppSettings;
-import io.webby.db.kv.StorageType;
 import io.webby.testing.Testing;
+import io.webby.testing.TestingStorage;
 import io.webby.testing.ext.SqlDbSetupExtension;
 import org.jetbrains.annotations.NotNull;
 import org.junit.jupiter.api.Tag;
@@ -49,8 +49,8 @@ public class UserManagerIntegrationTest {
         AppSettings settings = Testing.defaultAppSettings();
         settings.modelFilter().setCommonPackageOf(DefaultUser.class);
         switch (scenario) {
-            case SQL -> settings.storageSettings().enableSqlStorage(SQL_DB.settings()).enableKeyValueStorage(StorageType.JAVA_MAP);
-            case KEY_VALUE -> settings.storageSettings().enableKeyValueStorage(StorageType.JAVA_MAP);
+            case SQL -> settings.storageSettings().enableSql(SQL_DB.settings()).enableKeyValue(TestingStorage.KEY_VALUE_DEFAULT);
+            case KEY_VALUE -> settings.storageSettings().enableKeyValue(TestingStorage.KEY_VALUE_DEFAULT);
         }
         return Testing.testStartup(settings, SQL_DB::savepoint, SQL_DB.combinedTestingModule()).getInstance(UserManager.class);
     }

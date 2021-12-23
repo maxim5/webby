@@ -409,9 +409,8 @@ public class KeyValueDbIntegrationTest {
         AppSettings settings = Testing.defaultAppSettings();
         settings.modelFilter().setCommonPackageOf(Session.class, DefaultUser.class, BlobKv.class);
         settings.storageSettings()
-                .enableKeyValueStorage(storageType)
-                .setKeyValueStoragePath(TEMP_DIRECTORY.getCurrentTempDir())
-                .enableSqlStorage(SQL_DB.settings());
+                .enableKeyValue(KeyValueSettings.of(storageType, TEMP_DIRECTORY.getCurrentTempDir()))
+                .enableSql(SQL_DB.settings());
         settings.setProfileMode(false);  // not testing TrackingDbAdapter by default
 
         settings.setProperty("db.chronicle.default.size", 64);
