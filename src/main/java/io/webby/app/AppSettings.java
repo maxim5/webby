@@ -30,6 +30,7 @@ public final class AppSettings implements Settings {
 
     private Path webPath = Path.of("web");
     private List<Path> viewPaths = List.of(Path.of("web"));
+    private Path userContentPath = Path.of("usercontent");
 
     private Charset charset = Charset.defaultCharset();
 
@@ -160,6 +161,19 @@ public final class AppSettings implements Settings {
 
     public void setViewPaths(@NotNull Path @NotNull ... viewPaths) {
         this.viewPaths = List.of(viewPaths);
+    }
+
+    @Override
+    public @NotNull Path userContentPath() {
+        return userContentPath;
+    }
+
+    public void setUserContentPath(@NotNull Path userContentPath) {
+        this.userContentPath = userContentPath;
+    }
+
+    public void setUserContentPath(@NotNull String userContentPath) {
+        this.userContentPath = Path.of(userContentPath);
     }
 
     @Override

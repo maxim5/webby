@@ -25,6 +25,7 @@ public class Testing {
 
     public static final String DEFAULT_WEB_PATH = "src/test/resources";
     public static final String DEFAULT_VIEW_PATH = "src/test/resources";
+    public static final String DEFAULT_USER_CONTENT_PATH = "src/test/resources";
 
     public static @NotNull AppSettings defaultAppSettings() {
         AppSettings settings = new AppSettings();
@@ -33,6 +34,7 @@ public class Testing {
         settings.setSecurityKey("12345678901234567890123456789012");
         settings.setWebPath(DEFAULT_WEB_PATH);
         settings.setViewPath(DEFAULT_VIEW_PATH);
+        settings.setUserContentPath(DEFAULT_USER_CONTENT_PATH);
         settings.modelFilter().setPredicateUnsafe((pkg, cls) -> false);
         settings.handlerFilter().setPredicateUnsafe((pkg, cls) -> false);
         settings.interceptorFilter().setPredicateUnsafe((pkg, cls) -> false);

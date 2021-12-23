@@ -29,6 +29,8 @@ public interface Settings extends SettingsFilters, SettingsProps {
 
     @NotNull List<Path> viewPaths();
 
+    @NotNull Path userContentPath();
+
     @NotNull Charset charset();
 
     @NotNull QueryParser urlParser();

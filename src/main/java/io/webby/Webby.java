@@ -91,6 +91,7 @@ public class Webby {
         validateSecurityKey(settings.securityKey());
         validateWebPath(settings.webPath());
         validateViewPaths(settings.viewPaths());
+        validateUserContentPath(settings.userContentPath());
         validateHotReload(settings);
         validateProfileMode(settings);
         validateSafeMode(settings);
@@ -176,6 +177,10 @@ public class Webby {
     private static void validateViewPaths(@Nullable List<Path> viewPaths) {
         failIf(isNullOrEmpty(viewPaths), "Invalid settings: view paths are not set");
         viewPaths.forEach(viewPath -> validateDirectory(viewPath, "view path", false));
+    }
+
+    private static void validateUserContentPath(@Nullable Path userContentPath) {
+        validateDirectory(userContentPath, "user content path", false);  // TODO: true for dev?
     }
 
     private static void validateDirectory(@Nullable Path path, @NotNull String name, boolean autoCreate) {
