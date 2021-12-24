@@ -31,4 +31,8 @@ public class EasyFiles {
         FileChannel fileChannel = fileInputStream.getChannel();
         return fileChannel.map(FileChannel.MapMode.READ_ONLY, 0, file.length());
     }
+
+    public static long getLastModifiedTime(@NotNull Path path) throws IOException {
+        return Files.getLastModifiedTime(path).toMillis();
+    }
 }

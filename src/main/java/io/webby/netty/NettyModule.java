@@ -17,6 +17,7 @@ public class NettyModule extends AbstractModule {
         bind(ResponseHeaders.class).asEagerSingleton();
         bind(ResponseMapper.class).asEagerSingleton();
         bind(StaticServing.class).asEagerSingleton();
+        bind(UserContentServing.class).asEagerSingleton();
 
         bind(Sender.class).to(ChannelSender.class);  // not a singleton!
         // MessageSender.class must use @ImplementedBy to handle generics (not ideal, but works).

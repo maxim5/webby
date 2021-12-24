@@ -2,7 +2,6 @@ package io.webby.db.content;
 
 import com.google.errorprone.annotations.MustBeClosed;
 import org.jetbrains.annotations.NotNull;
-import org.jetbrains.annotations.Nullable;
 
 import java.io.IOException;
 import java.io.InputStream;
@@ -14,14 +13,18 @@ public interface UserContentStorage {
 
     long getFileSizeInBytes(@NotNull FileId fileId) throws IOException;
 
-    default byte @Nullable [] getFileContent(@NotNull FileId fileId) throws IOException {
+    long getLastModifiedMillis(@NotNull FileId fileId) throws IOException;
+
+    @NotNull CharSequence getContentType(@NotNull FileId fileId);
+
+    default byte @NotNull [] getFileContent(@NotNull FileId fileId) throws IOException {
         try (InputStream stream = readFileContent(fileId)) {
-            return stream != null ? stream.readAllBytes() : null;
+            return stream.readAllBytes();
         }
     }
 
     @MustBeClosed
-    @Nullable InputStream readFileContent(@NotNull FileId fileId) throws IOException;
+    @NotNull InputStream readFileContent(@NotNull FileId fileId) throws IOException;
 
     boolean deleteFile(@NotNull FileId fileId) throws IOException;
 }

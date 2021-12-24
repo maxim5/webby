@@ -67,6 +67,12 @@ public class HttpResponseFactory {
         return response;
     }
 
+    public @NotNull StreamingHttpResponse newResponse(@NotNull InputStream content,
+                                                      @NotNull HttpResponseStatus status,
+                                                      @NotNull CharSequence contentType) {
+        return withContentType(newResponse(content, status), headers.ensureCharset(contentType));
+    }
+
     public @NotNull StreamingHttpResponse newResponse(@NotNull File content, @NotNull HttpResponseStatus status)
             throws IOException {
         ChunkedFile chunkedFile = new ChunkedFile(content);
