@@ -3,22 +3,18 @@ package io.webby.netty.response;
 import com.google.common.flogger.FluentLogger;
 import com.google.inject.Inject;
 import io.netty.buffer.ByteBuf;
-import io.netty.buffer.Unpooled;
 import io.netty.handler.codec.http.*;
 import io.webby.app.Settings;
 import io.webby.common.InjectorHelper;
 import io.webby.netty.HttpConst;
 import io.webby.util.base.Rethrow;
+import io.webby.util.io.EasyFiles;
+import io.webby.util.netty.EasyByteBuf;
 import org.jetbrains.annotations.NotNull;
-import org.jetbrains.annotations.Nullable;
 import org.jetbrains.annotations.VisibleForTesting;
 
-import java.io.File;
-import java.io.FileInputStream;
 import java.io.IOException;
 import java.net.URLConnection;
-import java.nio.MappedByteBuffer;
-import java.nio.channels.FileChannel;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.List;
@@ -59,7 +55,7 @@ public class StaticServing {
             return factory.newResponse304();
         }
 
-        ByteBuf byteBuf = getByteBufOrNull(fullPath);
+        ByteBuf byteBuf = EasyByteBuf.wrapNullable(EasyFiles.readByteBufferOrNull(fullPath));
         if (byteBuf == null) {
             log.at(Level.WARNING).log("Can't serve the static path: %s. Return 404", path);
             return factory.newResponse404();
@@ -78,31 +74,6 @@ public class StaticServing {
         }
 
         return response;
-    }
-
-    /*package*/ @Nullable ByteBuf getByteBufOrNull(@NotNull String path) throws IOException {
-        return getByteBufOrNull(settings.webPath().resolve(path));
-    }
-
-    /*package*/ @Nullable ByteBuf getByteBufOrNull(@NotNull Path path) throws IOException {
-        if (Files.exists(path)) {
-            return fileToByteBuf(path.toFile());
-        }
-        return null;
-    }
-
-    /*package*/ byte @Nullable [] getBytesOrNull(@NotNull Path path) throws IOException {
-        if (Files.exists(path)) {
-            return Files.readAllBytes(path);
-        }
-        return null;
-    }
-
-    private static @NotNull ByteBuf fileToByteBuf(@NotNull File file) throws IOException {
-        FileInputStream fileInputStream = new FileInputStream(file);
-        FileChannel fileChannel = fileInputStream.getChannel();
-        MappedByteBuffer mappedByteBuffer = fileChannel.map(FileChannel.MapMode.READ_ONLY, 0, file.length());
-        return Unpooled.wrappedBuffer(mappedByteBuffer);
     }
 
     @VisibleForTesting

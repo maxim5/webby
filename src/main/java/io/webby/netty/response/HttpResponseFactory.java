@@ -11,6 +11,8 @@ import io.netty.handler.stream.ChunkedStream;
 import io.webby.app.Settings;
 import io.webby.netty.HttpConst;
 import io.webby.netty.errors.*;
+import io.webby.util.io.EasyFiles;
+import io.webby.util.netty.EasyByteBuf;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
@@ -18,6 +20,7 @@ import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.InputStream;
+import java.nio.file.Path;
 import java.util.function.Consumer;
 import java.util.logging.Level;
 
@@ -27,7 +30,6 @@ public class HttpResponseFactory {
     private static final String DEFAULT_WEB = "/web";
 
     @Inject private Settings settings;
-    @Inject private StaticServing staticServing;
     @Inject private ResponseHeaders headers;
 
     public @NotNull FullHttpResponse newResponse(@NotNull CharSequence content, @NotNull HttpResponseStatus status) {
@@ -122,7 +124,8 @@ public class HttpResponseFactory {
 
         String name = "%d.html".formatted(status.code());
         try {
-            ByteBuf clientError = staticServing.getByteBufOrNull(name);
+            Path clientErrorPath = settings.webPath().resolve(name);
+            ByteBuf clientError = EasyByteBuf.wrapNullable(EasyFiles.readByteBufferOrNull(clientErrorPath));
             if (settings.isDevMode()) {
                 ByteBuf resource = (clientError != null) ? clientError : getDefaultResource(name);
                 String content = resource.toString(settings.charset()).formatted(

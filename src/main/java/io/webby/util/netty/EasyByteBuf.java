@@ -1,10 +1,12 @@
 package io.webby.util.netty;
 
 import io.netty.buffer.ByteBuf;
+import io.netty.buffer.Unpooled;
 import io.netty.util.AsciiString;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
+import java.nio.ByteBuffer;
 import java.nio.charset.StandardCharsets;
 
 public class EasyByteBuf {
@@ -61,5 +63,9 @@ public class EasyByteBuf {
 
     public static void writeLongString(long value, @NotNull ByteBuf dest) {
         dest.writeCharSequence(String.valueOf(value), StandardCharsets.US_ASCII);
+    }
+
+    public static @Nullable ByteBuf wrapNullable(@Nullable ByteBuffer buffer) {
+        return buffer != null ? Unpooled.wrappedBuffer(buffer) : null;
     }
 }
