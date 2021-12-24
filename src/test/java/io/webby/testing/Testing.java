@@ -8,6 +8,7 @@ import io.webby.app.AppLifetime;
 import io.webby.app.AppSettings;
 import io.webby.common.ClasspathScanner;
 import io.webby.netty.marshal.Json;
+import io.webby.util.collect.Pair;
 import org.apache.logging.log4j.Level;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.core.config.Configurator;
@@ -21,8 +22,6 @@ import java.util.function.Consumer;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 
 public class Testing {
-    public static final boolean LOG_VERBOSE = false;
-
     public static final String DEFAULT_WEB_PATH = "src/test/resources";
     public static final String DEFAULT_VIEW_PATH = "src/test/resources";
     public static final String DEFAULT_USER_CONTENT_PATH = "src/test/resources";
@@ -69,8 +68,7 @@ public class Testing {
     public static @NotNull Injector testStartup(@NotNull AppSettings settings,
                                                 @NotNull Runnable callback,
                                                 @NotNull Module... modules) {
-        Configurator.setAllLevels(LogManager.ROOT_LOGGER_NAME, LOG_VERBOSE ? Level.TRACE : Level.WARN);
-
+        setLogLevelsFromSettings(settings);
         Locale.setDefault(Locale.US);  // any way to remove this?
 
         Module testingClasspathScanner = TestingModules.instance(new ClasspathScanner());
@@ -78,6 +76,22 @@ public class Testing {
         Internals.injector = Webby.getReady(settings, module);
         callback.run();
         return Internals.injector;
+    }
+
+    private static void setLogLevelsFromSettings(@NotNull AppSettings settings) {
+        String logging = settings.getProperty("testing.logging");
+        if (logging == null) {
+            Configurator.setAllLevels(LogManager.ROOT_LOGGER_NAME, Level.WARN);
+        } else if (logging.contains("=")) {
+            Configurator.setAllLevels(LogManager.ROOT_LOGGER_NAME, Level.WARN);
+            String[] rules = logging.split(",");
+            for (String rule : rules) {
+                Pair<String, String> pair = Pair.of(rule.split("=", 2));
+                Configurator.setLevel(pair.first(), Level.toLevel(pair.second()));
+            }
+        } else {
+            Configurator.setAllLevels(LogManager.ROOT_LOGGER_NAME, Level.toLevel(logging));
+        }
     }
 
     public static class Internals {

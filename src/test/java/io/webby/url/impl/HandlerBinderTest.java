@@ -51,8 +51,8 @@ public class HandlerBinderTest {
         return instance;
     }
 
-    private static @NotNull Map<String, RouteEndpoint>
-            getEndpoints(@NotNull HandlerBinder binder, @NotNull Class<?> handlerClass) {
+    private static @NotNull Map<String, RouteEndpoint> getEndpoints(@NotNull HandlerBinder binder,
+                                                                    @NotNull Class<?> handlerClass) {
         Map<String, RouteEndpoint> endpoints = new HashMap<>();
         List<Binding> bindings = binder.getBindings(Set.of(handlerClass));
         binder.processBindings(bindings, SimpleQueryParser.DEFAULT, endpoints::put);

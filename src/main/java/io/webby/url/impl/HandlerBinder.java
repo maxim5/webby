@@ -17,8 +17,8 @@ import io.webby.url.caller.CallerFactory;
 import io.webby.url.convert.Constraint;
 import io.webby.url.view.Renderer;
 import io.webby.url.view.RendererFactory;
-import io.webby.util.collect.Pair;
 import io.webby.util.base.TimeIt;
+import io.webby.util.collect.Pair;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import org.jetbrains.annotations.VisibleForTesting;
@@ -61,22 +61,31 @@ public class HandlerBinder {
         TimeIt.timeIt(
             () -> processBindings(bindings, parser, (url, endpoint) -> {
                 setup.add(url, endpoint);
-                log.at(Level.FINEST).log("Rule: %s -> %s", url, LazyArgs.lazy(endpoint::describe));
+                log.at(Level.FINE).log("Rule: %s -> %s", url, LazyArgs.lazy(endpoint::describe));
             }),
             millis -> log.at(Level.FINE).log("Endpoints mapped to urls in %d ms", millis)
         );
 
-        try {
-            TimeIt.timeItOrDie(
-                () -> staticServing.iterateStaticFiles(path -> {
-                    String url = "/%s".formatted(path);
-                    setup.add(url, new StaticRouteEndpoint(path, staticServing));
-                    log.at(Level.FINEST).log("Rule: %s -> %s", url, path);
-                }),
-                millis -> log.at(Level.FINE).log("Static files processed in %d ms", millis)
-            );
-        } catch (IOException e) {
-            throw new UrlConfigError("Failed to add static files to URL router", e);
+        String staticFilesUrlPrefix = settings.getProperty("url.static.files.prefix", "/");
+        boolean staticFilesDynamicLookup = settings.getBoolProperty("url.static.files.dynamic.lookup", settings.isDevMode());
+        if (staticFilesDynamicLookup) {
+            String url = "%s{path}".formatted(staticFilesUrlPrefix);
+            StaticRouteDynamicEndpoint endpoint = new StaticRouteDynamicEndpoint(staticFilesUrlPrefix, staticServing);
+            setup.add(url, endpoint);
+            log.at(Level.FINE).log("Rule: %s -> %s", url, LazyArgs.lazy(endpoint::describe));
+        } else {
+            try {
+                TimeIt.timeItOrDie(
+                    () -> staticServing.iterateStaticFiles(path -> {
+                        String url = "%s%s".formatted(staticFilesUrlPrefix, path);
+                        setup.add(url, new StaticRouteStaticEndpoint(path, staticServing));
+                        log.at(Level.FINE).log("Rule: %s -> %s", url, path);
+                    }),
+                    millis -> log.at(Level.FINE).log("Static files processed in %d ms", millis)
+                );
+            } catch (IOException e) {
+                throw new UrlConfigError("Failed to add static files to URL router", e);
+            }
         }
 
         return setup.withParser(parser);
