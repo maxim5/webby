@@ -2,7 +2,7 @@ package io.webby.db.content;
 
 import com.google.inject.Inject;
 import io.webby.app.Settings;
-import io.webby.netty.response.ContentTypeDetector;
+import io.webby.util.collect.OneOf;
 import org.jetbrains.annotations.NotNull;
 
 import java.io.FileInputStream;
@@ -12,13 +12,16 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 
 public class FileSystemStorage implements UserContentStorage {
-    private final ContentTypeDetector detector;
     private final Path root;
 
     @Inject
-    public FileSystemStorage(@NotNull Settings settings, @NotNull ContentTypeDetector detector) {
-        this.detector = detector;
+    public FileSystemStorage(@NotNull Settings settings) {
         root = settings.userContentPath();
+    }
+
+    @Override
+    public @NotNull UserContentLocation getLocation(@NotNull FileId fileId) {
+        return new UserContentLocation(OneOf.ofFirst(resolve(fileId)));
     }
 
     @Override
@@ -42,12 +45,6 @@ public class FileSystemStorage implements UserContentStorage {
     public long getLastModifiedMillis(@NotNull FileId fileId) throws IOException {
         Path path = resolve(fileId);
         return Files.getLastModifiedTime(path).toMillis();
-    }
-
-    @Override
-    public @NotNull CharSequence getContentType(@NotNull FileId fileId) {
-        Path path = resolve(fileId);
-        return detector.guessContentType(path);
     }
 
     @Override

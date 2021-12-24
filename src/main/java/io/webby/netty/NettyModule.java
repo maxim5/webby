@@ -16,6 +16,7 @@ public class NettyModule extends AbstractModule {
         bind(HttpResponseFactory.class).asEagerSingleton();
         bind(ResponseHeaders.class).asEagerSingleton();
         bind(ResponseMapper.class).asEagerSingleton();
+        bind(HttpCachingRequestProcessor.class).asEagerSingleton();
         bind(StaticServing.class).asEagerSingleton();
         bind(UserContentServing.class).asEagerSingleton();
 
