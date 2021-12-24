@@ -118,7 +118,12 @@ public class NettyHttpHandler extends ChannelInboundHandlerAdapter {
 
         if (response instanceof AsyncResponse) {
             if (response instanceof StreamingHttpResponse streaming) {
-                channel.write(streaming).addListener(future -> channel.writeAndFlush(streaming.chunkedContent()));  // TODO: streaming must be closed
+                // TODO: streaming must be closed
+                // The following code doesn't work for http://localhost:8888/headers/zip
+                // channel.write(streaming).addListener(future -> channel.writeAndFlush(streaming.chunkedContent()));
+                // Something's wrong with the executor.
+                context.write(streaming);
+                context.writeAndFlush(streaming.chunkedContent());
             } else if (response instanceof EmptyHttpResponse) {
                 log.at(Level.FINE).log("Response to be handled async");
             }
