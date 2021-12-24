@@ -30,6 +30,7 @@ public class NettyModule extends AbstractModule {
         bind(MarshallerFactory.class).asEagerSingleton();
         bind(Json.class).toProvider(MarshallerFactory.class).asEagerSingleton();
 
+        bind(NettyConst.class).asEagerSingleton();
         bind(NettyBootstrap.class).asEagerSingleton();
         bind(NettyDispatcher.class);   // not a singleton!
         bind(NettyHttpHandler.class);  // not a singleton!

@@ -24,6 +24,7 @@ public class NettyBootstrap {
     @Inject private Settings settings;
     @Inject private AppMaintenance maintenance;
     @Inject private Provider<NettyDispatcher> nettyDispatcher;
+    @Inject private NettyConst nc;
 
     private final Lifetime.Definition lifetime;
 
@@ -35,32 +36,26 @@ public class NettyBootstrap {
     public void runLocally(int port) throws InterruptedException {
         attachShutdownHook();
 
-        int masterThreads = settings.getIntProperty("netty.master.group.threads", 0);
-        int workerThreads = settings.getIntProperty("netty.worker.group.threads", 0);
-        int maxInitLineLength = settings.getIntProperty("netty.max.init.line.length", HttpObjectDecoder.DEFAULT_MAX_INITIAL_LINE_LENGTH);
-        int maxHeaderLength = settings.getIntProperty("netty.max.header.length", HttpObjectDecoder.DEFAULT_MAX_HEADER_SIZE);
-        int maxChunkLength = settings.getIntProperty("netty.max.chunk.length", HttpObjectDecoder.DEFAULT_MAX_CHUNK_SIZE);
-
-        EventLoopGroup masterGroup = new NioEventLoopGroup(masterThreads);
+        EventLoopGroup masterGroup = new NioEventLoopGroup(nc.masterThreads);
         lifetime.onTerminate(masterGroup::shutdownGracefully);
 
-        EventLoopGroup workerGroup = new NioEventLoopGroup(workerThreads);
+        EventLoopGroup workerGroup = new NioEventLoopGroup(nc.workerThreads);
         lifetime.onTerminate(workerGroup::shutdownGracefully);
 
         try {
             ServerBootstrap bootstrap = new ServerBootstrap();
             bootstrap.group(masterGroup, workerGroup)
-                    .channel(NioServerSocketChannel.class)
-                    .childHandler(new ChannelInitializer<>() {
-                        @Override
-                        protected void initChannel(@NotNull Channel channel) {
-                            ChannelPipeline pipeline = channel.pipeline();
-                            pipeline.addLast(new HttpServerCodec(maxInitLineLength, maxHeaderLength, maxChunkLength));
-                            pipeline.addLast(nettyDispatcher.get());
-                        }
-                    })
-                    .option(ChannelOption.SO_BACKLOG, 128)
-                    .childOption(ChannelOption.SO_KEEPALIVE, true);
+                .channel(NioServerSocketChannel.class)
+                .childHandler(new ChannelInitializer<>() {
+                    @Override
+                    protected void initChannel(@NotNull Channel channel) {
+                        ChannelPipeline pipeline = channel.pipeline();
+                        pipeline.addLast(new HttpServerCodec(nc.maxInitLineLength, nc.maxHeaderLength, nc.maxChunkLength));
+                        pipeline.addLast(nettyDispatcher.get());
+                    }
+                })
+                .option(ChannelOption.SO_BACKLOG, 128)
+                .childOption(ChannelOption.SO_KEEPALIVE, true);
             ChannelFuture httpChannel = bootstrap.bind(port).sync();
             log.at(Level.INFO).log("Server running at %s://%s:%d/", "http", "localhost", port);
             httpChannel.channel().closeFuture().sync();

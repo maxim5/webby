@@ -49,6 +49,7 @@ public class NettyDispatcher extends ChannelInboundHandlerAdapter {
     @Inject private HttpResponseFactory factory;
     @Inject private SessionManager sessionManager;
     @Inject private UserManager userManager;
+    @Inject private NettyConst nc;
 
     private ChannelPipeline pipeline;
 
@@ -61,8 +62,6 @@ public class NettyDispatcher extends ChannelInboundHandlerAdapter {
     public void channelRead(@NotNull ChannelHandlerContext context, @NotNull Object message) {
         log.at(Level.FINER).log("Dispatching %s\n", message);
 
-        int maxContentLength = settings.getIntProperty("netty.content.max.length.bytes", 10 << 20);
-
         if (message instanceof HttpRequest request) {
             String uri = request.uri();
             AgentEndpoint endpoint = websocketRouter.route(uri);
@@ -70,13 +69,13 @@ public class NettyDispatcher extends ChannelInboundHandlerAdapter {
             if (endpoint != null) {
                 log.at(Level.FINER).log("Upgrading channel to Websocket: %s", uri);
                 ClientInfo clientInfo = getClientInfo(request);
-                pipeline.addLast(new HttpObjectAggregator(maxContentLength));
+                pipeline.addLast(new HttpObjectAggregator(nc.maxContentLength));
                 pipeline.addLast(new WebSocketServerCompressionHandler());
                 pipeline.addLast(new WebSocketServerProtocolHandler(uri, PROTOCOL, true));
                 pipeline.addLast(helper.injectMembers(new NettyWebsocketHandler(endpoint, clientInfo)));
             } else {
                 log.at(Level.FINER).log("Migrating channel to default HTTP: %s", uri);
-                pipeline.addLast(new HttpObjectAggregator(maxContentLength));
+                pipeline.addLast(new HttpObjectAggregator(nc.maxContentLength));
                 pipeline.addLast(new ChunkedWriteHandler());
                 pipeline.addLast(httpHandler.get());
             }
