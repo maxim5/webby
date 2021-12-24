@@ -32,16 +32,18 @@ public class FileSystemStorage implements UserContentStorage {
     }
 
     @Override
-    public @Nullable InputStream readFileContent(@NotNull FileId fileId) throws IOException {
-        Path path = resolve(fileId);
-        if (!Files.exists(path)) {
-            return null;
-        }
-        return new FileInputStream(path.toFile());
+    public long getFileSizeInBytes(@NotNull FileId fileId) throws IOException {
+        return Files.size(resolve(fileId));
     }
 
     @Override
-    public boolean deleteFileContent(@NotNull FileId fileId) throws IOException {
+    public @Nullable InputStream readFileContent(@NotNull FileId fileId) throws IOException {
+        Path path = resolve(fileId);
+        return Files.exists(path) ? new FileInputStream(path.toFile()) : null;
+    }
+
+    @Override
+    public boolean deleteFile(@NotNull FileId fileId) throws IOException {
         Path path = resolve(fileId);
         if (Files.exists(path)) {
             Files.delete(path);

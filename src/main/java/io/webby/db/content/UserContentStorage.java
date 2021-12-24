@@ -12,6 +12,8 @@ public interface UserContentStorage {
 
     void addFileOrDie(@NotNull FileId fileId, byte @NotNull [] content) throws IOException;
 
+    long getFileSizeInBytes(@NotNull FileId fileId) throws IOException;
+
     default byte @Nullable [] getFileContent(@NotNull FileId fileId) throws IOException {
         try (InputStream stream = readFileContent(fileId)) {
             return stream != null ? stream.readAllBytes() : null;
@@ -21,5 +23,5 @@ public interface UserContentStorage {
     @MustBeClosed
     @Nullable InputStream readFileContent(@NotNull FileId fileId) throws IOException;
 
-    boolean deleteFileContent(@NotNull FileId fileId) throws IOException;
+    boolean deleteFile(@NotNull FileId fileId) throws IOException;
 }
