@@ -9,6 +9,7 @@ import io.routekit.*;
 import io.webby.app.AppConfigException;
 import io.webby.app.Settings;
 import io.webby.netty.response.StaticServing;
+import io.webby.netty.response.UserContentServing;
 import io.webby.url.HandlerConfigError;
 import io.webby.url.UrlConfigError;
 import io.webby.url.annotate.*;
@@ -45,6 +46,7 @@ public class HandlerBinder {
     @Inject private CallerFactory callerFactory;
     @Inject private RendererFactory rendererFactory;
     @Inject private StaticServing staticServing;
+    @Inject private UserContentServing userContentServing;
 
     public @NotNull Router<RouteEndpoint> buildHandlerRouter() throws AppConfigException {
         Set<? extends Class<?>> handlerClasses = scanner.getHandlerClassesFromClasspath();
@@ -70,7 +72,7 @@ public class HandlerBinder {
         boolean staticFilesDynamicLookup = settings.getBoolProperty("url.static.files.dynamic.lookup", settings.isDevMode());
         if (staticFilesDynamicLookup) {
             String url = "%s{path}".formatted(staticFilesUrlPrefix);
-            StaticRouteDynamicEndpoint endpoint = new StaticRouteDynamicEndpoint(staticFilesUrlPrefix, staticServing);
+            DynamicServingRouteEndpoint endpoint = new DynamicServingRouteEndpoint(staticFilesUrlPrefix, staticServing);
             setup.add(url, endpoint);
             log.at(Level.FINE).log("Rule: %s -> %s", url, LazyArgs.lazy(endpoint::describe));
         } else {
@@ -78,7 +80,7 @@ public class HandlerBinder {
                 TimeIt.timeItOrDie(
                     () -> staticServing.iterateStaticFiles(path -> {
                         String url = "%s%s".formatted(staticFilesUrlPrefix, path);
-                        setup.add(url, new StaticRouteStaticEndpoint(path, staticServing));
+                        setup.add(url, new StaticRouteEndpoint(path, staticServing));
                         log.at(Level.FINE).log("Rule: %s -> %s", url, path);
                     }),
                     millis -> log.at(Level.FINE).log("Static files processed in %d ms", millis)
@@ -87,6 +89,12 @@ public class HandlerBinder {
                 throw new UrlConfigError("Failed to add static files to URL router", e);
             }
         }
+
+        String userContentUrlPrefix = settings.getProperty("url.user.content.prefix", "/content/");
+        String url = "%s{path}".formatted(userContentUrlPrefix);
+        DynamicServingRouteEndpoint endpoint = new DynamicServingRouteEndpoint(userContentUrlPrefix, userContentServing);
+        setup.add(url, endpoint);
+        log.at(Level.FINE).log("Rule: %s -> %s", url, LazyArgs.lazy(endpoint::describe));
 
         return setup.withParser(parser);
     }

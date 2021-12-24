@@ -10,13 +10,13 @@ import org.jetbrains.annotations.Nullable;
 
 import java.util.Map;
 
-public final class StaticRouteDynamicEndpoint implements RouteEndpoint {
+public final class StaticRouteEndpoint implements RouteEndpoint {
     private final Endpoint endpoint;
     private final StaticServing serving;
 
-    public StaticRouteDynamicEndpoint(@NotNull String prefix, @NotNull StaticServing serving) {
+    public StaticRouteEndpoint(@NotNull String path, @NotNull StaticServing serving) {
         this.serving = serving;
-        endpoint = new Endpoint(new DynamicCaller(prefix), EndpointContext.EMPTY_CONTEXT, EndpointOptions.DEFAULT);
+        endpoint = new Endpoint(new StaticServingCaller(path), EndpointContext.EMPTY_CONTEXT, EndpointOptions.DEFAULT);
     }
 
     @Override
@@ -29,22 +29,21 @@ public final class StaticRouteDynamicEndpoint implements RouteEndpoint {
         return endpoint.caller().method().toString();
     }
 
-    private class DynamicCaller implements Caller {
-        private final String prefix;
+    private class StaticServingCaller implements Caller {
+        private final String path;
 
-        private DynamicCaller(@NotNull String prefix) {
-            this.prefix = prefix;
+        private StaticServingCaller(@NotNull String path) {
+            this.path = path;
         }
 
         @Override
         public Object call(@NotNull FullHttpRequest request, @NotNull Map<String, CharArray> variables) throws Exception {
-            CharArray path = variables.get("path");
-            return serving.serve(path.toString(), request);
+            return serving.serve(path, request);
         }
 
         @Override
         public @NotNull Object method() {
-            return "DynamicCaller:" + prefix;
+            return "StaticServingCaller[%s->%s]".formatted(path, serving);
         }
     }
 }

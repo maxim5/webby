@@ -3,20 +3,22 @@ package io.webby.url.impl;
 import io.netty.handler.codec.http.FullHttpRequest;
 import io.netty.handler.codec.http.HttpRequest;
 import io.routekit.util.CharArray;
-import io.webby.netty.response.StaticServing;
+import io.webby.netty.response.Serving;
 import io.webby.url.caller.Caller;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.Map;
 
-public final class StaticRouteStaticEndpoint implements RouteEndpoint {
+public final class DynamicServingRouteEndpoint implements RouteEndpoint {
     private final Endpoint endpoint;
-    private final StaticServing serving;
+    private final Serving serving;
+    private final String prefix;
 
-    public StaticRouteStaticEndpoint(@NotNull String path, @NotNull StaticServing serving) {
+    public DynamicServingRouteEndpoint(@NotNull String prefix, @NotNull Serving serving) {
         this.serving = serving;
-        endpoint = new Endpoint(new StaticCaller(path), EndpointContext.EMPTY_CONTEXT, EndpointOptions.DEFAULT);
+        this.prefix = prefix;
+        this.endpoint = new Endpoint(new ServingCaller(), EndpointContext.EMPTY_CONTEXT, EndpointOptions.DEFAULT);
     }
 
     @Override
@@ -29,21 +31,16 @@ public final class StaticRouteStaticEndpoint implements RouteEndpoint {
         return endpoint.caller().method().toString();
     }
 
-    private class StaticCaller implements Caller {
-        private final String path;
-
-        private StaticCaller(@NotNull String path) {
-            this.path = path;
-        }
-
+    private class ServingCaller implements Caller {
         @Override
         public Object call(@NotNull FullHttpRequest request, @NotNull Map<String, CharArray> variables) throws Exception {
-            return serving.serve(path, request);
+            CharArray path = variables.get("path");
+            return serving.serve(path.toString(), request);
         }
 
         @Override
         public @NotNull Object method() {
-            return "StaticCaller:" + path;
+            return "ServingCaller[%s->%s]".formatted(prefix, serving);
         }
     }
 }

@@ -1,8 +1,8 @@
 package io.webby.netty.response;
 
 import com.google.inject.Inject;
-import io.netty.handler.codec.http.FullHttpRequest;
 import io.netty.handler.codec.http.HttpMethod;
+import io.netty.handler.codec.http.HttpRequest;
 import io.netty.handler.codec.http.HttpResponse;
 import io.webby.app.Settings;
 import org.jetbrains.annotations.NotNull;
@@ -12,7 +12,7 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.function.Consumer;
 
-public class StaticServing {
+public class StaticServing implements Serving {
     @Inject private Settings settings;
     @Inject private HttpCachingRequestProcessor cachingProcessor;
 
@@ -25,11 +25,13 @@ public class StaticServing {
         });
     }
 
+    @Override
     public boolean accept(@NotNull HttpMethod method) {
         return method.equals(HttpMethod.GET);
     }
 
-    public @NotNull HttpResponse serve(@NotNull String path, @NotNull FullHttpRequest request) throws IOException {
+    @Override
+    public @NotNull HttpResponse serve(@NotNull String path, @NotNull HttpRequest request) throws IOException {
         Path fullPath = settings.webPath().resolve(path);
         return cachingProcessor.process(fullPath, request);
     }
