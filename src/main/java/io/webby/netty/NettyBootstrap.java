@@ -7,10 +7,8 @@ import io.netty.bootstrap.ServerBootstrap;
 import io.netty.channel.*;
 import io.netty.channel.nio.NioEventLoopGroup;
 import io.netty.channel.socket.nio.NioServerSocketChannel;
-import io.netty.handler.codec.http.HttpObjectAggregator;
 import io.netty.handler.codec.http.HttpObjectDecoder;
 import io.netty.handler.codec.http.HttpServerCodec;
-import io.netty.handler.stream.ChunkedWriteHandler;
 import io.webby.app.AppLifetime;
 import io.webby.app.AppMaintenance;
 import io.webby.app.Settings;
@@ -39,7 +37,6 @@ public class NettyBootstrap {
 
         int masterThreads = settings.getIntProperty("netty.master.group.threads", 0);
         int workerThreads = settings.getIntProperty("netty.worker.group.threads", 0);
-        int maxContentLength = settings.getIntProperty("netty.content.max.length.bytes", 10 << 20);
         int maxInitLineLength = settings.getIntProperty("netty.max.init.line.length", HttpObjectDecoder.DEFAULT_MAX_INITIAL_LINE_LENGTH);
         int maxHeaderLength = settings.getIntProperty("netty.max.header.length", HttpObjectDecoder.DEFAULT_MAX_HEADER_SIZE);
         int maxChunkLength = settings.getIntProperty("netty.max.chunk.length", HttpObjectDecoder.DEFAULT_MAX_CHUNK_SIZE);
@@ -56,11 +53,9 @@ public class NettyBootstrap {
                     .channel(NioServerSocketChannel.class)
                     .childHandler(new ChannelInitializer<>() {
                         @Override
-                        protected void initChannel(Channel ch) {
-                            ChannelPipeline pipeline = ch.pipeline();
+                        protected void initChannel(@NotNull Channel channel) {
+                            ChannelPipeline pipeline = channel.pipeline();
                             pipeline.addLast(new HttpServerCodec(maxInitLineLength, maxHeaderLength, maxChunkLength));
-                            pipeline.addLast(new HttpObjectAggregator(maxContentLength));
-                            pipeline.addLast(new ChunkedWriteHandler());
                             pipeline.addLast(nettyDispatcher.get());
                         }
                     })

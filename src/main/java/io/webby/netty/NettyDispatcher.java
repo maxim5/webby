@@ -12,6 +12,7 @@ import io.netty.handler.codec.http.websocketx.WebSocketFrame;
 import io.netty.handler.codec.http.websocketx.WebSocketServerProtocolHandler;
 import io.netty.handler.codec.http.websocketx.extensions.compression.WebSocketServerCompressionHandler;
 import io.netty.handler.stream.ChunkedWriteHandler;
+import io.webby.app.Settings;
 import io.webby.auth.session.Session;
 import io.webby.auth.session.SessionManager;
 import io.webby.auth.user.User;
@@ -39,9 +40,10 @@ import java.util.stream.Collectors;
 public class NettyDispatcher extends ChannelInboundHandlerAdapter {
     private static final FluentLogger log = FluentLogger.forEnclosingClass();
 
-    public static final String PROTOCOL = "io.webby";
+    private static final String PROTOCOL = "io.webby";
 
     @Inject private InjectorHelper helper;
+    @Inject private Settings settings;
     @Inject private WebsocketRouter websocketRouter;
     @Inject private Provider<NettyHttpHandler> httpHandler;
     @Inject private HttpResponseFactory factory;
@@ -59,6 +61,8 @@ public class NettyDispatcher extends ChannelInboundHandlerAdapter {
     public void channelRead(@NotNull ChannelHandlerContext context, @NotNull Object message) {
         log.at(Level.FINER).log("Dispatching %s\n", message);
 
+        int maxContentLength = settings.getIntProperty("netty.content.max.length.bytes", 10 << 20);
+
         if (message instanceof HttpRequest request) {
             String uri = request.uri();
             AgentEndpoint endpoint = websocketRouter.route(uri);
@@ -66,12 +70,14 @@ public class NettyDispatcher extends ChannelInboundHandlerAdapter {
             if (endpoint != null) {
                 log.at(Level.FINER).log("Upgrading channel to Websocket: %s", uri);
                 ClientInfo clientInfo = getClientInfo(request);
+                pipeline.addLast(new HttpObjectAggregator(maxContentLength));
                 pipeline.addLast(new WebSocketServerCompressionHandler());
                 pipeline.addLast(new WebSocketServerProtocolHandler(uri, PROTOCOL, true));
                 pipeline.addLast(helper.injectMembers(new NettyWebsocketHandler(endpoint, clientInfo)));
-                pipeline.remove(ChunkedWriteHandler.class);
             } else {
-                log.at(Level.FINER).log("Migrating channel to HTTP: %s", uri);
+                log.at(Level.FINER).log("Migrating channel to default HTTP: %s", uri);
+                pipeline.addLast(new HttpObjectAggregator(maxContentLength));
+                pipeline.addLast(new ChunkedWriteHandler());
                 pipeline.addLast(httpHandler.get());
             }
 
