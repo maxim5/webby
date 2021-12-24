@@ -5,35 +5,23 @@ import com.google.inject.Inject;
 import io.netty.buffer.ByteBuf;
 import io.netty.handler.codec.http.*;
 import io.webby.app.Settings;
-import io.webby.common.InjectorHelper;
 import io.webby.netty.HttpConst;
-import io.webby.util.base.Rethrow;
 import io.webby.util.io.EasyFiles;
 import io.webby.util.netty.EasyByteBuf;
 import org.jetbrains.annotations.NotNull;
-import org.jetbrains.annotations.VisibleForTesting;
 
 import java.io.IOException;
-import java.net.URLConnection;
 import java.nio.file.Files;
 import java.nio.file.Path;
-import java.util.List;
 import java.util.function.Consumer;
 import java.util.logging.Level;
-
-import static io.webby.util.base.EasyObjects.firstNonNull;
 
 public class StaticServing {
     private static final FluentLogger log = FluentLogger.forEnclosingClass();
 
-    private ContentTypeProvider contentTypeProvider;
     @Inject private Settings settings;
     @Inject private HttpResponseFactory factory;
-
-    @Inject
-    private void init(@NotNull InjectorHelper helper) {
-        contentTypeProvider = helper.getOrDefault(ContentTypeProvider.class, () -> path -> null);
-    }
+    @Inject private ContentTypeDetector detector;
 
     public void iterateStaticFiles(@NotNull Consumer<String> consumer) throws IOException {
         Path webPath = settings.webPath();
@@ -64,7 +52,7 @@ public class StaticServing {
             return factory.newResponse304();
         }
 
-        FullHttpResponse response = factory.newResponse(byteBuf, HttpResponseStatus.OK, guessContentType(fullPath));
+        FullHttpResponse response = factory.newResponse(byteBuf, HttpResponseStatus.OK, detector.guessContentType(fullPath));
         if (settings.isProdMode()) {
             response.headers().add(HttpConst.CACHE_CONTROL, HttpCaching.CACHE_FOREVER);
         } else {
@@ -74,15 +62,5 @@ public class StaticServing {
         }
 
         return response;
-    }
-
-    @VisibleForTesting
-    CharSequence guessContentType(@NotNull Path path) {
-        return firstNonNull(List.of(
-            () -> contentTypeProvider.getContentType(path),
-            () -> URLConnection.guessContentTypeFromName(path.toString()),
-            Rethrow.Suppliers.rethrow(() -> Files.probeContentType(path)),
-            Rethrow.Suppliers.rethrow(() -> ThirdPartyMimeTypeDetectors.detect(path.toFile()))
-        ), HttpConst.APPLICATION_OCTET_STREAM);
     }
 }
