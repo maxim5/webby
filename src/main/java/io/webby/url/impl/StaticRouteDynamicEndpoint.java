@@ -8,18 +8,15 @@ import io.webby.url.caller.Caller;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
-import java.util.Collections;
 import java.util.Map;
 
 public final class StaticRouteDynamicEndpoint implements RouteEndpoint {
-    private static final EndpointContext EMPTY_CONTEXT = new EndpointContext(Collections.emptyMap(), true, false);
-
     private final Endpoint endpoint;
     private final StaticServing serving;
 
     public StaticRouteDynamicEndpoint(@NotNull String prefix, @NotNull StaticServing serving) {
         this.serving = serving;
-        endpoint = new Endpoint(new DynamicCaller(prefix), EMPTY_CONTEXT, EndpointOptions.DEFAULT);
+        endpoint = new Endpoint(new DynamicCaller(prefix), EndpointContext.EMPTY_CONTEXT, EndpointOptions.DEFAULT);
     }
 
     @Override
