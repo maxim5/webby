@@ -1,4 +1,4 @@
-package io.webby.perf;
+package io.webby.testing;
 
 import okhttp3.MediaType;
 import okhttp3.Request;
