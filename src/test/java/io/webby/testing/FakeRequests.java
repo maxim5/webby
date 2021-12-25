@@ -27,7 +27,7 @@ public class FakeRequests {
     public static @NotNull FullHttpRequest request(@NotNull HttpMethod method,
                                                    @NotNull String uri,
                                                    @Nullable Object content) {
-        ByteBuf byteBuf = TestingBytes.asByteBuf((content instanceof String str) ? str : toJson(content));
+        ByteBuf byteBuf = toByteBufContent(content);
         return new DefaultFullHttpRequest(HttpVersion.HTTP_1_1, method, uri, byteBuf);
     }
 
@@ -35,7 +35,7 @@ public class FakeRequests {
                                                    @NotNull String uri,
                                                    @Nullable Object content,
                                                    @NotNull HttpHeaders headers) {
-        ByteBuf byteBuf = TestingBytes.asByteBuf((content instanceof String str) ? str : toJson(content));
+        ByteBuf byteBuf = toByteBufContent(content);
         return new DefaultFullHttpRequest(HttpVersion.HTTP_1_1, method, uri, byteBuf, headers, new DefaultHttpHeaders());
     }
 
@@ -56,6 +56,19 @@ public class FakeRequests {
                                                          int attributes) {
         return new DefaultHttpRequestEx(request, new EmbeddedChannel(), Testing.Internals.json(),
                                         constraints, new Object[attributes]);
+    }
+
+    public static @NotNull ByteBuf toByteBufContent(@Nullable Object content) {
+        if (content instanceof ByteBuf buf) {
+            return buf;
+        }
+        if (content instanceof byte[] array) {
+            return TestingBytes.asByteBufOrNull(array);
+        }
+        if (content instanceof String str) {
+            return TestingBytes.asByteBuf(str);
+        }
+        return TestingBytes.asByteBuf(toJson(content));
     }
 
     public static @Nullable String toJson(@Nullable Object obj) {

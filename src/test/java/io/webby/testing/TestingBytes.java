@@ -29,12 +29,16 @@ public class TestingBytes {
         return asReadable(content != null ? Unpooled.copiedBuffer(content, CHARSET) : Unpooled.EMPTY_BUFFER);
     }
 
+    public static @NotNull ByteBuf asByteBuf(byte @NotNull [] bytes) {
+        return Unpooled.wrappedBuffer(bytes);
+    }
+
     public static @Nullable ByteBuf asByteBufOrNull(@Nullable String content) {
         return content != null ? asByteBuf(content) : null;
     }
 
     public static @Nullable ByteBuf asByteBufOrNull(byte @Nullable [] bytes) {
-        return bytes != null ? Unpooled.wrappedBuffer(bytes) : null;
+        return bytes != null ? asByteBuf(bytes) : null;
     }
 
     public static @NotNull ByteArrayInputStream asByteStream(@NotNull String str) {
