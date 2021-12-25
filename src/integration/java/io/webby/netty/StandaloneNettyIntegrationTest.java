@@ -79,8 +79,9 @@ public class StandaloneNettyIntegrationTest {
 
     private static void call(@NotNull Request request, @NotNull ThrowConsumer<Response, IOException> onSuccess) {
         OkHttpClient client = new OkHttpClient.Builder().build();
+        log.at(Level.INFO).log("[CLIENT] Sending request:\n%s", describe(request));
         try (Response response = client.newCall(request).execute()) {
-            log.at(Level.INFO).log("[CLIENT] Received: " + response.code() + " " + response.body().contentLength());
+            log.at(Level.INFO).log("[CLIENT] Received response:\n%s", describe(response));
             onSuccess.accept(response);
         } catch (IOException e) {
             fail(e);
@@ -91,10 +92,14 @@ public class StandaloneNettyIntegrationTest {
                                          @NotNull WebSocketListener listener,
                                          @NotNull Consumer<WebSocket> session) {
         OkHttpClient client = new OkHttpClient.Builder().build();
+        log.at(Level.INFO).log("[CLIENT] Sending request:\n%s", describe(request));
         WebSocket ws = client.newWebSocket(request, listener);
-        session.accept(ws);
-        TestingUtil.waitFor(200);
-        ws.close(1000, null);
+        try {
+            session.accept(ws);
+            TestingUtil.waitFor(200);
+        } finally {
+            ws.close(1000, null);
+        }
     }
 
     private static @NotNull AppSettings createSettingsForTest() {

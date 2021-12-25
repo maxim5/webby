@@ -13,6 +13,8 @@ import java.util.List;
 import java.util.concurrent.atomic.AtomicReference;
 import java.util.logging.Level;
 
+import static io.webby.testing.OkAsserts.describe;
+
 public class DefaultWebSocketListener extends WebSocketListener {
     private static final FluentLogger log = FluentLogger.forEnclosingClass();
 
@@ -29,12 +31,12 @@ public class DefaultWebSocketListener extends WebSocketListener {
 
     @Override
     public void onOpen(@NotNull WebSocket webSocket, @NotNull Response response) {
-        log.at(Level.INFO).log("[WS:%s] onOpen:\n%s", webSocket, response);
+        log.at(Level.INFO).log("[WS:%s] onOpen:\n%s", webSocket, describe(response));
     }
 
     @Override
     public void onFailure(@NotNull WebSocket webSocket, @NotNull Throwable cause, @Nullable Response response) {
-        log.at(Level.SEVERE).withCause(cause).log("[WS:%s] onFailure:\n%s", webSocket, response);
+        log.at(Level.SEVERE).withCause(cause).log("[WS:%s] onFailure:\n%s", webSocket, describe(response));
         error.set(cause);
     }
 
