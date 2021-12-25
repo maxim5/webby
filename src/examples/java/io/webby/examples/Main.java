@@ -33,6 +33,7 @@ public class Main {
         settings.setSecurityKey("12345678901234567890123456789012");
         settings.setWebPath("out/examples/resources/web");
         settings.setViewPath("out/examples/resources/web");
+        settings.setUserContentPath(".data/userdata");
         settings.modelFilter().setPackageOnly("io.webby");  // because this class is in `io.webby.examples`
         settings.setProperty("jte.class.directory", JteExample.CLASS_DIR);
         settings.setProperty("jte.view.paths", "out/examples/resources/web/jte");
