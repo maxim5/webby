@@ -19,6 +19,8 @@ import java.util.logging.Level;
 
 import static com.google.common.truth.Truth.assertThat;
 import static io.webby.testing.OkAsserts.*;
+import static io.webby.testing.OkRequests.files;
+import static io.webby.testing.OkRequests.json;
 import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.fail;
 
@@ -41,7 +43,7 @@ public class StandaloneNettyIntegrationTest {
 
     @Test
     public void post_json() {
-        call(Ok.postJson("/strint/foo-bar/777", "{a: 1, b: 2, c:3}"), response -> {
+        call(Ok.post("/strint/foo-bar/777", json("{a: 1, b: 2, c:3}")), response -> {
             assertClientCode(response, 200);
             assertClientBody(response, "Vars: str=foo-bar y=777 content=<{a=1.0, b=2.0, c=3.0}>");
             assertClientHeader(response, "Content-Type", "text/html; charset=UTF-8");
@@ -63,6 +65,41 @@ public class StandaloneNettyIntegrationTest {
             assertClientCode(response, 200);
             assertClientBody(response, 388);
             assertClientHeader(response, "Content-Type", "application/zip");
+        });
+    }
+
+    @Test
+    public void upload_file() {
+        call(Ok.post("/upload/file", files("src/examples/resources/web/favicon.ico")), response -> {
+            assertClientCode(response, 200);
+            assertClientHeader(response, "Content-Type", "text/html; charset=UTF-8");
+            assertClientBody(response, """
+                Mixed: content-disposition: form-data; name="favicon.ico"; filename="favicon.ico"
+                content-type: application/octet-stream; charset=UTF-8
+                content-length: 15406
+                Completed: true
+                IsInMemory: true""");
+        });
+    }
+
+    @Test
+    public void upload_many_files() {
+        call(Ok.post("/upload/file", files("src/examples/resources/web/favicon.ico",
+                                           "src/examples/resources/web/perf.js")), response -> {
+            assertClientCode(response, 200);
+            assertClientHeader(response, "Content-Type", "text/html; charset=UTF-8");
+            assertClientBody(response, """
+                Mixed: content-disposition: form-data; name="favicon.ico"; filename="favicon.ico"
+                content-type: application/octet-stream; charset=UTF-8
+                content-length: 15406
+                Completed: true
+                IsInMemory: true
+                ----------
+                Mixed: content-disposition: form-data; name="perf.js"; filename="perf.js"
+                content-type: application/octet-stream; charset=UTF-8
+                content-length: 815
+                Completed: true
+                IsInMemory: true""");
         });
     }
 

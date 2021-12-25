@@ -19,6 +19,7 @@ import java.util.List;
 
 import static io.webby.perf.ConcurrentStressing.MEDIUM_WAIT;
 import static io.webby.perf.ConcurrentStressing.execWorkers;
+import static io.webby.testing.OkRequests.json;
 import static io.webby.util.base.Rethrow.Runnables.rethrow;
 
 public class StressNettyMain {
@@ -31,9 +32,9 @@ public class StressNettyMain {
 
             Init init = new Init(1000_000, new ProgressMonitor(5_000), new Rand());
             execWorkers(MEDIUM_WAIT, List.of(
-                HttpWorker.randomListCaller(init, List.of(Ok.get("/"), Ok.postJson("/user/", ""))),
-                HttpWorker.randomListCaller(init, List.of(Ok.get("/"), Ok.postJson("/user/", ""))),
-                HttpWorker.randomListCaller(init, List.of(Ok.get("/"), Ok.postJson("/user/", ""))),
+                HttpWorker.randomListCaller(init, List.of(Ok.get("/"), Ok.post("/user/", json("")))),
+                HttpWorker.randomListCaller(init, List.of(Ok.get("/"), Ok.post("/user/", json("")))),
+                HttpWorker.randomListCaller(init, List.of(Ok.get("/"), Ok.post("/user/", json("")))),
                 HttpWorker.randomListCaller(init, List.of(Ok.get("/"), Ok.get("/user/1"), Ok.get("/user/")))
             ));
         }
