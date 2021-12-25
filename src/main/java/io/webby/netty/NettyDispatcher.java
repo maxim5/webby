@@ -12,7 +12,6 @@ import io.netty.handler.codec.http.websocketx.WebSocketFrame;
 import io.netty.handler.codec.http.websocketx.WebSocketServerProtocolHandler;
 import io.netty.handler.codec.http.websocketx.extensions.compression.WebSocketServerCompressionHandler;
 import io.netty.handler.stream.ChunkedWriteHandler;
-import io.webby.app.Settings;
 import io.webby.auth.session.Session;
 import io.webby.auth.session.SessionManager;
 import io.webby.auth.user.User;
@@ -43,13 +42,12 @@ public class NettyDispatcher extends ChannelInboundHandlerAdapter {
     private static final String PROTOCOL = "io.webby";
 
     @Inject private InjectorHelper helper;
-    @Inject private Settings settings;
+    @Inject private NettyConst nc;
     @Inject private WebsocketRouter websocketRouter;
     @Inject private Provider<NettyHttpHandler> httpHandler;
     @Inject private HttpResponseFactory factory;
     @Inject private SessionManager sessionManager;
     @Inject private UserManager userManager;
-    @Inject private NettyConst nc;
 
     private ChannelPipeline pipeline;
 
