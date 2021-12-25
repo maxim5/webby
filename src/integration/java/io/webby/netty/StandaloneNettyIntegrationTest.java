@@ -14,6 +14,7 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.RegisterExtension;
 
 import java.io.IOException;
+import java.util.Map;
 import java.util.function.Consumer;
 import java.util.logging.Level;
 
@@ -84,22 +85,36 @@ public class StandaloneNettyIntegrationTest {
 
     @Test
     public void upload_many_files() {
-        call(Ok.post("/upload/file", files("src/examples/resources/web/favicon.ico",
-                                           "src/examples/resources/web/perf.js")), response -> {
+        call(Ok.post("/upload/file", files(Map.of("foo.txt", new byte[64], "bar.png", new byte[64]))), response -> {
             assertClientCode(response, 200);
             assertClientHeader(response, "Content-Type", "text/html; charset=UTF-8");
             assertClientBody(response, """
-                Mixed: content-disposition: form-data; name="favicon.ico"; filename="favicon.ico"
+                Mixed: content-disposition: form-data; name="foo.txt"; filename="foo.txt"
                 content-type: application/octet-stream; charset=UTF-8
-                content-length: 15406
+                content-length: 64
                 Completed: true
                 IsInMemory: true
                 ----------
-                Mixed: content-disposition: form-data; name="perf.js"; filename="perf.js"
+                Mixed: content-disposition: form-data; name="bar.png"; filename="bar.png"
                 content-type: application/octet-stream; charset=UTF-8
-                content-length: 815
+                content-length: 64
                 Completed: true
                 IsInMemory: true""");
+        });
+    }
+
+    @Test
+    public void upload_large_file() {
+        call(Ok.post("/upload/file", files(Map.of("foo.png", new byte[8 << 20]))), response -> {
+            assertClientCode(response, 200);
+            assertClientHeader(response, "Content-Type", "text/html; charset=UTF-8");
+            assertClientBody(response, """
+                Mixed: content-disposition: form-data; name="foo.png"; filename="foo.png"
+                content-type: application/octet-stream; charset=UTF-8
+                content-length: 8388608
+                Completed: true
+                IsInMemory: false
+                RealFile: <temp-path> DeleteAfter: true""");
         });
     }
 

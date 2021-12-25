@@ -8,6 +8,7 @@ import org.jetbrains.annotations.NotNull;
 
 import java.io.File;
 import java.util.Arrays;
+import java.util.Map;
 
 public record OkRequests(@NotNull String httpUrl, @NotNull String websocketUrl) {
     private static final MediaType JSON = MediaType.get("application/json; charset=utf-8");
@@ -41,6 +42,22 @@ public record OkRequests(@NotNull String httpUrl, @NotNull String websocketUrl) 
         for (File file : files) {
             builder.addFormDataPart(file.getName(), file.getName(),
                                     RequestBody.create(file, MediaType.parse("application/octet-stream")));
+        }
+        return builder.build();
+    }
+
+    public static @NotNull RequestBody files(@NotNull Map<String, byte[]> files) {
+        MultipartBody.Builder builder = new MultipartBody.Builder().setType(MultipartBody.FORM);
+        for (Map.Entry<String, byte[]> entry : files.entrySet()) {
+            builder.addFormDataPart(entry.getKey(), entry.getKey(), RequestBody.create(entry.getValue()));
+        }
+        return builder.build();
+    }
+
+    public static @NotNull RequestBody multipart(@NotNull Map<String, String> parts) {
+        MultipartBody.Builder builder = new MultipartBody.Builder().setType(MultipartBody.FORM);
+        for (Map.Entry<String, String> entry : parts.entrySet()) {
+            builder.addFormDataPart(entry.getKey(), entry.getValue());
         }
         return builder.build();
     }

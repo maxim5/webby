@@ -37,6 +37,7 @@ public class AcceptContent {
             List<String> bodyParts = decoder.getBodyHttpDatas().stream()
                     .map(Object::toString)
                     .map(s -> s.replace("\r\n", "\n"))
+                    .map(s -> s.replaceAll("RealFile:\\s[a-zA-Z0-9/\\\\-_:]+", "RealFile: <temp-path>"))
                     .toList();
             return String.join("\n----------\n", bodyParts);
         } finally {
