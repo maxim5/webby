@@ -4,6 +4,7 @@ import com.google.common.flogger.FluentLogger;
 import io.netty.handler.codec.http.websocketx.BinaryWebSocketFrame;
 import io.netty.handler.codec.http.websocketx.TextWebSocketFrame;
 import io.webby.url.annotate.Serve;
+import io.webby.util.netty.EasyByteBuf;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.ArrayList;
@@ -25,7 +26,7 @@ public class HelloWebsocket {
 
     public void onBinary(@NotNull BinaryWebSocketFrame frame) {
         frames.add(frame.content().retain());
-        log.at(Level.INFO).log("onBinary: %s", Arrays.toString(frame.content().array()));
+        log.at(Level.INFO).log("onBinary: %s", Arrays.toString(EasyByteBuf.copyToByteArray(frame.content())));
     }
 
     public List<Object> getFrames() {

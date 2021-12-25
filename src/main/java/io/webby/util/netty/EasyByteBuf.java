@@ -14,6 +14,12 @@ public class EasyByteBuf {
         return new AsciiString(bytes, false);
     }
 
+    public static byte @NotNull [] copyToByteArray(@NotNull ByteBuf byteBuf) {
+        byte[] bytes = new byte[byteBuf.readableBytes()];
+        byteBuf.duplicate().readBytes(bytes);
+        return bytes;
+    }
+
     public static @Nullable ByteBuf readUntil(@NotNull ByteBuf content, byte value, int minLength, int maxLength) {
         int start = content.readerIndex();
         int index = content.indexOf(start, start + Math.min(maxLength, content.readableBytes()), value);
