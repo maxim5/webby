@@ -1,6 +1,5 @@
 package io.webby.testing;
 
-import com.google.common.truth.Truth;
 import okhttp3.Response;
 import okhttp3.ResponseBody;
 import org.jetbrains.annotations.NotNull;
@@ -8,6 +7,7 @@ import org.jetbrains.annotations.Nullable;
 
 import java.io.IOException;
 
+import static com.google.common.truth.Truth.assertThat;
 import static org.junit.jupiter.api.Assertions.*;
 
 public class OkAsserts {
@@ -32,6 +32,6 @@ public class OkAsserts {
     }
 
     public static void assertClientHeader(@NotNull Response response, @NotNull String name, @NotNull String... expected) {
-        Truth.assertThat(response.headers(name)).containsExactlyElementsIn(expected).inOrder();
+        assertThat(response.headers(name)).containsExactlyElementsIn(expected).inOrder();
     }
 }

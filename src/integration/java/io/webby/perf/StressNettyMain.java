@@ -23,7 +23,7 @@ import static io.webby.util.base.Rethrow.Runnables.rethrow;
 
 public class StressNettyMain {
     private static final int PORT = 7000;
-    private static final OkRequests Ok = OkRequests.of(PORT);
+    private static final OkRequests Ok = OkRequests.ofLocalhost(PORT);
 
     public static void main(String[] args) throws Exception {
         try (Closeable ignored = bootstrapServer()) {
