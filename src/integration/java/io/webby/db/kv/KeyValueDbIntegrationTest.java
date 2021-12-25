@@ -26,6 +26,7 @@ import io.webby.testing.ext.TempDirectoryExtension;
 import io.webby.util.collect.Pair;
 import org.jetbrains.annotations.NotNull;
 import org.junit.jupiter.api.Tag;
+import org.junit.jupiter.api.Tags;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.RegisterExtension;
 import org.junit.jupiter.params.ParameterizedTest;
@@ -40,7 +41,7 @@ import static io.webby.testing.FakeRequests.postEx;
 import static io.webby.testing.TestingUtil.array;
 import static org.junit.jupiter.api.Assertions.*;
 
-@Tag("sql")
+@Tags({@Tag("sql"), @Tag("slow")})
 public class KeyValueDbIntegrationTest {
     @RegisterExtension private static final CloseAllExtension CLOSE_ALL = new CloseAllExtension();
     @RegisterExtension private static final TempDirectoryExtension TEMP_DIRECTORY = new TempDirectoryExtension();
