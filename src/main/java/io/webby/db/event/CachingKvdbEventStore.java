@@ -1,5 +1,6 @@
 package io.webby.db.event;
 
+import com.google.common.collect.ArrayListMultimap;
 import com.google.common.collect.Multimap;
 import com.google.mu.util.stream.BiStream;
 import io.webby.db.kv.KeyValueDb;
@@ -17,24 +18,31 @@ import java.util.concurrent.locks.ReentrantReadWriteLock;
 public class CachingKvdbEventStore<K, E> implements KeyEventStore<K, E> {
     private final ReadWriteLock LOCK = new ReentrantReadWriteLock();  // Alternative: Guava Striped
 
-    private final Multimap<K, E> cache;
     private final KeyValueDb<K, List<E>> db;
+    private final Multimap<K, E> cache = ArrayListMultimap.create();
+    private final KeyEventStoreFactory.Compacter<E> compacter;
 
     private final int maxCacheSizeBeforeFlush;
     private final int flushBatchSize;
 
-    public CachingKvdbEventStore(@NotNull Multimap<K, E> cache,
-                                 @NotNull KeyValueDb<K, List<E>> db,
-                                 int maxCacheSizeBeforeFlush, int flushBatchSize) {
-        this.cache = cache;
+    public CachingKvdbEventStore(@NotNull KeyValueDb<K, List<E>> db,
+                                 @NotNull KeyEventStoreFactory.Compacter<E> compacter,
+                                 int maxCacheSizeBeforeFlush,
+                                 int flushBatchSize) {
         this.db = db;
+        this.compacter = compacter;
         this.maxCacheSizeBeforeFlush = maxCacheSizeBeforeFlush;
         this.flushBatchSize = flushBatchSize;
     }
 
     @Override
     public void append(@NotNull K key, @NotNull E event) {
-        cache.put(key, event);
+        LOCK.readLock().lock();
+        try {
+            cache.put(key, event);
+        } finally {
+            LOCK.readLock().unlock();
+        }
     }
 
     @Override
@@ -81,6 +89,7 @@ public class CachingKvdbEventStore<K, E> implements KeyEventStore<K, E> {
                         "Internal error: keys/values mismatch: keys=%s values=%s".formatted(keys, values);
                 List<List<E>> combined = BiStream.zip(keys, values)
                         .mapKeys(cache::get)
+                        .mapKeys(compacter::compactInMemory)
                         .mapToObj(CachingKvdbEventStore::concatToList)
                         .toList();
                 db.putAll(keys, combined);

@@ -1,6 +1,8 @@
 package io.webby.db.event;
 
 import com.google.common.collect.ArrayListMultimap;
+import com.google.common.collect.ImmutableListMultimap;
+import com.google.common.collect.ImmutableMultimap;
 import com.google.common.collect.Multimap;
 import com.google.inject.Injector;
 import io.webby.app.AppSettings;
@@ -24,6 +26,7 @@ import org.junit.jupiter.params.provider.EnumSource;
 import org.junit.jupiter.params.provider.ValueSource;
 
 import java.util.Arrays;
+import java.util.Collections;
 
 import static com.google.common.truth.Truth.assertThat;
 import static io.webby.testing.TestingUtil.array;
@@ -141,6 +144,29 @@ public class KeyEventStoreIntegrationTest {
         }
     }
 
+    @ParameterizedTest
+    @EnumSource(StorageType.class)
+    public void many_events_per_key(StorageType storageType) {
+        KeyEventStoreFactory factory = setup(storageType).getInstance(KeyEventStoreFactory.class);
+
+        int size = 100000;
+        int flushEvery = 10000;
+        try (KeyEventStore<Integer, String> store = factory.getEventStore("foo", Integer.class, String.class)) {
+            for (int i = 1; i <= size; i++) {
+                store.append(1, "12345678");
+                if (i % flushEvery == 0) {
+                    store.forceFlush();
+                    assertEmptyCache(store);
+                }
+            }
+
+            Multimap<Integer, String> expected = new ImmutableMultimap.Builder<Integer, String>()
+                    .putAll(1, Collections.nCopies(size, "12345678"))
+                    .build();
+            assertEqualsTo(store, expected);
+        }
+    }
+
     private static @NotNull Injector setup(int batchSize) {
         AppSettings settings = Testing.defaultAppSettings();
         settings.setProperty("db.event.store.flush.batch.size", batchSize);
@@ -158,6 +184,7 @@ public class KeyEventStoreIntegrationTest {
         settings.setProfileMode(false);  // not testing TrackingDbAdapter by default
 
         settings.setProperty("db.event.store.flush.batch.size", 1);
+        settings.setProperty("db.event.store.average.size", 80);
 
         settings.setProperty("db.redis.port", REDIS.getPort());
         return Testing.testStartup(settings, SQL_DB::savepoint, SQL_DB.combinedTestingModule());

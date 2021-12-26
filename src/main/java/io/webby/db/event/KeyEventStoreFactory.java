@@ -1,9 +1,6 @@
 package io.webby.db.event;
 
-import com.google.common.collect.ArrayListMultimap;
 import com.google.common.collect.ImmutableList;
-import com.google.common.collect.ListMultimap;
-import com.google.common.collect.Multimaps;
 import com.google.inject.Inject;
 import io.webby.app.Settings;
 import io.webby.db.codec.Codec;
@@ -18,6 +15,7 @@ import org.jetbrains.annotations.NotNull;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
+import java.util.Collection;
 import java.util.List;
 
 import static io.webby.util.base.EasyCast.castAny;
@@ -27,22 +25,35 @@ public class KeyEventStoreFactory {
     @Inject private CodecProvider provider;
     @Inject private KeyValueFactory factory;
 
-    public <K, E> @NotNull KeyEventStore<K, E> getEventStore(@NotNull String name, @NotNull Class<K> key, @NotNull Class<E> value) {
-        ListMultimap<K, E> cache = Multimaps.synchronizedListMultimap(ArrayListMultimap.create());
-        Codec<List<E>> codec = getListCodec(value);
-        DbOptions<K, List<E>> options = DbOptions.<K, List<E>>of(name, key, castAny(List.class)).withCustomValueCodec(codec);
-        KeyValueDb<K, List<E>> db = factory.getDb(options);
-        int maxCacheSizeBeforeFlush = settings.getIntProperty("db.event.store.max.cache.size", 1 << 16);
-        int flushBatchSize = settings.getIntProperty("db.event.store.flush.batch.size", 64);
-        return new CachingKvdbEventStore<>(cache, db, maxCacheSizeBeforeFlush, flushBatchSize);
+    public <K, E> @NotNull KeyEventStore<K, E> getEventStore(@NotNull String name,
+                                                             @NotNull Class<K> key,
+                                                             @NotNull Class<E> value) {
+        return getEventStore(name, key, value, list -> list);
     }
 
-    private <E> @NotNull Codec<List<E>> getListCodec(@NotNull Class<E> value) {
+    public <K, E> @NotNull KeyEventStore<K, E> getEventStore(@NotNull String name,
+                                                             @NotNull Class<K> key,
+                                                             @NotNull Class<E> value,
+                                                             @NotNull Compacter<E> compacter) {
+        int maxCacheSizeBeforeFlush = settings.getIntProperty("db.event.store.max.cache.size", 1 << 16);
+        int flushBatchSize = settings.getIntProperty("db.event.store.flush.batch.size", 64);
+        int averageSizePerKey = settings.getIntProperty("db.event.store.average.size", 10);
+
+        Codec<List<E>> codec = getListCodec(value, averageSizePerKey);
+        DbOptions<K, List<E>> options = DbOptions.<K, List<E>>of(name, key, castAny(List.class)).withCustomValueCodec(codec);
+        KeyValueDb<K, List<E>> db = factory.getDb(options);
+        return new CachingKvdbEventStore<>(db, compacter, maxCacheSizeBeforeFlush, flushBatchSize);
+    }
+
+    private <E> @NotNull Codec<List<E>> getListCodec(@NotNull Class<E> value, long averageSizePerKey) {
         Codec<E> valueCodec = provider.getCodecOrDie(value);
         return new Codec<>() {
             @Override
             public @NotNull CodecSize size() {
-                return CodecSize.minSize(4);
+                if (averageSizePerKey == -1 || valueCodec.size().numBytes() < 0) {
+                    return CodecSize.minSize(4);
+                }
+                return CodecSize.averageSize(averageSizePerKey * valueCodec.size().numBytes());
             }
 
             @Override
@@ -77,5 +88,9 @@ public class KeyEventStoreFactory {
                 return builder.build();
             }
         };
+    }
+
+    public interface Compacter<E> {
+        @NotNull Collection<E> compactInMemory(@NotNull Collection<E> events);
     }
 }
