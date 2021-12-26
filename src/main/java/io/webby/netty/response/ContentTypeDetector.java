@@ -3,6 +3,7 @@ package io.webby.netty.response;
 import com.google.inject.Inject;
 import io.webby.common.InjectorHelper;
 import io.webby.netty.HttpConst;
+import io.webby.util.base.EasyObjects;
 import io.webby.util.base.Rethrow;
 import org.jetbrains.annotations.NotNull;
 
@@ -11,7 +12,7 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.List;
 
-import static io.webby.util.base.EasyObjects.firstNonNull;
+import static io.webby.util.base.EasyObjects.*;
 
 public class ContentTypeDetector {
     private ContentTypeProvider contentTypeProvider;
@@ -21,7 +22,7 @@ public class ContentTypeDetector {
         contentTypeProvider = helper.getOrDefault(ContentTypeProvider.class, () -> path -> null);
     }
 
-    public CharSequence guessContentType(@NotNull Path path) {
+    public @NotNull CharSequence guessContentType(@NotNull Path path) {
         return firstNonNull(List.of(
             () -> contentTypeProvider.getContentType(path),
             () -> URLConnection.guessContentTypeFromName(path.toString()),
