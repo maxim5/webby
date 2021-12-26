@@ -4,6 +4,8 @@ import com.google.errorprone.annotations.CanIgnoreReturnValue;
 import io.webby.util.func.*;
 import org.jetbrains.annotations.NotNull;
 
+import java.io.IOException;
+import java.io.UncheckedIOException;
 import java.util.function.BiConsumer;
 import java.util.function.Consumer;
 import java.util.function.Function;
@@ -18,6 +20,16 @@ public interface Rethrow {
     @CanIgnoreReturnValue
     static <T> T rethrow(@NotNull String message, @NotNull Throwable exception) {
         throw new RuntimeException(message, exception);
+    }
+
+    @CanIgnoreReturnValue
+    static <T> T rethrow(@NotNull IOException exception) {
+        throw new UncheckedIOException(exception);
+    }
+
+    @CanIgnoreReturnValue
+    static <T> T rethrow(@NotNull String message, @NotNull IOException exception) {
+        throw new UncheckedIOException(message, exception);
     }
 
     interface Runnables {
