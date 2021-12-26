@@ -1,13 +1,11 @@
 package io.webby.db.kv.tupl;
 
-import com.google.inject.Inject;
-import io.webby.app.Settings;
 import io.webby.db.codec.Codec;
-import io.webby.db.codec.CodecProvider;
+import io.webby.db.kv.DbOptions;
 import io.webby.db.kv.impl.BaseKeyValueFactory;
+import io.webby.util.base.Rethrow;
 import io.webby.util.lazy.AtomicLazy;
 import io.webby.util.lazy.DelayedAccessLazy;
-import io.webby.util.base.Rethrow;
 import org.cojen.tupl.*;
 import org.jetbrains.annotations.NotNull;
 
@@ -20,18 +18,15 @@ import static io.webby.util.base.Rethrow.rethrow;
 public class TuplFactory extends BaseKeyValueFactory {
     private final DelayedAccessLazy<Database> db = AtomicLazy.emptyLazy();
 
-    @Inject private Settings settings;
-    @Inject private CodecProvider provider;
-
     @Override
-    public @NotNull <K, V> TuplDb<K, V> getInternalDb(@NotNull String name, @NotNull Class<K> key, @NotNull Class<V> value) {
-        return cacheIfAbsent(name, () -> {
+    public @NotNull <K, V> TuplDb<K, V> getInternalDb(@NotNull DbOptions<K, V> options) {
+        return cacheIfAbsent(options.name(), () -> {
             Database database = db.lazyGet(Rethrow.Suppliers.rethrow(() -> Database.open(getDatabaseConfig())));
 
             try {
-                Codec<K> keyCodec = provider.getCodecOrDie(key);
-                Codec<V> valueCodec = provider.getCodecOrDie(value);
-                Index index = database.openIndex(name);
+                Codec<K> keyCodec = keyCodecOrDie(options);
+                Codec<V> valueCodec = valueCodecOrDie(options);
+                Index index = database.openIndex(options.name());
                 return new TuplDb<>(index, database, keyCodec, valueCodec);
             } catch (IOException e) {
                 return rethrow(e);

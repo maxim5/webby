@@ -1,9 +1,7 @@
 package io.webby.db.kv.swaydb;
 
-import com.google.inject.Inject;
-import io.webby.app.Settings;
 import io.webby.db.codec.Codec;
-import io.webby.db.codec.CodecProvider;
+import io.webby.db.kv.DbOptions;
 import io.webby.db.kv.impl.BaseKeyValueFactory;
 import org.jetbrains.annotations.NotNull;
 import swaydb.data.slice.Slice;
@@ -15,21 +13,18 @@ import swaydb.persistent.DefaultConfigs;
 import java.nio.file.Path;
 
 public class SwayDbFactory extends BaseKeyValueFactory {
-    @Inject private Settings settings;
-    @Inject private CodecProvider provider;
-
     @Override
-    public @NotNull <K, V> SwayDb<K, V> getInternalDb(@NotNull String name, @NotNull Class<K> key, @NotNull Class<V> value) {
-        return cacheIfAbsent(name, () -> {
+    public @NotNull <K, V> SwayDb<K, V> getInternalDb(@NotNull DbOptions<K, V> options) {
+        return cacheIfAbsent(options.name(), () -> {
             Path storagePath = settings.storageSettings().keyValueSettingsOrDie().path();
             String filename = settings.getProperty("db.swaydb.filename.pattern", "swaydb-%s");
             int mapSize = settings.getIntProperty("db.swaydb.init.map.size.bytes", 4 << 20);
             int minSegmentSize = settings.getIntProperty("db.swaydb.segment.size.bytes", 2 << 20);
             int checkpointSize = settings.getIntProperty("db.swaydb.appendix.flush.checkpoint.size.bytes", 2 << 20);
 
-            Path path = storagePath.resolve(formatFileName(filename, name));
-            Codec<K> keyCodec = provider.getCodecOrDie(key);
-            Codec<V> valueCodec = provider.getCodecOrDie(value);
+            Path path = storagePath.resolve(formatFileName(filename, options.name()));
+            Codec<K> keyCodec = keyCodecOrDie(options);
+            Codec<V> valueCodec = valueCodecOrDie(options);
 
             PersistentMap.Config<K, V, Void> config = PersistentMap
                     .functionsOff(path, getSerializer(keyCodec), getSerializer(valueCodec))

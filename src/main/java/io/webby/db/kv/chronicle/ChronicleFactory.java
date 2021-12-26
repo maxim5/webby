@@ -1,11 +1,9 @@
 package io.webby.db.kv.chronicle;
 
 import com.google.common.flogger.FluentLogger;
-import com.google.inject.Inject;
-import io.webby.app.Settings;
 import io.webby.db.codec.Codec;
-import io.webby.db.codec.CodecProvider;
 import io.webby.db.codec.CodecSize;
+import io.webby.db.kv.DbOptions;
 import io.webby.db.kv.impl.BaseKeyValueFactory;
 import net.openhft.chronicle.hash.serialization.SizeMarshaller;
 import net.openhft.chronicle.hash.serialization.SizedReader;
@@ -29,12 +27,9 @@ import static java.util.Objects.requireNonNull;
 public class ChronicleFactory extends BaseKeyValueFactory {
     private static final FluentLogger log = FluentLogger.forEnclosingClass();
 
-    @Inject private Settings settings;
-    @Inject private CodecProvider provider;
-
     @Override
-    public @NotNull <K, V> ChronicleDb<K, V> getInternalDb(@NotNull String name, @NotNull Class<K> key, @NotNull Class<V> value) {
-        return cacheIfAbsent(name, rethrow(() -> {
+    public @NotNull <K, V> ChronicleDb<K, V> getInternalDb(@NotNull DbOptions<K, V> options) {
+        return cacheIfAbsent(options.name(), rethrow(() -> {
             Path storagePath = settings.storageSettings().keyValueSettingsOrDie().path();
             String filename = settings.getProperty("db.chronicle.filename.pattern", "chronicle-%s.data");
             boolean putReturnsNull = settings.getBoolProperty("db.chronicle.put.return.null", false);
@@ -43,9 +38,9 @@ public class ChronicleFactory extends BaseKeyValueFactory {
             int replicationId = settings.getIntProperty("db.chronicle.replication.identifier", -1);
             long defaultSize = settings.getLongProperty("db.chronicle.default.size", 1 << 20);
 
-            ChronicleMapBuilder<K, V> builder = ChronicleMap.of(key, value)
+            ChronicleMapBuilder<K, V> builder = ChronicleMap.of(options.key(), options.value())
                     .entries(defaultSize)
-                    .name(name)
+                    .name(options.name())
                     .putReturnsNull(putReturnsNull)
                     .removeReturnsNull(removeReturnsNull)
                     .skipCloseOnExitHook(skipExitHook);
@@ -53,20 +48,22 @@ public class ChronicleFactory extends BaseKeyValueFactory {
                 builder.replication((byte) replicationId);
             }
 
-            pickSerialization(key, builder::keySizeMarshaller, builder::averageKeySize, builder::keyMarshaller);
-            pickSerialization(value, builder::valueSizeMarshaller, builder::averageValueSize, builder::valueMarshaller);
+            pickSerialization(options.key(), keyCodecOrNull(options),
+                              builder::keySizeMarshaller, builder::averageKeySize, builder::keyMarshaller);
+            pickSerialization(options.value(), valueCodecOrNull(options),
+                              builder::valueSizeMarshaller, builder::averageValueSize, builder::valueMarshaller);
 
-            File destination = storagePath.resolve(formatFileName(filename, name)).toFile();
+            File destination = storagePath.resolve(formatFileName(filename, options.name())).toFile();
             ChronicleMap<K, V> map = builder.createPersistedTo(destination);
             return new ChronicleDb<>(map);
         }));
     }
 
     private <T> void pickSerialization(@NotNull Class<T> klass,
+                                       @Nullable Codec<T> codec,
                                        @NotNull Consumer<SizeMarshaller> onSize,
                                        @NotNull LongConsumer onAverageValueSize,
                                        @NotNull Consumer<BytesReaderWriter<T>> onMarshaller) {
-        Codec<T> codec = provider.getCodecOrNull(klass);
         SerializationBuilder<T> serialization = new SerializationBuilder<>(klass);
         CodecSize codecSize = bestSize(serialization, codec);
         switch (codecSize.estimate()) {

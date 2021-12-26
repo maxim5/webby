@@ -4,10 +4,11 @@ import com.google.common.collect.ImmutableMap;
 import com.google.inject.Inject;
 import io.webby.app.Settings;
 import io.webby.common.InjectorHelper;
-import io.webby.db.kv.impl.BaseKeyValueFactory;
 import io.webby.db.codec.Codec;
-import io.webby.db.codec.CodecProvider;
+import io.webby.db.kv.DbOptions;
+import io.webby.db.kv.impl.BaseKeyValueFactory;
 import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 import org.mapdb.*;
 import org.mapdb.serializer.GroupSerializerObjectArray;
 
@@ -21,23 +22,24 @@ public class MapDbFactory extends BaseKeyValueFactory {
     private final DB db;
     private final MapDbCreator creator;
 
-    @Inject private CodecProvider codecProvider;
-
     @Inject
     public MapDbFactory(@NotNull InjectorHelper helper) {
         db = helper.getOrDefault(DB.class, this::createDefaultMapDB);
-        creator = helper.getOrDefault(MapDbCreator.class, () -> (db, name, key, value) -> null);
+        creator = helper.getOrDefault(MapDbCreator.class, () -> (db, options) -> null);
     }
 
-    public @NotNull <K, V> MapDbImpl<K, V> getInternalDb(@NotNull String name, @NotNull Class<K> key, @NotNull Class<V> value) {
-        return cacheIfAbsent(name, () -> {
-            DB.Maker<HTreeMap<?, ?>> customMaker = creator.getMaker(db, name, key, value);
+    @Override
+    public @NotNull <K, V> MapDbImpl<K, V> getInternalDb(@NotNull DbOptions<K, V> options) {
+        return cacheIfAbsent(options.name(), () -> {
+            DB.Maker<HTreeMap<?, ?>> customMaker = creator.getMaker(db, options);
 
             DB.Maker<HTreeMap<K, V>> maker;
             if (customMaker != null) {
                 maker = castAny(customMaker);
             } else {
-                maker = db.hashMap(name, pickSerializer(key), pickSerializer(value));
+                maker = db.hashMap(options.name(),
+                                   pickSerializer(options.key(), keyCodecOrNull(options)),
+                                   pickSerializer(options.value(), valueCodecOrNull(options)));
             }
 
             HTreeMap<K, V> map = maker.createOrOpen();
@@ -46,7 +48,7 @@ public class MapDbFactory extends BaseKeyValueFactory {
     }
 
     @Override
-    public void close() throws IOException {
+    public void close() {
         db.close();
     }
 
@@ -96,23 +98,22 @@ public class MapDbFactory extends BaseKeyValueFactory {
     // More flexibility:
     // - force custom
     // - force different out-of-box (e.g. elsa, or packed)
-    private <T> @NotNull Serializer<T> pickSerializer(@NotNull Class<T> klass) {
+    private <T> @NotNull Serializer<T> pickSerializer(@NotNull Class<T> klass, @Nullable Codec<T> codec) {
         Serializer<?> outOfBox = OUT_OF_BOX.get(klass);
         if (outOfBox != null) {
             return castAny(outOfBox);
         }
 
-        Codec<T> ownCustom = codecProvider.getCodecOrNull(klass);
-        if (ownCustom != null) {
+        if (codec != null) {
             return new GroupSerializerObjectArray<>() {
                 @Override
                 public void serialize(@NotNull DataOutput2 out, @NotNull T value) throws IOException {
-                    ownCustom.writeTo(out, value);
+                    codec.writeTo(out, value);
                 }
 
                 @Override
                 public T deserialize(@NotNull DataInput2 input, int available) throws IOException {
-                    return ownCustom.readFrom(new DataInput2.DataInputToStream(input), available);
+                    return codec.readFrom(new DataInput2.DataInputToStream(input), available);
                 }
             };
         }
