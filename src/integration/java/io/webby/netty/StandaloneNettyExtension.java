@@ -12,8 +12,6 @@ import org.junit.jupiter.api.extension.ExtensionContext;
 
 import java.util.logging.Level;
 
-import static io.webby.util.base.Rethrow.Runnables.rethrow;
-
 public class StandaloneNettyExtension implements BeforeAllCallback, AfterAllCallback {
     private static final FluentLogger log = FluentLogger.forEnclosingClass();
     public static final int DEFAULT_PORT = 9999;
@@ -24,7 +22,13 @@ public class StandaloneNettyExtension implements BeforeAllCallback, AfterAllCall
 
     public StandaloneNettyExtension(@NotNull AppSettings settings, int port) {
         bootstrap = Webby.nettyBootstrap(settings, TestingModules.PERSISTENT_DB_CLEANER_MODULE);
-        serverThread = new Thread(rethrow(() -> bootstrap.runLocally(port)));
+        serverThread = new Thread(() -> {
+            try {
+                bootstrap.runLocally(port);
+            } catch (InterruptedException e) {
+                log.at(Level.FINE).withCause(e).log("Server thread interrupted");
+            }
+        });
         this.port = port;
     }
 
