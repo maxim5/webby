@@ -6,6 +6,7 @@ import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
 import java.io.Closeable;
+import java.io.Flushable;
 import java.util.*;
 import java.util.function.BiConsumer;
 import java.util.function.BiFunction;
@@ -14,7 +15,7 @@ import java.util.function.Supplier;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
-public interface KeyValueDb<K, V> extends Iterable<Map.Entry<K, V>>, Closeable {
+public interface KeyValueDb<K, V> extends Iterable<Map.Entry<K, V>>, Flushable, Closeable {
     // DB size
 
     int size();
@@ -245,11 +246,13 @@ public interface KeyValueDb<K, V> extends Iterable<Map.Entry<K, V>>, Closeable {
 
     // I/O
 
+    @Override
     void flush();
 
     default void forceFlush() {
         flush();
     }
 
+    @Override
     void close();
 }
