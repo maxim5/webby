@@ -19,6 +19,8 @@ import java.util.function.Supplier;
 
 import static io.webby.app.AppConfigException.assure;
 import static io.webby.util.base.EasyCast.castAny;
+import static io.webby.util.base.EasyObjects.firstNonNull;
+import static io.webby.util.base.EasyObjects.firstNonNullIfExist;
 
 public abstract class BaseKeyValueFactory implements InternalKeyValueFactory, Closeable {
     protected final Map<String, KeyValueDb<?, ?>> cache = new HashMap<>();
@@ -50,19 +52,19 @@ public abstract class BaseKeyValueFactory implements InternalKeyValueFactory, Cl
     }
 
     protected <K, V> @NotNull Codec<K> keyCodecOrDie(@NotNull DbOptions<K, V> options) {
-        return provider.getCodecOrDie(options.key());
+        return firstNonNull(options.keyCodec(), () -> provider.getCodecOrDie(options.key()));
     }
 
     protected <K, V> @Nullable Codec<K> keyCodecOrNull(@NotNull DbOptions<K, V> options) {
-        return provider.getCodecOrNull(options.key());
+        return firstNonNullIfExist(options.keyCodec(), () -> provider.getCodecOrNull(options.key()));
     }
 
     protected <K, V> @NotNull Codec<V> valueCodecOrDie(@NotNull DbOptions<K, V> options) {
-        return provider.getCodecOrDie(options.value());
+        return firstNonNull(options.valueCodec(), () -> provider.getCodecOrDie(options.value()));
     }
 
     protected <K, V> @Nullable Codec<V> valueCodecOrNull(@NotNull DbOptions<K, V> options) {
-        return provider.getCodecOrNull(options.value());
+        return firstNonNullIfExist(options.valueCodec(), () -> provider.getCodecOrNull(options.value()));
     }
 
     protected static @NotNull String formatFileName(@NotNull String pattern, @NotNull String name) {
