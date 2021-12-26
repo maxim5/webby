@@ -22,16 +22,23 @@ public class CachingKvdbEventStore<K, E> implements KeyEventStore<K, E> {
     private final Multimap<K, E> cache = ArrayListMultimap.create();
     private final KeyEventStoreFactory.Compacter<E> compacter;
 
-    private final int maxCacheSizeBeforeFlush;
+    private final int cacheSizeSoftLimit;
+    private final int cacheSizeHardLimit;
     private final int flushBatchSize;
 
     public CachingKvdbEventStore(@NotNull KeyValueDb<K, List<E>> db,
                                  @NotNull KeyEventStoreFactory.Compacter<E> compacter,
-                                 int maxCacheSizeBeforeFlush,
+                                 int cacheSizeSoftLimit,
+                                 int cacheSizeHardLimit,
                                  int flushBatchSize) {
+        assert cacheSizeSoftLimit > 0 :
+                "Invalid cache size limits: soft=%d hard=%d".formatted(cacheSizeSoftLimit, cacheSizeHardLimit);
+        assert cacheSizeHardLimit >= cacheSizeSoftLimit :
+                "Invalid cache size limits: soft=%d hard=%d".formatted(cacheSizeSoftLimit, cacheSizeHardLimit);
         this.db = db;
         this.compacter = compacter;
-        this.maxCacheSizeBeforeFlush = maxCacheSizeBeforeFlush;
+        this.cacheSizeSoftLimit = cacheSizeSoftLimit;
+        this.cacheSizeHardLimit = cacheSizeHardLimit;
         this.flushBatchSize = flushBatchSize;
     }
 
@@ -42,6 +49,9 @@ public class CachingKvdbEventStore<K, E> implements KeyEventStore<K, E> {
             cache.put(key, event);
         } finally {
             LOCK.readLock().unlock();
+        }
+        if (cache.size() >= cacheSizeHardLimit) {
+            forceFlush();
         }
     }
 
@@ -70,7 +80,7 @@ public class CachingKvdbEventStore<K, E> implements KeyEventStore<K, E> {
 
     @Override
     public void flush() {
-        if (cache.size() >= maxCacheSizeBeforeFlush) {
+        if (cache.size() >= cacheSizeSoftLimit) {
             forceFlush();
         }
     }

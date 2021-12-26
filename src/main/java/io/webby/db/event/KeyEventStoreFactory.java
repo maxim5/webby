@@ -35,14 +35,15 @@ public class KeyEventStoreFactory {
                                                              @NotNull Class<K> key,
                                                              @NotNull Class<E> value,
                                                              @NotNull Compacter<E> compacter) {
-        int maxCacheSizeBeforeFlush = settings.getIntProperty("db.event.store.max.cache.size", 1 << 16);
+        int cacheSizeSoftLimit = settings.getIntProperty("db.event.store.cache.size.soft.limit", 1 << 16);
+        int cacheSizeHardLimit = settings.getIntProperty("db.event.store.cache.size.hard.limit", 1 << 17);
         int flushBatchSize = settings.getIntProperty("db.event.store.flush.batch.size", 64);
         int averageSizePerKey = settings.getIntProperty("db.event.store.average.size", 10);
 
         Codec<List<E>> codec = getListCodec(value, averageSizePerKey);
         DbOptions<K, List<E>> options = DbOptions.<K, List<E>>of(name, key, castAny(List.class)).withCustomValueCodec(codec);
         KeyValueDb<K, List<E>> db = factory.getDb(options);
-        return new CachingKvdbEventStore<>(db, compacter, maxCacheSizeBeforeFlush, flushBatchSize);
+        return new CachingKvdbEventStore<>(db, compacter, cacheSizeSoftLimit, cacheSizeHardLimit, flushBatchSize);
     }
 
     private <E> @NotNull Codec<List<E>> getListCodec(@NotNull Class<E> value, long averageSizePerKey) {
