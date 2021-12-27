@@ -4,14 +4,13 @@ import com.google.common.collect.ImmutableList;
 import com.google.inject.Inject;
 import io.webby.app.Settings;
 import io.webby.common.Lifetime;
+import io.webby.common.ManagedBy;
 import io.webby.db.codec.Codec;
 import io.webby.db.codec.CodecProvider;
 import io.webby.db.codec.CodecSize;
-import io.webby.db.codec.Codecs;
 import io.webby.db.kv.DbOptions;
 import io.webby.db.kv.KeyValueDb;
 import io.webby.db.kv.KeyValueFactory;
-import io.webby.common.ManagedBy;
 import org.jetbrains.annotations.NotNull;
 
 import java.io.IOException;
@@ -20,6 +19,7 @@ import java.io.OutputStream;
 import java.util.Collection;
 import java.util.List;
 
+import static io.webby.db.codec.Codecs.*;
 import static io.webby.util.base.EasyCast.castAny;
 import static java.util.Objects.requireNonNull;
 
@@ -55,7 +55,7 @@ public class KeyEventStoreFactory {
             @Override
             public @NotNull CodecSize size() {
                 if (averageSizePerKey == -1 || valueCodec.size().numBytes() < 0) {
-                    return CodecSize.minSize(4);
+                    return CodecSize.minSize(INT32_SIZE);
                 }
                 return CodecSize.averageSize(averageSizePerKey * valueCodec.size().numBytes());
             }
@@ -63,18 +63,18 @@ public class KeyEventStoreFactory {
             @Override
             public int sizeOf(@NotNull List<E> instance) {
                 if (instance.isEmpty()) {
-                    return 4;
+                    return INT32_SIZE;
                 }
                 if (valueCodec.size().isFixed()) {
-                    return instance.size() * valueCodec.sizeOf(instance.get(0)) + 4;
+                    return instance.size() * valueCodec.sizeOf(instance.get(0)) + INT32_SIZE;
                 }
-                return instance.stream().mapToInt(valueCodec::sizeOf).sum() + 4;
+                return instance.stream().mapToInt(valueCodec::sizeOf).sum() + INT32_SIZE;
             }
 
             @Override
             public int writeTo(@NotNull OutputStream output, @NotNull List<E> instance) throws IOException {
-                Codecs.writeInt32(instance.size(), output);
-                int total = 4;
+                writeInt32(instance.size(), output);
+                int total = INT32_SIZE;
                 for (E event : instance) {
                     total += valueCodec.writeTo(output, event);
                 }
@@ -83,7 +83,7 @@ public class KeyEventStoreFactory {
 
             @Override
             public @NotNull List<E> readFrom(@NotNull InputStream input, int available) throws IOException {
-                int size = Codecs.readInt32(input);
+                int size = readInt32(input);
                 ImmutableList.Builder<E> builder = ImmutableList.builder();
                 for (int i = 0; i < size; i++) {
                     E event = valueCodec.readFrom(input, input.available());
