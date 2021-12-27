@@ -21,7 +21,7 @@ import java.util.function.Function;
 import java.util.function.Predicate;
 import java.util.stream.Stream;
 
-import static io.webby.util.base.EasyPrimitives.IntCounter;
+import static io.webby.util.base.EasyPrimitives.MutableInt;
 import static io.webby.util.io.EasyIO.Close.closeQuietly;
 
 public class LevelDbImpl<K, V> extends ByteArrayDb<K, V> implements KeyValueDb<K, V> {
@@ -34,7 +34,7 @@ public class LevelDbImpl<K, V> extends ByteArrayDb<K, V> implements KeyValueDb<K
 
     @Override
     public int size() {
-        IntCounter counter = new IntCounter();
+        MutableInt counter = new MutableInt();
         forEachEntry(entry -> counter.value++);
         return counter.value;
     }

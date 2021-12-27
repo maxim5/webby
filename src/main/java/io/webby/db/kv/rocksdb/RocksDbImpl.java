@@ -7,7 +7,7 @@ import com.google.mu.util.stream.BiStream;
 import io.webby.db.codec.Codec;
 import io.webby.db.kv.KeyValueDb;
 import io.webby.db.kv.impl.ByteArrayDb;
-import io.webby.util.base.EasyPrimitives.IntCounter;
+import io.webby.util.base.EasyPrimitives.MutableInt;
 import io.webby.util.base.Rethrow.Consumers;
 import io.webby.util.func.ThrowConsumer;
 import io.webby.util.func.ThrowFunction;
@@ -36,7 +36,7 @@ public class RocksDbImpl<K, V> extends ByteArrayDb<K, V> implements KeyValueDb<K
 
     @Override
     public int size() {
-        IntCounter counter = new IntCounter();
+        MutableInt counter = new MutableInt();
         forEachEntry(iterator -> counter.value++);
         return counter.value;
     }

@@ -2,7 +2,7 @@ package io.webby.db.codec;
 
 import io.webby.perf.stats.CodecStatsListener;
 import io.webby.perf.stats.Stat;
-import io.webby.util.base.EasyPrimitives.IntCounter;
+import io.webby.util.base.EasyPrimitives.MutableInt;
 import org.jetbrains.annotations.NotNull;
 
 import java.io.IOException;
@@ -39,7 +39,7 @@ public class TrackingCodecAdapter<T> implements Codec<T> {
 
     @Override
     public @NotNull T readFrom(@NotNull InputStream input, int available) throws IOException {
-        IntCounter counter = new IntCounter();
+        MutableInt counter = new MutableInt();
         InputStream wrapper = new InputStream() {
             @Override
             public int read() throws IOException {
