@@ -4,6 +4,8 @@ import com.google.common.flogger.FluentLogger;
 import com.google.errorprone.annotations.CanIgnoreReturnValue;
 import io.webby.util.func.ThrowRunnable;
 import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
+import org.jetbrains.annotations.VisibleForTesting;
 
 import java.io.Closeable;
 import java.util.ArrayDeque;
@@ -62,6 +64,7 @@ public abstract class Lifetime {
 
         @Override
         public void onTerminate(@NotNull Closeable closeable) {
+            log.atFiner().log("Adding closeable for terminate: %s...", closeable);
             tryToAdd(closeable);
         }
 
@@ -110,20 +113,26 @@ public abstract class Lifetime {
         private void deconstruct() {
             while (!resources.isEmpty()) {
                 Object resource = resources.pollLast();  // in reverse order: lowest on the stack added first
+                log.atInfo().log("Terminating %s...", resource);
                 try {
-                    if (resource instanceof Closeable closeable) {
-                        closeable.close();
-                    } else if (resource instanceof ThrowRunnable<?> runnable) {
-                        runnable.run();
-                    } else if (resource instanceof Definition definition) {
-                        definition.terminate();
-                    } else {
-                        log.atSevere().log("Failed to terminal unexpected resource: %s", resource);
-                    }
+                    deconstruct(resource);
                 } catch (Throwable throwable) {
                     throwable.printStackTrace();
                     log.atWarning().withCause(throwable).log("Runnable failed: %s", throwable.getMessage());
                 }
+            }
+        }
+
+        @VisibleForTesting
+        void deconstruct(@Nullable Object resource) throws Throwable {
+            if (resource instanceof Closeable closeable) {
+                closeable.close();
+            } else if (resource instanceof ThrowRunnable<?> runnable) {
+                runnable.run();
+            } else if (resource instanceof Definition definition) {
+                definition.terminate();
+            } else {
+                log.atSevere().log("Failed to terminal unexpected resource: %s", resource);
             }
         }
 
