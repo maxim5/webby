@@ -109,7 +109,7 @@ public abstract class Lifetime {
 
         private void deconstruct() {
             while (!resources.isEmpty()) {
-                Object resource = resources.pollFirst();
+                Object resource = resources.pollLast();  // in reverse order: lowest on the stack added first
                 try {
                     if (resource instanceof Closeable closeable) {
                         closeable.close();
