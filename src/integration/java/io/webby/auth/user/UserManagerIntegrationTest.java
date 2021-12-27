@@ -2,6 +2,7 @@ package io.webby.auth.user;
 
 import io.webby.app.AppSettings;
 import io.webby.testing.Testing;
+import io.webby.testing.TestingModels;
 import io.webby.testing.TestingStorage;
 import io.webby.testing.ext.SqlDbSetupExtension;
 import org.jetbrains.annotations.NotNull;
@@ -10,7 +11,10 @@ import org.junit.jupiter.api.extension.RegisterExtension;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.EnumSource;
 
-import static io.webby.db.model.LongAutoIdModel.AUTO_ID;
+import java.time.Instant;
+import java.time.temporal.ChronoUnit;
+
+import static io.webby.db.model.IntAutoIdModel.AUTO_ID;
 import static org.junit.jupiter.api.Assertions.*;
 
 @Tag("sql")
@@ -29,8 +33,8 @@ public class UserManagerIntegrationTest {
     @EnumSource(Scenario.class)
     public void create_one_user(Scenario scenario) {
         UserManager userManager = startup(scenario);
-        DefaultUser user = new DefaultUser(AUTO_ID, UserAccess.Simple);
-        long userId = userManager.createUserAutoId(user);
+        DefaultUser user = TestingModels.newUser(AUTO_ID, Instant.now().truncatedTo(ChronoUnit.MILLIS), UserAccess.Simple);
+        int userId = userManager.createUserAutoId(user);
         assertEquals(userId, user.userId());
         assertTrue(userId > 0);
         assertEquals(user, userManager.findByUserId(userId));
@@ -41,7 +45,7 @@ public class UserManagerIntegrationTest {
     @EnumSource(Scenario.class)
     public void invalid_user_with_id(Scenario scenario) {
         UserManager userManager = startup(scenario);
-        DefaultUser user = new DefaultUser(1, UserAccess.Simple);
+        DefaultUser user = TestingModels.newUserNow(1, UserAccess.Simple);
         assertThrows(AssertionError.class, () -> userManager.createUserAutoId(user));
     }
 

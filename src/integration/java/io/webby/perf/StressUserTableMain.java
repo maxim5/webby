@@ -16,6 +16,7 @@ import io.webby.testing.TestingModules;
 import io.webby.testing.TestingProps;
 import org.jetbrains.annotations.NotNull;
 
+import java.time.Instant;
 import java.util.List;
 import java.util.function.Consumer;
 
@@ -27,20 +28,20 @@ public class StressUserTableMain {
         Connector connector = initConnector();
         new MemoryMonitor().startDaemon();
 
-        Init<Long, DefaultUser> init = initWorkers(connector);
+        Init<Integer, DefaultUser> init = initWorkers(connector);
         execWorkers(MEDIUM_WAIT, List.of(
-            TableWorker.inserter(init, id -> new DefaultUser(id, UserAccess.Simple)),
-            TableWorker.updater(init, id -> new DefaultUser(id, UserAccess.Admin)),
+            TableWorker.inserter(init, id -> new DefaultUser(id, Instant.now(), UserAccess.Simple)),
+            TableWorker.updater(init, id -> new DefaultUser(id, Instant.now(), UserAccess.Admin)),
             TableWorker.deleter(init),
             TableWorker.reader(init),
             TableWorker.scanner(init.withSteps(0.00001))
         ));
     }
 
-    private static @NotNull Init<Long, DefaultUser> initWorkers(@NotNull Connector connector) {
+    private static @NotNull Init<Integer, DefaultUser> initWorkers(@NotNull Connector connector) {
         UserTable userTable = new UserTable(connector);
         ProgressMonitor progress = new ProgressMonitor();
-        RandomLongGenerator generator = new RandomLongGenerator(100_000);
+        RandomIntGenerator generator = new RandomIntGenerator(100_000);
         Consumer<Integer> randomConnectionCleaner = step -> {
             if (generator.random() < 1e-4) {
                 ThreadLocalConnector.cleanupIfNecessary();

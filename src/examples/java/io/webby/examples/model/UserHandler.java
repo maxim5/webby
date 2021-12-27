@@ -19,7 +19,7 @@ public class UserHandler {
     @Inject private UserManager userManager;
 
     @GET(url = "/user/{id}")
-    public User get(long userId) {
+    public User get(int userId) {
         User user = userManager.findByUserId(userId);
         if (user == null) {
             throw new NotFoundException("User not found");
@@ -37,7 +37,7 @@ public class UserHandler {
         User user = request.user();
         Session session = request.session();
         if (!session.hasUser()) {
-            long userId = userManager.createUserAutoId(new DefaultUser(LongAutoIdModel.AUTO_ID, UserAccess.Simple));
+            int userId = userManager.createUserAutoId(DefaultUser.newAuto(UserAccess.Simple));
             return userId;
         } else {
             System.out.println(userManager.findByUserId(session.user()));

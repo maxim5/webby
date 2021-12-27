@@ -3,22 +3,34 @@ package io.webby.auth.user;
 import io.webby.orm.api.annotate.Model;
 import org.jetbrains.annotations.NotNull;
 
+import java.time.Instant;
 import java.util.Objects;
 
 @Model(exposeAs = User.class)
 public class DefaultUser implements User {
-    private long userId;
+    private int userId;
+    private final Instant created;
     private final UserAccess access;
 
-    public DefaultUser(long userId, @NotNull UserAccess access) {
+    public DefaultUser(int userId, @NotNull Instant created, @NotNull UserAccess access) {
+        this.created = created;
         assert userId == AUTO_ID || userId > 0: "Invalid userId=%d".formatted(userId);
         this.userId = userId;
         this.access = access;
     }
 
+    public static @NotNull DefaultUser newAuto(@NotNull UserAccess access) {
+        return new DefaultUser(AUTO_ID, Instant.now(), access);
+    }
+
     @Override
-    public long userId() {
+    public int userId() {
         return userId;
+    }
+
+    @Override
+    public @NotNull Instant created() {
+        return created;
     }
 
     @Override
@@ -28,12 +40,13 @@ public class DefaultUser implements User {
 
     @Override
     public boolean equals(Object o) {
-        return o instanceof User that && userId == that.userId() && access.equals(that.access());
+        return o instanceof User that && userId == that.userId() &&
+               created.equals(that.created()) && access.equals(that.access());
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(userId, access);
+        return Objects.hash(userId, created, access);
     }
 
     @Override
@@ -45,7 +58,7 @@ public class DefaultUser implements User {
         userId = AUTO_ID;
     }
 
-    public void setIfAutoIdOrDie(long newId) {
+    public void setIfAutoIdOrDie(int newId) {
         assert userId == AUTO_ID : "Failed to set auto-inc id to user: %s".formatted(this);
         userId = newId;
     }

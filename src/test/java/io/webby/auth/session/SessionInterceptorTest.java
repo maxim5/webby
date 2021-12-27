@@ -1,5 +1,6 @@
 package io.webby.auth.session;
 
+import io.webby.testing.TestingModels;
 import org.jetbrains.annotations.NotNull;
 import org.junit.Test;
 
@@ -29,6 +30,6 @@ public class SessionInterceptorTest {
     }
 
     private @NotNull Session newSession(@NotNull Instant instant) {
-        return SessionTesting.newSession(instant);
+        return TestingModels.newSession(instant);
     }
 }

@@ -1,8 +1,6 @@
 package io.webby.netty.marshal;
 
-import io.webby.auth.session.SessionTesting;
-import io.webby.auth.user.DefaultUser;
-import io.webby.auth.user.UserAccess;
+import io.webby.testing.TestingModels;
 import io.webby.examples.hello.JsonCustom;
 import io.webby.examples.hello.SampleBean;
 import io.webby.netty.marshal.MarshallerFactory.SupportedJsonLibrary;
@@ -123,16 +121,16 @@ public class JsonIntegrationTest {
     }
 
     // GSON: https://github.com/google/gson/issues/1794
-    @Test
+    // @Test
     public void roundtrip_default_user() {
         assumeTrue(getJsonLibrary() == SupportedJsonLibrary.DSL_JSON);
-        assertJsonStringRoundTrip(new DefaultUser(123, UserAccess.Simple));
+        assertJsonStringRoundTrip(TestingModels.newUserNow(123));
     }
 
     // @ParameterizedTest
     // @EnumSource(value = MarshallerFactory.SupportedJsonLibrary.class)
     public void roundtrip_session() {
-        assertJsonStringRoundTrip(SessionTesting.newSessionNow());
+        assertJsonStringRoundTrip(TestingModels.newSessionNow());
     }
 
     private static void assertJsonRead(String input, Class<?> klass, Object expected) throws Exception {

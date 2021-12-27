@@ -17,6 +17,7 @@ import io.webby.db.kv.paldb.PalDbFactory;
 import io.webby.db.kv.paldb.PalDbImpl;
 import io.webby.testing.Mocking;
 import io.webby.testing.Testing;
+import io.webby.testing.TestingModels;
 import io.webby.testing.TestingProps;
 import io.webby.testing.ext.CloseAllExtension;
 import io.webby.testing.ext.EmbeddedRedisExtension;
@@ -262,7 +263,7 @@ public class KeyValueDbIntegrationTest {
         KeyValueFactory dbFactory = setupFactory(storageType);
 
         try (KeyValueDb<Long, DefaultUser> db = dbFactory.getDb(DbOptions.of(User.DB_NAME, Long.class, DefaultUser.class))) {
-            runMultiTest(db, 777L, new DefaultUser(777, UserAccess.Simple));
+            runMultiTest(db, 777L, TestingModels.newUserNow(777, UserAccess.Simple));
         }
     }
 
@@ -274,7 +275,7 @@ public class KeyValueDbIntegrationTest {
         DbOptions<Long, DefaultUser> options = DbOptions.of("my-users", Long.class, DefaultUser.class);
         try (KeyValueDb<Long, DefaultUser> db = dbFactory.getDb(options)) {
             runMultiTest(db, Long.MIN_VALUE, Long.MAX_VALUE,
-                         new DefaultUser(777, UserAccess.Simple), new DefaultUser(0, UserAccess.Admin));
+                         TestingModels.newUserNow(777, UserAccess.Simple), TestingModels.newUserNow(0, UserAccess.Admin));
         }
     }
 

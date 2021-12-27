@@ -16,20 +16,23 @@ public class SqlSchemaMakerTest {
         assertThat(makeCreateTableQuery(Engine.SQLite, UserTable.class)).isEqualTo("""
             CREATE TABLE IF NOT EXISTS user (
                 user_id INTEGER PRIMARY KEY,
+                created INTEGER,
                 access_level INTEGER
             )
             """);
 
         assertThat(makeCreateTableQuery(Engine.H2, UserTable.class)).isEqualTo("""
             CREATE TABLE IF NOT EXISTS user (
-                user_id BIGINT PRIMARY KEY AUTO_INCREMENT,
+                user_id INTEGER PRIMARY KEY AUTO_INCREMENT,
+                created TIMESTAMP,
                 access_level INTEGER
             )
             """);
 
         assertThat(makeCreateTableQuery(Engine.MySQL, UserTable.class)).isEqualTo("""
             CREATE TABLE IF NOT EXISTS user (
-                user_id BIGINT PRIMARY KEY AUTO_INCREMENT,
+                user_id INTEGER PRIMARY KEY AUTO_INCREMENT,
+                created TIMESTAMP(3),
                 access_level INTEGER
             )
             """);
@@ -50,7 +53,7 @@ public class SqlSchemaMakerTest {
         assertThat(makeCreateTableQuery(Engine.H2, SessionTable.class)).isEqualTo("""
             CREATE TABLE IF NOT EXISTS session (
                 session_id BIGINT PRIMARY KEY AUTO_INCREMENT,
-                user_id BIGINT,
+                user_id INTEGER,
                 created TIMESTAMP,
                 user_agent VARCHAR,
                 ip_address VARCHAR
@@ -60,7 +63,7 @@ public class SqlSchemaMakerTest {
         assertThat(makeCreateTableQuery(Engine.MySQL, SessionTable.class)).isEqualTo("""
             CREATE TABLE IF NOT EXISTS session (
                 session_id BIGINT PRIMARY KEY AUTO_INCREMENT,
-                user_id BIGINT,
+                user_id INTEGER,
                 created TIMESTAMP(3),
                 user_agent VARCHAR(4096),
                 ip_address VARCHAR(4096)

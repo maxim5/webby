@@ -1,10 +1,10 @@
 package io.webby.auth.session;
 
 import io.webby.orm.api.Connector;
+import io.webby.orm.api.ForeignInt;
 import io.webby.orm.codegen.SqlSchemaMaker;
 import io.webby.testing.SqlDbTableTest;
 import io.webby.testing.TableLongTest;
-import io.webby.orm.api.ForeignLong;
 import org.jetbrains.annotations.NotNull;
 
 import java.time.Instant;
@@ -22,7 +22,7 @@ public class SessionTableTest
     @Override
     public @NotNull Session createEntity(@NotNull Long key, int version) {
         Instant created = Instant.now().truncatedTo(ChronoUnit.MILLIS);
-        return new Session(key, ForeignLong.ofId(1), created, String.valueOf(version), version == 0 ? "127.0.0.1" : null);
+        return new Session(key, ForeignInt.ofId(1), created, String.valueOf(version), version == 0 ? "127.0.0.1" : null);
     }
 
     @Override

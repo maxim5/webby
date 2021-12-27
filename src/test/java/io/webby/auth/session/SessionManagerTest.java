@@ -1,18 +1,17 @@
 package io.webby.auth.session;
 
 import io.netty.handler.codec.http.cookie.DefaultCookie;
-import io.webby.auth.user.DefaultUser;
 import io.webby.auth.user.User;
-import io.webby.auth.user.UserAccess;
 import io.webby.netty.request.HttpRequestEx;
 import io.webby.testing.FakeRequests;
 import io.webby.testing.Testing;
+import io.webby.testing.TestingModels;
 import org.junit.jupiter.api.Test;
 
 import static org.junit.jupiter.api.Assertions.*;
 
 public class SessionManagerTest {
-    private static final User DUMMY_USER = new DefaultUser(123, UserAccess.Simple);
+    private static final User DUMMY_USER = TestingModels.newUserNow(123);
 
     private final SessionManager manager = Testing.testStartup().getInstance(SessionManager.class);
     private final HttpRequestEx GET = FakeRequests.getEx("/");

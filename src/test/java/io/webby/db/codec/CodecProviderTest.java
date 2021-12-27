@@ -3,10 +3,9 @@ package io.webby.db.codec;
 import com.google.common.io.ByteStreams;
 import io.netty.buffer.ByteBuf;
 import io.webby.auth.session.Session;
-import io.webby.auth.session.SessionTesting;
 import io.webby.auth.user.DefaultUser;
-import io.webby.auth.user.UserAccess;
 import io.webby.testing.Testing;
+import io.webby.testing.TestingModels;
 import org.jetbrains.annotations.NotNull;
 import org.junit.jupiter.api.Test;
 
@@ -26,9 +25,9 @@ public class CodecProviderTest {
         assertCodecRoundTrip(provider.getCodecOrDie(Long.class), 0L);
         assertCodecRoundTrip(provider.getCodecOrDie(String.class), "");
         assertCodecRoundTrip(provider.getCodecOrDie(String.class), "foo");
-        assertCodecRoundTrip(provider.getCodecOrDie(Session.class), SessionTesting.newSessionNow());
-        assertCodecRoundTrip(provider.getCodecOrDie(Session.class), SessionTesting.newSessionWithoutIp());
-        assertCodecRoundTrip(provider.getCodecOrDie(DefaultUser.class), new DefaultUser(0, UserAccess.Simple));
+        assertCodecRoundTrip(provider.getCodecOrDie(Session.class), TestingModels.newSessionNow());
+        assertCodecRoundTrip(provider.getCodecOrDie(Session.class), TestingModels.newSessionWithoutIp());
+        assertCodecRoundTrip(provider.getCodecOrDie(DefaultUser.class), TestingModels.newUserNow(0));
     }
 
     @SuppressWarnings("UnstableApiUsage")

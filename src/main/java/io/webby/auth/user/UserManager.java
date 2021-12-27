@@ -1,13 +1,11 @@
 package io.webby.auth.user;
 
-import com.google.common.flogger.FluentLogger;
 import com.google.inject.Inject;
-import io.webby.orm.api.ForeignLong;
+import io.webby.orm.api.ForeignInt;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
 public class UserManager {
-    private static final FluentLogger log = FluentLogger.forEnclosingClass();
     private final UserStorage userStorage;
 
     @Inject
@@ -15,15 +13,15 @@ public class UserManager {
         this.userStorage = userStorage;
     }
 
-    public @Nullable User findByUserId(long userId) {
+    public @Nullable User findByUserId(int userId) {
         return userStorage.findByUserId(userId);
     }
 
-    public @Nullable User findByUserId(@NotNull ForeignLong<User> foreignId) {
-        return foreignId.hasEntity() ? foreignId.getEntity() : findByUserId(foreignId.getLongId());
+    public @Nullable User findByUserId(@NotNull ForeignInt<User> foreignId) {
+        return foreignId.hasEntity() ? foreignId.getEntity() : findByUserId(foreignId.getIntId());
     }
 
-    public long createUserAutoId(@NotNull User user) {
+    public int createUserAutoId(@NotNull User user) {
         assert user.isAutoId() : "User is not auto-id: %s".formatted(user);
         return userStorage.createUserAutoId(user);
     }
