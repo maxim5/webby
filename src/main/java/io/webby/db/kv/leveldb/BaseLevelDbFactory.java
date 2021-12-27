@@ -22,7 +22,7 @@ public abstract class BaseLevelDbFactory extends BaseKeyValueFactory {
 
     @Override
     public @NotNull <K, V> LevelDbImpl<K, V> getInternalDb(@NotNull DbOptions<K, V> options) {
-        return cacheIfAbsent(options.name(), () -> {
+        return cacheIfAbsent(options, () -> {
             Path storagePath = settings.storageSettings().keyValueSettingsOrDie().path();
             String filename = settings.getProperty("db.leveldb.filename.pattern", "leveldb-%s");
             boolean createIfMissing = settings.getBoolProperty("db.leveldb.create.if.missing", true);

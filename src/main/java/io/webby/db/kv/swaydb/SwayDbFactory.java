@@ -15,7 +15,7 @@ import java.nio.file.Path;
 public class SwayDbFactory extends BaseKeyValueFactory {
     @Override
     public @NotNull <K, V> SwayDb<K, V> getInternalDb(@NotNull DbOptions<K, V> options) {
-        return cacheIfAbsent(options.name(), () -> {
+        return cacheIfAbsent(options, () -> {
             Path storagePath = settings.storageSettings().keyValueSettingsOrDie().path();
             String filename = settings.getProperty("db.swaydb.filename.pattern", "swaydb-%s");
             int mapSize = settings.getIntProperty("db.swaydb.init.map.size.bytes", 4 << 20);

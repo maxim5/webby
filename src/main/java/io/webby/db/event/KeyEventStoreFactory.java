@@ -3,6 +3,7 @@ package io.webby.db.event;
 import com.google.common.collect.ImmutableList;
 import com.google.inject.Inject;
 import io.webby.app.Settings;
+import io.webby.common.Lifetime;
 import io.webby.db.codec.Codec;
 import io.webby.db.codec.CodecProvider;
 import io.webby.db.codec.CodecSize;
@@ -10,6 +11,7 @@ import io.webby.db.codec.Codecs;
 import io.webby.db.kv.DbOptions;
 import io.webby.db.kv.KeyValueDb;
 import io.webby.db.kv.KeyValueFactory;
+import io.webby.common.ManagedBy;
 import org.jetbrains.annotations.NotNull;
 
 import java.io.IOException;
@@ -19,31 +21,32 @@ import java.util.Collection;
 import java.util.List;
 
 import static io.webby.util.base.EasyCast.castAny;
+import static java.util.Objects.requireNonNull;
 
 public class KeyEventStoreFactory {
     @Inject private Settings settings;
     @Inject private CodecProvider provider;
     @Inject private KeyValueFactory factory;
+    @Inject private Lifetime lifetime;
 
-    public <K, E> @NotNull KeyEventStore<K, E> getEventStore(@NotNull String name,
-                                                             @NotNull Class<K> key,
-                                                             @NotNull Class<E> value) {
-        return getEventStore(name, key, value, list -> list);
-    }
-
-    public <K, E> @NotNull KeyEventStore<K, E> getEventStore(@NotNull String name,
-                                                             @NotNull Class<K> key,
-                                                             @NotNull Class<E> value,
-                                                             @NotNull Compacter<E> compacter) {
+    public <K, E> @NotNull KeyEventStore<K, E> getEventStore(@NotNull EventStoreOptions<K, E> options) {
         int cacheSizeSoftLimit = settings.getIntProperty("db.event.store.cache.size.soft.limit", 1 << 16);
         int cacheSizeHardLimit = settings.getIntProperty("db.event.store.cache.size.hard.limit", 1 << 17);
         int flushBatchSize = settings.getIntProperty("db.event.store.flush.batch.size", 64);
         int averageSizePerKey = settings.getIntProperty("db.event.store.average.size", 10);
 
-        Codec<List<E>> codec = getListCodec(value, averageSizePerKey);
-        DbOptions<K, List<E>> options = DbOptions.<K, List<E>>of(name, key, castAny(List.class)).withCustomValueCodec(codec);
-        KeyValueDb<K, List<E>> db = factory.getDb(options);
-        return new CachingKvdbEventStore<>(db, compacter, cacheSizeSoftLimit, cacheSizeHardLimit, flushBatchSize);
+        Codec<List<E>> codec = getListCodec(options.value(), averageSizePerKey);
+        KeyValueDb<K, List<E>> db = factory.getDb(
+            DbOptions.<K, List<E>>of(ManagedBy.MANUALLY_BY_CALLER, options.name(), options.key(), castAny(List.class))
+                    .withCustomValueCodec(codec)
+        );
+        CachingKvdbEventStore<K, E> store =
+            new CachingKvdbEventStore<>(db, options.compacter(), cacheSizeSoftLimit, cacheSizeHardLimit, flushBatchSize);
+        switch (options.managedBy().owner()) {
+            case PROVIDER -> lifetime.onTerminate(store);
+            case GIVEN -> requireNonNull(options.managedBy().lifetime()).onTerminate(store);
+        }
+        return store;
     }
 
     private <E> @NotNull Codec<List<E>> getListCodec(@NotNull Class<E> value, long averageSizePerKey) {

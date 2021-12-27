@@ -3,6 +3,7 @@ package io.webby.db.kv.lmdbjni;
 import com.google.inject.Inject;
 import io.webby.app.Settings;
 import io.webby.common.InjectorHelper;
+import io.webby.common.Lifetime;
 import io.webby.db.codec.Codec;
 import io.webby.db.kv.DbOptions;
 import io.webby.db.kv.impl.BaseKeyValueFactory;
@@ -18,23 +19,19 @@ public class LmdbJniDbFactory extends BaseKeyValueFactory {
     private final Env env;
 
     @Inject
-    public LmdbJniDbFactory(@NotNull InjectorHelper helper) {
+    public LmdbJniDbFactory(@NotNull InjectorHelper helper, @NotNull Lifetime lifetime) {
         env = helper.getOrDefault(Env.class, this::createDefaultEnv);
+        lifetime.onTerminate(env::close);
     }
 
     @Override
     public @NotNull <K, V> LmdbJniDb<K, V> getInternalDb(@NotNull DbOptions<K, V> options) {
-        return cacheIfAbsent(options.name(), () -> {
+        return cacheIfAbsent(options, () -> {
             Codec<K> keyCodec = keyCodecOrDie(options);
             Codec<V> valueCodec = valueCodecOrDie(options);
             Database database = env.openDatabase(options.name(), Constants.CREATE);
             return new LmdbJniDb<>(env, database, keyCodec, valueCodec);
         });
-    }
-
-    @Override
-    public void close() {
-        env.close();
     }
 
     private @NotNull Env createDefaultEnv(@NotNull Settings settings) {

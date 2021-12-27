@@ -20,7 +20,7 @@ public class TuplFactory extends BaseKeyValueFactory {
 
     @Override
     public @NotNull <K, V> TuplDb<K, V> getInternalDb(@NotNull DbOptions<K, V> options) {
-        return cacheIfAbsent(options.name(), () -> {
+        return cacheIfAbsent(options, () -> {
             Database database = db.lazyGet(Rethrow.Suppliers.rethrow(() -> Database.open(getDatabaseConfig())));
 
             try {

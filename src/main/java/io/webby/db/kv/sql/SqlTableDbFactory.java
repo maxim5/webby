@@ -15,7 +15,7 @@ public class SqlTableDbFactory extends BaseKeyValueFactory {
 
     @Override
     public @NotNull <K, V> KeyValueDb<K, V> getInternalDb(@NotNull DbOptions<K, V> options) {
-        return cacheIfAbsent(options.name(), () -> {
+        return cacheIfAbsent(options, () -> {
             if (tableManager.hasMatchingTable(options.name(), options.key(), options.value())) {
                 TableObj<K, V> table = tableManager.getMatchingTableOrDie(options.name(), options.key(), options.value());
                 return new SqlTableDb<>(table);

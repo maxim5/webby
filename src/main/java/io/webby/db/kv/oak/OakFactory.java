@@ -26,7 +26,7 @@ public class OakFactory extends BaseKeyValueFactory {
 
     @Override
     public @NotNull <K, V> OakDb<K, V> getInternalDb(@NotNull DbOptions<K, V> options) {
-        return cacheIfAbsent(options.name(), () -> {
+        return cacheIfAbsent(options, () -> {
             OakRecord<K> keyRecord =
                     Optional.ofNullable(OakKnownTypes.lookupRecord(options.key()))
                     .orElseGet(() -> helper.getOrDefault(new TypeLiteral<OakRecord<K>>() {}, () -> inferOakRecord(options)));

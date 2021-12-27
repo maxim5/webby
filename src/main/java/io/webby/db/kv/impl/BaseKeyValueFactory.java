@@ -12,7 +12,6 @@ import io.webby.util.lazy.LazyBoolean;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
-import java.io.Closeable;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.function.Supplier;
@@ -21,22 +20,19 @@ import static io.webby.app.AppConfigException.assure;
 import static io.webby.util.base.EasyCast.castAny;
 import static io.webby.util.base.EasyObjects.firstNonNull;
 import static io.webby.util.base.EasyObjects.firstNonNullIfExist;
+import static java.util.Objects.requireNonNull;
 
-public abstract class BaseKeyValueFactory implements InternalKeyValueFactory, Closeable {
+public abstract class BaseKeyValueFactory implements InternalKeyValueFactory {
     protected final Map<String, KeyValueDb<?, ?>> cache = new HashMap<>();
 
     @Inject protected Settings settings;
     @Inject protected StatsManager statsManager;
     @Inject protected CodecProvider provider;
+    @Inject protected Lifetime lifetime;
 
     private final LazyBoolean isTrackingKeyValuesOn = new LazyBoolean(() ->
         settings.isProfileMode() && settings.getBoolProperty("perf.track.db.kv.enabled", true)
     );
-
-    @Inject
-    protected void init(@NotNull Lifetime lifetime) {
-        lifetime.onTerminate(this);
-    }
 
     @Override
     public @NotNull <K, V> KeyValueDb<K, V> getDb(@NotNull DbOptions<K, V> options) {
@@ -47,8 +43,14 @@ public abstract class BaseKeyValueFactory implements InternalKeyValueFactory, Cl
         return internalDb;
     }
 
-    protected <K, V, KV extends KeyValueDb<K, V>> @NotNull KV cacheIfAbsent(@NotNull String name, @NotNull Supplier<KV> supplier) {
-        return castAny(cache.computeIfAbsent(name, k -> supplier.get()));
+    protected <K, V, KV extends KeyValueDb<K, V>> @NotNull KV cacheIfAbsent(@NotNull DbOptions<K, V> options,
+                                                                            @NotNull Supplier<KV> supplier) {
+        KeyValueDb<?, ?> db = cache.computeIfAbsent(options.name(), k -> supplier.get());
+        switch (options.managedBy().owner()) {
+            case PROVIDER -> lifetime.onTerminate(db);
+            case GIVEN -> requireNonNull(options.managedBy().lifetime()).onTerminate(db);
+        }
+        return castAny(db);
     }
 
     protected <K, V> @NotNull Codec<K> keyCodecOrDie(@NotNull DbOptions<K, V> options) {
@@ -70,10 +72,5 @@ public abstract class BaseKeyValueFactory implements InternalKeyValueFactory, Cl
     protected static @NotNull String formatFileName(@NotNull String pattern, @NotNull String name) {
         assure(pattern.contains("%s"), "The file pattern must contain '%%s' to use separate file per database: %s", pattern);
         return pattern.formatted(name);
-    }
-
-    @Override
-    public void close() {
-        cache.values().forEach(KeyValueDb::close);
     }
 }

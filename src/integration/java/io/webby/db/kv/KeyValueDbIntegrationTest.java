@@ -8,6 +8,7 @@ import io.webby.auth.session.SessionManager;
 import io.webby.auth.user.DefaultUser;
 import io.webby.auth.user.User;
 import io.webby.auth.user.UserAccess;
+import io.webby.common.ManagedBy;
 import io.webby.db.kv.chronicle.ChronicleDb;
 import io.webby.db.kv.chronicle.ChronicleFactory;
 import io.webby.db.kv.impl.AgnosticKeyValueFactory;
@@ -53,7 +54,7 @@ public class KeyValueDbIntegrationTest {
     public void simple_operations_fixed_size_key(StorageType storageType) {
         KeyValueFactory dbFactory = setupFactory(storageType);
 
-        try (KeyValueDb<Long, String> db = dbFactory.getDb(DbOptions.of("foo", Long.class, String.class))) {
+        try (KeyValueDb<Long, String> db = dbFactory.getDb(scopedDb("foo", Long.class, String.class))) {
             assertEqualsTo(db, Map.of());
             assertNotContainsAnyOf(db, Map.of(1L, "foo"));
 
@@ -95,7 +96,7 @@ public class KeyValueDbIntegrationTest {
     public void simple_operations_variable_size_key(StorageType storageType) {
         KeyValueFactory dbFactory = setupFactory(storageType);
 
-        try (KeyValueDb<String, Integer> db = dbFactory.getDb(DbOptions.of("foo", String.class, Integer.class))) {
+        try (KeyValueDb<String, Integer> db = dbFactory.getDb(scopedDb("foo", String.class, Integer.class))) {
             assertEqualsTo(db, Map.of());
             assertNotContainsAnyOf(db, Map.of("foo", 1));
 
@@ -137,7 +138,7 @@ public class KeyValueDbIntegrationTest {
     public void bulk_operations(StorageType storageType) {
         KeyValueFactory dbFactory = setupFactory(storageType);
 
-        try (KeyValueDb<String, String> db = dbFactory.getDb(DbOptions.of("foo", String.class, String.class))) {
+        try (KeyValueDb<String, String> db = dbFactory.getDb(scopedDb("foo", String.class, String.class))) {
             db.putAll(Map.of());
             db.putAll(List.of());
             db.putAll(Stream.of());
@@ -195,8 +196,8 @@ public class KeyValueDbIntegrationTest {
     public void maps_isolation(StorageType storageType) {
         KeyValueFactory dbFactory = setupFactory(storageType);
 
-        try (KeyValueDb<String, String> db1 = dbFactory.getDb(DbOptions.of("foo", String.class, String.class))) {
-            try (KeyValueDb<String, String> db2 = dbFactory.getDb(DbOptions.of("bar", String.class, String.class))) {
+        try (KeyValueDb<String, String> db1 = dbFactory.getDb(scopedDb("foo", String.class, String.class))) {
+            try (KeyValueDb<String, String> db2 = dbFactory.getDb(scopedDb("bar", String.class, String.class))) {
                 db1.put("a", "b");
                 assertEqualsTo(db1, Map.of("a", "b"));
                 assertEqualsTo(db2, Map.of());
@@ -228,7 +229,7 @@ public class KeyValueDbIntegrationTest {
         Session existingSession = sessionManager.getSessionOrNull(cookie);
         assertEquals(newSession, existingSession);
 
-        try (KeyValueDb<Long, Session> db = dbFactory.getDb(DbOptions.of(Session.DB_NAME, Long.class, Session.class))) {
+        try (KeyValueDb<Long, Session> db = dbFactory.getDb(scopedDb(Session.DB_NAME, Long.class, Session.class))) {
             assertEqualsTo(db, Map.of(newSession.sessionId(), newSession));
         }
     }
@@ -238,7 +239,7 @@ public class KeyValueDbIntegrationTest {
     public void multi_session_sql_compatible(StorageType storageType) {
         KeyValueFactory dbFactory = setupFactory(storageType);
 
-        try (KeyValueDb<Long, Session> db = dbFactory.getDb(DbOptions.of(Session.DB_NAME, Long.class, Session.class))) {
+        try (KeyValueDb<Long, Session> db = dbFactory.getDb(scopedDb(Session.DB_NAME, Long.class, Session.class))) {
             runMultiTest(db, 123L, Session.fromRequest(123, getEx("/foo")));
         }
     }
@@ -248,7 +249,7 @@ public class KeyValueDbIntegrationTest {
     public void multi_session_forced_key_value(StorageType storageType) {
         KeyValueFactory dbFactory = setupFactory(storageType);
 
-        try (KeyValueDb<Integer, Session> db = dbFactory.getDb(DbOptions.of("my-sessions", Integer.class, Session.class))) {
+        try (KeyValueDb<Integer, Session> db = dbFactory.getDb(scopedDb("my-sessions", Integer.class, Session.class))) {
             runMultiTest(db,
                          Integer.MIN_VALUE,
                          Integer.MAX_VALUE,
@@ -262,7 +263,7 @@ public class KeyValueDbIntegrationTest {
     public void multi_default_user_sql_compatible(StorageType storageType) {
         KeyValueFactory dbFactory = setupFactory(storageType);
 
-        try (KeyValueDb<Long, DefaultUser> db = dbFactory.getDb(DbOptions.of(User.DB_NAME, Long.class, DefaultUser.class))) {
+        try (KeyValueDb<Long, DefaultUser> db = dbFactory.getDb(scopedDb(User.DB_NAME, Long.class, DefaultUser.class))) {
             runMultiTest(db, 777L, new DefaultUser(777, UserAccess.Simple));
         }
     }
@@ -272,7 +273,8 @@ public class KeyValueDbIntegrationTest {
     public void multi_default_user_forced_key_value(StorageType storageType) {
         KeyValueFactory dbFactory = setupFactory(storageType);
 
-        try (KeyValueDb<Long, DefaultUser> db = dbFactory.getDb(DbOptions.of("my-users", Long.class, DefaultUser.class))) {
+        DbOptions<Long, DefaultUser> options = scopedDb("my-users", Long.class, DefaultUser.class);
+        try (KeyValueDb<Long, DefaultUser> db = dbFactory.getDb(options)) {
             runMultiTest(db, Long.MIN_VALUE, Long.MAX_VALUE,
                          new DefaultUser(777, UserAccess.Simple), new DefaultUser(0, UserAccess.Admin));
         }
@@ -283,15 +285,15 @@ public class KeyValueDbIntegrationTest {
         AgnosticKeyValueFactory dbFactory = setup(StorageType.JAVA_MAP).getInstance(AgnosticKeyValueFactory.class);
 
         ChronicleFactory chronicleFactory = dbFactory.getInternalFactory(StorageType.CHRONICLE_MAP);
-        ChronicleDb<Integer, String> chronicleDb = chronicleFactory.getInternalDb(DbOptions.of("foo", Integer.class, String.class));
+        ChronicleDb<Long, Long> chronicleDb = chronicleFactory.getInternalDb(delegated("foo", Long.class, Long.class));
         assertTrue(chronicleDb.isEmpty());
 
         MapDbFactory mapDbFactory = dbFactory.getInternalFactory(StorageType.MAP_DB);
-        MapDbImpl<Integer, String> mapDb = mapDbFactory.getInternalDb(DbOptions.of("foo", Integer.class, String.class));
+        MapDbImpl<Long, Long> mapDb = mapDbFactory.getInternalDb(delegated("foo", Long.class, Long.class));
         assertTrue(mapDb.isEmpty());
 
         PalDbFactory palDbFactory = dbFactory.getInternalFactory(StorageType.PAL_DB);
-        PalDbImpl<Integer, String> palDb = palDbFactory.getInternalDb(DbOptions.of("foo", Integer.class, String.class));
+        PalDbImpl<Long, Long> palDb = palDbFactory.getInternalDb(delegated("foo", Long.class, Long.class));
         assertTrue(palDb.isEmpty());
     }
 
@@ -430,5 +432,13 @@ public class KeyValueDbIntegrationTest {
         }
 
         return Testing.testStartup(settings, SQL_DB::savepoint, SQL_DB.combinedTestingModule());
+    }
+
+    private static <K, V> @NotNull DbOptions<K, V> scopedDb(String name, Class<K> key, Class<V> value) {
+        return DbOptions.of(ManagedBy.MANUALLY_BY_CALLER, name, key, value);
+    }
+
+    private static <K, V> @NotNull DbOptions<K, V> delegated(String name, Class<K> key, Class<V> value) {
+        return DbOptions.of(ManagedBy.BY_PROVIDER, name, key, value);
     }
 }

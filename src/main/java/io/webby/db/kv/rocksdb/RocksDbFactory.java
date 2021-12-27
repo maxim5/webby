@@ -19,7 +19,7 @@ public class RocksDbFactory extends BaseKeyValueFactory {
 
     @Override
     public @NotNull <K, V> RocksDbImpl<K, V> getInternalDb(@NotNull DbOptions<K, V> options) {
-        return cacheIfAbsent(options.name(), () -> {
+        return cacheIfAbsent(options, () -> {
             Path storagePath = settings.storageSettings().keyValueSettingsOrDie().path();
             String filename = settings.getProperty("db.rocksdb.filename.pattern", "rocksdb-%s");
             boolean createIfMissing = settings.getBoolProperty("db.rocksdb.create.if.missing", true);

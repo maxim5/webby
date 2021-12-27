@@ -14,7 +14,7 @@ import static io.webby.util.base.Rethrow.Suppliers.runRethrow;
 public class HaloDbFactory extends BaseKeyValueFactory {
     @Override
     public @NotNull <K, V> HaloDbImpl<K, V> getInternalDb(@NotNull DbOptions<K, V> options) {
-        return cacheIfAbsent(options.name(), () -> {
+        return cacheIfAbsent(options, () -> {
             Codec<K> keyCodec = keyCodecOrDie(options);
             Codec<V> valueCodec = valueCodecOrDie(options);
 

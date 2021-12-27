@@ -12,11 +12,8 @@ import java.util.HashMap;
 public class JavaMapDbFactory extends BaseKeyValueFactory {
     @Override
     public @NotNull <K, V> KeyValueDb<K, V> getInternalDb(@NotNull DbOptions<K, V> options) {
-        return cacheIfAbsent(options.name(), HashMapDb::new);
+        return cacheIfAbsent(options, HashMapDb::new);
     }
-
-    @Override
-    public void close() {}
 
     private static class HashMapDb<K, V> extends DefaultKeyValueDb<K, V, HashMap<K, V>> implements InMemoryDb<K, V> {
         public HashMapDb() {

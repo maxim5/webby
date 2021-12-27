@@ -4,6 +4,7 @@ import com.google.common.collect.ImmutableMap;
 import com.google.inject.Inject;
 import io.webby.app.Settings;
 import io.webby.common.InjectorHelper;
+import io.webby.common.Lifetime;
 import io.webby.db.codec.Codec;
 import io.webby.db.kv.DbOptions;
 import io.webby.db.kv.impl.BaseKeyValueFactory;
@@ -23,14 +24,15 @@ public class MapDbFactory extends BaseKeyValueFactory {
     private final MapDbCreator creator;
 
     @Inject
-    public MapDbFactory(@NotNull InjectorHelper helper) {
+    public MapDbFactory(@NotNull InjectorHelper helper, @NotNull Lifetime lifetime) {
         db = helper.getOrDefault(DB.class, this::createDefaultMapDB);
         creator = helper.getOrDefault(MapDbCreator.class, () -> (db, options) -> null);
+        lifetime.onTerminate(db);
     }
 
     @Override
     public @NotNull <K, V> MapDbImpl<K, V> getInternalDb(@NotNull DbOptions<K, V> options) {
-        return cacheIfAbsent(options.name(), () -> {
+        return cacheIfAbsent(options, () -> {
             DB.Maker<HTreeMap<?, ?>> customMaker = creator.getMaker(db, options);
 
             DB.Maker<HTreeMap<K, V>> maker;
@@ -45,11 +47,6 @@ public class MapDbFactory extends BaseKeyValueFactory {
             HTreeMap<K, V> map = maker.createOrOpen();
             return new MapDbImpl<>(db, map);
         });
-    }
-
-    @Override
-    public void close() {
-        db.close();
     }
 
     private @NotNull DB createDefaultMapDB(@NotNull Settings settings) {
