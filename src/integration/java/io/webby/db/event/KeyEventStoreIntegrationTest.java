@@ -40,8 +40,7 @@ public class KeyEventStoreIntegrationTest {
         KeyEventStoreFactory factory = Testing.testStartup().getInstance(KeyEventStoreFactory.class);
 
         try (KeyEventStore<Integer, String> store = factory.getEventStore(scopedStore("foo", Integer.class, String.class))) {
-            assertEmptyCache(store);
-            assertEqualsTo(store, multi());
+            assertCleanState(store);
 
             store.forceFlush();
             assertEmptyCache(store);
@@ -55,6 +54,8 @@ public class KeyEventStoreIntegrationTest {
         KeyEventStoreFactory factory = setup(batchSize).getInstance(KeyEventStoreFactory.class);
 
         try (KeyEventStore<Integer, String> store = factory.getEventStore(scopedStore("foo", Integer.class, String.class))) {
+            assertCleanState(store);
+
             store.append(1, "a");
             assertEqualsTo(store, multi(array(1, "a")));
 
@@ -89,6 +90,8 @@ public class KeyEventStoreIntegrationTest {
         KeyEventStoreFactory factory = setup(batchSize).getInstance(KeyEventStoreFactory.class);
 
         try (KeyEventStore<Integer, String> store = factory.getEventStore(scopedStore("foo", Integer.class, String.class))) {
+            assertCleanState(store);
+
             store.append(1, "a");
             assertEqualsTo(store, multi(array(1, "a")));
 
@@ -113,7 +116,9 @@ public class KeyEventStoreIntegrationTest {
     public void simple_operations(StorageType storageType) {
         KeyEventStoreFactory factory = setup(storageType).getInstance(KeyEventStoreFactory.class);
 
-        try (KeyEventStore<Integer, String> store = factory.getEventStore(scopedStore("foo", Integer.class, String.class))) {
+        try (KeyEventStore<Integer, String> store = factory.getEventStore(scopedStore("ops", Integer.class, String.class))) {
+            assertCleanState(store);
+
             store.append(1, "a");
             assertEqualsTo(store, multi(array(1, "a")));
 
@@ -149,7 +154,9 @@ public class KeyEventStoreIntegrationTest {
 
         int size = 100000;
         int flushEvery = 10000;
-        try (KeyEventStore<Integer, String> store = factory.getEventStore(scopedStore("foo", Integer.class, String.class))) {
+        try (KeyEventStore<Integer, String> store = factory.getEventStore(scopedStore("many", Integer.class, String.class))) {
+            assertCleanState(store);
+
             for (int i = 1; i <= size; i++) {
                 store.append(1, "12345678");
                 if (i % flushEvery == 0) {
@@ -167,16 +174,19 @@ public class KeyEventStoreIntegrationTest {
 
     @ParameterizedTest
     @EnumSource(StorageType.class)
-    public void lifetime(StorageType storageType) {
+    public void lifetime_and_persistence(StorageType storageType) {
         Injector injector = setup(storageType);
         Lifetime.Definition lifetime = injector.getInstance(Lifetime.class).createNested();
         KeyEventStoreFactory factory = injector.getInstance(KeyEventStoreFactory.class);
 
         KeyEventStore<Integer, String> store = factory.getEventStore(
-            EventStoreOptions.of(ManagedBy.byLifetime(lifetime), "foo", Integer.class, String.class)
+            EventStoreOptions.of(ManagedBy.byLifetime(lifetime), "life", Integer.class, String.class)
         );
 
+        assertCleanState(store);
         store.append(1, "a");
+        store.append(2, "b");
+        store.append(3, "c");
 
         lifetime.terminate();
         assertEmptyCache(store);
@@ -221,9 +231,20 @@ public class KeyEventStoreIntegrationTest {
         }
     }
 
+    private static <K, V> void assertCleanState(@NotNull KeyEventStore<K, V> store) {
+        assertEmptyCache(store);
+        assertUnderlyingDbEmpty(store);
+    }
+
     private static <K, V> void assertEmptyCache(@NotNull KeyEventStore<K, V> store) {
         if (store instanceof CachingKvdbEventStore<?, ?> cachingStore) {
             assertThat(cachingStore.cache()).isEmpty();
+        }
+    }
+
+    private static <K, V> void assertUnderlyingDbEmpty(@NotNull KeyEventStore<K, V> store) {
+        if (store instanceof CachingKvdbEventStore<?, ?> cachingStore) {
+            assertThat(cachingStore.db().keys()).isEmpty();
         }
     }
 

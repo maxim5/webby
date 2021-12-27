@@ -126,6 +126,11 @@ public class CachingKvdbEventStore<K, E> implements KeyEventStore<K, E> {
         return cache;
     }
 
+    @VisibleForTesting
+    @NotNull KeyValueDb<K, List<E>> db() {
+        return db;
+    }
+
     private static <E> @NotNull List<E> concatToList(@NotNull Collection<E> cached, @Nullable List<E> persistent) {
         if (persistent != null) {
             return EasyIterables.concat(cached, persistent);
