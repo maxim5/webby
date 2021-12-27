@@ -5,13 +5,10 @@ import com.google.common.collect.ImmutableMultimap;
 import com.google.common.collect.Multimap;
 import com.google.inject.Injector;
 import io.webby.app.AppSettings;
-import io.webby.auth.session.Session;
-import io.webby.auth.user.DefaultUser;
 import io.webby.common.Lifetime;
-import io.webby.db.kv.KeyValueSettings;
 import io.webby.common.ManagedBy;
+import io.webby.db.kv.KeyValueSettings;
 import io.webby.db.kv.StorageType;
-import io.webby.db.model.BlobKv;
 import io.webby.testing.Testing;
 import io.webby.testing.TestingProps;
 import io.webby.testing.ext.EmbeddedRedisExtension;
@@ -195,7 +192,7 @@ public class KeyEventStoreIntegrationTest {
         TestingProps.assumePropIfSet("test.kv.only_type", storageType.name());
 
         AppSettings settings = Testing.defaultAppSettings();
-        settings.modelFilter().setCommonPackageOf(Session.class, DefaultUser.class, BlobKv.class);
+        settings.modelFilter().setCommonPackageOf(Testing.CORE_MODELS);
         settings.storageSettings()
                 .enableKeyValue(KeyValueSettings.of(storageType, TEMP_DIRECTORY.getCurrentTempDir()))
                 .enableSql(SQL_DB.settings());

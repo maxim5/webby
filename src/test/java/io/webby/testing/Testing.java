@@ -6,7 +6,10 @@ import com.google.inject.util.Modules;
 import io.webby.Webby;
 import io.webby.app.AppLifetime;
 import io.webby.app.AppSettings;
+import io.webby.auth.session.Session;
+import io.webby.auth.user.DefaultUser;
 import io.webby.common.ClasspathScanner;
+import io.webby.db.model.BlobKv;
 import io.webby.netty.marshal.Json;
 import io.webby.util.collect.Pair;
 import org.apache.logging.log4j.Level;
@@ -16,6 +19,7 @@ import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
 import java.nio.charset.Charset;
+import java.util.List;
 import java.util.Locale;
 import java.util.function.Consumer;
 
@@ -25,6 +29,8 @@ public class Testing {
     public static final String DEFAULT_WEB_PATH = "src/test/resources";
     public static final String DEFAULT_VIEW_PATH = "src/test/resources";
     public static final String DEFAULT_USER_CONTENT_PATH = "src/test/resources";
+
+    public static final List<Class<?>> CORE_MODELS = List.of(Session.class, DefaultUser.class, BlobKv.class);
 
     public static @NotNull AppSettings defaultAppSettings() {
         AppSettings settings = new AppSettings();

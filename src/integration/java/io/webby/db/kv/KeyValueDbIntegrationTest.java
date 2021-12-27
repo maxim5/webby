@@ -16,7 +16,6 @@ import io.webby.db.kv.mapdb.MapDbFactory;
 import io.webby.db.kv.mapdb.MapDbImpl;
 import io.webby.db.kv.paldb.PalDbFactory;
 import io.webby.db.kv.paldb.PalDbImpl;
-import io.webby.db.model.BlobKv;
 import io.webby.testing.Mocking;
 import io.webby.testing.Testing;
 import io.webby.testing.TestingProps;
@@ -410,7 +409,7 @@ public class KeyValueDbIntegrationTest {
         TestingProps.assumePropIfSet("test.kv.only_type", storageType.name());
 
         AppSettings settings = Testing.defaultAppSettings();
-        settings.modelFilter().setCommonPackageOf(Session.class, DefaultUser.class, BlobKv.class);
+        settings.modelFilter().setCommonPackageOf(Testing.CORE_MODELS);
         settings.storageSettings()
                 .enableKeyValue(KeyValueSettings.of(storageType, TEMP_DIRECTORY.getCurrentTempDir()))
                 .enableSql(SQL_DB.settings());
