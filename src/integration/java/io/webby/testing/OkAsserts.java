@@ -9,6 +9,7 @@ import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
 import java.io.IOException;
+import java.util.function.Consumer;
 
 import static com.google.common.truth.Truth.assertThat;
 import static org.junit.jupiter.api.Assertions.*;
@@ -24,6 +25,15 @@ public class OkAsserts {
         } else {
             assertNotNull(response.body());
             assertEquals(content, response.peekBody(Long.MAX_VALUE).string());
+        }
+    }
+
+    public static void assertClientBody(@NotNull Response response, @Nullable Consumer<String> matcher) throws IOException {
+        if (matcher == null) {
+            assertNull(response.body());
+        } else {
+            assertNotNull(response.body());
+            matcher.accept(response.peekBody(Long.MAX_VALUE).string());
         }
     }
 
