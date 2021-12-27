@@ -3,7 +3,7 @@ package io.webby.db.kv.rocksdb;
 import com.google.inject.Inject;
 import io.webby.app.Settings;
 import io.webby.db.codec.Codec;
-import io.webby.db.codec.CodecProvider;
+import io.webby.db.kv.DbOptions;
 import io.webby.db.kv.impl.BaseKeyValueFactory;
 import org.jetbrains.annotations.NotNull;
 import org.rocksdb.Options;
@@ -16,24 +16,23 @@ import static io.webby.util.base.Rethrow.rethrow;
 
 public class RocksDbFactory extends BaseKeyValueFactory {
     @Inject private Settings settings;
-    @Inject private CodecProvider provider;
 
     @Override
-    public @NotNull <K, V> RocksDbImpl<K, V> getInternalDb(@NotNull String name, @NotNull Class<K> key, @NotNull Class<V> value) {
-        return cacheIfAbsent(name, () -> {
+    public @NotNull <K, V> RocksDbImpl<K, V> getInternalDb(@NotNull DbOptions<K, V> options) {
+        return cacheIfAbsent(options, () -> {
             Path storagePath = settings.storageSettings().keyValueSettingsOrDie().path();
             String filename = settings.getProperty("db.rocksdb.filename.pattern", "rocksdb-%s");
             boolean createIfMissing = settings.getBoolProperty("db.rocksdb.create.if.missing", true);
             boolean paranoidChecks = settings.getBoolProperty("db.rocksdb.paranoid.checks", false);
 
-            String destination = storagePath.resolve(formatFileName(filename, name)).toString();
-            Codec<K> keyCodec = provider.getCodecOrDie(key);
-            Codec<V> valueCodec = provider.getCodecOrDie(value);
+            String destination = storagePath.resolve(formatFileName(filename, options.name())).toString();
+            Codec<K> keyCodec = keyCodecOrDie(options);
+            Codec<V> valueCodec = valueCodecOrDie(options);
             try {
-                Options options = new Options()
+                Options rocksOptions = new Options()
                         .setCreateIfMissing(createIfMissing)
                         .setParanoidChecks(paranoidChecks);
-                RocksDB db = RocksDB.open(options, destination);
+                RocksDB db = RocksDB.open(rocksOptions, destination);
                 return new RocksDbImpl<>(db, keyCodec, valueCodec);
             } catch (RocksDBException e) {
                 return rethrow(e);

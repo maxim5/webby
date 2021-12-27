@@ -4,10 +4,7 @@ import com.google.inject.Inject;
 import io.webby.app.Settings;
 import io.webby.app.StorageSettings;
 import io.webby.common.InjectorHelper;
-import io.webby.db.kv.KeyValueDb;
-import io.webby.db.kv.KeyValueFactory;
-import io.webby.db.kv.KeyValueSettings;
-import io.webby.db.kv.StorageType;
+import io.webby.db.kv.*;
 import io.webby.db.kv.chronicle.ChronicleFactory;
 import io.webby.db.kv.halodb.HaloDbFactory;
 import io.webby.db.kv.javamap.JavaMapDbFactory;
@@ -38,13 +35,11 @@ public class AgnosticKeyValueFactory implements KeyValueFactory {
     }
 
     @Override
-    public <K, V> @NotNull KeyValueDb<K, V> getDb(@NotNull String name, @NotNull Class<K> key, @NotNull Class<V> value) {
-        return delegate.getDb(name, key, value);
-    }
-
-    public <K, V> @NotNull KeyValueDb<K, V> getDb(@NotNull StorageType storageType, @NotNull String name,
-                                                  @NotNull Class<K> key, @NotNull Class<V> value) {
-        return pickFactory(storageType).getDb(name, key, value);
+    public @NotNull <K, V> KeyValueDb<K, V> getDb(@NotNull DbOptions<K, V> options) {
+        if (options.storageType() != null) {
+            pickFactory(options.storageType()).getDb(options);
+        }
+        return delegate.getDb(options);
     }
 
     public <F extends InternalKeyValueFactory> @NotNull F getInternalFactory(@NotNull StorageType storageType) {

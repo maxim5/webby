@@ -6,7 +6,7 @@ import io.webby.db.codec.Codec;
 import io.webby.db.kv.KeyValueDb;
 import io.webby.db.kv.impl.ByteArrayDb;
 import io.webby.util.collect.EasyIterables;
-import io.webby.util.base.EasyPrimitives.BoolFlag;
+import io.webby.util.base.EasyPrimitives.MutableBool;
 import io.webby.util.base.Rethrow.Consumers;
 import io.webby.util.func.ThrowConsumer;
 import io.webby.util.func.ThrowFunction;
@@ -84,7 +84,7 @@ public class TuplDb<K, V> extends ByteArrayDb<K, V> implements KeyValueDb<K, V> 
 
     @Override
     public boolean containsValue(@NotNull V value) {
-        BoolFlag found = new BoolFlag();
+        MutableBool found = new MutableBool();
         byte[] bytes = fromValue(value);
         iterate(cursor -> {
             byte[] currentBytes = cursor.value();

@@ -39,7 +39,7 @@ public class AcceptContent {
                     .map(s -> s.replace("\r\n", "\n"))
                     .map(s -> s.replaceAll("RealFile:\\s[a-zA-Z0-9/\\\\-_:]+", "RealFile: <temp-path>"))
                     .toList();
-            return String.join("\n----------\n", bodyParts);
+            return String.join("\n\n", bodyParts);
         } finally {
             decoder.destroy();
         }

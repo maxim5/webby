@@ -2,7 +2,7 @@ package io.webby.netty.request;
 
 import io.netty.handler.codec.http.cookie.DefaultCookie;
 import io.webby.testing.Testing;
-import io.webby.util.base.EasyPrimitives.IntCounter;
+import io.webby.util.base.EasyPrimitives.MutableInt;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
@@ -43,7 +43,7 @@ public class DefaultHttpRequestExTest {
         assertEquals("{\"value\": 123}", request.contentAsString());
         Map<?, ?> map = request.contentAsJson(Map.class);
         assertJsonEquivalent(map, Map.of("value", 123));
-        IntCounter counter = request.contentAsJson(IntCounter.class);
+        MutableInt counter = request.contentAsJson(MutableInt.class);
         assertEquals(123, counter.value);
     }
 

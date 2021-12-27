@@ -3,13 +3,13 @@ package io.webby.util.base;
 import java.util.Arrays;
 
 public class EasyPrimitives {
-    public static class BoolFlag {
+    public static class MutableBool {
         public boolean flag = false;
 
-        public BoolFlag() {
+        public MutableBool() {
         }
 
-        public BoolFlag(boolean flag) {
+        public MutableBool(boolean flag) {
             this.flag = flag;
         }
 
@@ -18,13 +18,13 @@ public class EasyPrimitives {
         }
     }
 
-    public static class IntCounter {
+    public static class MutableInt {
         public int value = 0;
 
-        public IntCounter() {
+        public MutableInt() {
         }
 
-        public IntCounter(int value) {
+        public MutableInt(int value) {
             this.value = value;
         }
 
@@ -33,13 +33,13 @@ public class EasyPrimitives {
         }
     }
 
-    public static class LongCounter {
+    public static class MutableLong {
         public long value = 0;
 
-        public LongCounter() {
+        public MutableLong() {
         }
 
-        public LongCounter(int value) {
+        public MutableLong(int value) {
             this.value = value;
         }
 

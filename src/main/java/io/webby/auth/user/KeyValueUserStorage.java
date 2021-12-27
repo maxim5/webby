@@ -2,6 +2,7 @@ package io.webby.auth.user;
 
 import com.google.inject.Inject;
 import io.webby.app.Settings;
+import io.webby.db.kv.DbOptions;
 import io.webby.db.kv.KeyValueDb;
 import io.webby.db.kv.KeyValueFactory;
 import io.webby.db.model.LongIdGenerator;
@@ -18,7 +19,7 @@ public class KeyValueUserStorage implements UserStorage {
     public KeyValueUserStorage(@NotNull Settings settings, @NotNull KeyValueFactory dbFactory) {
         // TODO settings: user class, generator type
         Class<?> userClass = DefaultUser.class;
-        db = castAny(dbFactory.getDb(User.DB_NAME, Long.class, userClass));
+        db = castAny(dbFactory.getDb(DbOptions.of(User.DB_NAME, Long.class, userClass)));
         generator = LongIdGenerator.autoIncrement(this::getMaxId);
     }
 

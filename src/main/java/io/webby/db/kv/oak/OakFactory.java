@@ -3,12 +3,14 @@ package io.webby.db.kv.oak;
 import com.google.common.flogger.FluentLogger;
 import com.google.inject.Inject;
 import com.google.inject.TypeLiteral;
-import com.yahoo.oak.*;
+import com.yahoo.oak.OakComparator;
+import com.yahoo.oak.OakMapBuilder;
+import com.yahoo.oak.OakScopedReadBuffer;
+import com.yahoo.oak.OakSerializer;
 import com.yahoo.oak.common.intbuffer.OakIntBufferComparator;
-import io.webby.app.Settings;
 import io.webby.common.InjectorHelper;
 import io.webby.db.codec.Codec;
-import io.webby.db.codec.CodecProvider;
+import io.webby.db.kv.DbOptions;
 import io.webby.db.kv.impl.BaseKeyValueFactory;
 import org.jetbrains.annotations.NotNull;
 
@@ -20,22 +22,20 @@ import static io.webby.util.base.EasyCast.castAny;
 public class OakFactory extends BaseKeyValueFactory {
     private static final FluentLogger log = FluentLogger.forEnclosingClass();
 
-    @Inject private Settings settings;
-    @Inject private CodecProvider provider;
     @Inject private InjectorHelper helper;
 
     @Override
-    public @NotNull <K, V> OakDb<K, V> getInternalDb(@NotNull String name, @NotNull Class<K> key, @NotNull Class<V> value) {
-        return cacheIfAbsent(name, () -> {
+    public @NotNull <K, V> OakDb<K, V> getInternalDb(@NotNull DbOptions<K, V> options) {
+        return cacheIfAbsent(options, () -> {
             OakRecord<K> keyRecord =
-                    Optional.ofNullable(OakKnownTypes.lookupRecord(key))
-                    .orElseGet(() -> helper.getOrDefault(new TypeLiteral<OakRecord<K>>() {}, () -> inferOakRecord(key)));
+                    Optional.ofNullable(OakKnownTypes.lookupRecord(options.key()))
+                    .orElseGet(() -> helper.getOrDefault(new TypeLiteral<OakRecord<K>>() {}, () -> inferOakRecord(options)));
 
             OakSerializer<V> valueSerializer =
-                    Optional.ofNullable(OakKnownTypes.lookupRecord(value))
+                    Optional.ofNullable(OakKnownTypes.lookupRecord(options.value()))
                     .map(OakRecord::serializer)
                     .orElseGet(() -> {
-                        Codec<V> codec = provider.getCodecOrDie(value);
+                        Codec<V> codec = valueCodecOrDie(options);
                         return new OakSerializerAdapter<>(codec);
                     });
 
@@ -55,8 +55,9 @@ public class OakFactory extends BaseKeyValueFactory {
         });
     }
 
-    private <K> @NotNull OakRecord<K> inferOakRecord(@NotNull Class<K> key) {
-        Codec<K> keyCodec = provider.getCodecOrDie(key);
+    private <K, V> @NotNull OakRecord<K> inferOakRecord(@NotNull DbOptions<K, V> options) {
+        Class<K> key = options.key();
+        Codec<K> keyCodec = keyCodecOrDie(options);
         int byteSize = keyCodec.size().numBytes();
         assert keyCodec.size().isFixed() : "Oak requires fixed size codec for the key: %s".formatted(key);
         assert byteSize >= 0 : "Internal error: fixed byte size can't be negative: %d (%s)".formatted(byteSize, key);

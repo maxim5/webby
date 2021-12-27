@@ -4,14 +4,14 @@ import com.google.inject.Inject;
 import com.google.inject.TypeLiteral;
 import io.webby.app.Settings;
 import io.webby.common.InjectorHelper;
+import io.webby.common.Lifetime;
 import io.webby.db.codec.Codec;
-import io.webby.db.codec.CodecProvider;
+import io.webby.db.kv.DbOptions;
 import io.webby.db.kv.impl.BaseKeyValueFactory;
 import org.jetbrains.annotations.NotNull;
 import org.lmdbjava.Dbi;
 import org.lmdbjava.Env;
 
-import java.io.IOException;
 import java.nio.ByteBuffer;
 import java.nio.file.Path;
 
@@ -20,26 +20,20 @@ import static org.lmdbjava.DbiFlags.MDB_CREATE;
 public class LmdbJavaDbFactory extends BaseKeyValueFactory {
     private final Env<ByteBuffer> env;
 
-    @Inject private CodecProvider codecProvider;
-
     @Inject
-    public LmdbJavaDbFactory(@NotNull InjectorHelper helper) {
+    public LmdbJavaDbFactory(@NotNull InjectorHelper helper, @NotNull Lifetime lifetime) {
         env = helper.getOrDefault(new TypeLiteral<>() {}, this::createDefaultEnv);
+        lifetime.onTerminate(env::close);
     }
 
     @Override
-    public @NotNull <K, V> LmdbJavaDb<K, V> getInternalDb(@NotNull String name, @NotNull Class<K> key, @NotNull Class<V> value) {
-        return cacheIfAbsent(name, () -> {
-            Codec<K> keyCodec = codecProvider.getCodecOrDie(key);
-            Codec<V> valueCodec = codecProvider.getCodecOrDie(value);
-            Dbi<ByteBuffer> db = env.openDbi(name, MDB_CREATE);
+    public @NotNull <K, V> LmdbJavaDb<K, V> getInternalDb(@NotNull DbOptions<K, V> options) {
+        return cacheIfAbsent(options, () -> {
+            Codec<K> keyCodec = keyCodecOrDie(options);
+            Codec<V> valueCodec = valueCodecOrDie(options);
+            Dbi<ByteBuffer> db = env.openDbi(options.name(), MDB_CREATE);
             return new LmdbJavaDb<>(env, db, keyCodec, valueCodec);
         });
-    }
-
-    @Override
-    public void close() throws IOException {
-        env.close();
     }
 
     private @NotNull Env<ByteBuffer> createDefaultEnv(@NotNull Settings settings) {

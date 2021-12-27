@@ -3,6 +3,7 @@ package io.webby.db.kv.impl;
 import com.google.common.collect.Streams;
 import io.webby.db.kv.KeyValueDb;
 import io.webby.perf.stats.DbStatsListener;
+import io.webby.perf.stats.Stat;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
@@ -13,7 +14,6 @@ import java.util.function.Function;
 import java.util.function.Supplier;
 import java.util.stream.Stream;
 
-import io.webby.perf.stats.Stat;
 import static io.webby.perf.stats.DbStatsListener.OpContext;
 
 public class TrackingDbAdapter<K, V> implements KeyValueDb<K, V> {

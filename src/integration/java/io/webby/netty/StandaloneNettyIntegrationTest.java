@@ -88,18 +88,22 @@ public class StandaloneNettyIntegrationTest {
         call(Ok.post("/upload/file", files(Map.of("foo.txt", new byte[64], "bar.png", new byte[64]))), response -> {
             assertClientCode(response, 200);
             assertClientHeader(response, "Content-Type", "text/html; charset=UTF-8");
-            assertClientBody(response, """
-                Mixed: content-disposition: form-data; name="foo.txt"; filename="foo.txt"
-                content-type: application/octet-stream; charset=UTF-8
-                content-length: 64
-                Completed: true
-                IsInMemory: true
-                ----------
-                Mixed: content-disposition: form-data; name="bar.png"; filename="bar.png"
-                content-type: application/octet-stream; charset=UTF-8
-                content-length: 64
-                Completed: true
-                IsInMemory: true""");
+            assertClientBody(response, content -> {
+                assertThat(content.split("\n\n")).asList().containsExactly(
+                    """
+                    Mixed: content-disposition: form-data; name="foo.txt"; filename="foo.txt"
+                    content-type: application/octet-stream; charset=UTF-8
+                    content-length: 64
+                    Completed: true
+                    IsInMemory: true""",
+                    """
+                    Mixed: content-disposition: form-data; name="bar.png"; filename="bar.png"
+                    content-type: application/octet-stream; charset=UTF-8
+                    content-length: 64
+                    Completed: true
+                    IsInMemory: true"""
+                );
+            });
         });
     }
 

@@ -2,7 +2,6 @@ package io.webby.orm.arch;
 
 import com.google.common.collect.ImmutableMap;
 import com.google.common.flogger.FluentLogger;
-import io.webby.util.base.EasyObjects;
 import io.webby.util.collect.EasyIterables;
 import io.webby.util.reflect.EasyMembers;
 import org.jetbrains.annotations.NotNull;
@@ -19,8 +18,9 @@ import java.util.function.Predicate;
 import java.util.logging.Level;
 import java.util.stream.Collectors;
 
-import static io.webby.util.reflect.EasyMembers.*;
 import static io.webby.orm.arch.InvalidSqlModelException.failIf;
+import static io.webby.util.base.EasyObjects.firstNonNullIfExist;
+import static io.webby.util.reflect.EasyMembers.*;
 
 class JavaClassAnalyzer {
     private static final FluentLogger log = FluentLogger.forEnclosingClass();
@@ -113,7 +113,7 @@ class JavaClassAnalyzer {
                                   !isStatic(method))
                 .collect(ImmutableMap.toImmutableMap(Method::getName, Function.identity()));
 
-        return EasyObjects.firstNonNull(List.of(
+        return firstNonNullIfExist(List.of(
                 () -> eligibleMethods.get(fieldName),
                 () -> eligibleMethods.get("%s%s".formatted(
                         fieldType == boolean.class ? "is" : "get",
