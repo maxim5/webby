@@ -2,15 +2,10 @@ package io.webby.db.event;
 
 import org.jetbrains.annotations.NotNull;
 
-import java.io.Closeable;
-import java.io.Flushable;
+import java.util.function.Consumer;
 
-public interface EventLog<E> extends Flushable, Closeable {
+public interface EventLog<E> extends Persistable {
     void append(@NotNull E event);
 
-    @Override
-    void flush();
-
-    @Override
-    void close();
+    void forEach(@NotNull Consumer<E> consumer);
 }

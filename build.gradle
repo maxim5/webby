@@ -13,6 +13,7 @@ version '0.7.0-SNAPSHOT'
 repositories {
     mavenCentral()
     maven { url 'https://jitpack.io' }
+    maven { url 'https://raw.githubusercontent.com/bulldog2011/bulldog-repo/master/repo/releases/' }
 }
 
 def os
@@ -36,12 +37,14 @@ dependencies {
 
     // Implementation
     implementation group: 'com.carrotsearch', name: 'hppc', version: '0.9.1'
-    compileOnly group: 'com.google.protobuf', name: 'protobuf-java', version: '3.19.1'
     implementation group: 'org.jetbrains', name: 'annotations', version: '22.0.0'
 
     // Google Flogger
     compileOnly group: 'com.google.flogger', name: 'flogger', version: '0.7.2'
     runtimeOnly group: 'com.google.flogger', name: 'flogger-log4j2-backend', version: '0.7.2'
+
+    compileOnly group: 'com.google.protobuf', name: 'protobuf-java', version: '3.19.1'
+    compileOnly group: 'com.leansoft', name: 'bigqueue', version: '0.7.3'
 
     // Json
     compileOnly group: 'com.alibaba', name: 'fastjson', version: '1.2.79'
