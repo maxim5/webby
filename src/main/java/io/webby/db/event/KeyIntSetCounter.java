@@ -24,7 +24,15 @@ public class KeyIntSetCounter implements Persistable {
         this.db = db;
     }
 
-    public int update(int key, int eventId, int delta) {
+    public int increment(int key, int eventId) {
+        return update(key, eventId, 1);
+    }
+
+    public int decrement(int key, int eventId) {
+        return update(key, -eventId, -1);
+    }
+
+    private int update(int key, int eventId, int delta) {
         LOCK.writeLock().lock();
         try {
             IntHashSet events = cache.get(key);
@@ -32,21 +40,13 @@ public class KeyIntSetCounter implements Persistable {
                 events = db.getOrDefault(key, new IntHashSet());
                 cache.put(key, events);
             }
-            if (events.add(eventId)) {
+            if (events.remove(-eventId) || events.add(eventId)) {
                 return counters.addTo(key, delta);
             }
             return counters.get(key);
         } finally {
             LOCK.writeLock().unlock();
         }
-    }
-
-    public int increment(int key, int eventId) {
-        return update(key, eventId, 1);
-    }
-
-    public int decrement(int key, int eventId) {
-        return update(key, eventId, -1);
     }
 
     public int estimateCount(int key) {

@@ -2,6 +2,7 @@ package io.webby.db.event;
 
 import com.carrotsearch.hppc.IntHashSet;
 import com.google.inject.Inject;
+import io.webby.common.Lifetime;
 import io.webby.common.ManagedBy;
 import io.webby.db.kv.DbOptions;
 import io.webby.db.kv.KeyValueDb;
@@ -10,9 +11,12 @@ import org.jetbrains.annotations.NotNull;
 
 public class KeyCountersFactory {
     @Inject private KeyValueFactory factory;
+    @Inject private Lifetime lifetime;
 
     public @NotNull KeyIntSetCounter getIntCounter(@NotNull String name) {
         KeyValueDb<Integer, IntHashSet> db = factory.getDb(DbOptions.of(ManagedBy.BY_PROVIDER, name, Integer.class, IntHashSet.class));
-        return new KeyIntSetCounter(db);
+        KeyIntSetCounter counter = new KeyIntSetCounter(db);
+        lifetime.onTerminate(counter);
+        return counter;
     }
 }
