@@ -16,11 +16,12 @@ public class KeyValueUserStorage implements UserStorage {
     private final IntIdGenerator generator;
 
     @Inject
-    public KeyValueUserStorage(@NotNull Settings settings, @NotNull KeyValueFactory dbFactory) {
-        // TODO settings: user class, generator type
-        Class<?> userClass = DefaultUser.class;
+    public KeyValueUserStorage(@NotNull Settings settings,
+                               @NotNull Class<? extends User> userClass,
+                               @NotNull KeyValueFactory dbFactory) {
+        boolean randomIds = settings.getBoolProperty("user.id.generator.random.enabled");
         db = castAny(dbFactory.getDb(DbOptions.of(User.DB_NAME, Integer.class, userClass)));
-        generator = IntIdGenerator.autoIncrement(this::getMaxId);
+        generator = randomIds ? IntIdGenerator.random(null) : IntIdGenerator.autoIncrement(() -> db.size() + 1);
     }
 
     @Override
@@ -43,9 +44,5 @@ public class KeyValueUserStorage implements UserStorage {
 
     private boolean tryInsert(int userId, @NotNull User user) {
         return db.putIfAbsent(userId, user) == null;
-    }
-
-    private int getMaxId() {
-        return db.size() + 1;
     }
 }

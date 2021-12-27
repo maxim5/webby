@@ -13,8 +13,9 @@ public class SqlUserStorage implements UserStorage {
     private final TableInt<User> table;
 
     @Inject
-    public SqlUserStorage(@NotNull Settings settings, @NotNull TableManager manager) {
-        Class<? extends User> userClass = DefaultUser.class;
+    public SqlUserStorage(@NotNull Settings settings,
+                          @NotNull Class<? extends User> userClass,
+                          @NotNull TableManager manager) {
         table = castAny(manager.getMatchingTableOrDie(User.DB_NAME, Integer.class, userClass));
     }
 
