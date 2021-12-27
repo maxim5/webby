@@ -11,4 +11,6 @@ public interface Persistable extends Closeable, Flushable {
     }
 
     void forceFlush() throws IOException;
+
+    void clearCache() throws IOException;
 }

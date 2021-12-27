@@ -32,20 +32,13 @@ public class KeyIntSetCounter implements Persistable {
         return update(key, -eventId, -1);
     }
 
-    private int update(int key, int eventId, int delta) {
-        LOCK.writeLock().lock();
+    public int eventValue(int key, int eventId) {
+        LOCK.readLock().lock();
         try {
-            IntHashSet events = cache.get(key);
-            if (events == null) {
-                events = db.getOrDefault(key, new IntHashSet());
-                cache.put(key, events);
-            }
-            if (events.remove(-eventId) || events.add(eventId)) {
-                return counters.addTo(key, delta);
-            }
-            return counters.get(key);
+            IntHashSet events = getOrLoadAllEvents(key);
+            return events.contains(eventId) ? 1 : events.contains(-eventId) ? -1 : 0;
         } finally {
-            LOCK.writeLock().unlock();
+            LOCK.readLock().unlock();
         }
     }
 
@@ -88,5 +81,33 @@ public class KeyIntSetCounter implements Persistable {
 
     public void close() {
         forceFlush();
+    }
+
+    private int update(int key, int eventId, int delta) {
+        assert eventId != 0 : "EventId unsupported: " + eventId;
+        LOCK.writeLock().lock();
+        try {
+            IntHashSet events = getOrLoadAllEvents(key);
+            if (events.remove(-eventId) || events.add(eventId)) {
+                return counters.addTo(key, delta);
+            }
+            return counters.get(key);
+        } finally {
+            LOCK.writeLock().unlock();
+        }
+    }
+
+    private @NotNull IntHashSet getOrLoadAllEvents(int key) {
+        IntHashSet events = cache.get(key);
+        if (events == null) {
+            events = db.getOrDefault(key, new IntHashSet());
+            LOCK.writeLock().lock();
+            try {
+                cache.put(key, events);
+            } finally {
+                LOCK.writeLock().unlock();
+            }
+        }
+        return events;
     }
 }

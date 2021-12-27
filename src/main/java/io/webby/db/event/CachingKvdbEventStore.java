@@ -111,6 +111,11 @@ public class CachingKvdbEventStore<K, E> implements KeyEventStore<K, E> {
     }
 
     @Override
+    public void clearCache() {
+        forceFlush();
+    }
+
+    @Override
     public void close() {
         LOCK.writeLock().lock();
         try {
