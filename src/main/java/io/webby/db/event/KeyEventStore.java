@@ -10,13 +10,4 @@ public interface KeyEventStore<K, E> extends Persistable {
     @NotNull List<E> getAll(@NotNull K key);
 
     void deleteAll(@NotNull K key);
-
-    @Override
-    void flush();
-
-    @Override
-    void forceFlush();
-
-    @Override
-    void close();
 }
