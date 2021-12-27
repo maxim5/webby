@@ -9,7 +9,6 @@ import io.webby.auth.user.User;
 import io.webby.db.kv.DbOptions;
 import io.webby.db.kv.KeyValueDb;
 import io.webby.db.kv.KeyValueFactory;
-import io.webby.common.ManagedBy;
 import io.webby.db.model.LongIdGenerator;
 import io.webby.netty.request.HttpRequestEx;
 import org.jetbrains.annotations.NotNull;
@@ -45,7 +44,7 @@ public class SessionManager {
         decipher.init(Cipher.DECRYPT_MODE, key);
 
         generator = LongIdGenerator.securePositiveRandom(SecureRandom.getInstance("SHA1PRNG"));
-        db = factory.getDb(DbOptions.of(ManagedBy.BY_PROVIDER, Session.DB_NAME, Long.class, Session.class));
+        db = factory.getDb(DbOptions.of(Session.DB_NAME, Long.class, Session.class));
     }
 
     public @NotNull Session getOrCreateSession(@NotNull HttpRequestEx request, @Nullable Cookie cookie) {

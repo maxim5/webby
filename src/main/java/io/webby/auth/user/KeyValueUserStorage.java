@@ -5,7 +5,6 @@ import io.webby.app.Settings;
 import io.webby.db.kv.DbOptions;
 import io.webby.db.kv.KeyValueDb;
 import io.webby.db.kv.KeyValueFactory;
-import io.webby.common.ManagedBy;
 import io.webby.db.model.LongIdGenerator;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
@@ -20,7 +19,7 @@ public class KeyValueUserStorage implements UserStorage {
     public KeyValueUserStorage(@NotNull Settings settings, @NotNull KeyValueFactory dbFactory) {
         // TODO settings: user class, generator type
         Class<?> userClass = DefaultUser.class;
-        db = castAny(dbFactory.getDb(DbOptions.of(ManagedBy.BY_PROVIDER, User.DB_NAME, Long.class, userClass)));
+        db = castAny(dbFactory.getDb(DbOptions.of(User.DB_NAME, Long.class, userClass)));
         generator = LongIdGenerator.autoIncrement(this::getMaxId);
     }
 

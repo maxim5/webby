@@ -4,9 +4,9 @@ import com.google.common.collect.ArrayListMultimap;
 import com.google.common.collect.ImmutableMultimap;
 import com.google.common.collect.Multimap;
 import com.google.inject.Injector;
+import io.webby.app.AppLifetime;
 import io.webby.app.AppSettings;
 import io.webby.common.Lifetime;
-import io.webby.common.ManagedBy;
 import io.webby.db.kv.KeyValueSettings;
 import io.webby.db.kv.StorageType;
 import io.webby.testing.Testing;
@@ -39,7 +39,7 @@ public class KeyEventStoreIntegrationTest {
     public void simple_empty_store() {
         KeyEventStoreFactory factory = Testing.testStartup().getInstance(KeyEventStoreFactory.class);
 
-        try (KeyEventStore<Integer, String> store = factory.getEventStore(scopedStore("foo", Integer.class, String.class))) {
+        try (KeyEventStore<Integer, String> store = factory.getEventStore(EventStoreOptions.of("foo", Integer.class, String.class))) {
             assertCleanState(store);
 
             store.forceFlush();
@@ -53,7 +53,7 @@ public class KeyEventStoreIntegrationTest {
     public void simple_append_and_flush(int batchSize) {
         KeyEventStoreFactory factory = setup(batchSize).getInstance(KeyEventStoreFactory.class);
 
-        try (KeyEventStore<Integer, String> store = factory.getEventStore(scopedStore("foo", Integer.class, String.class))) {
+        try (KeyEventStore<Integer, String> store = factory.getEventStore(EventStoreOptions.of("foo", Integer.class, String.class))) {
             assertCleanState(store);
 
             store.append(1, "a");
@@ -89,7 +89,7 @@ public class KeyEventStoreIntegrationTest {
     public void simple_append_one_key_and_flush(int batchSize) {
         KeyEventStoreFactory factory = setup(batchSize).getInstance(KeyEventStoreFactory.class);
 
-        try (KeyEventStore<Integer, String> store = factory.getEventStore(scopedStore("foo", Integer.class, String.class))) {
+        try (KeyEventStore<Integer, String> store = factory.getEventStore(EventStoreOptions.of("foo", Integer.class, String.class))) {
             assertCleanState(store);
 
             store.append(1, "a");
@@ -116,7 +116,7 @@ public class KeyEventStoreIntegrationTest {
     public void simple_operations(StorageType storageType) {
         KeyEventStoreFactory factory = setup(storageType).getInstance(KeyEventStoreFactory.class);
 
-        try (KeyEventStore<Integer, String> store = factory.getEventStore(scopedStore("ops", Integer.class, String.class))) {
+        try (KeyEventStore<Integer, String> store = factory.getEventStore(EventStoreOptions.of("ops", Integer.class, String.class))) {
             assertCleanState(store);
 
             store.append(1, "a");
@@ -154,7 +154,7 @@ public class KeyEventStoreIntegrationTest {
 
         int size = 100000;
         int flushEvery = 10000;
-        try (KeyEventStore<Integer, String> store = factory.getEventStore(scopedStore("many", Integer.class, String.class))) {
+        try (KeyEventStore<Integer, String> store = factory.getEventStore(EventStoreOptions.of("many", Integer.class, String.class))) {
             assertCleanState(store);
 
             for (int i = 1; i <= size; i++) {
@@ -176,11 +176,11 @@ public class KeyEventStoreIntegrationTest {
     @EnumSource(StorageType.class)
     public void lifetime_and_persistence(StorageType storageType) {
         Injector injector = setup(storageType);
-        Lifetime.Definition lifetime = injector.getInstance(Lifetime.class).createNested();
+        Lifetime.Definition lifetime = injector.getInstance(AppLifetime.class).getLifetime();
         KeyEventStoreFactory factory = injector.getInstance(KeyEventStoreFactory.class);
 
         KeyEventStore<Integer, String> store = factory.getEventStore(
-            EventStoreOptions.of(ManagedBy.byLifetime(lifetime), "life", Integer.class, String.class)
+            EventStoreOptions.of("life", Integer.class, String.class)
         );
 
         assertCleanState(store);
@@ -246,9 +246,5 @@ public class KeyEventStoreIntegrationTest {
         if (store instanceof CachingKvdbEventStore<?, ?> cachingStore) {
             assertThat(cachingStore.db().keys()).isEmpty();
         }
-    }
-
-    private static <K, E> @NotNull EventStoreOptions<K, E> scopedStore(String name, Class<K> key, Class<E> value) {
-        return EventStoreOptions.of(ManagedBy.MANUALLY_BY_CALLER, name, key, value);
     }
 }

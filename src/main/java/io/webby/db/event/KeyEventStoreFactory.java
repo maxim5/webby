@@ -4,7 +4,6 @@ import com.google.common.collect.ImmutableList;
 import com.google.inject.Inject;
 import io.webby.app.Settings;
 import io.webby.common.Lifetime;
-import io.webby.common.ManagedBy;
 import io.webby.db.codec.Codec;
 import io.webby.db.codec.CodecProvider;
 import io.webby.db.codec.CodecSize;
@@ -21,7 +20,6 @@ import java.util.List;
 
 import static io.webby.db.codec.Codecs.*;
 import static io.webby.util.base.EasyCast.castAny;
-import static java.util.Objects.requireNonNull;
 
 public class KeyEventStoreFactory {
     @Inject private Settings settings;
@@ -37,15 +35,11 @@ public class KeyEventStoreFactory {
 
         Codec<List<E>> codec = getListCodec(options.value(), averageSizePerKey);
         KeyValueDb<K, List<E>> db = factory.getDb(
-            DbOptions.<K, List<E>>of(ManagedBy.MANUALLY_BY_CALLER, options.name(), options.key(), castAny(List.class))
-                    .withCustomValueCodec(codec)
+            DbOptions.<K, List<E>>of(options.name(), options.key(), castAny(List.class)).withCustomValueCodec(codec)
         );
         CachingKvdbEventStore<K, E> store =
             new CachingKvdbEventStore<>(db, options.compacter(), cacheSizeSoftLimit, cacheSizeHardLimit, flushBatchSize);
-        switch (options.managedBy().owner()) {
-            case PROVIDER -> lifetime.onTerminate(store);
-            case GIVEN -> requireNonNull(options.managedBy().lifetime()).onTerminate(store);
-        }
+        lifetime.onTerminate(store);
         return store;
     }
 

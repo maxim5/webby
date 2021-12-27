@@ -20,7 +20,6 @@ import static io.webby.app.AppConfigException.assure;
 import static io.webby.util.base.EasyCast.castAny;
 import static io.webby.util.base.EasyObjects.firstNonNull;
 import static io.webby.util.base.EasyObjects.firstNonNullIfExist;
-import static java.util.Objects.requireNonNull;
 
 public abstract class BaseKeyValueFactory implements InternalKeyValueFactory {
     protected final Map<String, KeyValueDb<?, ?>> cache = new HashMap<>();
@@ -46,10 +45,7 @@ public abstract class BaseKeyValueFactory implements InternalKeyValueFactory {
     protected <K, V, KV extends KeyValueDb<K, V>> @NotNull KV cacheIfAbsent(@NotNull DbOptions<K, V> options,
                                                                             @NotNull Supplier<KV> supplier) {
         KeyValueDb<?, ?> db = cache.computeIfAbsent(options.name(), k -> supplier.get());
-        switch (options.managedBy().owner()) {
-            case PROVIDER -> lifetime.onTerminate(db);
-            case GIVEN -> requireNonNull(options.managedBy().lifetime()).onTerminate(db);
-        }
+        lifetime.onTerminate(db);
         return castAny(db);
     }
 
