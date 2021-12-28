@@ -26,6 +26,7 @@ public class AuthModule extends AbstractModule {
         bind(UserStorage.class).to(isSqlEnabled ? SqlUserStorage.class : KeyValueUserStorage.class).asEagerSingleton();
     }
 
+    // TODO: detect user class automatically from settings/model setup?
     @Provides
     public Class<? extends UserModel> userClass() {
         return DefaultUser.class;
