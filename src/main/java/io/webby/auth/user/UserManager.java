@@ -13,15 +13,15 @@ public class UserManager {
         this.userStorage = userStorage;
     }
 
-    public @Nullable User findByUserId(int userId) {
+    public @Nullable UserModel findByUserId(int userId) {
         return userStorage.findByUserId(userId);
     }
 
-    public @Nullable User findByUserId(@NotNull ForeignInt<User> foreignId) {
+    public @Nullable UserModel findByUserId(@NotNull ForeignInt<UserModel> foreignId) {
         return foreignId.hasEntity() ? foreignId.getEntity() : findByUserId(foreignId.getIntId());
     }
 
-    public int createUserAutoId(@NotNull User user) {
+    public int createUserAutoId(@NotNull UserModel user) {
         assert user.isAutoId() : "User is not auto-id: %s".formatted(user);
         return userStorage.createUserAutoId(user);
     }

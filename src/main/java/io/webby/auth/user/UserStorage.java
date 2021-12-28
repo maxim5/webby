@@ -4,7 +4,7 @@ import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
 public interface UserStorage {
-    @Nullable User findByUserId(int userId);
+    @Nullable UserModel findByUserId(int userId);
 
-    int createUserAutoId(@NotNull User user);
+    int createUserAutoId(@NotNull UserModel user);
 }

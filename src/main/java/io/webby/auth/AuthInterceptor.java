@@ -2,7 +2,7 @@ package io.webby.auth;
 
 import com.google.inject.Inject;
 import io.webby.auth.session.Session;
-import io.webby.auth.user.User;
+import io.webby.auth.user.UserModel;
 import io.webby.auth.user.UserManager;
 import io.webby.netty.errors.ServeException;
 import io.webby.netty.errors.UnauthorizedException;
@@ -25,7 +25,7 @@ public class AuthInterceptor implements AdvancedInterceptor {
 
         Session session = request.session();
         if (session.hasUser()) {
-            User user = userManager.findByUserId(session.user());
+            UserModel user = userManager.findByUserId(session.user());
             request.setNullableAttr(Attributes.User, user);
         }
     }

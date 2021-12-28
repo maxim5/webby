@@ -6,8 +6,8 @@ import org.jetbrains.annotations.NotNull;
 import java.time.Instant;
 import java.util.Objects;
 
-@Model(exposeAs = User.class)
-public class DefaultUser implements User {
+@Model(exposeAs = UserModel.class)
+public class DefaultUser implements UserModel {
     private int userId;
     private final Instant created;
     private final UserAccess access;
@@ -40,7 +40,7 @@ public class DefaultUser implements User {
 
     @Override
     public boolean equals(Object o) {
-        return o instanceof User that && userId == that.userId() &&
+        return o instanceof UserModel that && userId == that.userId() &&
                created.equals(that.created()) && access.equals(that.access());
     }
 

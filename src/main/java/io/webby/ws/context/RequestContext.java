@@ -4,7 +4,7 @@ import io.netty.handler.codec.http.websocketx.BinaryWebSocketFrame;
 import io.netty.handler.codec.http.websocketx.TextWebSocketFrame;
 import io.netty.handler.codec.http.websocketx.WebSocketFrame;
 import io.webby.auth.session.Session;
-import io.webby.auth.user.User;
+import io.webby.auth.user.UserModel;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
@@ -19,11 +19,11 @@ public record RequestContext(long requestId,
         return clientInfo.sessionOrDie();
     }
 
-    public @Nullable User userOrNull() {
+    public @Nullable UserModel userOrNull() {
         return clientInfo.userOrNull();
     }
 
-    public @NotNull User userOrDie() {
+    public @NotNull UserModel userOrDie() {
         return clientInfo.userOrDie();
     }
 

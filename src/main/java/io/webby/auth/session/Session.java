@@ -1,7 +1,7 @@
 package io.webby.auth.session;
 
 import io.netty.handler.codec.http.HttpHeaders;
-import io.webby.auth.user.User;
+import io.webby.auth.user.UserModel;
 import io.webby.db.model.Ids;
 import io.webby.netty.HttpConst;
 import io.webby.netty.request.HttpRequestEx;
@@ -12,7 +12,7 @@ import org.jetbrains.annotations.Nullable;
 import java.time.Instant;
 
 public record Session(long sessionId,
-                      @NotNull ForeignInt<User> user,
+                      @NotNull ForeignInt<UserModel> user,
                       @NotNull Instant created,
                       @NotNull String userAgent,
                       @Nullable String ipAddress) {
@@ -34,7 +34,7 @@ public record Session(long sessionId,
         return userId() != NO_USER_ID;
     }
 
-    public @NotNull Session withUser(@NotNull User user) {
+    public @NotNull Session withUser(@NotNull UserModel user) {
         return new Session(sessionId, ForeignInt.ofEntity(user.userId(), user), created, userAgent, ipAddress);
     }
 }

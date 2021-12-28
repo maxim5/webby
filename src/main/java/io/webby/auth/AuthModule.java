@@ -27,7 +27,7 @@ public class AuthModule extends AbstractModule {
     }
 
     @Provides
-    public Class<? extends User> userClass() {
+    public Class<? extends UserModel> userClass() {
         return DefaultUser.class;
     }
 }

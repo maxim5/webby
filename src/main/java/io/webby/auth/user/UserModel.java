@@ -5,7 +5,7 @@ import org.jetbrains.annotations.NotNull;
 
 import java.time.Instant;
 
-public interface User extends IntAutoIdModel {
+public interface UserModel extends IntAutoIdModel {
     String DB_NAME = "user";
 
     int userId();

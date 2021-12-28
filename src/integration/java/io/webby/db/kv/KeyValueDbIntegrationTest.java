@@ -6,7 +6,7 @@ import io.webby.app.AppSettings;
 import io.webby.auth.session.Session;
 import io.webby.auth.session.SessionManager;
 import io.webby.auth.user.DefaultUser;
-import io.webby.auth.user.User;
+import io.webby.auth.user.UserModel;
 import io.webby.auth.user.UserAccess;
 import io.webby.db.kv.chronicle.ChronicleDb;
 import io.webby.db.kv.chronicle.ChronicleFactory;
@@ -262,7 +262,7 @@ public class KeyValueDbIntegrationTest {
     public void multi_default_user_sql_compatible(StorageType storageType) {
         KeyValueFactory dbFactory = setupFactory(storageType);
 
-        try (KeyValueDb<Long, DefaultUser> db = dbFactory.getDb(DbOptions.of(User.DB_NAME, Long.class, DefaultUser.class))) {
+        try (KeyValueDb<Long, DefaultUser> db = dbFactory.getDb(DbOptions.of(UserModel.DB_NAME, Long.class, DefaultUser.class))) {
             runMultiTest(db, 777L, TestingModels.newUserNow(777, UserAccess.Simple));
         }
     }

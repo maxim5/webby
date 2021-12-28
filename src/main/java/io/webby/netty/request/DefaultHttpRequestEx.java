@@ -5,7 +5,7 @@ import io.netty.handler.codec.http.*;
 import io.netty.handler.codec.http.cookie.Cookie;
 import io.webby.auth.CookieUtil;
 import io.webby.auth.session.Session;
-import io.webby.auth.user.User;
+import io.webby.auth.user.UserModel;
 import io.webby.netty.HttpConst;
 import io.webby.netty.intercept.attr.Attributes;
 import io.webby.netty.marshal.Json;
@@ -156,12 +156,12 @@ public class DefaultHttpRequestEx extends DefaultFullHttpRequest implements Muta
     }
 
     @Override
-    public @Nullable User user() {
-        return (User) attr(Attributes.User);
+    public @Nullable UserModel user() {
+        return (UserModel) attr(Attributes.User);
     }
 
     @Override
-    public @NotNull User userOrDie() {
+    public @NotNull UserModel userOrDie() {
         return attrOrDie(Attributes.User);
     }
 

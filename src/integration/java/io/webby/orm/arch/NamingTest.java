@@ -1,7 +1,7 @@
 package io.webby.orm.arch;
 
 import io.webby.auth.session.Session;
-import io.webby.auth.user.User;
+import io.webby.auth.user.UserModel;
 import io.webby.examples.model.NestedModel;
 import org.junit.jupiter.api.Test;
 
@@ -10,7 +10,7 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 public class NamingTest {
     @Test
     public void generatedSimpleJavaName_simple() {
-        assertEquals("User", Naming.generatedSimpleJavaName(User.class));
+        assertEquals("UserModel", Naming.generatedSimpleJavaName(UserModel.class));
         assertEquals("Session", Naming.generatedSimpleJavaName(Session.class));
 
         assertEquals("NestedModel", Naming.generatedSimpleJavaName(NestedModel.class));
@@ -20,7 +20,7 @@ public class NamingTest {
 
     @Test
     public void shortCanonicalJavaName_simple() {
-        assertEquals("User", Naming.shortCanonicalJavaName(User.class));
+        assertEquals("UserModel", Naming.shortCanonicalJavaName(UserModel.class));
         assertEquals("Session", Naming.shortCanonicalJavaName(Session.class));
 
         assertEquals("NestedModel", Naming.shortCanonicalJavaName(NestedModel.class));

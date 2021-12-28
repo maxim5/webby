@@ -14,7 +14,7 @@ import io.netty.handler.codec.http.websocketx.extensions.compression.WebSocketSe
 import io.netty.handler.stream.ChunkedWriteHandler;
 import io.webby.auth.session.Session;
 import io.webby.auth.session.SessionManager;
-import io.webby.auth.user.User;
+import io.webby.auth.user.UserModel;
 import io.webby.auth.user.UserManager;
 import io.webby.common.InjectorHelper;
 import io.webby.netty.errors.ServeException;
@@ -133,7 +133,7 @@ public class NettyDispatcher extends ChannelInboundHandlerAdapter {
             default -> null;  // throw?
         };
         Session session = sessionManager.getSessionOrNull(sessionId);  // throw?
-        User user = session != null ? userManager.findByUserId(session.user()) : null;  // throw?
+        UserModel user = session != null ? userManager.findByUserId(session.user()) : null;  // throw?
 
         return new ClientInfo(Optional.ofNullable(version),
                               Optional.ofNullable(preferredType),
