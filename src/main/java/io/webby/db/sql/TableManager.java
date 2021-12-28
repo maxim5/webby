@@ -23,6 +23,7 @@ import java.util.logging.Level;
 
 import static io.webby.util.base.EasyCast.castAny;
 import static io.webby.util.base.Rethrow.rethrow;
+import static java.util.Objects.requireNonNull;
 
 @Singleton
 public class TableManager implements WithEngine {
@@ -66,13 +67,30 @@ public class TableManager implements WithEngine {
         return tableMap.values().stream().map(EntityTable::tableName).toList();
     }
 
-    public @Nullable BaseTable<?> getTableByNameOrNull(@NotNull String name) {
+    public <T extends BaseTable<?>> @Nullable T getTableOrNull(@NotNull Class<T> tableClass) {
         for (EntityTable entityTable : tableMap.values()) {
-            if (entityTable.tableName().equals(name)) {
+            if (entityTable.tableClass().equals(tableClass)) {
                 return castAny(entityTable.instantiate.apply(connector));
             }
         }
         return null;
+    }
+
+    public <T> @NotNull BaseTable<T> getTableOrDie(@NotNull Class<BaseTable<T>> tableClass) {
+        return requireNonNull(getTableOrNull(tableClass));
+    }
+
+    public @Nullable BaseTable<?> getTableOrNull(@NotNull String tableName) {
+        for (EntityTable entityTable : tableMap.values()) {
+            if (entityTable.tableName().equals(tableName)) {
+                return castAny(entityTable.instantiate.apply(connector));
+            }
+        }
+        return null;
+    }
+
+    public @NotNull BaseTable<?> getTableOrDie(@NotNull String tableName) {
+        return requireNonNull(getTableOrNull(tableName));
     }
 
     public <E> @NotNull BaseTable<E> getMatchingBaseTableOrDie(@NotNull String name, @NotNull Class<? extends E> entity) {
@@ -111,7 +129,7 @@ public class TableManager implements WithEngine {
             Class<?> key = (Class<?>) tableClass.getField("KEY_CLASS").get(null);
             Class<?> entity = (Class<?>) tableClass.getField("ENTITY_CLASS").get(null);
             Function<Connector, ?> instantiate = castAny(tableClass.getField("INSTANTIATE").get(null));
-            result.put(entity, new EntityTable(meta, key, instantiate));
+            result.put(entity, new EntityTable(tableClass, meta, key, instantiate));
         }
         return result.buildOrThrow();
     }
@@ -133,7 +151,8 @@ public class TableManager implements WithEngine {
         }
     }
 
-    private record EntityTable(@NotNull TableMeta meta,
+    private record EntityTable(@NotNull Class<?> tableClass,
+                               @NotNull TableMeta meta,
                                @Nullable Class<?> key,
                                @NotNull Function<Connector, ?> instantiate) {
         public @NotNull String tableName() {
