@@ -244,6 +244,7 @@ public class ArchFactory {
     private static boolean isPrimaryKeyField(@NotNull String fieldName, @NotNull ModelInput input) {
         return fieldName.equals("id") ||
                fieldName.equals(Naming.idJavaName(input.javaModelName())) ||
+               fieldName.equals(Naming.idJavaName(input.modelClass())) ||
                (input.modelInterface() != null && fieldName.equals(Naming.idJavaName(input.modelInterface())));
     }
 
