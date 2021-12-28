@@ -9,8 +9,9 @@ import io.webby.auth.session.Session;
 import io.webby.auth.session.SessionCodec;
 import io.webby.auth.user.DefaultUser;
 import io.webby.auth.user.DefaultUserCodec;
-import io.webby.db.event.IntHashSetCodec;
+import io.webby.db.codec.standard.IntHashSetCodec;
 import io.webby.perf.stats.impl.StatsManager;
+import io.webby.util.collect.EasyMaps;
 import io.webby.util.lazy.LazyBoolean;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
@@ -19,20 +20,19 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.nio.charset.Charset;
-import java.util.Map;
 
-import static io.webby.db.codec.Codecs.*;
+import static io.webby.db.codec.standard.Codecs.*;
 import static io.webby.util.base.EasyCast.castAny;
 
 // Scan for codecs
 public class CodecProvider {
-    private final Map<Class<?>, Codec<?>> map = ImmutableMap.of(
-        Session.class, new SessionCodec(),
-        DefaultUser.class, new DefaultUserCodec(),
+    private final ImmutableMap<Class<?>, Codec<?>> map = EasyMaps.immutableOf(
+        Session.class, SessionCodec.DEFAULT_INSTANCE,
+        DefaultUser.class, DefaultUserCodec.DEFAULT_INSTANCE,
         Integer.class, INT_CODEC,
         Long.class, LONG_CODEC,
         String.class, STRING_CODEC,
-        IntHashSet.class, new IntHashSetCodec()
+        IntHashSet.class, IntHashSetCodec.INSTANCE
     );
 
     @Inject private Settings settings;

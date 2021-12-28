@@ -3,6 +3,7 @@ package io.webby.auth.session;
 import com.google.inject.Inject;
 import io.webby.db.codec.Codec;
 import io.webby.db.codec.CodecSize;
+import io.webby.db.codec.standard.Instant64Codec;
 import io.webby.orm.api.ForeignInt;
 import org.jetbrains.annotations.NotNull;
 
@@ -12,19 +13,26 @@ import java.io.OutputStream;
 import java.nio.charset.Charset;
 import java.time.Instant;
 
-import static io.webby.db.codec.Codecs.*;
+import static io.webby.db.codec.standard.Codecs.*;
 
 public class SessionCodec implements Codec<Session> {
+    public static final SessionCodec DEFAULT_INSTANCE = new SessionCodec(Instant64Codec.INSTANCE);
+
+    private final Codec<Instant> instantCodec;
     @Inject private Charset charset;
+
+    public SessionCodec(@NotNull Codec<Instant> instantCodec) {
+        this.instantCodec = instantCodec;
+    }
 
     @Override
     public @NotNull CodecSize size() {
-        return CodecSize.averageSize(160);   // 2 * 8 + 2 * 4 + 124 + 12
+        return CodecSize.averageSize(160);   // 2 * 8 + 4 + 128 + 12
     }
 
     @Override
     public int sizeOf(@NotNull Session instance) {
-        return INT64_SIZE * 2 + INT32_SIZE * 2 +
+        return INT64_SIZE + INT32_SIZE + instantCodec.size().numBytes() +
                stringSize(instance.userAgent(), charset) +
                nullableStringSize(instance.ipAddress(), charset);
     }
@@ -33,8 +41,7 @@ public class SessionCodec implements Codec<Session> {
     public int writeTo(@NotNull OutputStream output, @NotNull Session instance) throws IOException {
         return writeLong64(instance.sessionId(), output) +
                writeInt32(instance.userId(), output) +
-               writeLong64(instance.created().getEpochSecond(), output) +
-               writeInt32(instance.created().getNano(), output) +
+               instantCodec.writeTo(output, instance.created()) +
                writeString(instance.userAgent(), charset, output) +
                writeNullableString(instance.ipAddress(), charset, output);
     }
@@ -43,10 +50,9 @@ public class SessionCodec implements Codec<Session> {
     public @NotNull Session readFrom(@NotNull InputStream input, int available) throws IOException {
         long sessionId = readLong64(input);
         int userId = readInt32(input);
-        long seconds = readLong64(input);
-        int nanos = readInt32(input);
+        Instant created = instantCodec.readFrom(input, available);
         String userAgent = readString(input, charset);
         String ipAddress = readNullableString(input, charset);
-        return new Session(sessionId, ForeignInt.ofId(userId), Instant.ofEpochSecond(seconds, nanos), userAgent, ipAddress);
+        return new Session(sessionId, ForeignInt.ofId(userId), created, userAgent, ipAddress);
     }
 }

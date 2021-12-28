@@ -18,7 +18,7 @@ import java.io.OutputStream;
 import java.util.Collection;
 import java.util.List;
 
-import static io.webby.db.codec.Codecs.*;
+import static io.webby.db.codec.standard.Codecs.*;
 import static io.webby.util.base.EasyCast.castAny;
 
 public class KeyEventStoreFactory {

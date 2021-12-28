@@ -1,4 +1,4 @@
-package io.webby.db.codec;
+package io.webby.db.codec.standard;
 
 import com.google.common.base.Utf8;
 import com.google.common.flogger.FluentLogger;
