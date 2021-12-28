@@ -1,10 +1,9 @@
 package io.webby.db.codec.standard;
 
 import com.carrotsearch.hppc.IntContainer;
-import com.carrotsearch.hppc.procedures.IntProcedure;
+import com.carrotsearch.hppc.cursors.IntCursor;
 import io.webby.db.codec.Codec;
 import io.webby.db.codec.CodecSize;
-import io.webby.util.base.Rethrow;
 import io.webby.util.func.ThrowIntSupplier;
 import org.jetbrains.annotations.NotNull;
 
@@ -28,13 +27,9 @@ public interface IntContainerCodec<T extends IntContainer> extends Codec<T> {
     @Override
     default int writeTo(@NotNull OutputStream output, @NotNull T instance) throws IOException {
         writeInt32(instance.size(), output);
-        instance.forEach((IntProcedure) value -> {
-            try {
-                writeInt32(value, output);
-            } catch (IOException e) {
-                Rethrow.rethrow(e);
-            }
-        });
+        for (IntCursor cursor : instance) {
+            writeInt32(cursor.value, output);
+        }
         return instance.size() * INT32_SIZE + INT32_SIZE;
     }
 
