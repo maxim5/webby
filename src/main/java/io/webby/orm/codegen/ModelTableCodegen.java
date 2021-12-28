@@ -587,8 +587,7 @@ public class ModelTableCodegen extends BaseCodegen {
     private void deleteWhere() throws IOException {
         Snippet query = new Snippet().withLines(DeleteMaker.make(table));
         Map<String, String> context = EasyMaps.asMap(
-            "$sql_query_literal", wrapAsTextBlock(query, INDENT2),
-            "$pk_object", toKeyObject(requireNonNull(table.primaryKeyField()), "$pk_name")
+            "$sql_query_literal", wrapAsTextBlock(query, INDENT2)
         );
 
         appendCode("""
