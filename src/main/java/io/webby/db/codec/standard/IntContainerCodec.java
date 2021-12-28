@@ -5,7 +5,7 @@ import com.carrotsearch.hppc.procedures.IntProcedure;
 import io.webby.db.codec.Codec;
 import io.webby.db.codec.CodecSize;
 import io.webby.util.base.Rethrow;
-import net.openhft.chronicle.core.util.ThrowingIntSupplier;
+import io.webby.util.func.ThrowIntSupplier;
 import org.jetbrains.annotations.NotNull;
 
 import java.io.IOException;
@@ -44,5 +44,5 @@ public interface IntContainerCodec<T extends IntContainer> extends Codec<T> {
         return createContainer(size, () -> readInt32(input));
     }
 
-    @NotNull T createContainer(int size, @NotNull ThrowingIntSupplier<IOException> reader) throws IOException;
+    @NotNull T createContainer(int size, @NotNull ThrowIntSupplier<IOException> reader) throws IOException;
 }
