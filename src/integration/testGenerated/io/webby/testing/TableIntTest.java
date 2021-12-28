@@ -1,5 +1,6 @@
 package io.webby.testing;
 
+import com.carrotsearch.hppc.IntArrayList;
 import io.webby.db.model.IntAutoIdModel;
 import io.webby.orm.api.TableInt;
 import io.webby.orm.api.query.CompareType;
@@ -13,6 +14,8 @@ import java.util.HashMap;
 import java.util.Map;
 
 import static com.google.common.truth.Truth.assertThat;
+import static io.webby.testing.TestingPrimitives.newIntArrayList;
+import static io.webby.testing.TestingPrimitives.newIntObjectMap;
 import static io.webby.testing.TestingUtil.array;
 import static org.junit.jupiter.api.Assertions.*;
 
@@ -20,6 +23,23 @@ public interface TableIntTest<E, T extends TableInt<E>> extends PrimaryKeyTableT
     @Override
     default @NotNull Integer[] keys() {
         return array(1, 2, 3, 4, 5);
+    }
+
+    @Test
+    default void getBatchByPk_ints() {
+        assumeKeys(2);
+        int key1 = keys()[0];
+        int key2 = keys()[1];
+        IntArrayList batch = newIntArrayList(key1, key2);
+        assertThat(table().getBatchByPk(batch)).isEmpty();
+
+        E entity1 = createEntity(key1);
+        assertEquals(1, table().insert(entity1));
+        assertEquals(table().getBatchByPk(batch), newIntObjectMap(key1, entity1));
+
+        E entity2 = createEntity(key2);
+        assertEquals(1, table().insert(entity2));
+        assertEquals(table().getBatchByPk(batch), newIntObjectMap(key1, entity1, key2, entity2));
     }
 
     @Test
@@ -36,7 +56,7 @@ public interface TableIntTest<E, T extends TableInt<E>> extends PrimaryKeyTableT
 
     @Test
     default void insert_auto_id_ignore_existing() {
-        Integer key = keys()[3];
+        Integer key = 1000;
         E entity = createEntity(key, 0);
         int autoId = table().insertAutoIncPk(entity);
         assertTrue(autoId > 0);

@@ -12,8 +12,10 @@ import org.jetbrains.annotations.NotNull;
 import org.junit.jupiter.api.Test;
 
 import java.util.Arrays;
+import java.util.List;
 
 import static com.google.common.truth.Truth.assertThat;
+import static io.webby.testing.AssertBasics.assertMapContents;
 import static org.junit.jupiter.api.Assertions.*;
 import static org.junit.jupiter.api.Assumptions.assumeTrue;
 
@@ -27,6 +29,22 @@ public interface PrimaryKeyTableTest<K, E, T extends TableObj<K, E>> extends Bas
         assertTableCount(0);
         assertNull(table().getByPkOrNull(keys()[0]));
         assertThat(table().fetchAll()).isEmpty();
+    }
+
+    @Test
+    default void getBatchByPk() {
+        assumeKeys(2);
+        K key1 = keys()[0];
+        K key2 = keys()[1];
+        assertMapContents(table().getBatchByPk(List.of(key1, key2)));
+
+        E entity1 = createEntity(key1);
+        assertEquals(1, table().insert(entity1));
+        assertMapContents(table().getBatchByPk(List.of(key1, key2)), key1, entity1);
+
+        E entity2 = createEntity(key2);
+        assertEquals(1, table().insert(entity2));
+        assertMapContents(table().getBatchByPk(List.of(key1, key2)), key1, entity1, key2, entity2);
     }
 
     @Test

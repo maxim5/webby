@@ -125,7 +125,7 @@ public class QueryRunner {
     }
 
     @MustBeClosed
-    public @NotNull PreparedStatement prepareQuery(@NotNull String sql, @NotNull List<Object> params) throws SQLException {
+    public @NotNull PreparedStatement prepareQuery(@NotNull String sql, @NotNull List<?> params) throws SQLException {
         PreparedStatement prepared = connection.prepareStatement(sql);
         for (int i = 0; i < params.size(); i++) {
             prepared.setObject(i + 1, params.get(i));
@@ -136,7 +136,7 @@ public class QueryRunner {
     @MustBeClosed
     public @NotNull PreparedStatement prepareQuery(@NotNull String sql, @NotNull IntContainer params) throws SQLException {
         PreparedStatement prepared = connection.prepareStatement(sql);
-        int index = 1;
+        int index = 0;
         for (IntCursor cursor : params) {
             prepared.setInt(++index, cursor.value);
         }
@@ -146,7 +146,7 @@ public class QueryRunner {
     @MustBeClosed
     public @NotNull PreparedStatement prepareQuery(@NotNull String sql, @NotNull LongContainer params) throws SQLException {
         PreparedStatement prepared = connection.prepareStatement(sql);
-        int index = 1;
+        int index = 0;
         for (LongCursor cursor : params) {
             prepared.setLong(++index, cursor.value);
         }

@@ -6,8 +6,10 @@ import io.webby.orm.codegen.SqlSchemaMaker;
 import io.webby.testing.PrimaryKeyTableTest;
 import io.webby.testing.SqlDbTableTest;
 import org.jetbrains.annotations.NotNull;
+import org.junit.jupiter.api.Test;
 
 import static io.webby.testing.TestingUtil.array;
+import static org.junit.jupiter.api.Assumptions.assumeTrue;
 
 public class BlobKvTableTest
         extends SqlDbTableTest<byte[], BlobKv, BlobKvTable>
@@ -26,5 +28,11 @@ public class BlobKvTableTest
     @Override
     public @NotNull BlobKv createEntity(byte @NotNull [] key, int version) {
         return new BlobKv(key, version == 0 ? null : Ints.toByteArray(version));
+    }
+
+    @Override
+    @Test
+    public void getBatchByPk() {
+        assumeTrue(false, "Byte arrays are not hashable, hence can't be used for map keys");
     }
 }

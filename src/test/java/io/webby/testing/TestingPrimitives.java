@@ -55,4 +55,32 @@ public class TestingPrimitives {
         }
         return container;
     }
+
+    public static <T> @NotNull IntObjectMap<T> newIntObjectMap(int key, @NotNull T value) {
+        IntObjectHashMap<T> map = new IntObjectHashMap<>();
+        map.put(key, value);
+        return map;
+    }
+
+    public static <T> @NotNull IntObjectMap<T> newIntObjectMap(int key1, @NotNull T value1,
+                                                               int key2, @NotNull T value2) {
+        IntObjectHashMap<T> map = new IntObjectHashMap<>();
+        map.put(key1, value1);
+        map.put(key2, value2);
+        return map;
+    }
+
+    public static <T> @NotNull LongObjectMap<T> newLongObjectMap(long key, @NotNull T value) {
+        LongObjectHashMap<T> map = new LongObjectHashMap<>();
+        map.put(key, value);
+        return map;
+    }
+
+    public static <T> @NotNull LongObjectMap<T> newLongObjectMap(long key1, @NotNull T value1,
+                                                                 long key2, @NotNull T value2) {
+        LongObjectHashMap<T> map = new LongObjectHashMap<>();
+        map.put(key1, value1);
+        map.put(key2, value2);
+        return map;
+    }
 }

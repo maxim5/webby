@@ -2,6 +2,7 @@ package io.webby.orm.codegen;
 
 import com.google.common.collect.Iterables;
 import com.google.common.collect.Streams;
+import com.google.common.primitives.Primitives;
 import io.webby.orm.api.*;
 import io.webby.orm.api.query.Filter;
 import io.webby.orm.api.query.TermType;
@@ -46,6 +47,9 @@ public class ModelTableCodegen extends BaseCodegen {
         TableField primaryKeyField = table.primaryKeyField();
         this.pkContext = primaryKeyField == null ? Map.of() : EasyMaps.asMap(
             "$pk_type", Naming.shortCanonicalJavaName(primaryKeyField.javaType()),
+            "$PkClass", primaryKeyField.javaType().isPrimitive() ?
+                    Primitives.wrap(primaryKeyField.javaType()).getSimpleName() :
+                    Naming.shortCanonicalJavaName(primaryKeyField.javaType()),
             "$pk_annotation", primaryKeyField.javaType().isPrimitive() ? "" : "@Nonnull ",
             "$pk_name", primaryKeyField.javaName()
         );
@@ -65,6 +69,7 @@ public class ModelTableCodegen extends BaseCodegen {
         selectConstants();
 
         getByPk();
+        getBatchByPk();
         keyOf();
         iterator();
 
@@ -130,6 +135,8 @@ public class ModelTableCodegen extends BaseCodegen {
         import java.util.*;
         import java.util.function.*;
         import javax.annotation.*;
+
+        import com.carrotsearch.hppc.*;
         
         $imports\n
         """, context);
@@ -311,6 +318,79 @@ public class ModelTableCodegen extends BaseCodegen {
             return "%s.toValueObject(%s)".formatted(adapterApi.staticRef(), paramName);
         } else {
             return "%s.toNewValuesArray(%s)".formatted(adapterApi.staticRef(), paramName);
+        }
+    }
+
+    private void getBatchByPk() throws IOException {
+        TableField primaryField = table.primaryKeyField();
+        if (primaryField == null || !primaryField.isNativelySupportedType()) {
+            return;  // non-native fields require keys conversion
+        }
+
+        List<String> primaryColumns = primaryField.columns(ReadFollow.NO_FOLLOW)
+                .stream()
+                .map(PrefixedColumn::sqlPrefixedName)
+                .toList();
+        if (primaryColumns.size() != 1) {
+            return;  // will use a slow default implementation
+        }
+
+        String queryExecution = """
+            String query = SELECT_ENTITY_ALL[follow.ordinal()] + "WHERE $pk_column IN (" + "?,".repeat(keys.size() - 1) + "?)";
+            try (PreparedStatement statement = runner().prepareQuery(query, keys);
+                 ResultSet result = statement.executeQuery()) {
+                while (result.next()) {
+                    $ModelClass entity = fromRow(result, follow, 0);
+                    map.put(entity.$pk_getter(), entity);
+                }
+            } catch (SQLException e) {
+                throw new QueryException("Failed to find by PK batch in $TableClass", query, keys, e);
+            }\
+        """;
+
+        Map<String, String> context = EasyMaps.asMap(
+            "$query_execution", queryExecution,
+            "$pk_column", primaryColumns.get(0),
+            "$pk_getter", primaryField.javaGetter()
+        );
+
+        appendCode("""
+        @Override
+        public @Nonnull Map<$PkClass, $ModelClass> getBatchByPk(@Nonnull List<$PkClass> keys) {
+            if (keys.isEmpty()) {
+                return Map.of();
+            }
+            HashMap<$PkClass, $ModelClass> map = new HashMap<>(keys.size());
+        $query_execution
+            return map;
+        }\n
+        """, EasyMaps.merge(context, mainContext, pkContext));
+
+        if (table.isPrimaryKeyInt()) {
+            appendCode("""
+            @Override
+            public @Nonnull IntObjectMap<$ModelClass> getBatchByPk(@Nonnull IntContainer keys) {
+                if (keys.isEmpty()) {
+                    return new IntObjectHashMap<>();
+                }
+                IntObjectHashMap<$ModelClass> map = new IntObjectHashMap<>(keys.size());
+            $query_execution
+                return map;
+            }\n
+            """, EasyMaps.merge(context, mainContext, pkContext));
+        }
+        if (table.isPrimaryKeyLong()) {
+            appendCode("""
+            @Override
+            public @Nonnull LongObjectMap<$ModelClass> getBatchByPk(@Nonnull LongContainer keys) {
+                if (keys.isEmpty()) {
+                    return new LongObjectHashMap<>();
+                }
+                LongObjectHashMap<$ModelClass> map = new LongObjectHashMap<>(keys.size());
+            $query_execution
+                return map;
+            }\n
+            """, EasyMaps.merge(context, mainContext, pkContext));
         }
     }
 

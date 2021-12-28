@@ -1,5 +1,7 @@
 package io.webby.orm.api;
 
+import com.carrotsearch.hppc.LongContainer;
+import com.carrotsearch.hppc.LongObjectMap;
 import com.google.errorprone.annotations.CanIgnoreReturnValue;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
@@ -36,6 +38,8 @@ public interface TableLong<E> extends TableObj<Long, E> {
     default @NotNull Optional<E> getOptionalByPk(@NotNull Long key) {
         return getOptionalByPk(key.longValue());
     }
+
+    @NotNull LongObjectMap<E> getBatchByPk(@NotNull LongContainer keys);
 
     long insertAutoIncPk(@NotNull E entity);
 
