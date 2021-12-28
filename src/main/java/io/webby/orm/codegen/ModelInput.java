@@ -13,6 +13,7 @@ import static io.webby.util.base.EasyStrings.ofNonEmpty;
 
 public record ModelInput(@NotNull Class<?> modelClass,
                          @Nullable Class<?> modelInterface,
+                         @NotNull String javaModelName,
                          @NotNull String sqlName,
                          @NotNull String javaTableName) {
     public static @NotNull ModelInput of(@NotNull Class<?> modelClass) {
@@ -25,12 +26,12 @@ public record ModelInput(@NotNull Class<?> modelClass,
                     .orElseGet(() -> Naming.modelSqlName(javaModelName));
             String javaTableName = ofNonEmpty(annotation.javaTableName())
                     .orElseGet(() -> Naming.generatedJavaTableName(javaModelName));
-            return new ModelInput(modelClass, exposeAs, sqlName, javaTableName);
+            return new ModelInput(modelClass, exposeAs, javaModelName, sqlName, javaTableName);
         }
         String javaModelName = Naming.generatedSimpleJavaName(modelClass);
         String sqlName = Naming.modelSqlName(javaModelName);
         String javaTableName = Naming.generatedJavaTableName(javaModelName);
-        return new ModelInput(modelClass, null, sqlName, javaTableName);
+        return new ModelInput(modelClass, null, javaModelName, sqlName, javaTableName);
     }
 
     public @NotNull Iterable<Class<?>> keys() {

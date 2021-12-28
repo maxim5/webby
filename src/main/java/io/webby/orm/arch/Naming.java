@@ -66,8 +66,12 @@ public class Naming {
         return camelUpperToLower(type.getSimpleName());
     }
 
+    public static @NotNull String idJavaName(@NotNull String typeName) {
+        return Naming.camelUpperToLower(typeName) + "Id";
+    }
+
     public static @NotNull String idJavaName(@NotNull Class<?> type) {
-        return Naming.camelUpperToLower(type.getSimpleName()) + "Id";
+        return idJavaName(type.getSimpleName());
     }
 
     public static @NotNull String defaultAdapterName(@NotNull Class<?> model) {

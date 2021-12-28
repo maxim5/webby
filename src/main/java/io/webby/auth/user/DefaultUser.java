@@ -6,14 +6,14 @@ import org.jetbrains.annotations.NotNull;
 import java.time.Instant;
 import java.util.Objects;
 
-@Model(exposeAs = UserModel.class)
+@Model(exposeAs = UserModel.class, javaName = "User")
 public class DefaultUser implements UserModel {
     private int userId;
-    private final Instant created;
+    private final Instant createdAt;
     private final UserAccess access;
 
-    public DefaultUser(int userId, @NotNull Instant created, @NotNull UserAccess access) {
-        this.created = created;
+    public DefaultUser(int userId, @NotNull Instant createdAt, @NotNull UserAccess access) {
+        this.createdAt = createdAt;
         assert userId == AUTO_ID || userId > 0: "Invalid userId=%d".formatted(userId);
         this.userId = userId;
         this.access = access;
@@ -30,7 +30,7 @@ public class DefaultUser implements UserModel {
 
     @Override
     public @NotNull Instant createdAt() {
-        return created;
+        return createdAt;
     }
 
     @Override
@@ -41,12 +41,12 @@ public class DefaultUser implements UserModel {
     @Override
     public boolean equals(Object o) {
         return o instanceof UserModel that && userId == that.userId() &&
-               created.equals(that.createdAt()) && access.equals(that.access());
+               createdAt.equals(that.createdAt()) && access.equals(that.access());
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(userId, created, access);
+        return Objects.hash(userId, createdAt, access);
     }
 
     @Override
