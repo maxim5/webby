@@ -9,6 +9,7 @@ import io.webby.app.AppSettings;
 import io.webby.common.Lifetime;
 import io.webby.db.kv.KeyValueSettings;
 import io.webby.db.kv.StorageType;
+import io.webby.orm.api.Engine;
 import io.webby.testing.Testing;
 import io.webby.testing.TestingProps;
 import io.webby.testing.ext.EmbeddedRedisExtension;
@@ -152,8 +153,10 @@ public class KeyEventStoreIntegrationTest {
     public void many_events_per_key(StorageType storageType) {
         KeyEventStoreFactory factory = setup(storageType).getInstance(KeyEventStoreFactory.class);
 
-        int size = 100000;
-        int flushEvery = 10000;
+        int maxSize = storageType == StorageType.SQL_DB && SQL_DB.engine() == Engine.MySQL ? 2000 : Integer.MAX_VALUE;
+        int size = Math.min(100000, maxSize);
+        int flushEvery = size / 10;
+
         try (KeyEventStore<Integer, String> store = factory.getEventStore(EventStoreOptions.of("many", Integer.class, String.class))) {
             assertCleanState(store);
 
