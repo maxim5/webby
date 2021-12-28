@@ -14,7 +14,7 @@ public abstract class Unit implements ArgsHolder {
         this(repr, ImmutableList.of());
     }
 
-    protected Unit(@NotNull String repr, @NotNull List<Object> args) {
+    protected Unit(@NotNull String repr, @NotNull List<?> args) {
         this.repr = repr;
         this.args = ImmutableList.copyOf(args);
     }
