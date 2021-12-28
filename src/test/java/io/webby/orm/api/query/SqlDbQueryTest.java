@@ -8,6 +8,7 @@ import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.RegisterExtension;
 
+import java.sql.SQLException;
 import java.util.List;
 
 import static io.webby.orm.api.query.CompareType.*;
@@ -15,7 +16,10 @@ import static io.webby.orm.api.query.Func.*;
 import static io.webby.orm.api.query.Shortcuts.*;
 import static io.webby.orm.testing.AssertSql.*;
 import static io.webby.orm.testing.PersonTableData.*;
+import static io.webby.testing.TestingPrimitives.newIntArrayList;
+import static io.webby.testing.TestingPrimitives.newLongArrayList;
 import static io.webby.testing.TestingUtil.array;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assumptions.assumeFalse;
 
 @Tag("sql")
@@ -317,5 +321,35 @@ public class SqlDbQueryTest {
                    array("DE", 1),
                    array("RU", 1),
                    array("US", 1));
+    }
+
+    @Test
+    public void runner_fetchIntColumn() throws SQLException {
+        SelectQuery query = SelectWhere.from(PERSON_META)
+                .select(PersonColumn.id)
+                .orderBy(OrderBy.of(PersonColumn.id, Order.DESC))
+                .build();
+        assertRepr(query, """
+            SELECT id
+            FROM person
+            ORDER BY id DESC
+            """);
+        assertNoArgs(query);
+        assertEquals(newIntArrayList(4, 3, 2, 1), SQL_DB.runner().fetchIntColumn(query));
+    }
+
+    @Test
+    public void runner_fetchLongColumn() throws SQLException {
+        SelectQuery query = SelectWhere.from(PERSON_META)
+                .select(PersonColumn.iq)
+                .orderBy(OrderBy.of(PersonColumn.iq, Order.ASC))
+                .build();
+        assertRepr(query, """
+                SELECT iq
+                FROM person
+                ORDER BY iq ASC
+                """);
+        assertNoArgs(query);
+        assertEquals(newLongArrayList(100, 110, 120, 130), SQL_DB.runner().fetchLongColumn(query));
     }
 }

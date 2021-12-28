@@ -1,5 +1,8 @@
 package io.webby.orm.api;
 
+import com.carrotsearch.hppc.*;
+import com.carrotsearch.hppc.cursors.IntCursor;
+import com.carrotsearch.hppc.cursors.LongCursor;
 import com.google.common.collect.Lists;
 import com.google.errorprone.annotations.MustBeClosed;
 import io.webby.orm.api.query.SelectQuery;
@@ -47,6 +50,18 @@ public class QueryRunner {
         try (ResultSetIterator<E> iterator = iterate(query, converter)) {
             return Lists.newArrayList(iterator);
         }
+    }
+
+    public @NotNull IntArrayList fetchIntColumn(@NotNull SelectQuery query) throws SQLException {
+        IntArrayList list = new IntArrayList();
+        forEach(query, resultSet -> list.add(resultSet.getInt(1)));
+        return list;
+    }
+
+    public @NotNull LongArrayList fetchLongColumn(@NotNull SelectQuery query) throws SQLException {
+        LongArrayList list = new LongArrayList();
+        forEach(query, resultSet -> list.add(resultSet.getLong(1)));
+        return list;
     }
 
     // Prepare Query
@@ -114,6 +129,26 @@ public class QueryRunner {
         PreparedStatement prepared = connection.prepareStatement(sql);
         for (int i = 0; i < params.size(); i++) {
             prepared.setObject(i + 1, params.get(i));
+        }
+        return prepared;
+    }
+
+    @MustBeClosed
+    public @NotNull PreparedStatement prepareQuery(@NotNull String sql, @NotNull IntContainer params) throws SQLException {
+        PreparedStatement prepared = connection.prepareStatement(sql);
+        int index = 1;
+        for (IntCursor cursor : params) {
+            prepared.setInt(++index, cursor.value);
+        }
+        return prepared;
+    }
+
+    @MustBeClosed
+    public @NotNull PreparedStatement prepareQuery(@NotNull String sql, @NotNull LongContainer params) throws SQLException {
+        PreparedStatement prepared = connection.prepareStatement(sql);
+        int index = 1;
+        for (LongCursor cursor : params) {
+            prepared.setLong(++index, cursor.value);
         }
         return prepared;
     }
