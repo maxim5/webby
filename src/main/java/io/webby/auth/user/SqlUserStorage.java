@@ -1,7 +1,6 @@
 package io.webby.auth.user;
 
 import com.google.inject.Inject;
-import io.webby.app.Settings;
 import io.webby.db.sql.TableManager;
 import io.webby.orm.api.TableInt;
 import org.jetbrains.annotations.NotNull;
@@ -13,9 +12,7 @@ public class SqlUserStorage implements UserStorage {
     private final TableInt<UserModel> table;
 
     @Inject
-    public SqlUserStorage(@NotNull Settings settings,
-                          @NotNull Class<? extends UserModel> userClass,
-                          @NotNull TableManager manager) {
+    public SqlUserStorage(@NotNull TableManager manager, @NotNull Class<? extends UserModel> userClass) {
         table = castAny(manager.getMatchingTableOrDie(UserModel.DB_NAME, Integer.class, userClass));
     }
 
