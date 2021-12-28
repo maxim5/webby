@@ -228,7 +228,7 @@ public class HandlerBinder {
                 consumer.accept(url, endpoint);
             });
         } catch (ConfigurationException e) {
-            throw new HandlerConfigError("Handler instance can't be found or created (use @Inject to register a constructor)", e);
+            throw new HandlerConfigError("Handler instance can't be found or createdAt (use @Inject to register a constructor)", e);
         } catch (QueryParseException e) {
             throw new UrlConfigError(e);
         }

@@ -59,7 +59,7 @@ public class SessionInterceptor implements Interceptor {
 
     @VisibleForTesting
     static boolean shouldRefresh(@NotNull Session session) {
-        long createdMillis = session.created().getEpochSecond() * 1000;
+        long createdMillis = session.createdAt().getEpochSecond() * 1000;
         long now = System.currentTimeMillis();
         return createdMillis + JUST_CREATED_MILLIS >= now || createdMillis + TIME_TO_REFRESH_MILLIS < now;
     }

@@ -14,7 +14,7 @@ public interface UserModel extends IntAutoIdModel {
         return userId() == AUTO_ID;
     }
 
-    @NotNull Instant created();
+    @NotNull Instant createdAt();
 
     @NotNull UserAccess access();
 }

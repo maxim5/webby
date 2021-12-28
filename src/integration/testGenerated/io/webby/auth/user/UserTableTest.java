@@ -26,6 +26,6 @@ public class UserTableTest
 
     @Override
     public @NotNull DefaultUser copyEntityWithId(@NotNull DefaultUser user, int autoId) {
-        return new DefaultUser(autoId, user.created(), user.access());
+        return new DefaultUser(autoId, user.createdAt(), user.access());
     }
 }

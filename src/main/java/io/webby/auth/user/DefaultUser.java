@@ -29,7 +29,7 @@ public class DefaultUser implements UserModel {
     }
 
     @Override
-    public @NotNull Instant created() {
+    public @NotNull Instant createdAt() {
         return created;
     }
 
@@ -41,7 +41,7 @@ public class DefaultUser implements UserModel {
     @Override
     public boolean equals(Object o) {
         return o instanceof UserModel that && userId == that.userId() &&
-               created.equals(that.created()) && access.equals(that.access());
+               created.equals(that.createdAt()) && access.equals(that.access());
     }
 
     @Override

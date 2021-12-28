@@ -29,7 +29,7 @@ public class DefaultUserCodec implements Codec<DefaultUser> {
     @Override
     public int writeTo(@NotNull OutputStream output, @NotNull DefaultUser instance) throws IOException {
         return writeInt32(instance.userId(), output) +
-               instantCodec.writeTo(output, instance.created()) +
+               instantCodec.writeTo(output, instance.createdAt()) +
                writeInt16(instance.access().level(), output);
     }
 

@@ -41,7 +41,7 @@ public class SessionCodec implements Codec<Session> {
     public int writeTo(@NotNull OutputStream output, @NotNull Session instance) throws IOException {
         return writeLong64(instance.sessionId(), output) +
                writeInt32(instance.userId(), output) +
-               instantCodec.writeTo(output, instance.created()) +
+               instantCodec.writeTo(output, instance.createdAt()) +
                writeString(instance.userAgent(), charset, output) +
                writeNullableString(instance.ipAddress(), charset, output);
     }

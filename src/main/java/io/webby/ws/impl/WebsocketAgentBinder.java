@@ -222,7 +222,7 @@ public class WebsocketAgentBinder {
                 }
             } catch (ConfigurationException e) {
                 String message =
-                        "Websocket agent instance of %s can't be found or created (use @Inject to register a constructor)"
+                        "Websocket agent instance of %s can't be found or createdAt (use @Inject to register a constructor)"
                         .formatted(binding.agentClass());
                 throw new WebsocketAgentConfigError(message, e);
             } catch (IllegalAccessException e) {

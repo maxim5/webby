@@ -13,7 +13,7 @@ import java.time.Instant;
 
 public record Session(long sessionId,
                       @NotNull ForeignInt<UserModel> user,
-                      @NotNull Instant created,
+                      @NotNull Instant createdAt,
                       @NotNull String userAgent,
                       @Nullable String ipAddress) {
     public static final String DB_NAME = "session";
@@ -35,6 +35,6 @@ public record Session(long sessionId,
     }
 
     public @NotNull Session withUser(@NotNull UserModel user) {
-        return new Session(sessionId, ForeignInt.ofEntity(user.userId(), user), created, userAgent, ipAddress);
+        return new Session(sessionId, ForeignInt.ofEntity(user.userId(), user), createdAt, userAgent, ipAddress);
     }
 }

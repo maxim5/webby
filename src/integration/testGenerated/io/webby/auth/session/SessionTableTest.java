@@ -27,6 +27,6 @@ public class SessionTableTest
 
     @Override
     public @NotNull Session copyEntityWithId(@NotNull Session session, long autoId) {
-        return new Session(autoId, session.user(), session.created(), session.userAgent(), session.ipAddress());
+        return new Session(autoId, session.user(), session.createdAt(), session.userAgent(), session.ipAddress());
     }
 }

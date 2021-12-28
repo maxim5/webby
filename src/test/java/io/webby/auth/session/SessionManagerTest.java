@@ -62,7 +62,7 @@ public class SessionManagerTest {
 
         Session newSession = manager.addUserOrDie(session, DUMMY_USER);
         assertEquals(newSession.sessionId(), session.sessionId());
-        assertEquals(newSession.created(), session.created());
+        assertEquals(newSession.createdAt(), session.createdAt());
         assertEquals(newSession.userAgent(), session.userAgent());
         assertEquals(newSession.ipAddress(), session.ipAddress());
         assertTrue(newSession.hasUser());
