@@ -32,11 +32,11 @@ dependencies {
     api group: 'com.google.inject', name: 'guice', version: '5.0.1'
     api group: 'com.google.mug', name: 'mug', version: '5.7'
     api group: 'io.netty', name: 'netty-all', version: '4.1.72.Final'
+    api group: 'com.carrotsearch', name: 'hppc', version: '0.9.1'
     // RouteKit
     api group: 'io.routekit', name: 'routekit', version: 'v0.2.0'
 
     // Implementation
-    implementation group: 'com.carrotsearch', name: 'hppc', version: '0.9.1'
     implementation group: 'org.jetbrains', name: 'annotations', version: '22.0.0'
 
     // Google Flogger
