@@ -1,19 +1,30 @@
 package io.webby.util.hppc;
 
-import com.carrotsearch.hppc.IntContainer;
-import com.carrotsearch.hppc.IntIntHashMap;
-import com.carrotsearch.hppc.IntIntMap;
-import com.carrotsearch.hppc.IntObjectHashMap;
+import com.carrotsearch.hppc.*;
 import com.carrotsearch.hppc.cursors.IntCursor;
 import com.carrotsearch.hppc.procedures.IntIntProcedure;
 import com.carrotsearch.hppc.procedures.IntObjectProcedure;
+import com.google.errorprone.annotations.CheckReturnValue;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Map;
 
+@CheckReturnValue
 public class EasyHppc {
+    public static @NotNull IntArrayList slice(@NotNull IntArrayList list, int fromIndex, int toIndex) {
+        assert fromIndex >= 0 && toIndex >= 0 && fromIndex <= toIndex :
+                "Invalid range: from=%d to=%d".formatted(fromIndex, toIndex);
+        fromIndex = Math.min(fromIndex, list.elementsCount);
+        toIndex = Math.min(toIndex, list.elementsCount);
+        IntArrayList slice = new IntArrayList();
+        slice.buffer = Arrays.copyOfRange(list.buffer, fromIndex, toIndex);
+        slice.elementsCount = toIndex - fromIndex;
+        return slice;
+    }
+
     public static @NotNull IntIntMap slice(@NotNull IntIntMap map, int @NotNull [] keys) {
         IntIntHashMap result = new IntIntHashMap(keys.length);
         for (int key : keys) {
