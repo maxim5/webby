@@ -11,7 +11,6 @@ import io.webby.orm.api.Engine;
 import io.webby.orm.api.TableMeta;
 import io.webby.orm.codegen.SqlSchemaMaker;
 import org.jetbrains.annotations.NotNull;
-import org.jetbrains.annotations.Nullable;
 
 import java.sql.SQLException;
 import java.util.List;
@@ -24,23 +23,23 @@ public class DDL {
 
     private final Settings settings;
     private final TableManager manager;
+    private final EventBus eventBus;
 
     @Inject
     public DDL(@NotNull Settings settings, @NotNull TableManager manager, @NotNull EventBus eventBus) {
         assert settings.storageSettings().isSqlEnabled() : "SQL storage is disabled";
         this.settings = settings;
         this.manager = manager;
+        this.eventBus = eventBus;
         eventBus.register(this);
-    }
-
-    protected DDL(@NotNull Settings settings, @Nullable TableManager manager) {
-        this.settings = settings;
-        this.manager = manager;
     }
 
     @Subscribe
     public void guiceComplete(@NotNull GuiceCompleteEvent event) {
+        log.at(Level.FINE).log("Getting SQL ready...");
         checkSqlReady();
+        log.at(Level.FINE).log("SQL ready!");
+        eventBus.post(new SqlReadyEvent());
     }
 
     protected void checkSqlReady() {

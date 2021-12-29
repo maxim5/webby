@@ -3,7 +3,6 @@ package io.webby.testing;
 import com.google.inject.Module;
 import com.google.inject.Provider;
 import com.google.inject.util.Modules;
-import io.webby.db.sql.DDL;
 import io.webby.db.sql.testing.TestingPersistentDbTableCleaner;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
@@ -13,7 +12,7 @@ import java.util.concurrent.atomic.AtomicReference;
 import static io.webby.util.base.EasyCast.castAny;
 
 public class TestingModules {
-    public static final Module PERSISTENT_DB_CLEANER_MODULE = override(DDL.class, TestingPersistentDbTableCleaner.class);
+    public static final Module PERSISTENT_DB_CLEANER_MODULE = singleton(TestingPersistentDbTableCleaner.class);
 
     public static <T> @NotNull Module instance(@NotNull Class<? super T> klass, @NotNull T instance) {
         return binder -> binder.bind(klass).toInstance(instance);
