@@ -1,5 +1,7 @@
 package io.webby.orm.api.query;
 
+import com.carrotsearch.hppc.IntArrayList;
+import com.carrotsearch.hppc.LongArrayList;
 import io.webby.orm.api.Engine;
 import io.webby.orm.codegen.SqlSchemaMaker;
 import io.webby.testing.ext.SqlDbSetupExtension;
@@ -15,8 +17,6 @@ import static io.webby.orm.api.query.Func.*;
 import static io.webby.orm.api.query.Shortcuts.*;
 import static io.webby.orm.testing.AssertSql.*;
 import static io.webby.orm.testing.PersonTableData.*;
-import static io.webby.testing.TestingPrimitives.newIntArrayList;
-import static io.webby.testing.TestingPrimitives.newLongArrayList;
 import static io.webby.testing.TestingUtil.array;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assumptions.assumeFalse;
@@ -334,7 +334,7 @@ public class SqlDbQueryTest {
             ORDER BY id DESC
             """);
         assertNoArgs(query);
-        assertEquals(newIntArrayList(4, 3, 2, 1), SQL_DB.runner().fetchIntColumn(query));
+        assertEquals(IntArrayList.from(4, 3, 2, 1), SQL_DB.runner().fetchIntColumn(query));
     }
 
     @Test
@@ -349,6 +349,6 @@ public class SqlDbQueryTest {
                 ORDER BY iq ASC
                 """);
         assertNoArgs(query);
-        assertEquals(newLongArrayList(100, 110, 120, 130), SQL_DB.runner().fetchLongColumn(query));
+        assertEquals(LongArrayList.from(100, 110, 120, 130), SQL_DB.runner().fetchLongColumn(query));
     }
 }

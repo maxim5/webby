@@ -14,7 +14,6 @@ import java.util.HashMap;
 import java.util.Map;
 
 import static com.google.common.truth.Truth.assertThat;
-import static io.webby.testing.TestingPrimitives.newLongArrayList;
 import static io.webby.testing.TestingPrimitives.newLongObjectMap;
 import static io.webby.testing.TestingUtil.array;
 import static org.junit.jupiter.api.Assertions.*;
@@ -30,7 +29,7 @@ public interface TableLongTest<E, T extends TableLong<E>> extends PrimaryKeyTabl
         assumeKeys(2);
         long key1 = keys()[0];
         long key2 = keys()[1];
-        LongArrayList batch = newLongArrayList(key1, key2);
+        LongArrayList batch = LongArrayList.from(key1, key2);
         assertThat(table().getBatchByPk(batch)).isEmpty();
 
         E entity1 = createEntity(key1);

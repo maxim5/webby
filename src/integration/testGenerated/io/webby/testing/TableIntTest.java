@@ -14,7 +14,6 @@ import java.util.HashMap;
 import java.util.Map;
 
 import static com.google.common.truth.Truth.assertThat;
-import static io.webby.testing.TestingPrimitives.newIntArrayList;
 import static io.webby.testing.TestingPrimitives.newIntObjectMap;
 import static io.webby.testing.TestingUtil.array;
 import static org.junit.jupiter.api.Assertions.*;
@@ -30,7 +29,7 @@ public interface TableIntTest<E, T extends TableInt<E>> extends PrimaryKeyTableT
         assumeKeys(2);
         int key1 = keys()[0];
         int key2 = keys()[1];
-        IntArrayList batch = newIntArrayList(key1, key2);
+        IntArrayList batch = IntArrayList.from(key1, key2);
         assertThat(table().getBatchByPk(batch)).isEmpty();
 
         E entity1 = createEntity(key1);
