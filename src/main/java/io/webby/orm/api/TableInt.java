@@ -1,8 +1,10 @@
 package io.webby.orm.api;
 
+import com.carrotsearch.hppc.IntArrayList;
 import com.carrotsearch.hppc.IntContainer;
 import com.carrotsearch.hppc.IntObjectMap;
 import com.google.errorprone.annotations.CanIgnoreReturnValue;
+import io.webby.orm.api.query.Filter;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
@@ -40,6 +42,8 @@ public interface TableInt<E> extends TableObj<Integer, E> {
     }
 
     @NotNull IntObjectMap<E> getBatchByPk(@NotNull IntContainer keys);
+
+    @NotNull IntArrayList fetchPks(@NotNull Filter filter);
 
     int insertAutoIncPk(@NotNull E entity);
 

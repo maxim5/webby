@@ -14,6 +14,7 @@ import org.jetbrains.annotations.NotNull;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 import java.util.function.Predicate;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
@@ -69,6 +70,7 @@ public class ModelTableCodegen extends BaseCodegen {
 
         getByPk();
         getBatchByPk();
+        fetchPks();
         keyOf();
         iterator();
 
@@ -388,6 +390,45 @@ public class ModelTableCodegen extends BaseCodegen {
                 LongObjectHashMap<$ModelClass> map = new LongObjectHashMap<>(keys.size());
             $query_execution
                 return map;
+            }\n
+            """, EasyMaps.merge(context, mainContext, pkContext));
+        }
+    }
+
+    private void fetchPks() {
+        String primaryKeyColumn = Optional.ofNullable(table.primaryKeyField())
+                .map(WithColumns::columns)
+                .map(cols -> cols.get(0))
+                .map(Column::sqlName)
+                .orElse(null);
+
+        Map<String, String> context = EasyMaps.asMap(
+            "$pk_column", primaryKeyColumn
+        );
+
+        if (table.isPrimaryKeyInt()) {
+            appendCode("""
+            @Override
+            public @Nonnull IntArrayList fetchPks(@Nonnull Filter filter) {
+                String query = "SELECT $pk_column FROM $table_sql\\n" + filter.repr();
+                try {
+                    return runner().fetchIntColumn(() -> runner().prepareQuery(query, filter.args()));
+                } catch (SQLException e) {
+                    throw new QueryException("Failed to fetch by PKs in $TableClass", query, filter.args(), e);
+                }
+            }\n
+            """, EasyMaps.merge(context, mainContext, pkContext));
+        }
+        if (table.isPrimaryKeyLong()) {
+            appendCode("""
+            @Override
+            public @Nonnull LongArrayList fetchPks(@Nonnull Filter filter) {
+                String query = "SELECT $pk_column FROM $table_sql\\n" + filter.repr();
+                try {
+                    return runner().fetchLongColumn(() -> runner().prepareQuery(query, filter.args()));
+                } catch (SQLException e) {
+                    throw new QueryException("Failed to fetch by PKs in $TableClass", query, filter.args(), e);
+                }
             }\n
             """, EasyMaps.merge(context, mainContext, pkContext));
         }

@@ -1,8 +1,10 @@
 package io.webby.orm.api;
 
+import com.carrotsearch.hppc.LongArrayList;
 import com.carrotsearch.hppc.LongContainer;
 import com.carrotsearch.hppc.LongObjectMap;
 import com.google.errorprone.annotations.CanIgnoreReturnValue;
+import io.webby.orm.api.query.Filter;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
@@ -41,6 +43,8 @@ public interface TableLong<E> extends TableObj<Long, E> {
 
     @NotNull LongObjectMap<E> getBatchByPk(@NotNull LongContainer keys);
 
+    @NotNull LongArrayList fetchPks(@NotNull Filter filter);
+
     long insertAutoIncPk(@NotNull E entity);
 
     long longKeyOf(@NotNull E entity);
@@ -50,7 +54,7 @@ public interface TableLong<E> extends TableObj<Long, E> {
     }
 
     @CanIgnoreReturnValue
-    int deleteByPk(long key) ;
+    int deleteByPk(long key);
 
     @CanIgnoreReturnValue
     default int deleteByPk(@NotNull Long key) {
