@@ -1,36 +1,36 @@
-sourceSets {
-    examples
-}
-
-configurations {
-    examplesImplementation.extendsFrom(implementation, compileOnly)
-    examplesRuntimeOnly.extendsFrom runtimeOnly
-}
-
-dependencies {
-    examplesImplementation sourceSets.main.output
-    examplesImplementation sourceSets.examplesModel.output
-    examplesRuntimeOnly sourceSets.main.output
-    examplesRuntimeOnly sourceSets.examplesModel.output
-
-    // Silence SLF4J: https://stackoverflow.com/questions/66386000/how-to-disable-slf4j-in-jetty
-    examplesRuntimeOnly group: 'org.slf4j', name: 'slf4j-nop', version: '2.0.0-alpha4'
-}
-
-// https://github.com/etiennestuder/gradle-rocker-plugin
-rocker {
-    version = '1.3.0'  // optional
-    configurations {
-        examples {
-            templateDir = file('src/examples/resources/web/rocker')
-            outputDir = file('build/generated/rocker/examples/java')
-            optimize = true
-        }
-    }
-}
-
-sourceSets.examples.java.srcDirs += [rocker.configurations.examples.outputDir]
-
-if (new File(project.GENERATED_EXAMPLES_SQL_PATH).exists()) {
-    sourceSets.examples.java.srcDirs += [project.GENERATED_EXAMPLES_SQL_PATH]
-}
+//sourceSets {
+//    examples
+//}
+//
+//configurations {
+//    examplesImplementation.extendsFrom(implementation, compileOnly)
+//    examplesRuntimeOnly.extendsFrom runtimeOnly
+//}
+//
+//dependencies {
+//    examplesImplementation sourceSets.main.output
+//    examplesImplementation sourceSets.examplesModel.output
+//    examplesRuntimeOnly sourceSets.main.output
+//    examplesRuntimeOnly sourceSets.examplesModel.output
+//
+//    // Silence SLF4J: https://stackoverflow.com/questions/66386000/how-to-disable-slf4j-in-jetty
+//    examplesRuntimeOnly group: 'org.slf4j', name: 'slf4j-nop', version: '2.0.0-alpha4'
+//}
+//
+//// https://github.com/etiennestuder/gradle-rocker-plugin
+//rocker {
+//    version = '1.3.0'  // optional
+//    configurations {
+//        examples {
+//            templateDir = file('src/examples/resources/web/rocker')
+//            outputDir = file('build/generated/rocker/examples/java')
+//            optimize = true
+//        }
+//    }
+//}
+//
+//sourceSets.examples.java.srcDirs += [rocker.configurations.examples.outputDir]
+//
+//if (new File(project.GENERATED_EXAMPLES_SQL_PATH).exists()) {
+//    sourceSets.examples.java.srcDirs += [project.GENERATED_EXAMPLES_SQL_PATH]
+//}

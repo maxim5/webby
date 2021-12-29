@@ -1,6 +1,7 @@
 package io.webby.examples;
 
 import com.google.common.io.BaseEncoding;
+import io.webby.db.sql.SqlSettings;
 import io.webby.orm.api.QueryRunner;
 import io.webby.orm.api.debug.DebugSql;
 import org.jetbrains.annotations.NotNull;
@@ -20,7 +21,7 @@ public class Playground {
     }
 
     private static void runMysql() throws SQLException {
-        try (Connection connection = connect(MYSQL_TEST)) {
+        try (Connection connection = SqlSettings.connect(SqlSettings.MYSQL_TEST)) {
             QueryRepl main = new QueryRepl(connection);
 
             main.update("DROP TABLE IF EXISTS userx");
@@ -59,7 +60,7 @@ public class Playground {
     }
 
     private static void runSqlite() throws SQLException {
-        try (Connection connection = connect(SQLITE_IN_MEMORY)) {
+        try (Connection connection = SqlSettings.connect(SqlSettings.SQLITE_IN_MEMORY)) {
             QueryRepl main = new QueryRepl(connection);
             sqliteTextForBlobPk(main);
             // sqliteJoins(main);
@@ -68,7 +69,7 @@ public class Playground {
     }
 
     private static void runH2() throws SQLException {
-        try (Connection connection = connect(H2_IN_MEMORY)) {
+        try (Connection connection = SqlSettings.connect(SqlSettings.H2_IN_MEMORY)) {
             QueryRepl main = new QueryRepl(connection);
 
             main.update("CREATE TABLE blobx (blob_id VARCHAR PRIMARY KEY, blob_value BLOB)");

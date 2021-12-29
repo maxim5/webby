@@ -1,5 +1,9 @@
 rootProject.name = 'webby'
 
+include 'demo-model'
+include 'demo-frontend'
+include 'core'
+
 sourceControl {
     gitRepository('https://github.com/maxim5/routekit.git') {
         producesModule("io.routekit:routekit")
