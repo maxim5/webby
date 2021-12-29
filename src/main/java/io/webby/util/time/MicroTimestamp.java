@@ -16,4 +16,8 @@ public class MicroTimestamp {
         int micro = (int) (timestamp & 0x000f_ffffL);  // 0b1111_1111_1111_1111_1111L, 20 bits
         return Instant.ofEpochSecond(epochSecond, micro * 1000);
     }
+
+    public static long longMicroToEpochSeconds(long timestamp) {
+        return timestamp >>> 20;
+    }
 }

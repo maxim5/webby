@@ -17,4 +17,8 @@ public class NanoTimestamp {
         int nano = (int) (timestamp & 0x3fff_ffffL);  // 0b0011_1111_1111_1111_1111_1111_1111_1111L, 30 bits
         return Instant.ofEpochSecond(epochSecond, nano);
     }
+
+    public static long longNanoToEpochSeconds(long timestamp) {
+        return timestamp >>> 30;
+    }
 }
