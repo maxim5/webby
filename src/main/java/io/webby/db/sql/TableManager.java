@@ -76,7 +76,7 @@ public class TableManager implements WithEngine {
         return null;
     }
 
-    public <T> @NotNull BaseTable<T> getTableOrDie(@NotNull Class<BaseTable<T>> tableClass) {
+    public <T extends BaseTable<?>> @NotNull T getTableOrDie(@NotNull Class<T> tableClass) {
         return requireNonNull(getTableOrNull(tableClass));
     }
 
