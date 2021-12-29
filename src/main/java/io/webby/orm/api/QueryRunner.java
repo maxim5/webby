@@ -1,6 +1,9 @@
 package io.webby.orm.api;
 
-import com.carrotsearch.hppc.*;
+import com.carrotsearch.hppc.IntArrayList;
+import com.carrotsearch.hppc.IntContainer;
+import com.carrotsearch.hppc.LongArrayList;
+import com.carrotsearch.hppc.LongContainer;
 import com.carrotsearch.hppc.cursors.IntCursor;
 import com.carrotsearch.hppc.cursors.LongCursor;
 import com.google.common.collect.Lists;
@@ -19,6 +22,19 @@ public class QueryRunner {
 
     public QueryRunner(@NotNull Connection connection) {
         this.connection = connection;
+    }
+
+    public void runInTransaction(@NotNull ThrowConsumer<QueryRunner, SQLException> action) throws SQLException {
+        boolean autoCommit = connection.getAutoCommit();
+        connection.setAutoCommit(false);
+        try {
+            action.accept(this);
+        } catch (Throwable throwable) {
+            connection.rollback();
+        } finally {
+            connection.commit();
+            connection.setAutoCommit(autoCommit);
+        }
     }
 
     // Run SelectQuery

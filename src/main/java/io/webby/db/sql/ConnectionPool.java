@@ -1,7 +1,6 @@
 package io.webby.db.sql;
 
 import com.google.inject.Inject;
-import com.google.inject.Singleton;
 import com.zaxxer.hikari.HikariConfig;
 import com.zaxxer.hikari.HikariDataSource;
 import io.webby.app.Settings;
@@ -15,12 +14,12 @@ import org.jetbrains.annotations.VisibleForTesting;
 import java.sql.Connection;
 import java.sql.SQLException;
 
-@Singleton
 public class ConnectionPool implements WithEngine {
     private final HikariDataSource dataSource;
 
     @Inject
     public ConnectionPool(@NotNull Settings settings, @NotNull Lifetime lifetime) {
+        assert settings.storageSettings().isSqlEnabled() : "SQL storage is disabled";
         HikariConfig config = new HikariConfig();
         config.setJdbcUrl(settings.storageSettings().sqlSettingsOrDie().url());
         dataSource = new HikariDataSource(config);

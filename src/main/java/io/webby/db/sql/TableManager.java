@@ -4,33 +4,27 @@ import com.google.common.collect.ImmutableMap;
 import com.google.common.flogger.FluentLogger;
 import com.google.common.primitives.Primitives;
 import com.google.inject.Inject;
-import com.google.inject.Singleton;
 import io.webby.app.Settings;
 import io.webby.common.ClasspathScanner;
 import io.webby.common.Lifetime;
 import io.webby.orm.api.*;
-import io.webby.orm.codegen.SqlSchemaMaker;
 import io.webby.util.lazy.ResettableAtomicLazy;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import org.jetbrains.annotations.VisibleForTesting;
 
-import java.sql.SQLException;
 import java.util.List;
 import java.util.Set;
 import java.util.function.Function;
 import java.util.logging.Level;
 
 import static io.webby.util.base.EasyCast.castAny;
-import static io.webby.util.base.Rethrow.rethrow;
 import static java.util.Objects.requireNonNull;
 
-@Singleton
 public class TableManager implements WithEngine {
     private static final FluentLogger log = FluentLogger.forEnclosingClass();
     private static final ResettableAtomicLazy<TableManager> SHARED_INSTANCE = new ResettableAtomicLazy<>();
 
-    private final Settings settings;
     private final Connector connector;
     private final Engine engine;
     private final ImmutableMap<Class<?>, EntityTable> tableMap;
@@ -43,7 +37,6 @@ public class TableManager implements WithEngine {
         assert settings.storageSettings().isSqlEnabled() : "SQL storage is disabled";
         assert pool.isRunning() : "Invalid pool state: %s".formatted(pool);
 
-        this.settings = settings;
         connector = new ThreadLocalConnector(pool, settings.getLongProperty("db.sql.connection.expiration.millis", 30_000));
         engine = pool.engine();
 
@@ -61,10 +54,6 @@ public class TableManager implements WithEngine {
     @Override
     public @NotNull Engine engine() {
         return engine;
-    }
-
-    public @NotNull List<String> allTableNames() {
-        return tableMap.values().stream().map(EntityTable::tableName).toList();
     }
 
     public <T extends BaseTable<?>> @Nullable T getTableOrNull(@NotNull Class<T> tableClass) {
@@ -134,21 +123,8 @@ public class TableManager implements WithEngine {
         return result.buildOrThrow();
     }
 
-    public void createAllTablesIfNotExist() {
-        if (settings.isProdMode()) {
-            log.at(Level.WARNING).log("Automatic SQL table creation called in production");
-        }
-
-        Engine engine = connector.engine();
-        try {
-            for (EntityTable entityTable : tableMap.values()) {
-                log.at(Level.FINE).log("Creating SQL table if not exists: `%s`...", entityTable.tableName());
-                String query = SqlSchemaMaker.makeCreateTableQuery(engine, entityTable.meta());
-                connector().runner().runUpdate(query);
-            }
-        } catch (SQLException e) {
-            rethrow(e);
-        }
+    @NotNull List<TableMeta> getAllTables() {
+        return tableMap.values().stream().map(EntityTable::meta).toList();
     }
 
     private record EntityTable(@NotNull Class<?> tableClass,

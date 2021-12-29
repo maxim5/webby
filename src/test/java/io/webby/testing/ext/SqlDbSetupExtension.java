@@ -71,7 +71,9 @@ public class SqlDbSetupExtension implements AfterAllCallback, BeforeEachCallback
             if (savepoint != null) {
                 log.at(Level.FINE).log("[SQL] Rollback to savepoint");
                 connection.rollback(savepoint);
+                connection.releaseSavepoint(savepoint);
                 savepoint = null;
+                connection.setAutoCommit(true);
             }
         });
     }

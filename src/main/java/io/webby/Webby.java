@@ -16,7 +16,6 @@ import io.webby.db.DbModule;
 import io.webby.db.kv.KeyValueSettings;
 import io.webby.db.kv.StorageType;
 import io.webby.db.kv.impl.KeyValueStorageTypeDetector;
-import io.webby.db.sql.TableManager;
 import io.webby.netty.NettyBootstrap;
 import io.webby.netty.NettyModule;
 import io.webby.orm.OrmModule;
@@ -44,24 +43,7 @@ public class Webby {
     }
 
     public static @NotNull Injector getReady(@NotNull AppSettings settings, @NotNull Module ... modules) {
-        Injector injector = initGuice(settings, modules);
-        if (settings.isDevMode()) {
-            prepareForDev(settings, injector);
-        } else {
-            prepareForProd(settings, injector);
-        }
-        return injector;
-    }
-
-    private static void prepareForDev(@NotNull AppSettings settings, @NotNull Injector injector) {
-        if (settings.storageSettings().isSqlEnabled()) {
-            TableManager tableManager = injector.getInstance(TableManager.class);
-            tableManager.createAllTablesIfNotExist();
-        }
-    }
-
-    private static void prepareForProd(@NotNull AppSettings settings, @NotNull Injector injector) {
-        // check tables exist?
+        return initGuice(settings, modules);
     }
 
     public static @NotNull Injector initGuice(@NotNull AppSettings settings, @NotNull Module ... modules) {
@@ -78,7 +60,7 @@ public class Webby {
             new AppModule(settings),
             new AuthModule(settings),
             new CommonModule(),
-            new DbModule(),
+            new DbModule(settings),
             new NettyModule(),
             new OrmModule(),
             new PerfModule(),
