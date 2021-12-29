@@ -31,13 +31,13 @@ public class Main {
         AppSettings settings = new AppSettings();
         settings.setDevMode(true);
         settings.setSecurityKey("12345678901234567890123456789012");
-        settings.setWebPath("out/examples/resources/web");
-        settings.setViewPath("out/examples/resources/web");
+        settings.setWebPath("src/main/resources/web");
+        settings.setViewPath("src/main/resources/web");
         settings.setUserContentPath(".data/userdata");
         settings.modelFilter().setPackageOnly("io.webby");  // because this class is in `io.webby.examples`
         settings.setProperty("jte.class.directory", JteExample.CLASS_DIR);
-        settings.setProperty("jte.view.paths", "out/examples/resources/web/jte");
-        settings.setProperty("pebble.view.paths", "out/examples/resources/web/pebble");
+        settings.setProperty("jte.view.paths", "src/main/resources/web/jte");
+        settings.setProperty("pebble.view.paths", "src/main/resources/web/pebble");
         settings.setProperty("db.mapdb.checksum.enabled", false);
         settings.storageSettings()
                 .enableKeyValue(KeyValueSettings.of(StorageType.MAP_DB, ".data/mapdb"))

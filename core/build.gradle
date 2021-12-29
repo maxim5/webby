@@ -6,9 +6,6 @@ plugins {
     id 'java-test-fixtures'
 }
 
-group 'io.webby'
-version '0.7.0-SNAPSHOT'
-
 repositories {
     mavenCentral()
     maven { url 'https://jitpack.io' }

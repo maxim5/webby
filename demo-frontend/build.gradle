@@ -3,11 +3,9 @@ plugins {
     id 'nu.studer.rocker' version '3.0.2'
 }
 
-group 'io.webby'
-version '0.7.0-SNAPSHOT'
-
 dependencies {
     implementation project(':core')
+    implementation project(':demo-model')
 
     // Json
     implementation group: 'com.alibaba', name: 'fastjson', version: '1.2.79'
@@ -28,6 +26,16 @@ dependencies {
     implementation group: 'org.freemarker', name: 'freemarker', version: '2.3.31'
     implementation group: 'org.thymeleaf', name: 'thymeleaf', version: '3.0.14.RELEASE'
     implementation group: 'org.trimou', name: 'trimou-core', version: '2.5.1.Final'
+
+    // Embedded Key-Values
+    implementation group: 'org.mapdb', name: 'mapdb', version: '3.0.8'
+    implementation group: 'org.rocksdb', name: 'rocksdbjni', version: '6.26.1'
+
+    // SQLs
+    implementation group: 'com.h2database', name: 'h2', version: '1.4.200'
+    implementation group: 'com.zaxxer', name: 'HikariCP', version: '5.0.0'
+    implementation group: 'mysql', name: 'mysql-connector-java', version: '8.0.27'
+    implementation group: 'org.xerial', name: 'sqlite-jdbc', version: '3.36.0.3'
 }
 
 // https://github.com/etiennestuder/gradle-rocker-plugin
@@ -43,6 +51,7 @@ rocker {
 }
 
 sourceSets.main.java.srcDirs += [rocker.configurations.demo.outputDir]
+sourceSets.main.java.srcDirs += ["$projectDir/build/generated/sources/orm"]
 
 test {
     useJUnitPlatform()

@@ -10,7 +10,7 @@ import io.webby.orm.codegen.ModelInput;
 import java.util.List;
 
 public class ExamplesCodegenMain {
-    private static final String DESTINATION_DIRECTORY = "src/examples/generated/sql";
+    private static final String DESTINATION_DIRECTORY = "demo-frontend/build/generated/sources/orm";
     private static final List<ModelInput> MODEL_INPUTS = List.of(
         ModelInput.of(DefaultUser.class),
         ModelInput.of(Session.class),
