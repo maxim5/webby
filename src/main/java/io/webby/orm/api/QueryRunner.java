@@ -7,6 +7,7 @@ import com.google.common.collect.Lists;
 import com.google.errorprone.annotations.MustBeClosed;
 import io.webby.orm.api.query.SelectQuery;
 import io.webby.util.func.ThrowConsumer;
+import io.webby.util.func.ThrowSupplier;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
@@ -23,44 +24,72 @@ public class QueryRunner {
     // Run SelectQuery
 
     public void run(@NotNull SelectQuery query,
-                    @NotNull ThrowConsumer<ResultSet, SQLException> resultsConsumer) throws SQLException {
+                    @NotNull ThrowConsumer<ResultSet, SQLException> resultsConsumer) {
         try (PreparedStatement statement = prepareQuery(query);
              ResultSet resultSet = statement.executeQuery()) {
             resultsConsumer.accept(resultSet);
+        } catch (SQLException e) {
+            throw new QueryException("Failed to execute select query", query.repr(), query.args(), e);
         }
     }
 
-    public void forEach(@NotNull SelectQuery query,
-                        @NotNull ThrowConsumer<ResultSet, SQLException> rowConsumer) throws SQLException {
+    public void forEach(@NotNull SelectQuery query, @NotNull ThrowConsumer<ResultSet, SQLException> rowConsumer) {
         run(query, result -> {
            while (result.next()) {
                 rowConsumer.accept(result);
-            }
+           }
         });
     }
 
     @MustBeClosed
     public <E> @NotNull ResultSetIterator<E> iterate(@NotNull SelectQuery query,
-                                                     @NotNull ResultSetIterator.Converter<E> converter) throws SQLException {
-        return ResultSetIterator.of(prepareQuery(query).executeQuery(), converter);
+                                                     @NotNull ResultSetIterator.Converter<E> converter) {
+        try {
+            return ResultSetIterator.of(prepareQuery(query).executeQuery(), converter);
+        } catch (SQLException e) {
+            throw new QueryException("Failed to execute select query", query.repr(), query.args(), e);
+        }
     }
 
-    public <E> @NotNull List<E> fetchAll(@NotNull SelectQuery query,
-                                         @NotNull ResultSetIterator.Converter<E> converter) throws SQLException {
+    public <E> @NotNull List<E> fetchAll(@NotNull SelectQuery query, @NotNull ResultSetIterator.Converter<E> converter) {
         try (ResultSetIterator<E> iterator = iterate(query, converter)) {
             return Lists.newArrayList(iterator);
         }
     }
 
-    public @NotNull IntArrayList fetchIntColumn(@NotNull SelectQuery query) throws SQLException {
+    public @NotNull IntArrayList fetchIntColumn(@NotNull SelectQuery query) {
         IntArrayList list = new IntArrayList();
         forEach(query, resultSet -> list.add(resultSet.getInt(1)));
         return list;
     }
 
-    public @NotNull LongArrayList fetchLongColumn(@NotNull SelectQuery query) throws SQLException {
+    public @NotNull LongArrayList fetchLongColumn(@NotNull SelectQuery query) {
         LongArrayList list = new LongArrayList();
         forEach(query, resultSet -> list.add(resultSet.getLong(1)));
+        return list;
+    }
+
+    //  Run PreparedStatement
+
+    public void forEach(@NotNull ThrowSupplier<PreparedStatement, SQLException> preparedProvider,
+                        @NotNull ThrowConsumer<ResultSet, SQLException> rowConsumer) throws SQLException {
+        try (PreparedStatement statement = preparedProvider.get();
+             ResultSet resultSet = statement.executeQuery()) {
+            while (resultSet.next()) {
+                rowConsumer.accept(resultSet);
+            }
+        }
+    }
+
+    public @NotNull IntArrayList fetchIntColumn(@NotNull ThrowSupplier<PreparedStatement, SQLException> provider) throws SQLException {
+        IntArrayList list = new IntArrayList();
+        forEach(provider, resultSet -> list.add(resultSet.getInt(1)));
+        return list;
+    }
+
+    public @NotNull LongArrayList fetchLongColumn(@NotNull ThrowSupplier<PreparedStatement, SQLException> provider) throws SQLException {
+        LongArrayList list = new LongArrayList();
+        forEach(provider, resultSet -> list.add(resultSet.getLong(1)));
         return list;
     }
 

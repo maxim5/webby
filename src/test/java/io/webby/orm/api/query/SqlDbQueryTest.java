@@ -8,7 +8,6 @@ import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.RegisterExtension;
 
-import java.sql.SQLException;
 import java.util.List;
 
 import static io.webby.orm.api.query.CompareType.*;
@@ -324,7 +323,7 @@ public class SqlDbQueryTest {
     }
 
     @Test
-    public void runner_fetchIntColumn() throws SQLException {
+    public void runner_fetchIntColumn() {
         SelectQuery query = SelectWhere.from(PERSON_META)
                 .select(PersonColumn.id)
                 .orderBy(OrderBy.of(PersonColumn.id, Order.DESC))
@@ -339,7 +338,7 @@ public class SqlDbQueryTest {
     }
 
     @Test
-    public void runner_fetchLongColumn() throws SQLException {
+    public void runner_fetchLongColumn() {
         SelectQuery query = SelectWhere.from(PERSON_META)
                 .select(PersonColumn.iq)
                 .orderBy(OrderBy.of(PersonColumn.iq, Order.ASC))
