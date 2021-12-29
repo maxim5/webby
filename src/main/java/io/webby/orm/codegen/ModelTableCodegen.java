@@ -11,7 +11,6 @@ import io.webby.orm.arch.*;
 import io.webby.util.collect.EasyMaps;
 import org.jetbrains.annotations.NotNull;
 
-import java.io.IOException;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
@@ -55,7 +54,7 @@ public class ModelTableCodegen extends BaseCodegen {
         );
     }
 
-    public void generateJava() throws IOException {
+    public void generateJava() {
         imports();
 
         classDef();
@@ -95,7 +94,7 @@ public class ModelTableCodegen extends BaseCodegen {
         appendLine("}");
     }
 
-    private void imports() throws IOException {
+    private void imports() {
         List<Class<?>> customClasses = table.fields().stream()
                 .filter(TableField::isCustomSupportType)
                 .filter(Predicate.not(TableField::isForeignKey))
@@ -146,7 +145,7 @@ public class ModelTableCodegen extends BaseCodegen {
         return packageName.equals(table.packageName()) || packageName.equals("java.util") || packageName.equals("java.lang");
     }
 
-    private void classDef() throws IOException {
+    private void classDef() {
         Class<?> baseTableClass = pickBaseTableClass();
         Map<String, String> context = Map.of(
             "$BaseClass", Naming.shortCanonicalJavaName(baseTableClass),
@@ -171,7 +170,7 @@ public class ModelTableCodegen extends BaseCodegen {
         return TableObj.class;
     }
 
-    private void constructors() throws IOException {
+    private void constructors() {
         appendCode("""
         protected final Connector connector;
         protected final ReadFollow follow;
@@ -187,7 +186,7 @@ public class ModelTableCodegen extends BaseCodegen {
         """, mainContext);
     }
 
-    private void withFollowOnRead() throws IOException {
+    private void withFollowOnRead() {
         String code = (table.hasForeignKeyField()) ?
             """
             @Override
@@ -204,7 +203,7 @@ public class ModelTableCodegen extends BaseCodegen {
         appendCode(code, mainContext);
     }
 
-    private void getters() throws IOException {
+    private void getters() {
         appendCode("""
         @Override
         public @Nonnull Engine engine() {
@@ -218,7 +217,7 @@ public class ModelTableCodegen extends BaseCodegen {
         """);
     }
 
-    private void count() throws IOException {
+    private void count() {
         appendCode("""
         @Override
         public int count() {
@@ -244,7 +243,7 @@ public class ModelTableCodegen extends BaseCodegen {
         """, mainContext);
     }
 
-    private void exists() throws IOException {
+    private void exists() {
         appendCode("""
         @Override
         public boolean isNotEmpty() {
@@ -270,7 +269,7 @@ public class ModelTableCodegen extends BaseCodegen {
         """, mainContext);
     }
 
-    private void selectConstants() throws IOException {
+    private void selectConstants() {
         String constants = Arrays.stream(ReadFollow.values())
                 .map(follow -> new SelectMaker(table).make(follow))
                 .map(snippet -> new Snippet().withLines(snippet))
@@ -284,7 +283,7 @@ public class ModelTableCodegen extends BaseCodegen {
         """, EasyMaps.asMap("$constants", constants));
     }
 
-    private void getByPk() throws IOException {
+    private void getByPk() {
         if (!table.hasPrimaryKeyField()) {
             return;
         }
@@ -321,7 +320,7 @@ public class ModelTableCodegen extends BaseCodegen {
         }
     }
 
-    private void getBatchByPk() throws IOException {
+    private void getBatchByPk() {
         TableField primaryField = table.primaryKeyField();
         if (primaryField == null || !primaryField.isNativelySupportedType()) {
             return;  // non-native fields require keys conversion
@@ -394,7 +393,7 @@ public class ModelTableCodegen extends BaseCodegen {
         }
     }
 
-    private void keyOf() throws IOException {
+    private void keyOf() {
         if (!table.hasPrimaryKeyField()) {
             return;
         }
@@ -412,7 +411,7 @@ public class ModelTableCodegen extends BaseCodegen {
         """, EasyMaps.merge(context, mainContext, pkContext));
     }
 
-    private void iterator() throws IOException {
+    private void iterator() {
         appendCode("""
         @Override
         public void forEach(@Nonnull Consumer<? super $ModelClass> consumer) {
@@ -451,7 +450,7 @@ public class ModelTableCodegen extends BaseCodegen {
         """, mainContext);
     }
 
-    private void insert() throws IOException {
+    private void insert() {
         Snippet query = InsertMaker.makeAll(table);
         Map<String, String> context = Map.of(
             "$model_id_assert", AssertModelIdMaker.makeAssert("$model_param", table).join(),
@@ -472,7 +471,7 @@ public class ModelTableCodegen extends BaseCodegen {
         """, EasyMaps.merge(context, mainContext));
     }
 
-    private void valuesForInsert() throws IOException {
+    private void valuesForInsert() {
         ValuesArrayMaker maker = new ValuesArrayMaker("$model_param", table.fields());
         Map<String, String> context = Map.of(
             "$array_init", maker.makeInitValues().join(linesJoiner(INDENT2)),
@@ -490,7 +489,7 @@ public class ModelTableCodegen extends BaseCodegen {
         """, EasyMaps.merge(context, mainContext));
     }
 
-    private void insertAutoIncPk() throws IOException {
+    private void insertAutoIncPk() {
         if (!table.isPrimaryKeyInt() && !table.isPrimaryKeyLong()) {
             return;
         }
@@ -513,7 +512,7 @@ public class ModelTableCodegen extends BaseCodegen {
         """, EasyMaps.merge(mainContext, pkContext, context));
     }
 
-    private void valuesForInsertAutoIncPk() throws IOException {
+    private void valuesForInsertAutoIncPk() {
         if (!table.isPrimaryKeyInt() && !table.isPrimaryKeyLong()) {
             return;
         }
@@ -536,7 +535,7 @@ public class ModelTableCodegen extends BaseCodegen {
         """, EasyMaps.merge(context, mainContext));
     }
 
-    private void updateWhere() throws IOException {
+    private void updateWhere() {
         Snippet query = new Snippet()
                 .withLines(UpdateMaker.make(table, table.columns(Predicate.not(TableField::isPrimaryKey))));
 
@@ -558,7 +557,7 @@ public class ModelTableCodegen extends BaseCodegen {
         """, EasyMaps.merge(mainContext, context));
     }
 
-    private void valuesForUpdateWhere() throws IOException {
+    private void valuesForUpdateWhere() {
         List<TableField> nonPrimary = table.fields().stream().filter(Predicate.not(TableField::isPrimaryKey)).toList();
         ValuesArrayMaker maker = new ValuesArrayMaker("$model_param", nonPrimary);
         Map<String, String> context = Map.of(
@@ -589,7 +588,7 @@ public class ModelTableCodegen extends BaseCodegen {
         """, EasyMaps.merge(context, mainContext));
     }
 
-    private void updateByPk() throws IOException {
+    private void updateByPk() {
         if (!table.hasPrimaryKeyField()) {
             return;
         }
@@ -614,7 +613,7 @@ public class ModelTableCodegen extends BaseCodegen {
         """, EasyMaps.merge(mainContext, pkContext, context));
     }
 
-    private void valuesForUpdateByPk() throws IOException {
+    private void valuesForUpdateByPk() {
         if (!table.hasPrimaryKeyField()) {
             return;
         }
@@ -638,7 +637,7 @@ public class ModelTableCodegen extends BaseCodegen {
         """, EasyMaps.merge(context, mainContext));
     }
 
-    private void deleteByPk() throws IOException {
+    private void deleteByPk() {
         if (!table.hasPrimaryKeyField()) {
             return;
         }
@@ -664,7 +663,7 @@ public class ModelTableCodegen extends BaseCodegen {
         """, EasyMaps.merge(context, mainContext, pkContext));
     }
 
-    private void deleteWhere() throws IOException {
+    private void deleteWhere() {
         Snippet query = new Snippet().withLines(DeleteMaker.make(table));
         Map<String, String> context = EasyMaps.asMap(
             "$sql_query_literal", wrapAsTextBlock(query, INDENT2)
@@ -683,7 +682,7 @@ public class ModelTableCodegen extends BaseCodegen {
         """, EasyMaps.merge(context, mainContext));
     }
 
-    private void fromRow() throws IOException {
+    private void fromRow() {
         ResultSetConversionMaker maker = new ResultSetConversionMaker("result", "follow", "start");
         Map<String, String> context = Map.of(
             "$fields_assignments", maker.make(table).join(linesJoiner(INDENT1)),
@@ -698,7 +697,7 @@ public class ModelTableCodegen extends BaseCodegen {
         """, EasyMaps.merge(mainContext, context));
     }
 
-    private void internalMeta() throws IOException {
+    private void internalMeta() {
         Map<String, String> context = Map.of(
             "$KeyClass", table.hasPrimaryKeyField() ? "$pk_type.class" : "null"
         );
@@ -711,7 +710,7 @@ public class ModelTableCodegen extends BaseCodegen {
         """, EasyMaps.merge(mainContext, context, pkContext));
     }
 
-    private void columnsEnum() throws IOException {
+    private void columnsEnum() {
         Map<String, String> context = Map.of(
             "$own_enum_values", ColumnEnumMaker.make(table.columns(ReadFollow.NO_FOLLOW)).join(Collectors.joining(",\n" + INDENT1))
         );
@@ -732,7 +731,7 @@ public class ModelTableCodegen extends BaseCodegen {
         """, EasyMaps.merge(mainContext, context));
     }
 
-    private void tableMeta() throws IOException {
+    private void tableMeta() {
         Map<String, String> context = Map.of(
             "$column_meta", table.columnsWithFields().stream().map(pair -> {
                 TableField field = pair.first();

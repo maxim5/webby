@@ -1,22 +1,21 @@
 package io.webby.orm.codegen;
 
 import com.google.common.collect.Streams;
-import io.webby.util.collect.EasyMaps;
 import io.webby.orm.adapter.JdbcAdapt;
 import io.webby.orm.adapter.JdbcArrayAdapter;
 import io.webby.orm.adapter.JdbcSingleValueAdapter;
 import io.webby.orm.arch.*;
+import io.webby.util.collect.EasyMaps;
 import org.jetbrains.annotations.NotNull;
 
-import java.io.IOException;
 import java.util.ArrayList;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Stream;
 
-import static io.webby.orm.codegen.Joining.*;
 import static io.webby.orm.codegen.JavaSupport.INDENT1;
+import static io.webby.orm.codegen.Joining.*;
 
 @SuppressWarnings("UnnecessaryStringEscape")
 public class ModelAdapterCodegen extends BaseCodegen {
@@ -33,7 +32,7 @@ public class ModelAdapterCodegen extends BaseCodegen {
         );
     }
 
-    public void generateJava() throws IOException {
+    public void generateJava() {
         imports();
 
         classDef();
@@ -48,7 +47,7 @@ public class ModelAdapterCodegen extends BaseCodegen {
         appendLine("}");
     }
 
-    private void imports() throws IOException {
+    private void imports() {
         List<String> classesToImport = Streams.concat(
             Stream.of(JdbcAdapt.class, getBaseClass()).map(FQN::of),
             getNestedAdapters().stream().map(FQN::of)
@@ -84,7 +83,7 @@ public class ModelAdapterCodegen extends BaseCodegen {
         return packageName.equals(adapter.packageName()) || packageName.equals("java.util") || packageName.equals("java.lang");
     }
 
-    private void classDef() throws IOException {
+    private void classDef() {
         Map<String, String> context = Map.of(
             "$BaseClass", getBaseClass().getSimpleName(),
             "$BaseGeneric", "$ModelClass"
@@ -96,13 +95,13 @@ public class ModelAdapterCodegen extends BaseCodegen {
         """, EasyMaps.merge(context, mainContext));
     }
 
-    private void staticConst() throws IOException {
+    private void staticConst() {
         appendCode("""
         public static final $AdapterClass ADAPTER = new $AdapterClass();\n
         """, mainContext);
     }
 
-    private void createInstance() throws IOException {
+    private void createInstance() {
         PojoArch pojo = adapter.pojoArch();
         Map<String, String> context = Map.of(
             "$params", pojo.columns().stream().map(ModelAdapterCodegen::columnToParam).collect(COMMA_JOINER),
@@ -164,7 +163,7 @@ public class ModelAdapterCodegen extends BaseCodegen {
         return builder.append(")").toString();
     }
 
-    private void toValueObject() throws IOException {
+    private void toValueObject() {
         PojoArch pojo = adapter.pojoArch();
         if (pojo.columnsNumber() != 1) {
             return;
@@ -196,7 +195,7 @@ public class ModelAdapterCodegen extends BaseCodegen {
         }
     }
 
-    private void fillArrayValues() throws IOException {
+    private void fillArrayValues() {
         PojoArch pojo = adapter.pojoArch();
         if (pojo.columnsNumber() == 1) {
             return;
@@ -233,7 +232,7 @@ public class ModelAdapterCodegen extends BaseCodegen {
         return result;
     }
 
-    private void toNewValuesArray() throws IOException {
+    private void toNewValuesArray() {
         int columnsNumber = adapter.pojoArch().columnsNumber();
         if (columnsNumber == 1) {
             return;

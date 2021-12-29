@@ -1,8 +1,8 @@
 package io.webby.orm.codegen;
 
+import io.webby.util.io.UncheckedAppendable;
 import org.jetbrains.annotations.NotNull;
 
-import java.io.IOException;
 import java.util.Map;
 import java.util.stream.Stream;
 
@@ -10,33 +10,33 @@ import static io.webby.orm.codegen.JavaSupport.INDENT1;
 
 @SuppressWarnings("UnusedReturnValue")
 public abstract class BaseCodegen {
-    protected final Appendable writer;
+    protected final UncheckedAppendable writer;
 
     protected BaseCodegen(@NotNull Appendable writer) {
-        this.writer = writer;
+        this.writer = new UncheckedAppendable(writer);
     }
 
-    private BaseCodegen append(@NotNull String value) throws IOException {
+    private BaseCodegen append(@NotNull String value) {
         writer.append(value);
         return this;
     }
 
-    private BaseCodegen indent(int level) throws IOException {
+    private BaseCodegen indent(int level) {
         for (int i = 0; i < level; i++) {
             writer.append(INDENT1);
         }
         return this;
     }
 
-    protected BaseCodegen appendCode(@NotNull String code) throws IOException {
+    protected BaseCodegen appendCode(@NotNull String code) {
         return appendCode(1, code, Map.of());
     }
 
-    protected BaseCodegen appendCode(@NotNull String code, @NotNull Map<String, String> context) throws IOException {
+    protected BaseCodegen appendCode(@NotNull String code, @NotNull Map<String, String> context) {
         return appendCode(1, code, context);
     }
 
-    protected BaseCodegen appendCode(int indent, @NotNull String code, @NotNull Map<String, String> context) throws IOException {
+    protected BaseCodegen appendCode(int indent, @NotNull String code, @NotNull Map<String, String> context) {
         for (Map.Entry<String, String> entry : context.entrySet()) {
             code = code.replace(entry.getKey(), entry.getValue());
         }
@@ -47,7 +47,7 @@ public abstract class BaseCodegen {
         return this;
     }
 
-    protected BaseCodegen appendLine(@NotNull String... values) throws IOException {
+    protected BaseCodegen appendLine(@NotNull String... values) {
         for (String value : values) {
             writer.append(value);
         }
