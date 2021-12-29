@@ -8,13 +8,20 @@ import io.webby.db.kv.KeyValueDb;
 import io.webby.db.kv.KeyValueFactory;
 import org.jetbrains.annotations.NotNull;
 
-public class KeyCountersFactory {
+public class CountersFactory {
     @Inject private KeyValueFactory factory;
     @Inject private Lifetime lifetime;
 
-    public @NotNull KeyIntSetCounter getIntCounter(@NotNull String name) {
+    public @NotNull IntCounter getIntCounter(@NotNull String name) {
+        KeyValueDb<Integer, Integer> db = factory.getDb(DbOptions.of(name, Integer.class, Integer.class));
+        IntCounter counter = new IntCounter(db);
+        lifetime.onTerminate(counter);
+        return counter;
+    }
+
+    public @NotNull IntSetCounter getIntSetCounter(@NotNull String name) {
         KeyValueDb<Integer, IntHashSet> db = factory.getDb(DbOptions.of(name, Integer.class, IntHashSet.class));
-        KeyIntSetCounter counter = new KeyIntSetCounter(db);
+        IntSetCounter counter = new IntSetCounter(db);
         lifetime.onTerminate(counter);
         return counter;
     }

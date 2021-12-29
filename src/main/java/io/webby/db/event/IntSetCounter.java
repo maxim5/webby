@@ -1,27 +1,25 @@
 package io.webby.db.event;
 
-import com.carrotsearch.hppc.IntHashSet;
-import com.carrotsearch.hppc.IntIntHashMap;
-import com.carrotsearch.hppc.IntIntMap;
-import com.carrotsearch.hppc.IntObjectHashMap;
-import com.carrotsearch.hppc.procedures.IntObjectProcedure;
+import com.carrotsearch.hppc.*;
+import com.carrotsearch.hppc.cursors.IntCursor;
 import io.webby.db.kv.KeyValueDb;
+import io.webby.util.hppc.EasyHppc;
 import org.jetbrains.annotations.NotNull;
 
-import java.util.HashMap;
-import java.util.Map;
 import java.util.concurrent.locks.ReadWriteLock;
 import java.util.concurrent.locks.ReentrantReadWriteLock;
 
-public class KeyIntSetCounter implements Persistable {
+public class IntSetCounter implements Persistable {
     private final ReadWriteLock LOCK = new ReentrantReadWriteLock();
 
-    private final IntObjectHashMap<IntHashSet> cache = new IntObjectHashMap<>();
-    private final IntIntHashMap counters = new IntIntHashMap();
     private final KeyValueDb<Integer, IntHashSet> db;
+    private final IntObjectHashMap<IntHashSet> cache;
+    private final IntIntHashMap counters;
 
-    public KeyIntSetCounter(@NotNull KeyValueDb<Integer, IntHashSet> db) {
+    public IntSetCounter(@NotNull KeyValueDb<Integer, IntHashSet> db) {
         this.db = db;
+        this.cache = new IntObjectHashMap<>();  // load anything at the start?
+        this.counters = loadFreshCountsSlow(db);
     }
 
     public int increment(int key, int eventId) {
@@ -54,11 +52,25 @@ public class KeyIntSetCounter implements Persistable {
     public @NotNull IntIntMap estimateCounts(int @NotNull [] keys) {
         LOCK.readLock().lock();
         try {
-            IntIntHashMap result = new IntIntHashMap(keys.length);
-            for (int key : keys) {
-                result.put(key, counters.get(key));
-            }
-            return result;
+            return EasyHppc.slice(counters, keys);
+        } finally {
+            LOCK.readLock().unlock();
+        }
+    }
+
+    public @NotNull IntIntMap estimateCounts(@NotNull IntContainer keys) {
+        LOCK.readLock().lock();
+        try {
+            return EasyHppc.slice(counters, keys);
+        } finally {
+            LOCK.readLock().unlock();
+        }
+    }
+
+    public @NotNull IntIntMap estimateAllCounts() {
+        LOCK.readLock().lock();
+        try {
+            return new IntIntHashMap(counters);
         } finally {
             LOCK.readLock().unlock();
         }
@@ -67,9 +79,7 @@ public class KeyIntSetCounter implements Persistable {
     public void forceFlush() {
         LOCK.writeLock().lock();
         try {
-            Map<Integer, IntHashSet> map = new HashMap<>(cache.size());
-            cache.forEach((IntObjectProcedure<? super IntHashSet>) map::put);
-            db.putAll(map);
+            db.putAll(EasyHppc.toJavaMap(cache));
         } finally {
             LOCK.writeLock().unlock();
         }
@@ -88,6 +98,9 @@ public class KeyIntSetCounter implements Persistable {
         LOCK.writeLock().lock();
         try {
             IntHashSet events = getOrLoadAllEvents(key);
+            if (!counters.containsKey(key)) {
+                counters.put(key, countEvents(events));
+            }
             if (events.remove(-eventId) || events.add(eventId)) {
                 return counters.addTo(key, delta);
             }
@@ -109,5 +122,23 @@ public class KeyIntSetCounter implements Persistable {
             }
         }
         return events;
+    }
+
+    private static @NotNull IntIntHashMap loadFreshCountsSlow(@NotNull KeyValueDb<Integer, IntHashSet> db) {
+        IntIntHashMap result = new IntIntHashMap();
+        db.forEach((key, events) -> result.put(key, countEvents(events)));
+        return result;
+    }
+
+    private static int countEvents(@NotNull IntHashSet events) {
+        int result = 0;
+        for (IntCursor cursor : events) {
+            if (cursor.value > 0) {
+                result++;
+            } else {
+                result--;
+            }
+        }
+        return result;
     }
 }
