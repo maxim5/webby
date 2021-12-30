@@ -4,6 +4,7 @@ import com.github.mustachejava.DefaultMustacheFactory;
 import com.github.mustachejava.Mustache;
 import com.github.mustachejava.MustacheFactory;
 import com.google.common.base.Suppliers;
+import io.webby.examples.DevPaths;
 import io.webby.url.annotate.GET;
 import io.webby.url.annotate.Render;
 import io.webby.url.annotate.Serve;
@@ -11,6 +12,7 @@ import io.webby.url.annotate.View;
 import io.webby.url.view.EasyRender;
 import org.jetbrains.annotations.NotNull;
 
+import java.nio.file.Paths;
 import java.util.List;
 import java.util.Map;
 import java.util.function.Supplier;
@@ -42,6 +44,6 @@ public class MustacheJavaExample {
 
     private static @NotNull Mustache getTemplate(@NotNull String name) {
         MustacheFactory factory = new DefaultMustacheFactory();
-        return factory.compile("src/examples/resources/web/%s".formatted(name));
+        return factory.compile(Paths.get(DevPaths.DEMO_WEB, name).toUri().toString());
     }
 }

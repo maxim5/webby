@@ -5,7 +5,7 @@ import org.junit.jupiter.api.Test;
 
 import static io.webby.testing.TestingBytes.asByteBuf;
 import static io.webby.testing.TestingBytes.assertByteBuf;
-import static io.webby.ws.meta.AssertMeta.assertNotParsed;
+import static io.webby.testing.ws.meta.AssertMeta.assertNotParsed;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
 public class TextSeparatorFrameMetadataTest {

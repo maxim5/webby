@@ -2,6 +2,7 @@ package io.webby.examples.templates;
 
 import com.samskivert.mustache.Mustache;
 import com.samskivert.mustache.Template;
+import io.webby.examples.DevPaths;
 import io.webby.url.annotate.GET;
 import io.webby.url.annotate.Render;
 import io.webby.url.annotate.Serve;
@@ -36,7 +37,7 @@ public class JMustacheExample {
     private record Person(String name, int age) {}
 
     private static @NotNull Template getTemplate(@NotNull String name) throws FileNotFoundException {
-        FileReader reader = new FileReader("src/examples/resources/web/%s".formatted(name));
+        FileReader reader = new FileReader("%s/%s".formatted(DevPaths.DEMO_WEB, name));
         return Mustache.compiler().compile(reader);
     }
 }

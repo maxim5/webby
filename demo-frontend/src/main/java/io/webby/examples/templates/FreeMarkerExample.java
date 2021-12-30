@@ -29,8 +29,8 @@ class FreeMarkerExample {
     @View(template = "freemarker/hello.ftl")
     public Map<String, Object> hello(String name) {
         return Map.of(
-                "user", name,
-                "latestProduct", new Product("products/green-mouse.html", "Green Mouse")
+            "user", name,
+            "latestProduct", new Product("products/green-mouse.html", "Green Mouse")
         );
     }
 

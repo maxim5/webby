@@ -6,7 +6,7 @@
       <GradleProjectSettings>
         <option name="delegatedBuild" value="false" />
         <option name="testRunner" value="PLATFORM" />
-        <option name="distributionType" value="DEFAULT_WRAPPED" />
+        <option name="distributionType" value="WRAPPED" />
         <option name="externalProjectPath" value="$PROJECT_DIR$" />
         <option name="gradleJvm" value="16" />
         <option name="modules">
@@ -15,6 +15,7 @@
             <option value="$PROJECT_DIR$/core" />
             <option value="$PROJECT_DIR$/demo-frontend" />
             <option value="$PROJECT_DIR$/demo-model" />
+            <option value="$PROJECT_DIR$/demo-test" />
           </set>
         </option>
       </GradleProjectSettings>

@@ -1,6 +1,7 @@
 package io.webby.examples.templates;
 
 import com.google.common.base.Suppliers;
+import io.webby.examples.DevPaths;
 import io.webby.url.annotate.GET;
 import io.webby.url.annotate.Render;
 import io.webby.url.annotate.Serve;
@@ -47,7 +48,7 @@ public class TrimouExample {
         MustacheEngine engine = MustacheEngineBuilder.newBuilder()
                 .setProperty(EngineConfigurationKey.SKIP_VALUE_ESCAPING, true)  // Disable HTML escaping
                 .setProperty(CombinedIndexResolver.ENABLED_KEY, false)  // Disable useless resolver
-                .addTemplateLocator(new FileSystemTemplateLocator(1, "src/examples/resources/web", "trimou"))
+                .addTemplateLocator(new FileSystemTemplateLocator(1, DevPaths.DEMO_WEB, "trimou"))
                 .registerHelpers(HelpersBuilder.extra().build())
                 // .addGlobalData("footer", "© 2014 Trimou team")
                 .build();

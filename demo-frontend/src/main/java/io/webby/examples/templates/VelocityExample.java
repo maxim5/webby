@@ -1,6 +1,7 @@
 package io.webby.examples.templates;
 
 import com.google.common.base.Suppliers;
+import io.webby.examples.DevPaths;
 import io.webby.url.annotate.GET;
 import io.webby.url.annotate.Render;
 import io.webby.url.annotate.Serve;
@@ -43,7 +44,7 @@ public class VelocityExample {
         Properties configuration = new Properties();
         configuration.setProperty(RuntimeConstants.RESOURCE_LOADER, "file");
         configuration.setProperty(RuntimeConstants.FILE_RESOURCE_LOADER_CACHE, "false");
-        configuration.setProperty(RuntimeConstants.FILE_RESOURCE_LOADER_PATH, "src/examples/resources/web");
+        configuration.setProperty(RuntimeConstants.FILE_RESOURCE_LOADER_PATH, DevPaths.DEMO_WEB);
         configuration.setProperty(RuntimeConstants.RUNTIME_LOG, "");
         configuration.setProperty(RuntimeConstants.RUNTIME_LOG_LOGSYSTEM_CLASS, "org.apache.velocity.runtime.log.NullLogChute");
         return new VelocityEngine(configuration).getTemplate(name);

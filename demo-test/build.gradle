@@ -1,0 +1,13 @@
+plugins {
+    id 'java'
+}
+
+dependencies {
+    implementation project(':demo-frontend')
+
+    testImplementation testFixtures(project(":core"))
+}
+
+configurations {
+    testImplementation.extendsFrom(common)
+}

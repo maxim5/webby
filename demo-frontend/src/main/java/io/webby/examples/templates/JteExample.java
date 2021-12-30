@@ -7,6 +7,7 @@ import gg.jte.TemplateEngine;
 import gg.jte.TemplateOutput;
 import gg.jte.output.StringOutput;
 import gg.jte.resolve.ResourceCodeResolver;
+import io.webby.examples.DevPaths;
 import io.webby.url.annotate.GET;
 import io.webby.url.annotate.Render;
 import io.webby.url.annotate.Serve;
@@ -19,7 +20,7 @@ import java.util.function.Supplier;
 // JTE: must be public
 public class JteExample {
     private static final Supplier<TemplateEngine> templateEngine = Suppliers.memoize(JteExample::create);
-    public static final String CLASS_DIR = "build/generated/jte/examples/java";
+    public static final String CLASS_DIR = DevPaths.DEMO_HOME + "build/generated/jte/examples/java";
 
     @GET(url = "/templates/jte/hello")
     @View(template = "example.jte")

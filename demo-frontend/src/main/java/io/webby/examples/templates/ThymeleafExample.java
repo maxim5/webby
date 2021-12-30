@@ -1,5 +1,6 @@
 package io.webby.examples.templates;
 
+import io.webby.examples.DevPaths;
 import io.webby.url.annotate.GET;
 import io.webby.url.annotate.Render;
 import io.webby.url.annotate.Serve;
@@ -36,7 +37,7 @@ public class ThymeleafExample {
         engine.setCacheManager(new StandardCacheManager());
         engine.setTemplateResolver(new FileTemplateResolver());
         IContext context = new Context(Locale.getDefault(), students);
-        TemplateSpec spec = new TemplateSpec("src/examples/resources/web/%s".formatted(template), TemplateMode.HTML);
+        TemplateSpec spec = new TemplateSpec("%s/%s".formatted(DevPaths.DEMO_WEB, template), TemplateMode.HTML);
         return engine.process(spec, context);
     }
 

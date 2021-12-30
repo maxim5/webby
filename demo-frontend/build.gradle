@@ -1,41 +1,15 @@
 plugins {
     id 'java'
+    id 'java-library'
     id 'nu.studer.rocker' version '3.0.2'
 }
 
 dependencies {
-    implementation project(':core')
-    implementation project(':demo-model')
+    api project(':demo-model')
+}
 
-    // Json
-    implementation group: 'com.alibaba', name: 'fastjson', version: '1.2.79'
-    implementation group: 'com.dslplatform', name: 'dsl-json-java8', version: '1.9.9'
-    implementation group: 'com.fasterxml.jackson.core', name: 'jackson-databind', version: '2.13.1'
-    implementation group: 'com.google.code.gson', name: 'gson', version: '2.8.9'
-    implementation group: 'com.squareup.moshi', name: 'moshi', version: '1.13.0'
-    implementation group: 'org.jodd', name: 'jodd-json', version: '6.0.3'
-
-    // Templates
-    implementation group: 'com.fizzed', name: 'rocker-runtime', version: '1.3.0'
-    implementation group: 'com.github.jknack', name: 'handlebars', version: '4.3.0'
-    implementation group: 'com.github.spullara.mustache.java', name: 'compiler', version: '0.9.10'
-    implementation group: 'com.samskivert', name: 'jmustache', version: '1.15'
-    implementation group: 'gg.jte', name: 'jte', version: '1.12.1'
-    implementation group: 'io.pebbletemplates', name: 'pebble', version: '3.1.5'
-    implementation group: 'org.apache.velocity', name: 'velocity', version: '1.7'
-    implementation group: 'org.freemarker', name: 'freemarker', version: '2.3.31'
-    implementation group: 'org.thymeleaf', name: 'thymeleaf', version: '3.0.14.RELEASE'
-    implementation group: 'org.trimou', name: 'trimou-core', version: '2.5.1.Final'
-
-    // Embedded Key-Values
-    implementation group: 'org.mapdb', name: 'mapdb', version: '3.0.8'
-    implementation group: 'org.rocksdb', name: 'rocksdbjni', version: '6.26.1'
-
-    // SQLs
-    implementation group: 'com.h2database', name: 'h2', version: '1.4.200'
-    implementation group: 'com.zaxxer', name: 'HikariCP', version: '5.0.0'
-    implementation group: 'mysql', name: 'mysql-connector-java', version: '8.0.27'
-    implementation group: 'org.xerial', name: 'sqlite-jdbc', version: '3.36.0.3'
+configurations {
+    compileOnly.extendsFrom(common)
 }
 
 // https://github.com/etiennestuder/gradle-rocker-plugin
@@ -52,7 +26,3 @@ rocker {
 
 sourceSets.main.java.srcDirs += [rocker.configurations.demo.outputDir]
 sourceSets.main.java.srcDirs += ["$projectDir/build/generated/sources/orm"]
-
-test {
-    useJUnitPlatform()
-}

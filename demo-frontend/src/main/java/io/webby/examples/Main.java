@@ -31,16 +31,16 @@ public class Main {
         AppSettings settings = new AppSettings();
         settings.setDevMode(true);
         settings.setSecurityKey("12345678901234567890123456789012");
-        settings.setWebPath("src/main/resources/web");
-        settings.setViewPath("src/main/resources/web");
-        settings.setUserContentPath(".data/userdata");
+        settings.setWebPath(DevPaths.DEMO_WEB);
+        settings.setViewPath(DevPaths.DEMO_WEB);
+        settings.setUserContentPath(DevPaths.DEMO_HOME + ".data/userdata");
         settings.modelFilter().setPackageOnly("io.webby");  // because this class is in `io.webby.examples`
         settings.setProperty("jte.class.directory", JteExample.CLASS_DIR);
-        settings.setProperty("jte.view.paths", "src/main/resources/web/jte");
-        settings.setProperty("pebble.view.paths", "src/main/resources/web/pebble");
+        settings.setProperty("jte.view.paths", DevPaths.DEMO_WEB + "jte");
+        settings.setProperty("pebble.view.paths", DevPaths.DEMO_WEB + "pebble");
         settings.setProperty("db.mapdb.checksum.enabled", false);
         settings.storageSettings()
-                .enableKeyValue(KeyValueSettings.of(StorageType.MAP_DB, ".data/mapdb"))
+                .enableKeyValue(KeyValueSettings.of(StorageType.MAP_DB, DevPaths.DEMO_HOME + ".data/mapdb"))
                 .enableSql(SqlSettings.inMemoryNotForProduction(Engine.H2));
         return settings;
     }
