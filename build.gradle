@@ -31,7 +31,7 @@ subprojects {
         implementation group: 'org.jetbrains', name: 'annotations', version: '22.0.0'
 
         compileOnly group: 'com.google.flogger', name: 'flogger', version: '0.7.4'
-        runtimeOnly group: 'com.google.flogger', name: 'flogger-system-backend', version: '0.7.4'
+        runtimeOnly group: 'com.google.flogger', name: 'flogger-log4j2-backend', version: '0.7.4'
 
         // Silence SLF4J: https://stackoverflow.com/questions/66386000/how-to-disable-slf4j-in-jetty
         runtimeOnly group: 'org.slf4j', name: 'slf4j-nop', version: '2.0.0-alpha4'
