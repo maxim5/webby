@@ -5,7 +5,9 @@ import io.webby.common.Packages;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.List;
+import java.util.Set;
 import java.util.function.BiPredicate;
+import java.util.stream.Collectors;
 
 public final class ClassFilter {
     private static final BiPredicate<String, String> EXCLUDE_IMPLEMENTATION_PACKAGES =
@@ -47,6 +49,14 @@ public final class ClassFilter {
         setPredicate(onlyClass(klass));
     }
 
+    public void setPackagesOf(@NotNull List<Class<?>> classes) {
+        setPredicate(packagesOf(classes));
+    }
+
+    public void setPackagesOf(@NotNull Class<?> @NotNull ... classes) {
+        setPackagesOf(List.of(classes));
+    }
+
     public void setCommonPackageOf(@NotNull List<Class<?>> classes) {
         setPackageOnly(getCommonPackage(classes));
     }
@@ -69,6 +79,11 @@ public final class ClassFilter {
 
     private static @NotNull BiPredicate<String, String> onlyClass(@NotNull Class<?> klass) {
         return (pkg, cls) -> pkg.equals(klass.getPackageName()) && cls.equals(klass.getSimpleName());
+    }
+
+    private static @NotNull BiPredicate<String, String> packagesOf(@NotNull List<Class<?>> classes) {
+        Set<String> packages = classes.stream().map(Class::getPackageName).collect(Collectors.toSet());
+        return (pkg, cls) -> packages.contains(pkg);
     }
 
     private static @NotNull BiPredicate<String, String> allInPackage(@NotNull String packageName) {

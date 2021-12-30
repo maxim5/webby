@@ -409,7 +409,7 @@ public class KeyValueDbIntegrationTest {
         TestingProps.assumePropIfSet("test.kv.only_type", storageType.name());
 
         AppSettings settings = Testing.defaultAppSettings();
-        settings.modelFilter().setCommonPackageOf(Testing.CORE_MODELS);
+        settings.modelFilter().setPackagesOf(Testing.CORE_MODELS);
         settings.storageSettings()
                 .enableKeyValue(KeyValueSettings.of(storageType, TEMP_DIRECTORY.getCurrentTempDir()))
                 .enableSql(SQL_DB.settings());
