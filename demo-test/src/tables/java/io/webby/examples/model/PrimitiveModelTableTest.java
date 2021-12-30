@@ -2,8 +2,8 @@ package io.webby.examples.model;
 
 import io.webby.orm.api.Connector;
 import io.webby.orm.codegen.SqlSchemaMaker;
-import io.webby.testing.SqlDbTableTest;
 import io.webby.testing.TableIntTest;
+import io.webby.testing.SqlDbTableTest;
 import org.jetbrains.annotations.NotNull;
 
 public class PrimitiveModelTableTest

@@ -10,7 +10,7 @@ import org.jetbrains.annotations.NotNull;
 public class ForeignKeyModelTableTest
         extends SqlDbTableTest<Long, ForeignKeyModel, ForeignKeyModelTable>
         implements TableLongTest<ForeignKeyModel, ForeignKeyModelTable>,
-                   ForeignKeyTableTest<Long, ForeignKeyModel, ForeignKeyModelTable> {
+        ForeignKeyTableTest<Long, ForeignKeyModel, ForeignKeyModelTable> {
     @Override
     protected void setUp(@NotNull Connector connector) throws Exception {
         table = new ForeignKeyModelTable(connector);

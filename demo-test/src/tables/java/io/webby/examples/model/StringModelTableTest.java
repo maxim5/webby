@@ -3,16 +3,16 @@ package io.webby.examples.model;
 import com.google.common.primitives.Ints;
 import io.webby.orm.api.Connector;
 import io.webby.orm.codegen.SqlSchemaMaker;
+import io.webby.testing.MaliciousTableTest;
 import io.webby.testing.PrimaryKeyTableTest;
 import io.webby.testing.SqlDbTableTest;
-import io.webby.testing.MaliciousTableTest;
 import org.jetbrains.annotations.NotNull;
 
 import static io.webby.testing.TestingUtil.array;
 
 public class StringModelTableTest extends SqlDbTableTest<String, StringModel, StringModelTable>
         implements PrimaryKeyTableTest<String, StringModel, StringModelTable>,
-                   MaliciousTableTest<String, StringModel, StringModelTable> {
+        MaliciousTableTest<String, StringModel, StringModelTable> {
     @Override
     protected void setUp(@NotNull Connector connector) throws Exception {
         table = new StringModelTable(connector);

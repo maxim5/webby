@@ -1,13 +1,22 @@
 plugins {
     id 'java'
+    id 'java-test-fixtures'
+}
+
+sourceSets {
+    core
+    demo
+    tables
 }
 
 dependencies {
-    implementation project(':demo-frontend')
-
-    testImplementation testFixtures(project(":core"))
+    testFixturesApi project(':demo-frontend')
+    testFixturesApi testFixtures(project(':core'))
 }
 
 configurations {
-    testImplementation.extendsFrom(common)
+    testFixturesImplementation.extendsFrom(common)
+    coreImplementation.extendsFrom(testFixturesImplementation)
+    demoImplementation.extendsFrom(testFixturesImplementation)
+    tablesImplementation.extendsFrom(testFixturesImplementation)
 }
