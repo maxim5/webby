@@ -17,7 +17,7 @@ sourceSets {
 // https://stackoverflow.com/questions/32122363/gradle-sourceset-depends-on-another-sourceset
 dependencies {
     testFixturesApi project(':demo-frontend')
-    testFixturesApi testFixtures(project(':core'))
+    testFixturesApi testFixtures(project(':webby-core'))
 }
 
 configurations {

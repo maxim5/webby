@@ -3,7 +3,7 @@ rootProject.name = 'webby'
 include 'demo-model'
 include 'demo-frontend'
 include 'demo-test'
-include 'core'
+include 'webby-core'
 
 sourceControl {
     gitRepository('https://github.com/maxim5/routekit.git') {
