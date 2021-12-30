@@ -18,6 +18,10 @@ sourceSets {
 dependencies {
     testFixturesApi project(':demo-frontend')
     testFixturesApi testFixtures(project(':webby-core'))
+
+    coreImplementation sourceSets.testFixtures.output
+    demoImplementation sourceSets.testFixtures.output
+    tablesImplementation sourceSets.testFixtures.output
 }
 
 configurations {
