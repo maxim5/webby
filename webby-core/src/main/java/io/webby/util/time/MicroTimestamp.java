@@ -20,4 +20,8 @@ public class MicroTimestamp {
     public static long longMicroToEpochSeconds(long timestamp) {
         return timestamp >>> 20;
     }
+
+    public static long now() {
+        return instantToLongMicro(Instant.now());
+    }
 }

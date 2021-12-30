@@ -21,4 +21,8 @@ public class NanoTimestamp {
     public static long longNanoToEpochSeconds(long timestamp) {
         return timestamp >>> 30;
     }
+
+    public static long now() {
+        return instantToLongNano(Instant.now());
+    }
 }
