@@ -103,6 +103,11 @@ public class Testing {
     public static class Internals {
         private static Injector injector;
 
+        public static @NotNull Injector injector() {
+            assertNotNull(injector, "Test Guice Injector is not initialized");
+            return injector;
+        }
+
         public static <T> @NotNull T getInstance(@NotNull Class<T> type) {
             assertNotNull(injector, "Test Guice Injector is not initialized");
             return injector.getInstance(type);
