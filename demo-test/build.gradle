@@ -9,6 +9,12 @@ sourceSets {
     tables
 }
 
+// Useful:
+// https://leanmind.es/en/blog/test-fixtures-with-gradle/
+// https://remonsinnema.com/2016/05/09/how-to-manage-dependencies-in-a-gradle-multi-project-build/
+// See also:
+// https://newbedev.com/multi-project-test-dependencies-with-gradle
+// https://stackoverflow.com/questions/32122363/gradle-sourceset-depends-on-another-sourceset
 dependencies {
     testFixturesApi project(':demo-frontend')
     testFixturesApi testFixtures(project(':core'))
