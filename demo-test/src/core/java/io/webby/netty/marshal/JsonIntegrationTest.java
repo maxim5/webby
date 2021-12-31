@@ -1,8 +1,8 @@
 package io.webby.netty.marshal;
 
 import io.webby.testing.TestingModels;
-import io.webby.examples.hello.JsonCustom;
-import io.webby.examples.hello.SampleBean;
+import io.webby.demo.hello.JsonCustom;
+import io.webby.demo.hello.SampleBean;
 import io.webby.netty.marshal.MarshallerFactory.SupportedJsonLibrary;
 import io.webby.testing.Testing;
 import org.jetbrains.annotations.NotNull;

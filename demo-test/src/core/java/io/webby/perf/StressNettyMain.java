@@ -4,7 +4,7 @@ import io.webby.Webby;
 import io.webby.app.AppSettings;
 import io.webby.auth.session.Session;
 import io.webby.auth.user.DefaultUser;
-import io.webby.examples.Main;
+import io.webby.demo.Main;
 import io.webby.netty.NettyBootstrap;
 import io.webby.netty.NettyHttpHandler;
 import io.webby.netty.response.HttpResponseFactory;

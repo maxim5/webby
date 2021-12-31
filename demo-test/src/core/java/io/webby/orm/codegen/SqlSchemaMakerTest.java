@@ -3,7 +3,7 @@ package io.webby.orm.codegen;
 import io.webby.auth.session.SessionTable;
 import io.webby.auth.user.UserTable;
 import io.webby.db.model.BlobKvTable;
-import io.webby.examples.model.*;
+import io.webby.demo.model.*;
 import io.webby.orm.api.Engine;
 import org.junit.jupiter.api.Test;
 

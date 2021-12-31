@@ -2,8 +2,8 @@ package io.webby.netty;
 
 import com.google.common.flogger.FluentLogger;
 import io.webby.app.AppSettings;
-import io.webby.examples.DevPaths;
-import io.webby.examples.Main;
+import io.webby.demo.DevPaths;
+import io.webby.demo.Main;
 import io.webby.testing.OkRequests;
 import io.webby.testing.TestingUtil;
 import io.webby.util.func.ThrowConsumer;

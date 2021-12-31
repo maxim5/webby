@@ -2,7 +2,7 @@ package io.webby.orm.arch;
 
 import io.webby.auth.session.Session;
 import io.webby.auth.user.UserModel;
-import io.webby.examples.model.NestedModel;
+import io.webby.demo.model.NestedModel;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 

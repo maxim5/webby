@@ -1,7 +1,7 @@
 package io.webby.netty.response;
 
 import io.netty.handler.codec.http.HttpResponse;
-import io.webby.examples.hello.HelloWorld;
+import io.webby.demo.hello.HelloWorld;
 import io.webby.netty.HttpConst;
 import io.webby.testing.BaseHttpIntegrationTest;
 import io.webby.testing.FakeRequests;

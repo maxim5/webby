@@ -3,7 +3,7 @@ package io.webby.testing;
 import com.google.inject.Injector;
 import io.netty.channel.embedded.EmbeddedChannel;
 import io.webby.app.AppSettings;
-import io.webby.examples.DevPaths;
+import io.webby.demo.DevPaths;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.ArrayDeque;
