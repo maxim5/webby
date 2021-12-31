@@ -43,7 +43,7 @@ public class StressNettyMain {
     private static @NotNull Closeable bootstrapServer() {
         AppSettings settings = Main.localSettings();
         settings.modelFilter().setCommonPackageOf(DefaultUser.class, Session.class);
-        settings.handlerFilter().setPackageOnly("io.webby.examples");
+        settings.handlerFilter().setPackageOnly("io.webby.demo");
         settings.storageSettings()
                 .enableKeyValue(TestingStorage.KEY_VALUE_DEFAULT)
                 .enableSql(TestingProps.propsSqlSettings());

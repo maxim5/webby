@@ -161,7 +161,7 @@ public class StandaloneNettyIntegrationTest {
 
     private static @NotNull AppSettings createSettingsForTest() {
         AppSettings settings = Main.localSettings();
-        settings.handlerFilter().setPackageOnly("io.webby.examples");
+        settings.handlerFilter().setPackageOnly("io.webby.demo");
         return settings;
     }
 }

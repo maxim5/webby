@@ -34,7 +34,7 @@ public class Main {
         settings.setWebPath(DevPaths.DEMO_WEB);
         settings.setViewPath(DevPaths.DEMO_WEB);
         settings.setUserContentPath(DevPaths.DEMO_HOME + ".data/userdata");
-        settings.modelFilter().setPackageOnly("io.webby");  // because this class is in `io.webby.examples`
+        settings.modelFilter().setPackageOnly("io.webby");  // because this class is in `io.webby.demo`
         settings.setProperty("jte.class.directory", JteExample.CLASS_DIR);
         settings.setProperty("jte.view.paths", DevPaths.DEMO_WEB + "jte");
         settings.setProperty("pebble.view.paths", DevPaths.DEMO_WEB + "pebble");
