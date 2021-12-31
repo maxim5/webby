@@ -1,0 +1,25 @@
+<component name="ProjectRunConfigurationManager">
+  <configuration default="false" name="SQL tag [sqlite/in-memory]" type="JUnit" factoryName="JUnit">
+    <shortenClasspath name="MANIFEST" />
+    <extension name="coverage">
+      <pattern>
+        <option name="PATTERN" value="io.webby.common.*" />
+        <option name="ENABLED" value="true" />
+      </pattern>
+    </extension>
+    <option name="ALTERNATIVE_JRE_PATH_ENABLED" value="true" />
+    <option name="ALTERNATIVE_JRE_PATH" value="16" />
+    <option name="PACKAGE_NAME" value="io.webby.db.kv" />
+    <option name="MAIN_CLASS_NAME" value="io.webby.db.kv.KeyValueDbIntegrationTest" />
+    <option name="METHOD_NAME" value="" />
+    <option name="TEST_OBJECT" value="tags" />
+    <option name="VM_PARAMETERS" value="-ea --illegal-access=permit -Dtest.sql.engine=SQLite -Dtest.kv.only_type=SQL_DB" />
+    <option name="TEST_SEARCH_SCOPE">
+      <value defaultName="wholeProject" />
+    </option>
+    <tag value="sql" />
+    <method v="2">
+      <option name="Make" enabled="true" />
+    </method>
+  </configuration>
+</component>
