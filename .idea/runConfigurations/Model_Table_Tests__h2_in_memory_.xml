@@ -1,22 +1,20 @@
 <component name="ProjectRunConfigurationManager">
-  <configuration default="false" name="All Tests" type="JUnit" factoryName="JUnit">
+  <configuration default="false" name="Model Table Tests [h2/in-memory]" type="JUnit" factoryName="JUnit">
     <shortenClasspath name="MANIFEST" />
-    <extension name="coverage">
-      <pattern>
-        <option name="PATTERN" value="io.webby.*" />
-        <option name="ENABLED" value="true" />
-      </pattern>
-    </extension>
     <option name="ALTERNATIVE_JRE_PATH_ENABLED" value="true" />
     <option name="ALTERNATIVE_JRE_PATH" value="16" />
-    <option name="PACKAGE_NAME" value="io.webby" />
+    <option name="PACKAGE_NAME" value="" />
     <option name="MAIN_CLASS_NAME" value="" />
     <option name="METHOD_NAME" value="" />
-    <option name="TEST_OBJECT" value="package" />
-    <option name="VM_PARAMETERS" value="-ea --illegal-access=permit" />
+    <option name="TEST_OBJECT" value="pattern" />
+    <option name="VM_PARAMETERS" value="-ea --illegal-access=permit -Dtest.sql.engine=h2" />
     <option name="TEST_SEARCH_SCOPE">
       <value defaultName="wholeProject" />
     </option>
+    <dir value="$PROJECT_DIR$/demo-test/src/tables" />
+    <patterns>
+      <pattern testClass=".*TableTest" />
+    </patterns>
     <method v="2">
       <option name="Make" enabled="true" />
     </method>

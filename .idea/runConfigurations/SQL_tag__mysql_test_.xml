@@ -13,9 +13,9 @@
     <option name="MAIN_CLASS_NAME" value="io.webby.db.kv.KeyValueDbIntegrationTest" />
     <option name="METHOD_NAME" value="" />
     <option name="TEST_OBJECT" value="tags" />
-    <option name="VM_PARAMETERS" value="-ea -Dflogger.backend_factory=com.google.common.flogger.backend.log4j2.Log4j2BackendFactory#getInstance --illegal-access=permit -Dtest.sql.url=jdbc:mysql://localhost/test?user=test&amp;password=test -Dtest.kv.only_type=SQL_DB" />
+    <option name="VM_PARAMETERS" value="-ea --illegal-access=permit -Dtest.sql.url=jdbc:mysql://localhost/test?user=test&amp;password=test -Dtest.kv.only_type=SQL_DB" />
     <option name="TEST_SEARCH_SCOPE">
-      <value defaultName="wholeProject"/>
+      <value defaultName="wholeProject" />
     </option>
     <tag value="sql" />
     <method v="2">
