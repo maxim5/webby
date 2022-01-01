@@ -156,12 +156,12 @@ public class DefaultHttpRequestEx extends DefaultFullHttpRequest implements Muta
     }
 
     @Override
-    public @Nullable UserModel user() {
-        return (UserModel) attr(Attributes.User);
+    public @Nullable <U extends UserModel> U user() {
+        return castAny(attr(Attributes.User));
     }
 
     @Override
-    public @NotNull UserModel userOrDie() {
+    public @NotNull <U extends UserModel> U userOrDie() {
         return attrOrDie(Attributes.User);
     }
 

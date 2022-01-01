@@ -41,7 +41,7 @@ public interface HttpRequestEx extends FullHttpRequest {
 
     boolean isAuthenticated();
 
-    @Nullable UserModel user();
+    @Nullable <U extends UserModel> U user();
 
-    @NotNull UserModel userOrDie();
+    @NotNull <U extends UserModel> U userOrDie();
 }
