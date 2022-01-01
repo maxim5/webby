@@ -10,12 +10,13 @@ import io.webby.db.sql.TableManager;
 import io.webby.testing.Testing;
 import io.webby.testing.TestingModules;
 import org.jetbrains.annotations.NotNull;
-import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 import org.mockito.Mockito;
 
 import java.util.ArrayList;
 import java.util.List;
+
+import static org.junit.jupiter.api.Assertions.assertEquals;
 
 public class LifetimeTest {
     private final List<Class<?>> addedResources = new ArrayList<>();
@@ -35,8 +36,8 @@ public class LifetimeTest {
         lifetimeMock.terminate();
 
         List<Class<?>> expected = List.of(HikariDataSource.class, TableManager.class, JavaMapDbFactory.class);
-        Assertions.assertEquals(expected, addedResources);
-        Assertions.assertEquals(Lists.reverse(expected), deconstructedResources);
+        assertEquals(expected, addedResources);
+        assertEquals(Lists.reverse(expected), deconstructedResources);
     }
 
     private @NotNull Lifetime.Definition mockLifetime() throws Throwable {

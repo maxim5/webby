@@ -1,7 +1,6 @@
 package io.webby.demo.websockets.lowlevel;
 
 import io.netty.handler.codec.http.websocketx.WebSocketFrame;
-import io.webby.testing.AssertFrame;
 import io.webby.testing.BaseWebsocketIntegrationTest;
 import org.junit.jupiter.api.Test;
 
@@ -21,12 +20,12 @@ public class LLSendingTest extends BaseWebsocketIntegrationTest {
     @Test
     public void text_countdown_immediately() {
         agent.countDownImmediately(3);
-        AssertFrame.assertFrames(readAllFramesUntilEmpty(), "3", "2", "1");
+        assertFrames(readAllFramesUntilEmpty(), "3", "2", "1");
     }
 
     @Test
     public void text_countdown_listener() {
         agent.countDownViaListener(3);
-        AssertFrame.assertFrames(readAllFramesUntilEmpty(), "3", "2", "1");
+        assertFrames(readAllFramesUntilEmpty(), "3", "2", "1");
     }
 }

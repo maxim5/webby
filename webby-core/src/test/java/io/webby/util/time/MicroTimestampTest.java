@@ -1,13 +1,13 @@
 package io.webby.util.time;
 
 import org.jetbrains.annotations.NotNull;
-import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 
 import java.time.Instant;
 
 import static io.webby.util.time.MicroTimestamp.instantToLongMicro;
 import static io.webby.util.time.MicroTimestamp.longMicroToInstant;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 
 public class MicroTimestampTest {
     @Test
@@ -26,6 +26,6 @@ public class MicroTimestampTest {
     private static void assertInstantRoundtrip(@NotNull Instant instant) {
         long timestamp = instantToLongMicro(instant);
         Instant back = longMicroToInstant(timestamp);
-        Assertions.assertEquals(instant, back);
+        assertEquals(instant, back);
     }
 }
