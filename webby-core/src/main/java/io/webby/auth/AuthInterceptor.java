@@ -2,8 +2,8 @@ package io.webby.auth;
 
 import com.google.inject.Inject;
 import io.webby.auth.session.Session;
+import io.webby.auth.user.BaseUserManager;
 import io.webby.auth.user.UserModel;
-import io.webby.auth.user.UserManager;
 import io.webby.netty.errors.ServeException;
 import io.webby.netty.errors.UnauthorizedException;
 import io.webby.netty.intercept.AdvancedInterceptor;
@@ -15,7 +15,7 @@ import org.jetbrains.annotations.NotNull;
 
 @AttributeOwner(position = Attributes.User)
 public class AuthInterceptor implements AdvancedInterceptor {
-    @Inject private UserManager userManager;
+    @Inject private BaseUserManager userManager;
 
     @Override
     public void enter(@NotNull MutableHttpRequestEx request, @NotNull Endpoint endpoint) throws ServeException {

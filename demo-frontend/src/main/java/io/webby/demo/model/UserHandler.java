@@ -3,9 +3,9 @@ package io.webby.demo.model;
 import com.google.inject.Inject;
 import io.webby.auth.session.Session;
 import io.webby.auth.user.DefaultUser;
-import io.webby.auth.user.UserModel;
 import io.webby.auth.user.UserAccess;
-import io.webby.auth.user.UserManager;
+import io.webby.auth.user.BaseUserManager;
+import io.webby.auth.user.UserModel;
 import io.webby.netty.errors.NotFoundException;
 import io.webby.netty.request.HttpRequestEx;
 import io.webby.url.annotate.GET;
@@ -15,7 +15,7 @@ import org.jetbrains.annotations.NotNull;
 
 @Serve
 public class UserHandler {
-    @Inject private UserManager userManager;
+    @Inject private BaseUserManager userManager;
 
     @GET(url = "/user/{id}")
     public UserModel get(int userId) {

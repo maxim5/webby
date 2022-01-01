@@ -1,26 +1,23 @@
 package io.webby.auth.user;
 
 import com.google.inject.Inject;
-import io.webby.orm.api.ForeignInt;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
-public class UserManager {
+public class SimpleUserManager implements BaseUserManager {
     private final UserStorage userStorage;
 
     @Inject
-    public UserManager(@NotNull UserStorage userStorage) {
+    public SimpleUserManager(@NotNull UserStorage userStorage) {
         this.userStorage = userStorage;
     }
 
+    @Override
     public @Nullable UserModel findByUserId(int userId) {
         return userStorage.findByUserId(userId);
     }
 
-    public @Nullable UserModel findByUserId(@NotNull ForeignInt<UserModel> foreignId) {
-        return foreignId.hasEntity() ? foreignId.getEntity() : findByUserId(foreignId.getIntId());
-    }
-
+    @Override
     public int createUserAutoId(@NotNull UserModel user) {
         assert user.isAutoId() : "User is not auto-id: %s".formatted(user);
         return userStorage.createUserAutoId(user);

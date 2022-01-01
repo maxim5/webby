@@ -22,7 +22,7 @@ public class AuthModule extends AbstractModule {
         bind(SessionManager.class).asEagerSingleton();
 
         boolean isSqlEnabled = settings.storageSettings().isSqlEnabled();
-        bind(UserManager.class).asEagerSingleton();
+        bind(BaseUserManager.class).to(SimpleUserManager.class).asEagerSingleton();
         bind(UserStorage.class).to(isSqlEnabled ? SqlUserStorage.class : KeyValueUserStorage.class).asEagerSingleton();
     }
 

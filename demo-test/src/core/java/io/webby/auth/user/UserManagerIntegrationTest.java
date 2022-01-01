@@ -24,7 +24,7 @@ public class UserManagerIntegrationTest {
     @ParameterizedTest
     @EnumSource(Scenario.class)
     public void no_users(Scenario scenario) {
-        UserManager userManager = startup(scenario);
+        BaseUserManager userManager = startup(scenario);
         assertNull(userManager.findByUserId(0));
         assertNull(userManager.findByUserId(1));
     }
@@ -32,7 +32,7 @@ public class UserManagerIntegrationTest {
     @ParameterizedTest
     @EnumSource(Scenario.class)
     public void create_one_user(Scenario scenario) {
-        UserManager userManager = startup(scenario);
+        BaseUserManager userManager = startup(scenario);
         DefaultUser user = TestingModels.newUser(AUTO_ID, Instant.now().truncatedTo(ChronoUnit.MILLIS), UserAccess.Simple);
         int userId = userManager.createUserAutoId(user);
         assertEquals(userId, user.userId());
@@ -44,19 +44,19 @@ public class UserManagerIntegrationTest {
     @ParameterizedTest
     @EnumSource(Scenario.class)
     public void invalid_user_with_id(Scenario scenario) {
-        UserManager userManager = startup(scenario);
+        BaseUserManager userManager = startup(scenario);
         DefaultUser user = TestingModels.newUserNow(1, UserAccess.Simple);
         assertThrows(AssertionError.class, () -> userManager.createUserAutoId(user));
     }
 
-    private static @NotNull UserManager startup(@NotNull Scenario scenario) {
+    private static @NotNull BaseUserManager startup(@NotNull Scenario scenario) {
         AppSettings settings = Testing.defaultAppSettings();
         settings.modelFilter().setCommonPackageOf(DefaultUser.class);
         switch (scenario) {
             case SQL -> settings.storageSettings().enableSql(SQL_DB.settings()).enableKeyValue(TestingStorage.KEY_VALUE_DEFAULT);
             case KEY_VALUE -> settings.storageSettings().enableKeyValue(TestingStorage.KEY_VALUE_DEFAULT);
         }
-        return Testing.testStartup(settings, SQL_DB::savepoint, SQL_DB.combinedTestingModule()).getInstance(UserManager.class);
+        return Testing.testStartup(settings, SQL_DB::savepoint, SQL_DB.combinedTestingModule()).getInstance(BaseUserManager.class);
     }
 
     private enum Scenario {
