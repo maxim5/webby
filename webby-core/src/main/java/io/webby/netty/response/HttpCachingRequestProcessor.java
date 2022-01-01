@@ -65,6 +65,7 @@ public class HttpCachingRequestProcessor {
         if (settings.isProdMode()) {
             headers.add(HttpConst.CACHE_CONTROL, HttpCaching.CACHE_FOREVER);
         } else {
+            headers.add(HttpConst.CACHE_CONTROL, HttpCaching.NO_NOT_CACHE);
             headers.add(HttpConst.LAST_MODIFIED, HttpCaching.lastModifiedValue(lastModifiedMillis));
             if (byteBuf != null) {
                 headers.add(HttpConst.ETAG, HttpCaching.simpleEtag(byteBuf));

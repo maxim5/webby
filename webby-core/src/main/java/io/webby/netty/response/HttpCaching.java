@@ -13,6 +13,7 @@ import java.sql.Timestamp;
 // Date format: RFC_1123_DATE_TIME "EEE, dd MMM yyyy HH:mm:ss zzz"
 public class HttpCaching {
     public static final AsciiString CACHE_FOREVER = AsciiString.of("max-age=31536000");
+    public static final AsciiString NO_NOT_CACHE = AsciiString.of("max-age=0");
 
     public static @NotNull String lastModifiedValue(long millis) {
         return DateFormatter.format(new Timestamp(millis));
@@ -21,7 +22,7 @@ public class HttpCaching {
     public static boolean isModifiedSince(long modifiedTime, @NotNull HttpHeaders headers) {
         // If-Modified-Since: Fri, 27 Aug 2021 22:46:13 GMT
         Long resourceMillis = headers.getTimeMillis(HttpConst.IF_MODIFIED_SINCE);
-        return resourceMillis == null || modifiedTime > resourceMillis;
+        return resourceMillis == null || modifiedTime > resourceMillis + 1000;  // one extra second
     }
 
     public static boolean isSimpleEtagChanged(@NotNull ByteBuf byteBuf, HttpHeaders headers) {

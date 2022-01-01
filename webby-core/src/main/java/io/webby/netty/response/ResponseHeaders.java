@@ -1,6 +1,7 @@
 package io.webby.netty.response;
 
 import com.google.inject.Inject;
+import io.webby.app.Settings;
 import io.webby.netty.HttpConst;
 import io.webby.util.collect.Pair;
 import org.jetbrains.annotations.NotNull;
@@ -10,6 +11,7 @@ import java.nio.charset.StandardCharsets;
 import java.util.List;
 
 public class ResponseHeaders {
+    @Inject private Settings settings;
     @Inject private Charset charset;
 
     public @NotNull CharSequence ensureCharset(@NotNull CharSequence contentType) {
@@ -24,6 +26,11 @@ public class ResponseHeaders {
     }
 
     public @NotNull List<Pair<CharSequence, CharSequence>> defaultHeaders(@NotNull CharSequence contentType) {
+        if (settings.isDevMode()) {
+            return List.of(
+                    Pair.of(HttpConst.CONTENT_TYPE, ensureCharset(contentType))
+            );
+        }
         return List.of(
                 Pair.of(HttpConst.CONTENT_TYPE, ensureCharset(contentType)),
                 Pair.of(HttpConst.X_FRAME_OPTIONS, HttpConst.SAMEORIGIN),               // iframe attack
