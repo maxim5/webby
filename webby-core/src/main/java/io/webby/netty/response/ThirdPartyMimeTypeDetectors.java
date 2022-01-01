@@ -2,6 +2,9 @@ package io.webby.netty.response;
 
 
 import com.google.common.collect.ImmutableMap;
+import com.j256.simplemagic.ContentInfo;
+import com.j256.simplemagic.ContentInfoUtil;
+import eu.medsea.mimeutil.MimeUtil2;
 import io.webby.util.func.ThrowFunction;
 import io.webby.util.reflect.EasyClasspath;
 import org.jetbrains.annotations.NotNull;
@@ -31,18 +34,19 @@ public class ThirdPartyMimeTypeDetectors {
         return null;
     }
 
+    // https://github.com/j256/simplemagic
     private static @Nullable String runSimpleMagic(@NotNull File file) throws IOException {
-        com.j256.simplemagic.ContentInfoUtil util = new com.j256.simplemagic.ContentInfoUtil();
-        com.j256.simplemagic.ContentInfo info = file.exists() ? util.findMatch(file) : null;
+        ContentInfoUtil util = new ContentInfoUtil();
+        ContentInfo info = file.exists() ? util.findMatch(file) : null;
         if (info == null) {
-            info = com.j256.simplemagic.ContentInfoUtil.findExtensionMatch(file.getName());
+            info = ContentInfoUtil.findExtensionMatch(file.getName());
         }
         return info != null ? info.getMimeType() : null;
     }
 
     private static @NotNull String runMimeUtil2(@NotNull File file) {
-        eu.medsea.mimeutil.MimeUtil2 mimeUtil = new eu.medsea.mimeutil.MimeUtil2();
+        MimeUtil2 mimeUtil = new MimeUtil2();
         mimeUtil.registerMimeDetector("eu.medsea.mimeutil.detector.MagicMimeMimeDetector");
-        return eu.medsea.mimeutil.MimeUtil2.getMostSpecificMimeType(mimeUtil.getMimeTypes(file)).toString();
+        return MimeUtil2.getMostSpecificMimeType(mimeUtil.getMimeTypes(file)).toString();
     }
 }
