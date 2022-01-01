@@ -67,7 +67,7 @@ public class StaticServingIntegrationTest extends BaseHttpIntegrationTest {
         assert404(get("/int"));
     }
 
-    private static void assertFavicon(@NotNull HttpResponse response) throws Exception {
+    private static void assertFavicon(@NotNull HttpResponse response) {
         assert200(response);
         assertEquals("15406", response.headers().get(HttpConst.CONTENT_LENGTH));
         assertOneOf(response.headers().get(HttpConst.CONTENT_TYPE), ICON_MIME_TYPES);

@@ -131,7 +131,7 @@ public class HttpResponseFactory {
         String name = "%d.html".formatted(status.code());
         try {
             Path clientErrorPath = settings.webPath().resolve(name);
-            ByteBuf clientError = EasyByteBuf.wrapNullable(EasyFiles.readByteBufferOrNull(clientErrorPath));
+            ByteBuf clientError = EasyByteBuf.wrapNullable(EasyFiles.readAllBytesOrNull(clientErrorPath));
             if (settings.isDevMode()) {
                 ByteBuf resource = (clientError != null) ? clientError : getDefaultResource(name);
                 String content = resource.toString(settings.charset()).formatted(
