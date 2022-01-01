@@ -17,7 +17,6 @@ public class SimpleUserManager implements BaseUserManager {
         return userStorage.findByUserId(userId);
     }
 
-    @Override
     public int createUserAutoId(@NotNull UserModel user) {
         assert user.isAutoId() : "User is not auto-id: %s".formatted(user);
         return userStorage.createUserAutoId(user);
