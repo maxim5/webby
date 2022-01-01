@@ -343,6 +343,7 @@ public class CallerFactoryTest {
         Caller caller = factory.create(instance, binding(instance), Map.of(), List.of("x", "y", "z", "b"));
 
         assertEquals("1:2.00:3.00:false", caller.call(get(), vars("x", 1, "y", 2.0, "z", 3.0, "b", false)));
+        assertEquals("1:2.00:3.00:true", caller.call(get(), vars("x", 1, "y", 2.0, "z", 3.0, "b", true)));
         assertThrows(ConversionError.class, () -> caller.call(get(), vars("x", 1_000_000, "y", 0, "z", 0, "b", true)));
     }
 
