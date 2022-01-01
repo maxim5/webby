@@ -15,10 +15,10 @@ public final class DynamicServingRouteEndpoint implements RouteEndpoint {
     private final Serving serving;
     private final String prefix;
 
-    public DynamicServingRouteEndpoint(@NotNull String prefix, @NotNull Serving serving) {
+    public DynamicServingRouteEndpoint(@NotNull String prefix, @NotNull String directory, @NotNull Serving serving) {
         this.serving = serving;
         this.prefix = prefix;
-        this.endpoint = new Endpoint(new ServingCaller(), EndpointContext.EMPTY_CONTEXT, EndpointOptions.DEFAULT);
+        this.endpoint = new Endpoint(new ServingCaller(directory), EndpointContext.EMPTY_CONTEXT, EndpointOptions.DEFAULT);
     }
 
     @Override
@@ -32,15 +32,21 @@ public final class DynamicServingRouteEndpoint implements RouteEndpoint {
     }
 
     private class ServingCaller implements Caller {
+        private final String directory;
+
+        public ServingCaller(@NotNull String directory) {
+            this.directory = directory;
+        }
+
         @Override
         public Object call(@NotNull FullHttpRequest request, @NotNull Map<String, CharArray> variables) throws Exception {
             CharArray path = variables.get("path");
-            return serving.serve(path.toString(), request);
+            return serving.serve(UrlFix.joinWithSlash(directory, path), request);
         }
 
         @Override
         public @NotNull Object method() {
-            return "ServingCaller[%s->%s]".formatted(prefix, serving);
+            return "ServingCaller[%s/%s/*->%s]".formatted(prefix, directory, serving);
         }
     }
 }

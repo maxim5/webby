@@ -20,7 +20,16 @@ public class StaticServing implements Serving {
         Path webPath = settings.webPath();
         Files.walk(webPath).forEach(path -> {
             if (path.toFile().isFile()) {
-                consumer.accept(webPath.relativize(path).toString());
+                consumer.accept(webPath.relativize(path).toString().replace('\\', '/'));
+            }
+        });
+    }
+
+    public void iterateStaticDirectories(@NotNull Consumer<String> consumer) throws IOException {
+        Path webPath = settings.webPath();
+        Files.walk(webPath).forEach(path -> {
+            if (path.toFile().isDirectory()) {
+                consumer.accept(webPath.relativize(path).toString().replace('\\', '/'));
             }
         });
     }

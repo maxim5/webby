@@ -60,41 +60,46 @@ public class HandlerBinder {
         RouterSetup<RouteEndpoint> setup = new RouterSetup<>();
         QueryParser parser = settings.urlParser();
 
+        BiConsumer<String, RouteEndpoint> setupConsumer = (url, endpoint) -> {
+            setup.add(url, endpoint);
+            log.at(Level.FINE).log("Rule: %s -> %s", url, LazyArgs.lazy(endpoint::describe));
+        };
+
         TimeIt.timeIt(
-            () -> processBindings(bindings, parser, (url, endpoint) -> {
-                setup.add(url, endpoint);
-                log.at(Level.FINE).log("Rule: %s -> %s", url, LazyArgs.lazy(endpoint::describe));
-            }),
+            () -> processBindings(bindings, parser, setupConsumer),
             millis -> log.at(Level.FINE).log("Endpoints mapped to urls in %d ms", millis)
         );
 
         String staticFilesUrlPrefix = settings.getProperty("url.static.files.prefix", "/");
         boolean staticFilesDynamicLookup = settings.getBoolProperty("url.static.files.dynamic.lookup", settings.isDevMode());
-        if (staticFilesDynamicLookup) {
-            String url = "%s{path}".formatted(staticFilesUrlPrefix);
-            DynamicServingRouteEndpoint endpoint = new DynamicServingRouteEndpoint(staticFilesUrlPrefix, staticServing);
-            setup.add(url, endpoint);
-            log.at(Level.FINE).log("Rule: %s -> %s", url, LazyArgs.lazy(endpoint::describe));
-        } else {
-            try {
+        try {
+            if (staticFilesDynamicLookup) {
+                TimeIt.timeItOrDie(
+                    () -> staticServing.iterateStaticDirectories(dir -> {
+                        String url = UrlFix.joinWithSlash(staticFilesUrlPrefix, dir, "{path}");
+                        RouteEndpoint endpoint = new DynamicServingRouteEndpoint(staticFilesUrlPrefix, dir, staticServing);
+                        setupConsumer.accept(url, endpoint);
+                    }),
+                    millis -> log.at(Level.FINE).log("Static files urls processed in %d ms", millis)
+                );
+            } else {
                 TimeIt.timeItOrDie(
                     () -> staticServing.iterateStaticFiles(path -> {
-                        String url = "%s%s".formatted(staticFilesUrlPrefix, path);
-                        setup.add(url, new StaticRouteEndpoint(path, staticServing));
-                        log.at(Level.FINE).log("Rule: %s -> %s", url, path);
+                        String url = UrlFix.joinWithSlash(staticFilesUrlPrefix, path);
+                        RouteEndpoint endpoint = new StaticRouteEndpoint(path, staticServing);
+                        setupConsumer.accept(url, endpoint);
                     }),
-                    millis -> log.at(Level.FINE).log("Static files processed in %d ms", millis)
+                    millis -> log.at(Level.FINE).log("Static files urls processed in %d ms", millis)
                 );
-            } catch (IOException e) {
-                throw new UrlConfigError("Failed to add static files to URL router", e);
             }
+        } catch (IOException e) {
+            throw new UrlConfigError("Failed to add static files to URL router", e);
         }
 
         String userContentUrlPrefix = settings.getProperty("url.user.content.prefix", "/content/");
-        String url = "%s{path}".formatted(userContentUrlPrefix);
-        DynamicServingRouteEndpoint endpoint = new DynamicServingRouteEndpoint(userContentUrlPrefix, userContentServing);
-        setup.add(url, endpoint);
-        log.at(Level.FINE).log("Rule: %s -> %s", url, LazyArgs.lazy(endpoint::describe));
+        String url = UrlFix.joinWithSlash(userContentUrlPrefix, "{*path}");
+        RouteEndpoint endpoint = new DynamicServingRouteEndpoint(userContentUrlPrefix, "", userContentServing);
+        setupConsumer.accept(url, endpoint);
 
         return setup.withParser(parser);
     }
