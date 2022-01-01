@@ -72,6 +72,6 @@ public class StaticServingIntegrationTest extends BaseHttpIntegrationTest {
         assertEquals("15406", response.headers().get(HttpConst.CONTENT_LENGTH));
         assertOneOf(response.headers().get(HttpConst.CONTENT_TYPE), ICON_MIME_TYPES);
         assertEquals("1e5d75d6", response.headers().get(HttpConst.ETAG));
-        assertNotNull(HttpCaching.DATE_FORMAT.parse(response.headers().get(HttpConst.LAST_MODIFIED)));
+        assertNotNull(response.headers().getTimeMillis(HttpConst.LAST_MODIFIED));
     }
 }

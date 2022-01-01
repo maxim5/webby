@@ -34,8 +34,7 @@ public class HttpCachingRequestProcessor {
         }
 
         long lastModifiedMillis = EasyFiles.getLastModifiedTime(path);
-        String ifModifiedSince = headers.get(HttpConst.IF_MODIFIED_SINCE);
-        if (ifModifiedSince != null && !HttpCaching.isModifiedSince(lastModifiedMillis, ifModifiedSince)) {
+        if (!HttpCaching.isModifiedSince(lastModifiedMillis, headers)) {
             return factory.newResponse304();
         }
 
@@ -50,8 +49,8 @@ public class HttpCachingRequestProcessor {
             return response;
         }
 
-        ByteBuf byteBuf = Unpooled.wrappedBuffer(EasyFiles.readFileToByteBuffer(path.toFile()));
-        if (!HttpCaching.isSimpleEtagChanged(byteBuf, headers.get(HttpConst.IF_NONE_MATCH))) {
+        ByteBuf byteBuf = Unpooled.wrappedBuffer(Files.readAllBytes(path));
+        if (!HttpCaching.isSimpleEtagChanged(byteBuf, headers)) {
             return factory.newResponse304();
         }
 
