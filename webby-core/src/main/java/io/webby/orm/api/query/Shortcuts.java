@@ -38,6 +38,14 @@ public class Shortcuts {
         return new Variable(timestamp, TermType.TIME);
     }
 
+    public static @NotNull BoolTerm lookupBy(@NotNull Column column, @NotNull Number variable) {
+        return CompareType.EQ.compare(column, var(variable));
+    }
+
+    public static @NotNull BoolTerm lookupBy(@NotNull Column column, @NotNull String variable) {
+        return CompareType.EQ.compare(column, var(variable));
+    }
+
     public static @NotNull Like like(@NotNull Term lhs, @NotNull Term rhs) {
         return new Like(lhs, rhs);
     }

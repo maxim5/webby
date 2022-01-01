@@ -5,6 +5,7 @@ import com.google.errorprone.annotations.CanIgnoreReturnValue;
 import com.google.errorprone.annotations.MustBeClosed;
 import io.webby.orm.api.query.*;
 import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 
 import java.util.List;
 import java.util.function.Consumer;
@@ -74,6 +75,12 @@ public interface BaseTable<E> extends Iterable<E> {
             return new Page<>(items, pageToken);
         }
         return new Page<>(items, null);
+    }
+
+    default @Nullable E getFirstMatchingOrNull(@NotNull Filter filter) {
+        try (ResultSetIterator<E> iterator = iterator(filter)) {
+            return iterator.hasNext() ? iterator.next() : null;
+        }
     }
 
     @CanIgnoreReturnValue
