@@ -170,6 +170,7 @@ public class NettyHttpHandler extends ChannelInboundHandlerAdapter {
             DefaultHttpRequestEx requestEx = interceptors.createRequest(request, channel, endpoint.context());
             HttpResponse intercepted = interceptors.enter(requestEx, endpoint);
             if (intercepted != null) {
+                interceptors.cleanup();  // consider try-finally?
                 return intercepted;
             }
             HttpResponse response = call(requestEx, match, endpoint);
