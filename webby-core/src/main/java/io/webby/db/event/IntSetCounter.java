@@ -23,20 +23,38 @@ public class IntSetCounter implements Persistable {
     }
 
     public int increment(int key, int eventId) {
+        assert eventId > 0 : "EventId unsupported: " + eventId;
         return update(key, eventId, 1);
     }
 
     public int decrement(int key, int eventId) {
+        assert eventId > 0 : "EventId unsupported: " + eventId;
         return update(key, -eventId, -1);
     }
 
     public int eventValue(int key, int eventId) {
-        LOCK.readLock().lock();
+        assert eventId > 0 : "EventId unsupported: " + eventId;
+        LOCK.writeLock().lock();
         try {
             IntHashSet events = getOrLoadAllEvents(key);
             return events.contains(eventId) ? 1 : events.contains(-eventId) ? -1 : 0;
         } finally {
-            LOCK.readLock().unlock();
+            LOCK.writeLock().unlock();
+        }
+    }
+
+    public @NotNull IntIntMap eventValues(@NotNull IntContainer keys, int eventId) {
+        assert eventId > 0 : "EventId unsupported: " + eventId;
+        LOCK.writeLock().lock();
+        try {
+            IntIntHashMap result = new IntIntHashMap(keys.size());
+            for (IntCursor cursor : keys) {
+                IntHashSet events = getOrLoadAllEvents(cursor.value);
+                result.put(cursor.value, events.contains(eventId) ? 1 : events.contains(-eventId) ? -1 : 0);
+            }
+            return result;
+        } finally {
+            LOCK.writeLock().unlock();
         }
     }
 
@@ -94,7 +112,6 @@ public class IntSetCounter implements Persistable {
     }
 
     private int update(int key, int eventId, int delta) {
-        assert eventId != 0 : "EventId unsupported: " + eventId;
         LOCK.writeLock().lock();
         try {
             IntHashSet events = getOrLoadAllEvents(key);
@@ -114,12 +131,7 @@ public class IntSetCounter implements Persistable {
         IntHashSet events = cache.get(key);
         if (events == null) {
             events = db.getOrDefault(key, new IntHashSet());
-            LOCK.writeLock().lock();
-            try {
-                cache.put(key, events);
-            } finally {
-                LOCK.writeLock().unlock();
-            }
+            cache.put(key, events);
         }
         return events;
     }
