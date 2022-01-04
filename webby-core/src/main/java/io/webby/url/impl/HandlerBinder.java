@@ -36,6 +36,7 @@ import java.util.logging.Level;
 import java.util.stream.Collectors;
 
 import static io.webby.url.HandlerConfigError.failIf;
+import static io.webby.util.reflect.EasyAnnotations.getOptionalAnnotation;
 
 public class HandlerBinder {
     private static final FluentLogger log = FluentLogger.forEnclosingClass();
@@ -171,31 +172,18 @@ public class HandlerBinder {
                     consumer.accept(binding);
                 };
 
-                if (method.isAnnotationPresent(GET.class)) {
-                    GET ann = method.getAnnotation(GET.class);
-                    sink.accept("GET", ann.url(), false);
-                }
-                if (method.isAnnotationPresent(POST.class)) {
-                    POST ann = method.getAnnotation(POST.class);
-                    sink.accept("POST", ann.url(), true);
-                }
-                if (method.isAnnotationPresent(PUT.class)) {
-                    PUT ann = method.getAnnotation(PUT.class);
-                    sink.accept("PUT", ann.url(), true);
-                }
-                if (method.isAnnotationPresent(DELETE.class)) {
-                    DELETE ann = method.getAnnotation(DELETE.class);
-                    sink.accept("DELETE", ann.url(), false);
-                }
-                if (method.isAnnotationPresent(Call.class)) {
-                    Call ann = method.getAnnotation(Call.class);
+                getOptionalAnnotation(method, GET.class).ifPresent(ann -> sink.accept("GET", ann.url(), false));
+                getOptionalAnnotation(method, POST.class).ifPresent(ann -> sink.accept("POST", ann.url(), true));
+                getOptionalAnnotation(method, PUT.class).ifPresent(ann -> sink.accept("PUT", ann.url(), true));
+                getOptionalAnnotation(method, DELETE.class).ifPresent(ann -> sink.accept("DELETE", ann.url(), false));
+                getOptionalAnnotation(method, Call.class).ifPresent(ann -> {
                     for (String type : ann.methods()) {
                         if (!type.equals(type.toUpperCase())) {
                             log.at(Level.WARNING).log("@Call http method is not upper-case: %s (at %s)", type, method);
                         }
                         sink.accept(type, ann.url(), true);
                     }
-                }
+                });
             }
         });
     }
@@ -322,26 +310,22 @@ public class HandlerBinder {
 
     @VisibleForTesting
     static @NotNull EndpointHttp getEndpointHttpFromAnnotation(@NotNull AnnotatedElement element) {
-        if (element.isAnnotationPresent(Http.class)) {
-            Http http = element.getAnnotation(Http.class);
+        return getOptionalAnnotation(element, Http.class).map(http -> {
             String contentType = http.contentType();
             List<Pair<String, String>> headers = Arrays.stream(http.headers())
                     .map(header -> Pair.of(header.name(), header.value()))
                     .toList();
             return new EndpointHttp(contentType, headers);
-        }
-        return EndpointHttp.EMPTY;
+        }).orElse(EndpointHttp.EMPTY);
     }
 
     @VisibleForTesting
     @Nullable EndpointView<?> getEndpointViewFromAnnotation(@NotNull AnnotatedElement element, @NotNull Render render) {
-        if (element.isAnnotationPresent(View.class)) {
-            View view = element.getAnnotation(View.class);
+        return getOptionalAnnotation(element, View.class).map(view -> {
             String templateName = view.template();
             Renderer<?> renderer = rendererFactory.getRenderer(render, templateName);
             return EndpointView.of(renderer, templateName);
-        }
-        return null;
+        }).orElse(null);
     }
 
     private static boolean isVoid(@NotNull Method method) {
