@@ -1,10 +1,7 @@
 package io.webby.auth.user;
 
 import org.jetbrains.annotations.NotNull;
-import org.jetbrains.annotations.Nullable;
 
-public interface UserStorage {
-    @Nullable UserModel findByUserId(int userId);
-
+public interface UserStore extends UserReadStore {
     int createUserAutoId(@NotNull UserModel user);
 }

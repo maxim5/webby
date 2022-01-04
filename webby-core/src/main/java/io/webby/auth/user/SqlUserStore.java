@@ -8,12 +8,22 @@ import org.jetbrains.annotations.Nullable;
 
 import static io.webby.util.base.EasyCast.castAny;
 
-public class SqlUserStorage implements UserStorage {
+public class SqlUserStore implements UserStore {
     private final TableInt<UserModel> table;
 
     @Inject
-    public SqlUserStorage(@NotNull TableManager manager, @NotNull Class<? extends UserModel> userClass) {
+    public SqlUserStore(@NotNull TableManager manager, @NotNull Class<? extends UserModel> userClass) {
         table = castAny(manager.getMatchingTableOrDie(UserModel.DB_NAME, Integer.class, userClass));
+    }
+
+    @Override
+    public int size() {
+        return table.count();
+    }
+
+    @Override
+    public @NotNull Iterable<? extends UserModel> fetchAllUsers() {
+        return table.fetchAll();
     }
 
     @Override
@@ -23,6 +33,7 @@ public class SqlUserStorage implements UserStorage {
 
     @Override
     public int createUserAutoId(@NotNull UserModel user) {
+        assert user.isAutoId() : "User is not auto-id: %s".formatted(user);
         int autoId = table.insertAutoIncPk(user);
         user.setIfAutoIdOrDie(autoId);
         return autoId;

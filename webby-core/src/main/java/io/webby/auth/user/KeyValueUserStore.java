@@ -11,17 +11,27 @@ import org.jetbrains.annotations.Nullable;
 
 import static io.webby.util.base.EasyCast.castAny;
 
-public class KeyValueUserStorage implements UserStorage {
+public class KeyValueUserStore implements UserStore {
     private final KeyValueDb<Integer, UserModel> db;
     private final IntIdGenerator generator;
 
     @Inject
-    public KeyValueUserStorage(@NotNull Settings settings,
-                               @NotNull Class<? extends UserModel> userClass,
-                               @NotNull KeyValueFactory dbFactory) {
+    public KeyValueUserStore(@NotNull Settings settings,
+                             @NotNull Class<? extends UserModel> userClass,
+                             @NotNull KeyValueFactory dbFactory) {
         boolean randomIds = settings.getBoolProperty("user.id.generator.random.enabled");
         db = castAny(dbFactory.getDb(DbOptions.of(UserModel.DB_NAME, Integer.class, userClass)));
         generator = randomIds ? IntIdGenerator.random(null) : IntIdGenerator.autoIncrement(() -> db.size() + 1);
+    }
+
+    @Override
+    public int size() {
+        return db.size();
+    }
+
+    @Override
+    public @NotNull Iterable<? extends UserModel> fetchAllUsers() {
+        return db.values();
     }
 
     @Override
@@ -31,6 +41,7 @@ public class KeyValueUserStorage implements UserStorage {
 
     @Override
     public int createUserAutoId(@NotNull UserModel user) {
+        assert user.isAutoId() : "User is not auto-id: %s".formatted(user);
         for (int i = 0; i < 5; i++) {
             user.resetIdToAuto();
             int userId = generator.nextId();

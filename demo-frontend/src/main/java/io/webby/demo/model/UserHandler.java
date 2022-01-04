@@ -12,11 +12,11 @@ import org.jetbrains.annotations.NotNull;
 
 @Serve
 public class UserHandler {
-    @Inject private SimpleUserManager userManager;
+    @Inject private UserStore users;
 
     @GET(url = "/user/{id}")
     public UserModel get(int userId) {
-        UserModel user = userManager.findByUserId(userId);
+        UserModel user = users.findByUserId(userId);
         if (user == null) {
             throw new NotFoundException("User not found");
         }
@@ -33,10 +33,10 @@ public class UserHandler {
         UserModel user = request.user();
         Session session = request.session();
         if (!session.hasUser()) {
-            int userId = userManager.createUserAutoId(DefaultUser.newAuto(UserAccess.Simple));
+            int userId = users.createUserAutoId(DefaultUser.newAuto(UserAccess.Simple));
             return userId;
         } else {
-            System.out.println(userManager.findByUserId(session.user()));
+            System.out.println(users.findByUserId(session.user()));
             return "already exists: " + user;
         }
     }
