@@ -275,7 +275,7 @@ public class KeyValueDbIntegrationTest {
         DbOptions<Long, DefaultUser> options = DbOptions.of("my-users", Long.class, DefaultUser.class);
         try (KeyValueDb<Long, DefaultUser> db = dbFactory.getDb(options)) {
             runMultiTest(db, Long.MIN_VALUE, Long.MAX_VALUE,
-                         TestingModels.newUserNow(777, UserAccess.Simple), TestingModels.newUserNow(0, UserAccess.Admin));
+                         TestingModels.newUserNow(777, UserAccess.Simple), TestingModels.newUserNow(0, UserAccess.SuperAdmin));
         }
     }
 

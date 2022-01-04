@@ -1,12 +1,13 @@
 package io.webby.auth.user;
 
 public record UserAccess(int level) {
-    private static final short MAX_LEVEL = Short.MAX_VALUE;
+    public static final int SimpleLevel = 1;
+    public static final int SuperAdminLevel = Short.MAX_VALUE;
 
-    public static final UserAccess Simple = new UserAccess(1);
-    public static final UserAccess Admin = new UserAccess(MAX_LEVEL);
+    public static final UserAccess Simple = new UserAccess(SimpleLevel);
+    public static final UserAccess SuperAdmin = new UserAccess(SuperAdminLevel);
 
     public UserAccess {
-        assert 1 <= level && level <= MAX_LEVEL : "Incorrect level: %s".formatted(level);
+        assert 1 <= level && level <= SuperAdminLevel : "Incorrect level: %s".formatted(level);
     }
 }

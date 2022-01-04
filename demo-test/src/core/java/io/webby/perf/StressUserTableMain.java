@@ -31,7 +31,7 @@ public class StressUserTableMain {
         Init<Integer, DefaultUser> init = initWorkers(connector);
         execWorkers(MEDIUM_WAIT, List.of(
             TableWorker.inserter(init, id -> new DefaultUser(id, Instant.now(), UserAccess.Simple)),
-            TableWorker.updater(init, id -> new DefaultUser(id, Instant.now(), UserAccess.Admin)),
+            TableWorker.updater(init, id -> new DefaultUser(id, Instant.now(), UserAccess.SuperAdmin)),
             TableWorker.deleter(init),
             TableWorker.reader(init),
             TableWorker.scanner(init.withSteps(0.00001))

@@ -145,6 +145,7 @@ public class HandlerBinder {
             Marshal classIn = getMarshalFromAnnotations(klass, defaultIn);
             Marshal classOut = getMarshalFromAnnotations(klass, defaultOut);
             EndpointHttp classHttp = getEndpointHttpFromAnnotation(klass);
+            int classAccess = getOptionalAnnotation(klass, Access.class).map(Access::value).orElse(Access.Public);
 
             for (Method method : klass.getDeclaredMethods()) {
                 Marshal in = method.getParameterCount() > 0 ?
@@ -153,6 +154,7 @@ public class HandlerBinder {
                 Marshal out = getMarshalFromAnnotations(method, classOut);
                 EndpointHttp http = getEndpointHttpFromAnnotation(method).mergeWithDefault(classHttp);
                 EndpointView<?> view = getEndpointViewFromAnnotation(method, classRender);
+                int access = getOptionalAnnotation(method, Access.class).map(Access::value).orElse(classAccess);
 
                 interface Sink {
                     void accept(String type, String url, boolean usuallyExpectsContent);
@@ -167,7 +169,7 @@ public class HandlerBinder {
                     method.setAccessible(true);
 
                     boolean expectsContent = usuallyExpectsContent && in != null;
-                    EndpointOptions options = new EndpointOptions(in, out, http, view, expectsContent);
+                    EndpointOptions options = new EndpointOptions(in, out, http, view, access, expectsContent);
                     Binding binding = new Binding(url, method, type, options);
                     consumer.accept(binding);
                 };

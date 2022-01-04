@@ -11,6 +11,7 @@ import io.webby.netty.intercept.attr.AttributeOwner;
 import io.webby.netty.intercept.attr.Attributes;
 import io.webby.netty.request.MutableHttpRequestEx;
 import io.webby.url.impl.Endpoint;
+import io.webby.url.impl.EndpointOptions;
 import org.jetbrains.annotations.NotNull;
 
 @AttributeOwner(position = Attributes.User)
@@ -19,14 +20,17 @@ public class AuthInterceptor implements AdvancedInterceptor {
 
     @Override
     public void enter(@NotNull MutableHttpRequestEx request, @NotNull Endpoint endpoint) throws ServeException {
-        if (endpoint.options().requiresAuth()) {
-            throw new UnauthorizedException("Endpoint requires authorization: %s".formatted(request.uri()));
-        }
-
+        UserModel user = null;
         Session session = request.session();
         if (session.hasUser()) {
-            UserModel user = users.findByUserId(session.user());
+            user = users.findByUserId(session.user());
             request.setNullableAttr(Attributes.User, user);
         }
+
+        EndpointOptions options = endpoint.options();
+        UnauthorizedException.failIf(user == null && options.requiresAuth(),
+                                     "Authorization required for url=`%s`", request.uri());
+        UnauthorizedException.failIf(user != null && options.access() > user.access().level(),
+                                     "Insufficient access level for url=`%s`, user=`%s`", request.uri(), user);
     }
 }
