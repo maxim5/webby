@@ -1,5 +1,7 @@
 package io.webby.util.base;
 
+import org.jetbrains.annotations.Nullable;
+
 import java.util.Arrays;
 
 public class EasyPrimitives {
@@ -68,5 +70,17 @@ public class EasyPrimitives {
             }
         }
         throw new IllegalArgumentException("All numbers are negative: %s".formatted(Arrays.toString(nums)));
+    }
+
+    public static int parseIntSafe(@Nullable CharSequence val, int def) {
+        try {
+            return val != null ? Integer.parseInt(val, 0, val.length(), 10) : def;
+        } catch (NumberFormatException ignore) {
+            return def;
+        }
+    }
+
+    public static int parseIntSafe(@Nullable CharSequence val) {
+        return parseIntSafe(val, 0);
     }
 }

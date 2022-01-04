@@ -11,6 +11,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.stream.IntStream;
 
 @CheckReturnValue
 public class EasyHppc {
@@ -55,9 +56,13 @@ public class EasyHppc {
         return result;
     }
 
-    public static <T> @NotNull Map<Integer, T> toJavaMap(@NotNull IntObjectHashMap<T> map) {
+    public static <T> @NotNull Map<Integer, T> toJavaMap(@NotNull IntObjectMap<T> map) {
         HashMap<Integer, T> result = new HashMap<>(map.size());
         map.forEach((IntObjectProcedure<T>) result::put);
         return result;
+    }
+
+    public static @NotNull IntArrayList collectFromIntStream(@NotNull IntStream stream) {
+        return stream.collect(IntArrayList::new, IntArrayList::add, IntArrayList::addAll);
     }
 }
