@@ -9,7 +9,7 @@ public interface Foreign<I, E> {
     @Nullable E getEntity();
 
     default boolean hasEntity() {
-        return getEntity() == null;
+        return getEntity() != null;
     }
 
     boolean setEntityIfMissing(@NotNull E entity);
