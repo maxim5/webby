@@ -22,9 +22,7 @@ public class AuthModule extends AbstractModule {
         bind(SessionManager.class).asEagerSingleton();
 
         boolean isSqlEnabled = settings.storageSettings().isSqlEnabled();
-        Class<? extends UserStore> store = isSqlEnabled ? SqlUserStore.class : KeyValueUserStore.class;
-        bind(UserReadStore.class).to(store).asEagerSingleton();
-        bind(UserStore.class).to(store).asEagerSingleton();
+        bind(UserStore.class).to(isSqlEnabled ? SqlUserStore.class : KeyValueUserStore.class).asEagerSingleton();
     }
 
     // TODO: detect user class automatically from settings/model setup?

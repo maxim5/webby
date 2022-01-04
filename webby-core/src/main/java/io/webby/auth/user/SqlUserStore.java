@@ -9,7 +9,7 @@ import org.jetbrains.annotations.Nullable;
 import static io.webby.util.base.EasyCast.castAny;
 
 public class SqlUserStore implements UserStore {
-    private final TableInt<UserModel> table;
+    protected final TableInt<UserModel> table;
 
     @Inject
     public SqlUserStore(@NotNull TableManager manager, @NotNull Class<? extends UserModel> userClass) {

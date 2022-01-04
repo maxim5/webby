@@ -12,8 +12,8 @@ import org.jetbrains.annotations.Nullable;
 import static io.webby.util.base.EasyCast.castAny;
 
 public class KeyValueUserStore implements UserStore {
-    private final KeyValueDb<Integer, UserModel> db;
-    private final IntIdGenerator generator;
+    protected final KeyValueDb<Integer, UserModel> db;
+    protected final IntIdGenerator generator;
 
     @Inject
     public KeyValueUserStore(@NotNull Settings settings,
