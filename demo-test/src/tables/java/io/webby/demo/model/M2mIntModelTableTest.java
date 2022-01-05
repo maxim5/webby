@@ -52,7 +52,7 @@ public class M2mIntModelTableTest
         DefaultUser[] entities = new DefaultUser[num];
         for (int i = 0; i < num; i++) {
             keys[i] = i + 1;
-            entities[i] = TestingSql.getOrInsert(users, TestingModels.newUserNowMillisFix(i + 1));
+            entities[i] = TestingSql.getOrInsert(users, TestingModels.newUserNowFixMillis(i + 1));
         }
         return Pair.of(keys, entities);
     }

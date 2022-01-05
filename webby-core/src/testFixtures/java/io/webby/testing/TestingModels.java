@@ -23,11 +23,11 @@ public class TestingModels {
         return newUser(userId, createdAt, UserAccess.Simple);
     }
 
-    public static @NotNull DefaultUser newUserNowMillisFix(int userId) {
-        return newUserMillisFix(userId, Instant.now());
+    public static @NotNull DefaultUser newUserNowFixMillis(int userId) {
+        return newUserFixMillis(userId, Instant.now());
     }
 
-    public static @NotNull DefaultUser newUserMillisFix(int userId, @NotNull Instant createdAt) {
+    public static @NotNull DefaultUser newUserFixMillis(int userId, @NotNull Instant createdAt) {
         return newUser(userId, createdAt.truncatedTo(ChronoUnit.MILLIS), UserAccess.Simple);
     }
 

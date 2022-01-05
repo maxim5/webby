@@ -11,9 +11,6 @@ import org.junit.jupiter.api.extension.RegisterExtension;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.EnumSource;
 
-import java.time.Instant;
-import java.time.temporal.ChronoUnit;
-
 import static io.webby.db.model.IntAutoIdModel.AUTO_ID;
 import static org.junit.jupiter.api.Assertions.*;
 
@@ -33,7 +30,7 @@ public class UserStoreIntegrationTest {
     @EnumSource(Scenario.class)
     public void create_one_user(Scenario scenario) {
         UserStore users = startup(scenario);
-        DefaultUser user = TestingModels.newUserNowMillisFix(AUTO_ID);
+        DefaultUser user = TestingModels.newUserNowFixMillis(AUTO_ID);
         int userId = users.createUserAutoId(user);
         assertEquals(userId, user.userId());
         assertTrue(userId > 0);
