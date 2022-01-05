@@ -8,6 +8,7 @@ import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
 import java.time.Instant;
+import java.time.temporal.ChronoUnit;
 
 public class TestingModels {
     public static @NotNull DefaultUser newUserNow(int userId) {
@@ -20,6 +21,14 @@ public class TestingModels {
 
     public static @NotNull DefaultUser newUser(int userId, @NotNull Instant createdAt) {
         return newUser(userId, createdAt, UserAccess.Simple);
+    }
+
+    public static @NotNull DefaultUser newUserNowMillisFix(int userId) {
+        return newUserMillisFix(userId, Instant.now());
+    }
+
+    public static @NotNull DefaultUser newUserMillisFix(int userId, @NotNull Instant createdAt) {
+        return newUser(userId, createdAt.truncatedTo(ChronoUnit.MILLIS), UserAccess.Simple);
     }
 
     public static @NotNull DefaultUser newUser(int userId, @NotNull Instant createdAt, @NotNull UserAccess access) {

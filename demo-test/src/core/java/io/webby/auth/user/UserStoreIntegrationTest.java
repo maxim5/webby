@@ -33,7 +33,7 @@ public class UserStoreIntegrationTest {
     @EnumSource(Scenario.class)
     public void create_one_user(Scenario scenario) {
         UserStore users = startup(scenario);
-        DefaultUser user = TestingModels.newUser(AUTO_ID, Instant.now().truncatedTo(ChronoUnit.MILLIS), UserAccess.Simple);
+        DefaultUser user = TestingModels.newUserNowMillisFix(AUTO_ID);
         int userId = users.createUserAutoId(user);
         assertEquals(userId, user.userId());
         assertTrue(userId > 0);
