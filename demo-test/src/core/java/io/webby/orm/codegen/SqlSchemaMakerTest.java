@@ -525,4 +525,28 @@ public class SqlSchemaMakerTest {
             )
             """);
     }
+
+    @Test
+    public void create_table_m2m_int_model() {
+        assertThat(makeCreateTableQuery(Engine.SQLite, M2mIntModelTable.class)).isEqualTo("""
+            CREATE TABLE IF NOT EXISTS m2m_int_model (
+                foo_id INTEGER,
+                bar_id INTEGER
+            )
+            """);
+
+        assertThat(makeCreateTableQuery(Engine.H2, M2mIntModelTable.class)).isEqualTo("""
+            CREATE TABLE IF NOT EXISTS m2m_int_model (
+                foo_id INTEGER,
+                bar_id INTEGER
+            )
+            """);
+
+        assertThat(makeCreateTableQuery(Engine.MySQL, M2mIntModelTable.class)).isEqualTo("""
+            CREATE TABLE IF NOT EXISTS m2m_int_model (
+                foo_id INTEGER,
+                bar_id INTEGER
+            )
+            """);
+    }
 }
