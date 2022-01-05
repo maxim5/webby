@@ -30,7 +30,7 @@ public class ForeignTableField extends TableField {
     }
 
     public boolean isForeignKey() {
-        return foreignTable != null;
+        return true;
     }
 
     public @NotNull TableArch getForeignTable() {

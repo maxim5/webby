@@ -6,6 +6,7 @@ import org.jetbrains.annotations.NotNull;
 import java.util.Map;
 import java.util.stream.Stream;
 
+import static io.webby.orm.codegen.JavaSupport.EMPTY_LINE;
 import static io.webby.orm.codegen.JavaSupport.INDENT1;
 
 @SuppressWarnings("UnusedReturnValue")
@@ -40,7 +41,7 @@ public abstract class BaseCodegen {
         for (Map.Entry<String, String> entry : context.entrySet()) {
             code = code.replace(entry.getKey(), entry.getValue());
         }
-        Stream<String> lines = code.lines();
+        Stream<String> lines = code.lines().filter(line -> !line.trim().equals(EMPTY_LINE));
         for (String line : (Iterable<String>) lines::iterator) {
             indent(indent).appendLine(line);
         }

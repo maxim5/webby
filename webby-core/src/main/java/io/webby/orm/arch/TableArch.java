@@ -17,6 +17,7 @@ import java.util.stream.Stream;
 
 import static io.webby.orm.api.ReadFollow.FOLLOW_ALL;
 import static io.webby.orm.api.ReadFollow.FOLLOW_ONE_LEVEL;
+import static io.webby.orm.arch.InvalidSqlModelException.create;
 
 @Immutable
 public final class TableArch implements JavaNameHolder, WithColumns, WithPrefixedColumns {
@@ -26,11 +27,16 @@ public final class TableArch implements JavaNameHolder, WithColumns, WithPrefixe
     private final String sqlName;
     private final String javaName;
     private final Class<?> modelClass;
+    private final M2mInfo m2mInfo;
 
-    public TableArch(@NotNull String sqlName, @NotNull String javaName, @NotNull Class<?> modelClass) {
+    public TableArch(@NotNull String sqlName,
+                     @NotNull String javaName,
+                     @NotNull Class<?> modelClass,
+                     @Nullable M2mInfo m2mInfo) {
         this.sqlName = sqlName;
         this.javaName = javaName;
         this.modelClass = modelClass;
+        this.m2mInfo = m2mInfo;
     }
 
     public @NotNull String sqlName() {
@@ -111,8 +117,53 @@ public final class TableArch implements JavaNameHolder, WithColumns, WithPrefixe
         return fields().stream().flatMap(field -> field.columns().stream().map(column -> Pair.of(field, column))).toList();
     }
 
+    public boolean isM2M() {
+        return m2mInfo != null;
+    }
+
+    public @NotNull ForeignTableField m2mLeftFieldOrDie() {
+        assert m2mInfo != null : "Internal error. Many-to-many not available for table: " + this;
+        String leftName = m2mInfo.leftField();
+        Stream<ForeignTableField> stream = foreignFields(FOLLOW_ONE_LEVEL).stream();
+        if (leftName != null) {
+            return stream.filter(field -> field.javaName().equals(leftName)).findFirst().orElseThrow(() ->
+                create("Many-to-many left foreign-key field `%s` not found in model `%s`", leftName, describeModel())
+            );
+        } else {
+            return stream.findFirst().orElseThrow(() ->
+                create("Many-to-many right foreign-key field not found in model `%s`", describeModel())
+            );
+        }
+    }
+
+    public @NotNull ForeignTableField m2mRightFieldOrDie() {
+        assert m2mInfo != null : "Internal error. Many-to-many not available for table: " + this;
+        String rightName = m2mInfo.rightField();
+        Stream<ForeignTableField> stream = foreignFields(FOLLOW_ONE_LEVEL).stream();
+        if (rightName != null) {
+            return stream.filter(field -> field.javaName().equals(rightName)).findFirst().orElseThrow(() ->
+                create("Many-to-many right foreign-key field `%s` not found in model `%s`", rightName, describeModel())
+            );
+        } else {
+            return stream.skip(1).findFirst().orElseThrow(() ->
+                create("Many-to-many right foreign-key field not found in model `%s`", describeModel())
+            );
+        }
+    }
+
+    private @NotNull String describeModel() {
+        return modelClass.getSimpleName();
+    }
+
     /*package*/ void initializeOrDie(@NotNull ImmutableList<TableField> fields) {
         fieldsRef.initializeOrDie(fields);
+    }
+
+    /*package*/ void validate() {
+        if (isM2M()) {
+            m2mLeftFieldOrDie();
+            m2mRightFieldOrDie();
+        }
     }
 
     @Override

@@ -8,7 +8,7 @@ import static java.util.Objects.requireNonNull;
 public class AssertModelIdMaker {
     public static @NotNull Snippet makeAssert(@NotNull String param, @NotNull TableArch table) {
         if (!table.isPrimaryKeyInt() && !table.isPrimaryKeyLong()) {
-            return new Snippet().withLine("// No MySQL assert since PK is not integer");
+            return new Snippet().withLine(JavaSupport.EMPTY_LINE);
         }
         String pattern = """
             assert !(%s.%s() == 0 && engine() == Engine.MySQL) :

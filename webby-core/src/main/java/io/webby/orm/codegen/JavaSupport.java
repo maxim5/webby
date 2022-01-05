@@ -7,6 +7,8 @@ class JavaSupport {
     public static final String INDENT2 = "        ";
     public static final String INDENT3 = "            ";
 
+    public static final String EMPTY_LINE = "/* EMPTY */";
+
     public static @NotNull Snippet wrapAsStringLiteral(@NotNull Snippet snippet) {
         if (snippet.linesNumber() <= 1) {
             return new Snippet().withFormattedLine("\"%s\"", snippet.join());

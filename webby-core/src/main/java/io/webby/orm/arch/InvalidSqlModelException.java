@@ -27,4 +27,8 @@ public class InvalidSqlModelException extends AppConfigException {
             throw new InvalidSqlModelException(message, args);
         }
     }
+
+    public static @NotNull InvalidSqlModelException create(@NotNull String message, @Nullable Object @NotNull ... args) {
+        return new InvalidSqlModelException(message, args);
+    }
 }
