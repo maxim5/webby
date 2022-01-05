@@ -204,7 +204,7 @@ public class ModelTableCodegen extends BaseCodegen {
             "$left_table_decl", leftTable.map("protected final %s leftsTable;"::formatted).orElse(EMPTY_LINE),
             "$right_table_decl", rightTable.map("protected final %s rightsTable;"::formatted).orElse(EMPTY_LINE),
             "$left_table_init", leftTable.map("this.leftsTable = new %s(connector, follow);"::formatted).orElse(EMPTY_LINE),
-            "$right_table_init", leftTable.map("this.rightsTable = new %s(connector, follow);"::formatted).orElse(EMPTY_LINE)
+            "$right_table_init", rightTable.map("this.rightsTable = new %s(connector, follow);"::formatted).orElse(EMPTY_LINE)
         );
 
         appendCode("""
@@ -786,25 +786,25 @@ public class ModelTableCodegen extends BaseCodegen {
         appendCode("""
         @Override
         public int countRights(@Nonnull $left_index_wrap leftIndex) {
-            String sql = "$right_pk_sql IN (SELECT $right_fk_sql FROM $left_table_sql WHERE $left_fk_sql = ?)";
+            String sql = "$right_pk_sql IN (SELECT $right_fk_sql FROM $table_sql WHERE $left_fk_sql = ?)";
             return rightsTable.count(Where.hardcoded(sql, List.of(leftIndex)));
         }
         
         @Override
         public @Nonnull ResultSetIterator<$right_entity> iterateRights(@Nonnull $left_index_wrap leftIndex) {
-            String sql = "$right_pk_sql IN (SELECT $right_fk_sql FROM $left_table_sql WHERE $left_fk_sql = ?)";
+            String sql = "$right_pk_sql IN (SELECT $right_fk_sql FROM $table_sql WHERE $left_fk_sql = ?)";
             return rightsTable.iterator(Where.hardcoded(sql, List.of(leftIndex)));
         }
         
         @Override
         public int countLefts(@Nonnull $right_index_wrap rightIndex) {
-            String sql = "$left_pk_sql IN (SELECT $left_fk_sql FROM $right_table_sql WHERE $right_fk_sql = ?)";
+            String sql = "$left_pk_sql IN (SELECT $left_fk_sql FROM $table_sql WHERE $right_fk_sql = ?)";
             return leftsTable.count(Where.hardcoded(sql, List.of(rightIndex)));
         }
         
         @Override
         public @Nonnull ResultSetIterator<$left_entity> iterateLefts(@Nonnull $right_index_wrap rightIndex) {
-            String sql = "$left_pk_sql IN (SELECT $left_fk_sql FROM $right_table_sql WHERE $right_fk_sql = ?)";
+            String sql = "$left_pk_sql IN (SELECT $left_fk_sql FROM $table_sql WHERE $right_fk_sql = ?)";
             return leftsTable.iterator(Where.hardcoded(sql, List.of(rightIndex)));
         }\n
         """, EasyMaps.merge(mainContext, context));
