@@ -4,6 +4,7 @@ import com.google.common.collect.ImmutableMap;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
+import java.util.Arrays;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
@@ -12,7 +13,7 @@ import static io.webby.util.base.EasyCast.castAny;
 
 public class EasyMaps {
     public static <K, V> @NotNull LinkedHashMap<K, V> asMap(@Nullable Object @NotNull ... items) {
-        return asMap(List.of(items));
+        return asMap(Arrays.asList(items));
     }
 
     public static <K, V> @NotNull LinkedHashMap<K, V> asMap(@NotNull List<?> items) {
