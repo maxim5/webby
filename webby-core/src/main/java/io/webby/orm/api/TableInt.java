@@ -16,6 +16,13 @@ public interface TableInt<E> extends TableObj<Integer, E> {
     @Override
     @NotNull TableInt<E> withReferenceFollowOnRead(@NotNull ReadFollow follow);
 
+    boolean exists(int key);
+
+    @Override
+    default boolean exists(@NotNull Integer key) {
+        return exists(key.intValue());
+    }
+
     @Nullable E getByPkOrNull(int key);
 
     default @NotNull E getByPkOrDie(int key) {

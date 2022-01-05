@@ -16,6 +16,13 @@ public interface TableLong<E> extends TableObj<Long, E> {
     @Override
     @NotNull TableLong<E> withReferenceFollowOnRead(@NotNull ReadFollow follow);
 
+    boolean exists(long key);
+
+    @Override
+    default boolean exists(@NotNull Long key) {
+        return exists(key.longValue());
+    }
+
     @Nullable E getByPkOrNull(long key);
 
     default @NotNull E getByPkOrDie(long key) {

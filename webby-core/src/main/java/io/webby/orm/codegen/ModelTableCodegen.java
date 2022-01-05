@@ -69,6 +69,7 @@ public class ModelTableCodegen extends BaseCodegen {
 
         selectConstants();
 
+        existsByPk();
         getByPk();
         getBatchByPk();
         fetchPks();
@@ -321,6 +322,31 @@ public class ModelTableCodegen extends BaseCodegen {
         $constants
         };\n
         """, EasyMaps.asMap("$constants", constants));
+    }
+
+    private void existsByPk() {
+        if (!table.hasPrimaryKeyField()) {
+            return;
+        }
+
+        Snippet where = new Snippet().withLines(WhereMaker.makeForPrimaryColumns(table));
+        Map<String, String> context = EasyMaps.asMap(
+            "$sql_where_literal", wrapAsStringLiteral(where, INDENT2),
+            "$pk_object", toKeyObject(requireNonNull(table.primaryKeyField()), "$pk_name")
+        );
+
+        appendCode("""
+        @Override
+        public boolean exists($pk_annotation$pk_type $pk_name) {
+            String query = "SELECT EXISTS (SELECT * FROM $table_sql " + $sql_where_literal + " LIMIT 1)";
+            try (PreparedStatement statement = runner().prepareQuery(query, $pk_object);
+                 ResultSet result = statement.executeQuery()) {
+                return result.next() && result.getBoolean(1);
+            } catch (SQLException e) {
+                throw new QueryException("Failed to check exists in $TableClass", query, $pk_name, e);
+            }
+        }\n
+        """, EasyMaps.merge(context, mainContext, pkContext));
     }
 
     private void getByPk() {

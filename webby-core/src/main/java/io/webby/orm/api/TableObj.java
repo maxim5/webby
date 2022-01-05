@@ -15,6 +15,8 @@ public interface TableObj<K, E> extends BaseTable<E> {
     @Override
     @NotNull TableObj<K, E> withReferenceFollowOnRead(@NotNull ReadFollow follow);
 
+    boolean exists(@NotNull K key);
+
     @Nullable E getByPkOrNull(@NotNull K key);
 
     default @NotNull E getByPkOrDie(@NotNull K key) {
