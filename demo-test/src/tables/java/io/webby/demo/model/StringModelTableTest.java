@@ -12,7 +12,7 @@ import static io.webby.testing.TestingUtil.array;
 
 public class StringModelTableTest extends SqlDbTableTest<StringModel, StringModelTable>
         implements PrimaryKeyTableTest<String, StringModel, StringModelTable>,
-        MaliciousTableTest<String, StringModel, StringModelTable> {
+                   MaliciousTableTest<String, StringModel, StringModelTable> {
     @Override
     protected void setUp(@NotNull Connector connector) throws Exception {
         table = new StringModelTable(connector);

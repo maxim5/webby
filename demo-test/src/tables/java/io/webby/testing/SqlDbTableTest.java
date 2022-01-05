@@ -3,7 +3,6 @@ package io.webby.testing;
 import io.webby.orm.api.BaseTable;
 import io.webby.orm.api.Connector;
 import io.webby.orm.api.debug.DebugSql;
-import io.webby.orm.api.TableObj;
 import io.webby.testing.ext.SqlDbSetupExtension;
 import org.jetbrains.annotations.NotNull;
 import org.junit.jupiter.api.BeforeEach;

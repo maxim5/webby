@@ -7,12 +7,12 @@ import org.jetbrains.annotations.Nullable;
 import java.util.Arrays;
 
 public class TestingUtil {
-    @SuppressWarnings("unchecked")
+    @SafeVarargs
     public static <T> T[] array(@Nullable T @NotNull... items) {
         return items;
     }
 
-    @SuppressWarnings("unchecked")
+    @SafeVarargs
     public static <T> @NotNull T[] appendVarArg(@Nullable T arg, @Nullable T @NotNull ... args) {
         T[] result = Arrays.copyOf(args, args.length + 1);
         result[args.length] = arg;
