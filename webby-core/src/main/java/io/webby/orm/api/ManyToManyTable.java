@@ -8,6 +8,16 @@ import java.util.List;
 import java.util.function.Consumer;
 
 public interface ManyToManyTable<IL, EL, IR, ER> {
+    boolean exists(@NotNull IL leftIndex, @NotNull IR rightIndex);
+
+    default boolean leftExists(@NotNull IL leftIndex) {
+        return countRights(leftIndex) == 0;
+    }
+
+    default boolean rightExists(@NotNull IR rightIndex) {
+        return countLefts(rightIndex) == 0;
+    }
+
     int countRights(@NotNull IL leftIndex);
 
     @MustBeClosed
