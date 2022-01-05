@@ -1,5 +1,6 @@
 package io.webby.testing;
 
+import io.webby.orm.api.BaseTable;
 import io.webby.orm.api.Connector;
 import io.webby.orm.api.debug.DebugSql;
 import io.webby.orm.api.TableObj;
@@ -18,7 +19,7 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 
 @Tag("sql")
-public abstract class SqlDbTableTest<K, E, T extends TableObj<K, E>> implements BaseTableTest<E, T> {
+public abstract class SqlDbTableTest<E, T extends BaseTable<E>> implements BaseTableTest<E, T> {
     @RegisterExtension private final SqlDbSetupExtension SQL_DB = SqlDbSetupExtension.fromProperties();
 
     protected T table;

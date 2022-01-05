@@ -11,7 +11,7 @@ import java.time.Instant;
 import java.time.temporal.ChronoUnit;
 
 public class SessionTableTest
-        extends SqlDbTableTest<Long, Session, SessionTable>
+        extends SqlDbTableTest<Session, SessionTable>
         implements TableLongTest<Session, SessionTable> {
     @Override
     protected void setUp(@NotNull Connector connector) throws Exception {

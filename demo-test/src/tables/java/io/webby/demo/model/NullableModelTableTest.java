@@ -10,7 +10,7 @@ import org.jetbrains.annotations.NotNull;
 import static io.webby.testing.TestingUtil.array;
 
 public class NullableModelTableTest
-        extends SqlDbTableTest<String, NullableModel, NullableModelTable>
+        extends SqlDbTableTest<NullableModel, NullableModelTable>
         implements PrimaryKeyTableTest<String, NullableModel, NullableModelTable>,
                    MaliciousTableTest<String, NullableModel, NullableModelTable> {
     @Override

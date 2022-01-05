@@ -9,7 +9,7 @@ import org.jetbrains.annotations.NotNull;
 import static io.webby.testing.TestingUtil.array;
 
 public class EnumModelTableTest
-        extends SqlDbTableTest<EnumModel.Foo, EnumModel, EnumModelTable>
+        extends SqlDbTableTest<EnumModel, EnumModelTable>
         implements PrimaryKeyTableTest<EnumModel.Foo, EnumModel, EnumModelTable> {
     @Override
     protected void setUp(@NotNull Connector connector) throws Exception {

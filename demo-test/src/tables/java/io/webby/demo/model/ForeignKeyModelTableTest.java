@@ -8,7 +8,7 @@ import io.webby.testing.TableLongTest;
 import org.jetbrains.annotations.NotNull;
 
 public class ForeignKeyModelTableTest
-        extends SqlDbTableTest<Long, ForeignKeyModel, ForeignKeyModelTable>
+        extends SqlDbTableTest<ForeignKeyModel, ForeignKeyModelTable>
         implements TableLongTest<ForeignKeyModel, ForeignKeyModelTable>,
         ForeignKeyTableTest<Long, ForeignKeyModel, ForeignKeyModelTable> {
     @Override

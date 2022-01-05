@@ -9,7 +9,7 @@ import org.jetbrains.annotations.NotNull;
 import static io.webby.testing.TestingUtil.array;
 
 public class WrappersModelTableTest
-        extends SqlDbTableTest<Integer, WrappersModel, WrappersModelTable>
+        extends SqlDbTableTest<WrappersModel, WrappersModelTable>
         implements PrimaryKeyTableTest<Integer, WrappersModel, WrappersModelTable> {
     @Override
     protected void setUp(@NotNull Connector connector) throws Exception {

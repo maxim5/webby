@@ -10,7 +10,7 @@ import java.time.Instant;
 import java.time.temporal.ChronoUnit;
 
 public class UserTableTest
-        extends SqlDbTableTest<Integer, DefaultUser, UserTable>
+        extends SqlDbTableTest<DefaultUser, UserTable>
         implements TableIntTest<DefaultUser, UserTable> {
     @Override
     protected void setUp(@NotNull Connector connector) throws Exception {

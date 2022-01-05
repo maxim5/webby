@@ -12,7 +12,7 @@ import static io.webby.testing.TestingUtil.array;
 import static org.junit.jupiter.api.Assumptions.assumeTrue;
 
 public class BlobKvTableTest
-        extends SqlDbTableTest<byte[], BlobKv, BlobKvTable>
+        extends SqlDbTableTest<BlobKv, BlobKvTable>
         implements PrimaryKeyTableTest<byte[], BlobKv, BlobKvTable> {
     @Override
     protected void setUp(@NotNull Connector connector) throws Exception {

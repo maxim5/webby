@@ -7,7 +7,7 @@ import io.webby.testing.TableLongTest;
 import org.jetbrains.annotations.NotNull;
 
 public class NestedModelTableTest
-        extends SqlDbTableTest<Long, NestedModel, NestedModelTable>
+        extends SqlDbTableTest<NestedModel, NestedModelTable>
         implements TableLongTest<NestedModel, NestedModelTable> {
     @Override
     protected void setUp(@NotNull Connector connector) throws Exception {

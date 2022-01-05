@@ -7,7 +7,7 @@ import io.webby.testing.TableIntTest;
 import org.jetbrains.annotations.NotNull;
 
 public class InheritedModelTableTest
-        extends SqlDbTableTest<Integer, InheritedModel, InheritedModelTable>
+        extends SqlDbTableTest<InheritedModel, InheritedModelTable>
         implements TableIntTest<InheritedModel, InheritedModelTable> {
     @Override
     protected void setUp(@NotNull Connector connector) throws Exception {

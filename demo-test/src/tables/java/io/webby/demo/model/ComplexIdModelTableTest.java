@@ -9,7 +9,7 @@ import org.jetbrains.annotations.NotNull;
 import static io.webby.testing.TestingUtil.array;
 
 public class ComplexIdModelTableTest
-        extends SqlDbTableTest<ComplexIdModel.Key, ComplexIdModel, ComplexIdModelTable>
+        extends SqlDbTableTest<ComplexIdModel, ComplexIdModelTable>
         implements PrimaryKeyTableTest<ComplexIdModel.Key, ComplexIdModel, ComplexIdModelTable> {
     @Override
     protected void setUp(@NotNull Connector connector) throws Exception {

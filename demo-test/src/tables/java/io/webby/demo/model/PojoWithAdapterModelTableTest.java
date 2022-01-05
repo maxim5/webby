@@ -7,7 +7,7 @@ import io.webby.testing.SqlDbTableTest;
 import org.jetbrains.annotations.NotNull;
 
 public class PojoWithAdapterModelTableTest
-        extends SqlDbTableTest<Integer, PojoWithAdapterModel, PojoWithAdapterModelTable>
+        extends SqlDbTableTest<PojoWithAdapterModel, PojoWithAdapterModelTable>
         implements TableIntTest<PojoWithAdapterModel, PojoWithAdapterModelTable> {
     @Override
     protected void setUp(@NotNull Connector connector) throws Exception {

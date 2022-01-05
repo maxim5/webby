@@ -15,7 +15,7 @@ import java.time.temporal.ChronoUnit;
 import static io.webby.testing.TestingUtil.array;
 
 public class TimingModelTableTest
-        extends SqlDbTableTest<Timestamp, TimingModel, TimingModelTable>
+        extends SqlDbTableTest<TimingModel, TimingModelTable>
         implements PrimaryKeyTableTest<Timestamp, TimingModel, TimingModelTable> {
     @Override
     protected void setUp(@NotNull Connector connector) throws Exception {

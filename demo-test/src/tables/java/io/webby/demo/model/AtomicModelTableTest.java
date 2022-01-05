@@ -11,7 +11,7 @@ import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.atomic.AtomicLong;
 
 public class AtomicModelTableTest
-        extends SqlDbTableTest<Integer, AtomicModel, AtomicModelTable>
+        extends SqlDbTableTest<AtomicModel, AtomicModelTable>
         implements TableIntTest<AtomicModel, AtomicModelTable> {
     @Override
     protected void setUp(@NotNull Connector connector) throws Exception {

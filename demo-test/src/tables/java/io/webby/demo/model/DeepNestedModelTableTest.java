@@ -11,7 +11,7 @@ import io.webby.testing.TableIntTest;
 import org.jetbrains.annotations.NotNull;
 
 public class DeepNestedModelTableTest
-        extends SqlDbTableTest<Integer, DeepNestedModel, DeepNestedModelTable>
+        extends SqlDbTableTest<DeepNestedModel, DeepNestedModelTable>
         implements TableIntTest<DeepNestedModel, DeepNestedModelTable> {
     @Override
     protected void setUp(@NotNull Connector connector) throws Exception {
