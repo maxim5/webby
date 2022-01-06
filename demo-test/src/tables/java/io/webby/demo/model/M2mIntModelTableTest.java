@@ -13,6 +13,7 @@ import io.webby.util.collect.Pair;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.List;
+import java.util.stream.IntStream;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
@@ -25,8 +26,8 @@ public class M2mIntModelTableTest
     protected void setUp(@NotNull Connector connector) throws Exception {
         table = new M2mIntModelTable(connector);
         users = new UserTable(connector);
-        connector().runner().runUpdate(SqlSchemaMaker.makeCreateTableQuery(table.engine(), M2mIntModelTable.class));
-        connector().runner().runUpdate(SqlSchemaMaker.makeCreateTableQuery(users.engine(), UserTable.class));
+        connector().runner().runUpdate(SqlSchemaMaker.makeCreateTableQuery(table));
+        connector().runner().runUpdate(SqlSchemaMaker.makeCreateTableQuery(users));
     }
 
     @Override
@@ -48,12 +49,10 @@ public class M2mIntModelTableTest
     }
 
     private @NotNull Pair<Integer[], DefaultUser[]> insertUsers(int num) {
-        Integer[] keys = new Integer[num];
-        DefaultUser[] entities = new DefaultUser[num];
-        for (int i = 0; i < num; i++) {
-            keys[i] = i + 1;
-            entities[i] = TestingSql.getOrInsert(users, TestingModels.newUserNowFixMillis(i + 1));
-        }
+        Integer[] keys = IntStream.range(1, num + 1).boxed().toArray(Integer[]::new);
+        DefaultUser[] entities = IntStream.range(1, num + 1)
+            .mapToObj(i -> TestingSql.getOrInsert(users, TestingModels.newUserNowFixMillis(i)))
+            .toArray(DefaultUser[]::new);
         return Pair.of(keys, entities);
     }
 }

@@ -35,7 +35,9 @@ public class ExamplesCodegenMain {
         ModelInput.of(ForeignKeyModel.InnerString.class),
         ModelInput.of(ForeignKeyModel.class),
 
-        ModelInput.of(M2mIntModel.class)
+        ModelInput.of(M2mIntModel.class),
+        ModelInput.of(M2mLongModel.class),
+        ModelInput.of(M2mIntLongModel.class)
     );
 
     public static void main(String[] args) throws Exception {
