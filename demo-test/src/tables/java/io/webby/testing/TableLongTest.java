@@ -49,7 +49,7 @@ public interface TableLongTest<E, T extends TableLong<E>> extends PrimaryKeyTabl
         entity = copyEntityWithId(entity, autoId);
 
         assertTableCount(1);
-        assertEquals(entity, table().getByPkOrNull(autoId));
+        assertTableContains(autoId, entity);
         assertThat(table().fetchAll()).containsExactly(entity);
     }
 
@@ -63,8 +63,8 @@ public interface TableLongTest<E, T extends TableLong<E>> extends PrimaryKeyTabl
         entity = copyEntityWithId(entity, autoId);
 
         assertTableCount(1);
-        assertEquals(entity, table().getByPkOrNull(autoId));
-        assertNull(table().getByPkOrNull(key));
+        assertTableContains(autoId, entity);
+        assertTableNotContains(key);
         assertThat(table().fetchAll()).containsExactly(entity);
     }
 
@@ -83,7 +83,7 @@ public interface TableLongTest<E, T extends TableLong<E>> extends PrimaryKeyTabl
         assertThat(table().fetchAll()).containsExactlyElementsIn(entities.values());
 
         for (Map.Entry<Long, E> entry : entities.entrySet()) {
-            assertEquals(entry.getValue(), table().getByPkOrNull(entry.getKey()));
+            assertTableContains(entry.getKey(), entry.getValue());
         }
     }
 
@@ -97,8 +97,8 @@ public interface TableLongTest<E, T extends TableLong<E>> extends PrimaryKeyTabl
         assertEquals(1, table().updateWhere(entity, where));
 
         assertTableCount(1);
-        assertEquals(entity, table().getByPkOrNull(keys()[0]));
-        assertNull(table().getByPkOrNull(keys()[1]));
+        assertTableContains(keys()[0], entity);
+        assertTableNotContains(keys()[1]);
         assertThat(table().fetchAll()).containsExactly(entity);
     }
 

@@ -15,13 +15,13 @@ public interface ForeignKeyTableTest<K, E, T extends TableObj<K, E>> extends Pri
         TableObj<K, E> table = table().withReferenceFollowOnRead(NO_FOLLOW);
 
         assertTableCount(0);
-        assertNull(table.getByPkOrNull(keys()[0]));
+        assertTableNotContains(keys()[0]);
         assertThat(table.fetchAll()).isEmpty();
 
         E shallow = createEntity(keys()[0]);
         assertEquals(1, table.insert(shallow));
         assertTableCount(1);
-        assertEquals(shallow, table.getByPkOrNull(keys()[0]));
+        assertTableContains(keys()[0], shallow);
         assertThat(table.fetchAll()).containsExactly(shallow);
 
         enrichOneLevel(shallow);
@@ -35,7 +35,7 @@ public interface ForeignKeyTableTest<K, E, T extends TableObj<K, E>> extends Pri
         TableObj<K, E> table = table().withReferenceFollowOnRead(FOLLOW_ONE_LEVEL);
 
         assertTableCount(0);
-        assertNull(table.getByPkOrNull(keys()[0]));
+        assertTableNotContains(keys()[0]);
         assertThat(table.fetchAll()).isEmpty();
 
         E shallow = createEntity(keys()[0]);
@@ -53,7 +53,7 @@ public interface ForeignKeyTableTest<K, E, T extends TableObj<K, E>> extends Pri
         TableObj<K, E> table = table().withReferenceFollowOnRead(FOLLOW_ALL);
 
         assertTableCount(0);
-        assertNull(table.getByPkOrNull(keys()[0]));
+        assertTableNotContains(keys()[0]);
         assertThat(table.fetchAll()).isEmpty();
 
         E shallow = createEntity(keys()[0]);

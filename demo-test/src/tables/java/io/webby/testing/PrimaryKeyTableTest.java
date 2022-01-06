@@ -16,7 +16,7 @@ import java.util.Arrays;
 import java.util.List;
 
 import static com.google.common.truth.Truth.assertThat;
-import static io.webby.testing.AssertBasics.assertMapContents;
+import static io.webby.testing.AssertBasics.*;
 import static org.junit.jupiter.api.Assertions.*;
 import static org.junit.jupiter.api.Assumptions.assumeTrue;
 
@@ -28,8 +28,7 @@ public interface PrimaryKeyTableTest<K, E, T extends TableObj<K, E>> extends Bas
     default void empty() {
         assumeKeys(1);
         assertTableCount(0);
-        assertFalse(table().exists(keys()[0]));
-        assertNull(table().getByPkOrNull(keys()[0]));
+        assertTableNotContains(keys()[0]);
         assertThat(table().fetchAll()).isEmpty();
     }
 
@@ -56,10 +55,8 @@ public interface PrimaryKeyTableTest<K, E, T extends TableObj<K, E>> extends Bas
         assertEquals(1, table().insert(entity));
 
         assertTableCount(1);
-        assertTrue(table().exists(keys()[0]));
-        assertEquals(entity, table().getByPkOrNull(keys()[0]));
-        assertFalse(table().exists(keys()[1]));
-        assertNull(table().getByPkOrNull(keys()[1]));
+        assertTableContains(keys()[0], entity);
+        assertTableNotContains(keys()[1]);
         assertThat(table().fetchAll()).containsExactly(entity);
     }
 
@@ -72,10 +69,8 @@ public interface PrimaryKeyTableTest<K, E, T extends TableObj<K, E>> extends Bas
         assertEquals(1, table().insert(entity2));
 
         assertTableCount(2);
-        assertTrue(table().exists(keys()[0]));
-        assertTrue(table().exists(keys()[1]));
-        assertEquals(entity1, table().getByPkOrNull(keys()[0]));
-        assertEquals(entity2, table().getByPkOrNull(keys()[1]));
+        assertTableContains(keys()[0], entity1);
+        assertTableContains(keys()[1], entity2);
         assertThat(table().fetchAll()).containsExactly(entity1, entity2);
     }
 
@@ -94,10 +89,8 @@ public interface PrimaryKeyTableTest<K, E, T extends TableObj<K, E>> extends Bas
         assertEquals(0, table().insertIgnore(entity));
 
         assertTableCount(1);
-        assertTrue(table().exists(keys()[0]));
-        assertEquals(entity, table().getByPkOrNull(keys()[0]));
-        assertFalse(table().exists(keys()[1]));
-        assertNull(table().getByPkOrNull(keys()[1]));
+        assertTableContains(keys()[0], entity);
+        assertTableNotContains(keys()[1]);
         assertThat(table().fetchAll()).containsExactly(entity);
     }
 
@@ -109,8 +102,8 @@ public interface PrimaryKeyTableTest<K, E, T extends TableObj<K, E>> extends Bas
         assertEquals(1, table().updateByPk(entity));
 
         assertTableCount(1);
-        assertEquals(entity, table().getByPkOrNull(keys()[0]));
-        assertNull(table().getByPkOrNull(keys()[1]));
+        assertTableContains(keys()[0], entity);
+        assertTableNotContains(keys()[1]);
         assertThat(table().fetchAll()).containsExactly(entity);
     }
 
@@ -121,7 +114,7 @@ public interface PrimaryKeyTableTest<K, E, T extends TableObj<K, E>> extends Bas
         assertEquals(0, table().updateByPk(entity));
 
         assertTableCount(0);
-        assertNull(table().getByPkOrNull(keys()[0]));
+        assertTableNotContains(keys()[0]);
         assertThat(table().fetchAll()).isEmpty();
     }
 
@@ -132,8 +125,8 @@ public interface PrimaryKeyTableTest<K, E, T extends TableObj<K, E>> extends Bas
         assertEquals(1, table().updateByPkOrInsert(entity));
 
         assertTableCount(1);
-        assertEquals(entity, table().getByPkOrNull(keys()[0]));
-        assertNull(table().getByPkOrNull(keys()[1]));
+        assertTableContains(keys()[0], entity);
+        assertTableNotContains(keys()[1]);
         assertThat(table().fetchAll()).containsExactly(entity);
     }
 
@@ -145,8 +138,8 @@ public interface PrimaryKeyTableTest<K, E, T extends TableObj<K, E>> extends Bas
         assertEquals(1, table().updateByPkOrInsert(entity));
 
         assertTableCount(1);
-        assertEquals(entity, table().getByPkOrNull(keys()[0]));
-        assertNull(table().getByPkOrNull(keys()[1]));
+        assertTableContains(keys()[0], entity);
+        assertTableNotContains(keys()[1]);
         assertThat(table().fetchAll()).containsExactly(entity);
     }
 
@@ -160,8 +153,8 @@ public interface PrimaryKeyTableTest<K, E, T extends TableObj<K, E>> extends Bas
         assertEquals(1, table().updateWhere(newEntity, Where.of(Shortcuts.TRUE)));
 
         assertTableCount(1);
-        assertEquals(newEntity, table().getByPkOrNull(keys()[0]));
-        assertNull(table().getByPkOrNull(keys()[1]));
+        assertTableContains(keys()[0], newEntity);
+        assertTableNotContains(keys()[1]);
         assertThat(table().fetchAll()).containsExactly(newEntity);
     }
 
@@ -175,8 +168,8 @@ public interface PrimaryKeyTableTest<K, E, T extends TableObj<K, E>> extends Bas
         assertEquals(0, table().updateWhere(newEntity, Where.of(Shortcuts.FALSE)));
 
         assertTableCount(1);
-        assertEquals(entity, table().getByPkOrNull(keys()[0]));
-        assertNull(table().getByPkOrNull(keys()[1]));
+        assertTableContains(keys()[0], entity);
+        assertTableNotContains(keys()[1]);
         assertThat(table().fetchAll()).containsExactly(entity);
     }
 
@@ -187,7 +180,7 @@ public interface PrimaryKeyTableTest<K, E, T extends TableObj<K, E>> extends Bas
         assertEquals(1, table().deleteByPk(keys()[0]));
 
         assertTableCount(0);
-        assertNull(table().getByPkOrNull(keys()[0]));
+        assertTableNotContains(keys()[0]);
         assertThat(table().fetchAll()).isEmpty();
     }
 
@@ -197,7 +190,7 @@ public interface PrimaryKeyTableTest<K, E, T extends TableObj<K, E>> extends Bas
         assertEquals(0, table().deleteByPk(keys()[0]));
 
         assertTableCount(0);
-        assertNull(table().getByPkOrNull(keys()[0]));
+        assertTableNotContains(keys()[0]);
         assertThat(table().fetchAll()).isEmpty();
     }
 
@@ -208,7 +201,7 @@ public interface PrimaryKeyTableTest<K, E, T extends TableObj<K, E>> extends Bas
         assertEquals(1, table().deleteWhere(Where.of(Shortcuts.TRUE)));
 
         assertTableCount(0);
-        assertNull(table().getByPkOrNull(keys()[0]));
+        assertTableNotContains(keys()[0]);
         assertThat(table().fetchAll()).isEmpty();
     }
 
@@ -220,7 +213,8 @@ public interface PrimaryKeyTableTest<K, E, T extends TableObj<K, E>> extends Bas
         assertEquals(0, table().deleteWhere(Where.of(Shortcuts.FALSE)));
 
         assertTableCount(1);
-        assertEquals(entity, table().getByPkOrNull(keys()[0]));
+        assertTableContains(keys()[0], entity);
+        assertTableNotContains(keys()[1]);
         assertThat(table().fetchAll()).containsExactly(entity);
     }
 
@@ -275,6 +269,20 @@ public interface PrimaryKeyTableTest<K, E, T extends TableObj<K, E>> extends Bas
 
         assertEquals(0, table().count(Where.hardcoded("0 = 1", List.of())));
         assertFalse(table().exists(Where.hardcoded("0 = 1", List.of())));
+    }
+
+    default void assertTableContains(@NotNull K key, @NotNull E entity) {
+        assertTrue(table().exists(key));
+        assertEquals(entity, table().getByPkOrNull(key));
+        assertEquals(entity, table().getByPkOrDie(key));
+        assertPresent(table().getOptionalByPk(key), entity);
+    }
+
+    default void assertTableNotContains(@NotNull K key) {
+        assertFalse(table().exists(key));
+        assertNull(table().getByPkOrNull(key));
+        assertThrows(RuntimeException.class, () -> table().getByPkOrDie(key));
+        assertEmpty(table().getOptionalByPk(key));
     }
 
     default @NotNull String findPkColumnOrDie() {
