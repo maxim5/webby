@@ -35,19 +35,27 @@ public class TestingModels {
         return new DefaultUser(userId, createdAt, access);
     }
 
-    public static @NotNull Session newSessionNow() {
-        return newSession(Instant.now());
+    public static @NotNull Session newSessionNow(long sessionId) {
+        return newSession(sessionId, Instant.now());
     }
 
-    public static @NotNull Session newSessionWithoutIp() {
-        return newSession(Instant.now(), null);
+    public static @NotNull Session newSessionNowFixMillis(long sessionId) {
+        return newSessionFixMillis(sessionId, Instant.now());
     }
 
-    public static @NotNull Session newSession(@NotNull Instant instant) {
-        return newSession(instant, "127.0.0.1");
+    public static @NotNull Session newSessionNowWithoutIp(long sessionId) {
+        return newSession(sessionId, Instant.now(), null);
     }
 
-    public static @NotNull Session newSession(@NotNull Instant instant, @Nullable String ipAddress) {
-        return new Session(123, ForeignInt.ofId(Session.NO_USER_ID), instant, "User-Agent", ipAddress);
+    public static @NotNull Session newSession(long sessionId, @NotNull Instant instant) {
+        return newSession(sessionId, instant, "127.0.0.1");
+    }
+
+    public static @NotNull Session newSessionFixMillis(long sessionId, @NotNull Instant instant) {
+        return newSession(sessionId, instant.truncatedTo(ChronoUnit.MILLIS), "127.0.0.1");
+    }
+
+    public static @NotNull Session newSession(long sessionId, @NotNull Instant instant, @Nullable String ipAddress) {
+        return new Session(sessionId, ForeignInt.ofId(Session.NO_USER_ID), instant, "User-Agent", ipAddress);
     }
 }
