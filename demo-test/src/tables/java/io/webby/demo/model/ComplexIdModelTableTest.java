@@ -7,6 +7,7 @@ import io.webby.testing.SqlDbTableTest;
 import org.jetbrains.annotations.NotNull;
 
 import static io.webby.testing.TestingUtil.array;
+import static org.junit.jupiter.api.Assumptions.assumeTrue;
 
 public class ComplexIdModelTableTest
         extends SqlDbTableTest<ComplexIdModel, ComplexIdModelTable>
@@ -25,5 +26,10 @@ public class ComplexIdModelTableTest
     @Override
     public @NotNull ComplexIdModel createEntity(ComplexIdModel.@NotNull Key key, int version) {
         return new ComplexIdModel(key, version);
+    }
+
+    @Override
+    public void insert_ignore() {
+        assumeTrue(false, "Complex ids are not unique, hence allow duplicate inserts");
     }
 }

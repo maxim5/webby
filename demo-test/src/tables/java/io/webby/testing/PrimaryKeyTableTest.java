@@ -1,5 +1,6 @@
 package io.webby.testing;
 
+import io.webby.orm.api.Engine;
 import io.webby.orm.api.Page;
 import io.webby.orm.api.TableMeta;
 import io.webby.orm.api.TableObj;
@@ -76,6 +77,28 @@ public interface PrimaryKeyTableTest<K, E, T extends TableObj<K, E>> extends Bas
         assertEquals(entity1, table().getByPkOrNull(keys()[0]));
         assertEquals(entity2, table().getByPkOrNull(keys()[1]));
         assertThat(table().fetchAll()).containsExactly(entity1, entity2);
+    }
+
+    @Test
+    default void insert_ignore() {
+        // Ways to make it work in H2:
+        // 1) URL: ";MODE=MYSQL"
+        // 2) table().runner().runUpdate("SET MODE MYSQL")
+        //
+        // https://stackoverflow.com/questions/42364935/how-to-add-the-mode-mysql-to-embedded-h2-db-in-spring-boot-1-4-1-for-datajpates
+        assumeOneOfEngines(Engine.SQLite, Engine.MySQL);
+
+        assumeKeys(2);
+        E entity = createEntity(keys()[0]);
+        assertEquals(1, table().insert(entity));
+        assertEquals(0, table().insertIgnore(entity));
+
+        assertTableCount(1);
+        assertTrue(table().exists(keys()[0]));
+        assertEquals(entity, table().getByPkOrNull(keys()[0]));
+        assertFalse(table().exists(keys()[1]));
+        assertNull(table().getByPkOrNull(keys()[1]));
+        assertThat(table().fetchAll()).containsExactly(entity);
     }
 
     @Test

@@ -87,6 +87,9 @@ public interface BaseTable<E> extends Iterable<E> {
     int insert(@NotNull E entity);
 
     @CanIgnoreReturnValue
+    int insertIgnore(@NotNull E entity);
+
+    @CanIgnoreReturnValue
     int updateWhere(@NotNull E entity, @NotNull Where where);
 
     @CanIgnoreReturnValue

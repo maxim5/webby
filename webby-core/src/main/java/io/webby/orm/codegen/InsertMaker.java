@@ -10,13 +10,36 @@ import java.util.stream.Stream;
 import static io.webby.orm.codegen.Joining.COMMA_JOINER;
 
 class InsertMaker {
-    public static @NotNull Snippet makeAll(@NotNull TableArch table) {
+    private final Ignore ignore;
+
+    public InsertMaker(@NotNull Ignore ignore) {
+        this.ignore = ignore;
+    }
+
+    public @NotNull Snippet makeAll(@NotNull TableArch table) {
         return make(table, table.columns());
     }
 
-    public static @NotNull Snippet make(@NotNull TableArch table, @NotNull List<Column> columns) {
+    public @NotNull Snippet make(@NotNull TableArch table, @NotNull List<Column> columns) {
          return new Snippet()
-                 .withLine("INSERT INTO ", table.sqlName(), " (", columns.stream().map(Column::sqlName).collect(COMMA_JOINER), ")")
-                 .withLine("VALUES (", Stream.generate(() -> "?").limit(columns.size()).collect(COMMA_JOINER), ")");
+             .withLine("INSERT", ignore.value(), " INTO ", table.sqlName(),
+                       " (", columns.stream().map(Column::sqlName).collect(COMMA_JOINER), ")")
+             .withLine("VALUES (", Stream.generate(() -> "?").limit(columns.size()).collect(COMMA_JOINER), ")");
+    }
+
+    enum Ignore {
+        DEFAULT(""),
+        IGNORE(" IGNORE"),
+        OR_IGNORE(" OR IGNORE");
+
+        private final String value;
+
+        Ignore(String value) {
+            this.value = value;
+        }
+
+        public String value() {
+            return value;
+        }
     }
 }

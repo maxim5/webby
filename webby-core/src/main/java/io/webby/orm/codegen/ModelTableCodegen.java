@@ -77,6 +77,7 @@ public class ModelTableCodegen extends BaseCodegen {
         iterator();
 
         insert();
+        insertIgnore();
         valuesForInsert();
         insertAutoIncPk();
         valuesForInsertAutoIncPk();
@@ -556,7 +557,7 @@ public class ModelTableCodegen extends BaseCodegen {
     }
 
     private void insert() {
-        Snippet query = InsertMaker.makeAll(table);
+        Snippet query = new InsertMaker(InsertMaker.Ignore.DEFAULT).makeAll(table);
         Map<String, String> context = Map.of(
             "$model_id_assert", AssertModelIdMaker.makeAssert("$model_param", table).join(),
             "$sql_query_literal", wrapAsStringLiteral(query, INDENT2)
@@ -572,6 +573,32 @@ public class ModelTableCodegen extends BaseCodegen {
             } catch (SQLException e) {
                 throw new QueryException("Failed to insert entity into $TableClass", query, $model_param, e);
             }
+        }\n
+        """, EasyMaps.merge(context, mainContext));
+    }
+
+    private void insertIgnore() {
+        Map<String, String> context = Map.of(
+            "$model_id_assert", AssertModelIdMaker.makeAssert("$model_param", table).join(),
+            "$sql_query_literal1", wrapAsStringLiteral(new InsertMaker(InsertMaker.Ignore.IGNORE).makeAll(table), INDENT3),
+            "$sql_query_literal2", wrapAsStringLiteral(new InsertMaker(InsertMaker.Ignore.OR_IGNORE).makeAll(table), INDENT3)
+        );
+
+        appendCode("""
+        @Override
+        public int insertIgnore(@Nonnull $ModelClass $model_param) {
+            $model_id_assert
+            String query = switch (engine()) {
+                case MySQL, H2 -> $sql_query_literal1;
+                case SQLite -> $sql_query_literal2;
+                default -> throw new UnsupportedOperationException(
+                    "Insert-ignore unsupported for %s. Use insert() inside try-catch block".formatted(engine()));
+            };
+            try {
+                return runner().runUpdate(query, valuesForInsert($model_param));
+            } catch (SQLException e) {
+                throw new QueryException("Failed to insert entity into $TableClass", query, $model_param, e);
+           }
         }\n
         """, EasyMaps.merge(context, mainContext));
     }
@@ -599,7 +626,8 @@ public class ModelTableCodegen extends BaseCodegen {
             return;
         }
 
-        Snippet query = InsertMaker.make(table, table.columns(Predicate.not(TableField::isPrimaryKey)));
+        Snippet query = new InsertMaker(InsertMaker.Ignore.DEFAULT)
+            .make(table, table.columns(Predicate.not(TableField::isPrimaryKey)));
         Map<String, String> context = Map.of(
             "$sql_query_literal", wrapAsStringLiteral(query, INDENT2)
         );
