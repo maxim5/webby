@@ -6,9 +6,11 @@ import io.webby.orm.api.Foreign;
 import io.webby.orm.api.ForeignInt;
 import io.webby.orm.api.ForeignLong;
 import io.webby.orm.api.ForeignObj;
+import io.webby.orm.api.annotate.Sql;
 import io.webby.orm.codegen.ModelAdaptersScanner;
 import io.webby.orm.codegen.ModelInput;
 import io.webby.util.collect.Pair;
+import io.webby.util.reflect.EasyAnnotations;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import org.jetbrains.annotations.VisibleForTesting;
@@ -80,7 +82,7 @@ public class ArchFactory {
     @VisibleForTesting
     @NotNull TableField buildTableField(@NotNull TableArch table, @NotNull Field field, @NotNull ModelInput input) {
         Method getter = JavaClassAnalyzer.findGetterMethodOrDie(field);
-        boolean isPrimaryKey = isPrimaryKeyField(field.getName(), input);
+        boolean isPrimaryKey = isPrimaryKeyField(field, input);
 
         FieldInference inference = inferFieldArch(field);
         if (inference.isForeignTable()) {
@@ -242,11 +244,13 @@ public class ArchFactory {
         return new PojoArch(type, pojoFields);
     }
 
-    private static boolean isPrimaryKeyField(@NotNull String fieldName, @NotNull ModelInput input) {
+    private static boolean isPrimaryKeyField(@NotNull Field field, @NotNull ModelInput input) {
+        String fieldName = field.getName();
         return fieldName.equals("id") ||
                fieldName.equals(Naming.idJavaName(input.javaModelName())) ||
                fieldName.equals(Naming.idJavaName(input.modelClass())) ||
-               (input.modelInterface() != null && fieldName.equals(Naming.idJavaName(input.modelInterface())));
+               (input.modelInterface() != null && fieldName.equals(Naming.idJavaName(input.modelInterface()))) ||
+               EasyAnnotations.getOptionalAnnotation(field, Sql.class).map(Sql::primary).orElse(false);
     }
 
     private static void validateFieldForPojo(@NotNull Field field) {

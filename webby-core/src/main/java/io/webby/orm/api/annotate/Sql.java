@@ -9,4 +9,6 @@ import java.lang.annotation.Target;
 @Target({ElementType.FIELD, ElementType.PARAMETER})
 public @interface Sql {
     String value() default "";
+
+    boolean primary() default false;
 }
