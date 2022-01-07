@@ -5,6 +5,7 @@ import org.jetbrains.annotations.NotNull;
 public record FileExt(@NotNull String extension) {
     public static final FileExt EMPTY = new FileExt("");
     public static final FileExt IMAGE_PNG = new FileExt(".png");
+    public static final FileExt IMAGE_JPG = new FileExt(".jpg");
 
     public static @NotNull FileExt fromName(@NotNull String name, boolean forceLower) {
         int lastDot = name.lastIndexOf('.');
