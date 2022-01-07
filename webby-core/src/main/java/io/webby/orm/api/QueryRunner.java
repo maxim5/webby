@@ -39,6 +39,24 @@ public class QueryRunner {
 
     // Run SelectQuery
 
+    public int runAndGetInt(@NotNull SelectQuery query, int def) {
+        try (PreparedStatement statement = prepareQuery(query);
+             ResultSet resultSet = statement.executeQuery()) {
+            return resultSet.next() ? resultSet.getInt(1) : def;
+        } catch (SQLException e) {
+            throw new QueryException("Failed to execute select query", query.repr(), query.args(), e);
+        }
+    }
+
+    public long runAndGetLong(@NotNull SelectQuery query, long def) {
+        try (PreparedStatement statement = prepareQuery(query);
+             ResultSet resultSet = statement.executeQuery()) {
+            return resultSet.next() ? resultSet.getLong(1) : def;
+        } catch (SQLException e) {
+            throw new QueryException("Failed to execute select query", query.repr(), query.args(), e);
+        }
+    }
+
     public void run(@NotNull SelectQuery query,
                     @NotNull ThrowConsumer<ResultSet, SQLException> resultsConsumer) {
         try (PreparedStatement statement = prepareQuery(query);

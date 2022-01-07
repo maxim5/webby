@@ -10,7 +10,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 import static com.google.common.truth.Truth.assertThat;
-import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.*;
 
 public interface ManyToManyTableTest
         <IL, EL, IR, ER, E, T extends BaseTable<E> & ManyToManyTable<IL, EL, IR, ER>>
@@ -82,6 +82,21 @@ public interface ManyToManyTableTest
         assertLefts(rightKey[1]);
         assertRights(leftKey[0], rightVal[0]);
         assertRights(leftKey[1]);
+    }
+
+    @Test
+    default void exists_2x2() {
+        IL[] leftKey = prepareLefts(2).first();
+        IR[] rightKey = prepareRights(2).first();
+        prepareRelations(List.of(
+            Pair.of(leftKey[0], rightKey[0]),
+            Pair.of(leftKey[1], rightKey[1])
+        ));
+
+        assertTrue(table().exists(leftKey[0], rightKey[0]));
+        assertTrue(table().exists(leftKey[1], rightKey[1]));
+        assertFalse(table().exists(leftKey[0], rightKey[1]));
+        assertFalse(table().exists(leftKey[1], rightKey[0]));
     }
 
     @SafeVarargs

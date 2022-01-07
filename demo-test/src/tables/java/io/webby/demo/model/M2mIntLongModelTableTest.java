@@ -62,8 +62,8 @@ public class M2mIntLongModelTableTest
     private @NotNull Pair<Integer[], DefaultUser[]> insertUsers(int num) {
         Integer[] keys = IntStream.range(1, num + 1).boxed().toArray(Integer[]::new);
         DefaultUser[] entities = IntStream.range(1, num + 1)
-                .mapToObj(i -> TestingSql.getOrInsert(users, TestingModels.newUserNowFixMillis(i)))
-                .toArray(DefaultUser[]::new);
+            .mapToObj(i -> TestingSql.getOrInsert(users, TestingModels.newUserNowFixMillis(i)))
+            .toArray(DefaultUser[]::new);
         return Pair.of(keys, entities);
     }
 
