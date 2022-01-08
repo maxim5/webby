@@ -2,6 +2,7 @@ package io.webby.orm.arch;
 
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
+import com.google.common.collect.Streams;
 import io.webby.orm.api.Foreign;
 import io.webby.orm.api.ForeignInt;
 import io.webby.orm.api.ForeignLong;
@@ -19,10 +20,7 @@ import java.lang.reflect.Field;
 import java.lang.reflect.Method;
 import java.lang.reflect.ParameterizedType;
 import java.lang.reflect.Type;
-import java.util.Collection;
-import java.util.LinkedHashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 import static io.webby.orm.arch.InvalidSqlModelException.assure;
 import static io.webby.orm.arch.InvalidSqlModelException.failIf;
@@ -188,11 +186,32 @@ public class ArchFactory {
         TableArch foreignTable = tables.get(entityType);
         failIf(foreignTable == null,
                "Foreign model `%s` referenced from `%s` model is missing in the input set for table generation",
-               entityType.getSimpleName(), fieldType.getSimpleName());
-        assure(foreignTable.hasPrimaryKeyField(),
-               "Foreign model `%s` does not have a primary key. Expected key type: `%s`",
-               entityType.getSimpleName(), keyType);
-        Class<?> primaryKeyType = requireNonNull(foreignTable.primaryKeyField()).javaType();
+               entityType.getSimpleName(), field.getDeclaringClass().getSimpleName());
+
+        Class<?> primaryKeyType;
+        if (foreignTable.isInitialized()) {
+            assure(foreignTable.hasPrimaryKeyField(),
+                   "Foreign model `%s` does not have a primary key. Expected key type: `%s`",
+                   entityType.getSimpleName(), keyType);
+            primaryKeyType = requireNonNull(foreignTable.primaryKeyField()).javaType();
+        } else {
+            // A hacky way to get the PK field for a foreign model that hasn't been built yet.
+            // Essentially, this duplicates the work of `buildTableField` above.
+            // In theory, should work for dependency cycles.
+            Class<?> foreignModelClass = field.getDeclaringClass();
+            ModelInput foreignInput = Streams.stream(inputs)
+                    .filter(input -> input.modelClass().equals(foreignModelClass))
+                    .findFirst()
+                    .orElseThrow();
+            Optional<Field> foreignPrimaryKeyField = JavaClassAnalyzer.getAllFieldsOrdered(foreignModelClass).stream()
+                    .filter(f -> isPrimaryKeyField(f, foreignInput))
+                    .findFirst();
+            assure(foreignPrimaryKeyField.isPresent(),
+                   "Foreign model `%s` does not have a primary key. Expected key type: `%s`",
+                   entityType.getSimpleName(), keyType);
+            primaryKeyType = foreignPrimaryKeyField.get().getType();
+        }
+
         assure(primaryKeyType == keyType,
                "Foreign model `%s` primary key `%s` does match the foreign key",
                entityType.getSimpleName(), primaryKeyType, keyType);
