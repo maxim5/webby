@@ -155,6 +155,10 @@ public final class TableArch implements JavaNameHolder, WithColumns, WithPrefixe
         return modelClass.getSimpleName();
     }
 
+    /*package*/ boolean isInitialized() {
+        return fieldsRef.isInitialized();
+    }
+
     /*package*/ void initializeOrDie(@NotNull ImmutableList<TableField> fields) {
         fieldsRef.initializeOrDie(fields);
     }
@@ -170,16 +174,18 @@ public final class TableArch implements JavaNameHolder, WithColumns, WithPrefixe
     public boolean equals(Object obj) {
         return obj instanceof TableArch that &&
                Objects.equals(sqlName, that.sqlName) && Objects.equals(javaName, that.javaName) &&
-               Objects.equals(modelClass, that.modelClass) && Objects.equals(fieldsRef, that.fieldsRef);
+               Objects.equals(modelClass, that.modelClass) && Objects.equals(m2mInfo, that.m2mInfo) &&
+               Objects.equals(fieldsRef, that.fieldsRef);
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(sqlName, javaName, modelClass, fieldsRef);
+        return Objects.hash(sqlName, javaName, modelClass, m2mInfo, fieldsRef);
     }
 
     @Override
     public String toString() {
-        return "TableArch[sqlName=%s, javaName=%s, modelClass=%s]".formatted(sqlName, javaName, modelClass);
+        return "TableArch[sqlName=%s, javaName=%s, modelClass=%s, m2mInfo=%s]"
+                .formatted(sqlName, javaName, modelClass, m2mInfo);
     }
 }
