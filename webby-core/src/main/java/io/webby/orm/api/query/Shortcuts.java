@@ -3,6 +3,7 @@ package io.webby.orm.api.query;
 import org.jetbrains.annotations.NotNull;
 
 import java.sql.Timestamp;
+import java.util.List;
 
 public class Shortcuts {
     public static final Term NULL = new HardcodedTerm("NULL", TermType.WILDCARD);
@@ -44,6 +45,14 @@ public class Shortcuts {
 
     public static @NotNull BoolTerm lookupBy(@NotNull Column column, @NotNull String variable) {
         return CompareType.EQ.compare(column, var(variable));
+    }
+
+    public static @NotNull IsIn isIn(@NotNull Term lhs, @NotNull Term @NotNull ... terms) {
+        return new IsIn(lhs, List.of(terms));
+    }
+
+    public static @NotNull IsIn isIn(@NotNull Term lhs, @NotNull List<Term> terms) {
+        return new IsIn(lhs, terms);
     }
 
     public static @NotNull Like like(@NotNull Term lhs, @NotNull Term rhs) {
