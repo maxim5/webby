@@ -12,6 +12,7 @@ import io.webby.util.collect.EasyIterables;
 import org.jetbrains.annotations.NotNull;
 import org.junit.jupiter.api.Test;
 
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
@@ -57,7 +58,7 @@ public interface PrimaryKeyTableTest<K, E, T extends TableObj<K, E>> extends Bas
         assertTableCount(1);
         assertTableContains(keys()[0], entity);
         assertTableNotContains(keys()[1]);
-        assertThat(table().fetchAll()).containsExactly(entity);
+        assertTableAll(entity);
     }
 
     @Test
@@ -71,7 +72,7 @@ public interface PrimaryKeyTableTest<K, E, T extends TableObj<K, E>> extends Bas
         assertTableCount(2);
         assertTableContains(keys()[0], entity1);
         assertTableContains(keys()[1], entity2);
-        assertThat(table().fetchAll()).containsExactly(entity1, entity2);
+        assertTableAll(entity1, entity2);
     }
 
     @Test
@@ -91,7 +92,7 @@ public interface PrimaryKeyTableTest<K, E, T extends TableObj<K, E>> extends Bas
         assertTableCount(1);
         assertTableContains(keys()[0], entity);
         assertTableNotContains(keys()[1]);
-        assertThat(table().fetchAll()).containsExactly(entity);
+        assertTableAll(entity);
     }
 
     @Test
@@ -104,7 +105,7 @@ public interface PrimaryKeyTableTest<K, E, T extends TableObj<K, E>> extends Bas
         assertTableCount(1);
         assertTableContains(keys()[0], entity);
         assertTableNotContains(keys()[1]);
-        assertThat(table().fetchAll()).containsExactly(entity);
+        assertTableAll(entity);
     }
 
     @Test
@@ -127,7 +128,7 @@ public interface PrimaryKeyTableTest<K, E, T extends TableObj<K, E>> extends Bas
         assertTableCount(1);
         assertTableContains(keys()[0], entity);
         assertTableNotContains(keys()[1]);
-        assertThat(table().fetchAll()).containsExactly(entity);
+        assertTableAll(entity);
     }
 
     @Test
@@ -140,7 +141,7 @@ public interface PrimaryKeyTableTest<K, E, T extends TableObj<K, E>> extends Bas
         assertTableCount(1);
         assertTableContains(keys()[0], entity);
         assertTableNotContains(keys()[1]);
-        assertThat(table().fetchAll()).containsExactly(entity);
+        assertTableAll(entity);
     }
 
     @Test
@@ -155,7 +156,7 @@ public interface PrimaryKeyTableTest<K, E, T extends TableObj<K, E>> extends Bas
         assertTableCount(1);
         assertTableContains(keys()[0], newEntity);
         assertTableNotContains(keys()[1]);
-        assertThat(table().fetchAll()).containsExactly(newEntity);
+        assertTableAll(newEntity);
     }
 
     @Test
@@ -170,7 +171,7 @@ public interface PrimaryKeyTableTest<K, E, T extends TableObj<K, E>> extends Bas
         assertTableCount(1);
         assertTableContains(keys()[0], entity);
         assertTableNotContains(keys()[1]);
-        assertThat(table().fetchAll()).containsExactly(entity);
+        assertTableAll(entity);
     }
 
     @Test
@@ -215,7 +216,7 @@ public interface PrimaryKeyTableTest<K, E, T extends TableObj<K, E>> extends Bas
         assertTableCount(1);
         assertTableContains(keys()[0], entity);
         assertTableNotContains(keys()[1]);
-        assertThat(table().fetchAll()).containsExactly(entity);
+        assertTableAll(entity);
     }
 
     @Test
@@ -283,6 +284,14 @@ public interface PrimaryKeyTableTest<K, E, T extends TableObj<K, E>> extends Bas
         assertNull(table().getByPkOrNull(key));
         assertThrows(RuntimeException.class, () -> table().getByPkOrDie(key));
         assertEmpty(table().getOptionalByPk(key));
+    }
+
+    @SafeVarargs
+    private void assertTableAll(@NotNull E... entities) {
+        List<E> each = new ArrayList<>();
+        table().forEach(each::add);
+        assertThat(each).containsExactlyElementsIn(entities);
+        assertThat(table().fetchAll()).containsExactlyElementsIn(entities);
     }
 
     default @NotNull String findPkColumnOrDie() {
