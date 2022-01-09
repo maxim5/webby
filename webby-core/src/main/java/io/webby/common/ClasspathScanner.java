@@ -6,7 +6,7 @@ import com.google.common.flogger.FluentLogger;
 import com.google.common.reflect.ClassPath;
 import com.google.inject.Inject;
 import io.webby.app.ClassFilter;
-import io.webby.util.base.Rethrow;
+import io.webby.util.base.Unchecked;
 import io.webby.util.base.TimeIt;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.VisibleForTesting;
@@ -77,7 +77,7 @@ public class ClasspathScanner {
             try {
                 return current != null ? current : ClassPath.from(ClassLoader.getSystemClassLoader());
             } catch (Exception e) {
-                return Rethrow.rethrow(e);
+                return Unchecked.rethrow(e);
             }
         });
     }

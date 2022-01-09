@@ -16,7 +16,7 @@ import java.sql.SQLException;
 import java.util.List;
 import java.util.logging.Level;
 
-import static io.webby.util.base.Rethrow.rethrow;
+import static io.webby.util.base.Unchecked.rethrow;
 
 public class DDL {
     private static final FluentLogger log = FluentLogger.forEnclosingClass();

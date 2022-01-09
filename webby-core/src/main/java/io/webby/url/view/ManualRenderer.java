@@ -3,7 +3,7 @@ package io.webby.url.view;
 import com.google.inject.Inject;
 import io.webby.app.Settings;
 import io.webby.url.annotate.Render;
-import io.webby.util.base.Rethrow;
+import io.webby.util.base.Unchecked;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.Map;
@@ -22,7 +22,7 @@ public class ManualRenderer {
             Value value = getCachedValue(render, templateName);
             return value.renderer.renderToString(castAny(value.template), model);
         } catch (Exception e) {
-            return Rethrow.rethrow(e);
+            return Unchecked.rethrow(e);
         }
     }
 
@@ -31,7 +31,7 @@ public class ManualRenderer {
             Value value = getCachedValue(render, templateName);
             return value.renderer.renderToBytes(castAny(value.template), model);
         } catch (Exception e) {
-            return Rethrow.rethrow(e);
+            return Unchecked.rethrow(e);
         }
     }
 

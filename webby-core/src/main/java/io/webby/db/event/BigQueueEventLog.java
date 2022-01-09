@@ -2,7 +2,7 @@ package io.webby.db.event;
 
 import com.leansoft.bigqueue.IBigQueue;
 import io.webby.db.codec.Codec;
-import io.webby.util.base.Rethrow;
+import io.webby.util.base.Unchecked;
 import org.jetbrains.annotations.NotNull;
 
 import java.io.IOException;
@@ -23,7 +23,7 @@ public class BigQueueEventLog<E> implements EventLog<E> {
             byte[] bytes = codec.writeToBytes(event);
             queue.enqueue(bytes);
         } catch (IOException e) {
-            Rethrow.rethrow(e);
+            Unchecked.rethrow(e);
         }
     }
 
@@ -35,7 +35,7 @@ public class BigQueueEventLog<E> implements EventLog<E> {
                 consumer.accept(event);
             });
         } catch (IOException e) {
-            Rethrow.rethrow(e);
+            Unchecked.rethrow(e);
         }
     }
 

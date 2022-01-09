@@ -1,10 +1,10 @@
 package io.webby.util.collect;
 
-import io.webby.util.base.Rethrow;
+import io.webby.util.base.Unchecked;
 
 import java.util.Iterator;
 
-import static io.webby.util.base.Rethrow.*;
+import static io.webby.util.base.Unchecked.*;
 
 public interface ThrowIterator<T, E extends Throwable> extends Iterator<T> {
     boolean hasNextThrow() throws E;
@@ -19,7 +19,7 @@ public interface ThrowIterator<T, E extends Throwable> extends Iterator<T> {
         try {
             return hasNextThrow();
         } catch (Throwable e) {
-            return Rethrow.rethrow(e);
+            return Unchecked.rethrow(e);
         }
     }
 

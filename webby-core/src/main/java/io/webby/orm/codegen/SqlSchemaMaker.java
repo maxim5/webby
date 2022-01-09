@@ -3,7 +3,7 @@ package io.webby.orm.codegen;
 import io.webby.orm.api.BaseTable;
 import io.webby.orm.api.Engine;
 import io.webby.orm.api.TableMeta;
-import io.webby.util.base.Rethrow;
+import io.webby.util.base.Unchecked;
 import io.webby.util.collect.EasyMaps;
 import org.jetbrains.annotations.NotNull;
 
@@ -23,7 +23,7 @@ public class SqlSchemaMaker {
             TableMeta meta = castAny(tableClass.getField("META").get(null));
             return makeCreateTableQuery(engine, meta);
         } catch (Throwable e) {
-            return Rethrow.rethrow(e);
+            return Unchecked.rethrow(e);
         }
     }
 

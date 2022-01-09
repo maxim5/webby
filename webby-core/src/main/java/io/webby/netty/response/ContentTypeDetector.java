@@ -3,8 +3,7 @@ package io.webby.netty.response;
 import com.google.inject.Inject;
 import io.webby.common.InjectorHelper;
 import io.webby.netty.HttpConst;
-import io.webby.util.base.EasyObjects;
-import io.webby.util.base.Rethrow;
+import io.webby.util.base.Unchecked;
 import org.jetbrains.annotations.NotNull;
 
 import java.net.URLConnection;
@@ -26,8 +25,8 @@ public class ContentTypeDetector {
         return firstNonNull(List.of(
             () -> contentTypeProvider.getContentType(path),
             () -> URLConnection.guessContentTypeFromName(path.toString()),
-            Rethrow.Suppliers.rethrow(() -> Files.probeContentType(path)),
-            Rethrow.Suppliers.rethrow(() -> ThirdPartyMimeTypeDetectors.detect(path.toFile()))
+            Unchecked.Suppliers.rethrow(() -> Files.probeContentType(path)),
+            Unchecked.Suppliers.rethrow(() -> ThirdPartyMimeTypeDetectors.detect(path.toFile()))
         ), HttpConst.APPLICATION_OCTET_STREAM);
     }
 }

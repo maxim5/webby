@@ -7,7 +7,7 @@ import com.oath.halodb.RecordKey;
 import io.webby.db.codec.Codec;
 import io.webby.db.kv.KeyValueDb;
 import io.webby.db.kv.impl.ByteArrayDb;
-import io.webby.util.base.Rethrow.Consumers;
+import io.webby.util.base.Unchecked.Consumers;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
@@ -17,8 +17,8 @@ import java.util.Set;
 import java.util.stream.Collectors;
 
 import static io.webby.db.kv.impl.KeyValueCommons.streamOf;
-import static io.webby.util.base.Rethrow.Runnables.runRethrow;
-import static io.webby.util.base.Rethrow.Suppliers.runRethrow;
+import static io.webby.util.base.Unchecked.Runnables.runRethrow;
+import static io.webby.util.base.Unchecked.Suppliers.runRethrow;
 
 public class HaloDbImpl<K, V> extends ByteArrayDb<K, V> implements KeyValueDb<K, V> {
     private final HaloDB db;

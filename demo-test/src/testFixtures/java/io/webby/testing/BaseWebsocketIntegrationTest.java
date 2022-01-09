@@ -14,7 +14,7 @@ import io.webby.app.AppSettings;
 import io.webby.netty.NettyWebsocketHandler;
 import io.webby.url.annotate.FrameType;
 import io.webby.url.annotate.Marshal;
-import io.webby.util.base.Rethrow;
+import io.webby.util.base.Unchecked;
 import io.webby.ws.context.ClientInfo;
 import io.webby.ws.impl.AgentEndpoint;
 import io.webby.ws.impl.WebsocketRouter;
@@ -122,7 +122,7 @@ public class BaseWebsocketIntegrationTest extends BaseChannelTest {
         try {
             return constructor.newInstance("", new DefaultHttpHeaders(), null);
         } catch (Exception e) {
-            return Rethrow.rethrow(e);
+            return Unchecked.rethrow(e);
         }
     }
 }

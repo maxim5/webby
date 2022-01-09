@@ -2,7 +2,7 @@ package io.webby.db.sql;
 
 import io.webby.orm.api.Engine;
 import io.webby.orm.api.WithEngine;
-import io.webby.util.base.Rethrow;
+import io.webby.util.base.Unchecked;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
@@ -59,7 +59,7 @@ public record SqlSettings(@NotNull String url, @Nullable String user, @Nullable 
             }
             return DriverManager.getConnection(settings.url);
         } catch (SQLException e) {
-            return Rethrow.rethrow(e);
+            return Unchecked.rethrow(e);
         }
     }
 }

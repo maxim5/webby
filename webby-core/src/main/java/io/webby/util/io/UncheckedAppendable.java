@@ -1,6 +1,6 @@
 package io.webby.util.io;
 
-import io.webby.util.base.Rethrow;
+import io.webby.util.base.Unchecked;
 import org.jetbrains.annotations.NotNull;
 
 import java.io.IOException;
@@ -18,7 +18,7 @@ public class UncheckedAppendable implements Appendable {
         try {
             return delegate.append(csq);
         } catch (IOException e) {
-            return Rethrow.rethrow(e);
+            return Unchecked.rethrow(e);
         }
     }
 
@@ -27,7 +27,7 @@ public class UncheckedAppendable implements Appendable {
         try {
             return delegate.append(csq, start, end);
         } catch (IOException e) {
-            return Rethrow.rethrow(e);
+            return Unchecked.rethrow(e);
         }
     }
 
@@ -36,7 +36,7 @@ public class UncheckedAppendable implements Appendable {
         try {
             return delegate.append(c);
         } catch (IOException e) {
-            return Rethrow.rethrow(e);
+            return Unchecked.rethrow(e);
         }
     }
 }

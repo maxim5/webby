@@ -3,7 +3,7 @@ package io.webby.db.kv.leveldb;
 import io.webby.db.codec.Codec;
 import io.webby.db.kv.DbOptions;
 import io.webby.db.kv.impl.BaseKeyValueFactory;
-import io.webby.util.base.Rethrow;
+import io.webby.util.base.Unchecked;
 import org.iq80.leveldb.DB;
 import org.iq80.leveldb.DBFactory;
 import org.iq80.leveldb.Options;
@@ -37,7 +37,7 @@ public abstract class BaseLevelDbFactory extends BaseKeyValueFactory {
                         .paranoidChecks(paranoidChecks));
                 return new LevelDbImpl<>(db, keyCodec, valueCodec);
             } catch (IOException e) {
-                return Rethrow.rethrow(e);
+                return Unchecked.rethrow(e);
             }
         });
     }

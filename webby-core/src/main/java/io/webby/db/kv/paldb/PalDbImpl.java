@@ -7,7 +7,7 @@ import com.linkedin.paldb.impl.StorageReader;
 import io.webby.db.codec.Codec;
 import io.webby.db.kv.KeyValueDb;
 import io.webby.db.kv.impl.ByteArrayDb;
-import io.webby.util.base.Rethrow;
+import io.webby.util.base.Unchecked;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
@@ -205,7 +205,7 @@ public class PalDbImpl<K, V> extends ByteArrayDb<K, V> implements KeyValueDb<K, 
         try {
             return storageReader.newInstance(config, file);
         } catch (IllegalAccessException | InvocationTargetException | InstantiationException e) {
-            return Rethrow.rethrow(e);
+            return Unchecked.rethrow(e);
         }
     }
 
@@ -217,7 +217,7 @@ public class PalDbImpl<K, V> extends ByteArrayDb<K, V> implements KeyValueDb<K, 
         try {
             storageReader.close();
         } catch (IOException e) {
-            Rethrow.rethrow(e);
+            Unchecked.rethrow(e);
         }
     }
 }

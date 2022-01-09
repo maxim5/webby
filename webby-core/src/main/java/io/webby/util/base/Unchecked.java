@@ -11,7 +11,7 @@ import java.util.function.Consumer;
 import java.util.function.Function;
 import java.util.function.Supplier;
 
-public interface Rethrow {
+public interface Unchecked {
     @CanIgnoreReturnValue
     static <T> T rethrow(@NotNull Throwable exception) {
         throw new RuntimeException(exception);
@@ -38,7 +38,7 @@ public interface Rethrow {
                 try {
                     consumer.run();
                 } catch (Throwable e) {
-                    Rethrow.rethrow(e);
+                    Unchecked.rethrow(e);
                 }
             };
         }
@@ -47,7 +47,7 @@ public interface Rethrow {
             try {
                 action.run();
             } catch (Throwable e) {
-                Rethrow.rethrow(e);
+                Unchecked.rethrow(e);
             }
         }
     }
@@ -58,7 +58,7 @@ public interface Rethrow {
                 try {
                     consumer.accept(value);
                 } catch (Throwable e) {
-                    Rethrow.rethrow(e);
+                    Unchecked.rethrow(e);
                 }
             };
         }
@@ -68,7 +68,7 @@ public interface Rethrow {
                 try {
                     consumer.accept(t, u);
                 } catch (Throwable e) {
-                    Rethrow.rethrow(e);
+                    Unchecked.rethrow(e);
                 }
             };
         }
@@ -80,7 +80,7 @@ public interface Rethrow {
                 try {
                     return supplier.get();
                 } catch (Throwable e) {
-                    return Rethrow.rethrow(e);
+                    return Unchecked.rethrow(e);
                 }
             };
         }
@@ -89,7 +89,7 @@ public interface Rethrow {
             try {
                 return action.get();
             } catch (Throwable e) {
-                return Rethrow.rethrow(e);
+                return Unchecked.rethrow(e);
             }
         }
     }
@@ -100,7 +100,7 @@ public interface Rethrow {
                 try {
                     return function.apply(value);
                 } catch (Throwable e) {
-                    return Rethrow.rethrow(e);
+                    return Unchecked.rethrow(e);
                 }
             };
         }
@@ -114,7 +114,7 @@ public interface Rethrow {
                 try {
                     return function.apply(value);
                 } catch (Throwable e) {
-                    return Rethrow.rethrow(e);
+                    return Unchecked.rethrow(e);
                 }
             };
         }

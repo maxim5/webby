@@ -3,7 +3,7 @@ package io.webby.orm.api.debug;
 import com.google.errorprone.annotations.CanIgnoreReturnValue;
 import io.webby.orm.api.*;
 import io.webby.orm.api.query.SelectQuery;
-import io.webby.util.base.Rethrow;
+import io.webby.util.base.Unchecked;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
@@ -19,7 +19,7 @@ public interface DebugRunner extends WithRunner {
              ResultSet resultSet = statement.executeQuery()) {
             return DebugSql.toDebugRows(resultSet);
         } catch (SQLException e) {
-            return Rethrow.rethrow(e);
+            return Unchecked.rethrow(e);
         }
     }
 
@@ -40,7 +40,7 @@ public interface DebugRunner extends WithRunner {
         try {
             return runner().runUpdate(sql, params);
         } catch (SQLException e) {
-            return Rethrow.rethrow(e);
+            return Unchecked.rethrow(e);
         }
     }
 

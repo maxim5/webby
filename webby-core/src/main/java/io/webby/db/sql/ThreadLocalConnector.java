@@ -3,7 +3,7 @@ package io.webby.db.sql;
 import io.webby.orm.api.Connector;
 import io.webby.orm.api.Engine;
 import io.webby.orm.api.QueryRunner;
-import io.webby.util.base.Rethrow;
+import io.webby.util.base.Unchecked;
 import org.jetbrains.annotations.NotNull;
 
 import java.sql.Connection;
@@ -86,7 +86,7 @@ public class ThreadLocalConnector implements Connector {
                     connection.close();
                 }
             } catch (SQLException e) {
-                Rethrow.rethrow(e);
+                Unchecked.rethrow(e);
             }
         }
 
@@ -94,7 +94,7 @@ public class ThreadLocalConnector implements Connector {
             try {
                 return !connection.isClosed();
             } catch (SQLException e) {
-                return Rethrow.rethrow(e);
+                return Unchecked.rethrow(e);
             }
         }
 

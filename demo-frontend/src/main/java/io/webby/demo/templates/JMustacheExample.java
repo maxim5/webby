@@ -7,7 +7,7 @@ import io.webby.url.annotate.GET;
 import io.webby.url.annotate.Render;
 import io.webby.url.annotate.Serve;
 import io.webby.url.annotate.View;
-import io.webby.util.base.Rethrow;
+import io.webby.util.base.Unchecked;
 import org.jetbrains.annotations.NotNull;
 
 import java.io.FileNotFoundException;
@@ -17,7 +17,7 @@ import java.util.function.Supplier;
 
 @Serve(render = Render.JMUSTACHE)
 public class JMustacheExample {
-    private static final Supplier<Template> TEMPLATE = Rethrow.Suppliers.rethrow(() -> getTemplate("jmustache/persons.mustache"));
+    private static final Supplier<Template> TEMPLATE = Unchecked.Suppliers.rethrow(() -> getTemplate("jmustache/persons.mustache"));
 
     @GET(url = "/templates/jmustache/hello")
     @View(template = "jmustache/persons.mustache")

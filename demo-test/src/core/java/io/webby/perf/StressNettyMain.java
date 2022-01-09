@@ -20,7 +20,7 @@ import java.util.List;
 import static io.webby.perf.ConcurrentStressing.MEDIUM_WAIT;
 import static io.webby.perf.ConcurrentStressing.execWorkers;
 import static io.webby.testing.OkRequests.json;
-import static io.webby.util.base.Rethrow.Runnables.rethrow;
+import static io.webby.util.base.Unchecked.Runnables.rethrow;
 
 public class StressNettyMain {
     private static final int PORT = 7000;

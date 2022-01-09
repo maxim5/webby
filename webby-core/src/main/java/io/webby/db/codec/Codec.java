@@ -11,7 +11,7 @@ import java.io.*;
 import java.nio.ByteBuffer;
 
 import static io.webby.util.base.EasyPrimitives.firstNonNegative;
-import static io.webby.util.base.Rethrow.rethrow;
+import static io.webby.util.base.Unchecked.rethrow;
 
 // Aka Serializer
 public interface Codec<T> {

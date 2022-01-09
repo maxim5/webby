@@ -7,7 +7,7 @@ import io.webby.app.Settings;
 import io.webby.common.Lifetime;
 import io.webby.orm.api.Engine;
 import io.webby.orm.api.WithEngine;
-import io.webby.util.base.Rethrow;
+import io.webby.util.base.Unchecked;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.VisibleForTesting;
 
@@ -35,7 +35,7 @@ public class ConnectionPool implements WithEngine {
         try {
             return dataSource.getConnection();
         } catch (SQLException e) {
-            return Rethrow.rethrow(e);
+            return Unchecked.rethrow(e);
         }
     }
 

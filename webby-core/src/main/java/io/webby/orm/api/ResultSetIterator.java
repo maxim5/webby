@@ -1,7 +1,7 @@
 package io.webby.orm.api;
 
 import com.google.errorprone.annotations.MustBeClosed;
-import io.webby.util.base.Rethrow;
+import io.webby.util.base.Unchecked;
 import io.webby.util.collect.Pair;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
@@ -43,7 +43,7 @@ public class ResultSetIterator<E> implements Iterator<E>, Closeable {
             }
             return hasNextCached.get();
         } catch (SQLException e) {
-            return Rethrow.rethrow(e);
+            return Unchecked.rethrow(e);
         }
     }
 
@@ -53,7 +53,7 @@ public class ResultSetIterator<E> implements Iterator<E>, Closeable {
             nextCalled.set(false);
             return converter.convert(resultSet);
         } catch (SQLException e) {
-            return Rethrow.rethrow(e);
+            return Unchecked.rethrow(e);
         }
     }
 
@@ -62,7 +62,7 @@ public class ResultSetIterator<E> implements Iterator<E>, Closeable {
         try {
             resultSet.deleteRow();
         } catch (SQLException e) {
-            Rethrow.rethrow(e);
+            Unchecked.rethrow(e);
         }
     }
 
@@ -77,7 +77,7 @@ public class ResultSetIterator<E> implements Iterator<E>, Closeable {
             }
             resultSet.close();
         } catch (SQLException e) {
-            Rethrow.rethrow(e);
+            Unchecked.rethrow(e);
         }
     }
 

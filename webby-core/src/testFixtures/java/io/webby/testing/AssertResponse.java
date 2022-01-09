@@ -17,8 +17,8 @@ import java.util.stream.Stream;
 
 import static com.google.common.truth.Truth.assertThat;
 import static io.webby.testing.TestingBytes.*;
-import static io.webby.util.base.Rethrow.Consumers;
-import static io.webby.util.base.Rethrow.Suppliers;
+import static io.webby.util.base.Unchecked.Consumers;
+import static io.webby.util.base.Unchecked.Suppliers;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.fail;
 

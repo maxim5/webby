@@ -9,7 +9,7 @@ import org.jetbrains.annotations.NotNull;
 import java.io.*;
 import java.nio.ByteBuffer;
 
-import static io.webby.util.base.Rethrow.rethrow;
+import static io.webby.util.base.Unchecked.rethrow;
 
 public interface BinaryMarshaller {
     void writeBytes(@NotNull OutputStream output, @NotNull Object instance) throws IOException;

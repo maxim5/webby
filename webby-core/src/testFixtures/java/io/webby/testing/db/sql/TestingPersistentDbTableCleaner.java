@@ -13,7 +13,7 @@ import org.jetbrains.annotations.NotNull;
 import java.sql.SQLException;
 import java.util.logging.Level;
 
-import static io.webby.util.base.Rethrow.rethrow;
+import static io.webby.util.base.Unchecked.rethrow;
 
 public class TestingPersistentDbTableCleaner {
     private static final FluentLogger log = FluentLogger.forEnclosingClass();

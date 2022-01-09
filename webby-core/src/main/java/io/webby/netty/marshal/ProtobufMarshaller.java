@@ -11,7 +11,7 @@ import java.io.*;
 import java.nio.charset.Charset;
 
 import static io.webby.util.base.EasyCast.castAny;
-import static io.webby.util.base.Rethrow.rethrow;
+import static io.webby.util.base.Unchecked.rethrow;
 
 public record ProtobufMarshaller(@NotNull Charset charset) implements Marshaller {
     @Inject

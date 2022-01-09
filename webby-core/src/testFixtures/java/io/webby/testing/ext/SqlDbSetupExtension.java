@@ -10,7 +10,7 @@ import io.webby.orm.api.Engine;
 import io.webby.orm.api.debug.DebugRunner;
 import io.webby.testing.TestingModules;
 import io.webby.testing.TestingProps;
-import io.webby.util.base.Rethrow.Runnables;
+import io.webby.util.base.Unchecked.Runnables;
 import org.jetbrains.annotations.NotNull;
 import org.junit.jupiter.api.extension.AfterAllCallback;
 import org.junit.jupiter.api.extension.AfterEachCallback;

@@ -6,7 +6,7 @@ import com.google.mu.util.stream.BiStream;
 import io.webby.db.codec.Codec;
 import io.webby.db.kv.KeyValueDb;
 import io.webby.db.kv.impl.ByteArrayDb;
-import io.webby.util.base.Rethrow;
+import io.webby.util.base.Unchecked;
 import org.iq80.leveldb.DB;
 import org.iq80.leveldb.DBIterator;
 import org.iq80.leveldb.WriteBatch;
@@ -183,7 +183,7 @@ public class LevelDbImpl<K, V> extends ByteArrayDb<K, V> implements KeyValueDb<K
         try {
             db.close();
         } catch (IOException e) {
-            Rethrow.rethrow(e);
+            Unchecked.rethrow(e);
         }
     }
 

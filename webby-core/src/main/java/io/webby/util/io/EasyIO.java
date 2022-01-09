@@ -1,7 +1,7 @@
 package io.webby.util.io;
 
 import com.google.common.io.Closeables;
-import io.webby.util.base.Rethrow;
+import io.webby.util.base.Unchecked;
 import org.jetbrains.annotations.Nullable;
 
 import java.io.Closeable;
@@ -14,7 +14,7 @@ public interface EasyIO {
             try {
                 Closeables.close(closeable, true);
             } catch (IOException impossible) {
-                Rethrow.rethrow(impossible);
+                Unchecked.rethrow(impossible);
             }
         }
 
@@ -23,7 +23,7 @@ public interface EasyIO {
             try {
                 Closeables.close(closeable, false);
             } catch (IOException e) {
-                Rethrow.rethrow(e);
+                Unchecked.rethrow(e);
             }
         }
 
@@ -42,7 +42,7 @@ public interface EasyIO {
                     closeable.close();
                 }
             } catch (Exception e) {
-                Rethrow.rethrow(e);
+                Unchecked.rethrow(e);
             }
         }
     }

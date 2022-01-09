@@ -1,6 +1,6 @@
 package io.webby.orm.api;
 
-import io.webby.util.base.Rethrow;
+import io.webby.util.base.Unchecked;
 import org.jetbrains.annotations.NotNull;
 
 import java.sql.Connection;
@@ -43,7 +43,7 @@ public enum Engine {
         try {
             return fromConnection(connection);
         } catch (SQLException e) {
-            return Rethrow.rethrow(e);
+            return Unchecked.rethrow(e);
         }
     }
 

@@ -12,7 +12,7 @@ import org.rocksdb.RocksDBException;
 
 import java.nio.file.Path;
 
-import static io.webby.util.base.Rethrow.rethrow;
+import static io.webby.util.base.Unchecked.rethrow;
 
 public class RocksDbFactory extends BaseKeyValueFactory {
     @Inject private Settings settings;

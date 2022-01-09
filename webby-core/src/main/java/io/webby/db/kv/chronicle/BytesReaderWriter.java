@@ -1,7 +1,7 @@
 package io.webby.db.kv.chronicle;
 
 import io.webby.db.codec.Codec;
-import io.webby.util.base.Rethrow;
+import io.webby.util.base.Unchecked;
 import net.openhft.chronicle.bytes.Bytes;
 import net.openhft.chronicle.hash.serialization.BytesReader;
 import net.openhft.chronicle.hash.serialization.BytesWriter;
@@ -23,7 +23,7 @@ final class BytesReaderWriter<T> implements BytesReader<T>, BytesWriter<T> {
         try {
             return codec.readFrom(in.inputStream(), (int) in.readRemaining());
         } catch (IOException e) {
-            return Rethrow.rethrow("Failed to read bytes using %s".formatted(codec), e);
+            return Unchecked.rethrow("Failed to read bytes using %s".formatted(codec), e);
         }
     }
 
@@ -32,7 +32,7 @@ final class BytesReaderWriter<T> implements BytesReader<T>, BytesWriter<T> {
         try {
             codec.writeTo(out.outputStream(), toWrite);
         } catch (IOException e) {
-            Rethrow.rethrow("Failed to write bytes using %s".formatted(codec), e);
+            Unchecked.rethrow("Failed to write bytes using %s".formatted(codec), e);
         }
     }
 

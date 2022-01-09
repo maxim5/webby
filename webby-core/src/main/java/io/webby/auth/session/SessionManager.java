@@ -24,7 +24,7 @@ import java.util.Arrays;
 import java.util.Base64;
 import java.util.logging.Level;
 
-import static io.webby.util.base.Rethrow.rethrow;
+import static io.webby.util.base.Unchecked.rethrow;
 
 public class SessionManager {
     private static final FluentLogger log = FluentLogger.forEnclosingClass();
