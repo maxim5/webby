@@ -321,6 +321,16 @@ public class SqlSchemaMakerTest {
             )
             """);
 
+        assertThat(makeCreateTableQuery(Engine.H2, NullableModelTable.class)).isEqualTo("""
+            CREATE TABLE IF NOT EXISTS nullable_model (
+                id VARCHAR PRIMARY KEY,
+                str VARCHAR,
+                timestamp TIMESTAMP,
+                nested_id INTEGER,
+                nested_s VARCHAR
+            )
+            """);
+
         assertThat(makeCreateTableQuery(Engine.MySQL, NullableModelTable.class)).isEqualTo("""
             CREATE TABLE IF NOT EXISTS nullable_model (
                 id VARCHAR(255) PRIMARY KEY,
@@ -337,6 +347,14 @@ public class SqlSchemaMakerTest {
         assertThat(makeCreateTableQuery(Engine.SQLite, PojoWithAdapterModelTable.class)).isEqualTo("""
             CREATE TABLE IF NOT EXISTS pojo_with_adapter_model (
                 id INTEGER PRIMARY KEY,
+                pojo_id INTEGER,
+                pojo_buf VARCHAR
+            )
+            """);
+
+        assertThat(makeCreateTableQuery(Engine.H2, PojoWithAdapterModelTable.class)).isEqualTo("""
+            CREATE TABLE IF NOT EXISTS pojo_with_adapter_model (
+                id INTEGER PRIMARY KEY AUTO_INCREMENT,
                 pojo_id INTEGER,
                 pojo_buf VARCHAR
             )
@@ -364,6 +382,20 @@ public class SqlSchemaMakerTest {
                 f REAL,
                 d REAL,
                 bool INTEGER
+            )
+            """);
+
+        assertThat(makeCreateTableQuery(Engine.H2, PrimitiveModelTable.class)).isEqualTo("""
+            CREATE TABLE IF NOT EXISTS primitive_model (
+                id INTEGER PRIMARY KEY AUTO_INCREMENT,
+                i INTEGER,
+                l BIGINT,
+                b TINYINT,
+                s SMALLINT,
+                ch VARCHAR,
+                f REAL,
+                d DOUBLE,
+                bool BOOLEAN
             )
             """);
 
