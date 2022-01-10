@@ -10,14 +10,15 @@ import io.webby.netty.request.HttpRequestEx;
 import io.webby.url.annotate.GET;
 import io.webby.url.annotate.Param;
 import io.webby.url.annotate.Serve;
-import io.webby.url.convert.Converter;
-import io.webby.url.convert.StringConverter;
+import io.webby.url.convert.CharArrayConstraint;
+import io.webby.url.convert.Constraint;
+import io.webby.url.convert.StringConstraint;
 import org.jetbrains.annotations.NotNull;
 
 @Serve
 public class AcceptRequest {
-    @Param private static final Converter<String> name = StringConverter.MAX_256;
-    @Param final Converter<String> buf = new StringConverter(10);
+    @Param private static final Constraint<String> name = StringConstraint.MAX_256;
+    @Param final Constraint<CharArray> buf = new CharArrayConstraint(10);
 
     @GET(url="/request/simple")
     public String simple(@NotNull HttpRequest request) {

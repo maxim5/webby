@@ -6,7 +6,7 @@ import org.jetbrains.annotations.Nullable;
 
 import static io.webby.url.convert.ConversionError.failIf;
 
-public class LongConverter implements Converter<Long> {
+public class LongConverter implements SimpleConverter<Long> {
     public static final LongConverter ANY = new LongConverter(Long.MIN_VALUE, Long.MAX_VALUE);
     public static final LongConverter POSITIVE = new LongConverter(1, Long.MAX_VALUE);
     public static final LongConverter NON_NEGATIVE = new LongConverter(0, Long.MAX_VALUE);

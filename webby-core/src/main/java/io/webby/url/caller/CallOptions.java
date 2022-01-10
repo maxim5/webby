@@ -15,15 +15,7 @@ class CallOptions {
         return contentProvider != null;
     }
 
-    RichCallOptions toRichStr(boolean wantsBuffer) {
-        return new RichCallOptions(wantsRequest, contentProvider, wantsBuffer, wantsBuffer, false);
-    }
-
-    RichCallOptions toRichStrInt(boolean wantsBuffer, boolean swapArgs) {
-        return new RichCallOptions(wantsRequest, contentProvider, wantsBuffer, wantsBuffer, swapArgs);
-    }
-
-    RichCallOptions toRichStrStr(boolean wantsBuffer1, boolean wantsBuffer2) {
-        return new RichCallOptions(wantsRequest, contentProvider, wantsBuffer1, wantsBuffer2, false);
+    RichCallOptions toRich(boolean swapArgs) {
+        return new RichCallOptions(wantsRequest, contentProvider, swapArgs);
     }
 }

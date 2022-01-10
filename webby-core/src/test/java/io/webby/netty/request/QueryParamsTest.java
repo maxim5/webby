@@ -4,7 +4,7 @@ import io.netty.handler.codec.http.QueryStringDecoder;
 import io.webby.url.convert.Constraint;
 import io.webby.url.convert.ConversionError;
 import io.webby.url.convert.IntConverter;
-import io.webby.url.convert.StringConverter;
+import io.webby.url.convert.StringConstraint;
 import org.jetbrains.annotations.NotNull;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.function.Executable;
@@ -287,30 +287,30 @@ public class QueryParamsTest {
 
     @Test
     public void string_constraint_limited() {
-        QueryParams params1 = newQueryParams("/?s=12345678", Map.of("s", new StringConverter(8)));
+        QueryParams params1 = newQueryParams("/?s=12345678", Map.of("s", new StringConstraint(8)));
         assertEquals("12345678", params1.getOrNull("s"));
         assertEquals("12345678", params1.getConvertedOrDie("s"));
 
-        QueryParams params2 = newQueryParams("/?s=123456789", Map.of("s", new StringConverter(8)));
+        QueryParams params2 = newQueryParams("/?s=123456789", Map.of("s", new StringConstraint(8)));
         assertEquals("123456789", params2.getOrNull("s"));
         assertConversionError(() -> params2.getConvertedOrDie("s"), "[s]: The value exceeds max length 8");
 
-        QueryParams params3 = newQueryParams("/?s=", Map.of("s", new StringConverter(8)));
+        QueryParams params3 = newQueryParams("/?s=", Map.of("s", new StringConstraint(8)));
         assertEquals("", params3.getOrNull("s"));
         assertEquals("", params3.getConvertedOrDie("s"));
     }
 
     @Test
     public void string_constraint_unlimited() {
-        QueryParams params1 = newQueryParams("/?s=12345678", Map.of("s", StringConverter.UNLIMITED));
+        QueryParams params1 = newQueryParams("/?s=12345678", Map.of("s", StringConstraint.UNLIMITED));
         assertEquals("12345678", params1.getOrNull("s"));
         assertEquals("12345678", params1.getConvertedOrDie("s"));
 
-        QueryParams params2 = newQueryParams("/?s=123456789", Map.of("s", StringConverter.UNLIMITED));
+        QueryParams params2 = newQueryParams("/?s=123456789", Map.of("s", StringConstraint.UNLIMITED));
         assertEquals("123456789", params2.getOrNull("s"));
         assertEquals("123456789", params2.getConvertedOrDie("s"));
 
-        QueryParams params3 = newQueryParams("/?s=", Map.of("s", StringConverter.UNLIMITED));
+        QueryParams params3 = newQueryParams("/?s=", Map.of("s", StringConstraint.UNLIMITED));
         assertEquals("", params3.getOrNull("s"));
         assertEquals("", params3.getConvertedOrDie("s"));
     }

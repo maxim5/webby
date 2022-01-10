@@ -3,17 +3,16 @@ package io.webby.url.caller;
 import io.netty.handler.codec.http.FullHttpRequest;
 import io.routekit.util.CharArray;
 import io.webby.netty.request.HttpRequestEx;
+import io.webby.url.convert.Constraint;
 import io.webby.url.handle.StringHandler;
-import io.webby.url.convert.StringConverter;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.Map;
 
-public record NativeStringCaller(StringHandler<?> handler, StringConverter validator, String name) implements Caller {
+public record NativeStringCaller(StringHandler<?> handler, Constraint<CharArray> validator, String name) implements Caller {
     @Override
     public Object call(@NotNull FullHttpRequest request, @NotNull Map<String, CharArray> variables) throws Exception {
-        CharArray value = variables.get(name);
-        validator.validateString(name, value);
+        CharArray value = validator.applyWithName(name, variables.get(name));
         return handler.handleString((HttpRequestEx) request, value);
     }
 

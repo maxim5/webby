@@ -12,7 +12,9 @@ import io.routekit.util.MutableCharArray;
 import io.webby.netty.request.HttpRequestEx;
 import io.webby.testing.Testing;
 import io.webby.url.HandlerConfigError;
+import io.webby.url.convert.Constraint;
 import io.webby.url.convert.ConversionError;
+import io.webby.url.convert.StringConstraint;
 import io.webby.url.handle.Handler;
 import io.webby.url.handle.IntHandler;
 import io.webby.url.handle.StringHandler;
@@ -25,6 +27,7 @@ import java.lang.reflect.Method;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 import java.util.function.Function;
 import java.util.function.IntFunction;
 import java.util.function.IntSupplier;
@@ -71,12 +74,12 @@ public class CallerFactoryTest {
         assertFalse(CallerFactory.canPassContent(String.class));
         assertFalse(CallerFactory.canPassContent(CharSequence.class));
 
-        assertTrue(CallerFactory.canPassBuffer(CharSequence.class));
+        /*assertTrue(CallerFactory.canPassBuffer(CharSequence.class));
         assertTrue(CallerFactory.canPassBuffer(CharArray.class));
         assertFalse(CallerFactory.canPassBuffer(MutableCharArray.class));  // routekit contains immutable
         assertFalse(CallerFactory.canPassBuffer(String.class));
         assertFalse(CallerFactory.canPassBuffer(StringBuilder.class));
-        assertFalse(CallerFactory.canPassBuffer(Object.class));
+        assertFalse(CallerFactory.canPassBuffer(Object.class));*/
     }
 
     @Test
@@ -165,9 +168,6 @@ public class CallerFactoryTest {
 
     @Test
     public void optimized_one_var_string() throws Exception {
-        interface StringFunction {
-            String apply(String s);
-        }
         StringFunction instance = String::toUpperCase;
         Caller caller = factory.create(instance, binding(instance), Map.of(), List.of("str"));
 
@@ -178,10 +178,10 @@ public class CallerFactoryTest {
 
     @Test
     public void optimized_one_var_char_array() throws Exception {
-        interface StringFunction {
+        interface CharArrayFunction {
             int apply(CharArray s);
         }
-        StringFunction instance = CharArray::length;
+        CharArrayFunction instance = CharArray::length;
         Caller caller = factory.create(instance, binding(instance), Map.of(), List.of("str"));
 
         assertEquals(3, caller.call(get(), vars("str", "foo")));
@@ -361,6 +361,28 @@ public class CallerFactoryTest {
         assertThrows(ConversionError.class, () -> caller.call(get(), vars("x", -1, "y", Long.MAX_VALUE)));
     }
 
+    @Test
+    public void optimized_one_var_string_converter() throws Exception {
+        StringConstraint constraint = new StringConstraint(5);
+        StringFunction instance = String::toUpperCase;
+        Caller caller = factory.create(instance, binding(instance), Map.of("s", constraint), List.of("s"));
+
+        assertEquals("FOO", caller.call(get(), vars("s", "foo")));
+        assertEquals("BAR", caller.call(post(), vars("s", "bar")));
+        assertThrows(ConversionError.class, () -> caller.call(get(), vars("s", "foobar")));
+    }
+
+    @Test
+    public void optimized_one_var_char_sequence_converter() throws Exception {
+        Constraint<String> constraint = s -> Objects.toString(s).toUpperCase();
+        StringFunction instance = s -> s;
+        Caller caller = factory.create(instance, binding(instance), Map.of("s", constraint), List.of("s"));
+
+        assertEquals("FOO", caller.call(get(), vars("s", "foo")));
+        assertEquals("BAR", caller.call(post(), vars("s", "bar")));
+        assertEquals("FOOBAR", caller.call(post(), vars("s", "FooBar")));
+    }
+
     private static @NotNull Binding binding(Object instance) {
         return binding(instance, null);
     }
@@ -390,5 +412,9 @@ public class CallerFactoryTest {
 
     public static @NotNull HttpRequestEx post() {
         return postEx(URL);   // Do not care about QueryParams for now
+    }
+
+    private interface StringFunction {
+        String apply(String s);
     }
 }

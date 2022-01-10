@@ -6,7 +6,7 @@ import org.jetbrains.annotations.Nullable;
 
 import static io.webby.url.convert.ConversionError.failIf;
 
-public interface Converter<T> extends Constraint<T> {
+public interface SimpleConverter<T> extends Constraint<T> {
     T convert(@NotNull String value) throws ConversionError;
 
     @Override

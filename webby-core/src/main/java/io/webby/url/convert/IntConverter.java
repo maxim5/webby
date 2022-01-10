@@ -6,7 +6,7 @@ import org.jetbrains.annotations.Nullable;
 
 import static io.webby.url.convert.ConversionError.failIf;
 
-public class IntConverter implements Converter<Integer> {
+public class IntConverter implements SimpleConverter<Integer> {
     public static final IntConverter ANY = new IntConverter(Integer.MIN_VALUE, Integer.MAX_VALUE);
     public static final IntConverter POSITIVE = new IntConverter(1, Integer.MAX_VALUE);
     public static final IntConverter NON_NEGATIVE = new IntConverter(0, Integer.MAX_VALUE);
