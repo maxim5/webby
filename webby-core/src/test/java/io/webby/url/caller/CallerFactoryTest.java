@@ -73,13 +73,6 @@ public class CallerFactoryTest {
         assertFalse(CallerFactory.canPassContent(int.class));
         assertFalse(CallerFactory.canPassContent(String.class));
         assertFalse(CallerFactory.canPassContent(CharSequence.class));
-
-        /*assertTrue(CallerFactory.canPassBuffer(CharSequence.class));
-        assertTrue(CallerFactory.canPassBuffer(CharArray.class));
-        assertFalse(CallerFactory.canPassBuffer(MutableCharArray.class));  // routekit contains immutable
-        assertFalse(CallerFactory.canPassBuffer(String.class));
-        assertFalse(CallerFactory.canPassBuffer(StringBuilder.class));
-        assertFalse(CallerFactory.canPassBuffer(Object.class));*/
     }
 
     @Test
