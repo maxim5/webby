@@ -15,7 +15,7 @@ public record StrStrCaller(Object instance, Method method,
     @Override
     public Object call(@NotNull FullHttpRequest request, @NotNull Map<String, CharArray> variables) throws Exception {
         CharSequence value1 = validator1.applyWithName(name1, variables.get(name1));
-        CharSequence value2 = validator1.applyWithName(name2, variables.get(name2));
+        CharSequence value2 = validator2.applyWithName(name2, variables.get(name2));
 
         if (opts.wantsContent()) {
             Object content = opts.contentProvider.getContent(request);
