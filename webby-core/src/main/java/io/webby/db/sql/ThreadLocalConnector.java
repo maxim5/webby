@@ -97,11 +97,5 @@ public class ThreadLocalConnector implements Connector {
                 return Unchecked.rethrow(e);
             }
         }
-
-        @SuppressWarnings("deprecation")
-        @Override
-        protected void finalize() {
-            close();
-        }
     }
 }
