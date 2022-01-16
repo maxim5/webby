@@ -39,7 +39,7 @@ dependencies {
     testFixturesApi group: 'com.squareup.okio', name: 'okio', version: '3.0.0'
     // SQLs for Unit tests
     testFixturesApi group: 'com.h2database', name: 'h2', version: '1.4.200'
-    testFixturesApi group: 'com.zaxxer', name: 'HikariCP', version: '5.0.0'
+    testFixturesApi group: 'com.zaxxer', name: 'HikariCP', version: '5.0.1'
     testFixturesApi group: 'mysql', name: 'mysql-connector-java', version: '8.0.27'
     testFixturesApi group: 'org.testcontainers', name: 'mysql', version: '1.16.2'
     testFixturesApi group: 'org.testcontainers', name: 'testcontainers', version: '1.16.2'
