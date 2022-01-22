@@ -188,10 +188,11 @@ public class QueryRunner {
     }
 
     @MustBeClosed
-    public @NotNull PreparedStatement prepareQuery(@NotNull String sql, @NotNull List<?> params) throws SQLException {
+    public @NotNull PreparedStatement prepareQuery(@NotNull String sql, @NotNull Iterable<?> params) throws SQLException {
         PreparedStatement prepared = connection.prepareStatement(sql);
-        for (int i = 0; i < params.size(); i++) {
-            prepared.setObject(i + 1, params.get(i));
+        int index = 0;
+        for (Object param : params) {
+            prepared.setObject(++index, param);
         }
         return prepared;
     }

@@ -4,10 +4,7 @@ import com.google.errorprone.annotations.CanIgnoreReturnValue;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.Optional;
+import java.util.*;
 
 import static java.util.Objects.requireNonNull;
 
@@ -27,7 +24,7 @@ public interface TableObj<K, E> extends BaseTable<E> {
         return Optional.ofNullable(getByPkOrNull(key));
     }
 
-    default @NotNull Map<K, E> getBatchByPk(@NotNull List<K> keys) {
+    default @NotNull Map<K, E> getBatchByPk(@NotNull Collection<K> keys) {
         // The following code is simpler, but doesn't handle nulls correctly.
         //   return keys.stream().collect(Collectors.toMap(k -> k, this::getByPkOrNull));
         // See https://stackoverflow.com/questions/24630963/nullpointerexception-in-collectors-tomap-with-null-entry-values

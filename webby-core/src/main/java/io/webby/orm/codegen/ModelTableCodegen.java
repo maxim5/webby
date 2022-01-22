@@ -422,7 +422,7 @@ public class ModelTableCodegen extends BaseCodegen {
 
         appendCode("""
         @Override
-        public @Nonnull Map<$PkClass, $ModelClass> getBatchByPk(@Nonnull List<$PkClass> keys) {
+        public @Nonnull Map<$PkClass, $ModelClass> getBatchByPk(@Nonnull Collection<$PkClass> keys) {
             if (keys.isEmpty()) {
                 return Map.of();
             }
