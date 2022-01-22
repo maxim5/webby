@@ -24,7 +24,7 @@ public interface TableObj<K, E> extends BaseTable<E> {
         return Optional.ofNullable(getByPkOrNull(key));
     }
 
-    default @NotNull Map<K, E> getBatchByPk(@NotNull Collection<K> keys) {
+    default @NotNull Map<K, E> getBatchByPk(@NotNull Collection<? extends K> keys) {
         // The following code is simpler, but doesn't handle nulls correctly.
         //   return keys.stream().collect(Collectors.toMap(k -> k, this::getByPkOrNull));
         // See https://stackoverflow.com/questions/24630963/nullpointerexception-in-collectors-tomap-with-null-entry-values
