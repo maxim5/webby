@@ -3,6 +3,7 @@ package io.webby.testing;
 import io.webby.auth.session.Session;
 import io.webby.auth.user.DefaultUser;
 import io.webby.auth.user.UserAccess;
+import io.webby.auth.user.UserModel;
 import io.webby.orm.api.ForeignInt;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
@@ -56,6 +57,6 @@ public class TestingModels {
     }
 
     public static @NotNull Session newSession(long sessionId, @NotNull Instant instant, @Nullable String ipAddress) {
-        return new Session(sessionId, ForeignInt.ofId(Session.NO_USER_ID), instant, "User-Agent", ipAddress);
+        return new Session(sessionId, ForeignInt.ofId(UserModel.NO_USER_ID), instant, "User-Agent", ipAddress);
     }
 }
