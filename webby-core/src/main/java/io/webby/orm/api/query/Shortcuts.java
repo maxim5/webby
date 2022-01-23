@@ -51,7 +51,7 @@ public class Shortcuts {
         return new IsIn(lhs, List.of(terms));
     }
 
-    public static @NotNull IsIn isIn(@NotNull Term lhs, @NotNull List<Term> terms) {
+    public static @NotNull IsIn isIn(@NotNull Term lhs, @NotNull List<? extends Term> terms) {
         return new IsIn(lhs, terms);
     }
 

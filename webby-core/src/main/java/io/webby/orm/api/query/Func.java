@@ -135,7 +135,7 @@ public enum Func implements Representable {
         return pattern.formatted(term1.repr(), term2.repr());
     }
 
-    public @NotNull String format(@NotNull List<Term> terms) {
+    public @NotNull String format(@NotNull List<? extends Term> terms) {
         assure(matchesInput(terms), "Incompatible function `%s` inputs: `%s`", this, terms);
         return pattern.formatted(terms.stream().map(Representable::repr).toArray());
     }
@@ -148,7 +148,7 @@ public enum Func implements Representable {
         return arity() == 2 && match(inputTypes.get(0), term1.type()) && match(inputTypes.get(1), term2.type());
     }
 
-    public boolean matchesInput(@NotNull List<Term> terms) {
+    public boolean matchesInput(@NotNull List<? extends Term> terms) {
         return BiStream.zip(inputTypes, terms).allMatch(((inputType, term) -> match(inputType, term.type())));
     }
 
@@ -168,7 +168,7 @@ public enum Func implements Representable {
         return apply(List.of(terms));
     }
 
-    public @NotNull FuncExpr apply(@NotNull List<Term> terms) {
+    public @NotNull FuncExpr apply(@NotNull List<? extends Term> terms) {
         return new FuncExpr(this, terms);
     }
 

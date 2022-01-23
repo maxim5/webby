@@ -22,7 +22,7 @@ public class OrderBy extends Unit implements Filter, Representable {
         return of(new OrderTerm(term, order));
     }
 
-    public static @NotNull OrderBy of(@NotNull Order order, @NotNull List<Term> terms) {
+    public static @NotNull OrderBy of(@NotNull Order order, @NotNull List<? extends Term> terms) {
         return of(terms.stream().map(term -> new OrderTerm(term, order)).collect(ImmutableList.toImmutableList()));
     }
 

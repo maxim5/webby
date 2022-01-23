@@ -19,7 +19,7 @@ public class FuncExpr extends Unit implements Term {
         this.func = func;
     }
 
-    public FuncExpr(@NotNull Func func, @NotNull List<Term> terms) {
+    public FuncExpr(@NotNull Func func, @NotNull List<? extends Term> terms) {
         super(func.format(terms), flattenArgsOf(terms));
         this.func = func;
     }
