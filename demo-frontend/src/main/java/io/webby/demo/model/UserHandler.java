@@ -16,7 +16,7 @@ public class UserHandler {
 
     @GET(url = "/user/{id}")
     public UserModel get(int userId) {
-        UserModel user = users.findByUserId(userId);
+        UserModel user = users.getUserByIdOrNull(userId);
         if (user == null) {
             throw new NotFoundException("User not found");
         }
@@ -36,7 +36,7 @@ public class UserHandler {
             int userId = users.createUserAutoId(DefaultUser.newAuto(UserAccess.Simple));
             return userId;
         } else {
-            System.out.println(users.findByUserId(session.user()));
+            System.out.println(users.getUserByIdOrNull(session.user()));
             return "already exists: " + user;
         }
     }

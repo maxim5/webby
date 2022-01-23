@@ -22,8 +22,8 @@ public class UserStoreIntegrationTest {
     @EnumSource(Scenario.class)
     public void no_users(Scenario scenario) {
         UserStore users = startup(scenario);
-        assertNull(users.findByUserId(0));
-        assertNull(users.findByUserId(1));
+        assertNull(users.getUserByIdOrNull(0));
+        assertNull(users.getUserByIdOrNull(1));
     }
 
     @ParameterizedTest
@@ -34,8 +34,8 @@ public class UserStoreIntegrationTest {
         int userId = users.createUserAutoId(user);
         assertEquals(userId, user.userId());
         assertTrue(userId > 0);
-        assertEquals(user, users.findByUserId(userId));
-        assertNull(users.findByUserId(0));
+        assertEquals(user, users.getUserByIdOrNull(userId));
+        assertNull(users.getUserByIdOrNull(0));
     }
 
     @ParameterizedTest

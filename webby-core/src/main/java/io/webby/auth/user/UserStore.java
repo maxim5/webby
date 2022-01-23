@@ -9,10 +9,10 @@ public interface UserStore {
 
     @NotNull Iterable<? extends UserModel> fetchAllUsers();
 
-    @Nullable UserModel findByUserId(int userId);
+    @Nullable UserModel getUserByIdOrNull(int userId);
 
-    default @Nullable UserModel findByUserId(@NotNull ForeignInt<? extends UserModel> foreignId) {
-        return foreignId.hasEntity() ? foreignId.getEntity() : findByUserId(foreignId.getIntId());
+    default @Nullable UserModel getUserByIdOrNull(@NotNull ForeignInt<? extends UserModel> foreignId) {
+        return foreignId.hasEntity() ? foreignId.getEntity() : getUserByIdOrNull(foreignId.getIntId());
     }
 
     int createUserAutoId(@NotNull UserModel user);

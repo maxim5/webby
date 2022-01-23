@@ -35,7 +35,7 @@ public class KeyValueUserStore implements UserStore {
     }
 
     @Override
-    public @Nullable UserModel findByUserId(int userId) {
+    public @Nullable UserModel getUserByIdOrNull(int userId) {
         return db.get(userId);
     }
 

@@ -27,7 +27,7 @@ public class SqlUserStore implements UserStore {
     }
 
     @Override
-    public @Nullable UserModel findByUserId(int userId) {
+    public @Nullable UserModel getUserByIdOrNull(int userId) {
         return table.getByPkOrNull(userId);
     }
 
