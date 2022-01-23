@@ -1,8 +1,9 @@
 package io.webby.netty.errors;
 
-import io.webby.app.AppConfigException;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
+
+import java.util.function.Supplier;
 
 public class NotFoundException extends ServeException {
     public NotFoundException(String message) {
@@ -27,5 +28,13 @@ public class NotFoundException extends ServeException {
         if (cond) {
             throw new NotFoundException(message.formatted(args));
         }
+    }
+
+    public static <T> @NotNull T getOrThrowNotFound(@NotNull Supplier<T> supplier,
+                                                    @NotNull String message,
+                                                    @Nullable Object @NotNull ... args) {
+        T result = supplier.get();
+        failIf(result == null, message, args);
+        return result;
     }
 }

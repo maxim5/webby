@@ -1,9 +1,10 @@
 package io.webby.auth.user;
 
-import io.webby.netty.errors.NotFoundException;
 import io.webby.orm.api.ForeignInt;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
+
+import static io.webby.netty.errors.NotFoundException.getOrThrowNotFound;
 
 public interface UserStore {
     int size();
@@ -13,9 +14,7 @@ public interface UserStore {
     @Nullable UserModel getUserByIdOrNull(int userId);
 
     default @NotNull UserModel getUserByIdOr404(int userId) {
-        UserModel user = getUserByIdOrNull(userId);
-        NotFoundException.failIf(user == null, "User not found: id=%d", userId);
-        return user;
+        return getOrThrowNotFound(() -> getUserByIdOrNull(userId), "User not found: id=%d", userId);
     }
 
     default @Nullable UserModel getUserByIdOrNull(@NotNull ForeignInt<? extends UserModel> foreignId) {
@@ -23,9 +22,7 @@ public interface UserStore {
     }
 
     default @NotNull UserModel getUserByIdOr404(@NotNull ForeignInt<? extends UserModel> foreignId) {
-        UserModel user = getUserByIdOrNull(foreignId);
-        NotFoundException.failIf(user == null, "User not found: foreign_id=%s", foreignId);
-        return user;
+        return getOrThrowNotFound(() -> getUserByIdOrNull(foreignId), "User not found: foreign_id=%s", foreignId);
     }
 
     int createUserAutoId(@NotNull UserModel user);
