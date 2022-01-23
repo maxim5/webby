@@ -4,6 +4,7 @@ import com.carrotsearch.hppc.*;
 import com.carrotsearch.hppc.cursors.IntCursor;
 import com.carrotsearch.hppc.procedures.IntIntProcedure;
 import com.carrotsearch.hppc.procedures.IntObjectProcedure;
+import com.google.common.collect.Streams;
 import com.google.errorprone.annotations.CheckReturnValue;
 import org.jetbrains.annotations.NotNull;
 
@@ -12,6 +13,7 @@ import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.stream.IntStream;
+import java.util.stream.Stream;
 
 @CheckReturnValue
 public class EasyHppc {
@@ -40,6 +42,11 @@ public class EasyHppc {
             result.put(cursor.value, map.get(cursor.value));
         }
         return result;
+    }
+
+    @SuppressWarnings("UnstableApiUsage")
+    public static @NotNull Stream<IntCursor> toJavaStream(@NotNull IntContainer container) {
+        return Streams.stream(container.iterator());
     }
 
     public static @NotNull ArrayList<Integer> toJavaList(@NotNull IntContainer container) {

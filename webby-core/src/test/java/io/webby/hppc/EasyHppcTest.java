@@ -3,10 +3,14 @@ package io.webby.hppc;
 import com.carrotsearch.hppc.IntArrayList;
 import com.carrotsearch.hppc.IntIntHashMap;
 import com.carrotsearch.hppc.IntObjectHashMap;
+import com.carrotsearch.hppc.cursors.IntCursor;
+import com.google.common.truth.IterableSubject;
 import io.webby.util.hppc.EasyHppc;
+import org.jetbrains.annotations.NotNull;
 import org.junit.Test;
 
 import java.util.stream.IntStream;
+import java.util.stream.Stream;
 
 import static com.google.common.truth.Truth.assertThat;
 import static io.webby.testing.AssertPrimitives.assertInts;
@@ -50,6 +54,13 @@ public class EasyHppcTest {
     }
 
     @Test
+    public void int_list_to_java_stream() {
+        assertStreamThat(EasyHppc.toJavaStream(IntArrayList.from())).isEmpty();
+        assertStreamThat(EasyHppc.toJavaStream(IntArrayList.from(1))).containsExactly(1).inOrder();
+        assertStreamThat(EasyHppc.toJavaStream(IntArrayList.from(1, 2, 3))).containsExactly(1, 2, 3).inOrder();
+    }
+
+    @Test
     public void int_list_to_java_list() {
         assertThat(EasyHppc.toJavaList(IntArrayList.from())).isEmpty();
         assertThat(EasyHppc.toJavaList(IntArrayList.from(1))).containsExactly(1).inOrder();
@@ -75,5 +86,9 @@ public class EasyHppcTest {
         assertIntsOrdered(EasyHppc.collectFromIntStream(IntStream.of()));
         assertIntsOrdered(EasyHppc.collectFromIntStream(IntStream.of(1)), 1);
         assertIntsOrdered(EasyHppc.collectFromIntStream(IntStream.of(1, 2)), 1, 2);
+    }
+
+    private static @NotNull IterableSubject assertStreamThat(@NotNull Stream<IntCursor> stream) {
+        return assertThat(stream.map(cursor -> cursor.value).toList());
     }
 }
