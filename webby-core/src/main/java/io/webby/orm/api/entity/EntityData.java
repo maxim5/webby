@@ -1,4 +1,4 @@
-package io.webby.orm.api;
+package io.webby.orm.api.entity;
 
 import io.webby.orm.api.query.Column;
 import io.webby.util.func.ThrowConsumer;

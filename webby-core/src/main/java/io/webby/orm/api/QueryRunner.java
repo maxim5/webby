@@ -302,28 +302,6 @@ public class QueryRunner {
         }
     }
 
-    public int @NotNull [] runUpdateBatch(@NotNull String sql,
-                                          @NotNull Collection<Object[]> paramsBatch) throws SQLException {
-        try (PreparedStatement prepared = prepareQuery(sql)) {
-            for (Object[] params : paramsBatch) {
-                setPreparedParams(prepared, params);
-                prepared.addBatch();
-            }
-            return prepared.executeBatch();
-        }
-    }
-
-    public int @NotNull [] runUpdateBatch(@NotNull String sql,
-                                          @NotNull Iterable<? extends Iterable<?>> paramsBatch) throws SQLException {
-        try (PreparedStatement prepared = prepareQuery(sql)) {
-            for (Iterable<?> params : paramsBatch) {
-                setPreparedParams(prepared, params);
-                prepared.addBatch();
-            }
-            return prepared.executeBatch();
-        }
-    }
-
     public @NotNull AutoIncResult runAutoIncUpdate(@NotNull String sql,
                                                    @Nullable Object @NotNull ... params) throws SQLException {
         try (PreparedStatement prepared = connection.prepareStatement(sql, Statement.RETURN_GENERATED_KEYS)) {
@@ -342,5 +320,37 @@ public class QueryRunner {
     }
 
     public record AutoIncResult(int changedRowCount, long lastId) {
+    }
+
+    public int @NotNull [] runUpdateBatch(@NotNull String sql,
+                                          @NotNull Collection<Object[]> paramsBatch) throws SQLException {
+        try (PreparedStatement prepared = prepareQuery(sql)) {
+            setBatchPreparedParams(prepared, paramsBatch);
+            return prepared.executeBatch();
+        }
+    }
+
+    public static void setBatchPreparedParams(@NotNull PreparedStatement prepared,
+                                              @NotNull Collection<Object[]> paramsBatch) throws SQLException {
+        for (Object[] params : paramsBatch) {
+            setPreparedParams(prepared, params);
+            prepared.addBatch();
+        }
+    }
+
+    public int @NotNull [] runUpdateBatch(@NotNull String sql,
+                                          @NotNull Iterable<? extends Iterable<?>> paramsBatch) throws SQLException {
+        try (PreparedStatement prepared = prepareQuery(sql)) {
+            setBatchPreparedParams(prepared, paramsBatch);
+            return prepared.executeBatch();
+        }
+    }
+
+    public static void setBatchPreparedParams(@NotNull PreparedStatement prepared,
+                                              @NotNull Iterable<? extends Iterable<?>> paramsBatch) throws SQLException {
+        for (Iterable<?> params : paramsBatch) {
+            setPreparedParams(prepared, params);
+            prepared.addBatch();
+        }
     }
 }
