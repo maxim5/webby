@@ -93,6 +93,30 @@ public interface BaseTable<E> extends Iterable<E> {
     int updateWhere(@NotNull E entity, @NotNull Where where);
 
     @CanIgnoreReturnValue
+    default int updateWhereOrInsert(@NotNull E entity, @NotNull Where where) {
+        int updated = updateWhere(entity, where);
+        if (updated == 0) {
+            return insert(entity);
+        }
+        return updated;
+    }
+
+    @CanIgnoreReturnValue
+    int insertData(@NotNull EntityData data);
+
+    @CanIgnoreReturnValue
+    int updateDataWhere(@NotNull EntityData data, @NotNull Where where);
+
+    @CanIgnoreReturnValue
+    default int updateWhereOrInsertData(@NotNull EntityData data, @NotNull Where where) {
+        int updated = updateDataWhere(data, where);
+        if (updated == 0) {
+            return insertData(data);
+        }
+        return updated;
+    }
+
+    @CanIgnoreReturnValue
     int deleteWhere(@NotNull Where where);
 
     @NotNull TableMeta meta();
