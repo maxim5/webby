@@ -17,13 +17,6 @@ public record EntityColumnMap<E extends Enum<E> & Column>(@NotNull EnumMap<E, Ob
 
     @Override
     public @NotNull ThrowConsumer<PreparedStatement, SQLException> dataProvider() {
-        return statement -> setParams(statement, map.values());
-    }
-
-    public static void setParams(@NotNull PreparedStatement statement, @NotNull Iterable<Object> values) throws SQLException {
-        int index = 0;
-        for (Object value : values) {
-            statement.setObject(++index, value);
-        }
+        return statement -> QueryRunner.setParams(statement, map.values());
     }
 }

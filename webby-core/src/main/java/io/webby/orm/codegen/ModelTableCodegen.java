@@ -90,6 +90,9 @@ public class ModelTableCodegen extends BaseCodegen {
         insertData();
         updateDataWhere();
 
+        insertBatch();
+        updateWhereBatch();
+
         deleteByPk();
         deleteWhere();
 
@@ -675,7 +678,6 @@ public class ModelTableCodegen extends BaseCodegen {
     private void updateWhere() {
         Snippet query = new Snippet()
                 .withLines(UpdateMaker.make(table, table.columns(Predicate.not(TableField::isPrimaryKey))));
-
         Map<String, String> context = EasyMaps.asMap(
             "$sql_query_literal", wrapAsStringLiteral(query, INDENT2)
         );
@@ -815,6 +817,47 @@ public class ModelTableCodegen extends BaseCodegen {
             }
         }\n
         """, mainContext);
+    }
+
+    private void insertBatch() {
+        Snippet query = new InsertMaker(InsertMaker.Ignore.DEFAULT).makeAll(table);
+        Map<String, String> context = Map.of(
+            // TODO[minor]: add an assert for batch
+            // "$model_id_assert", AssertModelIdMaker.makeAssert("$model_param", table).join(),
+            "$sql_query_literal", wrapAsStringLiteral(query, INDENT2)
+        );
+
+        appendCode("""
+        @Override
+        public int[] insertBatch(@Nonnull Collection<? extends $ModelClass> batch) {
+            String query = $sql_query_literal;
+            try {
+                return runner().runUpdateBatch(query, batch.stream().map($TableClass::valuesForInsert).toList());
+            } catch (SQLException e) {
+                throw new QueryException("Failed to insert a batch of entities into $TableClass", query, batch, e);
+            }
+        }\n
+        """, EasyMaps.merge(context, mainContext));
+    }
+
+    private void updateWhereBatch() {
+        Snippet query = new Snippet()
+                .withLines(UpdateMaker.make(table, table.columns(Predicate.not(TableField::isPrimaryKey))));
+        Map<String, String> context = EasyMaps.asMap(
+            "$sql_query_literal", wrapAsStringLiteral(query, INDENT2)
+        );
+
+        appendCode("""
+        @Override
+        public int[] updateWhereBatch(@Nonnull Collection<? extends $ModelClass> batch, @Nonnull Where where) {
+            String query = $sql_query_literal + where.repr();
+            try {
+                return runner().runUpdateBatch(query, batch.stream().map(entity -> valuesForUpdateWhere(entity, where)).toList());
+            } catch (SQLException e) {
+                throw new QueryException("Failed to update a batch of entities in $TableClass by a filter", query, batch, e);
+            }
+        }\n
+        """, EasyMaps.merge(context, mainContext));
     }
 
     private void deleteByPk() {

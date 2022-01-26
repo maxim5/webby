@@ -7,6 +7,7 @@ import io.webby.orm.api.query.*;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
+import java.util.Collection;
 import java.util.List;
 import java.util.function.Consumer;
 
@@ -115,6 +116,12 @@ public interface BaseTable<E> extends Iterable<E> {
         }
         return updated;
     }
+
+    @CanIgnoreReturnValue
+    int[] insertBatch(@NotNull Collection<? extends E> batch);
+
+    @CanIgnoreReturnValue
+    int[] updateWhereBatch(@NotNull Collection<? extends E> batch, @NotNull Where where);
 
     @CanIgnoreReturnValue
     int deleteWhere(@NotNull Where where);
