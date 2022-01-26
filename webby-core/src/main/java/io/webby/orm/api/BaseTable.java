@@ -3,6 +3,8 @@ package io.webby.orm.api;
 import com.google.common.collect.Lists;
 import com.google.errorprone.annotations.CanIgnoreReturnValue;
 import com.google.errorprone.annotations.MustBeClosed;
+import io.webby.orm.api.entity.BatchEntityData;
+import io.webby.orm.api.entity.EntityData;
 import io.webby.orm.api.query.*;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
@@ -122,6 +124,12 @@ public interface BaseTable<E> extends Iterable<E> {
 
     @CanIgnoreReturnValue
     int[] updateWhereBatch(@NotNull Collection<? extends E> batch, @NotNull Where where);
+
+    @CanIgnoreReturnValue
+    int[] insertDataBatch(@NotNull BatchEntityData batchData);
+
+    @CanIgnoreReturnValue
+    int[] updateDataWhereBatch(@NotNull BatchEntityData batchData, @NotNull Where where);
 
     @CanIgnoreReturnValue
     int deleteWhere(@NotNull Where where);

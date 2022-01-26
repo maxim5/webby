@@ -5,6 +5,8 @@ import com.google.common.collect.Streams;
 import com.google.common.primitives.Primitives;
 import com.google.mu.util.Optionals;
 import io.webby.orm.api.*;
+import io.webby.orm.api.entity.BatchEntityData;
+import io.webby.orm.api.entity.EntityData;
 import io.webby.orm.api.query.Filter;
 import io.webby.orm.api.query.TermType;
 import io.webby.orm.api.query.Where;
@@ -93,6 +95,9 @@ public class ModelTableCodegen extends BaseCodegen {
         insertBatch();
         updateWhereBatch();
 
+        insertDataBatch();
+        updateDataWhereBatch();
+
         deleteByPk();
         deleteWhere();
 
@@ -134,7 +139,7 @@ public class ModelTableCodegen extends BaseCodegen {
             baseTableClasses().stream().map(FQN::of),
             Stream.of(Connector.class, QueryRunner.class, QueryException.class, Engine.class, ReadFollow.class,
                       Filter.class, Where.class, io.webby.orm.api.query.Column.class, TermType.class,
-                      ResultSetIterator.class, TableMeta.class, EntityData.class).map(FQN::of),
+                      ResultSetIterator.class, TableMeta.class, EntityData.class, BatchEntityData.class).map(FQN::of),
             customClasses.stream().map(FQN::of),
             customClasses.stream().map(adaptersScanner::locateAdapterFqn),
             foreignKeyClasses.stream().map(FQN::of),
@@ -783,17 +788,20 @@ public class ModelTableCodegen extends BaseCodegen {
             Collection<? extends Column> columns = data.columns();
             assert columns.size() > 0 : "Entity data contains empty columns: " + data;
             
-            String columnsSql = columns.stream().map(Column::name).collect(Collectors.joining(", "));
-            String valuesSql = "?,".repeat(columns.size() - 1);
-            String query = "INSERT INTO $table_sql (" + columnsSql + ")\\n" +
-                           "VALUES (" + valuesSql + "?)\\n";
-            
+            String query = makeInsertQueryForColumns(columns);
             try (PreparedStatement statement = runner().prepareQuery(query)) {
                 data.dataProvider().accept(statement);
                 return statement.executeUpdate();
             } catch (SQLException e) {
                 throw new QueryException("Failed to insert entity data into $TableClass", query, data, e);
             }
+        }
+        
+        protected static @Nonnull String makeInsertQueryForColumns(@Nonnull Collection<? extends Column> columns) {
+            String columnsSql = columns.stream().map(Column::name).collect(Collectors.joining(", "));
+            String valuesSql = "?,".repeat(columns.size() - 1);
+            return "INSERT INTO $table_sql (" + columnsSql + ")\\n" +
+                   "VALUES (" + valuesSql + "?)\\n";
         }\n
         """, mainContext);
     }
@@ -805,16 +813,19 @@ public class ModelTableCodegen extends BaseCodegen {
             Collection<? extends Column> columns = data.columns();
             assert columns.size() > 0 : "Entity data contains empty columns: " + data;
     
-            String valuesSql = columns.stream().map(column -> column.name() + "=?").collect(Collectors.joining(", ", "", "\\n"));
-            String query = "UPDATE $table_sql\\n" +
-                           "SET " + valuesSql + where.repr();
-    
+            String query = makeUpdateQueryForColumns(columns, where);
             try (PreparedStatement statement = runner().prepareQuery(query)) {
                 data.dataProvider().accept(statement);
                 return statement.executeUpdate();
             } catch (SQLException e) {
                 throw new QueryException("Failed to update entities data in $TableClass by a filter", query, data, e);
             }
+        }
+        
+        protected static @Nonnull String makeUpdateQueryForColumns(@Nonnull Collection<? extends Column> columns, @Nonnull Where where) {
+            String valuesSql = columns.stream().map(column -> column.name() + "=?").collect(Collectors.joining(", ", "", "\\n"));
+            return "UPDATE $table_sql\\n" +
+                   "SET " + valuesSql + where.repr();
         }\n
         """, mainContext);
     }
@@ -858,6 +869,43 @@ public class ModelTableCodegen extends BaseCodegen {
             }
         }\n
         """, EasyMaps.merge(context, mainContext));
+    }
+
+    private void insertDataBatch() {
+        appendCode("""
+        @Override
+        public int[] insertDataBatch(@Nonnull BatchEntityData batchData) {
+            Collection<? extends Column> columns = batchData.columns();
+            assert columns.size() > 0 : "Entity data contains empty columns: " + batchData;
+    
+            String query = makeInsertQueryForColumns(columns);
+            try (PreparedStatement statement = runner().prepareQuery(query)) {
+                batchData.dataProvider().accept(statement);
+                return statement.executeBatch();
+            } catch (SQLException e) {
+                throw new QueryException("Failed to insert a batch of entity data into $TableClass", query, batchData, e);
+            }
+        }\n
+        """, mainContext);
+    }
+
+    // TODO: where args are missing - depend on the batch
+    private void updateDataWhereBatch() {
+        appendCode("""
+        @Override
+        public int[] updateDataWhereBatch(@Nonnull BatchEntityData batchData, @Nonnull Where where) {
+            Collection<? extends Column> columns = batchData.columns();
+            assert columns.size() > 0 : "Entity data contains empty columns: " + batchData;
+    
+            String query = makeUpdateQueryForColumns(columns, where);
+            try (PreparedStatement statement = runner().prepareQuery(query)) {
+                batchData.dataProvider().accept(statement);
+                return statement.executeBatch();
+            } catch (SQLException e) {
+                throw new QueryException("Failed to update batch of entity data in $TableClass by a filter", query, batchData, e);
+            }
+        }\n
+        """, mainContext);
     }
 
     private void deleteByPk() {
