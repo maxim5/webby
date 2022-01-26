@@ -182,12 +182,12 @@ public class QueryRunner {
     public @NotNull PreparedStatement prepareQuery(@NotNull String sql,
                                                    @Nullable Object @NotNull ... params) throws SQLException {
         PreparedStatement prepared = connection.prepareStatement(sql);
-        setParams(prepared, params);
+        setPreparedParams(prepared, params);
         return prepared;
     }
 
-    public static void setParams(@NotNull PreparedStatement statement,
-                                 @Nullable Object @NotNull ... params) throws SQLException {
+    public static void setPreparedParams(@NotNull PreparedStatement statement,
+                                         @Nullable Object @NotNull ... params) throws SQLException {
         for (int i = 0; i < params.length; i++) {
             statement.setObject(i + 1, params[i]);
         }
@@ -196,11 +196,12 @@ public class QueryRunner {
     @MustBeClosed
     public @NotNull PreparedStatement prepareQuery(@NotNull String sql, @NotNull Iterable<?> params) throws SQLException {
         PreparedStatement prepared = connection.prepareStatement(sql);
-        setParams(prepared, params);
+        setPreparedParams(prepared, params);
         return prepared;
     }
 
-    public static void setParams(@NotNull PreparedStatement statement, @NotNull Iterable<?> values) throws SQLException {
+    public static void setPreparedParams(@NotNull PreparedStatement statement,
+                                         @NotNull Iterable<?> values) throws SQLException {
         int index = 0;
         for (Object value : values) {
             statement.setObject(++index, value);
@@ -210,11 +211,12 @@ public class QueryRunner {
     @MustBeClosed
     public @NotNull PreparedStatement prepareQuery(@NotNull String sql, @NotNull IntContainer params) throws SQLException {
         PreparedStatement prepared = connection.prepareStatement(sql);
-        setParams(prepared, params);
+        setPreparedParams(prepared, params);
         return prepared;
     }
 
-    public static void setParams(@NotNull PreparedStatement statement, @NotNull IntContainer values) throws SQLException {
+    public static void setPreparedParams(@NotNull PreparedStatement statement,
+                                         @NotNull IntContainer values) throws SQLException {
         int index = 0;
         for (IntCursor cursor : values) {
             statement.setInt(++index, cursor.value);
@@ -224,11 +226,12 @@ public class QueryRunner {
     @MustBeClosed
     public @NotNull PreparedStatement prepareQuery(@NotNull String sql, @NotNull LongContainer params) throws SQLException {
         PreparedStatement prepared = connection.prepareStatement(sql);
-        setParams(prepared, params);
+        setPreparedParams(prepared, params);
         return prepared;
     }
 
-    public static void setParams(@NotNull PreparedStatement statement, @NotNull LongContainer values) throws SQLException {
+    public static void setPreparedParams(@NotNull PreparedStatement statement,
+                                         @NotNull LongContainer values) throws SQLException {
         int index = 0;
         for (LongCursor cursor : values) {
             statement.setLong(++index, cursor.value);
@@ -303,7 +306,7 @@ public class QueryRunner {
                                           @NotNull Collection<Object[]> paramsBatch) throws SQLException {
         try (PreparedStatement prepared = prepareQuery(sql)) {
             for (Object[] params : paramsBatch) {
-                setParams(prepared, params);
+                setPreparedParams(prepared, params);
                 prepared.addBatch();
             }
             return prepared.executeBatch();
@@ -314,7 +317,7 @@ public class QueryRunner {
                                           @NotNull Iterable<? extends Iterable<?>> paramsBatch) throws SQLException {
         try (PreparedStatement prepared = prepareQuery(sql)) {
             for (Iterable<?> params : paramsBatch) {
-                setParams(prepared, params);
+                setPreparedParams(prepared, params);
                 prepared.addBatch();
             }
             return prepared.executeBatch();
@@ -324,7 +327,7 @@ public class QueryRunner {
     public @NotNull AutoIncResult runAutoIncUpdate(@NotNull String sql,
                                                    @Nullable Object @NotNull ... params) throws SQLException {
         try (PreparedStatement prepared = connection.prepareStatement(sql, Statement.RETURN_GENERATED_KEYS)) {
-            setParams(prepared, params);
+            setPreparedParams(prepared, params);
 
             // See https://stackoverflow.com/questions/1915166/how-to-get-the-insert-id-in-jdbc
             int changedRowCount = prepared.executeUpdate();

@@ -11,6 +11,6 @@ import java.util.List;
 
 public record EntityLongData(@NotNull List<Column> columns, @NotNull LongContainer values) implements EntityData {
     @Override public @NotNull ThrowConsumer<PreparedStatement, SQLException> dataProvider() {
-        return statement -> QueryRunner.setParams(statement, values);
+        return statement -> QueryRunner.setPreparedParams(statement, values);
     }
 }
