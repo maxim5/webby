@@ -1,5 +1,6 @@
 package io.webby.orm.api;
 
+import io.webby.orm.api.query.Column;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.List;
@@ -9,5 +10,9 @@ public interface TableMeta {
 
     @NotNull List<ColumnMeta> sqlColumns();
 
-    record ColumnMeta(@NotNull String name, @NotNull Class<?> type, boolean isPrimaryKey, boolean isForeignKey) {}
+    record ColumnMeta(@NotNull Column column, @NotNull Class<?> type, boolean isPrimaryKey, boolean isForeignKey) {
+        public @NotNull String name() {
+            return column.name();
+        }
+    }
 }

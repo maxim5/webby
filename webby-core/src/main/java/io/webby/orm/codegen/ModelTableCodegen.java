@@ -948,7 +948,7 @@ public class ModelTableCodegen extends BaseCodegen {
                                 nativeType == byte[].class ?
                                         "byte[]" :
                                         nativeType.getName();
-                return "new ColumnMeta(\"%s\", %s.class, %s, %s)".formatted(sqlName, type, primaryKey, foreignKey);
+                return "new ColumnMeta(OwnColumn.%s, %s.class, %s, %s)".formatted(sqlName, type, primaryKey, foreignKey);
             }).collect(Collectors.joining(",\n" + INDENT3))
         );
 

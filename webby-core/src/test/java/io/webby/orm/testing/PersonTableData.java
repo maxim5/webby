@@ -40,14 +40,14 @@ public class PersonTableData {
         @Override
         public @NotNull List<ColumnMeta> sqlColumns() {
             return List.of(
-                new ColumnMeta("id", int.class, true, false),
-                new ColumnMeta("name", String.class, false, false),
-                new ColumnMeta("country", String.class, false, false),
-                new ColumnMeta("sex", boolean.class, false, false),
-                new ColumnMeta("birthday", Timestamp.class, false, false),
-                new ColumnMeta("iq", int.class, false, false),
-                new ColumnMeta("height", double.class, false, false),
-                new ColumnMeta("photo", byte[].class, false, false)
+                new ColumnMeta(PersonColumn.id, int.class, true, false),
+                new ColumnMeta(PersonColumn.name, String.class, false, false),
+                new ColumnMeta(PersonColumn.country, String.class, false, false),
+                new ColumnMeta(PersonColumn.sex, boolean.class, false, false),
+                new ColumnMeta(PersonColumn.birthday, Timestamp.class, false, false),
+                new ColumnMeta(PersonColumn.iq, int.class, false, false),
+                new ColumnMeta(PersonColumn.height, double.class, false, false),
+                new ColumnMeta(PersonColumn.photo, byte[].class, false, false)
             );
         }
     };
