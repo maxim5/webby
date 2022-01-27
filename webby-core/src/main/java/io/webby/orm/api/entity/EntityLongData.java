@@ -3,7 +3,6 @@ package io.webby.orm.api.entity;
 import com.carrotsearch.hppc.LongContainer;
 import io.webby.orm.api.QueryRunner;
 import io.webby.orm.api.query.Column;
-import io.webby.util.func.ThrowConsumer;
 import org.jetbrains.annotations.NotNull;
 
 import java.sql.PreparedStatement;
@@ -17,7 +16,7 @@ public record EntityLongData(@NotNull List<Column> columns, @NotNull LongContain
     }
 
     @Override
-    public @NotNull ThrowConsumer<PreparedStatement, SQLException> dataProvider() {
-        return statement -> QueryRunner.setPreparedParams(statement, values);
+    public void provideValues(@NotNull PreparedStatement statement) throws SQLException {
+        QueryRunner.setPreparedParams(statement, values);
     }
 }

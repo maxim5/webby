@@ -3,7 +3,6 @@ package io.webby.orm.api.entity;
 import com.carrotsearch.hppc.LongContainer;
 import com.carrotsearch.hppc.cursors.LongCursor;
 import io.webby.orm.api.query.Column;
-import io.webby.util.func.ThrowConsumer;
 import org.jetbrains.annotations.NotNull;
 
 import java.sql.PreparedStatement;
@@ -24,12 +23,12 @@ public record BatchEntityLongData(@NotNull List<Column> columns,
     }
 
     @Override
-    public @NotNull ThrowConsumer<PreparedStatement, SQLException> dataProvider() {
-        return statement -> setBatchPreparedParams(statement, values, batchSize);
+    public void provideValues(@NotNull PreparedStatement statement) throws SQLException {
+        setBatchPreparedParams(statement, values, batchSize);
     }
 
-    public static void setBatchPreparedParams(@NotNull PreparedStatement statement, 
-                                              @NotNull LongContainer values, 
+    public static void setBatchPreparedParams(@NotNull PreparedStatement statement,
+                                              @NotNull LongContainer values,
                                               int batchSize) throws SQLException {
         int index = 0;
         for (LongCursor cursor : values) {

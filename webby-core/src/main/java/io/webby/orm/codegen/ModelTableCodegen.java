@@ -790,7 +790,7 @@ public class ModelTableCodegen extends BaseCodegen {
             
             String query = makeInsertQueryForColumns(columns);
             try (PreparedStatement statement = runner().prepareQuery(query)) {
-                data.dataProvider().accept(statement);
+                data.provideValues(statement);
                 return statement.executeUpdate();
             } catch (SQLException e) {
                 throw new QueryException("Failed to insert entity data into $TableClass", query, data, e);
@@ -815,7 +815,7 @@ public class ModelTableCodegen extends BaseCodegen {
     
             String query = makeUpdateQueryForColumns(columns, where);
             try (PreparedStatement statement = runner().prepareQuery(query)) {
-                data.dataProvider().accept(statement);
+                data.provideValues(statement);
                 return statement.executeUpdate();
             } catch (SQLException e) {
                 throw new QueryException("Failed to update entities data in $TableClass by a filter", query, data, e);
@@ -880,7 +880,7 @@ public class ModelTableCodegen extends BaseCodegen {
     
             String query = makeInsertQueryForColumns(columns);
             try (PreparedStatement statement = runner().prepareQuery(query)) {
-                batchData.dataProvider().accept(statement);
+                batchData.provideValues(statement);
                 return statement.executeBatch();
             } catch (SQLException e) {
                 throw new QueryException("Failed to insert a batch of entity data into $TableClass", query, batchData, e);
@@ -899,7 +899,7 @@ public class ModelTableCodegen extends BaseCodegen {
     
             String query = makeUpdateQueryForColumns(columns, where);
             try (PreparedStatement statement = runner().prepareQuery(query)) {
-                batchData.dataProvider().accept(statement);
+                batchData.provideValues(statement);
                 return statement.executeBatch();
             } catch (SQLException e) {
                 throw new QueryException("Failed to update batch of entity data in $TableClass by a filter", query, batchData, e);

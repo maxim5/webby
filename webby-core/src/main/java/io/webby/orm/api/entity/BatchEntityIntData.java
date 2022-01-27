@@ -3,7 +3,6 @@ package io.webby.orm.api.entity;
 import com.carrotsearch.hppc.IntContainer;
 import com.carrotsearch.hppc.cursors.IntCursor;
 import io.webby.orm.api.query.Column;
-import io.webby.util.func.ThrowConsumer;
 import org.jetbrains.annotations.NotNull;
 
 import java.sql.PreparedStatement;
@@ -24,8 +23,8 @@ public record BatchEntityIntData(@NotNull List<Column> columns,
     }
 
     @Override
-    public @NotNull ThrowConsumer<PreparedStatement, SQLException> dataProvider() {
-        return statement -> setBatchPreparedParams(statement, values, batchSize);
+    public void provideValues(@NotNull PreparedStatement statement) throws SQLException {
+        setBatchPreparedParams(statement, values, batchSize);
     }
 
     public static void setBatchPreparedParams(@NotNull PreparedStatement statement,

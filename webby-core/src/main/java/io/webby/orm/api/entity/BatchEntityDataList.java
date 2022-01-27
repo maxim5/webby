@@ -20,13 +20,11 @@ public record BatchEntityDataList(@NotNull List<EntityData> batch) implements Ba
     }
 
     @Override
-    public @NotNull ThrowConsumer<PreparedStatement, SQLException> dataProvider() {
-        return statement -> {
-            for (EntityData entityData : batch) {
-                entityData.dataProvider().accept(statement);
-                statement.addBatch();
-            }
-        };
+    public void provideValues(@NotNull PreparedStatement statement) throws SQLException {
+        for (EntityData entityData : batch) {
+            entityData.provideValues(statement);
+            statement.addBatch();
+        }
     }
 
     @Override
