@@ -1,9 +1,6 @@
 package io.webby.testing;
 
-import com.carrotsearch.hppc.IntArrayList;
-import com.carrotsearch.hppc.IntContainer;
-import com.carrotsearch.hppc.IntHashSet;
-import com.carrotsearch.hppc.IntIntMap;
+import com.carrotsearch.hppc.*;
 import org.jetbrains.annotations.NotNull;
 
 import static io.webby.testing.TestingPrimitives.newIntMap;
@@ -20,5 +17,13 @@ public class AssertPrimitives {
 
     public static void assertInts(@NotNull IntIntMap map, int... keyValues) {
         assertEquals(newIntMap(keyValues), map);
+    }
+
+    public static void assertLongsNoOrder(@NotNull LongContainer container, long... expected) {
+        assertEquals(LongHashSet.from(expected), new LongHashSet(container));
+    }
+
+    public static void assertLongsOrdered(@NotNull LongContainer container, long... expected) {
+        assertEquals(LongArrayList.from(expected), container);
     }
 }

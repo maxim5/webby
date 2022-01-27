@@ -3,6 +3,7 @@ package io.webby.hppc;
 import com.carrotsearch.hppc.IntArrayList;
 import com.carrotsearch.hppc.IntIntHashMap;
 import com.carrotsearch.hppc.IntObjectHashMap;
+import com.carrotsearch.hppc.LongArrayList;
 import com.carrotsearch.hppc.cursors.IntCursor;
 import com.google.common.truth.IterableSubject;
 import io.webby.util.hppc.EasyHppc;
@@ -13,8 +14,7 @@ import java.util.stream.IntStream;
 import java.util.stream.Stream;
 
 import static com.google.common.truth.Truth.assertThat;
-import static io.webby.testing.AssertPrimitives.assertInts;
-import static io.webby.testing.AssertPrimitives.assertIntsOrdered;
+import static io.webby.testing.AssertPrimitives.*;
 import static io.webby.testing.TestingPrimitives.ints;
 import static io.webby.testing.TestingUtil.array;
 
@@ -28,6 +28,17 @@ public class EasyHppcTest {
         assertIntsOrdered(EasyHppc.slice(list, 0, 4), 1, 2, 3);
         assertIntsOrdered(EasyHppc.slice(list, 1, 2), 2);
         assertIntsOrdered(EasyHppc.slice(list, 1, 1));
+    }
+
+    @Test
+    public void long_list_slice() {
+        LongArrayList list = LongArrayList.from(1, 2, 3);
+
+        assertLongsOrdered(EasyHppc.slice(list, 0, 2), 1, 2);
+        assertLongsOrdered(EasyHppc.slice(list, 0, 3), 1, 2, 3);
+        assertLongsOrdered(EasyHppc.slice(list, 0, 4), 1, 2, 3);
+        assertLongsOrdered(EasyHppc.slice(list, 1, 2), 2);
+        assertLongsOrdered(EasyHppc.slice(list, 1, 1));
     }
 
     @Test

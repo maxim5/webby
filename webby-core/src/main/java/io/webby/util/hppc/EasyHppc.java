@@ -28,6 +28,17 @@ public class EasyHppc {
         return slice;
     }
 
+    public static @NotNull LongArrayList slice(@NotNull LongArrayList list, int fromIndex, int toIndex) {
+        assert fromIndex >= 0 && toIndex >= 0 && fromIndex <= toIndex :
+            "Invalid range: from=%d to=%d".formatted(fromIndex, toIndex);
+        fromIndex = Math.min(fromIndex, list.elementsCount);
+        toIndex = Math.min(toIndex, list.elementsCount);
+        LongArrayList slice = new LongArrayList();
+        slice.buffer = Arrays.copyOfRange(list.buffer, fromIndex, toIndex);
+        slice.elementsCount = toIndex - fromIndex;
+        return slice;
+    }
+
     public static @NotNull IntIntMap slice(@NotNull IntIntMap map, int @NotNull [] keys) {
         IntIntHashMap result = new IntIntHashMap(keys.length);
         for (int key : keys) {
@@ -42,6 +53,14 @@ public class EasyHppc {
             result.put(cursor.value, map.get(cursor.value));
         }
         return result;
+    }
+
+    public static @NotNull IntArrayList toArrayList(@NotNull IntContainer container) {
+        return container instanceof IntArrayList arrayList ? arrayList : new IntArrayList(container);
+    }
+
+    public static @NotNull LongArrayList toArrayList(@NotNull LongContainer container) {
+        return container instanceof LongArrayList arrayList ? arrayList : new LongArrayList(container);
     }
 
     @SuppressWarnings("UnstableApiUsage")
