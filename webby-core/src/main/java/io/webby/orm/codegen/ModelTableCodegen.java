@@ -7,6 +7,7 @@ import com.google.mu.util.Optionals;
 import io.webby.orm.api.*;
 import io.webby.orm.api.entity.BatchEntityData;
 import io.webby.orm.api.entity.EntityData;
+import io.webby.orm.api.query.Contextual;
 import io.webby.orm.api.query.Filter;
 import io.webby.orm.api.query.TermType;
 import io.webby.orm.api.query.Where;
@@ -139,7 +140,8 @@ public class ModelTableCodegen extends BaseCodegen {
             baseTableClasses().stream().map(FQN::of),
             Stream.of(Connector.class, QueryRunner.class, QueryException.class, Engine.class, ReadFollow.class,
                       Filter.class, Where.class, io.webby.orm.api.query.Column.class, TermType.class,
-                      ResultSetIterator.class, TableMeta.class, EntityData.class, BatchEntityData.class).map(FQN::of),
+                      ResultSetIterator.class, TableMeta.class, EntityData.class, BatchEntityData.class,
+                      Contextual.class).map(FQN::of),
             customClasses.stream().map(FQN::of),
             customClasses.stream().map(adaptersScanner::locateAdapterFqn),
             foreignKeyClasses.stream().map(FQN::of),
@@ -287,7 +289,7 @@ public class ModelTableCodegen extends BaseCodegen {
         @Override
         public int count(@Nonnull Filter filter) {
             String query = "SELECT COUNT(*) FROM $table_sql\\n" + filter.repr();
-            try (PreparedStatement statement = runner().prepareQuery(query, filter.args());
+            try (PreparedStatement statement = runner().prepareQuery(query, filter.argsAssertingResolved());
                  ResultSet result = statement.executeQuery()) {
                 return result.next() ? result.getInt(1) : 0;
             } catch (SQLException e) {
@@ -313,7 +315,7 @@ public class ModelTableCodegen extends BaseCodegen {
         @Override
         public boolean exists(@Nonnull Where where) {
             String query = "SELECT EXISTS (SELECT * FROM $table_sql " + where.repr() + " LIMIT 1)";
-            try (PreparedStatement statement = runner().prepareQuery(query, where.args());
+            try (PreparedStatement statement = runner().prepareQuery(query, where.argsAssertingResolved());
                  ResultSet result = statement.executeQuery()) {
                 return result.next() && result.getBoolean(1);
             } catch (SQLException e) {
@@ -489,7 +491,7 @@ public class ModelTableCodegen extends BaseCodegen {
             public @Nonnull IntArrayList fetchPks(@Nonnull Filter filter) {
                 String query = "SELECT $pk_column FROM $table_sql\\n" + filter.repr();
                 try {
-                    return runner().fetchIntColumn(() -> runner().prepareQuery(query, filter.args()));
+                    return runner().fetchIntColumn(() -> runner().prepareQuery(query, filter.argsAssertingResolved()));
                 } catch (SQLException e) {
                     throw new QueryException("Failed to fetch by PKs in $TableClass", query, filter.args(), e);
                 }
@@ -502,7 +504,7 @@ public class ModelTableCodegen extends BaseCodegen {
             public @Nonnull LongArrayList fetchPks(@Nonnull Filter filter) {
                 String query = "SELECT $pk_column FROM $table_sql\\n" + filter.repr();
                 try {
-                    return runner().fetchLongColumn(() -> runner().prepareQuery(query, filter.args()));
+                    return runner().fetchLongColumn(() -> runner().prepareQuery(query, filter.argsAssertingResolved()));
                 } catch (SQLException e) {
                     throw new QueryException("Failed to fetch by PKs in $TableClass", query, filter.args(), e);
                 }
@@ -559,7 +561,7 @@ public class ModelTableCodegen extends BaseCodegen {
         public @Nonnull ResultSetIterator<$ModelClass> iterator(@Nonnull Filter filter) {
             String query = SELECT_ENTITY_ALL[follow.ordinal()] + filter.repr();
             try {
-                return ResultSetIterator.of(runner().prepareQuery(query, filter.args()).executeQuery(),
+                return ResultSetIterator.of(runner().prepareQuery(query, filter.argsAssertingResolved()).executeQuery(),
                                             result -> fromRow(result, follow, 0));
             } catch (SQLException e) {
                 throw new QueryException("Failed to iterate over $TableClass", query, filter.args(), e);
@@ -710,9 +712,9 @@ public class ModelTableCodegen extends BaseCodegen {
         );
 
         appendCode("""
-        protected static @Nonnull List<Object> valuesForUpdateWhere(@Nonnull $ModelClass $model_param, @Nonnull Where where) {
+        protected static @Nonnull List<Object> valuesForUpdateWhere(@Nonnull $ModelClass $model_param,
+                                                                    @Nonnull List<Object> whereArgs) {
             Object[] values = valuesForUpdateWhere($model_param);
-            List<Object> whereArgs = where.args();
             if (whereArgs.isEmpty()) {
                 return Arrays.asList(values);
             }
@@ -720,6 +722,10 @@ public class ModelTableCodegen extends BaseCodegen {
             result.addAll(Arrays.asList(values));
             result.addAll(whereArgs);
             return result;
+        }
+        
+        protected static @Nonnull List<Object> valuesForUpdateWhere(@Nonnull $ModelClass $model_param, @Nonnull Where where) {
+            return valuesForUpdateWhere($model_param, where.argsAssertingResolved());
         }
         
         protected static @Nonnull Object[] valuesForUpdateWhere(@Nonnull $ModelClass $model_param) {
@@ -784,7 +790,7 @@ public class ModelTableCodegen extends BaseCodegen {
     private void insertData() {
         appendCode("""
         @Override
-        public int insertData(@Nonnull EntityData data) {
+        public int insertData(@Nonnull EntityData<?> data) {
             Collection<? extends Column> columns = data.columns();
             assert columns.size() > 0 : "Entity data contains empty columns: " + data;
             
@@ -809,7 +815,7 @@ public class ModelTableCodegen extends BaseCodegen {
     private void updateDataWhere() {
         appendCode("""
         @Override
-        public int updateDataWhere(@Nonnull EntityData data, @Nonnull Where where) {
+        public int updateDataWhere(@Nonnull EntityData<?> data, @Nonnull Where where) {
             Collection<? extends Column> columns = data.columns();
             assert columns.size() > 0 : "Entity data contains empty columns: " + data;
     
@@ -860,10 +866,13 @@ public class ModelTableCodegen extends BaseCodegen {
 
         appendCode("""
         @Override
-        public int[] updateWhereBatch(@Nonnull Collection<? extends $ModelClass> batch, @Nonnull Where where) {
+        public int[] updateWhereBatch(@Nonnull Collection<? extends $ModelClass> batch, @Nonnull Contextual<Where, $ModelClass> where) {
             String query = $sql_query_literal + where.repr();
             try {
-                return runner().runUpdateBatch(query, batch.stream().map(entity -> valuesForUpdateWhere(entity, where)).toList());
+                return runner().runUpdateBatch(
+                    query,
+                    batch.stream().map(entity -> valuesForUpdateWhere(entity, where.resolveQueryArgs(entity))).toList()
+                );
             } catch (SQLException e) {
                 throw new QueryException("Failed to update a batch of entities in $TableClass by a filter", query, batch, e);
             }
@@ -874,13 +883,13 @@ public class ModelTableCodegen extends BaseCodegen {
     private void insertDataBatch() {
         appendCode("""
         @Override
-        public int[] insertDataBatch(@Nonnull BatchEntityData batchData) {
+        public int[] insertDataBatch(@Nonnull BatchEntityData<?> batchData) {
             Collection<? extends Column> columns = batchData.columns();
             assert columns.size() > 0 : "Entity data contains empty columns: " + batchData;
     
             String query = makeInsertQueryForColumns(columns);
             try (PreparedStatement statement = runner().prepareQuery(query)) {
-                batchData.provideValues(statement);
+                batchData.provideBatchValues(statement, null);
                 return statement.executeBatch();
             } catch (SQLException e) {
                 throw new QueryException("Failed to insert a batch of entity data into $TableClass", query, batchData, e);
@@ -889,17 +898,16 @@ public class ModelTableCodegen extends BaseCodegen {
         """, mainContext);
     }
 
-    // TODO: where args are missing - depend on the batch
     private void updateDataWhereBatch() {
         appendCode("""
         @Override
-        public int[] updateDataWhereBatch(@Nonnull BatchEntityData batchData, @Nonnull Where where) {
+        public <B> int[] updateDataWhereBatch(@Nonnull BatchEntityData<B> batchData, @Nonnull Contextual<Where, B> where) {
             Collection<? extends Column> columns = batchData.columns();
             assert columns.size() > 0 : "Entity data contains empty columns: " + batchData;
     
-            String query = makeUpdateQueryForColumns(columns, where);
+            String query = makeUpdateQueryForColumns(columns, where.query());
             try (PreparedStatement statement = runner().prepareQuery(query)) {
-                batchData.provideValues(statement);
+                batchData.provideBatchValues(statement, where);
                 return statement.executeBatch();
             } catch (SQLException e) {
                 throw new QueryException("Failed to update batch of entity data in $TableClass by a filter", query, batchData, e);
@@ -945,7 +953,7 @@ public class ModelTableCodegen extends BaseCodegen {
         public int deleteWhere(@Nonnull Where where) {
             String query = $sql_query_literal + where.repr();
             try {
-               return runner().runUpdate(query, where.args());
+               return runner().runUpdate(query, where.argsAssertingResolved());
            } catch (SQLException e) {
                throw new QueryException("Failed to delete entities in $TableClass by a filter", query, where.args(), e);
            }

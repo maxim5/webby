@@ -202,9 +202,14 @@ public class QueryRunner {
 
     public static void setPreparedParams(@NotNull PreparedStatement statement,
                                          @NotNull Iterable<?> values) throws SQLException {
-        int index = 0;
+        setPreparedParams(statement, values, 0);
+    }
+
+    public static void setPreparedParams(@NotNull PreparedStatement statement,
+                                         @NotNull Iterable<?> values,
+                                         int startIndex) throws SQLException {
         for (Object value : values) {
-            statement.setObject(++index, value);
+            statement.setObject(++startIndex, value);
         }
     }
 

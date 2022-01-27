@@ -103,27 +103,27 @@ public interface BaseTable<E> extends Iterable<E> {
     int insertIgnore(@NotNull E entity);
 
     @CanIgnoreReturnValue
-    int insertData(@NotNull EntityData data);
+    int insertData(@NotNull EntityData<?> data);
 
     @CanIgnoreReturnValue
     int[] insertBatch(@NotNull Collection<? extends E> batch);
 
     @CanIgnoreReturnValue
-    int[] insertDataBatch(@NotNull BatchEntityData batchData);
+    int[] insertDataBatch(@NotNull BatchEntityData<?> batchData);
 
     // UPDATE
 
     @CanIgnoreReturnValue
-    int updateDataWhere(@NotNull EntityData data, @NotNull Where where);
+    int updateDataWhere(@NotNull EntityData<?> data, @NotNull Where where);
 
     @CanIgnoreReturnValue
     int updateWhere(@NotNull E entity, @NotNull Where where);
 
     @CanIgnoreReturnValue
-    int[] updateWhereBatch(@NotNull Collection<? extends E> batch, @NotNull Where where);
+    int[] updateWhereBatch(@NotNull Collection<? extends E> batch, @NotNull Contextual<Where, E> where);
 
     @CanIgnoreReturnValue
-    int[] updateDataWhereBatch(@NotNull BatchEntityData batchData, @NotNull Where where);
+    <B> int[] updateDataWhereBatch(@NotNull BatchEntityData<B> batchData, @NotNull Contextual<Where, B> where);
 
     // INSERT OR UPDATE
 
@@ -137,7 +137,7 @@ public interface BaseTable<E> extends Iterable<E> {
     }
 
     @CanIgnoreReturnValue
-    default int updateWhereOrInsertData(@NotNull EntityData data, @NotNull Where where) {
+    default int updateWhereOrInsertData(@NotNull EntityData<?> data, @NotNull Where where) {
         int updated = updateDataWhere(data, where);
         if (updated == 0) {
             return insertData(data);

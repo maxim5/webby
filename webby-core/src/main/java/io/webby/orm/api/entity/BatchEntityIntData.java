@@ -1,41 +1,38 @@
 package io.webby.orm.api.entity;
 
+import com.carrotsearch.hppc.IntArrayList;
 import com.carrotsearch.hppc.IntContainer;
-import com.carrotsearch.hppc.cursors.IntCursor;
+import io.webby.orm.api.QueryRunner;
 import io.webby.orm.api.query.Column;
+import io.webby.orm.api.query.Contextual;
+import io.webby.util.hppc.EasyHppc;
 import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 
 import java.sql.PreparedStatement;
 import java.sql.SQLException;
 import java.util.List;
 
 public record BatchEntityIntData(@NotNull List<Column> columns,
-                                 @NotNull IntContainer values,
-                                 int batchSize) implements BatchEntityData {
+                                 @NotNull IntContainer values) implements BatchEntityData<IntContainer> {
     public BatchEntityIntData {
         assert !columns.isEmpty() : "Entity data batch columns are empty: " + this;
         assert !values.isEmpty() : "Entity data batch empty: " + this;
-        assert columns.size() * batchSize == values.size() : "Entity values don't match the columns and batch size: " + this;
-    }
-
-    public BatchEntityIntData(@NotNull List<Column> columns, @NotNull IntContainer values) {
-        this(columns, values, columns.isEmpty() ? 0 : values.size() / columns.size());
+        assert values.size() % columns.size() == 0 : "Entity values don't match the columns size: " + this;
     }
 
     @Override
-    public void provideValues(@NotNull PreparedStatement statement) throws SQLException {
-        setBatchPreparedParams(statement, values, batchSize);
-    }
-
-    public static void setBatchPreparedParams(@NotNull PreparedStatement statement,
-                                              @NotNull IntContainer values,
-                                              int batchSize) throws SQLException {
-        int index = 0;
-        for (IntCursor cursor : values) {
-            statement.setInt(++index, cursor.value);
-            if (index % batchSize == 0) {
-                statement.addBatch();
+    public void provideBatchValues(@NotNull PreparedStatement statement,
+                                   @Nullable Contextual<?, IntContainer> contextual) throws SQLException {
+        IntArrayList arrayList = EasyHppc.toArrayList(values);
+        for (int dataSize = dataSize(), i = 0; i < arrayList.size(); i += dataSize) {
+            IntArrayList slice = EasyHppc.slice(arrayList, i, i + dataSize);
+            QueryRunner.setPreparedParams(statement, slice);
+            if (contextual != null) {
+                List<Object> restQueryArgs = contextual.resolveQueryArgs(slice);
+                QueryRunner.setPreparedParams(statement, restQueryArgs, dataSize);
             }
+            statement.addBatch();
         }
     }
 }
