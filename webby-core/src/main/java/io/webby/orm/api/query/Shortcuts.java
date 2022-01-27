@@ -1,6 +1,7 @@
 package io.webby.orm.api.query;
 
 import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 
 import java.sql.Timestamp;
 import java.util.List;
@@ -37,6 +38,14 @@ public class Shortcuts {
 
     public static @NotNull Variable var(@NotNull Timestamp timestamp) {
         return new Variable(timestamp, TermType.TIME);
+    }
+
+    public static @NotNull Variable unresolved(@NotNull String name, @NotNull TermType type) {
+        return unresolved(name, type, UnresolvedArg.defaultValueForType(type));
+    }
+
+    public static @NotNull Variable unresolved(@NotNull String name, @NotNull TermType type, @Nullable Object defaultValue) {
+        return new Variable(new UnresolvedArg(name, defaultValue), type);
     }
 
     public static @NotNull BoolTerm lookupBy(@NotNull Column column, @NotNull Number variable) {
