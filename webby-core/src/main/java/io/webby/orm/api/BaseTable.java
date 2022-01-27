@@ -14,11 +14,17 @@ import java.util.List;
 import java.util.function.Consumer;
 
 public interface BaseTable<E> extends Iterable<E> {
+    // Base
+
     @NotNull Engine engine();
 
     @NotNull QueryRunner runner();
 
+    @NotNull TableMeta meta();
+
     @NotNull BaseTable<E> withReferenceFollowOnRead(@NotNull ReadFollow follow);
+
+    // Size
 
     int count();
 
@@ -35,6 +41,8 @@ public interface BaseTable<E> extends Iterable<E> {
     default boolean exists(@NotNull Where where) {
         return count(where) > 0;
     }
+
+    // Iteration
 
     @Override
     @MustBeClosed
@@ -86,6 +94,8 @@ public interface BaseTable<E> extends Iterable<E> {
         }
     }
 
+    // INSERT
+
     @CanIgnoreReturnValue
     int insert(@NotNull E entity);
 
@@ -93,7 +103,29 @@ public interface BaseTable<E> extends Iterable<E> {
     int insertIgnore(@NotNull E entity);
 
     @CanIgnoreReturnValue
+    int insertData(@NotNull EntityData data);
+
+    @CanIgnoreReturnValue
+    int[] insertBatch(@NotNull Collection<? extends E> batch);
+
+    @CanIgnoreReturnValue
+    int[] insertDataBatch(@NotNull BatchEntityData batchData);
+
+    // UPDATE
+
+    @CanIgnoreReturnValue
+    int updateDataWhere(@NotNull EntityData data, @NotNull Where where);
+
+    @CanIgnoreReturnValue
     int updateWhere(@NotNull E entity, @NotNull Where where);
+
+    @CanIgnoreReturnValue
+    int[] updateWhereBatch(@NotNull Collection<? extends E> batch, @NotNull Where where);
+
+    @CanIgnoreReturnValue
+    int[] updateDataWhereBatch(@NotNull BatchEntityData batchData, @NotNull Where where);
+
+    // INSERT OR UPDATE
 
     @CanIgnoreReturnValue
     default int updateWhereOrInsert(@NotNull E entity, @NotNull Where where) {
@@ -105,12 +137,6 @@ public interface BaseTable<E> extends Iterable<E> {
     }
 
     @CanIgnoreReturnValue
-    int insertData(@NotNull EntityData data);
-
-    @CanIgnoreReturnValue
-    int updateDataWhere(@NotNull EntityData data, @NotNull Where where);
-
-    @CanIgnoreReturnValue
     default int updateWhereOrInsertData(@NotNull EntityData data, @NotNull Where where) {
         int updated = updateDataWhere(data, where);
         if (updated == 0) {
@@ -119,20 +145,8 @@ public interface BaseTable<E> extends Iterable<E> {
         return updated;
     }
 
-    @CanIgnoreReturnValue
-    int[] insertBatch(@NotNull Collection<? extends E> batch);
-
-    @CanIgnoreReturnValue
-    int[] updateWhereBatch(@NotNull Collection<? extends E> batch, @NotNull Where where);
-
-    @CanIgnoreReturnValue
-    int[] insertDataBatch(@NotNull BatchEntityData batchData);
-
-    @CanIgnoreReturnValue
-    int[] updateDataWhereBatch(@NotNull BatchEntityData batchData, @NotNull Where where);
+    // DELETE
 
     @CanIgnoreReturnValue
     int deleteWhere(@NotNull Where where);
-
-    @NotNull TableMeta meta();
 }
