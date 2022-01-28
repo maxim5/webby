@@ -63,9 +63,8 @@ public class EasyHppc {
         return container instanceof LongArrayList arrayList ? arrayList : new LongArrayList(container);
     }
 
-    @SuppressWarnings("UnstableApiUsage")
     public static @NotNull Stream<IntCursor> toJavaStream(@NotNull IntContainer container) {
-        return Streams.stream(container.iterator());
+        return Streams.stream(container);
     }
 
     public static @NotNull ArrayList<Integer> toJavaList(@NotNull IntContainer container) {
