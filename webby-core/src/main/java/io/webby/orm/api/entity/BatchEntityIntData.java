@@ -14,7 +14,7 @@ import java.sql.SQLException;
 import java.util.List;
 
 public record BatchEntityIntData(@NotNull List<Column> columns,
-                                 @NotNull IntContainer values) implements BatchEntityData<IntContainer> {
+                                 @NotNull IntContainer values) implements BatchEntityData<IntArrayList> {
     public BatchEntityIntData {
         assert !columns.isEmpty() : "Entity data batch columns are empty: " + this;
         assert !values.isEmpty() : "Entity data batch empty: " + this;
@@ -23,7 +23,7 @@ public record BatchEntityIntData(@NotNull List<Column> columns,
 
     @Override
     public void provideBatchValues(@NotNull PreparedStatement statement,
-                                   @Nullable Contextual<?, IntContainer> contextual) throws SQLException {
+                                   @Nullable Contextual<?, IntArrayList> contextual) throws SQLException {
         IntArrayList arrayList = EasyHppc.toArrayList(values);
         for (int dataSize = dataSize(), i = 0; i < arrayList.size(); i += dataSize) {
             IntArrayList slice = EasyHppc.slice(arrayList, i, i + dataSize);
