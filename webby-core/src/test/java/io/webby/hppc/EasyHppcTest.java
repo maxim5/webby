@@ -1,9 +1,6 @@
 package io.webby.hppc;
 
-import com.carrotsearch.hppc.IntArrayList;
-import com.carrotsearch.hppc.IntIntHashMap;
-import com.carrotsearch.hppc.IntObjectHashMap;
-import com.carrotsearch.hppc.LongArrayList;
+import com.carrotsearch.hppc.*;
 import com.carrotsearch.hppc.cursors.IntCursor;
 import com.google.common.truth.IterableSubject;
 import io.webby.util.hppc.EasyHppc;
@@ -97,6 +94,39 @@ public class EasyHppcTest {
         assertIntsOrdered(EasyHppc.collectFromIntStream(IntStream.of()));
         assertIntsOrdered(EasyHppc.collectFromIntStream(IntStream.of(1)), 1);
         assertIntsOrdered(EasyHppc.collectFromIntStream(IntStream.of(1, 2)), 1, 2);
+    }
+
+    @Test
+    public void int_union() {
+        assertIntsNoOrder(EasyHppc.union(IntHashSet.from(), IntHashSet.from()));
+        assertIntsNoOrder(EasyHppc.union(IntHashSet.from(1, 2, 3), IntHashSet.from()), 1, 2, 3);
+        assertIntsNoOrder(EasyHppc.union(IntHashSet.from(), IntHashSet.from(1, 2, 3)), 1, 2, 3);
+        assertIntsNoOrder(EasyHppc.union(IntHashSet.from(1), IntHashSet.from(2)), 1, 2);
+        assertIntsNoOrder(EasyHppc.union(IntHashSet.from(1, 2), IntHashSet.from(1, 2)), 1, 2);
+        assertIntsNoOrder(EasyHppc.union(IntHashSet.from(1, 2, 3), IntHashSet.from(3, 4)), 1, 2, 3, 4);
+        assertIntsNoOrder(EasyHppc.union(IntHashSet.from(1, 2, 3), IntHashSet.from(4, 5)), 1, 2, 3, 4, 5);
+    }
+
+    @Test
+    public void int_intersect() {
+        assertIntsNoOrder(EasyHppc.intersect(IntHashSet.from(), IntHashSet.from()));
+        assertIntsNoOrder(EasyHppc.intersect(IntHashSet.from(1, 2, 3), IntHashSet.from()));
+        assertIntsNoOrder(EasyHppc.intersect(IntHashSet.from(), IntHashSet.from(1, 2, 3)));
+        assertIntsNoOrder(EasyHppc.intersect(IntHashSet.from(1), IntHashSet.from(2)));
+        assertIntsNoOrder(EasyHppc.intersect(IntHashSet.from(1, 2), IntHashSet.from(1, 2)), 1, 2);
+        assertIntsNoOrder(EasyHppc.intersect(IntHashSet.from(1, 2, 3), IntHashSet.from(3, 4)), 3);
+        assertIntsNoOrder(EasyHppc.intersect(IntHashSet.from(1, 2, 3), IntHashSet.from(4, 5)));
+    }
+
+    @Test
+    public void int_subtract() {
+        assertIntsNoOrder(EasyHppc.subtract(IntHashSet.from(), IntHashSet.from()));
+        assertIntsNoOrder(EasyHppc.subtract(IntHashSet.from(1, 2, 3), IntHashSet.from()), 1, 2, 3);
+        assertIntsNoOrder(EasyHppc.subtract(IntHashSet.from(), IntHashSet.from(1, 2, 3)));
+        assertIntsNoOrder(EasyHppc.subtract(IntHashSet.from(1), IntHashSet.from(2)), 1);
+        assertIntsNoOrder(EasyHppc.subtract(IntHashSet.from(1, 2), IntHashSet.from(1, 2)));
+        assertIntsNoOrder(EasyHppc.subtract(IntHashSet.from(1, 2, 3), IntHashSet.from(3, 4)), 1, 2);
+        assertIntsNoOrder(EasyHppc.subtract(IntHashSet.from(1, 2, 3), IntHashSet.from(4, 5)), 1, 2, 3);
     }
 
     private static @NotNull IterableSubject assertStreamThat(@NotNull Stream<IntCursor> stream) {

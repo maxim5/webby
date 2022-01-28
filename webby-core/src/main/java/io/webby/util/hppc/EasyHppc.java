@@ -91,4 +91,22 @@ public class EasyHppc {
     public static @NotNull IntArrayList collectFromIntStream(@NotNull IntStream stream) {
         return stream.collect(IntArrayList::new, IntArrayList::add, IntArrayList::addAll);
     }
+
+    public static @NotNull IntHashSet union(@NotNull IntContainer lhs, @NotNull IntContainer rhs) {
+        IntHashSet copy = new IntHashSet(lhs);
+        copy.addAll(rhs);
+        return copy;
+    }
+
+    public static @NotNull IntHashSet intersect(@NotNull IntContainer lhs, @NotNull IntLookupContainer rhs) {
+        IntHashSet copy = new IntHashSet(lhs);
+        copy.retainAll(rhs);
+        return copy;
+    }
+
+    public static @NotNull IntHashSet subtract(@NotNull IntContainer lhs, @NotNull IntContainer rhs) {
+        IntHashSet copy = new IntHashSet(lhs);
+        copy.removeAll(rhs);
+        return copy;
+    }
 }
