@@ -72,6 +72,7 @@ subprojects {
 
         common group: 'com.google.protobuf', name: 'protobuf-java', version: '3.19.3'
         common group: 'com.leansoft', name: 'bigqueue', version: '0.7.3'
+        common group: 'org.jctools', name: 'jctools-core', version: '3.3.0'
 
         // Json
         common group: 'com.alibaba', name: 'fastjson', version: '1.2.79'

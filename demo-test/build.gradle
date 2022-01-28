@@ -19,6 +19,8 @@ dependencies {
     testFixturesApi project(':demo-frontend')
     testFixturesApi testFixtures(project(':webby-core'))
 
+    coreImplementation group: 'com.volkhart.memory', name: 'measurer', version: '0.1.1'
+
     coreImplementation sourceSets.testFixtures.output
     demoImplementation sourceSets.testFixtures.output
     tablesImplementation sourceSets.testFixtures.output
