@@ -113,7 +113,9 @@ public class ThreadLocalConnectorTest {
             executor.execute(supplier.get());
         }
         executor.shutdown();
-        assertTrue(executor.awaitTermination(100, TimeUnit.MILLISECONDS));
+        if (!executor.awaitTermination(100, TimeUnit.MILLISECONDS)) {
+            executor.shutdownNow();
+        }
     }
 
     private static void assertSingleThreadAccessAndClosed(@NotNull List<SimpleConnection> connections, int expected) {
