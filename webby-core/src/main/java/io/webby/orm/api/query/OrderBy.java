@@ -7,8 +7,8 @@ import org.jetbrains.annotations.NotNull;
 import java.util.Arrays;
 import java.util.List;
 
-import static io.webby.orm.api.query.Units.flattenArgsOf;
-import static io.webby.orm.api.query.Units.joinWithCommas;
+import static io.webby.orm.api.query.Args.flattenArgsOf;
+import static io.webby.orm.api.query.Representables.joinWithCommas;
 
 public class OrderBy extends Unit implements Filter, Representable {
     private final ImmutableList<OrderTerm> terms;

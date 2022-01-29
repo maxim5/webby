@@ -29,8 +29,7 @@ public record BatchEntityLongData(@NotNull List<Column> columns,
             LongArrayList slice = EasyHppc.slice(arrayList, i, i + dataSize);
             QueryRunner.setPreparedParams(statement, slice);
             if (contextual != null) {
-                List<Object> restQueryArgs = contextual.resolveQueryArgs(slice);
-                QueryRunner.setPreparedParams(statement, restQueryArgs, dataSize);
+                contextual.resolveQueryArgs(slice).setPreparedParams(statement, dataSize);
             }
             statement.addBatch();
         }

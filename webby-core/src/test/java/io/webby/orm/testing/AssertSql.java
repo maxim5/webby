@@ -29,12 +29,12 @@ public class AssertSql {
         assertThrows(InvalidQueryException.class, repr::get);
     }
 
-    public static void assertArgs(@NotNull ArgsHolder holder, @NotNull Object @Nullable ... expected) {
-        assertThat(holder.args()).containsExactly(expected);
+    public static void assertArgs(@NotNull HasArgs hasArgs, @NotNull Object @Nullable ... expected) {
+        assertThat(hasArgs.args().asList()).containsExactly(expected);
     }
 
-    public static void assertNoArgs(@NotNull ArgsHolder holder) {
-        assertArgs(holder);
+    public static void assertNoArgs(@NotNull HasArgs hasArgs) {
+        assertArgs(hasArgs);
     }
 
     public static void assertRows(@NotNull List<DebugSql.Row> result, @NotNull Object[] ... expected) {

@@ -5,8 +5,8 @@ import io.webby.orm.api.TableMeta;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
-import static io.webby.orm.api.query.Units.flattenArgsOf;
-import static io.webby.orm.api.query.Units.joinWithLines;
+import static io.webby.orm.api.query.Args.flattenArgsOf;
+import static io.webby.orm.api.query.Representables.joinWithLines;
 
 public class SelectGroupBy extends Unit implements SelectQuery {
     private final int columnsNumber;

@@ -5,8 +5,8 @@ import org.jetbrains.annotations.NotNull;
 
 import java.util.List;
 
-import static io.webby.orm.api.query.Units.flattenArgsOf;
-import static io.webby.orm.api.query.Units.joinWithCommas;
+import static io.webby.orm.api.query.Args.flattenArgsOf;
+import static io.webby.orm.api.query.Representables.joinWithCommas;
 
 public class SelectFrom extends Unit {
     private static final String PATTERN = """

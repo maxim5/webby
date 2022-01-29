@@ -2,8 +2,8 @@ package io.webby.orm.api.query;
 
 import org.jetbrains.annotations.NotNull;
 
+import static io.webby.orm.api.query.Args.flattenArgsOf;
 import static io.webby.orm.api.query.InvalidQueryException.assure;
-import static io.webby.orm.api.query.Units.flattenArgsOf;
 
 public class Like extends Unit implements BoolTerm {
     public Like(@NotNull Term lhs, @NotNull Term rhs) {

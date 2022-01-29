@@ -6,7 +6,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.function.Function;
 
-public abstract class Contextual<Q extends Unit, C> implements Representable {
+public abstract class Contextual<Q extends HasArgs, C> implements Representable {
     private final Q query;
 
     public Contextual(@NotNull Q query) {
@@ -22,36 +22,38 @@ public abstract class Contextual<Q extends Unit, C> implements Representable {
         return query.repr();
     }
 
-    public abstract @NotNull List<Object> resolveQueryArgs(@NotNull C context);
+    public abstract @NotNull Args resolveQueryArgs(@NotNull C context);
 
-    public static <Q extends Unit, C> @NotNull Contextual<Q, C> constant(@NotNull Q query) {
+    public static <Q extends HasArgs, C> @NotNull Contextual<Q, C> constant(@NotNull Q query) {
         return new Contextual<>(query) {
             @Override
-            public @NotNull List<Object> resolveQueryArgs(@NotNull C context) {
-                return query.argsAssertingResolved();
+            public @NotNull Args resolveQueryArgs(@NotNull C context) {
+                return query.args();
             }
         };
     }
 
-    public static <Q extends Unit, C>
+    public static <Q extends HasArgs, C>
             @NotNull Contextual<Q, C> resolvingByName(@NotNull Q query, @NotNull Function<C, Map<String, ?>> resolver) {
         return new Contextual<>(query) {
             @Override
-            public @NotNull List<Object> resolveQueryArgs(@NotNull C context) {
+            public @NotNull Args resolveQueryArgs(@NotNull C context) {
                 Map<String, ?> map = resolver.apply(context);
-                return query.resolveArgsByName(map);
+                return query.args().resolveArgsByName(map);
             }
         };
     }
 
-    public static <Q extends Unit, C>
+    public static <Q extends HasArgs, C>
             @NotNull Contextual<Q, C> resolvingByOrderedList(@NotNull Q query, @NotNull Function<C, List<?>> resolver) {
         return new Contextual<>(query) {
             @Override
-            public @NotNull List<Object> resolveQueryArgs(@NotNull C context) {
+            public @NotNull Args resolveQueryArgs(@NotNull C context) {
                 List<?> args = resolver.apply(context);
-                return query.resolveArgsByOrderedList(args);
+                return query.args().resolveArgsByOrderedList(args);
             }
         };
     }
+
+    // FIX[norm]: resolvingByInts, resolvingByLongs
 }

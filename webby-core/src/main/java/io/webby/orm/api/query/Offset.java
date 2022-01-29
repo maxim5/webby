@@ -1,12 +1,10 @@
 package io.webby.orm.api.query;
 
-import java.util.List;
-
 public class Offset extends Unit implements Filter, Representable {
     private final int offset;
 
     public Offset(int offset) {
-        super("OFFSET ?", List.of(offset));
+        super("OFFSET ?", Args.of(offset));
         this.offset = offset;
     }
 

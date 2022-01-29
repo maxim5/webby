@@ -8,6 +8,7 @@ import com.carrotsearch.hppc.cursors.IntCursor;
 import com.carrotsearch.hppc.cursors.LongCursor;
 import com.google.common.collect.Lists;
 import com.google.errorprone.annotations.MustBeClosed;
+import io.webby.orm.api.query.Args;
 import io.webby.orm.api.query.SelectQuery;
 import io.webby.util.func.ThrowConsumer;
 import io.webby.util.func.ThrowSupplier;
@@ -136,6 +137,14 @@ public class QueryRunner {
     }
 
     @MustBeClosed
+    public @NotNull PreparedStatement prepareQuery(@NotNull String sql, @NotNull Args args) throws SQLException {
+        assert args.isAllResolved() : "Query contains unresolved args: query=`%s` args=`%s`".formatted(sql, args);
+        PreparedStatement prepared = connection.prepareStatement(sql);
+        args.setPreparedParams(prepared);
+        return prepared;
+    }
+
+    @MustBeClosed
     public @NotNull PreparedStatement prepareQuery(@NotNull String sql, @Nullable Object param) throws SQLException {
         PreparedStatement prepared = connection.prepareStatement(sql);
         prepared.setObject(1, param);
@@ -186,31 +195,11 @@ public class QueryRunner {
         return prepared;
     }
 
-    public static void setPreparedParams(@NotNull PreparedStatement statement,
-                                         @Nullable Object @NotNull ... params) throws SQLException {
-        for (int i = 0; i < params.length; i++) {
-            statement.setObject(i + 1, params[i]);
-        }
-    }
-
     @MustBeClosed
     public @NotNull PreparedStatement prepareQuery(@NotNull String sql, @NotNull Iterable<?> params) throws SQLException {
         PreparedStatement prepared = connection.prepareStatement(sql);
         setPreparedParams(prepared, params);
         return prepared;
-    }
-
-    public static void setPreparedParams(@NotNull PreparedStatement statement,
-                                         @NotNull Iterable<?> values) throws SQLException {
-        setPreparedParams(statement, values, 0);
-    }
-
-    public static void setPreparedParams(@NotNull PreparedStatement statement,
-                                         @NotNull Iterable<?> values,
-                                         int startIndex) throws SQLException {
-        for (Object value : values) {
-            statement.setObject(++startIndex, value);
-        }
     }
 
     @MustBeClosed
@@ -220,14 +209,6 @@ public class QueryRunner {
         return prepared;
     }
 
-    public static void setPreparedParams(@NotNull PreparedStatement statement,
-                                         @NotNull IntContainer values) throws SQLException {
-        int index = 0;
-        for (IntCursor cursor : values) {
-            statement.setInt(++index, cursor.value);
-        }
-    }
-
     @MustBeClosed
     public @NotNull PreparedStatement prepareQuery(@NotNull String sql, @NotNull LongContainer params) throws SQLException {
         PreparedStatement prepared = connection.prepareStatement(sql);
@@ -235,17 +216,57 @@ public class QueryRunner {
         return prepared;
     }
 
-    public static void setPreparedParams(@NotNull PreparedStatement statement,
-                                         @NotNull LongContainer values) throws SQLException {
-        int index = 0;
-        for (LongCursor cursor : values) {
-            statement.setLong(++index, cursor.value);
-        }
-    }
-
     @MustBeClosed
     public @NotNull PreparedStatement prepareQuery(@NotNull SelectQuery query) throws SQLException {
         return prepareQuery(query.repr(), query.args());
+    }
+
+    // Set params
+
+    public static void setPreparedParams(@NotNull PreparedStatement statement,
+                                         @Nullable Object @NotNull ... params) throws SQLException {
+        for (int i = 0; i < params.length; i++) {
+            statement.setObject(i + 1, params[i]);
+        }
+    }
+
+    public static void setPreparedParams(@NotNull PreparedStatement statement,
+                                         @NotNull Iterable<?> params) throws SQLException {
+        setPreparedParams(statement, params, 0);
+    }
+
+    public static void setPreparedParams(@NotNull PreparedStatement statement,
+                                         @NotNull Iterable<?> params,
+                                         int index) throws SQLException {
+        for (Object value : params) {
+            statement.setObject(++index, value);
+        }
+    }
+
+    public static void setPreparedParams(@NotNull PreparedStatement statement,
+                                         @NotNull IntContainer params) throws SQLException {
+        setPreparedParams(statement, params, 0);
+    }
+
+    public static void setPreparedParams(@NotNull PreparedStatement statement,
+                                         @NotNull IntContainer params,
+                                         int index) throws SQLException {
+        for (IntCursor cursor : params) {
+            statement.setInt(++index, cursor.value);
+        }
+    }
+
+    public static void setPreparedParams(@NotNull PreparedStatement statement,
+                                         @NotNull LongContainer params) throws SQLException {
+        setPreparedParams(statement, params, 0);
+    }
+
+    public static void setPreparedParams(@NotNull PreparedStatement statement,
+                                         @NotNull LongContainer params,
+                                         int index) throws SQLException {
+        for (LongCursor cursor : params) {
+            statement.setLong(++index, cursor.value);
+        }
     }
 
     // Run Updates
@@ -259,6 +280,12 @@ public class QueryRunner {
     public int runUpdate(@NotNull String sql) throws SQLException {
         try (PreparedStatement statement = connection.prepareStatement(sql)) {
             return statement.executeUpdate();
+        }
+    }
+
+    public int runUpdate(@NotNull String sql, @NotNull Args param) throws SQLException {
+        try (PreparedStatement prepared = prepareQuery(sql, param)) {
+            return prepared.executeUpdate();
         }
     }
 

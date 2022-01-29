@@ -7,11 +7,9 @@ import com.google.mu.util.Optionals;
 import io.webby.orm.api.*;
 import io.webby.orm.api.entity.BatchEntityData;
 import io.webby.orm.api.entity.EntityData;
-import io.webby.orm.api.query.Contextual;
-import io.webby.orm.api.query.Filter;
-import io.webby.orm.api.query.TermType;
-import io.webby.orm.api.query.Where;
+import io.webby.orm.api.query.*;
 import io.webby.orm.arch.*;
+import io.webby.orm.arch.Column;
 import io.webby.util.collect.EasyMaps;
 import org.jetbrains.annotations.NotNull;
 
@@ -138,10 +136,11 @@ public class ModelTableCodegen extends BaseCodegen {
 
         List<String> classesToImport = Streams.concat(
             baseTableClasses().stream().map(FQN::of),
-            Stream.of(Connector.class, QueryRunner.class, QueryException.class, Engine.class, ReadFollow.class,
-                      Filter.class, Where.class, io.webby.orm.api.query.Column.class, TermType.class,
-                      ResultSetIterator.class, TableMeta.class, EntityData.class, BatchEntityData.class,
-                      Contextual.class).map(FQN::of),
+            Stream.of(
+                Connector.class, QueryRunner.class, QueryException.class, Engine.class, ReadFollow.class,
+                Filter.class, Where.class, Args.class, io.webby.orm.api.query.Column.class, TermType.class,
+                ResultSetIterator.class, TableMeta.class, EntityData.class, BatchEntityData.class, Contextual.class
+            ).map(FQN::of),
             customClasses.stream().map(FQN::of),
             customClasses.stream().map(adaptersScanner::locateAdapterFqn),
             foreignKeyClasses.stream().map(FQN::of),
@@ -289,7 +288,7 @@ public class ModelTableCodegen extends BaseCodegen {
         @Override
         public int count(@Nonnull Filter filter) {
             String query = "SELECT COUNT(*) FROM $table_sql\\n" + filter.repr();
-            try (PreparedStatement statement = runner().prepareQuery(query, filter.argsAssertingResolved());
+            try (PreparedStatement statement = runner().prepareQuery(query, filter.args());
                  ResultSet result = statement.executeQuery()) {
                 return result.next() ? result.getInt(1) : 0;
             } catch (SQLException e) {
@@ -315,7 +314,7 @@ public class ModelTableCodegen extends BaseCodegen {
         @Override
         public boolean exists(@Nonnull Where where) {
             String query = "SELECT EXISTS (SELECT * FROM $table_sql " + where.repr() + " LIMIT 1)";
-            try (PreparedStatement statement = runner().prepareQuery(query, where.argsAssertingResolved());
+            try (PreparedStatement statement = runner().prepareQuery(query, where.args());
                  ResultSet result = statement.executeQuery()) {
                 return result.next() && result.getBoolean(1);
             } catch (SQLException e) {
@@ -491,7 +490,7 @@ public class ModelTableCodegen extends BaseCodegen {
             public @Nonnull IntArrayList fetchPks(@Nonnull Filter filter) {
                 String query = "SELECT $pk_column FROM $table_sql\\n" + filter.repr();
                 try {
-                    return runner().fetchIntColumn(() -> runner().prepareQuery(query, filter.argsAssertingResolved()));
+                    return runner().fetchIntColumn(() -> runner().prepareQuery(query, filter.args()));
                 } catch (SQLException e) {
                     throw new QueryException("Failed to fetch by PKs in $TableClass", query, filter.args(), e);
                 }
@@ -504,7 +503,7 @@ public class ModelTableCodegen extends BaseCodegen {
             public @Nonnull LongArrayList fetchPks(@Nonnull Filter filter) {
                 String query = "SELECT $pk_column FROM $table_sql\\n" + filter.repr();
                 try {
-                    return runner().fetchLongColumn(() -> runner().prepareQuery(query, filter.argsAssertingResolved()));
+                    return runner().fetchLongColumn(() -> runner().prepareQuery(query, filter.args()));
                 } catch (SQLException e) {
                     throw new QueryException("Failed to fetch by PKs in $TableClass", query, filter.args(), e);
                 }
@@ -561,7 +560,7 @@ public class ModelTableCodegen extends BaseCodegen {
         public @Nonnull ResultSetIterator<$ModelClass> iterator(@Nonnull Filter filter) {
             String query = SELECT_ENTITY_ALL[follow.ordinal()] + filter.repr();
             try {
-                return ResultSetIterator.of(runner().prepareQuery(query, filter.argsAssertingResolved()).executeQuery(),
+                return ResultSetIterator.of(runner().prepareQuery(query, filter.args()).executeQuery(),
                                             result -> fromRow(result, follow, 0));
             } catch (SQLException e) {
                 throw new QueryException("Failed to iterate over $TableClass", query, filter.args(), e);
@@ -693,7 +692,7 @@ public class ModelTableCodegen extends BaseCodegen {
         @Override
         public int updateWhere(@Nonnull $ModelClass $model_param, @Nonnull Where where) {
             String query = $sql_query_literal + where.repr();
-            List<Object> args = valuesForUpdateWhere($model_param, where);
+            List<Object> args = valuesForUpdateWhere($model_param, where.args());
             try {
                 return runner().runUpdate(query, args);
             } catch (SQLException e) {
@@ -712,20 +711,15 @@ public class ModelTableCodegen extends BaseCodegen {
         );
 
         appendCode("""
-        protected static @Nonnull List<Object> valuesForUpdateWhere(@Nonnull $ModelClass $model_param,
-                                                                    @Nonnull List<Object> whereArgs) {
+        protected static @Nonnull List<Object> valuesForUpdateWhere(@Nonnull $ModelClass $model_param, @Nonnull Args args) {
             Object[] values = valuesForUpdateWhere($model_param);
-            if (whereArgs.isEmpty()) {
+            if (args.isEmpty()) {
                 return Arrays.asList(values);
             }
-            List<Object> result = new ArrayList<>(values.length + whereArgs.size());
+            List<Object> result = new ArrayList<>(values.length + args.size());
             result.addAll(Arrays.asList(values));
-            result.addAll(whereArgs);
+            result.addAll(args.asList());
             return result;
-        }
-        
-        protected static @Nonnull List<Object> valuesForUpdateWhere(@Nonnull $ModelClass $model_param, @Nonnull Where where) {
-            return valuesForUpdateWhere($model_param, where.argsAssertingResolved());
         }
         
         protected static @Nonnull Object[] valuesForUpdateWhere(@Nonnull $ModelClass $model_param) {
@@ -953,7 +947,7 @@ public class ModelTableCodegen extends BaseCodegen {
         public int deleteWhere(@Nonnull Where where) {
             String query = $sql_query_literal + where.repr();
             try {
-               return runner().runUpdate(query, where.argsAssertingResolved());
+               return runner().runUpdate(query, where.args());
            } catch (SQLException e) {
                throw new QueryException("Failed to delete entities in $TableClass by a filter", query, where.args(), e);
            }
@@ -986,31 +980,31 @@ public class ModelTableCodegen extends BaseCodegen {
         appendCode("""
         @Override
         public boolean exists(@Nonnull $left_index_wrap leftIndex, @Nonnull $right_index_wrap rightIndex) {
-            return exists(Where.hardcoded("$left_fk_sql = ? AND $right_fk_sql = ?", List.of(leftIndex, rightIndex)));
+            return exists(Where.hardcoded("$left_fk_sql = ? AND $right_fk_sql = ?", Args.of(leftIndex, rightIndex)));
         }
         
         @Override
         public int countRights(@Nonnull $left_index_wrap leftIndex) {
             String sql = "$right_pk_sql IN (SELECT $right_fk_sql FROM $table_sql WHERE $left_fk_sql = ?)";
-            return rightsTable.count(Where.hardcoded(sql, List.of(leftIndex)));
+            return rightsTable.count(Where.hardcoded(sql, Args.of(leftIndex)));
         }
         
         @Override
         public @Nonnull ResultSetIterator<$right_entity> iterateRights(@Nonnull $left_index_wrap leftIndex) {
             String sql = "$right_pk_sql IN (SELECT $right_fk_sql FROM $table_sql WHERE $left_fk_sql = ?)";
-            return rightsTable.iterator(Where.hardcoded(sql, List.of(leftIndex)));
+            return rightsTable.iterator(Where.hardcoded(sql, Args.of(leftIndex)));
         }
         
         @Override
         public int countLefts(@Nonnull $right_index_wrap rightIndex) {
             String sql = "$left_pk_sql IN (SELECT $left_fk_sql FROM $table_sql WHERE $right_fk_sql = ?)";
-            return leftsTable.count(Where.hardcoded(sql, List.of(rightIndex)));
+            return leftsTable.count(Where.hardcoded(sql, Args.of(rightIndex)));
         }
         
         @Override
         public @Nonnull ResultSetIterator<$left_entity> iterateLefts(@Nonnull $right_index_wrap rightIndex) {
             String sql = "$left_pk_sql IN (SELECT $left_fk_sql FROM $table_sql WHERE $right_fk_sql = ?)";
-            return leftsTable.iterator(Where.hardcoded(sql, List.of(rightIndex)));
+            return leftsTable.iterator(Where.hardcoded(sql, Args.of(rightIndex)));
         }\n
         """, EasyMaps.merge(mainContext, context));
     }

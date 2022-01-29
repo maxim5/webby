@@ -12,7 +12,7 @@ public class Where extends Unit implements Filter, Representable {
         this.term = term;
     }
     
-    protected Where(@NotNull String repr, @NotNull List<?> args) {
+    protected Where(@NotNull String repr, @NotNull Args args) {
         super("WHERE %s".formatted(repr), args);
         this.term = new HardcodedBoolTerm(repr);
     }
@@ -45,7 +45,7 @@ public class Where extends Unit implements Filter, Representable {
         return and(where.term, term);
     }
 
-    public static @NotNull Where hardcoded(@NotNull String raw, @NotNull List<?> args) {
+    public static @NotNull Where hardcoded(@NotNull String raw, @NotNull Args args) {
         return new Where(raw, args);
     }
 

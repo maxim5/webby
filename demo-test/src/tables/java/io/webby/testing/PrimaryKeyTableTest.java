@@ -4,10 +4,7 @@ import io.webby.orm.api.Engine;
 import io.webby.orm.api.Page;
 import io.webby.orm.api.TableMeta;
 import io.webby.orm.api.TableObj;
-import io.webby.orm.api.query.CompositeFilter;
-import io.webby.orm.api.query.Pagination;
-import io.webby.orm.api.query.Shortcuts;
-import io.webby.orm.api.query.Where;
+import io.webby.orm.api.query.*;
 import io.webby.util.collect.EasyIterables;
 import org.jetbrains.annotations.NotNull;
 import org.junit.jupiter.api.Test;
@@ -265,11 +262,11 @@ public interface PrimaryKeyTableTest<K, E, T extends TableObj<K, E>> extends Bas
         assertEquals(count == 0, table().isEmpty());
         assertEquals(count > 0, table().isNotEmpty());
 
-        assertEquals(count, table().count(Where.hardcoded("1 = 1", List.of())));
-        assertEquals(count > 0, table().exists(Where.hardcoded("1 = 1", List.of())));
+        assertEquals(count, table().count(Where.hardcoded("1 = 1", Args.of())));
+        assertEquals(count > 0, table().exists(Where.hardcoded("1 = 1", Args.of())));
 
-        assertEquals(0, table().count(Where.hardcoded("0 = 1", List.of())));
-        assertFalse(table().exists(Where.hardcoded("0 = 1", List.of())));
+        assertEquals(0, table().count(Where.hardcoded("0 = 1", Args.of())));
+        assertFalse(table().exists(Where.hardcoded("0 = 1", Args.of())));
     }
 
     default void assertTableContains(@NotNull K key, @NotNull E entity) {

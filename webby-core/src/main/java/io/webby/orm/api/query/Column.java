@@ -2,8 +2,6 @@ package io.webby.orm.api.query;
 
 import org.jetbrains.annotations.NotNull;
 
-import java.util.List;
-
 public interface Column extends Named {
     @Override
     default @NotNull String repr() {
@@ -11,8 +9,8 @@ public interface Column extends Named {
     }
 
     @Override
-    default @NotNull List<Object> args() {
-        return List.of();
+    default @NotNull Args args() {
+        return Args.of();
     }
 
     default @NotNull DistinctColumn distinct() {

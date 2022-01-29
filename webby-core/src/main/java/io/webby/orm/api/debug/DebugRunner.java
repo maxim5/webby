@@ -23,8 +23,17 @@ public interface DebugRunner extends WithRunner {
         }
     }
 
+    default @NotNull List<DebugSql.Row> runQuery(@NotNull String query, @NotNull Iterable<?> params) {
+        try (PreparedStatement statement = runner().prepareQuery(query, params);
+             ResultSet resultSet = statement.executeQuery()) {
+            return DebugSql.toDebugRows(resultSet);
+        } catch (SQLException e) {
+            return Unchecked.rethrow(e);
+        }
+    }
+
     default @NotNull List<DebugSql.Row> runQuery(@NotNull SelectQuery query) {
-        return runQuery(query.repr(), query.args().toArray());
+        return runQuery(query.repr(), query.args().asList());
     }
 
     default @NotNull String runQueryToString(@NotNull String query, @Nullable Object @NotNull ... params) {
@@ -32,7 +41,7 @@ public interface DebugRunner extends WithRunner {
     }
 
     default @NotNull String runQueryToString(@NotNull SelectQuery query) {
-        return runQueryToString(query.repr(), query.args().toArray());
+        return runQueryToString(query.repr(), query.args().asList());
     }
 
     @CanIgnoreReturnValue

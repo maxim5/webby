@@ -2,6 +2,8 @@ package io.webby.util.hppc;
 
 import com.carrotsearch.hppc.*;
 import com.carrotsearch.hppc.cursors.IntCursor;
+import com.carrotsearch.hppc.cursors.LongCursor;
+import com.carrotsearch.hppc.predicates.IntPredicate;
 import com.carrotsearch.hppc.procedures.IntIntProcedure;
 import com.carrotsearch.hppc.procedures.IntObjectProcedure;
 import com.google.common.collect.Streams;
@@ -75,6 +77,14 @@ public class EasyHppc {
         return list;
     }
 
+    public static @NotNull ArrayList<Long> toJavaList(@NotNull LongContainer container) {
+        ArrayList<Long> list = new ArrayList<>(container.size());
+        for (LongCursor cursor : container) {
+            list.add(cursor.value);
+        }
+        return list;
+    }
+
     public static @NotNull Map<Integer, Integer> toJavaMap(@NotNull IntIntMap map) {
         HashMap<Integer, Integer> result = new HashMap<>(map.size());
         map.forEach((IntIntProcedure) result::put);
@@ -89,6 +99,18 @@ public class EasyHppc {
 
     public static @NotNull IntArrayList collectFromIntStream(@NotNull IntStream stream) {
         return stream.collect(IntArrayList::new, IntArrayList::add, IntArrayList::addAll);
+    }
+
+    public static @NotNull IntHashSet retainAllCopy(@NotNull IntContainer container, @NotNull IntPredicate predicate) {
+        IntHashSet copy = new IntHashSet(container);
+        copy.retainAll(predicate);
+        return copy;
+    }
+
+    public static @NotNull IntHashSet removeAllCopy(@NotNull IntContainer container, @NotNull IntPredicate predicate) {
+        IntHashSet copy = new IntHashSet(container);
+        copy.removeAll(predicate);
+        return copy;
     }
 
     public static @NotNull IntHashSet union(@NotNull IntContainer lhs, @NotNull IntContainer rhs) {

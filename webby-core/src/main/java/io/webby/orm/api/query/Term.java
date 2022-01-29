@@ -2,7 +2,7 @@ package io.webby.orm.api.query;
 
 import org.jetbrains.annotations.NotNull;
 
-public interface Term extends Representable, ArgsHolder {
+public interface Term extends Representable, HasArgs {
     @NotNull TermType type();
 
     default @NotNull Named namedAs(@NotNull String name) {

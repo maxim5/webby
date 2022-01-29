@@ -5,13 +5,13 @@ import org.jetbrains.annotations.NotNull;
 
 import java.util.List;
 
-import static io.webby.orm.api.query.Units.COMMA_JOINER;
+import static io.webby.orm.api.query.Representables.COMMA_JOINER;
 
 public class GroupBy extends Unit {
     private final ImmutableList<Named> terms;
 
     public GroupBy(@NotNull List<? extends Named> terms) {
-        super("GROUP BY " + terms.stream().map(Named::name).collect(COMMA_JOINER), List.of());
+        super("GROUP BY " + terms.stream().map(Named::name).collect(COMMA_JOINER), Args.of());
         this.terms = ImmutableList.copyOf(terms);
     }
 

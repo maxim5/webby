@@ -2,13 +2,11 @@ package io.webby.orm.api.query;
 
 import org.jetbrains.annotations.NotNull;
 
-import java.util.List;
-
 public class FetchOnly extends Unit implements LimitClause {
     private final int value;
 
     public FetchOnly(int value, boolean withTies) {
-        super("FETCH NEXT ? ROWS ONLY" + (withTies ? " WITH TIES" : ""), List.of(value));
+        super("FETCH NEXT ? ROWS ONLY" + (withTies ? " WITH TIES" : ""), Args.of(value));
         assert value > 0 : "Invalid limit value: " + value;
         this.value = value;
     }

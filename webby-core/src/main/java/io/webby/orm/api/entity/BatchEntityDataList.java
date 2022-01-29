@@ -28,8 +28,7 @@ public record BatchEntityDataList<D>(@NotNull List<EntityData<D>> batch) impleme
         for (EntityData<D> entityData : batch) {
             entityData.provideValues(statement);
             if (contextual != null) {
-                List<Object> restQueryArgs = contextual.resolveQueryArgs(entityData.data());
-                QueryRunner.setPreparedParams(statement, restQueryArgs, dataSize);
+                contextual.resolveQueryArgs(entityData.data()).setPreparedParams(statement, dataSize);
             }
             statement.addBatch();
         }
