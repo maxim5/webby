@@ -8,9 +8,11 @@ import io.webby.db.kv.KeyValueDb;
 import io.webby.util.hppc.EasyHppc;
 import org.jetbrains.annotations.NotNull;
 
+import javax.annotation.concurrent.ThreadSafe;
 import java.util.concurrent.locks.ReadWriteLock;
 import java.util.concurrent.locks.ReentrantReadWriteLock;
 
+@ThreadSafe
 public class IntCounter implements Persistable {
     private final ReadWriteLock LOCK = new ReentrantReadWriteLock();
 

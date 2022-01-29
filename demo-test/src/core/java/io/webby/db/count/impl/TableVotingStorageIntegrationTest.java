@@ -26,7 +26,7 @@ import static io.webby.testing.TestingPrimitives.newIntObjectMap;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
 @Tag("sql")
-public class TableIntSetStorageImplIntegrationTest {
+public class TableVotingStorageIntegrationTest {
     @RegisterExtension private static final SqlDbSetupExtension SQL_DB = SqlDbSetupExtension.fromProperties();
 
     private static final int A = 1000;
@@ -36,7 +36,7 @@ public class TableIntSetStorageImplIntegrationTest {
     private static final int Bob = 20;
     private static final int Don = 30;
 
-    private TableIntSetStorageImpl storage;
+    private TableVotingStorage storage;
     private UserRateModelTable table;
 
     @BeforeAll
@@ -48,7 +48,7 @@ public class TableIntSetStorageImplIntegrationTest {
     @BeforeEach
     void setUp() {
         table = new UserRateModelTable(SQL_DB);
-        storage = TableIntSetStorageImpl.from(new UserRateModelTable(SQL_DB), "content_id", "user_id", "value");
+        storage = TableVotingStorage.from(new UserRateModelTable(SQL_DB), "content_id", "user_id", "value");
     }
 
     @Test

@@ -2,59 +2,61 @@ package io.webby.db.count.impl;
 
 import com.carrotsearch.hppc.*;
 import com.carrotsearch.hppc.cursors.IntCursor;
-import io.webby.db.count.IntSetCounter;
+import io.webby.db.count.VotingCounter;
 import io.webby.util.hppc.EasyHppc;
 import org.jetbrains.annotations.NotNull;
 
+import javax.annotation.concurrent.ThreadSafe;
 import java.util.concurrent.locks.ReadWriteLock;
 import java.util.concurrent.locks.ReentrantReadWriteLock;
 
-public class LockBasedIntSetCounter implements IntSetCounter {
+@ThreadSafe
+public class LockBasedVotingCounter implements VotingCounter {
     private final ReadWriteLock LOCK = new ReentrantReadWriteLock();
 
-    private final IntSetStorage store;
+    private final VotingStorage store;
     private final IntObjectHashMap<IntHashSet> cache;
     private final IntIntHashMap counters;
 
-    public LockBasedIntSetCounter(@NotNull IntSetStorage store) {
+    public LockBasedVotingCounter(@NotNull VotingStorage store) {
         this.store = store;
         this.cache = new IntObjectHashMap<>();  // load anything at the start?
         this.counters = loadFreshCountsSlow(store);
     }
 
     @Override
-    public int increment(int key, int item) {
-        assert item > 0 : "Item unsupported: " + item;
-        return update(key, item, 1);
+    public int increment(int key, int actor) {
+        assert actor > 0 : "Actor unsupported: " + actor;
+        return update(key, actor, 1);
     }
 
     @Override
-    public int decrement(int key, int item) {
-        assert item > 0 : "Item unsupported: " + item;
-        return update(key, -item, -1);
+    public int decrement(int key, int actor) {
+        assert actor > 0 : "Actor unsupported: " + actor;
+        return update(key, -actor, -1);
     }
 
     @Override
-    public int itemValue(int key, int item) {
-        assert item > 0 : "Item unsupported: " + item;
+    public int getVote(int key, int actor) {
+        assert actor > 0 : "Actor unsupported: " + actor;
         LOCK.writeLock().lock();
         try {
-            IntHashSet items = getOrLoadForKey(key);
-            return items.contains(item) ? 1 : items.contains(-item) ? -1 : 0;
+            IntHashSet actors = getOrLoadForKey(key);
+            return actors.contains(actor) ? 1 : actors.contains(-actor) ? -1 : 0;
         } finally {
             LOCK.writeLock().unlock();
         }
     }
 
     @Override
-    public @NotNull IntIntMap itemValues(@NotNull IntContainer keys, int item) {
-        assert item > 0 : "Item unsupported: " + item;
+    public @NotNull IntIntMap getVotes(@NotNull IntContainer keys, int actor) {
+        assert actor > 0 : "Actor unsupported: " + actor;
         LOCK.writeLock().lock();
         try {
             IntIntHashMap result = new IntIntHashMap(keys.size());
             for (IntCursor cursor : keys) {
-                IntHashSet items = getOrLoadForKey(cursor.value);
-                result.put(cursor.value, items.contains(item) ? 1 : items.contains(-item) ? -1 : 0);
+                IntHashSet actors = getOrLoadForKey(cursor.value);
+                result.put(cursor.value, actors.contains(actor) ? 1 : actors.contains(-actor) ? -1 : 0);
             }
             return result;
         } finally {
@@ -112,14 +114,14 @@ public class LockBasedIntSetCounter implements IntSetCounter {
         forceFlush();
     }
 
-    private int update(int key, int item, int delta) {
+    private int update(int key, int actor, int delta) {
         LOCK.writeLock().lock();
         try {
-            IntHashSet items = getOrLoadForKey(key);
+            IntHashSet actors = getOrLoadForKey(key);
             if (!counters.containsKey(key)) {
-                counters.put(key, countItems(items));
+                counters.put(key, countActors(actors));
             }
-            if (items.remove(-item) || items.add(item)) {
+            if (actors.remove(-actor) || actors.add(actor)) {
                 return counters.addTo(key, delta);
             }
             return counters.get(key);
@@ -137,15 +139,15 @@ public class LockBasedIntSetCounter implements IntSetCounter {
         return events;
     }
 
-    private static @NotNull IntIntHashMap loadFreshCountsSlow(@NotNull IntSetStorage store) {
+    private static @NotNull IntIntHashMap loadFreshCountsSlow(@NotNull VotingStorage store) {
         IntIntHashMap result = new IntIntHashMap();
-        store.loadAll((key, items) -> result.put(key, countItems(items)));
+        store.loadAll((key, actors) -> result.put(key, countActors(actors)));
         return result;
     }
 
-    private static int countItems(@NotNull IntHashSet items) {
+    private static int countActors(@NotNull IntHashSet actors) {
         int result = 0;
-        for (IntCursor cursor : items) {
+        for (IntCursor cursor : actors) {
             if (cursor.value > 0) {
                 result++;
             } else {

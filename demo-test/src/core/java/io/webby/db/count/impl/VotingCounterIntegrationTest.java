@@ -8,7 +8,7 @@ import com.carrotsearch.hppc.cursors.IntIntCursor;
 import com.carrotsearch.hppc.cursors.IntObjectCursor;
 import com.google.errorprone.annotations.CanIgnoreReturnValue;
 import com.google.mu.util.stream.BiStream;
-import io.webby.db.count.IntSetCounter;
+import io.webby.db.count.VotingCounter;
 import io.webby.db.kv.javamap.JavaMapDbFactory;
 import io.webby.demo.model.UserRateModelTable;
 import io.webby.orm.codegen.SqlSchemaMaker;
@@ -25,8 +25,8 @@ import java.io.IOException;
 import java.util.List;
 import java.util.Map;
 
-import static io.webby.db.count.impl.TestRate.none;
-import static io.webby.db.count.impl.TestRate.rates;
+import static io.webby.db.count.impl.Vote.none;
+import static io.webby.db.count.impl.Vote.votes;
 import static io.webby.testing.AssertPrimitives.assertInts;
 import static io.webby.testing.AssertPrimitives.assertIntsTrimmed;
 import static io.webby.testing.TestingPrimitives.newIntMap;
@@ -34,7 +34,7 @@ import static io.webby.testing.TestingPrimitives.newIntObjectMap;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
 @Tag("sql")
-public class IntSetCounterIntegrationTest {
+public class VotingCounterIntegrationTest {
     @RegisterExtension private static final SqlDbSetupExtension SQL_DB = SqlDbSetupExtension.fromProperties();
 
     private static final int A = 1000;
@@ -45,8 +45,8 @@ public class IntSetCounterIntegrationTest {
     private static final int Bob = 2;
     private static final int Liz = 99;
 
-    private IntSetCounter counter;
-    private IntSetStorage storage;
+    private VotingCounter counter;
+    private VotingStorage storage;
 
     @BeforeAll
     static void beforeAll() {
@@ -61,7 +61,7 @@ public class IntSetCounterIntegrationTest {
 
         assertEquals(0, counter.estimateCount(A));
         assertCountEstimates(A, 0, B, 0, C, 0);
-        assertItemValues(Ann, rates(none(A), none(B), none(C)));
+        assertActorValues(Ann, votes(none(A), none(B), none(C)));
         assertStorage();
     }
 
@@ -73,7 +73,7 @@ public class IntSetCounterIntegrationTest {
         counter.flush();
 
         assertCountEstimates(A, 0, B, 0, C, 0);
-        assertItemValues(Ann, rates(none(A), none(B), none(C)));
+        assertActorValues(Ann, votes(none(A), none(B), none(C)));
         assertStorage();
     }
 
@@ -85,8 +85,8 @@ public class IntSetCounterIntegrationTest {
         assertEquals(1, counter.increment(A, Ann));
 
         assertCountEstimates(A, 1, B, 0, C, 0);
-        assertItemValues(Ann, rates(+A, none(B), none(C)),
-                         Bob, rates(none(A), none(B), none(C)));
+        assertActorValues(Ann, votes(+A, none(B), none(C)),
+                          Bob, votes(none(A), none(B), none(C)));
         assertStorage();
     }
 
@@ -99,8 +99,8 @@ public class IntSetCounterIntegrationTest {
         assertEquals(1, counter.increment(A, Ann));
 
         assertCountEstimates(A, 1, B, 0, C, 0);
-        assertItemValues(Ann, rates(+A, none(B), none(C)),
-                         Bob, rates(none(A), none(B), none(C)));
+        assertActorValues(Ann, votes(+A, none(B), none(C)),
+                          Bob, votes(none(A), none(B), none(C)));
         assertStorage();
     }
 
@@ -112,8 +112,8 @@ public class IntSetCounterIntegrationTest {
         assertEquals(-1, counter.decrement(A, Ann));
 
         assertCountEstimates(A, -1, B, 0, C, 0);
-        assertItemValues(Ann, rates(-A, none(B), none(C)),
-                         Bob, rates(none(A), none(B), none(C)));
+        assertActorValues(Ann, votes(-A, none(B), none(C)),
+                          Bob, votes(none(A), none(B), none(C)));
         assertStorage();
     }
 
@@ -126,8 +126,8 @@ public class IntSetCounterIntegrationTest {
         assertEquals(-1, counter.decrement(A, Ann));
 
         assertCountEstimates(A, -1, B, 0, C, 0);
-        assertItemValues(Ann, rates(-A, none(B), none(C)),
-                         Bob, rates(none(A), none(B), none(C)));
+        assertActorValues(Ann, votes(-A, none(B), none(C)),
+                          Bob, votes(none(A), none(B), none(C)));
         assertStorage();
     }
 
@@ -140,7 +140,7 @@ public class IntSetCounterIntegrationTest {
         assertEquals(0, counter.decrement(A, Ann));
 
         assertCountEstimates(A, 0, B, 0, C, 0);
-        assertItemValues(Ann, rates(none(A), none(B), none(C)));
+        assertActorValues(Ann, votes(none(A), none(B), none(C)));
         assertStorage();
     }
 
@@ -158,7 +158,7 @@ public class IntSetCounterIntegrationTest {
         assertEquals(-1, counter.decrement(A, Ann));
 
         assertCountEstimates(A, -1);
-        assertItemValues(Ann, rates(-A));
+        assertActorValues(Ann, votes(-A));
         assertStorage();
     }
 
@@ -172,7 +172,7 @@ public class IntSetCounterIntegrationTest {
         assertEquals(1, counter.increment(C, Ann));
 
         assertCountEstimates(A, 1, B, 1, C, 1);
-        assertItemValues(Ann, rates(+A, +B, +C));
+        assertActorValues(Ann, votes(+A, +B, +C));
         assertStorage();
     }
 
@@ -186,7 +186,7 @@ public class IntSetCounterIntegrationTest {
         assertEquals(3, counter.increment(A, Liz));
 
         assertCountEstimates(A, 3, B, 0, C, 0);
-        assertItemValues(Ann, rates(+A), Bob, rates(+A), Liz, rates(+A));
+        assertActorValues(Ann, votes(+A), Bob, votes(+A), Liz, votes(+A));
         assertStorage();
     }
 
@@ -203,7 +203,7 @@ public class IntSetCounterIntegrationTest {
         assertEquals(0, counter.decrement(A, Liz));
 
         assertCountEstimates(A, 0, B, 0, C, 0);
-        assertItemValues(Ann, rates(none(A)), Bob, rates(none(A)), Liz, rates(none(A)));
+        assertActorValues(Ann, votes(none(A)), Bob, votes(none(A)), Liz, votes(none(A)));
         assertStorage();
     }
 
@@ -220,9 +220,9 @@ public class IntSetCounterIntegrationTest {
         assertEquals(2, counter.increment(C, Liz));
 
         assertCountEstimates(A, 0, B, 0, C, 2);
-        assertItemValues(Ann, rates(+A, -B, none(C)),
-                         Bob, rates(-A, +C, none(B)),
-                         Liz, rates(+B, +C, none(A)));
+        assertActorValues(Ann, votes(+A, -B, none(C)),
+                          Bob, votes(-A, +C, none(B)),
+                          Liz, votes(+B, +C, none(A)));
         assertStorage();
     }
 
@@ -237,7 +237,7 @@ public class IntSetCounterIntegrationTest {
         counter.flush();
 
         assertCountEstimates(A, 2, B, 1);
-        assertItemValues(Ann, rates(+A), Bob, rates(+B), Liz, rates(+A));
+        assertActorValues(Ann, votes(+A), Bob, votes(+B), Liz, votes(+A));
         assertStorage(A, IntHashSet.from(Ann, Liz),
                       B, IntHashSet.from(Bob));
     }
@@ -253,7 +253,7 @@ public class IntSetCounterIntegrationTest {
         counter.flush();
 
         assertCountEstimates(A, -2, B, -1);
-        assertItemValues(Ann, rates(-A), Bob, rates(-B), Liz, rates(-A));
+        assertActorValues(Ann, votes(-A), Bob, votes(-B), Liz, votes(-A));
         assertStorage(A, IntHashSet.from(-Ann, -Liz),
                       B, IntHashSet.from(-Bob));
     }
@@ -269,7 +269,7 @@ public class IntSetCounterIntegrationTest {
         counter.flush();
 
         assertCountEstimates(A, 1, B, 1);
-        assertItemValues(Ann, rates(+A, +B));
+        assertActorValues(Ann, votes(+A, +B));
         assertStorage(A, IntHashSet.from(Ann),
                       B, IntHashSet.from(Ann));
     }
@@ -285,7 +285,7 @@ public class IntSetCounterIntegrationTest {
         counter.flush();
 
         assertCountEstimates(A, 1, B, 1);
-        assertItemValues(Ann, rates(+A, +B));
+        assertActorValues(Ann, votes(+A, +B));
         assertStorage(A, IntHashSet.from(Ann),
                       B, IntHashSet.from(Ann));
     }
@@ -301,7 +301,7 @@ public class IntSetCounterIntegrationTest {
         counter.flush();
 
         assertCountEstimates(A, 0);
-        assertItemValues(Ann, rates(none(A)));
+        assertActorValues(Ann, votes(none(A)));
         assertStorage();
     }
 
@@ -317,7 +317,7 @@ public class IntSetCounterIntegrationTest {
         counter.flush();
 
         assertCountEstimates(A, -1);
-        assertItemValues(Ann, rates(-A));
+        assertActorValues(Ann, votes(-A));
         assertStorage(A, IntHashSet.from(-Ann));
     }
 
@@ -334,8 +334,8 @@ public class IntSetCounterIntegrationTest {
         counter.flush();
 
         assertCountEstimates(A, 1, B, 0, C, -1);
-        assertItemValues(Ann, rates(+A, -B, -C),
-                         Bob, rates(+B));
+        assertActorValues(Ann, votes(+A, -B, -C),
+                          Bob, votes(+B));
         assertStorage(A, IntHashSet.from(Ann),
                       B, IntHashSet.from(-Ann, +Bob),
                       C, IntHashSet.from(-Ann));
@@ -353,20 +353,20 @@ public class IntSetCounterIntegrationTest {
         }
     }
 
-    private void assertItemValues(@NotNull Object @NotNull ... expected) {
-        IntObjectMap<List<TestRate>> expectedMap = newIntObjectMap(expected);
+    private void assertActorValues(@NotNull Object @NotNull ... expected) {
+        IntObjectMap<List<Vote>> expectedMap = newIntObjectMap(expected);
 
-        for (IntObjectCursor<List<TestRate>> cursor : expectedMap) {
+        for (IntObjectCursor<List<Vote>> cursor : expectedMap) {
             int user = cursor.key;
-            for (TestRate rate : cursor.value) {
-                assertEquals(rate.val(), counter.itemValue(rate.key(), user), "user=%d expected=%s".formatted(user, rate));
-                assertInts(counter.itemValues(IntArrayList.from(rate.key()), user), rate.key(), rate.val());
+            for (Vote vote : cursor.value) {
+                assertEquals(vote.val(), counter.getVote(vote.key(), user), "user=%d expected=%s".formatted(user, vote));
+                assertInts(counter.getVotes(IntArrayList.from(vote.key()), user), vote.key(), vote.val());
             }
 
-            IntArrayList keys = EasyHppc.fromJavaIterableInt(cursor.value.stream().map(TestRate::key).toList());
-            Map<Integer, Integer> expectedItemValues =
-                BiStream.biStream(cursor.value.stream()).mapKeys(TestRate::key).mapValues(TestRate::val).toMap();
-            assertInts(counter.itemValues(keys, user), expectedItemValues);
+            IntArrayList keys = EasyHppc.fromJavaIterableInt(cursor.value.stream().map(Vote::key).toList());
+            Map<Integer, Integer> expectedActorValues =
+                BiStream.biStream(cursor.value.stream()).mapKeys(Vote::key).mapValues(Vote::val).toMap();
+            assertInts(counter.getVotes(keys, user), expectedActorValues);
         }
     }
 
@@ -376,15 +376,15 @@ public class IntSetCounterIntegrationTest {
     }
 
     @CanIgnoreReturnValue
-    private @NotNull IntSetCounter setup(@NotNull Scenario scenario) {
+    private @NotNull VotingCounter setup(@NotNull Scenario scenario) {
         storage = switch (scenario.store) {
-            case TABLE -> TableIntSetStorageImpl.from(new UserRateModelTable(SQL_DB), "content_id", "user_id", "value");
-            case KV_JAVA_MAP -> new KvIntSetStorageImpl(new JavaMapDbFactory().inMemoryDb());
+            case TABLE -> TableVotingStorage.from(new UserRateModelTable(SQL_DB), "content_id", "user_id", "value");
+            case KV_JAVA_MAP -> new KvVotingStorage(new JavaMapDbFactory().inMemoryDb());
         };
 
         counter = switch (scenario.counter) {
-            case LOCK_BASED -> new LockBasedIntSetCounter(storage);
-            case NON_BLOCKING -> new NonBlockingIntSetCounter(storage);
+            case LOCK_BASED -> new LockBasedVotingCounter(storage);
+            case NON_BLOCKING -> new NonBlockingVotingCounter(storage);
         };
 
         return counter;

@@ -21,29 +21,29 @@ import java.util.logging.Level;
 import static io.webby.db.count.impl.RobustnessCheck.ensureStorageConsistency;
 import static io.webby.orm.api.query.Shortcuts.*;
 
-public class TableIntSetStorageImpl implements IntSetStorage {
+public class TableVotingStorage implements VotingStorage {
     private static final FluentLogger log = FluentLogger.forEnclosingClass();
 
     private final BaseTable<?> table;
     private final Column keyColumn;
-    private final Column itemColumn;
+    private final Column actorColumn;
     private final Column valueColumn;
 
-    public TableIntSetStorageImpl(@NotNull BaseTable<?> table,
-                                  @NotNull Column keyColumn,
-                                  @NotNull Column itemColumn,
-                                  @NotNull Column valueColumn) {
+    public TableVotingStorage(@NotNull BaseTable<?> table,
+                              @NotNull Column keyColumn,
+                              @NotNull Column actorColumn,
+                              @NotNull Column valueColumn) {
         this.table = table;
         this.keyColumn = keyColumn;
-        this.itemColumn = itemColumn;
+        this.actorColumn = actorColumn;
         this.valueColumn = valueColumn;
     }
 
-    public static @NotNull TableIntSetStorageImpl from(@NotNull BaseTable<?> table,
-                                                       @NotNull String key,
-                                                       @NotNull String item,
-                                                       @NotNull String value) {
-        return new TableIntSetStorageImpl(table, getColumn(table, key), getColumn(table, item), getColumn(table, value));
+    public static @NotNull TableVotingStorage from(@NotNull BaseTable<?> table,
+                                                   @NotNull String key,
+                                                   @NotNull String actor,
+                                                   @NotNull String value) {
+        return new TableVotingStorage(table, getColumn(table, key), getColumn(table, actor), getColumn(table, value));
     }
     
     private static @NotNull Column getColumn(@NotNull BaseTable<?> table, @NotNull String name) {
@@ -53,15 +53,15 @@ public class TableIntSetStorageImpl implements IntSetStorage {
 
     @Override
     public @NotNull IntHashSet load(int key) {
-        SelectWhere query = SelectWhere.from(table).select(itemColumn, valueColumn)
+        SelectWhere query = SelectWhere.from(table).select(actorColumn, valueColumn)
             .where(Where.of(lookupBy(keyColumn, key)))
             .build();
         IntHashSet set = new IntHashSet();
         table.runner().forEach(query, resultSet -> {
-            int item = resultSet.getInt(1);
+            int actor = resultSet.getInt(1);
             int value = resultSet.getInt(2);
             assert value >= -1 && value <= 1 : "Value outside of range: " + value;
-            set.add(value > 0 ? item : -item);
+            set.add(value > 0 ? actor : -actor);
         });
         return set;
     }
@@ -72,9 +72,9 @@ public class TableIntSetStorageImpl implements IntSetStorage {
             return;
         }
 
-        SelectWhere query = SelectWhere.from(table).select(keyColumn, itemColumn, valueColumn)
+        SelectWhere query = SelectWhere.from(table).select(keyColumn, actorColumn, valueColumn)
             .where(Where.of(isIn(keyColumn, makeIntVariables(keys))))
-            .orderBy(OrderBy.of(keyColumn.ordered(Order.ASC), itemColumn.ordered(Order.ASC)))
+            .orderBy(OrderBy.of(keyColumn.ordered(Order.ASC), actorColumn.ordered(Order.ASC)))
             .build();
 
         loadQueryResults(query, consumer);
@@ -82,8 +82,8 @@ public class TableIntSetStorageImpl implements IntSetStorage {
 
     @Override
     public void loadAll(@NotNull IntObjectProcedure<@NotNull IntHashSet> consumer) {
-        SelectWhere query = SelectWhere.from(table).select(keyColumn, itemColumn, valueColumn)
-            .orderBy(OrderBy.of(keyColumn.ordered(Order.ASC), itemColumn.ordered(Order.ASC)))
+        SelectWhere query = SelectWhere.from(table).select(keyColumn, actorColumn, valueColumn)
+            .orderBy(OrderBy.of(keyColumn.ordered(Order.ASC), actorColumn.ordered(Order.ASC)))
             .build();
 
         loadQueryResults(query, consumer);
@@ -93,7 +93,7 @@ public class TableIntSetStorageImpl implements IntSetStorage {
         IntObjectHashMap<IntHashSet> map = new IntObjectHashMap<>();
         table.runner().forEach(query, resultSet -> {
             int key = resultSet.getInt(1);
-            int item = resultSet.getInt(2);
+            int actor = resultSet.getInt(2);
             int value = resultSet.getInt(3);
             assert value >= -1 && value <= 1 : "Value outside of range: " + value;
             IntHashSet set = map.get(key);
@@ -101,7 +101,7 @@ public class TableIntSetStorageImpl implements IntSetStorage {
                 set = new IntHashSet();
                 map.put(key, set);
             }
-            set.add(value >= 0 ? item : -item);
+            set.add(value >= 0 ? actor : -actor);
         });
         map.forEach(consumer);
     }
@@ -115,7 +115,7 @@ public class TableIntSetStorageImpl implements IntSetStorage {
         }
 
         Diff diff = new Diff(curr, prev);
-        List<Column> columns = List.of(keyColumn, itemColumn, valueColumn);
+        List<Column> columns = List.of(keyColumn, actorColumn, valueColumn);
 
         try {
             // Insert
@@ -128,7 +128,7 @@ public class TableIntSetStorageImpl implements IntSetStorage {
                 table.updateDataWhereBatch(
                     new BatchEntityIntData(columns, diff.modified),
                     Contextual.resolvingByOrderedList(
-                        Where.and(lookupBy(keyColumn, UNRESOLVED_NUM), lookupBy(itemColumn, UNRESOLVED_NUM)),
+                        Where.and(lookupBy(keyColumn, UNRESOLVED_NUM), lookupBy(actorColumn, UNRESOLVED_NUM)),
                         array -> List.of(array.get(0), array.get(1))
                     )
                 );
@@ -138,7 +138,7 @@ public class TableIntSetStorageImpl implements IntSetStorage {
             for (IntObjectCursor<IntHashSet> cursor : diff.deleted) {
                 table.deleteWhere(Where.and(
                     lookupBy(keyColumn, cursor.key),
-                    isIn(itemColumn, makeIntVariables(cursor.value))
+                    isIn(actorColumn, makeIntVariables(cursor.value))
                 ));
             }
         } catch (QueryException e) {
@@ -151,11 +151,11 @@ public class TableIntSetStorageImpl implements IntSetStorage {
         for (IntObjectCursor<IntHashSet> entry : map) {
             for (IntCursor cursor : entry.value) {
                 int key = entry.key;
-                int item = Math.abs(cursor.value);
+                int actor = Math.abs(cursor.value);
                 int value = cursor.value >= 0 ? 1 : -1;
                 table.updateWhereOrInsertData(
                     new EntityIntData(List.of(valueColumn), IntArrayList.from(value)),
-                    Where.and(lookupBy(keyColumn, key), lookupBy(itemColumn, item))
+                    Where.and(lookupBy(keyColumn, key), lookupBy(actorColumn, actor))
                 );
             }
         }

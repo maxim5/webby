@@ -13,7 +13,7 @@ import java.util.logging.Level;
 /*package*/ class RobustnessCheck {
     private static final FluentLogger log = FluentLogger.forEnclosingClass();
 
-    public static boolean ensureStorageConsistency(@NotNull IntSetStorage storage, @NotNull IntObjectMap<IntHashSet> state) {
+    public static boolean ensureStorageConsistency(@NotNull VotingStorage storage, @NotNull IntObjectMap<IntHashSet> state) {
         record Mismatch(int key, IntHashSet expected, IntHashSet actual) {
         }
 

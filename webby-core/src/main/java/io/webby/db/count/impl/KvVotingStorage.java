@@ -15,10 +15,10 @@ import java.util.List;
 
 import static io.webby.db.count.impl.RobustnessCheck.ensureStorageConsistency;
 
-public class KvIntSetStorageImpl implements IntSetStorage {
+public class KvVotingStorage implements VotingStorage {
     private final KeyValueDb<Integer, IntHashSet> db;
 
-    public KvIntSetStorageImpl(@NotNull KeyValueDb<Integer, IntHashSet> db) {
+    public KvVotingStorage(@NotNull KeyValueDb<Integer, IntHashSet> db) {
         this.db = db;
     }
 

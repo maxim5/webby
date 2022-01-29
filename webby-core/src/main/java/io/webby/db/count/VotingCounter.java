@@ -6,17 +6,17 @@ import com.carrotsearch.hppc.IntIntMap;
 import io.webby.db.event.Persistable;
 import org.jetbrains.annotations.NotNull;
 
-public interface IntSetCounter extends Persistable {
-    int increment(int key, int item);
+public interface VotingCounter extends Persistable {
+    int increment(int key, int actor);
 
-    int decrement(int key, int item);
+    int decrement(int key, int actor);
 
-    int itemValue(int key, int item);
+    int getVote(int key, int actor);
 
-    @NotNull IntIntMap itemValues(@NotNull IntContainer keys, int item);
+    @NotNull IntIntMap getVotes(@NotNull IntContainer keys, int actor);
 
-    default @NotNull IntIntMap itemValues(int @NotNull [] keys, int item) {
-        return itemValues(IntArrayList.from(keys), item);
+    default @NotNull IntIntMap getVotes(int @NotNull [] keys, int actor) {
+        return getVotes(IntArrayList.from(keys), actor);
     }
 
     int estimateCount(int key);
