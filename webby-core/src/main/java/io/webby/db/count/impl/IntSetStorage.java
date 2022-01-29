@@ -27,5 +27,5 @@ import org.jetbrains.annotations.Nullable;
         return result;
     }
 
-    void storeBatch(@NotNull IntObjectMap<IntHashSet> map, @Nullable IntObjectMap<IntHashSet> prev);
+    void storeBatch(@NotNull IntObjectMap<IntHashSet> curr, @Nullable IntObjectMap<IntHashSet> prev);
 }
