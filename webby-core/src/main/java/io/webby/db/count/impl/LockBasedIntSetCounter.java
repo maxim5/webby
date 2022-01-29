@@ -1,56 +1,60 @@
-package io.webby.db.event;
+package io.webby.db.count.impl;
 
 import com.carrotsearch.hppc.*;
 import com.carrotsearch.hppc.cursors.IntCursor;
-import io.webby.db.kv.KeyValueDb;
+import io.webby.db.count.IntSetCounter;
 import io.webby.util.hppc.EasyHppc;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.concurrent.locks.ReadWriteLock;
 import java.util.concurrent.locks.ReentrantReadWriteLock;
 
-public class IntSetCounter implements Persistable {
+public class LockBasedIntSetCounter implements IntSetCounter {
     private final ReadWriteLock LOCK = new ReentrantReadWriteLock();
 
-    private final KeyValueDb<Integer, IntHashSet> db;
+    private final IntSetStorage store;
     private final IntObjectHashMap<IntHashSet> cache;
     private final IntIntHashMap counters;
 
-    public IntSetCounter(@NotNull KeyValueDb<Integer, IntHashSet> db) {
-        this.db = db;
+    public LockBasedIntSetCounter(@NotNull IntSetStorage store) {
+        this.store = store;
         this.cache = new IntObjectHashMap<>();  // load anything at the start?
-        this.counters = loadFreshCountsSlow(db);
+        this.counters = loadFreshCountsSlow(store);
     }
 
-    public int increment(int key, int eventId) {
-        assert eventId > 0 : "EventId unsupported: " + eventId;
-        return update(key, eventId, 1);
+    @Override
+    public int increment(int key, int item) {
+        assert item > 0 : "Item unsupported: " + item;
+        return update(key, item, 1);
     }
 
-    public int decrement(int key, int eventId) {
-        assert eventId > 0 : "EventId unsupported: " + eventId;
-        return update(key, -eventId, -1);
+    @Override
+    public int decrement(int key, int item) {
+        assert item > 0 : "Item unsupported: " + item;
+        return update(key, -item, -1);
     }
 
-    public int eventValue(int key, int eventId) {
-        assert eventId > 0 : "EventId unsupported: " + eventId;
+    @Override
+    public int itemValue(int key, int item) {
+        assert item > 0 : "Item unsupported: " + item;
         LOCK.writeLock().lock();
         try {
-            IntHashSet events = getOrLoadAllEvents(key);
-            return events.contains(eventId) ? 1 : events.contains(-eventId) ? -1 : 0;
+            IntHashSet items = getOrLoadForKey(key);
+            return items.contains(item) ? 1 : items.contains(-item) ? -1 : 0;
         } finally {
             LOCK.writeLock().unlock();
         }
     }
 
-    public @NotNull IntIntMap eventValues(@NotNull IntContainer keys, int eventId) {
-        assert eventId > 0 : "EventId unsupported: " + eventId;
+    @Override
+    public @NotNull IntIntMap itemValues(@NotNull IntContainer keys, int item) {
+        assert item > 0 : "Item unsupported: " + item;
         LOCK.writeLock().lock();
         try {
             IntIntHashMap result = new IntIntHashMap(keys.size());
             for (IntCursor cursor : keys) {
-                IntHashSet events = getOrLoadAllEvents(cursor.value);
-                result.put(cursor.value, events.contains(eventId) ? 1 : events.contains(-eventId) ? -1 : 0);
+                IntHashSet items = getOrLoadForKey(cursor.value);
+                result.put(cursor.value, items.contains(item) ? 1 : items.contains(-item) ? -1 : 0);
             }
             return result;
         } finally {
@@ -58,6 +62,7 @@ public class IntSetCounter implements Persistable {
         }
     }
 
+    @Override
     public int estimateCount(int key) {
         LOCK.readLock().lock();
         try {
@@ -67,15 +72,7 @@ public class IntSetCounter implements Persistable {
         }
     }
 
-    public @NotNull IntIntMap estimateCounts(int @NotNull [] keys) {
-        LOCK.readLock().lock();
-        try {
-            return EasyHppc.slice(counters, keys);
-        } finally {
-            LOCK.readLock().unlock();
-        }
-    }
-
+    @Override
     public @NotNull IntIntMap estimateCounts(@NotNull IntContainer keys) {
         LOCK.readLock().lock();
         try {
@@ -85,6 +82,7 @@ public class IntSetCounter implements Persistable {
         }
     }
 
+    @Override
     public @NotNull IntIntMap estimateAllCounts() {
         LOCK.readLock().lock();
         try {
@@ -94,31 +92,34 @@ public class IntSetCounter implements Persistable {
         }
     }
 
+    @Override
     public void forceFlush() {
         LOCK.writeLock().lock();
         try {
-            db.putAll(EasyHppc.toJavaMap(cache));
+            store.storeBatch(cache, null);
         } finally {
             LOCK.writeLock().unlock();
         }
     }
 
+    @Override
     public void clearCache() {
         cache.clear();
     }
 
+    @Override
     public void close() {
         forceFlush();
     }
 
-    private int update(int key, int eventId, int delta) {
+    private int update(int key, int item, int delta) {
         LOCK.writeLock().lock();
         try {
-            IntHashSet events = getOrLoadAllEvents(key);
+            IntHashSet items = getOrLoadForKey(key);
             if (!counters.containsKey(key)) {
-                counters.put(key, countEvents(events));
+                counters.put(key, countItems(items));
             }
-            if (events.remove(-eventId) || events.add(eventId)) {
+            if (items.remove(-item) || items.add(item)) {
                 return counters.addTo(key, delta);
             }
             return counters.get(key);
@@ -127,24 +128,24 @@ public class IntSetCounter implements Persistable {
         }
     }
 
-    private @NotNull IntHashSet getOrLoadAllEvents(int key) {
+    private @NotNull IntHashSet getOrLoadForKey(int key) {
         IntHashSet events = cache.get(key);
         if (events == null) {
-            events = db.getOrDefault(key, new IntHashSet());
+            events = store.load(key);
             cache.put(key, events);
         }
         return events;
     }
 
-    private static @NotNull IntIntHashMap loadFreshCountsSlow(@NotNull KeyValueDb<Integer, IntHashSet> db) {
+    private static @NotNull IntIntHashMap loadFreshCountsSlow(@NotNull IntSetStorage store) {
         IntIntHashMap result = new IntIntHashMap();
-        db.forEach((key, events) -> result.put(key, countEvents(events)));
+        store.loadAll((key, items) -> result.put(key, countItems(items)));
         return result;
     }
 
-    private static int countEvents(@NotNull IntHashSet events) {
+    private static int countItems(@NotNull IntHashSet items) {
         int result = 0;
-        for (IntCursor cursor : events) {
+        for (IntCursor cursor : items) {
             if (cursor.value > 0) {
                 result++;
             } else {

@@ -6,7 +6,7 @@ import io.webby.db.codec.CodecProvider;
 import io.webby.db.content.FileSystemStorage;
 import io.webby.db.content.StableFingerprint;
 import io.webby.db.content.UserContentStorage;
-import io.webby.db.event.CountersFactory;
+import io.webby.db.count.CountersFactory;
 import io.webby.db.event.KeyEventStoreFactory;
 import io.webby.db.kv.KeyValueFactory;
 import io.webby.db.kv.etcd.EtcdSettings;
