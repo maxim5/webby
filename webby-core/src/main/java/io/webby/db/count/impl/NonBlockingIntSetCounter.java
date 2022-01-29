@@ -9,6 +9,8 @@ import org.jctools.counters.CountersFactory;
 import org.jctools.maps.NonBlockingHashMapLong;
 import org.jetbrains.annotations.NotNull;
 
+import java.util.concurrent.atomic.AtomicReference;
+
 public class NonBlockingIntSetCounter implements IntSetCounter {
     private final IntSetStorage store;
     private final NonBlockingHashMapLong<IntSetValue> cache;
@@ -75,13 +77,21 @@ public class NonBlockingIntSetCounter implements IntSetCounter {
 
     @Override
     public void forceFlush() {
-        IntObjectHashMap<IntHashSet> map = new IntObjectHashMap<>();
+        IntObjectHashMap<IntHashSet> curr = new IntObjectHashMap<>();
+        IntObjectHashMap<IntHashSet> prev = new IntObjectHashMap<>();
         long[] keys = cache.keySetLong();
         for (long key : keys) {
             IntSetValue value = cache.get(key);
-            map.put((int) key, value.copyItems());
+            curr.put((int) key, value.copyItems());
+            prev.put((int) key, value.currentDbSnapshot());
         }
-        store.storeBatch(map, null);
+
+        store.storeBatch(curr, prev);
+
+        for (long key : keys) {
+            // FIX[minor]: log warning if false
+            cache.get(key).updateSnapshot(prev.get((int) key), curr.get((int) key));
+        }
     }
 
     @Override
@@ -124,12 +134,13 @@ public class NonBlockingIntSetCounter implements IntSetCounter {
     }
 
     private static final class IntSetValue {
-        // TODO[!]: store original items
+        private final AtomicReference<IntHashSet> currentDbSnapshot = new AtomicReference<>();
         private final IntHashSet items;
         private final Counter counter = CountersFactory.createFixedSizeStripedCounter(4);
 
         public IntSetValue(@NotNull IntHashSet items) {
             this.items = items;
+            this.currentDbSnapshot.set(new IntHashSet(items));
         }
 
         public int count() {
@@ -138,6 +149,14 @@ public class NonBlockingIntSetCounter implements IntSetCounter {
 
         public synchronized @NotNull IntHashSet copyItems() {
             return new IntHashSet(items);
+        }
+
+        public @NotNull IntHashSet currentDbSnapshot() {
+            return currentDbSnapshot.get();
+        }
+
+        public boolean updateSnapshot(@NotNull IntHashSet expected, @NotNull IntHashSet snapshot) {
+            return currentDbSnapshot.compareAndSet(expected, snapshot);
         }
 
         public synchronized int itemValue(int item) {
