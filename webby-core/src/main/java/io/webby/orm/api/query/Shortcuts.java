@@ -64,6 +64,8 @@ public class Shortcuts {
         return new IsIn(lhs, terms);
     }
 
+    // FIX[minor]: isIn for ints, longs
+
     public static @NotNull Like like(@NotNull Term lhs, @NotNull Term rhs) {
         return new Like(lhs, rhs);
     }
