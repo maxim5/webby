@@ -37,7 +37,9 @@ public class DemoTablesCodegenMain {
 
         ModelInput.of(M2mIntModel.class),
         ModelInput.of(M2mLongModel.class),
-        ModelInput.of(M2mIntLongModel.class)
+        ModelInput.of(M2mIntLongModel.class),
+
+        ModelInput.of(UserRateModel.class)  // TODO[!]: add tests to schema and basic ops
     );
 
     public static void main(String[] args) throws Exception {

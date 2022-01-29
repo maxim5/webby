@@ -10,10 +10,7 @@ import com.google.common.collect.Streams;
 import com.google.errorprone.annotations.CheckReturnValue;
 import org.jetbrains.annotations.NotNull;
 
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.HashMap;
-import java.util.Map;
+import java.util.*;
 import java.util.stream.IntStream;
 import java.util.stream.Stream;
 
@@ -65,7 +62,17 @@ public class EasyHppc {
         return container instanceof LongArrayList arrayList ? arrayList : new LongArrayList(container);
     }
 
+    public static @NotNull IntArrayList fromJavaIterableInt(@NotNull Iterable<Integer> list) {
+        IntArrayList arrayList = new IntArrayList();
+        list.forEach(arrayList::add);
+        return arrayList;
+    }
+
     public static @NotNull Stream<IntCursor> toJavaStream(@NotNull IntContainer container) {
+        return Streams.stream(container);
+    }
+
+    public static @NotNull Stream<LongCursor> toJavaStream(@NotNull LongContainer container) {
         return Streams.stream(container);
     }
 
