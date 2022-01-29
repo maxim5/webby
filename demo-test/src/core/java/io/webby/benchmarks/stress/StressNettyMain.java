@@ -1,4 +1,4 @@
-package io.webby.perf;
+package io.webby.benchmarks.stress;
 
 import io.webby.Webby;
 import io.webby.app.AppSettings;
@@ -8,7 +8,6 @@ import io.webby.demo.Main;
 import io.webby.netty.NettyBootstrap;
 import io.webby.netty.NettyHttpHandler;
 import io.webby.netty.response.HttpResponseFactory;
-import io.webby.perf.HttpWorker.Init;
 import io.webby.testing.*;
 import org.apache.logging.log4j.Level;
 import org.apache.logging.log4j.core.config.Configurator;
@@ -17,8 +16,8 @@ import org.jetbrains.annotations.NotNull;
 import java.io.Closeable;
 import java.util.List;
 
-import static io.webby.perf.ConcurrentStressing.MEDIUM_WAIT;
-import static io.webby.perf.ConcurrentStressing.execWorkers;
+import static io.webby.benchmarks.stress.ConcurrentStressing.MEDIUM_WAIT;
+import static io.webby.benchmarks.stress.ConcurrentStressing.execWorkers;
 import static io.webby.testing.OkRequests.json;
 import static io.webby.util.base.Unchecked.Runnables.rethrow;
 
@@ -30,7 +29,7 @@ public class StressNettyMain {
         try (Closeable ignored = bootstrapServer()) {
             new MemoryMonitor().startDaemon();
 
-            Init init = new Init(1000_000, new ProgressMonitor(5_000), new Rand());
+            HttpWorker.Init init = new HttpWorker.Init(1000_000, new ProgressMonitor(5_000), new Rand());
             execWorkers(MEDIUM_WAIT, List.of(
                 HttpWorker.randomListCaller(init, List.of(Ok.get("/"), Ok.post("/user/", json("")))),
                 HttpWorker.randomListCaller(init, List.of(Ok.get("/"), Ok.post("/user/", json("")))),

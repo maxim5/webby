@@ -1,4 +1,4 @@
-package io.webby.perf;
+package io.webby.benchmarks.stress;
 
 import com.google.inject.Injector;
 import io.webby.Webby;
@@ -10,7 +10,7 @@ import io.webby.auth.user.UserTable;
 import io.webby.db.sql.TableManager;
 import io.webby.db.sql.ThreadLocalConnector;
 import io.webby.orm.api.Connector;
-import io.webby.perf.TableWorker.Init;
+import io.webby.benchmarks.stress.TableWorker.Init;
 import io.webby.testing.Testing;
 import io.webby.testing.TestingModules;
 import io.webby.testing.TestingProps;
@@ -20,8 +20,8 @@ import java.time.Instant;
 import java.util.List;
 import java.util.function.Consumer;
 
-import static io.webby.perf.ConcurrentStressing.MEDIUM_WAIT;
-import static io.webby.perf.ConcurrentStressing.execWorkers;
+import static io.webby.benchmarks.stress.ConcurrentStressing.MEDIUM_WAIT;
+import static io.webby.benchmarks.stress.ConcurrentStressing.execWorkers;
 
 public class StressUserTableMain {
     public static void main(String[] args) throws Exception {

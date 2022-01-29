@@ -1,4 +1,4 @@
-package io.webby.perf;
+package io.webby.benchmarks.stress;
 
 import org.jetbrains.annotations.NotNull;
 

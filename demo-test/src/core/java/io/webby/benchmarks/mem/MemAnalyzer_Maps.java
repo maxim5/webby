@@ -1,4 +1,4 @@
-package io.webby.perf;
+package io.webby.benchmarks.mem;
 
 import com.carrotsearch.hppc.IntHashSet;
 import com.carrotsearch.hppc.IntObjectHashMap;

@@ -1,4 +1,4 @@
-package io.webby.perf;
+package io.webby.benchmarks.stress;
 
 import com.google.common.flogger.FluentLogger;
 import okhttp3.OkHttpClient;
