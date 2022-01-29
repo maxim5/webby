@@ -60,10 +60,8 @@ public class IntSetCounterIntegrationTest {
         setup(scenario);
 
         assertEquals(0, counter.estimateCount(A));
-        assertIntsTrimmed(counter.estimateCounts(IntArrayList.from(A, B)), A, 0, B, 0);
-        assertIntsTrimmed(counter.estimateAllCounts(), A, 0, B, 0);
-        assertEquals(0, counter.itemValue(A, Ann));
-        assertIntsTrimmed(counter.itemValues(IntArrayList.from(A, B), Ann), A, 0, B, 0);
+        assertCountEstimates(A, 0, B, 0, C, 0);
+        assertItemValues(Ann, rates(none(A), none(B), none(C)));
         assertStorage();
     }
 
@@ -96,6 +94,33 @@ public class IntSetCounterIntegrationTest {
 
     @ParameterizedTest
     @EnumSource(Scenario.class)
+    public void decrement_simple(Scenario scenario) {
+        setup(scenario);
+
+        assertEquals(-1, counter.decrement(A, Ann));
+
+        assertCountEstimates(A, -1, B, 0, C, 0);
+        assertItemValues(Ann, rates(-A, none(B), none(C)),
+                         Bob, rates(none(A), none(B), none(C)));
+        assertStorage();
+    }
+
+    @ParameterizedTest
+    @EnumSource(Scenario.class)
+    public void decrement_double(Scenario scenario) {
+        setup(scenario);
+
+        assertEquals(-1, counter.decrement(A, Ann));
+        assertEquals(-1, counter.decrement(A, Ann));
+
+        assertCountEstimates(A, -1, B, 0, C, 0);
+        assertItemValues(Ann, rates(-A, none(B), none(C)),
+                         Bob, rates(none(A), none(B), none(C)));
+        assertStorage();
+    }
+
+    @ParameterizedTest
+    @EnumSource(Scenario.class)
     public void one_user_inc_dec_same_key(Scenario scenario) {
         setup(scenario);
 
@@ -104,6 +129,24 @@ public class IntSetCounterIntegrationTest {
 
         assertCountEstimates(A, 0, B, 0, C, 0);
         assertItemValues(Ann, rates(none(A), none(B), none(C)));
+        assertStorage();
+    }
+
+    @ParameterizedTest
+    @EnumSource(Scenario.class)
+    public void one_user_multi_inc_dec_same_key(Scenario scenario) {
+        setup(scenario);
+
+        assertEquals(-1, counter.decrement(A, Ann));
+        assertEquals(-1, counter.decrement(A, Ann));
+        assertEquals(0, counter.increment(A, Ann));
+        assertEquals(1, counter.increment(A, Ann));
+        assertEquals(1, counter.increment(A, Ann));
+        assertEquals(0, counter.decrement(A, Ann));
+        assertEquals(-1, counter.decrement(A, Ann));
+
+        assertCountEstimates(A, -1);
+        assertItemValues(Ann, rates(-A));
         assertStorage();
     }
 
