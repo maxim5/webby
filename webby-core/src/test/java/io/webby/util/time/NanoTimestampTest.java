@@ -1,13 +1,13 @@
 package io.webby.util.time;
 
 import org.jetbrains.annotations.NotNull;
-import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 
 import java.time.Instant;
 
 import static io.webby.util.time.NanoTimestamp.instantToLongNano;
 import static io.webby.util.time.NanoTimestamp.longNanoToInstant;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 
 public class NanoTimestampTest {
     @Test
@@ -28,6 +28,6 @@ public class NanoTimestampTest {
     private static void assertInstantRoundtrip(@NotNull Instant instant) {
         long timestamp = instantToLongNano(instant);
         Instant back = longNanoToInstant(timestamp);
-        Assertions.assertEquals(instant, back);
+        assertEquals(instant, back);
     }
 }
