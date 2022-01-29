@@ -15,6 +15,7 @@ import io.webby.orm.codegen.SqlSchemaMaker;
 import io.webby.testing.ext.SqlDbSetupExtension;
 import io.webby.util.hppc.EasyHppc;
 import org.jetbrains.annotations.NotNull;
+import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.extension.RegisterExtension;
 import org.junit.jupiter.params.ParameterizedTest;
@@ -46,6 +47,12 @@ public class IntSetCounterIntegrationTest {
 
     private IntSetCounter counter;
     private IntSetStorage storage;
+
+    @BeforeAll
+    static void beforeAll() {
+        SQL_DB.runUpdate("DROP TABLE IF EXISTS %s".formatted(UserRateModelTable.META.sqlTableName()));
+        SQL_DB.runUpdate(SqlSchemaMaker.makeCreateTableQuery(SQL_DB.engine(), UserRateModelTable.META));
+    }
 
     @ParameterizedTest
     @EnumSource(Scenario.class)
@@ -233,14 +240,10 @@ public class IntSetCounterIntegrationTest {
     @CanIgnoreReturnValue
     private @NotNull IntSetCounter setup(@NotNull Scenario scenario) {
         storage = switch (scenario.store) {
-            case TABLE -> {
-                SQL_DB.runUpdate("DROP TABLE IF EXISTS %s".formatted(UserRateModelTable.META.sqlTableName()));
-                SQL_DB.runUpdate(SqlSchemaMaker.makeCreateTableQuery(SQL_DB.engine(), UserRateModelTable.META));
-                yield new TableIntSetStorageImpl(new UserRateModelTable(SQL_DB),
-                                                 UserRateModelTable.OwnColumn.user_id,
-                                                 UserRateModelTable.OwnColumn.content_id,
-                                                 UserRateModelTable.OwnColumn.value);
-            }
+            case TABLE -> new TableIntSetStorageImpl(new UserRateModelTable(SQL_DB),
+                                                     UserRateModelTable.OwnColumn.user_id,
+                                                     UserRateModelTable.OwnColumn.content_id,
+                                                     UserRateModelTable.OwnColumn.value);
             case KV_JAVA_MAP -> new KvIntSetStorageImpl(new JavaMapDbFactory().inMemoryDb());
         };
 

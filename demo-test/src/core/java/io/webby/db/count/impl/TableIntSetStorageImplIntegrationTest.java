@@ -57,6 +57,7 @@ public class TableIntSetStorageImplIntegrationTest {
     @Test
     public void load_empty() {
         assertThat(storage.load(A)).isEmpty();
+        assertThat(storage.loadBatch(IntArrayList.from())).isEmpty();
         assertThat(storage.loadBatch(IntArrayList.from(A, B))).isEmpty();
         assertThat(storage.loadAll()).isEmpty();
     }

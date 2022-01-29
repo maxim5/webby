@@ -54,6 +54,10 @@ public class TableIntSetStorageImpl implements IntSetStorage {
 
     @Override
     public void loadBatch(@NotNull IntContainer keys, @NotNull IntObjectProcedure<@NotNull IntHashSet> consumer) {
+        if (keys.isEmpty()) {
+            return;
+        }
+
         SelectWhere query = SelectWhere.from(table).select(keyColumn, itemColumn, valueColumn)
             .where(Where.of(isIn(keyColumn, makeIntVariables(keys))))
             .orderBy(OrderBy.of(keyColumn.ordered(Order.ASC), itemColumn.ordered(Order.ASC)))
