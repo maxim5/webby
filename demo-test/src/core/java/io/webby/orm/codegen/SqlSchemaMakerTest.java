@@ -581,4 +581,31 @@ public class SqlSchemaMakerTest {
             )
             """);
     }
+
+    @Test
+    public void create_table_user_rate_model() {
+        assertThat(makeCreateTableQuery(Engine.SQLite, UserRateModelTable.class)).isEqualTo("""
+            CREATE TABLE IF NOT EXISTS user_rate_model (
+                user_id INTEGER,
+                content_id INTEGER,
+                value INTEGER
+            )
+            """);
+
+        assertThat(makeCreateTableQuery(Engine.H2, UserRateModelTable.class)).isEqualTo("""
+            CREATE TABLE IF NOT EXISTS user_rate_model (
+                user_id INTEGER,
+                content_id INTEGER,
+                value INTEGER
+            )
+            """);
+
+        assertThat(makeCreateTableQuery(Engine.MySQL, UserRateModelTable.class)).isEqualTo("""
+            CREATE TABLE IF NOT EXISTS user_rate_model (
+                user_id INTEGER,
+                content_id INTEGER,
+                value INTEGER
+            )
+            """);
+    }
 }
