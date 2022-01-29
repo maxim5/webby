@@ -20,7 +20,7 @@ import static io.webby.orm.api.ReadFollow.FOLLOW_ONE_LEVEL;
 import static io.webby.orm.arch.InvalidSqlModelException.create;
 
 @Immutable
-public final class TableArch implements JavaNameHolder, WithColumns, WithPrefixedColumns {
+public final class TableArch implements JavaNameHolder, HasColumns, HasPrefixedColumns {
     private final AtomicLazyList<TableField> fieldsRef = AtomicLazyList.ofUninitializedList();
     private final AtomicLazy<Optional<TableField>> primaryKeyCache = new AtomicLazy<>();
 
@@ -101,7 +101,7 @@ public final class TableArch implements JavaNameHolder, WithColumns, WithPrefixe
     }
 
     public @NotNull List<Column> columns(@NotNull Predicate<TableField> fieldsFilter) {
-        return fields().stream().filter(fieldsFilter).map(WithColumns::columns).flatMap(List::stream).toList();
+        return fields().stream().filter(fieldsFilter).map(HasColumns::columns).flatMap(List::stream).toList();
     }
 
     @Override

@@ -6,7 +6,7 @@ import com.zaxxer.hikari.HikariDataSource;
 import io.webby.app.Settings;
 import io.webby.common.Lifetime;
 import io.webby.orm.api.Engine;
-import io.webby.orm.api.WithEngine;
+import io.webby.orm.api.HasEngine;
 import io.webby.util.base.Unchecked;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.VisibleForTesting;
@@ -14,7 +14,7 @@ import org.jetbrains.annotations.VisibleForTesting;
 import java.sql.Connection;
 import java.sql.SQLException;
 
-public class ConnectionPool implements WithEngine {
+public class ConnectionPool implements HasEngine {
     private final HikariDataSource dataSource;
 
     @Inject

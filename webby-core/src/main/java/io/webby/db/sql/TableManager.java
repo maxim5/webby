@@ -21,7 +21,7 @@ import java.util.logging.Level;
 import static io.webby.util.base.EasyCast.castAny;
 import static java.util.Objects.requireNonNull;
 
-public class TableManager implements WithEngine {
+public class TableManager implements HasEngine {
     private static final FluentLogger log = FluentLogger.forEnclosingClass();
     private static final ResettableAtomicLazy<TableManager> SHARED_INSTANCE = new ResettableAtomicLazy<>();
 

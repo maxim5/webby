@@ -475,7 +475,7 @@ public class ModelTableCodegen extends BaseCodegen {
 
     private void fetchPks() {
         String primaryKeyColumn = Optional.ofNullable(table.primaryKeyField())
-                .map(WithColumns::columns)
+                .map(HasColumns::columns)
                 .map(cols -> cols.get(0))
                 .map(Column::sqlName)
                 .orElse(null);

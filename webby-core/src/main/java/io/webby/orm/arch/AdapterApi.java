@@ -67,7 +67,7 @@ public class AdapterApi {
     }
 
     public int adapterColumnsNumber() {
-        return oneOf.mapToInt(klass -> getCreationParameters(klass).length, WithColumns::columnsNumber);
+        return oneOf.mapToInt(klass -> getCreationParameters(klass).length, HasColumns::columnsNumber);
     }
 
     private static @NotNull List<Column> classToAdapterColumns(@NotNull Class<?> klass, @NotNull String fieldSqlName) {

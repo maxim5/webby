@@ -8,7 +8,7 @@ import org.jetbrains.annotations.Nullable;
 import java.util.List;
 
 @Immutable
-public abstract class TableField implements WithColumns, WithPrefixedColumns {
+public abstract class TableField implements HasColumns, HasPrefixedColumns {
     protected final TableArch parent;
     protected final ModelField field;
     protected final boolean primaryKey;

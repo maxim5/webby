@@ -4,7 +4,7 @@ import org.jetbrains.annotations.NotNull;
 
 import java.sql.Connection;
 
-public interface Connector extends WithRunner, WithEngine {
+public interface Connector extends HasRunner, HasEngine {
     @NotNull Connection connection();
 
     @Override

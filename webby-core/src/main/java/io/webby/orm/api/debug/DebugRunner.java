@@ -13,7 +13,7 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.List;
 
-public interface DebugRunner extends WithRunner {
+public interface DebugRunner extends HasRunner {
     default @NotNull List<DebugSql.Row> runQuery(@NotNull String query, @Nullable Object @NotNull ... params) {
         try (PreparedStatement statement = runner().prepareQuery(query, params);
              ResultSet resultSet = statement.executeQuery()) {

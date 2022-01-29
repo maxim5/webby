@@ -5,7 +5,7 @@ import org.jetbrains.annotations.NotNull;
 
 import java.util.List;
 
-public interface WithPrefixedColumns {
+public interface HasPrefixedColumns {
     @NotNull List<PrefixedColumn> columns(@NotNull ReadFollow follow);
 
     default int columnsNumber(@NotNull ReadFollow follow) {

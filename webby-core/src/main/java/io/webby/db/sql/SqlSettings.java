@@ -1,7 +1,7 @@
 package io.webby.db.sql;
 
 import io.webby.orm.api.Engine;
-import io.webby.orm.api.WithEngine;
+import io.webby.orm.api.HasEngine;
 import io.webby.util.base.Unchecked;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
@@ -13,7 +13,7 @@ import java.sql.SQLException;
 // More SQL URLs:
 // SqlSettings.jdbcUrl(Engine.H2, "file:./.data/temp.h2")
 // SqlSettings.jdbcUrl(SqlSettings.SQLITE, "file:.data/temp.sqlite.db?mode=memory&cache=shared")
-public record SqlSettings(@NotNull String url, @Nullable String user, @Nullable String password) implements WithEngine {
+public record SqlSettings(@NotNull String url, @Nullable String user, @Nullable String password) implements HasEngine {
     private static final String H2_IN_MEMORY_URL = "jdbc:h2:mem:test;DB_CLOSE_DELAY=-1";
     private static final String SQLITE_IN_MEMORY_URL = "jdbc:sqlite::memory:";
     private static final String MYSQL_TEST_URL = "jdbc:mysql://localhost/test";

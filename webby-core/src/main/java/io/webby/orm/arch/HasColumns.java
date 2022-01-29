@@ -4,7 +4,7 @@ import org.jetbrains.annotations.NotNull;
 
 import java.util.List;
 
-public interface WithColumns {
+public interface HasColumns {
     @NotNull List<Column> columns();
 
     default int columnsNumber() {

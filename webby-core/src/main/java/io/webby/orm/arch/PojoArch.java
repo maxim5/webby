@@ -3,7 +3,6 @@ package io.webby.orm.arch;
 import com.google.common.collect.ImmutableList;
 import io.webby.util.lazy.AtomicLazy;
 import io.webby.util.lazy.DelayedAccessLazy;
-import io.webby.orm.codegen.ModelAdaptersScanner;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.ArrayList;
@@ -11,7 +10,7 @@ import java.util.List;
 import java.util.Objects;
 import java.util.function.Consumer;
 
-public final class PojoArch implements WithColumns {
+public final class PojoArch implements HasColumns {
     private final @NotNull Class<?> pojoType;
     private final @NotNull ImmutableList<PojoField> fields;
     private final DelayedAccessLazy<List<Column>> columnsRef = AtomicLazy.emptyLazy();
