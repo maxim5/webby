@@ -67,6 +67,18 @@ public class IntSetCounterIntegrationTest {
 
     @ParameterizedTest
     @EnumSource(Scenario.class)
+    public void empty_flush(Scenario scenario) throws IOException {
+        setup(scenario);
+
+        counter.flush();
+
+        assertCountEstimates(A, 0, B, 0, C, 0);
+        assertItemValues(Ann, rates(none(A), none(B), none(C)));
+        assertStorage();
+    }
+
+    @ParameterizedTest
+    @EnumSource(Scenario.class)
     public void increment_simple(Scenario scenario) {
         setup(scenario);
 
@@ -224,7 +236,7 @@ public class IntSetCounterIntegrationTest {
         assertEquals(2, counter.increment(A, Liz));
         counter.flush();
 
-        assertCountEstimates(A, 2, B, 1, C, 0);
+        assertCountEstimates(A, 2, B, 1);
         assertItemValues(Ann, rates(+A), Bob, rates(+B), Liz, rates(+A));
         assertStorage(A, IntHashSet.from(Ann, Liz),
                       B, IntHashSet.from(Bob));
@@ -240,10 +252,93 @@ public class IntSetCounterIntegrationTest {
         assertEquals(-2, counter.decrement(A, Liz));
         counter.flush();
 
-        assertCountEstimates(A, -2, B, -1, C, 0);
+        assertCountEstimates(A, -2, B, -1);
         assertItemValues(Ann, rates(-A), Bob, rates(-B), Liz, rates(-A));
         assertStorage(A, IntHashSet.from(-Ann, -Liz),
                       B, IntHashSet.from(-Bob));
+    }
+
+    @ParameterizedTest
+    @EnumSource(Scenario.class)
+    public void one_user_double_flush(Scenario scenario) throws IOException {
+        setup(scenario);
+
+        assertEquals(1, counter.increment(A, Ann));
+        assertEquals(1, counter.increment(B, Ann));
+        counter.flush();
+        counter.flush();
+
+        assertCountEstimates(A, 1, B, 1);
+        assertItemValues(Ann, rates(+A, +B));
+        assertStorage(A, IntHashSet.from(Ann),
+                      B, IntHashSet.from(Ann));
+    }
+
+    @ParameterizedTest
+    @EnumSource(Scenario.class)
+    public void one_user_inc_between_flushes(Scenario scenario) throws IOException {
+        setup(scenario);
+
+        assertEquals(1, counter.increment(A, Ann));
+        counter.flush();
+        assertEquals(1, counter.increment(B, Ann));
+        counter.flush();
+
+        assertCountEstimates(A, 1, B, 1);
+        assertItemValues(Ann, rates(+A, +B));
+        assertStorage(A, IntHashSet.from(Ann),
+                      B, IntHashSet.from(Ann));
+    }
+
+    @ParameterizedTest
+    @EnumSource(Scenario.class)
+    public void one_user_undo_between_flushes(Scenario scenario) throws IOException {
+        setup(scenario);
+
+        assertEquals(1, counter.increment(A, Ann));
+        counter.flush();
+        assertEquals(0, counter.decrement(A, Ann));
+        counter.flush();
+
+        assertCountEstimates(A, 0);
+        assertItemValues(Ann, rates(none(A)));
+        assertStorage();
+    }
+
+    @ParameterizedTest
+    @EnumSource(Scenario.class)
+    public void one_user_flip_between_flushes(Scenario scenario) throws IOException {
+        setup(scenario);
+
+        assertEquals(1, counter.increment(A, Ann));
+        counter.flush();
+        assertEquals(0, counter.decrement(A, Ann));
+        assertEquals(-1, counter.decrement(A, Ann));
+        counter.flush();
+
+        assertCountEstimates(A, -1);
+        assertItemValues(Ann, rates(-A));
+        assertStorage(A, IntHashSet.from(-Ann));
+    }
+
+    @ParameterizedTest
+    @EnumSource(Scenario.class)
+    public void multi_changes_between_flushes(Scenario scenario) throws IOException {
+        setup(scenario);
+
+        assertEquals(1, counter.increment(A, Ann));
+        assertEquals(-1, counter.decrement(B, Ann));
+        counter.flush();
+        assertEquals(-1, counter.decrement(C, Ann));
+        assertEquals(0, counter.increment(B, Bob));
+        counter.flush();
+
+        assertCountEstimates(A, 1, B, 0, C, -1);
+        assertItemValues(Ann, rates(+A, -B, -C),
+                         Bob, rates(+B));
+        assertStorage(A, IntHashSet.from(Ann),
+                      B, IntHashSet.from(-Ann, +Bob),
+                      C, IntHashSet.from(-Ann));
     }
 
     // TODO[!]: more flush test cases
