@@ -68,6 +68,12 @@ public class EasyHppc {
         return arrayList;
     }
 
+    public static @NotNull LongArrayList fromJavaIterableLong(@NotNull Iterable<Long> list) {
+        LongArrayList arrayList = new LongArrayList();
+        list.forEach(arrayList::add);
+        return arrayList;
+    }
+
     public static @NotNull Stream<IntCursor> toJavaStream(@NotNull IntContainer container) {
         return Streams.stream(container);
     }
@@ -92,7 +98,7 @@ public class EasyHppc {
         return list;
     }
 
-    public static @NotNull Map<Integer, Integer> toJavaMap(@NotNull IntIntMap map) {
+    public static @NotNull HashMap<Integer, Integer> toJavaMap(@NotNull IntIntMap map) {
         HashMap<Integer, Integer> result = new HashMap<>(map.size());
         map.forEach((IntIntProcedure) result::put);
         return result;

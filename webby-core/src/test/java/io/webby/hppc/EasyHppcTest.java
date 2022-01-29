@@ -2,11 +2,13 @@ package io.webby.hppc;
 
 import com.carrotsearch.hppc.*;
 import com.carrotsearch.hppc.cursors.IntCursor;
+import com.carrotsearch.hppc.cursors.LongCursor;
 import com.google.common.truth.IterableSubject;
 import io.webby.util.hppc.EasyHppc;
 import org.jetbrains.annotations.NotNull;
 import org.junit.Test;
 
+import java.util.List;
 import java.util.stream.IntStream;
 import java.util.stream.Stream;
 
@@ -62,10 +64,41 @@ public class EasyHppcTest {
     }
 
     @Test
+    public void int_to_array_list() {
+        assertIntsOrdered(EasyHppc.toArrayList(IntArrayList.from(1, 2, 3)), 1, 2, 3);
+        assertIntsNoOrder(EasyHppc.toArrayList(IntHashSet.from(1, 2, 3)), 1, 2, 3);
+    }
+
+    @Test
+    public void long_to_array_list() {
+        assertLongsOrdered(EasyHppc.toArrayList(LongArrayList.from(1, 2, 3)), 1, 2, 3);
+        assertLongsNoOrder(EasyHppc.toArrayList(LongHashSet.from(1, 2, 3)), 1, 2, 3);
+    }
+
+    @Test
+    public void int_from_java_iterable() {
+        assertIntsOrdered(EasyHppc.fromJavaIterableInt(List.of()));
+        assertIntsOrdered(EasyHppc.fromJavaIterableInt(List.of(3, 2, 1)), 3, 2, 1);
+    }
+
+    @Test
+    public void long_from_java_iterable() {
+        assertLongsOrdered(EasyHppc.fromJavaIterableLong(List.of()));
+        assertLongsOrdered(EasyHppc.fromJavaIterableLong(List.of(3L, 2L, 1L)), 3, 2, 1);
+    }
+
+    @Test
     public void int_list_to_java_stream() {
-        assertStreamThat(EasyHppc.toJavaStream(IntArrayList.from())).isEmpty();
-        assertStreamThat(EasyHppc.toJavaStream(IntArrayList.from(1))).containsExactly(1).inOrder();
-        assertStreamThat(EasyHppc.toJavaStream(IntArrayList.from(1, 2, 3))).containsExactly(1, 2, 3).inOrder();
+        assertIntStreamThat(EasyHppc.toJavaStream(IntArrayList.from())).isEmpty();
+        assertIntStreamThat(EasyHppc.toJavaStream(IntArrayList.from(1))).containsExactly(1).inOrder();
+        assertIntStreamThat(EasyHppc.toJavaStream(IntArrayList.from(1, 2, 3))).containsExactly(1, 2, 3).inOrder();
+    }
+
+    @Test
+    public void long_list_to_java_stream() {
+        assertLongStreamThat(EasyHppc.toJavaStream(LongArrayList.from())).isEmpty();
+        assertLongStreamThat(EasyHppc.toJavaStream(LongArrayList.from(1L))).containsExactly(1L).inOrder();
+        assertLongStreamThat(EasyHppc.toJavaStream(LongArrayList.from(1L, 2L, 3L))).containsExactly(1L, 2L, 3L).inOrder();
     }
 
     @Test
@@ -73,6 +106,13 @@ public class EasyHppcTest {
         assertThat(EasyHppc.toJavaList(IntArrayList.from())).isEmpty();
         assertThat(EasyHppc.toJavaList(IntArrayList.from(1))).containsExactly(1).inOrder();
         assertThat(EasyHppc.toJavaList(IntArrayList.from(1, 2, 3))).containsExactly(1, 2, 3).inOrder();
+    }
+
+    @Test
+    public void long_list_to_java_list() {
+        assertThat(EasyHppc.toJavaList(LongArrayList.from())).isEmpty();
+        assertThat(EasyHppc.toJavaList(LongArrayList.from(1L))).containsExactly(1L).inOrder();
+        assertThat(EasyHppc.toJavaList(LongArrayList.from(1L, 2L, 3L))).containsExactly(1L, 2L, 3L).inOrder();
     }
 
     @Test
@@ -129,7 +169,11 @@ public class EasyHppcTest {
         assertIntsNoOrder(EasyHppc.subtract(IntHashSet.from(1, 2, 3), IntHashSet.from(4, 5)), 1, 2, 3);
     }
 
-    private static @NotNull IterableSubject assertStreamThat(@NotNull Stream<IntCursor> stream) {
+    private static @NotNull IterableSubject assertIntStreamThat(@NotNull Stream<IntCursor> stream) {
+        return assertThat(stream.map(cursor -> cursor.value).toList());
+    }
+
+    private static @NotNull IterableSubject assertLongStreamThat(@NotNull Stream<LongCursor> stream) {
         return assertThat(stream.map(cursor -> cursor.value).toList());
     }
 }
