@@ -7,25 +7,27 @@ import io.webby.db.sql.ConnectionPool;
 import io.webby.db.sql.SqlSettings;
 import io.webby.orm.api.Connector;
 import io.webby.orm.api.Engine;
+import io.webby.orm.api.TableMeta;
 import io.webby.orm.api.debug.DebugRunner;
+import io.webby.orm.codegen.SqlSchemaMaker;
 import io.webby.testing.TestingModules;
 import io.webby.testing.TestingProps;
 import io.webby.util.base.Unchecked.Runnables;
 import org.jetbrains.annotations.NotNull;
-import org.junit.jupiter.api.extension.AfterAllCallback;
-import org.junit.jupiter.api.extension.AfterEachCallback;
-import org.junit.jupiter.api.extension.BeforeEachCallback;
-import org.junit.jupiter.api.extension.ExtensionContext;
+import org.junit.jupiter.api.extension.*;
 
 import java.sql.Connection;
 import java.sql.Savepoint;
 import java.util.logging.Level;
 
-public class SqlDbSetupExtension implements AfterAllCallback, BeforeEachCallback, AfterEachCallback, Connector, DebugRunner {
+public class SqlDbSetupExtension implements BeforeAllCallback, AfterAllCallback,
+                                            BeforeEachCallback, AfterEachCallback,
+                                            Connector, DebugRunner {
     private static final FluentLogger log = FluentLogger.forEnclosingClass();
 
     private final SqlSettings settings;
     private final Connection connection;
+    private TableMeta table;
     private Savepoint savepoint;
 
     public SqlDbSetupExtension(@NotNull SqlSettings settings) {
@@ -40,6 +42,19 @@ public class SqlDbSetupExtension implements AfterAllCallback, BeforeEachCallback
 
     public static @NotNull SqlDbSetupExtension fromProperties() {
         return from(TestingProps.propsSqlSettings());
+    }
+
+    public @NotNull SqlDbSetupExtension ofTable(@NotNull TableMeta table) {
+        this.table = table;
+        return this;
+    }
+
+    @Override
+    public void beforeAll(ExtensionContext context) {
+        if (table != null) {
+            runUpdate(SqlSchemaMaker.makeDropTableQuery(table));
+            runUpdate(SqlSchemaMaker.makeCreateTableQuery(engine(), table));
+        }
     }
 
     @Override

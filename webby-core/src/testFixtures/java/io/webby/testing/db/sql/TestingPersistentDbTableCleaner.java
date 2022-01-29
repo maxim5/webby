@@ -8,6 +8,7 @@ import io.webby.app.Settings;
 import io.webby.db.sql.DDL;
 import io.webby.db.sql.TableManager;
 import io.webby.orm.api.TableMeta;
+import io.webby.orm.codegen.SqlSchemaMaker;
 import org.jetbrains.annotations.NotNull;
 
 import java.sql.SQLException;
@@ -34,7 +35,7 @@ public class TestingPersistentDbTableCleaner {
                         connector().runner().runInTransaction(runner -> {
                             for (TableMeta meta : getAllTables()) {
                                 log.at(Level.INFO).log("Deleting SQL table if exists: `%s`...", meta.sqlTableName());
-                                String query = "DROP TABLE IF EXISTS %s".formatted(meta.sqlTableName());
+                                String query = SqlSchemaMaker.makeDropTableQuery(meta);
                                 runner.runUpdate(query);
                             }
                         });

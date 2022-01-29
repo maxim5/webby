@@ -3,7 +3,6 @@ package io.webby.orm.api.query;
 import com.carrotsearch.hppc.IntArrayList;
 import com.carrotsearch.hppc.LongArrayList;
 import io.webby.orm.api.Engine;
-import io.webby.orm.codegen.SqlSchemaMaker;
 import io.webby.testing.ext.SqlDbSetupExtension;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Tag;
@@ -23,13 +22,10 @@ import static org.junit.jupiter.api.Assumptions.assumeFalse;
 
 @Tag("sql")
 public class SqlDbQueryTest {
-    @RegisterExtension private static final SqlDbSetupExtension SQL_DB = SqlDbSetupExtension.fromProperties();
+    @RegisterExtension static final SqlDbSetupExtension SQL_DB = SqlDbSetupExtension.fromProperties().ofTable(PERSON_META);
 
     @BeforeAll
     static void beforeAll() {
-        SQL_DB.runUpdate("DROP TABLE IF EXISTS person");
-        SQL_DB.runUpdate(SqlSchemaMaker.makeCreateTableQuery(SQL_DB.engine(), PERSON_META));
-
         List<Object[]> rows = List.of(
             array("Kate", "DE", FEMALE, parseDate("1990-01-01"), 110, 160.5, photo(0x1111111)),
             array("Bill", "US", MALE,   parseDate("1971-10-20"), 120, 170.1, photo(0x2222222)),

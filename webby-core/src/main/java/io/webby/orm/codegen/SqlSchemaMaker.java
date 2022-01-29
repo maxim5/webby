@@ -51,6 +51,18 @@ public class SqlSchemaMaker {
         """.formatted(tableName, definitions);
     }
 
+    public static @NotNull String makeDropTableQuery(@NotNull BaseTable<?> table) {
+        return makeDropTableQuery(table.meta());
+    }
+
+    public static @NotNull String makeDropTableQuery(@NotNull TableMeta meta) {
+        return makeDropTableQuery(meta.sqlTableName());
+    }
+
+    public static @NotNull String makeDropTableQuery(@NotNull String table) {
+        return "DROP TABLE IF EXISTS %s".formatted(table);
+    }
+
     private static final Map<Class<?>, String> DEFAULT_DATA_TYPES = EasyMaps.asMap(
         boolean.class, "BOOLEAN",
         byte.class, "TINYINT",

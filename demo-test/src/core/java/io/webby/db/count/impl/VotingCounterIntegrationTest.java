@@ -11,11 +11,9 @@ import com.google.mu.util.stream.BiStream;
 import io.webby.db.count.VotingCounter;
 import io.webby.db.kv.javamap.JavaMapDbFactory;
 import io.webby.demo.model.UserRateModelTable;
-import io.webby.orm.codegen.SqlSchemaMaker;
 import io.webby.testing.ext.SqlDbSetupExtension;
 import io.webby.util.hppc.EasyHppc;
 import org.jetbrains.annotations.NotNull;
-import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.extension.RegisterExtension;
 import org.junit.jupiter.params.ParameterizedTest;
@@ -35,7 +33,7 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 
 @Tag("sql")
 public class VotingCounterIntegrationTest {
-    @RegisterExtension private static final SqlDbSetupExtension SQL_DB = SqlDbSetupExtension.fromProperties();
+    @RegisterExtension static final SqlDbSetupExtension SQL_DB = SqlDbSetupExtension.fromProperties().ofTable(UserRateModelTable.META);
 
     private static final int A = 1000;
     private static final int B = 2000;
@@ -47,12 +45,6 @@ public class VotingCounterIntegrationTest {
 
     private VotingCounter counter;
     private VotingStorage storage;
-
-    @BeforeAll
-    static void beforeAll() {
-        SQL_DB.runUpdate("DROP TABLE IF EXISTS %s".formatted(UserRateModelTable.META.sqlTableName()));
-        SQL_DB.runUpdate(SqlSchemaMaker.makeCreateTableQuery(SQL_DB.engine(), UserRateModelTable.META));
-    }
 
     @ParameterizedTest
     @EnumSource(Scenario.class)

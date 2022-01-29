@@ -7,10 +7,8 @@ import com.carrotsearch.hppc.IntObjectMap;
 import com.google.errorprone.annotations.CanIgnoreReturnValue;
 import io.webby.demo.model.UserRateModel;
 import io.webby.demo.model.UserRateModelTable;
-import io.webby.orm.codegen.SqlSchemaMaker;
 import io.webby.testing.ext.SqlDbSetupExtension;
 import org.jetbrains.annotations.NotNull;
-import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
@@ -27,7 +25,7 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 
 @Tag("sql")
 public class TableVotingStorageIntegrationTest {
-    @RegisterExtension private static final SqlDbSetupExtension SQL_DB = SqlDbSetupExtension.fromProperties();
+    @RegisterExtension static final SqlDbSetupExtension SQL_DB = SqlDbSetupExtension.fromProperties().ofTable(UserRateModelTable.META);
 
     private static final int A = 1000;
     private static final int B = 2000;
@@ -38,12 +36,6 @@ public class TableVotingStorageIntegrationTest {
 
     private TableVotingStorage storage;
     private UserRateModelTable table;
-
-    @BeforeAll
-    static void beforeAll() {
-        SQL_DB.runUpdate("DROP TABLE IF EXISTS %s".formatted(UserRateModelTable.META.sqlTableName()));
-        SQL_DB.runUpdate(SqlSchemaMaker.makeCreateTableQuery(SQL_DB.engine(), UserRateModelTable.META));
-    }
 
     @BeforeEach
     void setUp() {
