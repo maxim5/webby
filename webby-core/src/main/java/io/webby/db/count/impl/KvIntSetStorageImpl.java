@@ -37,7 +37,7 @@ public class KvIntSetStorageImpl implements IntSetStorage {
         while (keyIt.hasNext()) {
             IntCursor key = keyIt.next();
             IntHashSet value = valIt.next();
-            if (value != null) {
+            if (value != null && !value.isEmpty()) {
                 consumer.apply(key.value, value);
             }
         }
@@ -45,12 +45,16 @@ public class KvIntSetStorageImpl implements IntSetStorage {
 
     @Override
     public void loadAll(@NotNull IntObjectProcedure<@NotNull IntHashSet> consumer) {
-        db.forEach(consumer::apply);
+        db.forEach((key, value) -> {
+            if (!value.isEmpty()) {
+                consumer.apply(key, value);
+            }
+        });
     }
 
     @Override
-    public void storeBatch(@NotNull IntObjectMap<IntHashSet> map, @Nullable IntObjectMap<IntHashSet> prev) {
+    public void storeBatch(@NotNull IntObjectMap<IntHashSet> curr, @Nullable IntObjectMap<IntHashSet> prev) {
         assert prev == null || ensureStorageConsistency(this, prev) : "This is Impossible?!";
-        db.putAll(EasyHppc.toJavaMap(map));
+        db.putAll(EasyHppc.toJavaMap(curr));
     }
 }
