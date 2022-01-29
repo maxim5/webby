@@ -16,6 +16,8 @@ public class Shortcuts {
     public static final Term ZERO = num(0);
     public static final Term ONE = num(1);
 
+    public static final Variable UNRESOLVED_NUM = unresolved("noname", TermType.NUMBER);
+
     public static @NotNull NumberLiteral num(@NotNull Number value) {
         return new NumberLiteral(value);
     }
@@ -49,11 +51,15 @@ public class Shortcuts {
     }
 
     public static @NotNull BoolTerm lookupBy(@NotNull Column column, @NotNull Number variable) {
-        return CompareType.EQ.compare(column, var(variable));
+        return lookupBy(column, var(variable));
     }
 
     public static @NotNull BoolTerm lookupBy(@NotNull Column column, @NotNull String variable) {
-        return CompareType.EQ.compare(column, var(variable));
+        return lookupBy(column, var(variable));
+    }
+
+    public static @NotNull BoolTerm lookupBy(@NotNull Column column, @NotNull Variable variable) {
+        return CompareType.EQ.compare(column, variable);
     }
 
     public static @NotNull IsIn isIn(@NotNull Term lhs, @NotNull Term @NotNull ... terms) {

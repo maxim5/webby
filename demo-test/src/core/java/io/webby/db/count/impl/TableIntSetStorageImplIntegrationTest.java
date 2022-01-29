@@ -48,10 +48,7 @@ public class TableIntSetStorageImplIntegrationTest {
     @BeforeEach
     void setUp() {
         table = new UserRateModelTable(SQL_DB);
-        storage = new TableIntSetStorageImpl(table,
-                                             UserRateModelTable.OwnColumn.user_id,
-                                             UserRateModelTable.OwnColumn.content_id,
-                                             UserRateModelTable.OwnColumn.value);
+        storage = TableIntSetStorageImpl.from(new UserRateModelTable(SQL_DB), "content_id", "user_id", "value");
     }
 
     @Test
@@ -90,17 +87,17 @@ public class TableIntSetStorageImplIntegrationTest {
     public void store_batch_empty_insert_one_key() {
         storage.storeBatch(newIntObjectMap(A, IntHashSet.from(Ann, Bob, Don)),
                            newIntObjectMap());
-        assertThat(table.fetchAll()).containsExactly(new UserRateModel(A, Ann, 1),
-                                                     new UserRateModel(A, Bob, 1),
-                                                     new UserRateModel(A, Don, 1));
+        assertThat(table.fetchAll()).containsExactly(new UserRateModel(Ann, A, 1),
+                                                     new UserRateModel(Bob, A, 1),
+                                                     new UserRateModel(Don, A, 1));
     }
 
     @Test
     public void store_batch_empty_insert_two_keys() {
         storage.storeBatch(newIntObjectMap(A, IntHashSet.from(Ann), B, IntHashSet.from(-Ann)),
                            newIntObjectMap());
-        assertThat(table.fetchAll()).containsExactly(new UserRateModel(A, Ann, 1),
-                                                     new UserRateModel(B, Ann, -1));
+        assertThat(table.fetchAll()).containsExactly(new UserRateModel(Ann, A, 1),
+                                                     new UserRateModel(Ann, B, -1));
     }
 
     @Test
@@ -109,8 +106,8 @@ public class TableIntSetStorageImplIntegrationTest {
 
         storage.storeBatch(newIntObjectMap(A, IntHashSet.from(Ann), B, IntHashSet.from(Bob)),
                            state);
-        assertThat(table.fetchAll()).containsExactly(new UserRateModel(A, Ann, 1),
-                                                     new UserRateModel(B, Bob, 1));
+        assertThat(table.fetchAll()).containsExactly(new UserRateModel(Ann, A, 1),
+                                                     new UserRateModel(Bob, B, 1));
     }
 
     @Test
@@ -129,8 +126,8 @@ public class TableIntSetStorageImplIntegrationTest {
 
         storage.storeBatch(newIntObjectMap(A, IntHashSet.from(-Ann), B, IntHashSet.from(Bob)),
                            state);
-        assertThat(table.fetchAll()).containsExactly(new UserRateModel(A, Ann, -1),
-                                                     new UserRateModel(B, Bob, 1));
+        assertThat(table.fetchAll()).containsExactly(new UserRateModel(Ann, A, -1),
+                                                     new UserRateModel(Bob, B, 1));
     }
 
     @Test
@@ -140,9 +137,9 @@ public class TableIntSetStorageImplIntegrationTest {
 
         storage.storeBatch(newIntObjectMap(A, IntHashSet.from(Ann, -Bob, Don)),
                            state);
-        assertThat(table.fetchAll()).containsExactly(new UserRateModel(A, Ann, 1),
-                                                     new UserRateModel(A, Bob, -1),
-                                                     new UserRateModel(A, Don, 1));
+        assertThat(table.fetchAll()).containsExactly(new UserRateModel(Ann, A, 1),
+                                                     new UserRateModel(Bob, A, -1),
+                                                     new UserRateModel(Don, A, 1));
     }
 
     @Test
@@ -152,15 +149,15 @@ public class TableIntSetStorageImplIntegrationTest {
 
         storage.storeBatch(newIntObjectMap(A, IntHashSet.from(-Ann), B, IntHashSet.from(Bob)),
                            state);
-        assertThat(table.fetchAll()).containsExactly(new UserRateModel(A, Ann, -1),
-                                                     new UserRateModel(B, Bob, 1));
+        assertThat(table.fetchAll()).containsExactly(new UserRateModel(Ann, A, -1),
+                                                     new UserRateModel(Bob, B, 1));
     }
 
     // TODO[norm]: test cases when DB changed (fallback)
 
     @CanIgnoreReturnValue
     private @NotNull IntObjectMap<IntHashSet> setupTestData(int[] @NotNull ... rows) {
-        List<UserRateModel> models = Arrays.stream(rows).map(row -> new UserRateModel(row[0], row[1], row[2])).toList();
+        List<UserRateModel> models = Arrays.stream(rows).map(row -> new UserRateModel(row[1], row[0], row[2])).toList();
         table.insertBatch(models);
 
         return rowsToMap(rows);

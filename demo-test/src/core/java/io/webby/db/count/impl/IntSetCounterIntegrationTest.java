@@ -378,10 +378,7 @@ public class IntSetCounterIntegrationTest {
     @CanIgnoreReturnValue
     private @NotNull IntSetCounter setup(@NotNull Scenario scenario) {
         storage = switch (scenario.store) {
-            case TABLE -> new TableIntSetStorageImpl(new UserRateModelTable(SQL_DB),
-                                                     UserRateModelTable.OwnColumn.user_id,
-                                                     UserRateModelTable.OwnColumn.content_id,
-                                                     UserRateModelTable.OwnColumn.value);
+            case TABLE -> TableIntSetStorageImpl.from(new UserRateModelTable(SQL_DB), "content_id", "user_id", "value");
             case KV_JAVA_MAP -> new KvIntSetStorageImpl(new JavaMapDbFactory().inMemoryDb());
         };
 

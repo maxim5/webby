@@ -8,7 +8,8 @@ public record UnresolvedArg(@NotNull String name, @Nullable Object defaultValue)
         return switch (type) {
             case NUMBER -> 0;
             case BOOL -> false;
-            default -> null;
+            case STRING -> "";
+            default -> null;        // TODO[major]: breaks ImmutableList
         };
     }
 }

@@ -7,6 +7,7 @@ import com.carrotsearch.hppc.procedures.IntObjectProcedure;
 import com.google.common.flogger.FluentLogger;
 import io.webby.orm.api.BaseTable;
 import io.webby.orm.api.QueryException;
+import io.webby.orm.api.TableMeta;
 import io.webby.orm.api.entity.BatchEntityIntData;
 import io.webby.orm.api.entity.EntityIntData;
 import io.webby.orm.api.query.*;
@@ -18,7 +19,6 @@ import java.util.List;
 import java.util.logging.Level;
 
 import static io.webby.db.count.impl.RobustnessCheck.ensureStorageConsistency;
-import static io.webby.orm.api.query.CompareType.EQ;
 import static io.webby.orm.api.query.Shortcuts.*;
 
 public class TableIntSetStorageImpl implements IntSetStorage {
@@ -29,12 +29,26 @@ public class TableIntSetStorageImpl implements IntSetStorage {
     private final Column itemColumn;
     private final Column valueColumn;
 
-    // TODO[!]: temp (init from opts)
-    public TableIntSetStorageImpl(BaseTable<?> table, Column keyColumn, Column itemColumn, Column valueColumn) {
+    public TableIntSetStorageImpl(@NotNull BaseTable<?> table,
+                                  @NotNull Column keyColumn,
+                                  @NotNull Column itemColumn,
+                                  @NotNull Column valueColumn) {
         this.table = table;
         this.keyColumn = keyColumn;
         this.itemColumn = itemColumn;
         this.valueColumn = valueColumn;
+    }
+
+    public static @NotNull TableIntSetStorageImpl from(@NotNull BaseTable<?> table,
+                                                       @NotNull String key,
+                                                       @NotNull String item,
+                                                       @NotNull String value) {
+        return new TableIntSetStorageImpl(table, getColumn(table, key), getColumn(table, item), getColumn(table, value));
+    }
+    
+    private static @NotNull Column getColumn(@NotNull BaseTable<?> table, @NotNull String name) {
+        return table.meta().sqlColumns().stream().map(TableMeta.ColumnMeta::column)
+            .filter(column -> column.name().equals(name)).findFirst().orElseThrow();
     }
 
     @Override
@@ -63,20 +77,7 @@ public class TableIntSetStorageImpl implements IntSetStorage {
             .orderBy(OrderBy.of(keyColumn.ordered(Order.ASC), itemColumn.ordered(Order.ASC)))
             .build();
 
-        IntObjectHashMap<IntHashSet> map = new IntObjectHashMap<>();
-        table.runner().forEach(query, resultSet -> {
-            int key = resultSet.getInt(1);
-            int item = resultSet.getInt(2);
-            int value = resultSet.getInt(3);
-            assert value >= -1 && value <= 1 : "Value outside of range: " + value;
-            IntHashSet set = map.get(key);
-            if (set == null) {
-                set = new IntHashSet();
-                map.put(key, set);
-            }
-            set.add(value > 0 ? item : -item);  // log if 0?
-        });
-        map.forEach(consumer);
+        loadQueryResults(query, consumer);
     }
 
     @Override
@@ -85,6 +86,10 @@ public class TableIntSetStorageImpl implements IntSetStorage {
             .orderBy(OrderBy.of(keyColumn.ordered(Order.ASC), itemColumn.ordered(Order.ASC)))
             .build();
 
+        loadQueryResults(query, consumer);
+    }
+
+    private void loadQueryResults(@NotNull SelectWhere query, @NotNull IntObjectProcedure<@NotNull IntHashSet> consumer) {
         IntObjectHashMap<IntHashSet> map = new IntObjectHashMap<>();
         table.runner().forEach(query, resultSet -> {
             int key = resultSet.getInt(1);
@@ -123,10 +128,7 @@ public class TableIntSetStorageImpl implements IntSetStorage {
                 table.updateDataWhereBatch(
                     new BatchEntityIntData(columns, diff.modified),
                     Contextual.resolvingByOrderedList(
-                        Where.and(
-                            EQ.compare(keyColumn, unresolved("key", TermType.NUMBER)),
-                            EQ.compare(itemColumn, unresolved("item", TermType.NUMBER))
-                        ),
+                        Where.and(lookupBy(keyColumn, UNRESOLVED_NUM), lookupBy(itemColumn, UNRESOLVED_NUM)),
                         array -> List.of(array.get(0), array.get(1))
                     )
                 );
@@ -189,9 +191,11 @@ public class TableIntSetStorageImpl implements IntSetStorage {
                     }
                 }
 
-                addPositivesTo(key, EasyHppc.removeAllCopy(valuesBefore,
-                                                           value -> valuesNow.contains(value) || valuesNow.contains(-value)),
-                               deleted);
+                addPositivesTo(
+                    key,
+                    EasyHppc.removeAllCopy(valuesBefore, value -> valuesNow.contains(value) || valuesNow.contains(-value)),
+                    deleted
+                );
             }
         }
 
