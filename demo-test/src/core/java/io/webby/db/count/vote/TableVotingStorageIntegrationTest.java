@@ -9,6 +9,7 @@ import io.webby.demo.model.UserRateModel;
 import io.webby.demo.model.UserRateModelTable;
 import io.webby.orm.api.query.Shortcuts;
 import io.webby.orm.api.query.Where;
+import io.webby.testing.ext.FluentLoggingCapture;
 import io.webby.testing.ext.SqlDbSetupExtension;
 import org.jetbrains.annotations.NotNull;
 import org.junit.jupiter.api.BeforeEach;
@@ -29,6 +30,7 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 @Tag("sql")
 public class TableVotingStorageIntegrationTest {
     @RegisterExtension static final SqlDbSetupExtension SQL_DB = SqlDbSetupExtension.fromProperties().ofTable(UserRateModelTable.META);
+    @RegisterExtension static final FluentLoggingCapture LOGGING = new FluentLoggingCapture(Consistency.class);
 
     private static final int A = 1000;
     private static final int B = 2000;
@@ -85,6 +87,7 @@ public class TableVotingStorageIntegrationTest {
         assertThat(table.fetchAll()).containsExactly(new UserRateModel(Ann, A, 1),
                                                      new UserRateModel(Bob, A, 1),
                                                      new UserRateModel(Don, A, 1));
+        LOGGING.assertNoRecords();
     }
 
     @Test
@@ -93,6 +96,7 @@ public class TableVotingStorageIntegrationTest {
                            newIntObjectMap());
         assertThat(table.fetchAll()).containsExactly(new UserRateModel(Ann, A, 1),
                                                      new UserRateModel(Ann, B, -1));
+        LOGGING.assertNoRecords();
     }
 
     @Test
@@ -103,6 +107,7 @@ public class TableVotingStorageIntegrationTest {
                            state);
         assertThat(table.fetchAll()).containsExactly(new UserRateModel(Ann, A, 1),
                                                      new UserRateModel(Bob, B, 1));
+        LOGGING.assertNoRecords();
     }
 
     @Test
@@ -112,6 +117,7 @@ public class TableVotingStorageIntegrationTest {
         storage.storeBatch(newIntObjectMap(),
                            state);
         assertThat(table.fetchAll()).isEmpty();
+        LOGGING.assertNoRecords();
     }
 
     @Test
@@ -124,6 +130,7 @@ public class TableVotingStorageIntegrationTest {
         assertThat(table.fetchAll()).containsExactly(new UserRateModel(Ann, A, 1),
                                                      new UserRateModel(Bob, A, -1),
                                                      new UserRateModel(Don, A, 1));
+        LOGGING.assertNoRecords();
     }
 
     @Test
@@ -135,6 +142,7 @@ public class TableVotingStorageIntegrationTest {
                            state);
         assertThat(table.fetchAll()).containsExactly(new UserRateModel(Ann, A, -1),
                                                      new UserRateModel(Bob, B, 1));
+        LOGGING.assertNoRecords();
     }
 
     @Test
@@ -146,6 +154,7 @@ public class TableVotingStorageIntegrationTest {
                            state);
         assertThat(table.fetchAll()).containsExactly(new UserRateModel(Ann, A, -1),
                                                      new UserRateModel(Bob, B, 1));
+        LOGGING.assertNoRecords();
     }
 
     @Test
@@ -156,6 +165,7 @@ public class TableVotingStorageIntegrationTest {
         storage.storeBatch(newIntObjectMap(),
                            state);
         assertThat(table.fetchAll()).isEmpty();
+        LOGGING.assertNoRecords();
     }
 
     @Test
@@ -166,6 +176,7 @@ public class TableVotingStorageIntegrationTest {
         storage.storeBatch(newIntObjectMap(A, IntHashSet.from(Ann)),
                            state);
         assertThat(table.fetchAll()).containsExactly(new UserRateModel(Ann, A, -1));    // skips
+        assertThat(LOGGING.logRecordsContaining("key=1000 added=[-10] removed=[10]")).isNotEmpty();
     }
 
     @Test
@@ -176,6 +187,7 @@ public class TableVotingStorageIntegrationTest {
         storage.storeBatch(newIntObjectMap(A, IntHashSet.from(-Ann)),
                            state);
         assertThat(table.fetchAll()).containsExactly(new UserRateModel(Ann, A, -1));    // overwrites
+        assertThat(LOGGING.logRecordsContaining("key=1000 added=[-10] removed=[10]")).isNotEmpty();
     }
 
     // TODO[normal]: out-of-sync changes not processed correctly
@@ -188,6 +200,7 @@ public class TableVotingStorageIntegrationTest {
         storage.storeBatch(newIntObjectMap(A, IntHashSet.from(-Ann)),
                            state);
         // assertThat(table.fetchAll()).containsExactly(new UserRateModel(Ann, A, -1));    // overwrites
+        assertThat(LOGGING.logRecordsContaining("key=1000 added=[] removed=[10]")).isNotEmpty();
     }
 
     @Test
@@ -198,6 +211,7 @@ public class TableVotingStorageIntegrationTest {
         storage.storeBatch(newIntObjectMap(A, IntHashSet.from(-Ann)),
                            state);
         // assertThat(table.fetchAll()).containsExactly(new UserRateModel(Ann, A, -1));    // overwrites
+        assertThat(LOGGING.logRecordsContaining("key=1000 added=[10] removed=[]")).isNotEmpty();
     }
 
     @CanIgnoreReturnValue
