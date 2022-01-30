@@ -4,6 +4,7 @@ import com.google.common.collect.ImmutableList;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.List;
+import java.util.function.Consumer;
 
 public class SelectGroupByBuilder {
     private final String table;
@@ -63,6 +64,11 @@ public class SelectGroupByBuilder {
 
     public @NotNull SelectGroupByBuilder orderBy(@NotNull OrderBy orderBy) {
         filter.with(orderBy);
+        return this;
+    }
+
+    public @NotNull SelectGroupByBuilder applying(@NotNull Consumer<SelectGroupByBuilder> consumer) {
+        consumer.accept(this);
         return this;
     }
 

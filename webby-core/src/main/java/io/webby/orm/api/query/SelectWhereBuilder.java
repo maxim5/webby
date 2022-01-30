@@ -4,6 +4,8 @@ import com.google.common.collect.ImmutableList;
 import io.webby.orm.api.Engine;
 import org.jetbrains.annotations.NotNull;
 
+import java.util.function.Consumer;
+
 public class SelectWhereBuilder {
     private final String table;
     private final ImmutableList.Builder<Term> terms = ImmutableList.builder();
@@ -55,6 +57,11 @@ public class SelectWhereBuilder {
 
     public @NotNull SelectWhereBuilder with(@NotNull Pagination pagination, @NotNull Engine engine) {
         filter.with(pagination, engine);
+        return this;
+    }
+
+    public @NotNull SelectWhereBuilder applying(@NotNull Consumer<SelectWhereBuilder> consumer) {
+        consumer.accept(this);
         return this;
     }
 
