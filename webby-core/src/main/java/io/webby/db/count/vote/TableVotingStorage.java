@@ -209,7 +209,9 @@ public class TableVotingStorage implements VotingStorage {
                     set = new IntHashSet();
                     dest.put(key, set);
                 }
-                set.addAll(values);
+                for (IntCursor cursor : values) {
+                    set.add(Math.abs(cursor.value));
+                }
             }
         }
     }

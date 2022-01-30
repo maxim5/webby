@@ -230,8 +230,8 @@ public class VotingCounterIntegrationTest {
 
         assertCountEstimates(A, 2, B, 1);
         assertActorValues(Ann, votes(+A), Bob, votes(+B), Liz, votes(+A));
-        assertStorage(A, IntHashSet.from(Ann, Liz),
-                      B, IntHashSet.from(Bob));
+        assertStorage(A, IntHashSet.from(+Ann, +Liz),
+                      B, IntHashSet.from(+Bob));
     }
 
     @ParameterizedTest
@@ -262,8 +262,8 @@ public class VotingCounterIntegrationTest {
 
         assertCountEstimates(A, 1, B, 1);
         assertActorValues(Ann, votes(+A, +B));
-        assertStorage(A, IntHashSet.from(Ann),
-                      B, IntHashSet.from(Ann));
+        assertStorage(A, IntHashSet.from(+Ann),
+                      B, IntHashSet.from(+Ann));
     }
 
     @ParameterizedTest
@@ -278,18 +278,33 @@ public class VotingCounterIntegrationTest {
 
         assertCountEstimates(A, 1, B, 1);
         assertActorValues(Ann, votes(+A, +B));
-        assertStorage(A, IntHashSet.from(Ann),
-                      B, IntHashSet.from(Ann));
+        assertStorage(A, IntHashSet.from(+Ann),
+                      B, IntHashSet.from(+Ann));
     }
 
     @ParameterizedTest
     @EnumSource(Scenario.class)
-    public void one_user_undo_between_flushes(Scenario scenario) throws IOException {
+    public void one_user_undo_inc_between_flushes(Scenario scenario) throws IOException {
         setup(scenario);
 
         assertEquals(1, counter.increment(A, Ann));
         counter.flush();
         assertEquals(0, counter.decrement(A, Ann));
+        counter.flush();
+
+        assertCountEstimates(A, 0);
+        assertActorValues(Ann, votes(none(A)));
+        assertStorage();
+    }
+
+    @ParameterizedTest
+    @EnumSource(Scenario.class)
+    public void one_user_undo_dec_between_flushes(Scenario scenario) throws IOException {
+        setup(scenario);
+
+        assertEquals(-1, counter.decrement(A, Ann));
+        counter.flush();
+        assertEquals(0, counter.increment(A, Ann));
         counter.flush();
 
         assertCountEstimates(A, 0);
@@ -311,6 +326,24 @@ public class VotingCounterIntegrationTest {
         assertCountEstimates(A, -1);
         assertActorValues(Ann, votes(-A));
         assertStorage(A, IntHashSet.from(-Ann));
+    }
+
+    @ParameterizedTest
+    @EnumSource(Scenario.class)
+    public void one_user_no_change_between_flushes(Scenario scenario) throws IOException {
+        setup(scenario);
+
+        assertEquals(1, counter.increment(A, Ann));
+        assertEquals(-1, counter.decrement(B, Ann));
+        counter.flush();
+        assertEquals(1, counter.increment(A, Ann));
+        assertEquals(-1, counter.decrement(B, Ann));
+        counter.flush();
+
+        assertCountEstimates(A, 1, B, -1);
+        assertActorValues(Ann, votes(+A, -B));
+        assertStorage(A, IntHashSet.from(+Ann),
+                      B, IntHashSet.from(-Ann));
     }
 
     @ParameterizedTest

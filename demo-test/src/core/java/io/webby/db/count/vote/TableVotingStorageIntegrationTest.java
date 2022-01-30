@@ -111,7 +111,19 @@ public class TableVotingStorageIntegrationTest {
 
         storage.storeBatch(newIntObjectMap(),
                            state);
-        assertThat(table.fetchAll()).containsExactly();
+        assertThat(table.fetchAll()).isEmpty();
+    }
+
+    @Test
+    public void store_batch_one_key_insert_and_update() {
+        IntObjectMap<IntHashSet> state = setupTestData(ints(A, Ann, 1),
+                                                       ints(A, Bob, 1));
+
+        storage.storeBatch(newIntObjectMap(A, IntHashSet.from(Ann, -Bob, Don)),
+                           state);
+        assertThat(table.fetchAll()).containsExactly(new UserRateModel(Ann, A, 1),
+                                                     new UserRateModel(Bob, A, -1),
+                                                     new UserRateModel(Don, A, 1));
     }
 
     @Test
@@ -126,19 +138,7 @@ public class TableVotingStorageIntegrationTest {
     }
 
     @Test
-    public void store_batch_insert_and_update() {
-        IntObjectMap<IntHashSet> state = setupTestData(ints(A, Ann, 1),
-                                                       ints(A, Bob, 1));
-
-        storage.storeBatch(newIntObjectMap(A, IntHashSet.from(Ann, -Bob, Don)),
-                           state);
-        assertThat(table.fetchAll()).containsExactly(new UserRateModel(Ann, A, 1),
-                                                     new UserRateModel(Bob, A, -1),
-                                                     new UserRateModel(Don, A, 1));
-    }
-
-    @Test
-    public void store_batch_insert_update_delete() {
+    public void store_batch_two_keys_insert_update_delete() {
         IntObjectMap<IntHashSet> state = setupTestData(ints(A, Ann, 1),
                                                        ints(A, Bob, 1));
 
@@ -148,13 +148,22 @@ public class TableVotingStorageIntegrationTest {
                                                      new UserRateModel(Bob, B, 1));
     }
 
+    @Test
+    public void store_batch_two_keys_delete_all() {
+        IntObjectMap<IntHashSet> state = setupTestData(ints(A, Ann, 1),
+                                                       ints(B, Bob, -1));
+
+        storage.storeBatch(newIntObjectMap(),
+                           state);
+        assertThat(table.fetchAll()).isEmpty();
+    }
+
     // TODO[norm]: test cases when DB changed (fallback)
 
     @CanIgnoreReturnValue
     private @NotNull IntObjectMap<IntHashSet> setupTestData(int[] @NotNull ... rows) {
         List<UserRateModel> models = Arrays.stream(rows).map(row -> new UserRateModel(row[1], row[0], row[2])).toList();
         table.insertBatch(models);
-
         return rowsToMap(rows);
     }
 
