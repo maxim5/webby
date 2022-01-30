@@ -17,7 +17,7 @@ import org.jetbrains.annotations.Nullable;
 import java.util.List;
 import java.util.logging.Level;
 
-import static io.webby.db.count.vote.RobustnessCheck.ensureStorageConsistency;
+import static io.webby.db.count.vote.Consistency.checkStorageConsistency;
 import static io.webby.orm.api.query.Shortcuts.*;
 
 public class TableVotingStorage implements VotingStorage {
@@ -95,7 +95,7 @@ public class TableVotingStorage implements VotingStorage {
 
     @Override
     public void storeBatch(@NotNull IntObjectMap<IntHashSet> curr, @Nullable IntObjectMap<IntHashSet> prev) {
-        assert prev == null || ensureStorageConsistency(this, prev) : "This is Impossible?!";
+        assert prev == null || checkStorageConsistency(this, prev) : "This is Impossible?!";
 
         if (prev == null) {
             prev = loadBatch(curr.keys());

@@ -13,7 +13,7 @@ import org.jetbrains.annotations.Nullable;
 import java.util.Iterator;
 import java.util.List;
 
-import static io.webby.db.count.vote.RobustnessCheck.ensureStorageConsistency;
+import static io.webby.db.count.vote.Consistency.checkStorageConsistency;
 
 public class KvVotingStorage implements VotingStorage {
     private final KeyValueDb<Integer, IntHashSet> db;
@@ -54,7 +54,7 @@ public class KvVotingStorage implements VotingStorage {
 
     @Override
     public void storeBatch(@NotNull IntObjectMap<IntHashSet> curr, @Nullable IntObjectMap<IntHashSet> prev) {
-        assert prev == null || ensureStorageConsistency(this, prev) : "This is Impossible?!";
+        assert prev == null || checkStorageConsistency(this, prev) : "This is Impossible?!";
         db.putAll(EasyHppc.toJavaMap(curr));
     }
 }
