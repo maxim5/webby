@@ -8,7 +8,7 @@ import com.carrotsearch.hppc.procedures.IntObjectProcedure;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
-/*package*/ interface VotingStorage {
+public interface VotingStorage {
     @NotNull IntHashSet load(int key);
 
     void loadBatch(@NotNull IntContainer keys, @NotNull IntObjectProcedure<@NotNull IntHashSet> consumer);

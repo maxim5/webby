@@ -14,6 +14,7 @@ import io.webby.orm.api.query.*;
 import io.webby.util.hppc.EasyHppc;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
+import org.jetbrains.annotations.VisibleForTesting;
 
 import java.util.List;
 import java.util.logging.Level;
@@ -39,10 +40,9 @@ public class TableVotingStorage implements VotingStorage {
         this.valueColumn = valueColumn;
     }
 
-    public static @NotNull TableVotingStorage from(@NotNull BaseTable<?> table,
-                                                   @NotNull String key,
-                                                   @NotNull String actor,
-                                                   @NotNull String value) {
+    @VisibleForTesting
+    static @NotNull TableVotingStorage from(@NotNull BaseTable<?> table,
+                                            @NotNull String key, @NotNull String actor, @NotNull String value) {
         return new TableVotingStorage(table, getColumn(table, key), getColumn(table, actor), getColumn(table, value));
     }
     

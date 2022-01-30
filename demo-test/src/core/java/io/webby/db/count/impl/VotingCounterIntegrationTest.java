@@ -8,6 +8,8 @@ import com.carrotsearch.hppc.cursors.IntIntCursor;
 import com.carrotsearch.hppc.cursors.IntObjectCursor;
 import com.google.errorprone.annotations.CanIgnoreReturnValue;
 import com.google.mu.util.stream.BiStream;
+import io.webby.db.count.VotingCounterFactory.VotingCounterType;
+import io.webby.db.count.VotingCounterFactory.VotingStoreType;
 import io.webby.db.count.VotingCounter;
 import io.webby.db.kv.javamap.JavaMapDbFactory;
 import io.webby.demo.model.UserRateModelTable;
@@ -371,7 +373,7 @@ public class VotingCounterIntegrationTest {
     private @NotNull VotingCounter setup(@NotNull Scenario scenario) {
         storage = switch (scenario.store) {
             case TABLE -> TableVotingStorage.from(new UserRateModelTable(SQL_DB), "content_id", "user_id", "value");
-            case KV_JAVA_MAP -> new KvVotingStorage(new JavaMapDbFactory().inMemoryDb());
+            case KEY_VALUE_DB -> new KvVotingStorage(new JavaMapDbFactory().inMemoryDb());
         };
 
         counter = switch (scenario.counter) {
@@ -383,27 +385,17 @@ public class VotingCounterIntegrationTest {
     }
 
     private enum Scenario {
-        TABLE_LOCK(StoreImpl.TABLE, CounterImpl.LOCK_BASED),
-        TABLE_NB(StoreImpl.TABLE, CounterImpl.NON_BLOCKING),
-        KV_JAVA_LOCK(StoreImpl.KV_JAVA_MAP, CounterImpl.LOCK_BASED),
-        KV_JAVA_NB(StoreImpl.KV_JAVA_MAP, CounterImpl.NON_BLOCKING);
+        TABLE_LOCK(VotingStoreType.TABLE, VotingCounterType.LOCK_BASED),
+        TABLE_NB(VotingStoreType.TABLE, VotingCounterType.NON_BLOCKING),
+        KV_JAVA_LOCK(VotingStoreType.KEY_VALUE_DB, VotingCounterType.LOCK_BASED),
+        KV_JAVA_NB(VotingStoreType.KEY_VALUE_DB, VotingCounterType.NON_BLOCKING);
 
-        private final StoreImpl store;
-        private final CounterImpl counter;
+        private final VotingStoreType store;
+        private final VotingCounterType counter;
 
-        Scenario(StoreImpl store, CounterImpl counter) {
+        Scenario(VotingStoreType store, VotingCounterType counter) {
             this.store = store;
             this.counter = counter;
         }
-    }
-
-    private enum StoreImpl {
-        TABLE,
-        KV_JAVA_MAP,
-    }
-
-    private enum CounterImpl {
-        LOCK_BASED,
-        NON_BLOCKING,
     }
 }
