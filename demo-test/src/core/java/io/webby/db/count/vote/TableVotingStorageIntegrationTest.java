@@ -7,6 +7,8 @@ import com.carrotsearch.hppc.IntObjectMap;
 import com.google.errorprone.annotations.CanIgnoreReturnValue;
 import io.webby.demo.model.UserRateModel;
 import io.webby.demo.model.UserRateModelTable;
+import io.webby.orm.api.query.Shortcuts;
+import io.webby.orm.api.query.Where;
 import io.webby.testing.ext.SqlDbSetupExtension;
 import org.jetbrains.annotations.NotNull;
 import org.junit.jupiter.api.BeforeEach;
@@ -18,9 +20,7 @@ import java.util.Arrays;
 import java.util.List;
 
 import static com.google.common.truth.Truth.assertThat;
-import static io.webby.demo.model.UserRateModelTable.OwnColumn.content_id;
-import static io.webby.demo.model.UserRateModelTable.OwnColumn.user_id;
-import static io.webby.demo.model.UserRateModelTable.OwnColumn.value;
+import static io.webby.demo.model.UserRateModelTable.OwnColumn.*;
 import static io.webby.testing.AssertPrimitives.assertIntsNoOrder;
 import static io.webby.testing.TestingPrimitives.ints;
 import static io.webby.testing.TestingPrimitives.newIntObjectMap;
@@ -158,13 +158,58 @@ public class TableVotingStorageIntegrationTest {
         assertThat(table.fetchAll()).isEmpty();
     }
 
-    // TODO[norm]: test cases when DB changed (fallback)
+    @Test
+    public void store_batch_out_of_sync_one_key_changed_cache_skips() {
+        IntObjectMap<IntHashSet> state = setupTestData(ints(A, Ann, 1));
+        overwriteTestData(ints(A, Ann, -1));
+
+        storage.storeBatch(newIntObjectMap(A, IntHashSet.from(Ann)),
+                           state);
+        assertThat(table.fetchAll()).containsExactly(new UserRateModel(Ann, A, -1));    // skips
+    }
+
+    @Test
+    public void store_batch_out_of_sync_one_key_changed_cache_overwrites() {
+        IntObjectMap<IntHashSet> state = setupTestData(ints(A, Ann, 1));
+        overwriteTestData(ints(A, Ann, -1));
+
+        storage.storeBatch(newIntObjectMap(A, IntHashSet.from(-Ann)),
+                           state);
+        assertThat(table.fetchAll()).containsExactly(new UserRateModel(Ann, A, -1));    // overwrites
+    }
+
+    // TODO[normal]: out-of-sync changes not processed correctly
+
+    @Test
+    public void store_batch_out_of_sync_one_key_deleted_cache_overwrites() {
+        IntObjectMap<IntHashSet> state = setupTestData(ints(A, Ann, 1));
+        overwriteTestData();
+
+        storage.storeBatch(newIntObjectMap(A, IntHashSet.from(-Ann)),
+                           state);
+        // assertThat(table.fetchAll()).containsExactly(new UserRateModel(Ann, A, -1));    // overwrites
+    }
+
+    @Test
+    public void store_batch_out_of_sync_one_key_inserted_cache_overwrites() {
+        IntObjectMap<IntHashSet> state = setupTestData();
+        overwriteTestData(ints(A, Ann, 1));
+
+        storage.storeBatch(newIntObjectMap(A, IntHashSet.from(-Ann)),
+                           state);
+        // assertThat(table.fetchAll()).containsExactly(new UserRateModel(Ann, A, -1));    // overwrites
+    }
 
     @CanIgnoreReturnValue
     private @NotNull IntObjectMap<IntHashSet> setupTestData(int[] @NotNull ... rows) {
         List<UserRateModel> models = Arrays.stream(rows).map(row -> new UserRateModel(row[1], row[0], row[2])).toList();
         table.insertBatch(models);
         return rowsToMap(rows);
+    }
+
+    private void overwriteTestData(int[] @NotNull ... rows) {
+        table.deleteWhere(Where.of(Shortcuts.TRUE));
+        setupTestData(rows);
     }
 
     private static @NotNull IntObjectHashMap<IntHashSet> rowsToMap(int[] @NotNull [] rows) {
