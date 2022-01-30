@@ -16,6 +16,10 @@ public class SelectGroupByBuilder {
         this.table = table;
     }
 
+    public @NotNull SelectGroupByBuilder select(@NotNull Named term, @NotNull FuncExpr aggregate) {
+        return groupBy(term).aggregate(aggregate);
+    }
+
     public @NotNull SelectGroupByBuilder select(@NotNull List<Named> terms, @NotNull FuncExpr aggregate) {
         return groupBy(terms).aggregate(aggregate);
     }
