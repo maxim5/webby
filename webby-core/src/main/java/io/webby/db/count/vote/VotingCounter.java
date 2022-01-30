@@ -29,6 +29,4 @@ public interface VotingCounter extends Persistable {
     default @NotNull IntIntMap estimateCounts(int @NotNull [] keys) {
         return estimateCounts(IntArrayList.from(keys));
     }
-
-    @NotNull IntIntMap estimateAllCounts();
 }

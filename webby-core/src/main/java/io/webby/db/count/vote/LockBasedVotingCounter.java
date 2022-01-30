@@ -84,16 +84,6 @@ public class LockBasedVotingCounter implements VotingCounter {
     }
 
     @Override
-    public @NotNull IntIntMap estimateAllCounts() {
-        LOCK.readLock().lock();
-        try {
-            return new IntIntHashMap(counters);
-        } finally {
-            LOCK.readLock().unlock();
-        }
-    }
-
-    @Override
     public void forceFlush() {
         LOCK.readLock().lock();
         try {
@@ -111,6 +101,15 @@ public class LockBasedVotingCounter implements VotingCounter {
     @Override
     public void close() {
         forceFlush();
+    }
+
+    public @NotNull IntIntMap cache() {
+        LOCK.readLock().lock();
+        try {
+            return new IntIntHashMap(counters);
+        } finally {
+            LOCK.readLock().unlock();
+        }
     }
 
     private int update(int key, int actor, int delta) {

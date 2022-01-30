@@ -66,15 +66,6 @@ public class NonBlockingVotingCounter implements VotingCounter {
     }
 
     @Override
-    public @NotNull IntIntMap estimateAllCounts() {
-        IntIntHashMap map = new IntIntHashMap();
-        for (long key : cache.keySetLong()) {
-            map.put((int) key, estimateCount((int) key));
-        }
-        return map;
-    }
-
-    @Override
     public void forceFlush() {
         IntObjectHashMap<IntHashSet> curr = new IntObjectHashMap<>();
         IntObjectHashMap<IntHashSet> prev = new IntObjectHashMap<>();
@@ -101,6 +92,15 @@ public class NonBlockingVotingCounter implements VotingCounter {
     @Override
     public void close() {
         forceFlush();
+    }
+
+    // FIX[minor]: expose cache interface
+    public @NotNull IntIntMap cache() {
+        IntIntHashMap map = new IntIntHashMap();
+        for (long key : cache.keySetLong()) {
+            map.put((int) key, estimateCount((int) key));
+        }
+        return map;
     }
 
     private @NotNull VoteSet getOrLoadVotesForKey(int key) {

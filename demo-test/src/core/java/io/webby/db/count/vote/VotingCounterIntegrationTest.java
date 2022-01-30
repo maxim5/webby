@@ -339,7 +339,6 @@ public class VotingCounterIntegrationTest {
         IntIntHashMap expectedMap = newIntMap(expected);
 
         assertIntsTrimmed(counter.estimateCounts(expectedMap.keys), expected);
-        assertIntsTrimmed(counter.estimateAllCounts(), expected);
         for (IntIntCursor cursor : expectedMap) {
             assertEquals(cursor.value, counter.estimateCount(cursor.key));
         }
