@@ -5,6 +5,12 @@ import org.jetbrains.annotations.Nullable;
 import java.util.Arrays;
 
 public class EasyPrimitives {
+    public enum OptionalBool {
+        TRUE,
+        FALSE,
+        UNKNOWN,
+    }
+
     public static class MutableBool {
         public boolean flag = false;
 
