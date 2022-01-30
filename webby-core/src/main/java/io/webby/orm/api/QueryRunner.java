@@ -26,6 +26,10 @@ public class QueryRunner {
         this.connection = connection;
     }
 
+    /*package*/ @NotNull Connection connection() {
+        return connection;
+    }
+
     public void runInTransaction(@NotNull ThrowConsumer<QueryRunner, SQLException> action) throws SQLException {
         boolean autoCommit = connection.getAutoCommit();
         connection.setAutoCommit(false);
@@ -40,6 +44,24 @@ public class QueryRunner {
     }
 
     // Run SelectQuery
+
+    public @Nullable Object runAndGet(@NotNull SelectQuery query) {
+        try (PreparedStatement statement = prepareQuery(query);
+             ResultSet resultSet = statement.executeQuery()) {
+            return resultSet.next() ? resultSet.getObject(1) : null;
+        } catch (SQLException e) {
+            throw new QueryException("Failed to execute select query", query.repr(), query.args(), e);
+        }
+    }
+
+    public @Nullable String runAndGetString(@NotNull SelectQuery query) {
+        try (PreparedStatement statement = prepareQuery(query);
+             ResultSet resultSet = statement.executeQuery()) {
+            return resultSet.next() ? resultSet.getString(1) : null;
+        } catch (SQLException e) {
+            throw new QueryException("Failed to execute select query", query.repr(), query.args(), e);
+        }
+    }
 
     public int runAndGetInt(@NotNull SelectQuery query, int def) {
         try (PreparedStatement statement = prepareQuery(query);

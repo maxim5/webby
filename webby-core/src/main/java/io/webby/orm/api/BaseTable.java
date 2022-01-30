@@ -13,12 +13,8 @@ import java.util.Collection;
 import java.util.List;
 import java.util.function.Consumer;
 
-public interface BaseTable<E> extends Iterable<E> {
+public interface BaseTable<E> extends Iterable<E>, HasEngine, HasRunner {
     // Base
-
-    @NotNull Engine engine();
-
-    @NotNull QueryRunner runner();
 
     @NotNull TableMeta meta();
 
