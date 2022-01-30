@@ -1,4 +1,4 @@
-package io.webby.db.count.impl;
+package io.webby.db.count.vote;
 
 import com.carrotsearch.hppc.*;
 import com.carrotsearch.hppc.cursors.IntCursor;
@@ -19,7 +19,7 @@ import org.jetbrains.annotations.VisibleForTesting;
 import java.util.List;
 import java.util.logging.Level;
 
-import static io.webby.db.count.impl.RobustnessCheck.ensureStorageConsistency;
+import static io.webby.db.count.vote.RobustnessCheck.ensureStorageConsistency;
 import static io.webby.orm.api.query.Shortcuts.*;
 
 public class TableVotingStorage implements VotingStorage {
@@ -38,17 +38,6 @@ public class TableVotingStorage implements VotingStorage {
         this.keyColumn = keyColumn;
         this.actorColumn = actorColumn;
         this.valueColumn = valueColumn;
-    }
-
-    @VisibleForTesting
-    static @NotNull TableVotingStorage from(@NotNull BaseTable<?> table,
-                                            @NotNull String key, @NotNull String actor, @NotNull String value) {
-        return new TableVotingStorage(table, getColumn(table, key), getColumn(table, actor), getColumn(table, value));
-    }
-    
-    private static @NotNull Column getColumn(@NotNull BaseTable<?> table, @NotNull String name) {
-        return table.meta().sqlColumns().stream().map(TableMeta.ColumnMeta::column)
-            .filter(column -> column.name().equals(name)).findFirst().orElseThrow();
     }
 
     @Override

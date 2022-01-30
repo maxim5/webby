@@ -1,4 +1,4 @@
-package io.webby.db.count.impl;
+package io.webby.db.count.vote;
 
 import com.carrotsearch.hppc.IntArrayList;
 import com.carrotsearch.hppc.IntHashSet;
@@ -18,6 +18,9 @@ import java.util.Arrays;
 import java.util.List;
 
 import static com.google.common.truth.Truth.assertThat;
+import static io.webby.demo.model.UserRateModelTable.OwnColumn.content_id;
+import static io.webby.demo.model.UserRateModelTable.OwnColumn.user_id;
+import static io.webby.demo.model.UserRateModelTable.OwnColumn.value;
 import static io.webby.testing.AssertPrimitives.assertIntsNoOrder;
 import static io.webby.testing.TestingPrimitives.ints;
 import static io.webby.testing.TestingPrimitives.newIntObjectMap;
@@ -40,7 +43,7 @@ public class TableVotingStorageIntegrationTest {
     @BeforeEach
     void setUp() {
         table = new UserRateModelTable(SQL_DB);
-        storage = TableVotingStorage.from(new UserRateModelTable(SQL_DB), "content_id", "user_id", "value");
+        storage = new TableVotingStorage(new UserRateModelTable(SQL_DB), content_id, user_id, value);
     }
 
     @Test

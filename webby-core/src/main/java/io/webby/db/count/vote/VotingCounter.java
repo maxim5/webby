@@ -1,4 +1,4 @@
-package io.webby.db.count;
+package io.webby.db.count.vote;
 
 import com.carrotsearch.hppc.IntArrayList;
 import com.carrotsearch.hppc.IntContainer;

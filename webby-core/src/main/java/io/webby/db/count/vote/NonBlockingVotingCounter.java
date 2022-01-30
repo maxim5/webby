@@ -1,9 +1,8 @@
-package io.webby.db.count.impl;
+package io.webby.db.count.vote;
 
 import com.carrotsearch.hppc.*;
 import com.carrotsearch.hppc.cursors.IntCursor;
 import com.carrotsearch.hppc.procedures.IntObjectProcedure;
-import io.webby.db.count.VotingCounter;
 import org.jctools.counters.Counter;
 import org.jctools.counters.CountersFactory;
 import org.jctools.maps.NonBlockingHashMapLong;

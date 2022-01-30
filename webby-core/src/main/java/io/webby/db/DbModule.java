@@ -6,7 +6,8 @@ import io.webby.db.codec.CodecProvider;
 import io.webby.db.content.FileSystemStorage;
 import io.webby.db.content.StableFingerprint;
 import io.webby.db.content.UserContentStorage;
-import io.webby.db.count.VotingCounterFactory;
+import io.webby.db.count.IntCounterFactory;
+import io.webby.db.count.vote.VotingCounterFactory;
 import io.webby.db.event.KeyEventStoreFactory;
 import io.webby.db.kv.KeyValueFactory;
 import io.webby.db.kv.etcd.EtcdSettings;
@@ -34,6 +35,7 @@ public class DbModule extends AbstractModule {
         bind(KeyValueFactory.class).to(AgnosticKeyValueFactory.class).asEagerSingleton();
 
         bind(VotingCounterFactory.class).asEagerSingleton();
+        bind(IntCounterFactory.class).asEagerSingleton();
         bind(KeyEventStoreFactory.class).asEagerSingleton();
 
         bind(EtcdSettings.class).asEagerSingleton();

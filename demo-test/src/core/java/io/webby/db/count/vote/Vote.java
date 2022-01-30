@@ -1,4 +1,4 @@
-package io.webby.db.count.impl;
+package io.webby.db.count.vote;
 
 import org.jetbrains.annotations.NotNull;
 

@@ -1,8 +1,7 @@
-package io.webby.db.count.impl;
+package io.webby.db.count.vote;
 
 import com.carrotsearch.hppc.*;
 import com.carrotsearch.hppc.cursors.IntCursor;
-import io.webby.db.count.VotingCounter;
 import io.webby.util.hppc.EasyHppc;
 import org.jetbrains.annotations.NotNull;
 

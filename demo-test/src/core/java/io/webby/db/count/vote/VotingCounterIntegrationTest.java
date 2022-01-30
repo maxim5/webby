@@ -1,4 +1,4 @@
-package io.webby.db.count.impl;
+package io.webby.db.count.vote;
 
 import com.carrotsearch.hppc.IntArrayList;
 import com.carrotsearch.hppc.IntHashSet;
@@ -8,9 +8,6 @@ import com.carrotsearch.hppc.cursors.IntIntCursor;
 import com.carrotsearch.hppc.cursors.IntObjectCursor;
 import com.google.errorprone.annotations.CanIgnoreReturnValue;
 import com.google.mu.util.stream.BiStream;
-import io.webby.db.count.VotingCounterFactory.VotingCounterType;
-import io.webby.db.count.VotingCounterFactory.VotingStoreType;
-import io.webby.db.count.VotingCounter;
 import io.webby.db.kv.javamap.JavaMapDbFactory;
 import io.webby.demo.model.UserRateModelTable;
 import io.webby.testing.ext.SqlDbSetupExtension;
@@ -25,8 +22,9 @@ import java.io.IOException;
 import java.util.List;
 import java.util.Map;
 
-import static io.webby.db.count.impl.Vote.none;
-import static io.webby.db.count.impl.Vote.votes;
+import static io.webby.db.count.vote.Vote.none;
+import static io.webby.db.count.vote.Vote.votes;
+import static io.webby.demo.model.UserRateModelTable.OwnColumn.*;
 import static io.webby.testing.AssertPrimitives.assertInts;
 import static io.webby.testing.AssertPrimitives.assertIntsTrimmed;
 import static io.webby.testing.TestingPrimitives.newIntMap;
@@ -372,7 +370,7 @@ public class VotingCounterIntegrationTest {
     @CanIgnoreReturnValue
     private @NotNull VotingCounter setup(@NotNull Scenario scenario) {
         storage = switch (scenario.store) {
-            case TABLE -> TableVotingStorage.from(new UserRateModelTable(SQL_DB), "content_id", "user_id", "value");
+            case TABLE -> new TableVotingStorage(new UserRateModelTable(SQL_DB), content_id, user_id, value);
             case KEY_VALUE_DB -> new KvVotingStorage(new JavaMapDbFactory().inMemoryDb());
         };
 

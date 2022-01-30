@@ -1,4 +1,4 @@
-package io.webby.db.count.impl;
+package io.webby.db.count.vote;
 
 import com.carrotsearch.hppc.IntContainer;
 import com.carrotsearch.hppc.IntHashSet;
@@ -13,7 +13,7 @@ import org.jetbrains.annotations.Nullable;
 import java.util.Iterator;
 import java.util.List;
 
-import static io.webby.db.count.impl.RobustnessCheck.ensureStorageConsistency;
+import static io.webby.db.count.vote.RobustnessCheck.ensureStorageConsistency;
 
 public class KvVotingStorage implements VotingStorage {
     private final KeyValueDb<Integer, IntHashSet> db;
