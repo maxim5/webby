@@ -54,6 +54,8 @@ public class Playground {
 
             main.query("SELECT userx.user_id, COUNT(*) from userx GROUP BY userx.user_id");
             main.query("SELECT userx.user_id AS user_id, COUNT(*) from userx GROUP BY userx.user_id");
+
+            main.query("SELECT * FROM information_schema.tables WHERE TABLE_SCHEMA IN (SELECT DATABASE()) AND TABLE_NAME = 'blobx'");
         }
     }
 
