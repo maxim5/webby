@@ -14,6 +14,8 @@ import org.jetbrains.annotations.NotNull;
 
 import java.util.Objects;
 
+import static java.util.Objects.requireNonNull;
+
 public class VotingCounterFactory {
     @Inject private Settings settings;
     @Inject private KeyValueFactory keyValueFactory;
@@ -34,7 +36,7 @@ public class VotingCounterFactory {
         return options.store().mapToObj(storeType ->
             switch (storeType) {
                 case KEY_VALUE_DB -> new KvVotingStorage(getKeyValueDb(options.name()));
-                case TABLE -> getTableVotingStorage(Objects.requireNonNull(options.tableSpec()));
+                case TABLE -> getTableVotingStorage(requireNonNull(options.tableSpec()));
             },
             storage -> storage
         );

@@ -7,14 +7,12 @@ import com.carrotsearch.hppc.procedures.IntObjectProcedure;
 import com.google.common.flogger.FluentLogger;
 import io.webby.orm.api.BaseTable;
 import io.webby.orm.api.QueryException;
-import io.webby.orm.api.TableMeta;
 import io.webby.orm.api.entity.BatchEntityIntData;
 import io.webby.orm.api.entity.EntityIntData;
 import io.webby.orm.api.query.*;
 import io.webby.util.hppc.EasyHppc;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
-import org.jetbrains.annotations.VisibleForTesting;
 
 import java.util.List;
 import java.util.logging.Level;
