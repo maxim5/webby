@@ -1,10 +1,8 @@
-package io.webby.db.count;
+package io.webby.db.count.primitive;
 
 import com.carrotsearch.hppc.IntContainer;
 import com.carrotsearch.hppc.IntIntHashMap;
 import com.carrotsearch.hppc.IntIntMap;
-import io.webby.db.event.Persistable;
-import io.webby.db.kv.KeyValueDb;
 import io.webby.util.hppc.EasyHppc;
 import org.jetbrains.annotations.NotNull;
 
@@ -13,26 +11,19 @@ import java.util.concurrent.locks.ReadWriteLock;
 import java.util.concurrent.locks.ReentrantReadWriteLock;
 
 @ThreadSafe
-public class IntCounter implements Persistable {
+public class LockBasedIntCounter implements IntCounter {
     private final ReadWriteLock LOCK = new ReentrantReadWriteLock();
 
+    private final IntCountStorage store;
     private final IntIntHashMap cache;
-    private final KeyValueDb<Integer, Integer> db;
 
-    public IntCounter(@NotNull KeyValueDb<Integer, Integer> db) {
-        this.db = db;
-        cache = new IntIntHashMap(Math.max(db.size(), 1024));
-        db.forEach(cache::put);
+    public LockBasedIntCounter(@NotNull IntCountStorage store) {
+        this.store = store;
+        this.cache = new IntIntHashMap(Math.max(store.size(), 1024));
+        this.store.loadAll(cache::put);
     }
 
-    public int increment(int key) {
-        return update(key, 1);
-    }
-
-    public int decrement(int key) {
-        return update(key, -1);
-    }
-
+    @Override
     public int update(int key, int delta) {
         LOCK.writeLock().lock();
         try {
@@ -42,6 +33,7 @@ public class IntCounter implements Persistable {
         }
     }
 
+    @Override
     public int estimateCount(int key) {
         LOCK.readLock().lock();
         try {
@@ -51,15 +43,7 @@ public class IntCounter implements Persistable {
         }
     }
 
-    public @NotNull IntIntMap estimateCounts(int @NotNull [] keys) {
-        LOCK.readLock().lock();
-        try {
-            return EasyHppc.slice(cache, keys);
-        } finally {
-            LOCK.readLock().unlock();
-        }
-    }
-
+    @Override
     public @NotNull IntIntMap estimateCounts(@NotNull IntContainer keys) {
         LOCK.readLock().lock();
         try {
@@ -69,22 +53,13 @@ public class IntCounter implements Persistable {
         }
     }
 
-    public @NotNull IntIntMap estimateAllCounts() {
-        LOCK.readLock().lock();
-        try {
-            return new IntIntHashMap(cache);
-        } finally {
-            LOCK.readLock().unlock();
-        }
-    }
-
     @Override
     public void forceFlush() {
-        LOCK.writeLock().lock();
+        LOCK.readLock().lock();
         try {
-            db.putAll(EasyHppc.toJavaMap(cache));
+            store.storeBatch(cache);
         } finally {
-            LOCK.writeLock().unlock();
+            LOCK.readLock().unlock();
         }
     }
 
@@ -96,5 +71,14 @@ public class IntCounter implements Persistable {
     @Override
     public void close() {
         forceFlush();
+    }
+
+    public @NotNull IntIntMap cache() {
+        LOCK.readLock().lock();
+        try {
+            return new IntIntHashMap(cache);
+        } finally {
+            LOCK.readLock().unlock();
+        }
     }
 }

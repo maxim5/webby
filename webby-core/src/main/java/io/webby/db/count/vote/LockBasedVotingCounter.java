@@ -95,11 +95,11 @@ public class LockBasedVotingCounter implements VotingCounter {
 
     @Override
     public void forceFlush() {
-        LOCK.writeLock().lock();
+        LOCK.readLock().lock();
         try {
             store.storeBatch(cache, null);
         } finally {
-            LOCK.writeLock().unlock();
+            LOCK.readLock().unlock();
         }
     }
 
