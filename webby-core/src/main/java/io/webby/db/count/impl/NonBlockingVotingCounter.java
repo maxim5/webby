@@ -15,12 +15,11 @@ import java.util.concurrent.atomic.AtomicReference;
 @ThreadSafe
 public class NonBlockingVotingCounter implements VotingCounter {
     private final VotingStorage store;
-    private final NonBlockingHashMapLong<IntSetValue> cache;
+    private final NonBlockingHashMapLong<VoteSet> cache;
 
     public NonBlockingVotingCounter(@NotNull VotingStorage store) {
         this.store = store;
-        this.cache = new NonBlockingHashMapLong<>();
-        // TODO[!]: pre-fill
+        this.cache = new NonBlockingHashMapLong<>();  // FIX[minor]: load anything at the start?
     }
 
     @Override
@@ -36,28 +35,28 @@ public class NonBlockingVotingCounter implements VotingCounter {
     }
 
     private int update(int key, int actor, int delta) {
-        IntSetValue value = getOrLoadForKey(key);
-        value.updateActorValue(actor, delta);
+        VoteSet value = getOrLoadVotesForKey(key);
+        value.updateVote(actor, delta);
         return value.count();
     }
 
     @Override
     public int getVote(int key, int actor) {
         assert actor > 0 : "Actor unsupported: " + actor;
-        return getOrLoadForKey(key).actorValue(actor);
+        return getOrLoadVotesForKey(key).vote(actor);
     }
 
     @Override
     public @NotNull IntIntMap getVotes(@NotNull IntContainer keys, int actor) {
         assert actor > 0 : "Actor unsupported: " + actor;
         IntIntHashMap map = new IntIntHashMap(keys.size());
-        getOrLoadForKeys(keys, (key, value) -> map.put(key, value.actorValue(actor)));
+        getOrLoadForKeys(keys, (key, value) -> map.put(key, value.vote(actor)));
         return map;
     }
 
     @Override
     public int estimateCount(int key) {
-        return getOrLoadForKey(key).count();
+        return getOrLoadVotesForKey(key).count();
     }
 
     @Override
@@ -71,8 +70,7 @@ public class NonBlockingVotingCounter implements VotingCounter {
     public @NotNull IntIntMap estimateAllCounts() {
         IntIntHashMap map = new IntIntHashMap();
         for (long key : cache.keySetLong()) {
-            int intKey = (int) key;
-            map.put(intKey, estimateCount(intKey));
+            map.put((int) key, estimateCount((int) key));
         }
         return map;
     }
@@ -83,8 +81,8 @@ public class NonBlockingVotingCounter implements VotingCounter {
         IntObjectHashMap<IntHashSet> prev = new IntObjectHashMap<>();
         long[] keys = cache.keySetLong();
         for (long key : keys) {
-            IntSetValue value = cache.get(key);
-            curr.put((int) key, value.copyActors());
+            VoteSet value = cache.get(key);
+            curr.put((int) key, value.copyVotes());
             prev.put((int) key, value.currentDbSnapshot());
         }
 
@@ -106,20 +104,20 @@ public class NonBlockingVotingCounter implements VotingCounter {
         forceFlush();
     }
 
-    private @NotNull IntSetValue getOrLoadForKey(int key) {
-        IntSetValue value = cache.get(key);
+    private @NotNull VoteSet getOrLoadVotesForKey(int key) {
+        VoteSet value = cache.get(key);
         if (value == null) {
-            IntHashSet actors = store.load(key);
-            value = new IntSetValue(actors);
+            IntHashSet votes = store.load(key);
+            value = new VoteSet(votes);
             cache.put(key, value);
         }
         return value;
     }
 
-    private void getOrLoadForKeys(@NotNull IntContainer keys, @NotNull IntObjectProcedure<IntSetValue> consumer) {
+    private void getOrLoadForKeys(@NotNull IntContainer keys, @NotNull IntObjectProcedure<VoteSet> consumer) {
         IntHashSet keysToLoad = new IntHashSet();
         for (IntCursor cursor : keys) {
-            IntSetValue value = cache.get(cursor.value);
+            VoteSet value = cache.get(cursor.value);
             if (value != null) {
                 consumer.apply(cursor.value, value);
             } else {
@@ -127,30 +125,30 @@ public class NonBlockingVotingCounter implements VotingCounter {
             }
         }
         if (!keysToLoad.isEmpty()) {
-            store.loadBatch(keysToLoad, (key, actors) -> {
-                IntSetValue value = new IntSetValue(actors);
-                cache.put(key, value);
-                consumer.apply(key, value);
+            store.loadBatch(keysToLoad, (key, intSet) -> {
+                VoteSet votes = new VoteSet(intSet);
+                cache.put(key, votes);
+                consumer.apply(key, votes);
             });
         }
     }
 
-    private static final class IntSetValue {
+    private static final class VoteSet {
         private final AtomicReference<IntHashSet> currentDbSnapshot = new AtomicReference<>();
-        private final IntHashSet actors;
+        private final IntHashSet votes;
         private final Counter counter = CountersFactory.createFixedSizeStripedCounter(4);
 
-        public IntSetValue(@NotNull IntHashSet actors) {
-            this.actors = actors;
-            this.currentDbSnapshot.set(new IntHashSet(actors));
+        public VoteSet(@NotNull IntHashSet votes) {
+            this.votes = votes;
+            this.currentDbSnapshot.set(new IntHashSet(votes));
         }
 
         public int count() {
             return (int) counter.get();
         }
 
-        public synchronized @NotNull IntHashSet copyActors() {
-            return new IntHashSet(actors);
+        public synchronized @NotNull IntHashSet copyVotes() {
+            return new IntHashSet(votes);
         }
 
         public @NotNull IntHashSet currentDbSnapshot() {
@@ -161,12 +159,12 @@ public class NonBlockingVotingCounter implements VotingCounter {
             return currentDbSnapshot.compareAndSet(expected, snapshot);
         }
 
-        public synchronized int actorValue(int actor) {
-            return actors.contains(actor) ? 1 : actors.contains(-actor) ? -1 : 0;
+        public synchronized int vote(int actor) {
+            return votes.contains(actor) ? 1 : votes.contains(-actor) ? -1 : 0;
         }
 
-        public synchronized void updateActorValue(int actor, int delta) {
-            if (actors.remove(-actor) || actors.add(actor)) {
+        public synchronized void updateVote(int actor, int delta) {
+            if (votes.remove(-actor) || votes.add(actor)) {
                 counter.inc(delta);
             }
         }

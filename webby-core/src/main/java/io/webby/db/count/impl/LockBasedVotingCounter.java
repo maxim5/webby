@@ -20,7 +20,7 @@ public class LockBasedVotingCounter implements VotingCounter {
 
     public LockBasedVotingCounter(@NotNull VotingStorage store) {
         this.store = store;
-        this.cache = new IntObjectHashMap<>();  // load anything at the start?
+        this.cache = new IntObjectHashMap<>();  // FIX[minor]: load anything at the start?
         this.counters = loadFreshCountsSlow(store);
     }
 

@@ -6,6 +6,9 @@ import com.carrotsearch.hppc.IntIntMap;
 import io.webby.db.event.Persistable;
 import org.jetbrains.annotations.NotNull;
 
+import javax.annotation.concurrent.ThreadSafe;
+
+@ThreadSafe
 public interface VotingCounter extends Persistable {
     int increment(int key, int actor);
 
