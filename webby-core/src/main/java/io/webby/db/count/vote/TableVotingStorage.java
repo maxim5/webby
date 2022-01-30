@@ -15,6 +15,7 @@ import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.List;
+import java.util.function.Consumer;
 import java.util.logging.Level;
 
 import static io.webby.db.count.vote.Consistency.checkStorageConsistency;
@@ -58,25 +59,22 @@ public class TableVotingStorage implements VotingStorage {
         if (keys.isEmpty()) {
             return;
         }
-
-        SelectWhere query = SelectWhere.from(table).select(keyColumn, actorColumn, valueColumn)
-            .where(Where.of(isIn(keyColumn, makeIntVariables(keys))))
-            .orderBy(OrderBy.of(keyColumn.ordered(Order.ASC), actorColumn.ordered(Order.ASC)))
-            .build();
-
-        loadQueryResults(query, consumer);
+        // FIX[norm]: iterate batches of N
+        loadQueryResults(builder -> builder.where(Where.of(isIn(keyColumn, makeIntVariables(keys)))), consumer);
     }
 
     @Override
     public void loadAll(@NotNull IntObjectProcedure<@NotNull IntHashSet> consumer) {
+        loadQueryResults(builder -> {}, consumer);
+    }
+
+    private void loadQueryResults(@NotNull Consumer<SelectWhereBuilder> updater,
+                                  @NotNull IntObjectProcedure<@NotNull IntHashSet> consumer) {
         SelectWhere query = SelectWhere.from(table).select(keyColumn, actorColumn, valueColumn)
+            .applying(updater)
             .orderBy(OrderBy.of(keyColumn.ordered(Order.ASC), actorColumn.ordered(Order.ASC)))
             .build();
 
-        loadQueryResults(query, consumer);
-    }
-
-    private void loadQueryResults(@NotNull SelectWhere query, @NotNull IntObjectProcedure<@NotNull IntHashSet> consumer) {
         IntObjectHashMap<IntHashSet> map = new IntObjectHashMap<>();
         table.runner().forEach(query, resultSet -> {
             int key = resultSet.getInt(1);
