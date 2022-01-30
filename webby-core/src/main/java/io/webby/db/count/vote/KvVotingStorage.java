@@ -54,7 +54,7 @@ public class KvVotingStorage implements VotingStorage {
 
     @Override
     public void storeBatch(@NotNull IntObjectMap<IntHashSet> curr, @Nullable IntObjectMap<IntHashSet> prev) {
-        assert prev == null || checkStorageConsistency(this, prev) : "This is Impossible?!";
+        assert prev == null || checkStorageConsistency(this, curr, prev) : "This is Impossible?!";
         db.putAll(EasyHppc.toJavaMap(curr));
     }
 }
