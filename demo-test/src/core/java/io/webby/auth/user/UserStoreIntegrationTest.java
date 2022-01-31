@@ -16,7 +16,7 @@ import static org.junit.jupiter.api.Assertions.*;
 
 @Tag("sql")
 public class UserStoreIntegrationTest {
-    @RegisterExtension private static final SqlDbSetupExtension SQL_DB = SqlDbSetupExtension.fromProperties();
+    @RegisterExtension private static final SqlDbSetupExtension SQL = SqlDbSetupExtension.fromProperties();
 
     @ParameterizedTest
     @EnumSource(Scenario.class)
@@ -50,10 +50,10 @@ public class UserStoreIntegrationTest {
         AppSettings settings = Testing.defaultAppSettings();
         settings.modelFilter().setCommonPackageOf(DefaultUser.class);
         switch (scenario) {
-            case SQL -> settings.storageSettings().enableSql(SQL_DB.settings()).enableKeyValue(TestingStorage.KEY_VALUE_DEFAULT);
+            case SQL -> settings.storageSettings().enableSql(SQL.settings()).enableKeyValue(TestingStorage.KEY_VALUE_DEFAULT);
             case KEY_VALUE -> settings.storageSettings().enableKeyValue(TestingStorage.KEY_VALUE_DEFAULT);
         }
-        return Testing.testStartup(settings, SQL_DB::savepoint, SQL_DB.combinedTestingModule()).getInstance(UserStore.class);
+        return Testing.testStartup(settings, SQL::savepoint, SQL.combinedTestingModule()).getInstance(UserStore.class);
     }
 
     private enum Scenario {

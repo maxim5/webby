@@ -19,7 +19,7 @@ import static org.junit.jupiter.api.Assertions.assertFalse;
 
 @Tag("sql")
 public abstract class SqlDbTableTest<E, T extends BaseTable<E>> implements BaseTableTest<E, T> {
-    @RegisterExtension private final SqlDbSetupExtension SQL_DB = SqlDbSetupExtension.fromProperties();
+    @RegisterExtension private final SqlDbSetupExtension SQL = SqlDbSetupExtension.fromProperties();
 
     protected T table;
 
@@ -31,18 +31,18 @@ public abstract class SqlDbTableTest<E, T extends BaseTable<E>> implements BaseT
     @BeforeEach
     void setUp() throws Exception {
         setUp(connector());
-        SQL_DB.savepoint();
+        SQL.savepoint();
     }
 
     protected abstract void setUp(@NotNull Connector connector) throws Exception;
 
     @Test
     public void engine() {
-        assertEquals(SQL_DB.engine(), table.engine());
+        assertEquals(SQL.engine(), table.engine());
     }
 
     public @NotNull List<String> parseColumnNamesFromDb(@NotNull String name) {
-        return switch (SQL_DB.engine()) {
+        return switch (SQL.engine()) {
             case SQLite -> {
                 String sql = descTableInSqlite(name)
                         .replaceAll("\\s+", " ")
@@ -52,23 +52,23 @@ public abstract class SqlDbTableTest<E, T extends BaseTable<E>> implements BaseT
                         .map(line -> line.replaceFirst("(\\w+) .*", "$1"))
                         .toList();
             }
-            case H2, MySQL -> SQL_DB.runQuery("SHOW COLUMNS FROM " + name).stream()
+            case H2, MySQL -> SQL.runQuery("SHOW COLUMNS FROM " + name).stream()
                     .map(row -> row.getValueAt(0))
                     .map(DebugSql.RowValue::strValue)
                     .map(String::toLowerCase)
                     .toList();
-            default -> throw new UnsupportedOperationException("Engine not supported: " + SQL_DB.engine());
+            default -> throw new UnsupportedOperationException("Engine not supported: " + SQL.engine());
         };
     }
 
     private @NotNull String descTableInSqlite(@NotNull String name) {
-        List<DebugSql.Row> rows = SQL_DB.runQuery("SELECT sql FROM sqlite_master WHERE name=?", name);
+        List<DebugSql.Row> rows = SQL.runQuery("SELECT sql FROM sqlite_master WHERE name=?", name);
         assertFalse(rows.isEmpty(), "SQL table not found in DB: %s".formatted(name));
         assertThat(rows).hasSize(1);
         return rows.get(0).findValue("sql").map(DebugSql.RowValue::strValue).orElseThrow();
     }
 
     protected @NotNull Connector connector() {
-        return SQL_DB;
+        return SQL;
     }
 }

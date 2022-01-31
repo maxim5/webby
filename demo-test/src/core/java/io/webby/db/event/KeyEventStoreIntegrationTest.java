@@ -34,7 +34,7 @@ import static io.webby.testing.TestingUtil.array;
 public class KeyEventStoreIntegrationTest {
     @RegisterExtension private static final TempDirectoryExtension TEMP_DIRECTORY = new TempDirectoryExtension();
     @RegisterExtension private static final EmbeddedRedisExtension REDIS = new EmbeddedRedisExtension();
-    @RegisterExtension private static final SqlDbSetupExtension SQL_DB = SqlDbSetupExtension.fromProperties();
+    @RegisterExtension private static final SqlDbSetupExtension SQL = SqlDbSetupExtension.fromProperties();
 
     @Test
     public void simple_empty_store() {
@@ -153,7 +153,7 @@ public class KeyEventStoreIntegrationTest {
     public void many_events_per_key(StorageType storageType) {
         KeyEventStoreFactory factory = setup(storageType).getInstance(KeyEventStoreFactory.class);
 
-        int maxSize = storageType == StorageType.SQL_DB && SQL_DB.engine() == Engine.MySQL ? 2000 : Integer.MAX_VALUE;
+        int maxSize = storageType == StorageType.SQL_DB && SQL.engine() == Engine.MySQL ? 2000 : Integer.MAX_VALUE;
         int size = Math.min(100000, maxSize);
         int flushEvery = size / 10;
 
@@ -208,14 +208,14 @@ public class KeyEventStoreIntegrationTest {
         settings.modelFilter().setPackagesOf(Testing.CORE_MODELS);
         settings.storageSettings()
                 .enableKeyValue(KeyValueSettings.of(storageType, TEMP_DIRECTORY.getCurrentTempDir()))
-                .enableSql(SQL_DB.settings());
+                .enableSql(SQL.settings());
         settings.setProfileMode(false);  // not testing TrackingDbAdapter by default
 
         settings.setProperty("db.event.store.flush.batch.size", 1);
         settings.setProperty("db.event.store.average.size", 80);
 
         settings.setProperty("db.redis.port", REDIS.getPort());
-        return Testing.testStartup(settings, SQL_DB::savepoint, SQL_DB.combinedTestingModule());
+        return Testing.testStartup(settings, SQL::savepoint, SQL.combinedTestingModule());
     }
 
     @SuppressWarnings("unchecked")

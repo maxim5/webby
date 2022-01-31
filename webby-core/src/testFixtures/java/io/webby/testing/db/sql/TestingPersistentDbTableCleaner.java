@@ -35,8 +35,7 @@ public class TestingPersistentDbTableCleaner {
                         connector().runner().runInTransaction(runner -> {
                             for (TableMeta meta : getAllTables()) {
                                 log.at(Level.INFO).log("Deleting SQL table if exists: `%s`...", meta.sqlTableName());
-                                String query = SqlSchemaMaker.makeDropTableQuery(meta);
-                                runner.runUpdate(query);
+                                runner.runUpdate(SqlSchemaMaker.makeDropTableQuery(meta));
                             }
                         });
                     } catch (SQLException e) {

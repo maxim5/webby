@@ -46,7 +46,7 @@ public class KeyValueDbIntegrationTest {
     @RegisterExtension private static final CloseAllExtension CLOSE_ALL = new CloseAllExtension();
     @RegisterExtension private static final TempDirectoryExtension TEMP_DIRECTORY = new TempDirectoryExtension();
     @RegisterExtension private static final EmbeddedRedisExtension REDIS = new EmbeddedRedisExtension();
-    @RegisterExtension private static final SqlDbSetupExtension SQL_DB = SqlDbSetupExtension.fromProperties();
+    @RegisterExtension private static final SqlDbSetupExtension SQL = SqlDbSetupExtension.fromProperties();
 
     @ParameterizedTest
     @EnumSource(StorageType.class)
@@ -412,7 +412,7 @@ public class KeyValueDbIntegrationTest {
         settings.modelFilter().setPackagesOf(Testing.CORE_MODELS);
         settings.storageSettings()
                 .enableKeyValue(KeyValueSettings.of(storageType, TEMP_DIRECTORY.getCurrentTempDir()))
-                .enableSql(SQL_DB.settings());
+                .enableSql(SQL.settings());
         settings.setProfileMode(false);  // not testing TrackingDbAdapter by default
 
         settings.setProperty("db.chronicle.default.size", 64);
@@ -430,6 +430,6 @@ public class KeyValueDbIntegrationTest {
             CLOSE_ALL.addCloseable(mockedClock);
         }
 
-        return Testing.testStartup(settings, SQL_DB::savepoint, SQL_DB.combinedTestingModule());
+        return Testing.testStartup(settings, SQL::savepoint, SQL.combinedTestingModule());
     }
 }

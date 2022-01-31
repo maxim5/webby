@@ -7,27 +7,26 @@ import io.webby.db.sql.ConnectionPool;
 import io.webby.db.sql.SqlSettings;
 import io.webby.orm.api.Connector;
 import io.webby.orm.api.Engine;
-import io.webby.orm.api.TableMeta;
 import io.webby.orm.api.debug.DebugRunner;
-import io.webby.orm.codegen.SqlSchemaMaker;
 import io.webby.testing.TestingModules;
 import io.webby.testing.TestingProps;
 import io.webby.util.base.Unchecked.Runnables;
 import org.jetbrains.annotations.NotNull;
-import org.junit.jupiter.api.extension.*;
+import org.junit.jupiter.api.extension.AfterAllCallback;
+import org.junit.jupiter.api.extension.AfterEachCallback;
+import org.junit.jupiter.api.extension.BeforeEachCallback;
+import org.junit.jupiter.api.extension.ExtensionContext;
 
 import java.sql.Connection;
 import java.sql.Savepoint;
 import java.util.logging.Level;
 
-public class SqlDbSetupExtension implements BeforeAllCallback, AfterAllCallback,
-                                            BeforeEachCallback, AfterEachCallback,
-                                            Connector, DebugRunner {
+public class SqlDbSetupExtension implements AfterAllCallback, BeforeEachCallback, AfterEachCallback, Connector, DebugRunner {
     private static final FluentLogger log = FluentLogger.forEnclosingClass();
 
     private final SqlSettings settings;
     private final Connection connection;
-    private TableMeta table;
+    private boolean savepointEnabled = true;
     private Savepoint savepoint;
 
     public SqlDbSetupExtension(@NotNull SqlSettings settings) {
@@ -42,19 +41,6 @@ public class SqlDbSetupExtension implements BeforeAllCallback, AfterAllCallback,
 
     public static @NotNull SqlDbSetupExtension fromProperties() {
         return from(TestingProps.propsSqlSettings());
-    }
-
-    public @NotNull SqlDbSetupExtension ofTable(@NotNull TableMeta table) {
-        this.table = table;
-        return this;
-    }
-
-    @Override
-    public void beforeAll(ExtensionContext context) {
-        if (table != null) {
-            runUpdate(SqlSchemaMaker.makeDropTableQuery(table));
-            runUpdate(SqlSchemaMaker.makeCreateTableQuery(engine(), table));
-        }
     }
 
     @Override
@@ -73,17 +59,29 @@ public class SqlDbSetupExtension implements BeforeAllCallback, AfterAllCallback,
         rollback();
     }
 
+    public @NotNull SqlDbSetupExtension enableSavepoints() {
+        savepointEnabled = true;
+        return this;
+    }
+
+    public @NotNull SqlDbSetupExtension disableSavepoints() {
+        savepointEnabled = false;
+        return this;
+    }
+
     public void savepoint() {
         Runnables.runRethrow(() -> {
-            log.at(Level.FINE).log("[SQL] Set savepoint");
-            connection.setAutoCommit(false);
-            savepoint = connection.setSavepoint("save");
+            if (savepointEnabled) {
+                log.at(Level.FINE).log("[SQL] Set savepoint");
+                connection.setAutoCommit(false);
+                savepoint = connection.setSavepoint("save");
+            }
         });
     }
 
     public void rollback() {
         Runnables.runRethrow(() -> {
-            if (savepoint != null) {
+            if (savepointEnabled && savepoint != null) {
                 log.at(Level.FINE).log("[SQL] Rollback to savepoint");
                 connection.rollback(savepoint);
                 connection.releaseSavepoint(savepoint);

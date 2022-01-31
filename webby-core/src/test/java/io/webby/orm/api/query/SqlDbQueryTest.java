@@ -3,8 +3,9 @@ package io.webby.orm.api.query;
 import com.carrotsearch.hppc.IntArrayList;
 import com.carrotsearch.hppc.LongArrayList;
 import io.webby.orm.api.Engine;
+import io.webby.testing.ext.SqlCleanupExtension;
 import io.webby.testing.ext.SqlDbSetupExtension;
-import org.junit.jupiter.api.BeforeAll;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.RegisterExtension;
@@ -22,20 +23,21 @@ import static org.junit.jupiter.api.Assumptions.assumeFalse;
 
 @Tag("sql")
 public class SqlDbQueryTest {
-    @RegisterExtension static final SqlDbSetupExtension SQL_DB = SqlDbSetupExtension.fromProperties().ofTable(PERSON_META);
+    @RegisterExtension private static final SqlDbSetupExtension SQL = SqlDbSetupExtension.fromProperties().disableSavepoints();
+    @RegisterExtension private static final SqlCleanupExtension CLEANUP = SqlCleanupExtension.of(SQL, PERSON_META);
 
-    @BeforeAll
-    static void beforeAll() {
+    @BeforeEach
+    void setUp() {
         List<Object[]> rows = List.of(
-            array("Kate", "DE", FEMALE, parseDate("1990-01-01"), 110, 160.5, photo(0x1111111)),
-            array("Bill", "US", MALE,   parseDate("1971-10-20"), 120, 170.1, photo(0x2222222)),
-            array("Ivan", "RU", MALE,   parseDate("1999-07-16"), 100, 175.9, photo(0x3333333)),
-            array("Yuan", "CN", FEMALE, parseDate("2005-05-31"), 130, 156.2, photo(0x4444444))
+            array(1, "Kate", "DE", FEMALE, parseDate("1990-01-01"), 110, 160.5, photo(0x1111111)),
+            array(2, "Bill", "US", MALE,   parseDate("1971-10-20"), 120, 170.1, photo(0x2222222)),
+            array(3, "Ivan", "RU", MALE,   parseDate("1999-07-16"), 100, 175.9, photo(0x3333333)),
+            array(4, "Yuan", "CN", FEMALE, parseDate("2005-05-31"), 130, 156.2, photo(0x4444444))
         );
         for (Object[] row : rows) {
-            SQL_DB.runUpdate("""
-                INSERT INTO person (name, country, sex, birthday, iq, height, photo)
-                VALUES (?, ?, ?, ?, ?, ?, ?)
+            SQL.runUpdate("""
+                INSERT INTO person (id, name, country, sex, birthday, iq, height, photo)
+                VALUES (?, ?, ?, ?, ?, ?, ?, ?)
             """, row);
         }
     }
@@ -52,7 +54,7 @@ public class SqlDbQueryTest {
             WHERE name = 'Bill'
             """);
         assertNoArgs(query);
-        assertRows(SQL_DB.runQuery(query), array(2));
+        assertRows(SQL.runQuery(query), array(2));
     }
 
     @Test
@@ -65,7 +67,7 @@ public class SqlDbQueryTest {
             FROM person
             """);
         assertNoArgs(query);
-        assertRows(SQL_DB.runQuery(query), array(662.7));
+        assertRows(SQL.runQuery(query), array(662.7));
     }
 
     @Test
@@ -78,7 +80,7 @@ public class SqlDbQueryTest {
             FROM person
             """);
         assertNoArgs(query);
-        assertRows(SQL_DB.runQuery(query), array(FEMALE), array(MALE));
+        assertRows(SQL.runQuery(query), array(FEMALE), array(MALE));
     }
 
     @Test
@@ -95,7 +97,7 @@ public class SqlDbQueryTest {
             ORDER BY sex ASC, country DESC
             """);
         assertNoArgs(query);
-        assertOrderedRows(SQL_DB.runQuery(query),
+        assertOrderedRows(SQL.runQuery(query),
                           array(MALE, "US"),
                           array(MALE, "RU"),
                           array(FEMALE, "DE"),
@@ -112,7 +114,7 @@ public class SqlDbQueryTest {
             FROM person
             """);
         assertArgs(query, 125);
-        assertRows(SQL_DB.runQuery(query),
+        assertRows(SQL.runQuery(query),
                    array("Kate", false),
                    array("Bill", false),
                    array("Ivan", false),
@@ -132,7 +134,7 @@ public class SqlDbQueryTest {
             WHERE length(name) = ? AND country LIKE ?
             """);
         assertArgs(query, 4, "%U%");
-        assertRows(SQL_DB.runQuery(query),
+        assertRows(SQL.runQuery(query),
                    array(2, "US"),
                    array(3, "RU"));
     }
@@ -149,7 +151,7 @@ public class SqlDbQueryTest {
             WHERE birthday < ?
             """);
         assertArgs(query, parseDate("1985-01-01"));
-        assertRows(SQL_DB.runQuery(query), array(2, "US"));
+        assertRows(SQL.runQuery(query), array(2, "US"));
     }
 
     @Test
@@ -164,7 +166,7 @@ public class SqlDbQueryTest {
             WHERE birthday BETWEEN ? AND ?
             """);
         assertArgs(query, parseDate("1985-01-01"), parseDate("2000-01-01"));
-        assertRows(SQL_DB.runQuery(query),
+        assertRows(SQL.runQuery(query),
                    array(1, "DE"),
                    array(3, "RU"));
     }
@@ -179,7 +181,7 @@ public class SqlDbQueryTest {
             FROM person
             """);
         assertNoArgs(query);
-        assertRows(SQL_DB.runQuery(query),
+        assertRows(SQL.runQuery(query),
                    array(1, "DE"),
                    array(2, "US"),
                    array(3, "RU"),
@@ -188,7 +190,7 @@ public class SqlDbQueryTest {
 
     @Test
     public void selectWhere_cast_to_integer() {
-        assumeFalse(SQL_DB.engine() == Engine.H2, "Not working in H2 (blob cast doesn't work)");
+        assumeFalse(SQL.engine() == Engine.H2, "Not working in H2 (blob cast doesn't work)");
         SelectQuery query = SelectWhere.from(PERSON_META)
                 .select(PersonColumn.id, CAST_AS_SIGNED.apply(PersonColumn.photo))
                 .build();
@@ -197,7 +199,7 @@ public class SqlDbQueryTest {
             FROM person
             """);
         assertNoArgs(query);
-        assertRows(SQL_DB.runQuery(query),
+        assertRows(SQL.runQuery(query),
                    array(1, 1111111),
                    array(2, 2222222),
                    array(3, 3333333),
@@ -206,7 +208,7 @@ public class SqlDbQueryTest {
 
     @Test
     public void selectWhere_cast_to_string() {
-        assumeFalse(SQL_DB.engine() == Engine.H2, "Not working in H2 (blob cast doesn't work)");
+        assumeFalse(SQL.engine() == Engine.H2, "Not working in H2 (blob cast doesn't work)");
         SelectQuery query = SelectWhere.from(PERSON_META)
                 .select(PersonColumn.id, CAST_AS_CHAR.apply(PersonColumn.photo))
                 .build();
@@ -215,7 +217,7 @@ public class SqlDbQueryTest {
             FROM person
             """);
         assertNoArgs(query);
-        assertRows(SQL_DB.runQuery(query),
+        assertRows(SQL.runQuery(query),
                    array(1, "1111111"),
                    array(2, "2222222"),
                    array(3, "3333333"),
@@ -234,14 +236,14 @@ public class SqlDbQueryTest {
             GROUP BY sex
             """);
         assertNoArgs(query);
-        assertRows(SQL_DB.runQuery(query),
+        assertRows(SQL.runQuery(query),
                    array(FEMALE, 2),
                    array(MALE, 2));
     }
 
     @Test
     public void groupBy_one_column_avg() {
-        assumeFalse(SQL_DB.engine() == Engine.H2, "Not working in H2 (AVG is integer by default)");
+        assumeFalse(SQL.engine() == Engine.H2, "Not working in H2 (AVG is integer by default)");
         SelectQuery query = SelectGroupBy.from(PERSON_META)
                 .groupBy(PersonColumn.sex)
                 .aggregate(AVG.apply(PersonColumn.iq))
@@ -252,7 +254,7 @@ public class SqlDbQueryTest {
             GROUP BY sex
             """);
         assertNoArgs(query);
-        assertRows(SQL_DB.runQuery(query),
+        assertRows(SQL.runQuery(query),
                    array(FEMALE, 120.0),
                    array(MALE, 110.0));
     }
@@ -269,7 +271,7 @@ public class SqlDbQueryTest {
             GROUP BY sex, name
             """);
         assertNoArgs(query);
-        assertRows(SQL_DB.runQuery(query),
+        assertRows(SQL.runQuery(query),
                    array(FEMALE, "Kate", 1),
                    array(MALE,   "Bill", 2),
                    array(MALE,   "Ivan", 3),
@@ -292,7 +294,7 @@ public class SqlDbQueryTest {
             ORDER BY id ASC
             """);
         assertNoArgs(query);
-        assertOrderedRows(SQL_DB.runQuery(query),
+        assertOrderedRows(SQL.runQuery(query),
                           array("Kate", 1),
                           array("Yuan", 1));
     }
@@ -311,7 +313,7 @@ public class SqlDbQueryTest {
             HAVING count(id) > 0
             """);
         assertNoArgs(query);
-        assertRows(SQL_DB.runQuery(query),
+        assertRows(SQL.runQuery(query),
                    array("CN", 1),
                    array("DE", 1),
                    array("RU", 1),
@@ -330,7 +332,7 @@ public class SqlDbQueryTest {
             ORDER BY id DESC
             """);
         assertNoArgs(query);
-        assertEquals(IntArrayList.from(4, 3, 2, 1), SQL_DB.runner().fetchIntColumn(query));
+        assertEquals(IntArrayList.from(4, 3, 2, 1), SQL.runner().fetchIntColumn(query));
     }
 
     @Test
@@ -345,6 +347,6 @@ public class SqlDbQueryTest {
                 ORDER BY iq ASC
                 """);
         assertNoArgs(query);
-        assertEquals(LongArrayList.from(100, 110, 120, 130), SQL_DB.runner().fetchLongColumn(query));
+        assertEquals(LongArrayList.from(100, 110, 120, 130), SQL.runner().fetchLongColumn(query));
     }
 }

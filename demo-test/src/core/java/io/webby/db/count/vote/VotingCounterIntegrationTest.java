@@ -10,6 +10,7 @@ import com.google.errorprone.annotations.CanIgnoreReturnValue;
 import com.google.mu.util.stream.BiStream;
 import io.webby.db.kv.javamap.JavaMapDbFactory;
 import io.webby.demo.model.UserRateModelTable;
+import io.webby.testing.ext.SqlCleanupExtension;
 import io.webby.testing.ext.SqlDbSetupExtension;
 import io.webby.util.hppc.EasyHppc;
 import org.jetbrains.annotations.NotNull;
@@ -33,7 +34,8 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 
 @Tag("sql")
 public class VotingCounterIntegrationTest {
-    @RegisterExtension static final SqlDbSetupExtension SQL_DB = SqlDbSetupExtension.fromProperties().ofTable(UserRateModelTable.META);
+    @RegisterExtension private static final SqlDbSetupExtension SQL = SqlDbSetupExtension.fromProperties().disableSavepoints();
+    @RegisterExtension private static final SqlCleanupExtension CLEANUP = SqlCleanupExtension.of(SQL, UserRateModelTable.META);
 
     private static final int A = 1000;
     private static final int B = 2000;
@@ -402,7 +404,7 @@ public class VotingCounterIntegrationTest {
     @CanIgnoreReturnValue
     private @NotNull VotingCounter setup(@NotNull Scenario scenario) {
         storage = switch (scenario.store) {
-            case TABLE -> new TableVotingStorage(new UserRateModelTable(SQL_DB), content_id, user_id, value);
+            case TABLE -> new TableVotingStorage(new UserRateModelTable(SQL), content_id, user_id, value);
             case KEY_VALUE_DB -> new KvVotingStorage(new JavaMapDbFactory().inMemoryDb());
         };
 
