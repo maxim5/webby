@@ -3,22 +3,35 @@ package io.webby.db.count.vote;
 import com.carrotsearch.hppc.*;
 import com.carrotsearch.hppc.cursors.IntCursor;
 import com.carrotsearch.hppc.procedures.IntObjectProcedure;
+import com.google.common.eventbus.EventBus;
+import com.google.common.eventbus.Subscribe;
+import io.webby.db.count.StoreChangedEvent;
 import org.jctools.counters.Counter;
 import org.jctools.counters.CountersFactory;
 import org.jctools.maps.NonBlockingHashMapLong;
 import org.jetbrains.annotations.NotNull;
 
 import javax.annotation.concurrent.ThreadSafe;
+import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicReference;
 
 @ThreadSafe
 public class NonBlockingVotingCounter implements VotingCounter {
     private final VotingStorage store;
     private final NonBlockingHashMapLong<VoteSet> cache;
+    private final AtomicBoolean storeDirty = new AtomicBoolean();
 
-    public NonBlockingVotingCounter(@NotNull VotingStorage store) {
+    public NonBlockingVotingCounter(@NotNull VotingStorage store, @NotNull EventBus eventBus) {
         this.store = store;
         this.cache = new NonBlockingHashMapLong<>();  // FIX[minor]: load anything at the start?
+        eventBus.register(this);
+    }
+
+    @Subscribe
+    public void storeChanged(@NotNull StoreChangedEvent event) {
+        if (store.storeId().equals(event.storeId())) {
+            storeDirty.set(true);
+        }
     }
 
     @Override
@@ -76,7 +89,7 @@ public class NonBlockingVotingCounter implements VotingCounter {
             prev.put((int) key, value.currentDbSnapshot());
         }
 
-        store.storeBatch(curr, prev);
+        store.storeBatch(curr, storeDirty.getAndSet(false) ? null : prev);
 
         for (long key : keys) {
             // FIX[minor]: log warning if false

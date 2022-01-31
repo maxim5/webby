@@ -5,6 +5,8 @@ import com.carrotsearch.hppc.IntHashSet;
 import com.carrotsearch.hppc.IntObjectMap;
 import com.carrotsearch.hppc.cursors.IntCursor;
 import com.carrotsearch.hppc.procedures.IntObjectProcedure;
+import io.webby.db.StorageType;
+import io.webby.db.count.StoreId;
 import io.webby.db.kv.KeyValueDb;
 import io.webby.util.hppc.EasyHppc;
 import org.jetbrains.annotations.NotNull;
@@ -16,10 +18,17 @@ import java.util.List;
 import static io.webby.db.count.vote.Consistency.checkStorageConsistency;
 
 public class KvVotingStorage implements VotingStorage {
+    private final StoreId storeId;
     private final KeyValueDb<Integer, IntHashSet> db;
 
-    public KvVotingStorage(@NotNull KeyValueDb<Integer, IntHashSet> db) {
+    public KvVotingStorage(@NotNull String name, @NotNull KeyValueDb<Integer, IntHashSet> db) {
+        this.storeId = new StoreId(StorageType.KEY_VALUE_DB, name);
         this.db = db;
+    }
+
+    @Override
+    public @NotNull StoreId storeId() {
+        return storeId;
     }
 
     @Override

@@ -6,6 +6,8 @@ import com.carrotsearch.hppc.cursors.IntObjectCursor;
 import com.carrotsearch.hppc.procedures.IntObjectProcedure;
 import com.google.common.flogger.FluentLogger;
 import io.webby.common.SystemProperties;
+import io.webby.db.StorageType;
+import io.webby.db.count.StoreId;
 import io.webby.orm.api.BaseTable;
 import io.webby.orm.api.QueryException;
 import io.webby.orm.api.entity.BatchEntityIntData;
@@ -26,6 +28,7 @@ public class TableVotingStorage implements VotingStorage {
     private static final FluentLogger log = FluentLogger.forEnclosingClass();
     private static final int CHUNK_SIZE = SystemProperties.DEFAULT_SQL_MAX_PARAMS;
 
+    private final StoreId storeId;
     private final BaseTable<?> table;
     private final Column keyColumn;
     private final Column actorColumn;
@@ -35,10 +38,16 @@ public class TableVotingStorage implements VotingStorage {
                               @NotNull Column keyColumn,
                               @NotNull Column actorColumn,
                               @NotNull Column valueColumn) {
+        this.storeId = new StoreId(StorageType.SQL_DB, table.meta().sqlTableName());
         this.table = table;
         this.keyColumn = keyColumn;
         this.actorColumn = actorColumn;
         this.valueColumn = valueColumn;
+    }
+
+    @Override
+    public @NotNull StoreId storeId() {
+        return storeId;
     }
 
     @Override

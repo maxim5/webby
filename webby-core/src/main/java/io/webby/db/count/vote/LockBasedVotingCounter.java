@@ -2,6 +2,9 @@ package io.webby.db.count.vote;
 
 import com.carrotsearch.hppc.*;
 import com.carrotsearch.hppc.cursors.IntCursor;
+import com.google.common.eventbus.EventBus;
+import com.google.common.eventbus.Subscribe;
+import io.webby.db.count.StoreChangedEvent;
 import io.webby.util.hppc.EasyHppc;
 import org.jetbrains.annotations.NotNull;
 
@@ -17,10 +20,16 @@ public class LockBasedVotingCounter implements VotingCounter {
     private final IntObjectHashMap<IntHashSet> cache;
     private final IntIntHashMap counters;
 
-    public LockBasedVotingCounter(@NotNull VotingStorage store) {
+    public LockBasedVotingCounter(@NotNull VotingStorage store, @NotNull EventBus eventBus) {
         this.store = store;
         this.cache = new IntObjectHashMap<>();  // FIX[minor]: load anything at the start?
         this.counters = loadFreshCountsSlow(store);
+        eventBus.register(this);
+    }
+
+    @Subscribe
+    public void storeChanged(@NotNull StoreChangedEvent event) {
+        // ignore
     }
 
     @Override

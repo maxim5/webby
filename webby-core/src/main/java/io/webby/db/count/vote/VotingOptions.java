@@ -13,9 +13,8 @@ public record VotingOptions(@NotNull String name,
         return new VotingOptions(name, counterType, OneOf.ofFirst(StorageType.KEY_VALUE_DB), null);
     }
 
-    public static @NotNull VotingOptions ofSqlTable(@NotNull String name,
-                                                    @NotNull VotingCounterType counterType,
+    public static @NotNull VotingOptions ofSqlTable(@NotNull VotingCounterType counterType,
                                                     @NotNull VotingTableSpec tableSpec) {
-        return new VotingOptions(name, counterType, OneOf.ofFirst(StorageType.SQL_DB), tableSpec);
+        return new VotingOptions("", counterType, OneOf.ofFirst(StorageType.SQL_DB), tableSpec);
     }
 }

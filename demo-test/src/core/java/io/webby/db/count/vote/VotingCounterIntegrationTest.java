@@ -6,7 +6,7 @@ import com.carrotsearch.hppc.IntIntHashMap;
 import com.carrotsearch.hppc.IntObjectMap;
 import com.carrotsearch.hppc.cursors.IntIntCursor;
 import com.carrotsearch.hppc.cursors.IntObjectCursor;
-import com.google.errorprone.annotations.CanIgnoreReturnValue;
+import com.google.common.eventbus.EventBus;
 import com.google.mu.util.stream.BiStream;
 import io.webby.db.StorageType;
 import io.webby.db.kv.javamap.JavaMapDbFactory;
@@ -48,6 +48,7 @@ public class VotingCounterIntegrationTest {
 
     private VotingCounter counter;
     private VotingStorage storage;
+    private EventBus eventBus;
 
     @ParameterizedTest
     @EnumSource(Scenario.class)
@@ -402,19 +403,18 @@ public class VotingCounterIntegrationTest {
         assertEquals(expectedMap, storage.loadAll());
     }
 
-    @CanIgnoreReturnValue
-    private @NotNull VotingCounter setup(@NotNull Scenario scenario) {
+    private void setup(@NotNull Scenario scenario) {
+        eventBus = new EventBus();
+
         storage = switch (scenario.store) {
             case SQL_DB -> new TableVotingStorage(new UserRateModelTable(SQL), content_id, user_id, value);
-            case KEY_VALUE_DB -> new KvVotingStorage(new JavaMapDbFactory().inMemoryDb());
+            case KEY_VALUE_DB -> new KvVotingStorage("java", new JavaMapDbFactory().inMemoryDb());
         };
 
         counter = switch (scenario.counter) {
-            case LOCK_BASED -> new LockBasedVotingCounter(storage);
-            case NON_BLOCKING -> new NonBlockingVotingCounter(storage);
+            case LOCK_BASED -> new LockBasedVotingCounter(storage, eventBus);
+            case NON_BLOCKING -> new NonBlockingVotingCounter(storage, eventBus);
         };
-
-        return counter;
     }
 
     private enum Scenario {

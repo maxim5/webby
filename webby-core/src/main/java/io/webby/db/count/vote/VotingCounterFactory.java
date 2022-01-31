@@ -1,6 +1,7 @@
 package io.webby.db.count.vote;
 
 import com.carrotsearch.hppc.IntHashSet;
+import com.google.common.eventbus.EventBus;
 import com.google.inject.Inject;
 import com.google.inject.Provider;
 import io.webby.app.Settings;
@@ -19,21 +20,22 @@ public class VotingCounterFactory {
     @Inject private KeyValueFactory keyValueFactory;
     @Inject private Provider<TableManager> tableManagerProvider;
     @Inject private Lifetime lifetime;
+    @Inject private EventBus eventBus;
 
     public @NotNull VotingCounter getVotingCounter(@NotNull VotingOptions options) {
-        VotingStorage storage = getVotingStorage(options);
+        VotingStorage storage = getStorage(options);
         VotingCounter counter = switch (options.counterType()) {
-            case LOCK_BASED -> new LockBasedVotingCounter(storage);
-            case NON_BLOCKING -> new NonBlockingVotingCounter(storage);
+            case LOCK_BASED -> new LockBasedVotingCounter(storage, eventBus);
+            case NON_BLOCKING -> new NonBlockingVotingCounter(storage, eventBus);
         };
         lifetime.onTerminate(counter);
         return counter;
     }
 
-    private @NotNull VotingStorage getVotingStorage(@NotNull VotingOptions options) {
+    private @NotNull VotingStorage getStorage(@NotNull VotingOptions options) {
         return options.store().mapToObj(storeType ->
             switch (storeType) {
-                case KEY_VALUE_DB -> new KvVotingStorage(getKeyValueDb(options.name()));
+                case KEY_VALUE_DB -> new KvVotingStorage(options.name(), getKeyValueDb(options.name()));
                 case SQL_DB -> getTableVotingStorage(requireNonNull(options.tableSpec()));
             },
             storage -> storage
