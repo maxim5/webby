@@ -8,6 +8,7 @@ import com.carrotsearch.hppc.cursors.IntIntCursor;
 import com.carrotsearch.hppc.cursors.IntObjectCursor;
 import com.google.errorprone.annotations.CanIgnoreReturnValue;
 import com.google.mu.util.stream.BiStream;
+import io.webby.db.StorageType;
 import io.webby.db.kv.javamap.JavaMapDbFactory;
 import io.webby.demo.model.UserRateModelTable;
 import io.webby.testing.ext.SqlCleanupExtension;
@@ -404,7 +405,7 @@ public class VotingCounterIntegrationTest {
     @CanIgnoreReturnValue
     private @NotNull VotingCounter setup(@NotNull Scenario scenario) {
         storage = switch (scenario.store) {
-            case TABLE -> new TableVotingStorage(new UserRateModelTable(SQL), content_id, user_id, value);
+            case SQL_DB -> new TableVotingStorage(new UserRateModelTable(SQL), content_id, user_id, value);
             case KEY_VALUE_DB -> new KvVotingStorage(new JavaMapDbFactory().inMemoryDb());
         };
 
@@ -417,15 +418,15 @@ public class VotingCounterIntegrationTest {
     }
 
     private enum Scenario {
-        TABLE_LOCK(VotingStoreType.TABLE, VotingCounterType.LOCK_BASED),
-        TABLE_NB(VotingStoreType.TABLE, VotingCounterType.NON_BLOCKING),
-        KV_JAVA_LOCK(VotingStoreType.KEY_VALUE_DB, VotingCounterType.LOCK_BASED),
-        KV_JAVA_NB(VotingStoreType.KEY_VALUE_DB, VotingCounterType.NON_BLOCKING);
+        TABLE_LOCK(StorageType.SQL_DB, VotingCounterType.LOCK_BASED),
+        TABLE_NB(StorageType.SQL_DB, VotingCounterType.NON_BLOCKING),
+        KV_JAVA_LOCK(StorageType.KEY_VALUE_DB, VotingCounterType.LOCK_BASED),
+        KV_JAVA_NB(StorageType.KEY_VALUE_DB, VotingCounterType.NON_BLOCKING);
 
-        private final VotingStoreType store;
+        private final StorageType store;
         private final VotingCounterType counter;
 
-        Scenario(VotingStoreType store, VotingCounterType counter) {
+        Scenario(@NotNull StorageType store, @NotNull VotingCounterType counter) {
             this.store = store;
             this.counter = counter;
         }

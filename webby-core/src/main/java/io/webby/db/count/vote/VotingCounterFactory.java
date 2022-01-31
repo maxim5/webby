@@ -12,8 +12,6 @@ import io.webby.db.sql.TableManager;
 import io.webby.orm.api.BaseTable;
 import org.jetbrains.annotations.NotNull;
 
-import java.util.Objects;
-
 import static java.util.Objects.requireNonNull;
 
 public class VotingCounterFactory {
@@ -36,7 +34,7 @@ public class VotingCounterFactory {
         return options.store().mapToObj(storeType ->
             switch (storeType) {
                 case KEY_VALUE_DB -> new KvVotingStorage(getKeyValueDb(options.name()));
-                case TABLE -> getTableVotingStorage(requireNonNull(options.tableSpec()));
+                case SQL_DB -> getTableVotingStorage(requireNonNull(options.tableSpec()));
             },
             storage -> storage
         );

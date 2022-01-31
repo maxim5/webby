@@ -28,7 +28,7 @@ public class IntCounterFactory {
     private @NotNull IntCountStorage getStorage(@NotNull CountingOptions options) {
         return switch (options.storeType()) {
             case KEY_VALUE_DB -> new KvCountStorage(keyValueFactory.getDb(DbOptions.of(options.name(), Integer.class, Integer.class)));
-            case TABLE -> {
+            case SQL_DB -> {
                 assert settings.storageSettings().isSqlEnabled() : "SQL storage is disabled";
                 CountingTableSpec tableSpec = requireNonNull(options.tableSpec());
                 BaseTable<?> table = tableManagerProvider.get().getTableOrDie(tableSpec.tableClass());
