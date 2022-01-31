@@ -9,7 +9,7 @@ import org.jetbrains.annotations.Nullable;
 import java.sql.SQLException;
 import java.time.LocalDateTime;
 
-public class SystemInfo {
+public class DbSystem {
     public static @Nullable String getDatabase(@NotNull BaseTable<?> table) {
         try {
             String catalog = table.runner().connection().getCatalog();
