@@ -8,9 +8,13 @@ import com.carrotsearch.hppc.procedures.IntIntProcedure;
 import com.carrotsearch.hppc.procedures.IntObjectProcedure;
 import com.google.common.collect.Streams;
 import com.google.errorprone.annotations.CheckReturnValue;
+import io.webby.util.func.ThrowConsumer;
 import org.jetbrains.annotations.NotNull;
 
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.HashMap;
+import java.util.Map;
 import java.util.stream.IntStream;
 import java.util.stream.Stream;
 
@@ -36,6 +40,28 @@ public class EasyHppc {
         slice.buffer = Arrays.copyOfRange(list.buffer, fromIndex, toIndex);
         slice.elementsCount = toIndex - fromIndex;
         return slice;
+    }
+
+    public static <E extends Throwable> void iterateChunks(@NotNull IntContainer container,
+                                                           int chunkSize,
+                                                           @NotNull ThrowConsumer<IntArrayList, E> consumer) throws E {
+        assert chunkSize > 0 : "Invalid chunk size: " + chunkSize;
+        IntArrayList arrayList = toArrayList(container);
+        for (int i = 0; i < arrayList.size(); i += chunkSize) {
+            IntArrayList chunk = EasyHppc.slice(arrayList, i, i + chunkSize);
+            consumer.accept(chunk);
+        }
+    }
+
+    public static <E extends Throwable> void iterateChunks(@NotNull LongContainer container,
+                                                           int chunkSize,
+                                                           @NotNull ThrowConsumer<LongArrayList, E> consumer) throws E {
+        assert chunkSize > 0 : "Invalid chunk size: " + chunkSize;
+        LongArrayList arrayList = toArrayList(container);
+        for (int i = 0; i < arrayList.size(); i += chunkSize) {
+            LongArrayList chunk = EasyHppc.slice(arrayList, i, i + chunkSize);
+            consumer.accept(chunk);
+        }
     }
 
     public static @NotNull IntIntMap slice(@NotNull IntIntMap map, int @NotNull [] keys) {
@@ -114,18 +140,6 @@ public class EasyHppc {
         return stream.collect(IntArrayList::new, IntArrayList::add, IntArrayList::addAll);
     }
 
-    public static @NotNull IntHashSet retainAllCopy(@NotNull IntContainer container, @NotNull IntPredicate predicate) {
-        IntHashSet copy = new IntHashSet(container);
-        copy.retainAll(predicate);
-        return copy;
-    }
-
-    public static @NotNull IntHashSet removeAllCopy(@NotNull IntContainer container, @NotNull IntPredicate predicate) {
-        IntHashSet copy = new IntHashSet(container);
-        copy.removeAll(predicate);
-        return copy;
-    }
-
     public static @NotNull IntHashSet union(@NotNull IntContainer lhs, @NotNull IntContainer rhs) {
         IntHashSet copy = new IntHashSet(lhs);
         copy.addAll(rhs);
@@ -141,6 +155,18 @@ public class EasyHppc {
     public static @NotNull IntHashSet subtract(@NotNull IntContainer lhs, @NotNull IntContainer rhs) {
         IntHashSet copy = new IntHashSet(lhs);
         copy.removeAll(rhs);
+        return copy;
+    }
+
+    public static @NotNull IntHashSet retainAllCopy(@NotNull IntContainer container, @NotNull IntPredicate predicate) {
+        IntHashSet copy = new IntHashSet(container);
+        copy.retainAll(predicate);
+        return copy;
+    }
+
+    public static @NotNull IntHashSet removeAllCopy(@NotNull IntContainer container, @NotNull IntPredicate predicate) {
+        IntHashSet copy = new IntHashSet(container);
+        copy.removeAll(predicate);
         return copy;
     }
 }

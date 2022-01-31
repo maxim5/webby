@@ -4,6 +4,7 @@ import com.carrotsearch.hppc.*;
 import com.carrotsearch.hppc.cursors.IntCursor;
 import com.carrotsearch.hppc.cursors.LongCursor;
 import com.google.common.truth.IterableSubject;
+import io.webby.testing.MockConsumer;
 import io.webby.util.hppc.EasyHppc;
 import org.jetbrains.annotations.NotNull;
 import org.junit.Test;
@@ -38,6 +39,32 @@ public class EasyHppcTest {
         assertLongsOrdered(EasyHppc.slice(list, 0, 4), 1, 2, 3);
         assertLongsOrdered(EasyHppc.slice(list, 1, 2), 2);
         assertLongsOrdered(EasyHppc.slice(list, 1, 1));
+    }
+
+    @Test
+    public void int_iterate_chunks() {
+        try (MockConsumer.Tracker ignored = MockConsumer.trackAllConsumersDone()) {
+            EasyHppc.iterateChunks(IntArrayList.from(), 2, MockConsumer.expecting());
+            EasyHppc.iterateChunks(IntArrayList.from(1), 2, MockConsumer.expecting(IntArrayList.from(1)));
+            EasyHppc.iterateChunks(IntArrayList.from(1, 2), 2, MockConsumer.expecting(IntArrayList.from(1, 2)));
+            EasyHppc.iterateChunks(IntArrayList.from(1, 2, 3), 2,
+                                   MockConsumer.expecting(IntArrayList.from(1, 2), IntArrayList.from(3)));
+            EasyHppc.iterateChunks(IntArrayList.from(1, 2, 3, 4), 2,
+                                   MockConsumer.expecting(IntArrayList.from(1, 2), IntArrayList.from(3, 4)));
+        }
+    }
+
+    @Test
+    public void long_iterate_chunks() {
+        try (MockConsumer.Tracker ignored = MockConsumer.trackAllConsumersDone()) {
+            EasyHppc.iterateChunks(LongArrayList.from(), 2, MockConsumer.expecting());
+            EasyHppc.iterateChunks(LongArrayList.from(1), 2, MockConsumer.expecting(LongArrayList.from(1)));
+            EasyHppc.iterateChunks(LongArrayList.from(1, 2), 2, MockConsumer.expecting(LongArrayList.from(1, 2)));
+            EasyHppc.iterateChunks(LongArrayList.from(1, 2, 3), 2,
+                                   MockConsumer.expecting(LongArrayList.from(1, 2), LongArrayList.from(3)));
+            EasyHppc.iterateChunks(LongArrayList.from(1, 2, 3, 4), 2,
+                                   MockConsumer.expecting(LongArrayList.from(1, 2), LongArrayList.from(3, 4)));
+        }
     }
 
     @Test

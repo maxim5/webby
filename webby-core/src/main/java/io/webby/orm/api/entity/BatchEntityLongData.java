@@ -24,14 +24,13 @@ public record BatchEntityLongData(@NotNull List<Column> columns,
     @Override
     public void provideBatchValues(@NotNull PreparedStatement statement,
                                    @Nullable Contextual<?, LongArrayList> contextual) throws SQLException {
-        LongArrayList arrayList = EasyHppc.toArrayList(values);
-        for (int dataSize = dataSize(), i = 0; i < arrayList.size(); i += dataSize) {
-            LongArrayList slice = EasyHppc.slice(arrayList, i, i + dataSize);
-            QueryRunner.setPreparedParams(statement, slice);
+        int dataSize = dataSize();
+        EasyHppc.iterateChunks(values, dataSize, chunk -> {
+            QueryRunner.setPreparedParams(statement, chunk);
             if (contextual != null) {
-                contextual.resolveQueryArgs(slice).setPreparedParams(statement, dataSize);
+                contextual.resolveQueryArgs(chunk).setPreparedParams(statement, dataSize);
             }
             statement.addBatch();
-        }
+        });
     }
 }
