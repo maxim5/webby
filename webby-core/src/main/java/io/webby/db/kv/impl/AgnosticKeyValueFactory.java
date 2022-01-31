@@ -31,27 +31,27 @@ public class AgnosticKeyValueFactory implements KeyValueFactory {
     @Inject
     public AgnosticKeyValueFactory(@NotNull Settings settings, @NotNull InjectorHelper helper) {
         this.helper = helper;
-        delegate = pickFactory(getStorageType(settings.storageSettings()));
+        this.delegate = pickFactory(getDbType(settings.storageSettings()));
     }
 
     @Override
     public @NotNull <K, V> KeyValueDb<K, V> getDb(@NotNull DbOptions<K, V> options) {
-        if (options.storageType() != null) {
-            pickFactory(options.storageType()).getDb(options);
+        if (options.type() != null) {
+            pickFactory(options.type()).getDb(options);
         }
         return delegate.getDb(options);
     }
 
-    public <F extends InternalKeyValueFactory> @NotNull F getInternalFactory(@NotNull StorageType storageType) {
-        return castAny(pickFactory(storageType));
+    public <F extends InternalKeyValueFactory> @NotNull F getInternalFactory(@NotNull DbType type) {
+        return castAny(pickFactory(type));
     }
 
-    private static @NotNull StorageType getStorageType(@NotNull StorageSettings storage) {
+    private static @NotNull DbType getDbType(@NotNull StorageSettings storage) {
         return storage.isKeyValueEnabled() ? storage.keyValueSettingsOrDie().type() : KeyValueSettings.DEFAULT_TYPE;
     }
 
-    private @NotNull InternalKeyValueFactory pickFactory(@NotNull StorageType storageType) {
-        Class<? extends InternalKeyValueFactory> factoryClass = switch (storageType) {
+    private @NotNull InternalKeyValueFactory pickFactory(@NotNull DbType type) {
+        Class<? extends InternalKeyValueFactory> factoryClass = switch (type) {
             case CHRONICLE_MAP -> ChronicleFactory.class;
             case HALO_DB -> HaloDbFactory.class;
             case JAVA_MAP -> JavaMapDbFactory.class;

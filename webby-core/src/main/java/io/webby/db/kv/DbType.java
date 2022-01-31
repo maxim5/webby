@@ -1,6 +1,6 @@
 package io.webby.db.kv;
 
-public enum StorageType {
+public enum DbType {
     CHRONICLE_MAP,
     HALO_DB,
     JAVA_MAP,
@@ -15,5 +15,5 @@ public enum StorageType {
     ROCKS_DB,
     SQL_DB,
     SWAY_DB,
-    TUPL
+    TUPL,
 }

@@ -14,8 +14,8 @@ import io.webby.common.CommonModule;
 import io.webby.common.GuiceCompleteEvent;
 import io.webby.db.DbModule;
 import io.webby.db.kv.KeyValueSettings;
-import io.webby.db.kv.StorageType;
-import io.webby.db.kv.impl.KeyValueStorageTypeDetector;
+import io.webby.db.kv.DbType;
+import io.webby.db.kv.impl.KeyValueDbTypeDetector;
 import io.webby.netty.NettyBootstrap;
 import io.webby.netty.NettyModule;
 import io.webby.orm.OrmModule;
@@ -98,13 +98,13 @@ public class Webby {
         private void validateKeyValues() {
             if (kvSettings() == KeyValueSettings.AUTO_DETECT) {
                 failIf(settings.isProdMode(), "Auto-detect can't be used in production. Set the storage type explicitly");
-                StorageType autoStorageType = KeyValueStorageTypeDetector.autoDetectStorageTypeFromClasspath();
-                if (autoStorageType != null) {
-                    updateKvType(autoStorageType);
+                DbType autoDbType = KeyValueDbTypeDetector.autoDetectDbTypeFromClasspath();
+                if (autoDbType != null) {
+                    updateKvType(autoDbType);
                     log.at(Level.WARNING).log("Key-value storage auto-detect configured, " +
                                               "using type from classpath: %s", currentType());
                 } else if (storageSettings.isSqlEnabled()) {
-                    updateKvType(StorageType.SQL_DB);
+                    updateKvType(DbType.SQL_DB);
                     log.at(Level.WARNING).log("Key-value storage auto-detect configured. Using %s", currentType());
                 } else {
                     updateKvType(KeyValueSettings.DEFAULT_TYPE);
@@ -113,17 +113,17 @@ public class Webby {
                 }
             }
 
-            if (currentType() == StorageType.JAVA_MAP && settings.isProdMode()) {
+            if (currentType() == DbType.JAVA_MAP && settings.isProdMode()) {
                 log.at(Level.WARNING).log("Configured in-memory key-value storage in production: %s", currentType());
             }
-            if (currentType() == StorageType.SQL_DB && settings.isProdMode()) {
+            if (currentType() == DbType.SQL_DB && settings.isProdMode()) {
                 log.at(Level.WARNING).log("Configured inefficient key-value storage in production: %s", currentType());
             }
-            if (currentType() != StorageType.JAVA_MAP && currentType() != StorageType.SQL_DB) {
+            if (currentType() != DbType.JAVA_MAP && currentType() != DbType.SQL_DB) {
                 validateDirectory(kvSettings().path(), "storage path", settings.isDevMode());
             }
 
-            if (currentType() == StorageType.SQL_DB && !storageSettings.isSqlEnabled()) {
+            if (currentType() == DbType.SQL_DB && !storageSettings.isSqlEnabled()) {
                 log.at(Level.WARNING).log("SQL disabled. Ignoring the configured type: %s. " +
                                           "Using default instead", currentType());
                 updateKvType(KeyValueSettings.DEFAULT_TYPE);
@@ -134,13 +134,13 @@ public class Webby {
             return storageSettings.keyValueSettingsOrDie();
         }
 
-        private @NotNull StorageType currentType() {
+        private @NotNull DbType currentType() {
             return kvSettings().type();
         }
 
-        private void updateKvType(@NotNull StorageType storageType) {
+        private void updateKvType(@NotNull DbType type) {
             if (storageSettings.isKeyValueEnabled()) {
-                storageSettings.enableKeyValue(storageSettings.keyValueSettingsOrDie().with(storageType));
+                storageSettings.enableKeyValue(storageSettings.keyValueSettingsOrDie().with(type));
             }
         }
     }

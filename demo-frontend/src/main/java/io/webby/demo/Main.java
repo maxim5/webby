@@ -4,7 +4,7 @@ import com.google.common.flogger.FluentLogger;
 import io.webby.Webby;
 import io.webby.app.AppSettings;
 import io.webby.db.kv.KeyValueSettings;
-import io.webby.db.kv.StorageType;
+import io.webby.db.kv.DbType;
 import io.webby.db.sql.SqlSettings;
 import io.webby.demo.templates.JteExample;
 import io.webby.netty.NettyBootstrap;
@@ -40,8 +40,8 @@ public class Main {
         settings.setProperty("pebble.view.paths", DevPaths.DEMO_WEB + "pebble");
         settings.setProperty("db.mapdb.checksum.enabled", false);
         settings.storageSettings()
-                .enableKeyValue(KeyValueSettings.of(StorageType.MAP_DB, DevPaths.DEMO_HOME + ".data/mapdb"))
-                .enableSql(SqlSettings.inMemoryNotForProduction(Engine.H2));
+            .enableKeyValue(KeyValueSettings.of(DbType.MAP_DB, DevPaths.DEMO_HOME + ".data/mapdb"))
+            .enableSql(SqlSettings.inMemoryNotForProduction(Engine.H2));
         return settings;
     }
 }

@@ -49,9 +49,9 @@ public class KeyValueDbIntegrationTest {
     @RegisterExtension private static final SqlDbSetupExtension SQL = SqlDbSetupExtension.fromProperties();
 
     @ParameterizedTest
-    @EnumSource(StorageType.class)
-    public void simple_operations_fixed_size_key(StorageType storageType) {
-        KeyValueFactory dbFactory = setupFactory(storageType);
+    @EnumSource(DbType.class)
+    public void simple_operations_fixed_size_key(DbType dbType) {
+        KeyValueFactory dbFactory = setupFactory(dbType);
 
         try (KeyValueDb<Long, String> db = dbFactory.getDb(DbOptions.of("foo", Long.class, String.class))) {
             assertEqualsTo(db, Map.of());
@@ -91,9 +91,9 @@ public class KeyValueDbIntegrationTest {
     }
 
     @ParameterizedTest
-    @EnumSource(StorageType.class)
-    public void simple_operations_variable_size_key(StorageType storageType) {
-        KeyValueFactory dbFactory = setupFactory(storageType);
+    @EnumSource(DbType.class)
+    public void simple_operations_variable_size_key(DbType dbType) {
+        KeyValueFactory dbFactory = setupFactory(dbType);
 
         try (KeyValueDb<String, Integer> db = dbFactory.getDb(DbOptions.of("foo", String.class, Integer.class))) {
             assertEqualsTo(db, Map.of());
@@ -133,9 +133,9 @@ public class KeyValueDbIntegrationTest {
     }
 
     @ParameterizedTest
-    @EnumSource(StorageType.class)
-    public void bulk_operations(StorageType storageType) {
-        KeyValueFactory dbFactory = setupFactory(storageType);
+    @EnumSource(DbType.class)
+    public void bulk_operations(DbType dbType) {
+        KeyValueFactory dbFactory = setupFactory(dbType);
 
         try (KeyValueDb<String, String> db = dbFactory.getDb(DbOptions.of("foo", String.class, String.class))) {
             db.putAll(Map.of());
@@ -191,9 +191,9 @@ public class KeyValueDbIntegrationTest {
     }
 
     @ParameterizedTest
-    @EnumSource(StorageType.class)
-    public void maps_isolation(StorageType storageType) {
-        KeyValueFactory dbFactory = setupFactory(storageType);
+    @EnumSource(DbType.class)
+    public void maps_isolation(DbType dbType) {
+        KeyValueFactory dbFactory = setupFactory(dbType);
 
         try (KeyValueDb<String, String> db1 = dbFactory.getDb(DbOptions.of("foo", String.class, String.class))) {
             try (KeyValueDb<String, String> db2 = dbFactory.getDb(DbOptions.of("bar", String.class, String.class))) {
@@ -217,9 +217,9 @@ public class KeyValueDbIntegrationTest {
     }
 
     @ParameterizedTest
-    @EnumSource(StorageType.class)
-    public void serialize_session(StorageType storageType) {
-        Injector injector = setup(storageType);
+    @EnumSource(DbType.class)
+    public void serialize_session(DbType dbType) {
+        Injector injector = setup(dbType);
         SessionManager sessionManager = injector.getInstance(SessionManager.class);
         KeyValueFactory dbFactory = injector.getInstance(KeyValueFactory.class);
 
@@ -234,9 +234,9 @@ public class KeyValueDbIntegrationTest {
     }
 
     @ParameterizedTest
-    @EnumSource(StorageType.class)
-    public void multi_session_sql_compatible(StorageType storageType) {
-        KeyValueFactory dbFactory = setupFactory(storageType);
+    @EnumSource(DbType.class)
+    public void multi_session_sql_compatible(DbType dbType) {
+        KeyValueFactory dbFactory = setupFactory(dbType);
 
         try (KeyValueDb<Long, Session> db = dbFactory.getDb(DbOptions.of(Session.DB_NAME, Long.class, Session.class))) {
             runMultiTest(db, 123L, Session.fromRequest(123, getEx("/foo")));
@@ -244,9 +244,9 @@ public class KeyValueDbIntegrationTest {
     }
 
     @ParameterizedTest
-    @EnumSource(StorageType.class)
-    public void multi_session_forced_key_value(StorageType storageType) {
-        KeyValueFactory dbFactory = setupFactory(storageType);
+    @EnumSource(DbType.class)
+    public void multi_session_forced_key_value(DbType dbType) {
+        KeyValueFactory dbFactory = setupFactory(dbType);
 
         try (KeyValueDb<Integer, Session> db = dbFactory.getDb(DbOptions.of("my-sessions", Integer.class, Session.class))) {
             runMultiTest(db,
@@ -258,9 +258,9 @@ public class KeyValueDbIntegrationTest {
     }
 
     @ParameterizedTest
-    @EnumSource(StorageType.class)
-    public void multi_default_user_sql_compatible(StorageType storageType) {
-        KeyValueFactory dbFactory = setupFactory(storageType);
+    @EnumSource(DbType.class)
+    public void multi_default_user_sql_compatible(DbType dbType) {
+        KeyValueFactory dbFactory = setupFactory(dbType);
 
         try (KeyValueDb<Long, DefaultUser> db = dbFactory.getDb(DbOptions.of(UserModel.DB_NAME, Long.class, DefaultUser.class))) {
             runMultiTest(db, 777L, TestingModels.newUserNow(777, UserAccess.Simple));
@@ -268,9 +268,9 @@ public class KeyValueDbIntegrationTest {
     }
 
     @ParameterizedTest
-    @EnumSource(StorageType.class)
-    public void multi_default_user_forced_key_value(StorageType storageType) {
-        KeyValueFactory dbFactory = setupFactory(storageType);
+    @EnumSource(DbType.class)
+    public void multi_default_user_forced_key_value(DbType dbType) {
+        KeyValueFactory dbFactory = setupFactory(dbType);
 
         DbOptions<Long, DefaultUser> options = DbOptions.of("my-users", Long.class, DefaultUser.class);
         try (KeyValueDb<Long, DefaultUser> db = dbFactory.getDb(options)) {
@@ -281,17 +281,17 @@ public class KeyValueDbIntegrationTest {
 
     @Test
     public void internal_db() {
-        AgnosticKeyValueFactory dbFactory = setup(StorageType.JAVA_MAP).getInstance(AgnosticKeyValueFactory.class);
+        AgnosticKeyValueFactory dbFactory = setup(DbType.JAVA_MAP).getInstance(AgnosticKeyValueFactory.class);
 
-        ChronicleFactory chronicleFactory = dbFactory.getInternalFactory(StorageType.CHRONICLE_MAP);
+        ChronicleFactory chronicleFactory = dbFactory.getInternalFactory(DbType.CHRONICLE_MAP);
         ChronicleDb<Long, Long> chronicleDb = chronicleFactory.getInternalDb(DbOptions.of("foo", Long.class, Long.class));
         assertTrue(chronicleDb.isEmpty());
 
-        MapDbFactory mapDbFactory = dbFactory.getInternalFactory(StorageType.MAP_DB);
+        MapDbFactory mapDbFactory = dbFactory.getInternalFactory(DbType.MAP_DB);
         MapDbImpl<Long, Long> mapDb = mapDbFactory.getInternalDb(DbOptions.of("foo", Long.class, Long.class));
         assertTrue(mapDb.isEmpty());
 
-        PalDbFactory palDbFactory = dbFactory.getInternalFactory(StorageType.PAL_DB);
+        PalDbFactory palDbFactory = dbFactory.getInternalFactory(DbType.PAL_DB);
         PalDbImpl<Long, Long> palDb = palDbFactory.getInternalDb(DbOptions.of("foo", Long.class, Long.class));
         assertTrue(palDb.isEmpty());
     }
@@ -401,18 +401,18 @@ public class KeyValueDbIntegrationTest {
         }
     }
 
-    private static @NotNull KeyValueFactory setupFactory(@NotNull StorageType storageType) {
-        return setup(storageType).getInstance(KeyValueFactory.class);
+    private static @NotNull KeyValueFactory setupFactory(@NotNull DbType dbType) {
+        return setup(dbType).getInstance(KeyValueFactory.class);
     }
 
-    private static @NotNull Injector setup(@NotNull StorageType storageType) {
-        TestingProps.assumePropIfSet("test.kv.only_type", storageType.name());
+    private static @NotNull Injector setup(@NotNull DbType dbType) {
+        TestingProps.assumePropIfSet("test.kv.only_type", dbType.name());
 
         AppSettings settings = Testing.defaultAppSettings();
         settings.modelFilter().setPackagesOf(Testing.CORE_MODELS);
         settings.storageSettings()
-                .enableKeyValue(KeyValueSettings.of(storageType, TEMP_DIRECTORY.getCurrentTempDir()))
-                .enableSql(SQL.settings());
+            .enableKeyValue(KeyValueSettings.of(dbType, TEMP_DIRECTORY.getCurrentTempDir()))
+            .enableSql(SQL.settings());
         settings.setProfileMode(false);  // not testing TrackingDbAdapter by default
 
         settings.setProperty("db.chronicle.default.size", 64);
@@ -425,7 +425,7 @@ public class KeyValueDbIntegrationTest {
 
         settings.setProperty("db.redis.port", REDIS.getPort());
 
-        if (storageType == StorageType.SQL_DB) {
+        if (dbType == DbType.SQL_DB) {
             AutoCloseable mockedClock = Mocking.withMockedClock();
             CLOSE_ALL.addCloseable(mockedClock);
         }

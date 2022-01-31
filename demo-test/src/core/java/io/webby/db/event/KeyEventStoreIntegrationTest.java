@@ -8,7 +8,7 @@ import io.webby.app.AppLifetime;
 import io.webby.app.AppSettings;
 import io.webby.common.Lifetime;
 import io.webby.db.kv.KeyValueSettings;
-import io.webby.db.kv.StorageType;
+import io.webby.db.kv.DbType;
 import io.webby.orm.api.Engine;
 import io.webby.testing.Testing;
 import io.webby.testing.TestingProps;
@@ -113,9 +113,9 @@ public class KeyEventStoreIntegrationTest {
     }
 
     @ParameterizedTest
-    @EnumSource(StorageType.class)
-    public void simple_operations(StorageType storageType) {
-        KeyEventStoreFactory factory = setup(storageType).getInstance(KeyEventStoreFactory.class);
+    @EnumSource(DbType.class)
+    public void simple_operations(DbType dbType) {
+        KeyEventStoreFactory factory = setup(dbType).getInstance(KeyEventStoreFactory.class);
 
         try (KeyEventStore<Integer, String> store = factory.getEventStore(EventStoreOptions.of("ops", Integer.class, String.class))) {
             assertCleanState(store);
@@ -149,11 +149,11 @@ public class KeyEventStoreIntegrationTest {
     }
 
     @ParameterizedTest
-    @EnumSource(StorageType.class)
-    public void many_events_per_key(StorageType storageType) {
-        KeyEventStoreFactory factory = setup(storageType).getInstance(KeyEventStoreFactory.class);
+    @EnumSource(DbType.class)
+    public void many_events_per_key(DbType dbType) {
+        KeyEventStoreFactory factory = setup(dbType).getInstance(KeyEventStoreFactory.class);
 
-        int maxSize = storageType == StorageType.SQL_DB && SQL.engine() == Engine.MySQL ? 2000 : Integer.MAX_VALUE;
+        int maxSize = dbType == DbType.SQL_DB && SQL.engine() == Engine.MySQL ? 2000 : Integer.MAX_VALUE;
         int size = Math.min(100000, maxSize);
         int flushEvery = size / 10;
 
@@ -176,9 +176,9 @@ public class KeyEventStoreIntegrationTest {
     }
 
     @ParameterizedTest
-    @EnumSource(StorageType.class)
-    public void lifetime_and_persistence(StorageType storageType) {
-        Injector injector = setup(storageType);
+    @EnumSource(DbType.class)
+    public void lifetime_and_persistence(DbType dbType) {
+        Injector injector = setup(dbType);
         Lifetime.Definition lifetime = injector.getInstance(AppLifetime.class).getLifetime();
         KeyEventStoreFactory factory = injector.getInstance(KeyEventStoreFactory.class);
 
@@ -201,13 +201,13 @@ public class KeyEventStoreIntegrationTest {
         return Testing.testStartup(settings);
     }
 
-    private static @NotNull Injector setup(@NotNull StorageType storageType) {
-        TestingProps.assumePropIfSet("test.kv.only_type", storageType.name());
+    private static @NotNull Injector setup(@NotNull DbType dbType) {
+        TestingProps.assumePropIfSet("test.kv.only_type", dbType.name());
 
         AppSettings settings = Testing.defaultAppSettings();
         settings.modelFilter().setPackagesOf(Testing.CORE_MODELS);
         settings.storageSettings()
-                .enableKeyValue(KeyValueSettings.of(storageType, TEMP_DIRECTORY.getCurrentTempDir()))
+                .enableKeyValue(KeyValueSettings.of(dbType, TEMP_DIRECTORY.getCurrentTempDir()))
                 .enableSql(SQL.settings());
         settings.setProfileMode(false);  // not testing TrackingDbAdapter by default
 

@@ -7,7 +7,7 @@ import org.jetbrains.annotations.Nullable;
 public record DbOptions<K, V>(@NotNull String name,
                               @NotNull Class<K> key,
                               @NotNull Class<V> value,
-                              @Nullable StorageType storageType,
+                              @Nullable DbType type,
                               @Nullable Codec<K> keyCodec,
                               @Nullable Codec<V> valueCodec) {
     public static <K, V> @NotNull DbOptions<K, V> of(@NotNull String name,
@@ -16,15 +16,15 @@ public record DbOptions<K, V>(@NotNull String name,
         return new DbOptions<>(name, key, value, null, null, null);
     }
 
-    public @NotNull DbOptions<K, V> withCustomStorageType(@NotNull StorageType type) {
+    public @NotNull DbOptions<K, V> withCustomType(@NotNull DbType type) {
         return new DbOptions<>(name, key, value, type, keyCodec, valueCodec);
     }
 
     public @NotNull DbOptions<K, V> withCustomKeyCodec(@NotNull Codec<K> codec) {
-        return new DbOptions<>(name, key, value, storageType, codec, valueCodec);
+        return new DbOptions<>(name, key, value, type, codec, valueCodec);
     }
 
     public @NotNull DbOptions<K, V> withCustomValueCodec(@NotNull Codec<V> codec) {
-        return new DbOptions<>(name, key, value, storageType, keyCodec, codec);
+        return new DbOptions<>(name, key, value, type, keyCodec, codec);
     }
 }
