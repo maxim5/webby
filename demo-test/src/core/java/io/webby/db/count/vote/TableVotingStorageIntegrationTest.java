@@ -103,8 +103,7 @@ public class TableVotingStorageIntegrationTest {
     public void store_batch_one_key_insert_new_key() {
         IntObjectMap<IntHashSet> state = setupTestData(ints(A, Ann, 1));
 
-        storage.storeBatch(newIntObjectMap(A, IntHashSet.from(Ann), B, IntHashSet.from(Bob)),
-                           state);
+        storage.storeBatch(newIntObjectMap(A, IntHashSet.from(Ann), B, IntHashSet.from(Bob)), state);
         assertThat(table.fetchAll()).containsExactly(new UserRateModel(Ann, A, 1),
                                                      new UserRateModel(Bob, B, 1));
         LOGGING.assertNoRecords();
@@ -114,8 +113,7 @@ public class TableVotingStorageIntegrationTest {
     public void store_batch_one_key_delete() {
         IntObjectMap<IntHashSet> state = setupTestData(ints(A, Ann, 1));
 
-        storage.storeBatch(newIntObjectMap(),
-                           state);
+        storage.storeBatch(newIntObjectMap(A, IntHashSet.from()), state);
         assertThat(table.fetchAll()).isEmpty();
         LOGGING.assertNoRecords();
     }
@@ -125,8 +123,7 @@ public class TableVotingStorageIntegrationTest {
         IntObjectMap<IntHashSet> state = setupTestData(ints(A, Ann, 1),
                                                        ints(A, Bob, 1));
 
-        storage.storeBatch(newIntObjectMap(A, IntHashSet.from(Ann, -Bob, Don)),
-                           state);
+        storage.storeBatch(newIntObjectMap(A, IntHashSet.from(Ann, -Bob, Don)), state);
         assertThat(table.fetchAll()).containsExactly(new UserRateModel(Ann, A, 1),
                                                      new UserRateModel(Bob, A, -1),
                                                      new UserRateModel(Don, A, 1));
@@ -138,8 +135,7 @@ public class TableVotingStorageIntegrationTest {
         IntObjectMap<IntHashSet> state = setupTestData(ints(A, Ann, 1),
                                                        ints(B, Bob, -1));
 
-        storage.storeBatch(newIntObjectMap(A, IntHashSet.from(-Ann), B, IntHashSet.from(Bob)),
-                           state);
+        storage.storeBatch(newIntObjectMap(A, IntHashSet.from(-Ann), B, IntHashSet.from(Bob)), state);
         assertThat(table.fetchAll()).containsExactly(new UserRateModel(Ann, A, -1),
                                                      new UserRateModel(Bob, B, 1));
         LOGGING.assertNoRecords();
@@ -150,8 +146,7 @@ public class TableVotingStorageIntegrationTest {
         IntObjectMap<IntHashSet> state = setupTestData(ints(A, Ann, 1),
                                                        ints(A, Bob, 1));
 
-        storage.storeBatch(newIntObjectMap(A, IntHashSet.from(-Ann), B, IntHashSet.from(Bob)),
-                           state);
+        storage.storeBatch(newIntObjectMap(A, IntHashSet.from(-Ann), B, IntHashSet.from(Bob)), state);
         assertThat(table.fetchAll()).containsExactly(new UserRateModel(Ann, A, -1),
                                                      new UserRateModel(Bob, B, 1));
         LOGGING.assertNoRecords();
@@ -162,21 +157,9 @@ public class TableVotingStorageIntegrationTest {
         IntObjectMap<IntHashSet> state = setupTestData(ints(A, Ann, 1),
                                                        ints(B, Bob, -1));
 
-        storage.storeBatch(newIntObjectMap(),
-                           state);
+        storage.storeBatch(newIntObjectMap(A, IntHashSet.from(), B, IntHashSet.from()), state);
         assertThat(table.fetchAll()).isEmpty();
         LOGGING.assertNoRecords();
-    }
-
-    @Test
-    public void store_batch_out_of_sync_one_key_changed_cache_skips() {
-        IntObjectMap<IntHashSet> state = setupTestData(ints(A, Ann, 1));
-        overwriteTestData(ints(A, Ann, -1));
-
-        storage.storeBatch(newIntObjectMap(A, IntHashSet.from(Ann)),
-                           state);
-        assertThat(table.fetchAll()).containsExactly(new UserRateModel(Ann, A, -1));    // skips
-        assertThat(LOGGING.logRecordsContaining("key=1000 added=[-10] removed=[10]")).isNotEmpty();
     }
 
     @Test
@@ -184,22 +167,38 @@ public class TableVotingStorageIntegrationTest {
         IntObjectMap<IntHashSet> state = setupTestData(ints(A, Ann, 1));
         overwriteTestData(ints(A, Ann, -1));
 
-        storage.storeBatch(newIntObjectMap(A, IntHashSet.from(-Ann)),
-                           state);
-        assertThat(table.fetchAll()).containsExactly(new UserRateModel(Ann, A, -1));    // overwrites
+        storage.storeBatch(newIntObjectMap(A, IntHashSet.from(Ann)), state);
+        assertThat(table.fetchAll()).containsExactly(new UserRateModel(Ann, A, 1));     // overwrites
         assertThat(LOGGING.logRecordsContaining("key=1000 added=[-10] removed=[10]")).isNotEmpty();
     }
 
-    // TODO[normal]: out-of-sync changes not processed correctly
+    @Test
+    public void store_batch_out_of_sync_one_key_changed_cache_matches() {
+        IntObjectMap<IntHashSet> state = setupTestData(ints(A, Ann, 1));
+        overwriteTestData(ints(A, Ann, -1));
+
+        storage.storeBatch(newIntObjectMap(A, IntHashSet.from(-Ann)), state);
+        assertThat(table.fetchAll()).containsExactly(new UserRateModel(Ann, A, -1));    // same as before
+        assertThat(LOGGING.logRecordsContaining("key=1000 added=[-10] removed=[10]")).isNotEmpty();
+    }
 
     @Test
     public void store_batch_out_of_sync_one_key_deleted_cache_overwrites() {
         IntObjectMap<IntHashSet> state = setupTestData(ints(A, Ann, 1));
         overwriteTestData();
 
-        storage.storeBatch(newIntObjectMap(A, IntHashSet.from(-Ann)),
-                           state);
-        // assertThat(table.fetchAll()).containsExactly(new UserRateModel(Ann, A, -1));    // overwrites
+        storage.storeBatch(newIntObjectMap(A, IntHashSet.from(-Ann)), state);
+        assertThat(table.fetchAll()).containsExactly(new UserRateModel(Ann, A, -1));    // overwrites
+        assertThat(LOGGING.logRecordsContaining("key=1000 added=[] removed=[10]")).isNotEmpty();
+    }
+
+    @Test
+    public void store_batch_out_of_sync_one_key_deleted_cache_matches() {
+        IntObjectMap<IntHashSet> state = setupTestData(ints(A, Ann, 1));
+        overwriteTestData();
+
+        storage.storeBatch(newIntObjectMap(A, IntHashSet.from()), state);
+        assertThat(table.fetchAll()).isEmpty();                                         // matches
         assertThat(LOGGING.logRecordsContaining("key=1000 added=[] removed=[10]")).isNotEmpty();
     }
 
@@ -208,9 +207,28 @@ public class TableVotingStorageIntegrationTest {
         IntObjectMap<IntHashSet> state = setupTestData();
         overwriteTestData(ints(A, Ann, 1));
 
-        storage.storeBatch(newIntObjectMap(A, IntHashSet.from(-Ann)),
-                           state);
-        // assertThat(table.fetchAll()).containsExactly(new UserRateModel(Ann, A, -1));    // overwrites
+        storage.storeBatch(newIntObjectMap(A, IntHashSet.from(-Ann)), state);
+        assertThat(table.fetchAll()).containsExactly(new UserRateModel(Ann, A, -1));    // overwrites
+        assertThat(LOGGING.logRecordsContaining("key=1000 added=[10] removed=[]")).isNotEmpty();
+    }
+
+    @Test
+    public void store_batch_out_of_sync_one_key_inserted_cache_matches() {
+        IntObjectMap<IntHashSet> state = setupTestData();
+        overwriteTestData(ints(A, Ann, 1));
+
+        storage.storeBatch(newIntObjectMap(A, IntHashSet.from(Ann)), state);
+        assertThat(table.fetchAll()).containsExactly(new UserRateModel(Ann, A, 1));     // matches
+        assertThat(LOGGING.logRecordsContaining("key=1000 added=[10] removed=[]")).isNotEmpty();
+    }
+
+    @Test
+    public void store_batch_out_of_sync_one_key_inserted_cache_deletes() {
+        IntObjectMap<IntHashSet> state = setupTestData();
+        overwriteTestData(ints(A, Ann, 1));
+
+        storage.storeBatch(newIntObjectMap(A, IntHashSet.from()), state);
+        assertThat(table.fetchAll()).isEmpty();                                         // overwrites
         assertThat(LOGGING.logRecordsContaining("key=1000 added=[10] removed=[]")).isNotEmpty();
     }
 

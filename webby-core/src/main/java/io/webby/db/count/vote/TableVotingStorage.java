@@ -8,14 +8,21 @@ import com.google.common.flogger.FluentLogger;
 import io.webby.common.SystemProperties;
 import io.webby.orm.api.BaseTable;
 import io.webby.orm.api.QueryException;
+import io.webby.orm.api.SystemInfo;
 import io.webby.orm.api.entity.BatchEntityIntData;
 import io.webby.orm.api.entity.EntityIntData;
 import io.webby.orm.api.query.*;
+import io.webby.util.base.EasyPrimitives.OptionalBool;
 import io.webby.util.hppc.EasyHppc;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
+import org.jetbrains.annotations.VisibleForTesting;
 
+import java.time.Instant;
+import java.time.LocalDateTime;
+import java.time.ZoneId;
 import java.util.List;
+import java.util.concurrent.atomic.AtomicReference;
 import java.util.function.Consumer;
 import java.util.logging.Level;
 
@@ -25,6 +32,8 @@ import static io.webby.orm.api.query.Shortcuts.*;
 public class TableVotingStorage implements VotingStorage {
     private static final FluentLogger log = FluentLogger.forEnclosingClass();
     private static final int CHUNK_SIZE = SystemProperties.DEFAULT_SQL_MAX_PARAMS;
+
+    private final AtomicReference<@Nullable Instant> snapshotTimeRef = new AtomicReference<>();
 
     private final BaseTable<?> table;
     private final Column keyColumn;
@@ -39,6 +48,7 @@ public class TableVotingStorage implements VotingStorage {
         this.keyColumn = keyColumn;
         this.actorColumn = actorColumn;
         this.valueColumn = valueColumn;
+        snapshotDb();
     }
 
     @Override
@@ -96,7 +106,10 @@ public class TableVotingStorage implements VotingStorage {
     @Override
     public void storeBatch(@NotNull IntObjectMap<IntHashSet> curr, @Nullable IntObjectMap<IntHashSet> prev) {
         assert prev == null || checkStorageConsistency(this, curr, prev) : "This is Impossible?!";
-
+        if (prev != null && isDbChanged() != OptionalBool.FALSE) {
+            log.at(Level.INFO).log("The table probably changed externally. Ignoring the prev state");
+            prev = null;
+        }
         if (prev == null) {
             prev = loadBatch(curr.keys());
         }
@@ -131,6 +144,8 @@ public class TableVotingStorage implements VotingStorage {
         } catch (QueryException e) {
             log.at(Level.SEVERE).withCause(e).log("Failed to store batch. Fall back to ultra-safe method");
             storeBatchUltraSafe(curr);
+        } finally {
+            snapshotDb();
         }
     }
 
@@ -213,6 +228,29 @@ public class TableVotingStorage implements VotingStorage {
                     set.add(Math.abs(cursor.value));
                 }
             }
+        }
+    }
+
+    private void snapshotDb() {
+        snapshotTimeRef.set(getLastUpdateFromDb());
+    }
+
+    @VisibleForTesting
+    @NotNull OptionalBool isDbChanged() {
+        Instant lastUpdated = getLastUpdateFromDb();
+        Instant snapshot = snapshotTimeRef.get();
+        return lastUpdated == null || snapshot == null ?
+            OptionalBool.UNKNOWN :
+            OptionalBool.from(lastUpdated.isAfter(snapshot));
+    }
+
+    @VisibleForTesting
+    @Nullable Instant getLastUpdateFromDb() {
+        try {
+            LocalDateTime lastUpdateTime = SystemInfo.getLastUpdateTime(table);
+            return lastUpdateTime != null ? lastUpdateTime.atZone(ZoneId.systemDefault()).toInstant() : null;
+        } catch (UnsupportedOperationException e) {
+            return null;
         }
     }
 

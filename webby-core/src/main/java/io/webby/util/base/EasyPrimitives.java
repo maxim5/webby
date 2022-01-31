@@ -1,5 +1,6 @@
 package io.webby.util.base;
 
+import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.Arrays;
@@ -8,7 +9,15 @@ public class EasyPrimitives {
     public enum OptionalBool {
         TRUE,
         FALSE,
-        UNKNOWN,
+        UNKNOWN;
+
+        public static @NotNull OptionalBool from(boolean bool) {
+            return bool ? TRUE : FALSE;
+        }
+
+        public static @NotNull OptionalBool fromNullable(@Nullable Boolean bool) {
+            return bool == null ? UNKNOWN : from(bool);
+        }
     }
 
     public static class MutableBool {
