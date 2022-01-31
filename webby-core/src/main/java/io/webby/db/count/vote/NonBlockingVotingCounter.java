@@ -114,7 +114,7 @@ public class NonBlockingVotingCounter implements VotingCounter {
     }
 
     private void getOrLoadForKeys(@NotNull IntContainer keys, @NotNull IntObjectProcedure<VoteSet> consumer) {
-        IntHashSet keysToLoad = new IntHashSet();
+        IntArrayList keysToLoad = new IntArrayList();
         for (IntCursor cursor : keys) {
             VoteSet value = cache.get(cursor.value);
             if (value != null) {
