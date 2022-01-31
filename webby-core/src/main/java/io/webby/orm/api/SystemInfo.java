@@ -22,7 +22,8 @@ public class SystemInfo {
 
         return switch (table.engine()) {
             case MySQL -> table.runner().runAndGetString(HardcodedSelectQuery.of("SELECT DATABASE()"));
-            case SQLite -> table.runner().runAndGetString(HardcodedSelectQuery.of("SELECT name FROM pragma_database_list LIMIT 1"));
+            case SQLite ->
+                table.runner().runAndGetString(HardcodedSelectQuery.of("SELECT name FROM pragma_database_list LIMIT 1"));
             default -> throw new UnsupportedOperationException("Failed to get the current database in " + table.engine());
         };
     }
@@ -35,7 +36,9 @@ public class SystemInfo {
                     FROM   information_schema.tables
                     WHERE TABLE_SCHEMA IN (SELECT DATABASE()) AND TABLE_NAME = ?
                 """;
-                yield (LocalDateTime) table.runner().runAndGet(HardcodedSelectQuery.of(sql, Args.of(table.meta().sqlTableName())));
+                yield (LocalDateTime) table.runner().runAndGet(
+                    HardcodedSelectQuery.of(sql, Args.of(table.meta().sqlTableName()))
+                );
             }
             default -> throw new UnsupportedOperationException("Failed to get the last update time in " + table.engine());
         };
