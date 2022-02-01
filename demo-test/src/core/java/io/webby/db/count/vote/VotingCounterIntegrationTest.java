@@ -3,7 +3,9 @@ package io.webby.db.count.vote;
 import com.carrotsearch.hppc.*;
 import com.carrotsearch.hppc.cursors.IntIntCursor;
 import com.carrotsearch.hppc.cursors.IntObjectCursor;
+import com.google.common.collect.HashBasedTable;
 import com.google.common.eventbus.EventBus;
+import com.google.common.primitives.Ints;
 import com.google.mu.util.stream.BiStream;
 import io.webby.db.StorageType;
 import io.webby.db.count.StoreChangedEvent;
@@ -19,8 +21,7 @@ import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.EnumSource;
 
 import java.io.IOException;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 import static io.webby.db.count.vote.Vote.none;
 import static io.webby.db.count.vote.Vote.votes;
@@ -29,6 +30,7 @@ import static io.webby.testing.AssertPrimitives.assertInts;
 import static io.webby.testing.AssertPrimitives.assertIntsTrimmed;
 import static io.webby.testing.TestingPrimitives.newIntMap;
 import static io.webby.testing.TestingPrimitives.newIntObjectMap;
+import static java.util.Objects.requireNonNull;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
 @Tag("sql")
@@ -554,6 +556,65 @@ public class VotingCounterIntegrationTest {
                           Bob, votes(+A, -B));
         assertStorage(StorageState.of(A, IntHashSet.from(+Ann, +Bob),
                                       B, IntHashSet.from(-Bob)));
+    }
+
+    @Tag("slow")
+    @ParameterizedTest
+    @EnumSource(Scenario.class)
+    public void stress_test(Scenario scenario) throws IOException {
+        int users = 10;
+        int keys = 30;
+        int num = 10000;
+        double initFlushProb = 0.5, flushProb = 0.5;
+        Random random = new Random(0);
+
+        HashBasedTable<Integer, Integer, Integer> expectedVotes = HashBasedTable.create();  // key, user -> {+1, 0, -1}
+        setup(scenario, StorageState.EMPTY);
+
+        for (int i = 0; i < num; i++) {
+            // cast a vote
+            {
+                int user = random.nextInt(users) + 1;
+                int key = random.nextInt(keys) + 1;
+                boolean vote = random.nextBoolean();
+
+                int current = expectedVotes.contains(key, user) ? requireNonNull(expectedVotes.get(key, user)) : 0;
+                expectedVotes.put(key, user, Ints.constrainToRange(current + (vote ? 1 : -1), -1, 1));
+                int sum = expectedVotes.row(key).values().stream().mapToInt(x -> x).sum();
+
+                if (vote) {
+                    assertEquals(sum, counter.increment(key, user));
+                } else {
+                    assertEquals(sum, counter.decrement(key, user));
+                }
+            }
+
+            // assert votes
+            for (Integer voter : expectedVotes.columnKeySet()) {
+                Map<Integer, Integer> expectedColumn = expectedVotes.column(voter);
+                IntIntMap actualVotes = counter.getVotes(EasyHppc.fromJavaIterableInt(expectedColumn.keySet()), voter);
+                assertInts(actualVotes, expectedColumn);
+            }
+
+            // assert counts
+            IntIntMap counts = counter.estimateCounts(EasyHppc.fromJavaIterableInt(expectedVotes.rowKeySet()));
+            for (IntIntCursor cursor : counts) {
+                int sum = expectedVotes.row(cursor.key).values().stream().mapToInt(x -> x).sum();
+                assertEquals(sum, cursor.value);
+            }
+
+            // (maybe) flush
+            if (random.nextDouble() < flushProb) {
+                // long start = System.currentTimeMillis();
+                counter.flush();
+                // long time = System.currentTimeMillis() - start;
+                flushProb = flushProb / 2;
+                if (flushProb < 0.001) {
+                    flushProb = initFlushProb;
+                }
+                // System.out.println(flushProb + " " + i + " -> " + time + " ms");
+            }
+        }
     }
 
     private void assertCountEstimates(int... expected) {
