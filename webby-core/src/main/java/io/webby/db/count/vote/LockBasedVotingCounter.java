@@ -11,6 +11,7 @@ import org.jetbrains.annotations.NotNull;
 import javax.annotation.concurrent.ThreadSafe;
 import java.util.concurrent.locks.ReadWriteLock;
 import java.util.concurrent.locks.ReentrantReadWriteLock;
+import java.util.stream.IntStream;
 
 @ThreadSafe
 public class LockBasedVotingCounter implements VotingCounter {
@@ -126,7 +127,7 @@ public class LockBasedVotingCounter implements VotingCounter {
         try {
             IntHashSet actors = getOrLoadForKey(key);
             if (!counters.containsKey(key)) {
-                counters.put(key, countActors(actors));
+                counters.put(key, countVotes(actors));
             }
             if (actors.remove(-actor) || actors.add(actor)) {
                 return counters.addTo(key, delta);
@@ -148,19 +149,11 @@ public class LockBasedVotingCounter implements VotingCounter {
 
     private static @NotNull IntIntHashMap loadFreshCountsSlow(@NotNull VotingStorage store) {
         IntIntHashMap result = new IntIntHashMap();
-        store.loadAll((key, actors) -> result.put(key, countActors(actors)));
+        store.loadAll((key, votes) -> result.put(key, countVotes(votes)));
         return result;
     }
 
-    private static int countActors(@NotNull IntHashSet actors) {
-        int result = 0;
-        for (IntCursor cursor : actors) {
-            if (cursor.value > 0) {
-                result++;
-            } else {
-                result--;
-            }
-        }
-        return result;
+    private static int countVotes(@NotNull IntHashSet votes) {
+        return votes.isEmpty() ? 0 : IntStream.of(votes.keys).map(vote -> Integer.compare(vote, 0)).sum();
     }
 }

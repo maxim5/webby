@@ -14,6 +14,7 @@ import org.jetbrains.annotations.NotNull;
 import javax.annotation.concurrent.ThreadSafe;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicReference;
+import java.util.stream.IntStream;
 
 @ThreadSafe
 public class NonBlockingVotingCounter implements VotingCounter {
@@ -153,6 +154,7 @@ public class NonBlockingVotingCounter implements VotingCounter {
         public VoteSet(@NotNull IntHashSet votes) {
             this.votes = votes;
             this.currentDbSnapshot.set(new IntHashSet(votes));
+            this.counter.inc(votes.isEmpty() ? 0 : IntStream.of(votes.keys).map(vote -> Integer.compare(vote, 0)).sum());
         }
 
         public int count() {
