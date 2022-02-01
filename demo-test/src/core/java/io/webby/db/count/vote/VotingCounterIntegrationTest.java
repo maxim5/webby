@@ -436,7 +436,41 @@ public class VotingCounterIntegrationTest {
 
     @ParameterizedTest
     @EnumSource(Scenario.class)
-    public void existing_state_multi_changes(Scenario scenario) throws IOException {
+    public void existing_state_new_user_same_key(Scenario scenario) throws IOException {
+        setup(scenario, StorageState.of(A, IntHashSet.from(-Ann)));
+
+        assertEquals(-2, counter.decrement(A, Bob));
+        counter.flush();
+
+        assertCountEstimates(A, -2);
+        assertActorValues(Ann, votes(-A),
+                          Bob, votes(-A));
+        assertStorage(StorageState.of(A, IntHashSet.from(-Ann, -Bob)));
+    }
+
+    @ParameterizedTest
+    @EnumSource(Scenario.class)
+    public void existing_state_multi_changes_simple(Scenario scenario) throws IOException {
+        setup(scenario, StorageState.of(A, IntHashSet.from(+Ann),
+                                        B, IntHashSet.from(-Bob)));
+
+        assertEquals(2, counter.increment(A, Bob));
+        assertEquals(3, counter.increment(A, Liz));
+        assertEquals(-2, counter.decrement(B, Ann));
+        assertEquals(-3, counter.decrement(B, Liz));
+        counter.flush();
+
+        assertCountEstimates(A, 3, B, -3, C, 0);
+        assertActorValues(Ann, votes(+A, -B),
+                          Bob, votes(+A, -B),
+                          Liz, votes(+A, -B));
+        assertStorage(StorageState.of(A, IntHashSet.from(+Ann, +Bob, +Liz),
+                                      B, IntHashSet.from(-Ann, -Bob, -Liz)));
+    }
+
+    @ParameterizedTest
+    @EnumSource(Scenario.class)
+    public void existing_state_multi_changes_various(Scenario scenario) throws IOException {
         setup(scenario, StorageState.of(A, IntHashSet.from(-Ann, +Bob),
                                         B, IntHashSet.from(+Ann, +Bob, +Liz)));
 
