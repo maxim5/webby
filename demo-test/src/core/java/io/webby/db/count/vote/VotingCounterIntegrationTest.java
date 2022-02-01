@@ -383,6 +383,18 @@ public class VotingCounterIntegrationTest {
 
     @ParameterizedTest
     @EnumSource(Scenario.class)
+    public void existing_state_no_changes_flush(Scenario scenario) throws IOException {
+        setup(scenario, StorageState.of(A, IntHashSet.from(-Ann)));
+
+        counter.flush();
+
+        assertCountEstimates(A, -1);
+        assertActorValues(Ann, votes(-A));
+        assertStorage(StorageState.of(A, IntHashSet.from(-Ann)));
+    }
+
+    @ParameterizedTest
+    @EnumSource(Scenario.class)
     public void existing_state_undo_inc(Scenario scenario) throws IOException {
         setup(scenario, StorageState.of(A, IntHashSet.from(Ann)));
 
@@ -392,6 +404,59 @@ public class VotingCounterIntegrationTest {
         assertCountEstimates(A, 0);
         assertActorValues(Ann, votes(none(A)));
         assertStorage(StorageState.EMPTY);
+    }
+
+    @ParameterizedTest
+    @EnumSource(Scenario.class)
+    public void existing_state_flip(Scenario scenario) throws IOException {
+        setup(scenario, StorageState.of(A, IntHashSet.from(-Ann)));
+
+        assertEquals(0, counter.increment(A, Ann));
+        assertEquals(1, counter.increment(A, Ann));
+        counter.flush();
+
+        assertCountEstimates(A, 1);
+        assertActorValues(Ann, votes(+A));
+        assertStorage(StorageState.of(A, IntHashSet.from(+Ann)));
+    }
+
+    @ParameterizedTest
+    @EnumSource(Scenario.class)
+    public void existing_state_new_key_changed(Scenario scenario) throws IOException {
+        setup(scenario, StorageState.of(A, IntHashSet.from(-Ann)));
+
+        assertEquals(1, counter.increment(B, Ann));
+        counter.flush();
+
+        assertCountEstimates(A, -1, B, 1);
+        assertActorValues(Ann, votes(-A, +B));
+        assertStorage(StorageState.of(A, IntHashSet.from(-Ann),
+                                      B, IntHashSet.from(+Ann)));
+    }
+
+    @ParameterizedTest
+    @EnumSource(Scenario.class)
+    public void existing_state_multi_changes(Scenario scenario) throws IOException {
+        setup(scenario, StorageState.of(A, IntHashSet.from(-Ann, +Bob),
+                                        B, IntHashSet.from(+Ann, +Bob, +Liz)));
+
+        assertEquals(0, counter.decrement(A, Ann));     // double
+        assertEquals(-1, counter.decrement(A, Liz));    // new
+        assertEquals(-2, counter.decrement(A, Bob));    // undo
+        assertEquals(-3, counter.decrement(A, Bob));    // flip
+        assertEquals(2, counter.decrement(B, Ann));     // undo
+        assertEquals(2, counter.increment(B, Bob));     // double
+        assertEquals(1, counter.increment(C, Bob));     // new
+        assertEquals(0, counter.decrement(C, Liz));     // new
+        counter.flush();
+
+        assertCountEstimates(A, -3, B, 2, C, 0);
+        assertActorValues(Ann, votes(-A, none(B), none(C)),
+                          Bob, votes(-A, +B, +C),
+                          Liz, votes(-A, +B, -C));
+        assertStorage(StorageState.of(A, IntHashSet.from(-Ann, -Bob, -Liz),
+                                      B, IntHashSet.from(+Bob, +Liz),
+                                      C, IntHashSet.from(+Bob, -Liz)));
     }
 
     // TODO[!]: more flush test cases
