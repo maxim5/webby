@@ -4,22 +4,27 @@ import com.carrotsearch.hppc.*;
 import com.carrotsearch.hppc.cursors.IntCursor;
 import com.google.common.eventbus.EventBus;
 import com.google.common.eventbus.Subscribe;
+import com.google.common.flogger.FluentLogger;
 import io.webby.db.count.StoreChangedEvent;
 import io.webby.util.hppc.EasyHppc;
 import org.jetbrains.annotations.NotNull;
 
 import javax.annotation.concurrent.ThreadSafe;
+import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.locks.ReadWriteLock;
 import java.util.concurrent.locks.ReentrantReadWriteLock;
+import java.util.logging.Level;
 import java.util.stream.IntStream;
 
 @ThreadSafe
 public class LockBasedVotingCounter implements VotingCounter {
+    private static final FluentLogger log = FluentLogger.forEnclosingClass();
     private final ReadWriteLock LOCK = new ReentrantReadWriteLock();
 
     private final VotingStorage store;
     private final IntObjectHashMap<IntHashSet> cache;
     private final IntIntHashMap counters;
+    private final AtomicBoolean storeDirty = new AtomicBoolean();
 
     public LockBasedVotingCounter(@NotNull VotingStorage store, @NotNull EventBus eventBus) {
         this.store = store;
@@ -30,7 +35,10 @@ public class LockBasedVotingCounter implements VotingCounter {
 
     @Subscribe
     public void storeChanged(@NotNull StoreChangedEvent event) {
-        // ignore
+        if (store.storeId().equals(event.storeId())) {
+            log.at(Level.INFO).log("External change detected for %s. Marking the store dirty", event.storeId());
+            storeDirty.set(true);
+        }
     }
 
     @Override
@@ -100,6 +108,16 @@ public class LockBasedVotingCounter implements VotingCounter {
             store.storeBatch(cache, null);
         } finally {
             LOCK.readLock().unlock();
+        }
+
+        if (storeDirty.getAndSet(false)) {
+            LOCK.writeLock().lock();
+            try {
+                this.counters.clear();
+                this.counters.putAll(loadFreshCountsSlow(store));
+            } finally {
+                LOCK.writeLock().unlock();
+            }
         }
     }
 

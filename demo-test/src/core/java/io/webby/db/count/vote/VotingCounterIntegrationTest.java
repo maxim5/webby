@@ -363,7 +363,7 @@ public class VotingCounterIntegrationTest {
         assertCountEstimates(A, 1, B, 0, C, -1);
         assertActorValues(Ann, votes(+A, -B, -C),
                           Bob, votes(+B));
-        assertStorage(StorageState.of(A, IntHashSet.from(Ann),
+        assertStorage(StorageState.of(A, IntHashSet.from(+Ann),
                                       B, IntHashSet.from(-Ann, +Bob),
                                       C, IntHashSet.from(-Ann)));
     }
@@ -377,7 +377,7 @@ public class VotingCounterIntegrationTest {
         assertCountEstimates(A, 1, B, -1, C, 0);
         assertActorValues(Ann, votes(+A, none(B), none(C)),
                           Bob, votes(none(A), -B, none(C)));
-        assertStorage(StorageState.of(A, IntHashSet.from(Ann),
+        assertStorage(StorageState.of(A, IntHashSet.from(+Ann),
                                       B, IntHashSet.from(-Bob)));
     }
 
@@ -493,7 +493,68 @@ public class VotingCounterIntegrationTest {
                                       C, IntHashSet.from(+Bob, -Liz)));
     }
 
-    // TODO[!]: more flush test cases
+    @ParameterizedTest
+    @EnumSource(Scenario.class)
+    public void external_change_db_row_deleted(Scenario scenario) throws IOException {
+        setup(scenario, StorageState.of(A, IntHashSet.from(+Ann)));
+
+        assertEquals(0, counter.decrement(A, Ann));
+        assertEquals(-1, counter.decrement(A, Ann));    // flipped
+
+        pushToStorage(StorageState.EMPTY);
+        counter.flush();
+
+        assertCountEstimates(A, -1);
+        assertActorValues(Ann, votes(-A));
+        assertStorage(StorageState.of(A, IntHashSet.from(-Ann)));
+    }
+
+    @ParameterizedTest
+    @EnumSource(Scenario.class)
+    public void external_change_db_row_inserted(Scenario scenario) throws IOException {
+        setup(scenario, StorageState.EMPTY);
+
+        assertEquals(-1, counter.decrement(A, Ann));
+
+        pushToStorage(StorageState.of(A, IntHashSet.from(+Ann)));
+        counter.flush();
+
+        assertCountEstimates(A, -1);
+        assertActorValues(Ann, votes(-A));
+        assertStorage(StorageState.of(A, IntHashSet.from(-Ann)));
+    }
+
+    @ParameterizedTest
+    @EnumSource(Scenario.class)
+    public void external_change_unrelated_db_row_deleted(Scenario scenario) throws IOException {
+        setup(scenario, StorageState.of(A, IntHashSet.from(+Ann)));
+
+        assertEquals(-1, counter.decrement(B, Ann));
+
+        pushToStorage(StorageState.EMPTY);
+        counter.flush();
+
+        assertCountEstimates(A, 0, B, -1);
+        assertActorValues(Ann, votes(none(A), -B));
+        assertStorage(StorageState.of(B, IntHashSet.from(-Ann)));
+    }
+
+    @ParameterizedTest
+    @EnumSource(Scenario.class)
+    public void external_change_unrelated_db_row_inserted(Scenario scenario) throws IOException {
+        setup(scenario, StorageState.of(A, IntHashSet.from(+Ann)));
+
+        assertEquals(2, counter.increment(A, Bob));
+
+        pushToStorage(StorageState.of(B, IntHashSet.from(-Bob)));
+        counter.flush();
+
+        assertCountEstimates(A, 2, B, -1);
+        assertActorValues(Ann, votes(+A),
+                          Bob, votes(+A, -B));
+        assertStorage(StorageState.of(A, IntHashSet.from(+Ann, +Bob),
+                                      B, IntHashSet.from(-Bob)));
+    }
 
     private void assertCountEstimates(int... expected) {
         IntIntHashMap expectedMap = newIntMap(expected);

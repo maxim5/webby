@@ -5,6 +5,7 @@ import com.carrotsearch.hppc.cursors.IntCursor;
 import com.carrotsearch.hppc.procedures.IntObjectProcedure;
 import com.google.common.eventbus.EventBus;
 import com.google.common.eventbus.Subscribe;
+import com.google.common.flogger.FluentLogger;
 import io.webby.db.count.StoreChangedEvent;
 import org.jctools.counters.Counter;
 import org.jctools.counters.CountersFactory;
@@ -14,10 +15,12 @@ import org.jetbrains.annotations.NotNull;
 import javax.annotation.concurrent.ThreadSafe;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicReference;
+import java.util.logging.Level;
 import java.util.stream.IntStream;
 
 @ThreadSafe
 public class NonBlockingVotingCounter implements VotingCounter {
+    private static final FluentLogger log = FluentLogger.forEnclosingClass();
     private final VotingStorage store;
     private final NonBlockingHashMapLong<VoteSet> cache;
     private final AtomicBoolean storeDirty = new AtomicBoolean();
@@ -31,6 +34,7 @@ public class NonBlockingVotingCounter implements VotingCounter {
     @Subscribe
     public void storeChanged(@NotNull StoreChangedEvent event) {
         if (store.storeId().equals(event.storeId())) {
+            log.at(Level.INFO).log("External change detected for %s. Marking the store dirty", event.storeId());
             storeDirty.set(true);
         }
     }
