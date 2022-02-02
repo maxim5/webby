@@ -81,10 +81,7 @@ public class TableVotingStorage implements VotingStorage {
 
     private void loadQueryResults(@NotNull Consumer<SelectWhereBuilder> updater,
                                   @NotNull IntObjectProcedure<@NotNull IntHashSet> consumer) {
-        SelectWhere query = SelectWhere.from(table).select(keyColumn, actorColumn, valueColumn)
-            .applying(updater)
-            .orderBy(OrderBy.of(keyColumn.ordered(Order.ASC), actorColumn.ordered(Order.ASC)))
-            .build();
+        SelectWhere query = SelectWhere.from(table).select(keyColumn, actorColumn, valueColumn).applying(updater).build();
 
         IntObjectHashMap<IntHashSet> map = new IntObjectHashMap<>();
         table.runner().forEach(query, resultSet -> {
