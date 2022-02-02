@@ -15,6 +15,7 @@ import io.webby.testing.ext.SqlCleanupExtension;
 import io.webby.testing.ext.SqlDbSetupExtension;
 import io.webby.util.hppc.EasyHppc;
 import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.extension.RegisterExtension;
 import org.junit.jupiter.params.ParameterizedTest;
@@ -22,6 +23,7 @@ import org.junit.jupiter.params.provider.EnumSource;
 
 import java.io.IOException;
 import java.util.*;
+import java.util.function.BiConsumer;
 
 import static io.webby.db.count.vote.Vote.none;
 import static io.webby.db.count.vote.Vote.votes;
@@ -671,13 +673,38 @@ public class VotingCounterIntegrationTest {
 
         storage = switch (scenario.store) {
             case SQL_DB -> new TableVotingStorage(new UserRateModelTable(SQL), content_id, user_id, value);
-            case KEY_VALUE_DB -> new KvVotingStorage("java", new JavaMapDbFactory().inMemoryDb());
+            case KEY_VALUE_DB -> new KvVotingStorage("java", new JavaMapDbFactory().inMemoryDb(cloneValuesMap()));
         };
         pushToStorage(state);
 
         counter = switch (scenario.counter) {
             case LOCK_BASED -> new LockBasedVotingCounter(storage, eventBus);
             case NON_BLOCKING -> new NonBlockingVotingCounter(storage, eventBus);
+        };
+    }
+
+    // Make sure the values are copied.
+    // Otherwise, the `VotingCounter` instance can modify the `VotingStorage` state, which will cause mismatch warnings.
+    private static @NotNull Map<Integer, IntHashSet> cloneValuesMap() {
+        return new HashMap<>() {
+            @Override
+            public IntHashSet get(Object key) {
+                return copy(super.get(key));
+            }
+
+            @Override
+            public IntHashSet getOrDefault(Object key, IntHashSet defaultValue) {
+                return copy(super.getOrDefault(key, defaultValue));
+            }
+
+            @Override
+            public void forEach(BiConsumer<? super Integer, ? super IntHashSet> action) {
+                super.forEach((key, values) -> action.accept(key, copy(values)));
+            }
+
+            private static @Nullable IntHashSet copy(@Nullable IntHashSet container) {
+                return container != null ? new IntHashSet(container) : null;
+            }
         };
     }
 
