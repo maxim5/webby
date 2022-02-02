@@ -12,6 +12,7 @@ import io.webby.util.hppc.EasyHppc;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
+import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
 
@@ -38,16 +39,20 @@ public class KvVotingStorage implements VotingStorage {
 
     @Override
     public void loadBatch(@NotNull IntContainer keys, @NotNull IntObjectProcedure<@NotNull IntHashSet> consumer) {
-        List<IntHashSet> values = db.getAll(EasyHppc.toJavaList(keys));
-        assert keys.size() == values.size() :
-            "Internal error: keys/values mismatch: keys=%s values=%s".formatted(keys, values);
-        Iterator<IntCursor> keyIt = keys.iterator();
+        // keys.iterator() gives a different order each time
+        // See https://github.com/carrotsearch/hppc/issues/14
+        // FIX[minor]: is there is a cleaner solution to avoid two iterators? getAllToMap()?
+        ArrayList<Integer> keysFixedOrder = EasyHppc.toJavaList(keys);
+        List<IntHashSet> values = db.getAll(keysFixedOrder);
+        assert keysFixedOrder.size() == values.size() :
+            "Internal error: keys/values mismatch: keys=%s values=%s".formatted(keysFixedOrder, values);
+        Iterator<Integer> keyIt = keysFixedOrder.iterator();
         Iterator<IntHashSet> valIt = values.iterator();
         while (keyIt.hasNext()) {
-            IntCursor key = keyIt.next();
+            int key = keyIt.next();
             IntHashSet value = valIt.next();
             if (value != null && !value.isEmpty()) {
-                consumer.apply(key.value, value);
+                consumer.apply(key, value);
             }
         }
     }
