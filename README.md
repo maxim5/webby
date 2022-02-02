@@ -69,7 +69,7 @@ sourceControl {
 
 - `build.gradle`
 ```groovy
-implementation ('io.webby:webby:0.1.0')
+implementation ('io.webby:webby:0.8.0')
 ```
 
 To start the web server locally:
