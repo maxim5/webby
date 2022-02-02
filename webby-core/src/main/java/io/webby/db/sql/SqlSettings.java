@@ -16,7 +16,7 @@ import java.sql.SQLException;
 public record SqlSettings(@NotNull String url, @Nullable String user, @Nullable String password) implements HasEngine {
     private static final String H2_IN_MEMORY_URL = "jdbc:h2:mem:test;DB_CLOSE_DELAY=-1";
     private static final String SQLITE_IN_MEMORY_URL = "jdbc:sqlite::memory:";
-    private static final String MYSQL_TEST_URL = "jdbc:mysql://localhost/test";
+    private static final String MYSQL_TEST_URL = "jdbc:mysql://localhost/test?rewriteBatchedStatements=true";
 
     public static final SqlSettings H2_IN_MEMORY = new SqlSettings(H2_IN_MEMORY_URL);
     public static final SqlSettings SQLITE_IN_MEMORY = new SqlSettings(SQLITE_IN_MEMORY_URL);
