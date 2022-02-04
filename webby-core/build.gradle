@@ -47,4 +47,6 @@ dependencies {
     // NoSQLs for Integration tests
     testFixturesApi group: 'io.etcd', name: 'jetcd-test', version: '0.6.1'
     testFixturesApi group: 'it.ozimov', name: 'embedded-redis', version: '0.7.3'
+
+    testImplementation 'com.google.jimfs:jimfs:1.2'
 }

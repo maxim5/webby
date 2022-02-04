@@ -4,6 +4,7 @@ import com.google.inject.Inject;
 import io.webby.app.Settings;
 import io.webby.util.collect.OneOf;
 import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.VisibleForTesting;
 
 import java.io.FileInputStream;
 import java.io.IOException;
@@ -16,7 +17,12 @@ public class FileSystemStorage implements UserContentStorage {
 
     @Inject
     public FileSystemStorage(@NotNull Settings settings) {
-        root = settings.userContentPath();
+        this(settings.userContentPath());
+    }
+
+    @VisibleForTesting
+    public FileSystemStorage(@NotNull Path root) {
+        this.root = root;
     }
 
     @Override
@@ -33,6 +39,7 @@ public class FileSystemStorage implements UserContentStorage {
     public void addFileOrDie(@NotNull FileId fileId, byte @NotNull [] content) throws IOException {
         Path path = resolve(fileId);
         assert !Files.exists(path) : "File content already exists: %s".formatted(path);
+        Files.createDirectories(path.getParent());
         Files.write(path, content);
     }
 
@@ -50,7 +57,7 @@ public class FileSystemStorage implements UserContentStorage {
     @Override
     public @NotNull InputStream readFileContent(@NotNull FileId fileId) throws IOException {
         Path path = resolve(fileId);
-        return new FileInputStream(path.toFile());
+        return Files.newInputStream(path);
     }
 
     @Override
