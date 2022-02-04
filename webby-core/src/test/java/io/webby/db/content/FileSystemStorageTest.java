@@ -49,6 +49,14 @@ public class FileSystemStorageTest {
 
     @ParameterizedTest
     @EnumSource(Scenario.class)
+    public void add_file_unsafe_fails(Scenario scenario) throws IOException {
+        setup(scenario);
+        FileId fileId = new FileId("../foo.txt");
+        assertThrows(Throwable.class, () -> storage.addFileOrDie(fileId, CONTENT));
+    }
+
+    @ParameterizedTest
+    @EnumSource(Scenario.class)
     public void file_stats(Scenario scenario) throws IOException {
         setup(scenario);
         FileId fileId = new FileId("foo.txt");

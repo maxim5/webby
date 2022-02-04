@@ -6,7 +6,6 @@ import io.webby.util.collect.OneOf;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.VisibleForTesting;
 
-import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.nio.file.Files;
@@ -37,6 +36,7 @@ public class FileSystemStorage implements UserContentStorage {
 
     @Override
     public void addFileOrDie(@NotNull FileId fileId, byte @NotNull [] content) throws IOException {
+        assert fileId.isSafe() : "File id is unsafe: " + fileId;
         Path path = resolve(fileId);
         assert !Files.exists(path) : "File content already exists: %s".formatted(path);
         Files.createDirectories(path.getParent());

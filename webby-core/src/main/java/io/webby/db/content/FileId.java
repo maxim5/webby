@@ -21,6 +21,14 @@ public record FileId(@NotNull String path) {
 
     public boolean isSafe() {
         Path path = Path.of(this.path);
-        return !path.isAbsolute() && path.normalize().equals(path);
+        return !path.isAbsolute() && !isAbsoluteLike(this.path) && path.normalize().equals(path) && !hasDotDot(this.path);
+    }
+
+    private static boolean isAbsoluteLike(@NotNull String path) {
+        return path.contains(":") || path.startsWith("/") || path.startsWith("~");
+    }
+
+    private static boolean hasDotDot(@NotNull String path) {
+        return path.contains("..") && (path.startsWith("..") || path.contains("/..") || path.contains("\\.."));
     }
 }
