@@ -1,5 +1,6 @@
 package io.webby.db.content;
 
+import io.netty.handler.codec.http.QueryStringDecoder;
 import org.jetbrains.annotations.NotNull;
 
 public record FileExt(@NotNull String extension) {
@@ -12,5 +13,9 @@ public record FileExt(@NotNull String extension) {
             return new FileExt(forceLower ? extension.toLowerCase() : extension);
         }
         return EMPTY;
+    }
+
+    public static @NotNull FileExt fromUrl(@NotNull String url, boolean forceLower) {
+        return FileExt.fromName(new QueryStringDecoder(url).rawPath(), forceLower);  // FIX[perf]: can be more efficient
     }
 }
