@@ -11,7 +11,7 @@ public interface UserContentStorage {
 
     boolean exists(@NotNull FileId fileId);
 
-    void addFileOrDie(@NotNull FileId fileId, byte @NotNull [] content) throws IOException;
+    void addFile(@NotNull FileId fileId, byte @NotNull [] content, @NotNull WriteMode mode) throws IOException;
 
     long getFileSizeInBytes(@NotNull FileId fileId) throws IOException;
 
@@ -21,4 +21,11 @@ public interface UserContentStorage {
     @NotNull InputStream readFileContent(@NotNull FileId fileId) throws IOException;
 
     boolean deleteFile(@NotNull FileId fileId) throws IOException;
+
+    enum WriteMode {
+        FAIL_IF_EXISTS,
+        WARN_IF_EXISTS,
+        INFO_IF_EXISTS,
+        OVERWRITE,
+    }
 }

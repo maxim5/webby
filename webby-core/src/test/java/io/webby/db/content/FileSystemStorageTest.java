@@ -2,6 +2,7 @@ package io.webby.db.content;
 
 import com.google.common.jimfs.Configuration;
 import com.google.common.jimfs.Jimfs;
+import io.webby.db.content.UserContentStorage.WriteMode;
 import org.jetbrains.annotations.NotNull;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.EnumSource;
@@ -24,7 +25,7 @@ public class FileSystemStorageTest {
     @EnumSource(Scenario.class)
     public void add_new_file(Scenario scenario) throws IOException {
         setup(scenario);
-        storage.addFileOrDie(new FileId("foo.txt"), CONTENT);
+        storage.addFile(new FileId("foo.txt"), CONTENT, WriteMode.FAIL_IF_EXISTS);
         assertTrue(Files.exists(root.resolve("foo.txt")));
         assertBytes(Files.readAllBytes(root.resolve("foo.txt")), CONTENT);
     }
@@ -33,7 +34,7 @@ public class FileSystemStorageTest {
     @EnumSource(Scenario.class)
     public void add_new_directory_and_file(Scenario scenario) throws IOException {
         setup(scenario);
-        storage.addFileOrDie(new FileId("dir/foo.txt"), CONTENT);
+        storage.addFile(new FileId("dir/foo.txt"), CONTENT, WriteMode.FAIL_IF_EXISTS);
         assertTrue(Files.exists(root.resolve("dir/foo.txt")));
         assertBytes(Files.readAllBytes(root.resolve("dir/foo.txt")), CONTENT);
     }
@@ -43,8 +44,8 @@ public class FileSystemStorageTest {
     public void add_file_already_exists_fails(Scenario scenario) throws IOException {
         setup(scenario);
         FileId fileId = new FileId("foo.txt");
-        storage.addFileOrDie(fileId, CONTENT);
-        assertThrows(Throwable.class, () -> storage.addFileOrDie(fileId, CONTENT));
+        storage.addFile(fileId, CONTENT, WriteMode.FAIL_IF_EXISTS);
+        assertThrows(Throwable.class, () -> storage.addFile(fileId, CONTENT, WriteMode.FAIL_IF_EXISTS));
     }
 
     @ParameterizedTest
@@ -52,7 +53,7 @@ public class FileSystemStorageTest {
     public void add_file_unsafe_fails(Scenario scenario) throws IOException {
         setup(scenario);
         FileId fileId = new FileId("../foo.txt");
-        assertThrows(Throwable.class, () -> storage.addFileOrDie(fileId, CONTENT));
+        assertThrows(Throwable.class, () -> storage.addFile(fileId, CONTENT, WriteMode.FAIL_IF_EXISTS));
     }
 
     @ParameterizedTest
@@ -60,7 +61,7 @@ public class FileSystemStorageTest {
     public void file_stats(Scenario scenario) throws IOException {
         setup(scenario);
         FileId fileId = new FileId("foo.txt");
-        storage.addFileOrDie(fileId, CONTENT);
+        storage.addFile(fileId, CONTENT, WriteMode.FAIL_IF_EXISTS);
         assertTrue(storage.exists(fileId));
         assertEquals(CONTENT.length, storage.getFileSizeInBytes(fileId));
         assertTrue(System.currentTimeMillis() - storage.getLastModifiedMillis(fileId) < 100);
@@ -71,7 +72,7 @@ public class FileSystemStorageTest {
     public void file_content(Scenario scenario) throws IOException {
         setup(scenario);
         FileId fileId = new FileId("foo.txt");
-        storage.addFileOrDie(fileId, CONTENT);
+        storage.addFile(fileId, CONTENT, WriteMode.FAIL_IF_EXISTS);
         assertBytes(storage.readFileContent(fileId).readAllBytes(), CONTENT);
     }
 
@@ -80,7 +81,7 @@ public class FileSystemStorageTest {
     public void delete_file(Scenario scenario) throws IOException {
         setup(scenario);
         FileId fileId = new FileId("foo.txt");
-        storage.addFileOrDie(fileId, CONTENT);
+        storage.addFile(fileId, CONTENT, WriteMode.FAIL_IF_EXISTS);
         assertTrue(storage.deleteFile(fileId));
         assertFalse(storage.exists(fileId));
         assertFalse(Files.exists(root.resolve("foo.txt")));

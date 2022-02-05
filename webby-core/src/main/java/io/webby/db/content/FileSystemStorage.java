@@ -1,5 +1,6 @@
 package io.webby.db.content;
 
+import com.google.common.flogger.FluentLogger;
 import com.google.inject.Inject;
 import io.webby.app.Settings;
 import io.webby.util.collect.OneOf;
@@ -10,8 +11,10 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.util.logging.Level;
 
 public class FileSystemStorage implements UserContentStorage {
+    private static final FluentLogger log = FluentLogger.forEnclosingClass();
     private final Path root;
 
     @Inject
@@ -35,10 +38,24 @@ public class FileSystemStorage implements UserContentStorage {
     }
 
     @Override
-    public void addFileOrDie(@NotNull FileId fileId, byte @NotNull [] content) throws IOException {
-        assert fileId.isSafe() : "File id is unsafe: " + fileId;
+    public void addFile(@NotNull FileId fileId, byte @NotNull [] content, @NotNull WriteMode mode) throws IOException {
+        if (!fileId.isSafe()) {
+            throw new SecurityException("File id is unsafe: " + fileId);
+        }
+
         Path path = resolve(fileId);
-        assert !Files.exists(path) : "File content already exists: %s".formatted(path);
+        if (Files.exists(path)) {
+            switch (mode) {
+                case FAIL_IF_EXISTS -> throw new IOException("File content already exists: %s".formatted(path));
+                case WARN_IF_EXISTS -> log.at(Level.WARNING).log("Content storage already contains file: %s", fileId);
+                case INFO_IF_EXISTS -> log.at(Level.INFO).log("Content storage already contains file: %s", fileId);
+                case OVERWRITE -> log.at(Level.INFO).log("Overwriting existing file: %s", fileId);
+            }
+            if (mode != WriteMode.OVERWRITE) {
+                return;
+            }
+        }
+
         Files.createDirectories(path.getParent());
         Files.write(path, content);
     }
