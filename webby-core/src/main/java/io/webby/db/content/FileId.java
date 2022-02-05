@@ -19,6 +19,13 @@ public record FileId(@NotNull String path) {
             new FileId("%s.%s%s".formatted(contentId.contentId(), format.form(), ext.extension()));
     }
 
+    public @NotNull ContentId parseContentIdOrDie() {
+        Path path = Path.of(this.path);
+        String fileName = path.getFileName().toString();
+        String contentId = fileName.substring(0, fileName.indexOf('.'));
+        return new ContentId(contentId);
+    }
+
     public boolean isSafe() {
         Path path = Path.of(this.path);
         return !path.isAbsolute() && !isAbsoluteLike(this.path) && path.normalize().equals(path) && !hasDotDot(this.path);

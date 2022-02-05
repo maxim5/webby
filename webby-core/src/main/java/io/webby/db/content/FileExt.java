@@ -18,4 +18,8 @@ public record FileExt(@NotNull String extension) {
     public static @NotNull FileExt fromUrl(@NotNull String url, boolean forceLower) {
         return FileExt.fromName(new QueryStringDecoder(url).rawPath(), forceLower);  // FIX[perf]: can be more efficient
     }
+
+    public @NotNull String pureExtension() {
+        return extension.isEmpty() ? "" : extension.substring(1);
+    }
 }
