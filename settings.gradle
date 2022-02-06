@@ -7,6 +7,6 @@ include 'webby-core'
 
 sourceControl {
     gitRepository('https://github.com/maxim5/routekit.git') {
-        producesModule("io.routekit:routekit")
+        producesModule('io.routekit:routekit')
     }
 }
