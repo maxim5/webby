@@ -96,7 +96,9 @@ public class NettyHttpHandler extends ChannelInboundHandlerAdapter {
                 Stopwatch stopwatch = Stopwatch.createStarted();
                 HttpResponse response = processIncoming(request);
                 long millis = stopwatch.stop().elapsed(TimeUnit.MILLISECONDS);
-                log.at(Level.INFO).log("%s %s: %s (%d ms)", request.method(), request.uri(), response.status(), millis);
+                log.at(Level.INFO).log("%s %s: %s (%s b | %d ms)",
+                                       request.method(), request.uri(), response.status(),
+                                       response.headers().get(HttpConst.CONTENT_LENGTH), millis);
             } finally {
                 ReferenceCountUtil.release(request);
                 cleanupWorkingThread();
