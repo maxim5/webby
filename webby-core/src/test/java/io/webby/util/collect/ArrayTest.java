@@ -112,7 +112,7 @@ public class ArrayTest {
 
     private static void assertUnderlyingArrayType(@NotNull Array<?> array,
                                                   @NotNull Class<?> klass) throws IllegalAccessException {
-        Field field = EasyMembers.findField(Array.class, "arr");
+        Field field = EasyMembers.findField(BaseArray.class, "arr");
         assertNotNull(field);
         field.setAccessible(true);
         assertEquals(klass, field.get(array).getClass());
