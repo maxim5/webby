@@ -5,7 +5,7 @@ import io.webby.orm.api.Page;
 import io.webby.orm.api.TableMeta;
 import io.webby.orm.api.TableObj;
 import io.webby.orm.api.query.*;
-import io.webby.util.collect.EasyIterables;
+import io.webby.util.collect.ListBuilder;
 import org.jetbrains.annotations.NotNull;
 import org.junit.jupiter.api.Test;
 
@@ -238,7 +238,7 @@ public interface PrimaryKeyTableTest<K, E, T extends TableObj<K, E>> extends Bas
         assertThat(page2.items()).hasSize(1);
         assertThat(page2.items()).containsAnyOf(entity1, entity2);
 
-        assertThat(EasyIterables.concat(page1.items(), page2.items())).containsExactly(entity1, entity2);
+        assertThat(ListBuilder.concat(page1.items(), page2.items())).containsExactly(entity1, entity2);
 
         CompositeFilter thirdPageClause = CompositeFilter.builder().with(Pagination.ofOffset(2, 1), table().engine()).build();
         Page<E> page3 = table().fetchPage(thirdPageClause);

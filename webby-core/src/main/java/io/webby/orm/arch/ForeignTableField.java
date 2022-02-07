@@ -1,8 +1,8 @@
 package io.webby.orm.arch;
 
 import com.google.errorprone.annotations.Immutable;
-import io.webby.util.collect.EasyIterables;
 import io.webby.orm.api.ReadFollow;
+import io.webby.util.collect.ListBuilder;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.List;
@@ -42,8 +42,8 @@ public class ForeignTableField extends TableField {
         List<PrefixedColumn> fkColumns = List.of(foreignKeyColumn.prefixed(parent.sqlName()));
         return switch (follow) {
             case NO_FOLLOW -> fkColumns;
-            case FOLLOW_ONE_LEVEL -> EasyIterables.concat(fkColumns, foreignTable.columns(NO_FOLLOW));
-            case FOLLOW_ALL -> EasyIterables.concat(fkColumns, foreignTable.columns(FOLLOW_ALL));
+            case FOLLOW_ONE_LEVEL -> ListBuilder.concat(fkColumns, foreignTable.columns(NO_FOLLOW));
+            case FOLLOW_ALL -> ListBuilder.concat(fkColumns, foreignTable.columns(FOLLOW_ALL));
         };
     }
 

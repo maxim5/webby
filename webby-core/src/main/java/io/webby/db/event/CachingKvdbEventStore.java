@@ -4,7 +4,7 @@ import com.google.common.collect.ArrayListMultimap;
 import com.google.common.collect.Multimap;
 import com.google.mu.util.stream.BiStream;
 import io.webby.db.kv.KeyValueDb;
-import io.webby.util.collect.EasyIterables;
+import io.webby.util.collect.ListBuilder;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import org.jetbrains.annotations.VisibleForTesting;
@@ -138,7 +138,7 @@ public class CachingKvdbEventStore<K, E> implements KeyEventStore<K, E> {
 
     private static <E> @NotNull List<E> concatToList(@NotNull Collection<E> cached, @Nullable List<E> persistent) {
         if (persistent != null) {
-            return EasyIterables.concat(cached, persistent);
+            return ListBuilder.concat(cached, persistent);
         }
         return new ArrayList<>(cached);
     }

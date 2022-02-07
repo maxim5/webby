@@ -1,7 +1,7 @@
 package io.webby.orm.api.query;
 
 import com.google.common.collect.ImmutableList;
-import io.webby.util.collect.EasyIterables;
+import io.webby.util.collect.ListBuilder;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.Arrays;
@@ -43,7 +43,7 @@ public class OrderBy extends Unit implements Filter, Representable {
     }
 
     public @NotNull OrderBy withMoreTerms(@NotNull List<OrderTerm> terms) {
-        return of(EasyIterables.concat(this.terms, terms));
+        return of(ListBuilder.concat(this.terms, terms));
     }
 
     @NotNull ImmutableList<OrderTerm> terms() {
