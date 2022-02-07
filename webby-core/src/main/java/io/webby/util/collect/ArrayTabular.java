@@ -13,6 +13,7 @@ public class ArrayTabular<T> implements Tabular<T> {
         this.array = array;
     }
 
+    @SafeVarargs
     public static <T> @NotNull ArrayTabular<T> of(T @NotNull[] @NotNull... rows) {
         return new ArrayTabular<>(rows);
     }

@@ -4,9 +4,7 @@ import com.google.errorprone.annotations.Immutable;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.Map;
-import java.util.function.BiFunction;
-import java.util.function.Function;
-import java.util.function.ToIntBiFunction;
+import java.util.function.*;
 
 @Immutable
 public record Pair<U, V>(U first, V second) implements Map.Entry<U, V> {
@@ -45,6 +43,14 @@ public record Pair<U, V>(U first, V second) implements Map.Entry<U, V> {
 
     public int mapToInt(@NotNull ToIntBiFunction<U, V> convert) {
         return convert.applyAsInt(first, second);
+    }
+
+    public long mapToLong(@NotNull ToLongBiFunction<U, V> convert) {
+        return convert.applyAsLong(first, second);
+    }
+
+    public double mapToDouble(@NotNull ToDoubleBiFunction<U, V> convert) {
+        return convert.applyAsDouble(first, second);
     }
 
     @Override
