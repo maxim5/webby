@@ -9,14 +9,22 @@ import java.util.Comparator;
 import java.util.function.UnaryOperator;
 
 public final class Array<E> extends BaseArray<E> {
-    private Array(@NotNull E[] arr) {
+    private Array(@Nullable E @NotNull[] arr) {
         super(arr);
     }
 
     @SafeVarargs
     public static <E> @NotNull Array<E> of(@Nullable E @NotNull ... items) {
-        //noinspection NullableProblems
         return new Array<>(items);
+    }
+
+    @SafeVarargs
+    public static <E> @NotNull Array<E> copyOf(@Nullable E @NotNull ... items) {
+        return new Array<>(Arrays.copyOf(items, items.length));
+    }
+
+    public static <E> @NotNull Array<E> copyOf(@NotNull BaseArray<E> array) {
+        return copyOf(array.arr);
     }
 
     @Override
@@ -86,7 +94,7 @@ public final class Array<E> extends BaseArray<E> {
         }
 
         public @NotNull ImmutableArray<E> toImmutableArray() {
-            return ImmutableArray.of(arr);
+            return ImmutableArray.copyOf(arr);
         }
     }
 }

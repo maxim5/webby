@@ -3,20 +3,24 @@ package io.webby.util.collect;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
+import java.util.Arrays;
 import java.util.Collection;
 import java.util.Comparator;
 import java.util.function.Predicate;
 import java.util.function.UnaryOperator;
 
 public final class ImmutableArray<E> extends BaseArray<E> {
-    private ImmutableArray(@NotNull E[] arr) {
+    private ImmutableArray(@Nullable E @NotNull [] arr) {
         super(arr);
     }
 
     @SafeVarargs
-    public static <E> @NotNull ImmutableArray<E> of(@Nullable E @NotNull ... items) {
-        //noinspection NullableProblems
-        return new ImmutableArray<>(items);
+    public static <E> @NotNull ImmutableArray<E> copyOf(@Nullable E @NotNull ... items) {
+        return new ImmutableArray<>(Arrays.copyOf(items, items.length));
+    }
+
+    public static <E> @NotNull ImmutableArray<E> copyOf(@NotNull BaseArray<E> array) {
+        return copyOf(array.arr);
     }
 
     @Override
@@ -131,7 +135,7 @@ public final class ImmutableArray<E> extends BaseArray<E> {
         }
 
         public @NotNull ImmutableArray<E> toArray() {
-            return ImmutableArray.of(arr);
+            return ImmutableArray.copyOf(arr);
         }
 
         public @NotNull Array<E> toMutableArray() {

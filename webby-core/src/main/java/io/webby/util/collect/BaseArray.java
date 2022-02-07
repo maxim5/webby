@@ -9,7 +9,7 @@ import java.util.function.Consumer;
 public abstract class BaseArray<E> extends AbstractList<E> {
     protected final E[] arr;
 
-    protected BaseArray(@NotNull E[] arr) {
+    protected BaseArray(@Nullable E @NotNull [] arr) {
         this.arr = arr;
     }
 
