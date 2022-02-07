@@ -3,6 +3,9 @@ package io.webby.db.count.primitive;
 import com.carrotsearch.hppc.IntContainer;
 import com.carrotsearch.hppc.IntIntHashMap;
 import com.carrotsearch.hppc.IntIntMap;
+import com.google.common.eventbus.EventBus;
+import com.google.common.eventbus.Subscribe;
+import io.webby.db.DbReadyEvent;
 import io.webby.util.hppc.EasyHppc;
 import org.jetbrains.annotations.NotNull;
 
@@ -17,10 +20,15 @@ public class LockBasedIntCounter implements IntCounter {
     private final IntCountStorage store;
     private final IntIntHashMap cache;
 
-    public LockBasedIntCounter(@NotNull IntCountStorage store) {
+    public LockBasedIntCounter(@NotNull IntCountStorage store, @NotNull EventBus eventBus) {
         this.store = store;
         this.cache = new IntIntHashMap(Math.max(store.size(), 1024));
-        this.store.loadAll(cache::put);
+        eventBus.register(this);
+    }
+
+    @Subscribe
+    public void dbReady(@NotNull DbReadyEvent event) {
+        store.loadAll(cache::put);
     }
 
     @Override

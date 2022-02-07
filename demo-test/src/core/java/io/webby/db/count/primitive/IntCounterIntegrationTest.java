@@ -2,6 +2,7 @@ package io.webby.db.count.primitive;
 
 import com.carrotsearch.hppc.IntIntHashMap;
 import com.carrotsearch.hppc.cursors.IntIntCursor;
+import com.google.common.eventbus.EventBus;
 import io.webby.db.StorageType;
 import io.webby.db.kv.javamap.JavaMapDbFactory;
 import io.webby.demo.model.UserRateModelTable;
@@ -86,7 +87,7 @@ public class IntCounterIntegrationTest {
             case SQL_DB -> new TableCountStorage(new UserRateModelTable(SQL), content_id, OneOf.ofSecond(user_id));
             case KEY_VALUE_DB -> new KvCountStorage(new JavaMapDbFactory().inMemoryDb());
         };
-        counter = new LockBasedIntCounter(storage);
+        counter = new LockBasedIntCounter(storage, new EventBus());
     }
 
     private enum Scenario {

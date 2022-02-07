@@ -1,5 +1,6 @@
 package io.webby.db.count.primitive;
 
+import com.google.common.eventbus.EventBus;
 import com.google.inject.Inject;
 import com.google.inject.Provider;
 import io.webby.app.Settings;
@@ -17,10 +18,11 @@ public class IntCounterFactory {
     @Inject private KeyValueFactory keyValueFactory;
     @Inject private Provider<TableManager> tableManagerProvider;
     @Inject private Lifetime lifetime;
+    @Inject private EventBus eventBus;
 
     public @NotNull IntCounter getIntCounter(@NotNull CountingOptions options) {
         IntCountStorage storage = getStorage(options);
-        LockBasedIntCounter counter = new LockBasedIntCounter(storage);
+        LockBasedIntCounter counter = new LockBasedIntCounter(storage, eventBus);
         lifetime.onTerminate(counter);
         return counter;
     }

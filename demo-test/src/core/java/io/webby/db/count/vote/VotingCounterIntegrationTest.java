@@ -7,6 +7,7 @@ import com.google.common.collect.HashBasedTable;
 import com.google.common.eventbus.EventBus;
 import com.google.common.primitives.Ints;
 import com.google.mu.util.stream.BiStream;
+import io.webby.db.DbReadyEvent;
 import io.webby.db.StorageType;
 import io.webby.db.count.StoreChangedEvent;
 import io.webby.db.kv.javamap.JavaMapDbFactory;
@@ -681,6 +682,8 @@ public class VotingCounterIntegrationTest {
             case LOCK_BASED -> new LockBasedVotingCounter(storage, eventBus);
             case NON_BLOCKING -> new NonBlockingVotingCounter(storage, eventBus);
         };
+
+        eventBus.post(new DbReadyEvent());
     }
 
     // Make sure the values are copied.

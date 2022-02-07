@@ -48,5 +48,7 @@ public class DbModule extends AbstractModule {
             bind(TableManager.class).asEagerSingleton();
             bind(DDL.class).asEagerSingleton();
         }
+
+        bind(DbReadiness.class).asEagerSingleton();
     }
 }

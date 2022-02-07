@@ -5,6 +5,7 @@ import com.carrotsearch.hppc.cursors.IntCursor;
 import com.google.common.eventbus.EventBus;
 import com.google.common.eventbus.Subscribe;
 import com.google.common.flogger.FluentLogger;
+import io.webby.db.DbReadyEvent;
 import io.webby.db.count.StoreChangedEvent;
 import io.webby.util.hppc.EasyHppc;
 import org.jetbrains.annotations.NotNull;
@@ -29,8 +30,13 @@ public class LockBasedVotingCounter implements VotingCounter {
     public LockBasedVotingCounter(@NotNull VotingStorage store, @NotNull EventBus eventBus) {
         this.store = store;
         this.cache = new IntObjectHashMap<>();  // FIX[minor]: load anything at the start?
-        this.counters = loadFreshCountsSlow(store);
+        this.counters = new IntIntHashMap(1024);
         eventBus.register(this);
+    }
+
+    @Subscribe
+    public void dbReady(@NotNull DbReadyEvent event) {
+        store.loadAll((key, votes) -> counters.put(key, countVotes(votes)));
     }
 
     @Subscribe
@@ -113,8 +119,8 @@ public class LockBasedVotingCounter implements VotingCounter {
         if (storeDirty.getAndSet(false)) {
             LOCK.writeLock().lock();
             try {
-                this.counters.clear();
-                this.counters.putAll(loadFreshCountsSlow(store));
+                counters.clear();
+                store.loadAll((key, votes) -> counters.put(key, countVotes(votes)));
             } finally {
                 LOCK.writeLock().unlock();
             }
@@ -163,12 +169,6 @@ public class LockBasedVotingCounter implements VotingCounter {
             cache.put(key, events);
         }
         return events;
-    }
-
-    private static @NotNull IntIntHashMap loadFreshCountsSlow(@NotNull VotingStorage store) {
-        IntIntHashMap result = new IntIntHashMap();
-        store.loadAll((key, votes) -> result.put(key, countVotes(votes)));
-        return result;
     }
 
     private static int countVotes(@NotNull IntHashSet votes) {
