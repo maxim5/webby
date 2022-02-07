@@ -2,6 +2,7 @@ package io.webby.util.collect;
 
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.Streams;
+import com.google.errorprone.annotations.CanIgnoreReturnValue;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
@@ -10,6 +11,7 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.stream.Stream;
 
+@CanIgnoreReturnValue
 public class ListBuilder<T> {
     private final List<T> list;
 
@@ -56,6 +58,11 @@ public class ListBuilder<T> {
         return this;
     }
 
+    /*package*/ @NotNull ListBuilder<T> combine(@NotNull ListBuilder<T> builder) {
+        addAll(builder.list);
+        return this;
+    }
+
     // does not allow nulls
     public @NotNull List<T> toList() {
         return List.copyOf(list);
@@ -69,6 +76,11 @@ public class ListBuilder<T> {
     // does not allow nulls
     public @NotNull ImmutableList<T> toImmutableList() {
         return ImmutableList.copyOf(list);
+    }
+
+    // allows nulls
+    public @NotNull ImmutableArrayList<T> toImmutableArrayList() {
+        return new ImmutableArrayList<>(list);
     }
 
     // allows nulls
@@ -94,9 +106,5 @@ public class ListBuilder<T> {
 
     public static <E> @NotNull List<E> concatOne(@NotNull Iterable<E> first, @NotNull E second) {
         return Stream.concat(Streams.stream(first), Stream.of(second)).toList();
-    }
-
-    public static void main(String[] args) {
-        System.out.println(ListBuilder.builder().add(null).toList());
     }
 }
