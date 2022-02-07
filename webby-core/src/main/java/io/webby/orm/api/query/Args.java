@@ -4,10 +4,11 @@ import com.carrotsearch.hppc.IntArrayList;
 import com.carrotsearch.hppc.IntContainer;
 import com.carrotsearch.hppc.LongArrayList;
 import com.carrotsearch.hppc.LongContainer;
-import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
 import io.webby.orm.api.QueryRunner;
 import io.webby.util.base.EasyObjects;
+import io.webby.util.collect.ImmutableArrayList;
+import io.webby.util.collect.ListBuilder;
 import io.webby.util.hppc.EasyHppc;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
@@ -17,6 +18,8 @@ import java.sql.SQLException;
 import java.util.*;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
+
+import static io.webby.util.collect.ImmutableArrayList.toImmutableArrayList;
 
 public final class Args {
     private final InternalType type;
@@ -36,15 +39,15 @@ public final class Args {
     }
 
     public static @NotNull Args of() {
-        return new Args(InternalType.GENERIC_LIST, ImmutableList.of());
+        return new Args(InternalType.GENERIC_LIST, ImmutableArrayList.of());
     }
 
     public static @NotNull Args of(@Nullable Object @NotNull ... args) {
-        return new Args(InternalType.GENERIC_LIST, ImmutableList.copyOf(args));
+        return new Args(InternalType.GENERIC_LIST, ImmutableArrayList.copyOf(args));
     }
 
     public static @NotNull Args of(@NotNull Iterable<?> args) {
-        return new Args(InternalType.GENERIC_LIST, ImmutableList.copyOf(args));
+        return new Args(InternalType.GENERIC_LIST, ImmutableArrayList.copyOf(args));
     }
 
     public static @NotNull Args of(int arg) {
@@ -81,7 +84,7 @@ public final class Args {
 
     public static @NotNull Args concat(@NotNull Args lhs, @NotNull Args rhs) {
         // FIX[minor]: optimize for ints and longs
-        return of(new ImmutableList.Builder<>().addAll(lhs.internalList()).addAll(rhs.internalList()).build());
+        return of(new ListBuilder<>().addAll(lhs.internalList()).addAll(rhs.internalList()).toImmutableArrayList());
     }
 
     public static @NotNull Args flattenArgsOf(@NotNull HasArgs left, @NotNull HasArgs right) {
@@ -93,7 +96,7 @@ public final class Args {
                       .filter(Objects::nonNull)
                       .map(HasArgs::args)
                       .flatMap(Args::internalStream)
-                      .collect(ImmutableList.toImmutableList()));
+                      .collect(toImmutableArrayList()));
     }
 
     public static @NotNull Args flattenArgsOf(@NotNull Collection<? extends HasArgs> items) {
@@ -101,12 +104,12 @@ public final class Args {
                       .filter(Objects::nonNull)
                       .map(HasArgs::args)
                       .flatMap(Args::internalStream)
-                      .collect(ImmutableList.toImmutableList()));
+                      .collect(toImmutableArrayList()));
     }
 
     private static @NotNull Args resolved(@NotNull Iterable<?> args) {
         // FIX[minor]: assert all resolved?
-        return new Args(InternalType.GENERIC_LIST, ImmutableList.copyOf(args), ImmutableList.copyOf(args));
+        return new Args(InternalType.GENERIC_LIST, ImmutableArrayList.copyOf(args), ImmutableArrayList.copyOf(args));
     }
 
     public boolean isEmpty() {
@@ -161,16 +164,16 @@ public final class Args {
         return internalList().stream();
     }
 
-    private static @NotNull ImmutableList<Object> unwrapArgs(@NotNull List<?> args) {
+    private static @NotNull ImmutableArrayList<Object> unwrapArgs(@NotNull List<?> args) {
         return args.stream()
             .map(arg -> arg instanceof UnresolvedArg unresolved ? unresolved.defaultValue() : arg)
-            .collect(ImmutableList.toImmutableList());
+            .collect(toImmutableArrayList());
     }
 
     // FIX[minor]: Use array or IntObjMap?
-    private @NotNull Map<Integer, UnresolvedArg> unresolvedArgs() {
+    private @NotNull ImmutableMap<Integer, UnresolvedArg> unresolvedArgs() {
         if (type != InternalType.GENERIC_LIST) {
-            return Map.of();
+            return ImmutableMap.of();
         }
         Map<Integer, UnresolvedArg> map = null;
         int index = 0;
@@ -199,13 +202,13 @@ public final class Args {
 
         assert type == InternalType.GENERIC_LIST : "Internal error: type=%s, internal=%s".formatted(type, internal);
 
-        ImmutableList.Builder<Object> result = ImmutableList.builder();
+        ListBuilder<Object> result = new ListBuilder<>();
         int index = 0;
         for (Object arg : internal) {
             UnresolvedArg unresolvedArg = unresolvedArgs.get(++index);
             result.add(unresolvedArg != null ? resolved.get(unresolvedArg.name()) : arg);
         }
-        return Args.resolved(result.build());
+        return Args.resolved(result.toImmutableArrayList());
     }
 
     /*package*/ @NotNull Args resolveArgsByOrderedList(@NotNull List<?> resolved) {
@@ -223,14 +226,14 @@ public final class Args {
 
         assert type == InternalType.GENERIC_LIST : "Internal error: type=%s, internal=%s".formatted(type, internal);
 
-        ImmutableList.Builder<Object> result = ImmutableList.builder();
+        ListBuilder<Object> result = new ListBuilder<>();
         Iterator<?> iterator = resolved.iterator();
         int index = 0;
         for (Object arg : internal) {
             UnresolvedArg unresolvedArg = unresolvedArgs.get(++index);
             result.add(unresolvedArg != null ? iterator.next() : arg);
         }
-        return Args.resolved(result.build());
+        return Args.resolved(result.toImmutableArrayList());
     }
 
     @Override

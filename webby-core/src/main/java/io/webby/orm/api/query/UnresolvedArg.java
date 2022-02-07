@@ -9,7 +9,7 @@ public record UnresolvedArg(@NotNull String name, @Nullable Object defaultValue)
             case NUMBER -> 0;
             case BOOL -> false;
             case STRING -> "";
-            default -> null;        // TODO[major]: breaks ImmutableList
+            default -> null;
         };
     }
 }
