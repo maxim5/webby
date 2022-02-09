@@ -978,6 +978,14 @@ public class ModelTableCodegen extends BaseCodegen {
         Map<String, String> context = m2mContext();
 
         appendCode("""
+        public @Nonnull $LeftTable leftsTable() {
+            return leftsTable;
+        }
+        
+        public @Nonnull $RightTable rightsTable() {
+            return rightsTable;
+        }
+        
         @Override
         public boolean exists(@Nonnull $left_index_wrap leftIndex, @Nonnull $right_index_wrap rightIndex) {
             return exists(Where.hardcoded("$left_fk_sql = ? AND $right_fk_sql = ?", Args.of(leftIndex, rightIndex)));
@@ -1024,6 +1032,7 @@ public class ModelTableCodegen extends BaseCodegen {
         TableField rightTablePrimaryField = requireNonNull(rightTable.primaryKeyField());
 
         return EasyMaps.asMap(
+            "$LeftTable", leftTable.javaName(),
             "$left_table_sql", leftTable.sqlName(),
             "$left_index_native", Naming.shortCanonicalJavaName(leftTablePrimaryField.javaType()),
             "$left_index_wrap", Naming.shortCanonicalJavaName(Primitives.wrap(leftTablePrimaryField.javaType())),
@@ -1031,6 +1040,7 @@ public class ModelTableCodegen extends BaseCodegen {
             "$left_fk_sql", leftField.columns().get(0).sqlName(),
             "$left_entity", Naming.shortCanonicalJavaName(leftTable.modelClass()),
 
+            "$RightTable", rightTable.javaName(),
             "$right_table_sql", rightTable.sqlName(),
             "$right_index_native", Naming.shortCanonicalJavaName(rightTablePrimaryField.javaType()),
             "$right_index_wrap", Naming.shortCanonicalJavaName(Primitives.wrap(rightTablePrimaryField.javaType())),
