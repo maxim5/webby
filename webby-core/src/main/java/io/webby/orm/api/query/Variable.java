@@ -11,6 +11,16 @@ public class Variable extends Unit implements Term {
         this.type = type;
     }
 
+    public Variable(int value) {
+        super("?", Args.of(value));
+        this.type = TermType.NUMBER;
+    }
+
+    public Variable(long value) {
+        super("?", Args.of(value));
+        this.type = TermType.NUMBER;
+    }
+
     @Override
     public @NotNull TermType type() {
         return type;

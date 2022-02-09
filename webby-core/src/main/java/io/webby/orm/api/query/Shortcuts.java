@@ -18,6 +18,14 @@ public class Shortcuts {
 
     public static final Variable UNRESOLVED_NUM = unresolved("noname", TermType.NUMBER);
 
+    public static @NotNull NumberLiteral num(int value) {
+        return new NumberLiteral(value);
+    }
+
+    public static @NotNull NumberLiteral num(long value) {
+        return new NumberLiteral(value);
+    }
+
     public static @NotNull NumberLiteral num(@NotNull Number value) {
         return new NumberLiteral(value);
     }
@@ -26,8 +34,12 @@ public class Shortcuts {
         return new StringLiteral(value);
     }
 
-    public static @NotNull Variable var(@NotNull Number value) {
-        return new Variable(value, TermType.NUMBER);
+    public static @NotNull Variable var(int value) {
+        return new Variable(value);
+    }
+
+    public static @NotNull Variable var(long value) {
+        return new Variable(value);
     }
 
     public static @NotNull Variable var(@NotNull String value) {
@@ -50,7 +62,11 @@ public class Shortcuts {
         return new Variable(new UnresolvedArg(name, defaultValue), type);
     }
 
-    public static @NotNull BoolTerm lookupBy(@NotNull Column column, @NotNull Number variable) {
+    public static @NotNull BoolTerm lookupBy(@NotNull Column column, int variable) {
+        return lookupBy(column, var(variable));
+    }
+
+    public static @NotNull BoolTerm lookupBy(@NotNull Column column, long variable) {
         return lookupBy(column, var(variable));
     }
 

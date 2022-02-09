@@ -7,6 +7,14 @@ public class NumberLiteral extends Unit implements Term {
         super(num.toString());
     }
 
+    public NumberLiteral(int num) {
+        super(String.valueOf(num));
+    }
+
+    public NumberLiteral(long num) {
+        super(String.valueOf(num));
+    }
+
     @Override
     public @NotNull TermType type() {
         return TermType.NUMBER;
