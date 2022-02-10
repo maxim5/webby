@@ -1,10 +1,13 @@
 package io.webby.db.content;
 
-import io.netty.handler.codec.http.QueryStringDecoder;
 import org.jetbrains.annotations.NotNull;
 
 public record FileExt(@NotNull String extension) {
     public static final FileExt EMPTY = new FileExt("");
+
+    public FileExt {
+        assert extension.isEmpty() || extension.lastIndexOf('.') == 0 : "Invalid extension: " + extension;
+    }
 
     public static @NotNull FileExt fromName(@NotNull String name, boolean forceLower) {
         int lastDot = name.lastIndexOf('.');
@@ -16,7 +19,20 @@ public record FileExt(@NotNull String extension) {
     }
 
     public static @NotNull FileExt fromUrl(@NotNull String url, boolean forceLower) {
-        return FileExt.fromName(new QueryStringDecoder(url).rawPath(), forceLower);  // FIX[perf]: can be more efficient
+        int question = findPathEndIndex(url);
+        int slash = Math.max(url.lastIndexOf('/', question), 0);
+        return FileExt.fromName(url.substring(slash, question), forceLower);
+    }
+
+    private static int findPathEndIndex(@NotNull String uri) {
+        int len = uri.length();
+        for (int i = 0; i < len; i++) {
+            char c = uri.charAt(i);
+            if (c == '?' || c == '#') {
+                return i;
+            }
+        }
+        return len;
     }
 
     public @NotNull String pureExtension() {
