@@ -3,7 +3,7 @@ package io.webby.db.count.vote;
 import com.carrotsearch.hppc.IntArrayList;
 import com.carrotsearch.hppc.IntContainer;
 import com.carrotsearch.hppc.IntIntMap;
-import io.webby.db.event.Persistable;
+import io.webby.db.cache.Persistable;
 import org.jetbrains.annotations.NotNull;
 
 import javax.annotation.concurrent.ThreadSafe;

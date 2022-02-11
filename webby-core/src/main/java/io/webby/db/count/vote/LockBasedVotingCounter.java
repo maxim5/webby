@@ -6,6 +6,8 @@ import com.google.common.eventbus.EventBus;
 import com.google.common.eventbus.Subscribe;
 import com.google.common.flogger.FluentLogger;
 import io.webby.db.DbReadyEvent;
+import io.webby.db.cache.FlushMode;
+import io.webby.db.cache.HasCache;
 import io.webby.db.count.StoreChangedEvent;
 import io.webby.util.hppc.EasyHppc;
 import org.jetbrains.annotations.NotNull;
@@ -18,7 +20,7 @@ import java.util.logging.Level;
 import java.util.stream.IntStream;
 
 @ThreadSafe
-public class LockBasedVotingCounter implements VotingCounter {
+public class LockBasedVotingCounter implements VotingCounter, HasCache<IntIntMap> {
     private static final FluentLogger log = FluentLogger.forEnclosingClass();
     private final ReadWriteLock LOCK = new ReentrantReadWriteLock();
 
@@ -108,7 +110,7 @@ public class LockBasedVotingCounter implements VotingCounter {
     }
 
     @Override
-    public void forceFlush() {
+    public void flush(@NotNull FlushMode mode) {
         LOCK.readLock().lock();
         try {
             store.storeBatch(cache, null);
@@ -116,7 +118,7 @@ public class LockBasedVotingCounter implements VotingCounter {
             LOCK.readLock().unlock();
         }
 
-        if (storeDirty.getAndSet(false)) {
+        if (storeDirty.getAndSet(false) || mode.isFlushAll()) {
             LOCK.writeLock().lock();
             try {
                 counters.clear();
@@ -128,15 +130,6 @@ public class LockBasedVotingCounter implements VotingCounter {
     }
 
     @Override
-    public void clearCache() {
-        cache.clear();
-    }
-
-    @Override
-    public void close() {
-        forceFlush();
-    }
-
     public @NotNull IntIntMap cache() {
         LOCK.readLock().lock();
         try {

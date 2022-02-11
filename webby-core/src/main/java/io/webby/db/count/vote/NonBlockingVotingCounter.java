@@ -6,6 +6,9 @@ import com.carrotsearch.hppc.procedures.IntObjectProcedure;
 import com.google.common.eventbus.EventBus;
 import com.google.common.eventbus.Subscribe;
 import com.google.common.flogger.FluentLogger;
+import io.webby.db.cache.ClearCacheMode;
+import io.webby.db.cache.FlushMode;
+import io.webby.db.cache.HasCache;
 import io.webby.db.count.StoreChangedEvent;
 import org.jctools.counters.Counter;
 import org.jctools.counters.CountersFactory;
@@ -19,7 +22,7 @@ import java.util.logging.Level;
 import java.util.stream.IntStream;
 
 @ThreadSafe
-public class NonBlockingVotingCounter implements VotingCounter {
+public class NonBlockingVotingCounter implements VotingCounter, HasCache<IntIntMap> {
     private static final FluentLogger log = FluentLogger.forEnclosingClass();
     private final VotingStorage store;
     private final NonBlockingHashMapLong<VoteSet> cache;
@@ -84,7 +87,7 @@ public class NonBlockingVotingCounter implements VotingCounter {
     }
 
     @Override
-    public void forceFlush() {
+    public void flush(@NotNull FlushMode mode) {
         IntObjectHashMap<IntHashSet> curr = new IntObjectHashMap<>();
         IntObjectHashMap<IntHashSet> prev = new IntObjectHashMap<>();
         long[] keys = cache.keySetLong();
@@ -94,7 +97,13 @@ public class NonBlockingVotingCounter implements VotingCounter {
             prev.put((int) key, value.currentDbSnapshot());
         }
 
-        store.storeBatch(curr, storeDirty.getAndSet(false) ? null : prev);
+        boolean isFullFlush = storeDirty.getAndSet(false) || mode.isFlushAll();
+        store.storeBatch(curr, isFullFlush ? null : prev);
+
+        if (mode.clearCacheMode() == ClearCacheMode.FORCE_CLEAR_ALL) {
+            cache.clear();
+            return;
+        }
 
         for (long key : keys) {
             // FIX[minor]: log warning if false
@@ -103,16 +112,6 @@ public class NonBlockingVotingCounter implements VotingCounter {
     }
 
     @Override
-    public void clearCache() {
-        cache.clear();
-    }
-
-    @Override
-    public void close() {
-        forceFlush();
-    }
-
-    // FIX[minor]: expose cache interface
     public @NotNull IntIntMap cache() {
         IntIntHashMap map = new IntIntHashMap();
         for (long key : cache.keySetLong()) {

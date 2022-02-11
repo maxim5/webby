@@ -1,6 +1,7 @@
 package io.webby.db.event;
 
 import com.leansoft.bigqueue.IBigQueue;
+import io.webby.db.cache.FlushMode;
 import io.webby.db.codec.Codec;
 import io.webby.util.base.Unchecked;
 import org.jetbrains.annotations.NotNull;
@@ -44,15 +45,16 @@ public class BigQueueEventLog<E> implements EventLog<E> {
     }
 
     @Override
-    public void forceFlush() {
+    public void flush(@NotNull FlushMode mode) {
+        queue.flush();
     }
 
     @Override
-    public void clearCache() {
-    }
-
-    @Override
-    public void close() throws IOException {
-        queue.close();
+    public void close() {
+        try {
+            queue.close();
+        } catch (IOException e) {
+            Unchecked.rethrow(e);
+        }
     }
 }

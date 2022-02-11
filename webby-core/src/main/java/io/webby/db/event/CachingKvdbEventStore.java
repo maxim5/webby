@@ -3,6 +3,8 @@ package io.webby.db.event;
 import com.google.common.collect.ArrayListMultimap;
 import com.google.common.collect.Multimap;
 import com.google.mu.util.stream.BiStream;
+import io.webby.db.cache.FlushMode;
+import io.webby.db.cache.HasCache;
 import io.webby.db.kv.KeyValueDb;
 import io.webby.util.collect.ListBuilder;
 import org.jetbrains.annotations.NotNull;
@@ -15,7 +17,7 @@ import java.util.List;
 import java.util.concurrent.locks.ReadWriteLock;
 import java.util.concurrent.locks.ReentrantReadWriteLock;
 
-public class CachingKvdbEventStore<K, E> implements KeyEventStore<K, E> {
+public class CachingKvdbEventStore<K, E> implements KeyEventStore<K, E>, HasCache<Multimap<K, E>> {
     private final ReadWriteLock LOCK = new ReentrantReadWriteLock();  // Alternative: Guava Striped
 
     private final KeyValueDb<K, List<E>> db;
@@ -51,7 +53,7 @@ public class CachingKvdbEventStore<K, E> implements KeyEventStore<K, E> {
             LOCK.readLock().unlock();
         }
         if (cache.size() >= cacheSizeHardLimit) {
-            forceFlush();
+            flush(FlushMode.FULL_COMPACT);
         }
     }
 
@@ -81,12 +83,12 @@ public class CachingKvdbEventStore<K, E> implements KeyEventStore<K, E> {
     @Override
     public void flush() {
         if (cache.size() >= cacheSizeSoftLimit) {
-            forceFlush();
+            flush(FlushMode.INCREMENTAL);
         }
     }
 
     @Override
-    public void forceFlush() {
+    public void flush(@NotNull FlushMode mode) {
         LOCK.writeLock().lock();
         try {
             ArrayList<K> allKeys = new ArrayList<>(cache.keySet());
@@ -111,23 +113,17 @@ public class CachingKvdbEventStore<K, E> implements KeyEventStore<K, E> {
     }
 
     @Override
-    public void clearCache() {
-        forceFlush();
-    }
-
-    @Override
     public void close() {
         LOCK.writeLock().lock();
         try {
-            forceFlush();
+            flush(FlushMode.FULL_CLEAR);
             db.close();
         } finally {
             LOCK.writeLock().unlock();
         }
     }
 
-    @VisibleForTesting
-    @NotNull Multimap<K, E> cache() {
+    public @NotNull Multimap<K, E> cache() {
         return cache;
     }
 

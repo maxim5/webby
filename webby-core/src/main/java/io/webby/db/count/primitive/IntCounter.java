@@ -3,7 +3,7 @@ package io.webby.db.count.primitive;
 import com.carrotsearch.hppc.IntArrayList;
 import com.carrotsearch.hppc.IntContainer;
 import com.carrotsearch.hppc.IntIntMap;
-import io.webby.db.event.Persistable;
+import io.webby.db.cache.Persistable;
 import org.jetbrains.annotations.NotNull;
 
 public interface IntCounter extends Persistable {

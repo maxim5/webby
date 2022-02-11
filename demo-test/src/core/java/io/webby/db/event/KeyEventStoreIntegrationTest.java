@@ -7,6 +7,7 @@ import com.google.inject.Injector;
 import io.webby.app.AppLifetime;
 import io.webby.app.AppSettings;
 import io.webby.common.Lifetime;
+import io.webby.db.cache.FlushMode;
 import io.webby.db.kv.KeyValueSettings;
 import io.webby.db.kv.DbType;
 import io.webby.orm.api.Engine;
@@ -43,7 +44,7 @@ public class KeyEventStoreIntegrationTest {
         try (KeyEventStore<Integer, String> store = factory.getEventStore(EventStoreOptions.of("foo", Integer.class, String.class))) {
             assertCleanState(store);
 
-            store.forceFlush();
+            store.flush(FlushMode.FULL_CLEAR);
             assertEmptyCache(store);
             assertEqualsTo(store, multi());
         }
@@ -69,7 +70,7 @@ public class KeyEventStoreIntegrationTest {
             store.append(3, "d");
             assertEqualsTo(store, multi(array(1, "a", "c"), array(2, "b"), array(3, "d")));
 
-            store.forceFlush();
+            store.flush(FlushMode.FULL_CLEAR);
             assertEmptyCache(store);
             assertEqualsTo(store, multi(array(1, "a", "c"), array(2, "b"), array(3, "d")));
 
@@ -79,7 +80,7 @@ public class KeyEventStoreIntegrationTest {
             store.append(4, "f");
             assertEqualsTo(store, multi(array(1, "a", "c", "e"), array(2, "b"), array(3, "d"), array(4, "f")));
 
-            store.forceFlush();
+            store.flush(FlushMode.FULL_CLEAR);
             assertEmptyCache(store);
             assertEqualsTo(store, multi(array(1, "a", "c", "e"), array(2, "b"), array(3, "d"), array(4, "f")));
         }
@@ -99,14 +100,14 @@ public class KeyEventStoreIntegrationTest {
             store.append(1, "b");
             assertEqualsTo(store, multi(array(1, "a", "b")));
 
-            store.forceFlush();
+            store.flush(FlushMode.FULL_CLEAR);
             assertEmptyCache(store);
             assertEqualsTo(store, multi(array(1, "a", "b")));
 
             store.append(1, "c");
             assertEqualsTo(store, multi(array(1, "a", "b", "c")));
 
-            store.forceFlush();
+            store.flush(FlushMode.FULL_CLEAR);
             assertEmptyCache(store);
             assertEqualsTo(store, multi(array(1, "a", "b", "c")));
         }
@@ -132,7 +133,7 @@ public class KeyEventStoreIntegrationTest {
             store.deleteAll(1);
             assertEqualsTo(store, multi(array(2, "b")));
 
-            store.forceFlush();
+            store.flush(FlushMode.FULL_CLEAR);
             assertEmptyCache(store);
             assertEqualsTo(store, multi(array(2, "b")));
 
@@ -142,7 +143,7 @@ public class KeyEventStoreIntegrationTest {
             store.deleteAll(1);
             assertEqualsTo(store, multi(array(2, "b")));
 
-            store.forceFlush();
+            store.flush(FlushMode.FULL_CLEAR);
             assertEmptyCache(store);
             assertEqualsTo(store, multi(array(2, "b")));
         }
@@ -163,7 +164,7 @@ public class KeyEventStoreIntegrationTest {
             for (int i = 1; i <= size; i++) {
                 store.append(1, "12345678");
                 if (i % flushEvery == 0) {
-                    store.forceFlush();
+                    store.flush(FlushMode.FULL_CLEAR);
                     assertEmptyCache(store);
                 }
             }

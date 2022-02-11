@@ -6,6 +6,8 @@ import com.carrotsearch.hppc.IntIntMap;
 import com.google.common.eventbus.EventBus;
 import com.google.common.eventbus.Subscribe;
 import io.webby.db.DbReadyEvent;
+import io.webby.db.cache.FlushMode;
+import io.webby.db.cache.HasCache;
 import io.webby.util.hppc.EasyHppc;
 import org.jetbrains.annotations.NotNull;
 
@@ -14,7 +16,7 @@ import java.util.concurrent.locks.ReadWriteLock;
 import java.util.concurrent.locks.ReentrantReadWriteLock;
 
 @ThreadSafe
-public class LockBasedIntCounter implements IntCounter {
+public class LockBasedIntCounter implements IntCounter, HasCache<IntIntMap> {
     private final ReadWriteLock LOCK = new ReentrantReadWriteLock();
 
     private final IntCountStorage store;
@@ -62,7 +64,7 @@ public class LockBasedIntCounter implements IntCounter {
     }
 
     @Override
-    public void forceFlush() {
+    public void flush(@NotNull FlushMode mode) {
         LOCK.readLock().lock();
         try {
             store.storeBatch(cache);
@@ -72,15 +74,6 @@ public class LockBasedIntCounter implements IntCounter {
     }
 
     @Override
-    public void clearCache() {
-        forceFlush();
-    }
-
-    @Override
-    public void close() {
-        forceFlush();
-    }
-
     public @NotNull IntIntMap cache() {
         LOCK.readLock().lock();
         try {
