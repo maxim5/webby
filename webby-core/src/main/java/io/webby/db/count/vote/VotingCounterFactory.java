@@ -48,7 +48,7 @@ public class VotingCounterFactory {
 
     private @NotNull TableVotingStorage getTableVotingStorage(@NotNull VotingTableSpec tableSpec) {
         assert settings.storageSettings().isSqlEnabled() : "SQL storage is disabled";
-        BaseTable<?> table = tableManagerProvider.get().getTableOrDie(tableSpec.tableClass());
+        BaseTable<?> table = tableManagerProvider.get().getTableOrDie(tableSpec.table());
         return new TableVotingStorage(table, tableSpec.keyColumn(), tableSpec.actorColumn(), tableSpec.valueColumn());
     }
 }

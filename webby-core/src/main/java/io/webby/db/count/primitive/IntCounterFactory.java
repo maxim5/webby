@@ -33,7 +33,7 @@ public class IntCounterFactory {
             case SQL_DB -> {
                 assert settings.storageSettings().isSqlEnabled() : "SQL storage is disabled";
                 CountingTableSpec tableSpec = requireNonNull(options.tableSpec());
-                BaseTable<?> table = tableManagerProvider.get().getTableOrDie(tableSpec.tableClass());
+                BaseTable<?> table = tableManagerProvider.get().getTableOrDie(tableSpec.table());
                 yield new TableCountStorage(table, tableSpec.keyColumn(), tableSpec.valueColumn());
             }
         };

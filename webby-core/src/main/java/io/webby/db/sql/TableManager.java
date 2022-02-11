@@ -82,6 +82,14 @@ public class TableManager implements HasEngine {
         return requireNonNull(getTableOrNull(tableName));
     }
 
+    public @Nullable BaseTable<?> getTableOrNull(@NotNull TableMeta meta) {
+        return getTableOrNull(meta.sqlTableName());
+    }
+
+    public @NotNull BaseTable<?> getTableOrDie(@NotNull TableMeta meta) {
+        return getTableOrDie(meta.sqlTableName());
+    }
+
     public <E> @NotNull BaseTable<E> getMatchingBaseTableOrDie(@NotNull String name, @NotNull Class<? extends E> entity) {
         EntityTable entityTable = tableMap.get(entity);
         assert entityTable != null : "Entity table not found for: entity=%s".formatted(entity);
