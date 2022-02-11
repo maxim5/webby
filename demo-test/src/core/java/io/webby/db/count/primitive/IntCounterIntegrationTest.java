@@ -45,8 +45,8 @@ public class IntCounterIntegrationTest {
     @EnumSource(Scenario.class)
     public void empty_state_simple_inc_dec(Scenario scenario) {
         setup(scenario);
-        counter.increment(A);
-        counter.decrement(B);
+        assertEquals(1, counter.increment(A));
+        assertEquals(-1, counter.decrement(B));
         assertCountEstimates(A, 1, B, -1, C, 0);
     }
 
@@ -54,7 +54,7 @@ public class IntCounterIntegrationTest {
     @EnumSource(Scenario.class)
     public void empty_state_simple_update(Scenario scenario) {
         setup(scenario);
-        counter.update(A, 7);
+        assertEquals(7, counter.update(A, 7));
         assertCountEstimates(A, 7, B, 0, C, 0);
     }
 
@@ -62,14 +62,14 @@ public class IntCounterIntegrationTest {
     @EnumSource(Scenario.class)
     public void empty_state_multiple_updates(Scenario scenario) {
         setup(scenario);
-        counter.update(A, 5);
-        counter.update(B, -3);
-        counter.update(C, 0);
+        assertEquals(5, counter.update(A, 5));
+        assertEquals(-3, counter.update(B, -3));
+        assertEquals(0, counter.update(C, 0));
         assertCountEstimates(A, 5, B, -3, C, 0);
 
-        counter.update(A, 2);
-        counter.update(B, 1);
-        counter.update(C, -1);
+        assertEquals(7, counter.update(A, 2));
+        assertEquals(-2, counter.update(B, 1));
+        assertEquals(-1, counter.update(C, -1));
         assertCountEstimates(A, 7, B, -2, C, -1);
     }
 
