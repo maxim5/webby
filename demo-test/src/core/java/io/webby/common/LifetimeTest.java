@@ -3,6 +3,7 @@ package io.webby.common;
 import com.google.common.collect.Lists;
 import com.zaxxer.hikari.HikariDataSource;
 import io.webby.app.AppSettings;
+import io.webby.db.cache.BackgroundCacheCleaner;
 import io.webby.db.kv.KeyValueSettings;
 import io.webby.db.kv.javamap.JavaMapDbFactory;
 import io.webby.db.sql.SqlSettings;
@@ -35,7 +36,12 @@ public class LifetimeTest {
         Testing.testStartup(settings, TestingModules.instance(Lifetime.class, lifetimeMock));
         lifetimeMock.terminate();
 
-        List<Class<?>> expected = List.of(HikariDataSource.class, TableManager.class, JavaMapDbFactory.class);
+        List<Class<?>> expected = List.of(
+            HikariDataSource.class,
+            TableManager.class,
+            JavaMapDbFactory.class,
+            BackgroundCacheCleaner.class
+        );
         assertEquals(expected, addedResources);
         assertEquals(Lists.reverse(expected), deconstructedResources);
     }
