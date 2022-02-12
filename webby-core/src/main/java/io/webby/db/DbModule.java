@@ -2,6 +2,7 @@ package io.webby.db;
 
 import com.google.inject.AbstractModule;
 import io.webby.app.AppSettings;
+import io.webby.db.cache.BackgroundCacheCleaner;
 import io.webby.db.codec.CodecProvider;
 import io.webby.db.content.FileSystemStorage;
 import io.webby.db.content.StableFingerprint;
@@ -34,6 +35,7 @@ public class DbModule extends AbstractModule {
         bind(AgnosticKeyValueFactory.class).asEagerSingleton();
         bind(KeyValueFactory.class).to(AgnosticKeyValueFactory.class).asEagerSingleton();
 
+        bind(BackgroundCacheCleaner.class).asEagerSingleton();
         bind(VotingCounterFactory.class).asEagerSingleton();
         bind(IntCounterFactory.class).asEagerSingleton();
         bind(KeyEventStoreFactory.class).asEagerSingleton();

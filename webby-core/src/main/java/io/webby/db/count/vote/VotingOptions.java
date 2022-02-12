@@ -15,6 +15,6 @@ public record VotingOptions(@NotNull String name,
 
     public static @NotNull VotingOptions ofSqlTable(@NotNull VotingCounterType counterType,
                                                     @NotNull VotingTableSpec tableSpec) {
-        return new VotingOptions("", counterType, OneOf.ofFirst(StorageType.SQL_DB), tableSpec);
+        return new VotingOptions(tableSpec.table().sqlTableName(), counterType, OneOf.ofFirst(StorageType.SQL_DB), tableSpec);
     }
 }

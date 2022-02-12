@@ -12,6 +12,6 @@ public record CountingOptions(@NotNull String name,
     }
 
     public static @NotNull CountingOptions ofSqlTable(@NotNull CountingTableSpec tableSpec) {
-        return new CountingOptions("", StorageType.SQL_DB, tableSpec);
+        return new CountingOptions(tableSpec.table().sqlTableName(), StorageType.SQL_DB, tableSpec);
     }
 }

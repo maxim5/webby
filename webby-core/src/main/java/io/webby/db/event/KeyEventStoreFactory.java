@@ -4,6 +4,7 @@ import com.google.common.collect.ImmutableList;
 import com.google.inject.Inject;
 import io.webby.app.Settings;
 import io.webby.common.Lifetime;
+import io.webby.db.cache.BackgroundCacheCleaner;
 import io.webby.db.codec.Codec;
 import io.webby.db.codec.CodecProvider;
 import io.webby.db.codec.CodecSize;
@@ -26,6 +27,7 @@ public class KeyEventStoreFactory {
     @Inject private CodecProvider provider;
     @Inject private KeyValueFactory factory;
     @Inject private Lifetime lifetime;
+    @Inject private BackgroundCacheCleaner cacheCleaner;
 
     public <K, E> @NotNull KeyEventStore<K, E> getEventStore(@NotNull EventStoreOptions<K, E> options) {
         int cacheSizeSoftLimit = settings.getIntProperty("db.event.store.cache.size.soft.limit", 1 << 16);
@@ -39,6 +41,7 @@ public class KeyEventStoreFactory {
         );
         CachingKvdbEventStore<K, E> store =
             new CachingKvdbEventStore<>(db, options.compacter(), cacheSizeSoftLimit, cacheSizeHardLimit, flushBatchSize);
+        cacheCleaner.register(options.name(), store);
         lifetime.onTerminate(store);
         return store;
     }

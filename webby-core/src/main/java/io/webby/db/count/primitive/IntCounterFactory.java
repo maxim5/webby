@@ -5,6 +5,7 @@ import com.google.inject.Inject;
 import com.google.inject.Provider;
 import io.webby.app.Settings;
 import io.webby.common.Lifetime;
+import io.webby.db.cache.BackgroundCacheCleaner;
 import io.webby.db.kv.DbOptions;
 import io.webby.db.kv.KeyValueFactory;
 import io.webby.db.sql.TableManager;
@@ -19,10 +20,12 @@ public class IntCounterFactory {
     @Inject private Provider<TableManager> tableManagerProvider;
     @Inject private Lifetime lifetime;
     @Inject private EventBus eventBus;
+    @Inject private BackgroundCacheCleaner cacheCleaner;
 
     public @NotNull IntCounter getIntCounter(@NotNull CountingOptions options) {
         IntCountStorage storage = getStorage(options);
         LockBasedIntCounter counter = new LockBasedIntCounter(storage, eventBus);
+        cacheCleaner.register(options.name(), counter);
         lifetime.onTerminate(counter);
         return counter;
     }

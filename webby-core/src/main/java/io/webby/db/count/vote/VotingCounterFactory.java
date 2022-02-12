@@ -6,6 +6,7 @@ import com.google.inject.Inject;
 import com.google.inject.Provider;
 import io.webby.app.Settings;
 import io.webby.common.Lifetime;
+import io.webby.db.cache.BackgroundCacheCleaner;
 import io.webby.db.kv.DbOptions;
 import io.webby.db.kv.KeyValueDb;
 import io.webby.db.kv.KeyValueFactory;
@@ -21,6 +22,7 @@ public class VotingCounterFactory {
     @Inject private Provider<TableManager> tableManagerProvider;
     @Inject private Lifetime lifetime;
     @Inject private EventBus eventBus;
+    @Inject private BackgroundCacheCleaner cacheCleaner;
 
     public @NotNull VotingCounter getVotingCounter(@NotNull VotingOptions options) {
         VotingStorage storage = getStorage(options);
@@ -28,6 +30,7 @@ public class VotingCounterFactory {
             case LOCK_BASED -> new LockBasedVotingCounter(storage, eventBus);
             case NON_BLOCKING -> new NonBlockingVotingCounter(storage, eventBus);
         };
+        cacheCleaner.register(options.name(), counter);
         lifetime.onTerminate(counter);
         return counter;
     }
