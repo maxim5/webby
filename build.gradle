@@ -78,7 +78,7 @@ subprojects {
         common group: 'com.alibaba', name: 'fastjson', version: '1.2.79'
         common group: 'com.dslplatform', name: 'dsl-json-java8', version: '1.9.9'
         common group: 'com.fasterxml.jackson.core', name: 'jackson-databind', version: '2.13.1'
-        common group: 'com.google.code.gson', name: 'gson', version: '2.8.9'
+        common group: 'com.google.code.gson', name: 'gson', version: '2.9.0'
         common group: 'com.squareup.moshi', name: 'moshi', version: '1.13.0'
         common group: 'org.jodd', name: 'jodd-json', version: '6.0.3'
 
