@@ -31,4 +31,8 @@ class JavaSupport {
     public static @NotNull String wrapAsTextBlock(@NotNull Snippet snippet, @NotNull String indent) {
         return wrapAsTextBlock(snippet).join(indent);
     }
+
+    public static @NotNull String wrapAsStringLiteral(@NotNull String snippet) {
+        return "\"%s\"".formatted(snippet);
+    }
 }

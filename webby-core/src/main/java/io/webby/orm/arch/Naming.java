@@ -62,12 +62,16 @@ public class Naming {
         return type.getSimpleName();
     }
 
+    public static @NotNull String variableJavaName(@NotNull String sqlName) {
+        return snakeToCamel(sqlName);
+    }
+
     public static @NotNull String variableJavaName(@NotNull Class<?> type) {
         return camelUpperToLower(type.getSimpleName());
     }
 
     public static @NotNull String idJavaName(@NotNull String typeName) {
-        return Naming.camelUpperToLower(typeName) + "Id";
+        return camelUpperToLower(typeName) + "Id";
     }
 
     public static @NotNull String idJavaName(@NotNull Class<?> type) {
@@ -91,6 +95,12 @@ public class Naming {
     @SuppressWarnings("ConstantConditions")
     static @NotNull String camelToSnake(@NotNull String s) {
         return CaseFormat.UPPER_CAMEL.converterTo(CaseFormat.LOWER_UNDERSCORE).convert(s);
+    }
+
+    @VisibleForTesting
+    @SuppressWarnings("ConstantConditions")
+    static @NotNull String snakeToCamel(@NotNull String s) {
+        return CaseFormat.LOWER_UNDERSCORE.converterTo(CaseFormat.LOWER_CAMEL).convert(s);
     }
 
     @SuppressWarnings("ConstantConditions")

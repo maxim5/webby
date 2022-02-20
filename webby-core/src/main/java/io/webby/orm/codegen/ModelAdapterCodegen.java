@@ -84,13 +84,15 @@ public class ModelAdapterCodegen extends BaseCodegen {
     }
 
     private void classDef() {
+        PojoArch pojo = adapter.pojoArch();
         Map<String, String> context = Map.of(
             "$BaseClass", getBaseClass().getSimpleName(),
-            "$BaseGeneric", "$ModelClass"
+            "$BaseGeneric", "$ModelClass",
+            "$names", pojo.columns().stream().map(Column::sqlName).map(JavaSupport::wrapAsStringLiteral).collect(COMMA_JOINER)
         );
 
         appendCode(0, """
-        @JdbcAdapt($ModelClass.class)
+        @JdbcAdapt(value = $ModelClass.class, names = { $names })
         public class $AdapterClass implements $BaseClass<$BaseGeneric> {
         """, EasyMaps.merge(context, mainContext));
     }
@@ -115,10 +117,10 @@ public class ModelAdapterCodegen extends BaseCodegen {
         """, EasyMaps.merge(mainContext, context));
     }
 
+    // FIX[minor]: use javaVariableName
     private static @NotNull String columnToParam(@NotNull Column column) {
         Class<?> nativeType = column.type().jdbcType().nativeType();
-        String sqlName = column.sqlName();
-        return "%s %s".formatted(nativeType.getSimpleName(), sqlName);
+        return "%s %s".formatted(nativeType.getSimpleName(), column.sqlName());
     }
 
     private static @NotNull Map<PojoField, Column> nativeFieldsColumnIndex(@NotNull PojoArch pojo) {
@@ -126,8 +128,8 @@ public class ModelAdapterCodegen extends BaseCodegen {
         pojo.iterateAllFields(field -> {
             if (field instanceof PojoFieldNative fieldNative) {
                 assert !result.containsKey(field) :
-                        "Internal error. Several columns for one field: `%s` of `%s`: %s, %s"
-                        .formatted(field, pojo.pojoType(), fieldNative.column(), result.get(field));
+                    "Internal error. Several columns for one field: `%s` of `%s`: %s, %s"
+                    .formatted(field, pojo.pojoType(), fieldNative.column(), result.get(field));
                 result.put(field, fieldNative.column());
             }
         });
