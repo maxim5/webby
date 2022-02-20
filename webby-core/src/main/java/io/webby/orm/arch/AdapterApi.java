@@ -1,17 +1,22 @@
 package io.webby.orm.arch;
 
 import com.google.mu.util.stream.BiStream;
+import io.webby.orm.adapter.JdbcAdapt;
+import io.webby.util.base.EasyPrimitives.MutableInt;
 import io.webby.util.collect.OneOf;
 import io.webby.util.lazy.AtomicLazy;
 import io.webby.util.lazy.DelayedAccessLazy;
+import io.webby.util.reflect.EasyAnnotations;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
+import org.jetbrains.annotations.VisibleForTesting;
 
 import java.lang.reflect.Field;
 import java.lang.reflect.Method;
 import java.lang.reflect.Parameter;
 import java.util.Arrays;
 import java.util.List;
+import java.util.Optional;
 
 import static io.webby.util.reflect.EasyMembers.*;
 import static io.webby.orm.arch.InvalidSqlModelException.failIf;
@@ -70,7 +75,8 @@ public class AdapterApi {
         return oneOf.mapToInt(klass -> getCreationParameters(klass).length, HasColumns::columnsNumber);
     }
 
-    private static @NotNull List<Column> classToAdapterColumns(@NotNull Class<?> klass, @NotNull String fieldSqlName) {
+    @VisibleForTesting
+    static @NotNull List<Column> classToAdapterColumns(@NotNull Class<?> klass, @NotNull String fieldSqlName) {
         Parameter[] parameters = getCreationParameters(klass);
         if (parameters.length == 1) {
             JdbcType paramType = JdbcType.findByMatchingNativeType(parameters[0].getType());
@@ -78,13 +84,18 @@ public class AdapterApi {
             Column column = new Column(fieldSqlName, new ColumnType(paramType));
             return List.of(column);
         } else {
+            Optional<String[]> names = EasyAnnotations.getOptionalAnnotation(klass, JdbcAdapt.class).map(JdbcAdapt::names);
+            MutableInt count = new MutableInt();
             return BiStream.from(Arrays.stream(parameters),
                                  param -> param,
                                  param -> JdbcType.findByMatchingNativeType(param.getType()))
-                    .mapKeys(param -> Naming.concatSqlNames(fieldSqlName, Naming.fieldSqlName(param)))
-                    .mapValues(ColumnType::new)
-                    .mapToObj(Column::new)
-                    .toList();
+                .mapKeys(param -> Naming.concatSqlNames(
+                    fieldSqlName,
+                    names.map(array -> array[count.value++]).orElseGet(() -> Naming.fieldSqlName(param)))
+                )
+                .mapValues(ColumnType::new)
+                .mapToObj(Column::new)
+                .toList();
         }
     }
 

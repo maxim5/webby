@@ -9,4 +9,5 @@ import java.lang.annotation.Target;
 @Target({ElementType.TYPE})
 public @interface JdbcAdapt {
     Class<?>[] value();
+    String[] names() default {};
 }
