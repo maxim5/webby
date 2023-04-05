@@ -8,6 +8,9 @@ import java.util.Collection;
 import java.util.Comparator;
 import java.util.function.UnaryOperator;
 
+/**
+ * A mutable public version of a class backing {@code Arrays.asList()}. Supports the {@link Array.Builder}.
+ */
 public final class Array<E> extends BaseArray<E> {
     private Array(@Nullable E @NotNull[] arr) {
         super(arr);

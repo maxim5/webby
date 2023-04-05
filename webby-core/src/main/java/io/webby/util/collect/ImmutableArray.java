@@ -9,6 +9,9 @@ import java.util.Comparator;
 import java.util.function.Predicate;
 import java.util.function.UnaryOperator;
 
+/**
+ * An immutable public version of a class backing {@code Arrays.asList()}. Supports the {@link ImmutableArray.Builder}.
+ */
 public final class ImmutableArray<E> extends BaseArray<E> {
     private ImmutableArray(@Nullable E @NotNull [] arr) {
         super(arr);

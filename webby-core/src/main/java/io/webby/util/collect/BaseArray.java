@@ -6,6 +6,9 @@ import org.jetbrains.annotations.Nullable;
 import java.util.*;
 import java.util.function.Consumer;
 
+/**
+ * A base public version of a class backing {@code Arrays.asList()}. Supports the {@link BaseArray.BaseBuilder}.
+ */
 public abstract class BaseArray<E> extends AbstractList<E> {
     protected final E[] arr;
 
