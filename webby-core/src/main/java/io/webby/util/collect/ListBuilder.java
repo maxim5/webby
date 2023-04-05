@@ -5,12 +5,14 @@ import com.google.common.collect.Streams;
 import com.google.errorprone.annotations.CanIgnoreReturnValue;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
+import org.jetbrains.annotations.VisibleForTesting;
 
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.List;
+import java.util.*;
 import java.util.stream.Stream;
 
+/**
+ * A universal {@link List} builder. Supports null values.
+ */
 @CanIgnoreReturnValue
 public class ListBuilder<T> {
     private final List<T> list;
@@ -43,6 +45,11 @@ public class ListBuilder<T> {
         return this;
     }
 
+    public @NotNull ListBuilder<T> addAll(@NotNull Collection<? extends T> items) {
+        list.addAll(items);
+        return this;
+    }
+
     @SuppressWarnings("unchecked")
     public @NotNull ListBuilder<T> addAll(@Nullable T @NotNull ... items) {
         return addAll(Arrays.asList(items));
@@ -65,6 +72,7 @@ public class ListBuilder<T> {
 
     // does not allow nulls
     public @NotNull List<T> toList() {
+        assert !containsNulls() : "The builder contains nulls: toList() is not supported: " + list;
         return List.copyOf(list);
     }
 
@@ -74,7 +82,8 @@ public class ListBuilder<T> {
     }
 
     // does not allow nulls
-    public @NotNull ImmutableList<T> toImmutableList() {
+    public @NotNull ImmutableList<T> toGuavaImmutableList() {
+        assert !containsNulls() : "The builder contains nulls: toGuavaImmutableList() is not supported: " + list;
         return ImmutableList.copyOf(list);
     }
 
@@ -104,7 +113,12 @@ public class ListBuilder<T> {
         return result;
     }
 
-    public static <E> @NotNull List<E> concatOne(@NotNull Iterable<E> first, @NotNull E second) {
+    public static <E> @NotNull List<E> concatOne(@NotNull Iterable<E> first, @Nullable E second) {
         return Stream.concat(Streams.stream(first), Stream.of(second)).toList();
+    }
+
+    @VisibleForTesting
+    /*package*/ boolean containsNulls() {
+        return list.stream().anyMatch(Objects::isNull);
     }
 }
