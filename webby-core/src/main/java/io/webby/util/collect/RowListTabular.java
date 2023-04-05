@@ -40,11 +40,13 @@ public class RowListTabular<T, R> implements Tabular<T> {
 
     @Override
     public @NotNull List<T> rowAt(int row) {
+        assert row < rows() : "Out of bounds: [%d]".formatted(row);
         return rowToCol.apply(rows.get(row));
     }
 
     @Override
     public @NotNull List<T> columnAt(int col) {
+        assert col < columns() : "Out of bounds: [%d]".formatted(col);
         return IntStream.range(0, rows()).mapToObj(this::rowAt).map(row -> row.get(col)).toList();
     }
 }

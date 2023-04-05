@@ -40,11 +40,13 @@ public class ArrayTabular<T> implements Tabular<T> {
     }
 
     public T @NotNull[] fastRow(int row) {
+        assert row < rows() : "Out of bounds: [%d]".formatted(row);
         return array[row];
     }
 
     @Override
     public @NotNull List<T> columnAt(int col) {
+        assert col < columns() : "Out of bounds: [%d]".formatted(col);
         return IntStream.range(0, rows()).mapToObj(row -> array[row][col]).toList();
     }
 }
