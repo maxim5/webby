@@ -7,6 +7,9 @@ import org.jetbrains.annotations.Nullable;
 import java.util.function.Function;
 import java.util.function.ToIntFunction;
 
+/**
+ * Can hold an immutable pair of nullable objects, only one of which is set at a time.
+ */
 @Immutable
 public class OneOf<U, V> {
     private final U first;
@@ -63,10 +66,12 @@ public class OneOf<U, V> {
     }
 
     public <T> @NotNull OneOf<T, V> mapFirst(@NotNull Function<U, T> convert) {
+        assert hasFirst() : "Can't mapFirst() because first is not set: " + this;
         return map(convert, second -> second);
     }
 
     public <T> @NotNull OneOf<U, T> mapSecond(@NotNull Function<V, T> convert) {
+        assert hasSecond() : "Can't mapSecond() because second is not set: " + this;
         return map(first -> first, convert);
     }
 
@@ -85,6 +90,6 @@ public class OneOf<U, V> {
 
     public enum Which {
         FIRST,
-        SECOND
+        SECOND,
     }
 }
