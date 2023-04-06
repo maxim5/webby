@@ -2,12 +2,50 @@ package io.webby.util.collect;
 
 import org.junit.jupiter.api.Test;
 
+import java.util.List;
 import java.util.Optional;
 import java.util.stream.Stream;
 
+import static com.google.common.truth.Truth.assertThat;
+import static io.webby.testing.TestingUtil.iterable;
+import static io.webby.testing.TestingUtil.sortedSetOf;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
 public class EasyIterablesTest {
+    @Test
+    public void asList_list() {
+        assertThat(EasyIterables.asList(List.of())).isEmpty();
+        assertThat(EasyIterables.asList(List.of(1))).containsExactly(1).inOrder();
+        assertThat(EasyIterables.asList(List.of(1, 2))).containsExactly(1, 2).inOrder();
+    }
+
+    @Test
+    public void asList_list_same_instance() {
+        List<Integer> items = List.of(1, 2);
+        assertThat(EasyIterables.asList(items)).isSameInstanceAs(items);
+    }
+
+    @Test
+    public void asList_collection() {
+        assertThat(EasyIterables.asList(sortedSetOf())).isEmpty();
+        assertThat(EasyIterables.asList(sortedSetOf(1))).containsExactly(1).inOrder();
+        assertThat(EasyIterables.asList(sortedSetOf(1, 2))).containsExactly(1, 2).inOrder();
+    }
+
+    @Test
+    public void asList_iterable() {
+        assertThat(EasyIterables.asList(iterable())).isEmpty();
+        assertThat(EasyIterables.asList(iterable("foo"))).containsExactly("foo").inOrder();
+        assertThat(EasyIterables.asList(iterable("foo", "bar"))).containsExactly("foo", "bar").inOrder();
+    }
+
+    @Test
+    public void estimateSize_collection() {
+        assertEquals(EasyIterables.estimateSize(List.of(), -1), 0);
+        assertEquals(EasyIterables.estimateSize(List.of(1), -1), 1);
+        assertEquals(EasyIterables.estimateSize(List.of(1, 2), -1), 2);
+    }
+
     @Test
     public void getOnlyItemOrEmpty_simple() {
         assertEquals(Stream.of().collect(EasyIterables.getOnlyItemOrEmpty()), Optional.empty());

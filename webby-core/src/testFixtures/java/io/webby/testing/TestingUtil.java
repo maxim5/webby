@@ -5,11 +5,24 @@ import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.Arrays;
+import java.util.TreeSet;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 public class TestingUtil {
     @SafeVarargs
-    public static <T> T[] array(@Nullable T @NotNull... items) {
+    public static <T> T[] array(@Nullable T @NotNull ... items) {
         return items;
+    }
+
+    @SafeVarargs
+    public static <T> @NotNull Iterable<T> iterable(@Nullable T @NotNull ... items) {
+        return Stream.of(items)::iterator;
+    }
+
+    @SafeVarargs
+    public static <T> @NotNull TreeSet<T> sortedSetOf(@Nullable T @NotNull ... items) {
+        return Stream.of(items).collect(Collectors.toCollection(TreeSet::new));
     }
 
     @SafeVarargs

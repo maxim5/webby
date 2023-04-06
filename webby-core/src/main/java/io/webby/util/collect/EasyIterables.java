@@ -15,18 +15,18 @@ import static io.webby.util.base.EasyCast.castAny;
 public class EasyIterables {
     public static <E> @NotNull List<E> asList(@NotNull Iterable<? extends E> items) {
         return castAny(
-                items instanceof List<?> list
-                    ? list
-                    : items instanceof Collection<?> collection
-                        ? new ArrayList<>(collection)
-                        : StreamSupport.stream(items.spliterator(), false).toList()
+            items instanceof List<?> list
+                ? list
+                : items instanceof Collection<?> collection
+                    ? new ArrayList<>(collection)
+                    : StreamSupport.stream(items.spliterator(), false).toList()
         );
     }
 
     public static <E> long estimateSize(@NotNull Iterable<E> items, int def) {
         return items instanceof Collection<?> collection
-                ? collection.size()
-                : Math.min(items.spliterator().estimateSize(), def);
+            ? collection.size()
+            : Math.min(items.spliterator().estimateSize(), def);
     }
 
     public static <E> int estimateSizeInt(@NotNull Iterable<E> items, int def) {
@@ -49,7 +49,7 @@ public class EasyIterables {
     );
 
     /**
-     * Returns a collector that extracts a single non-null item from the stream or otherwise empty.
+     * Returns a stream collector that extracts a single non-null item from the stream or otherwise empty.
      * Treats null items as if they didn't appear in the stream.
      */
     public static <E> @NotNull Collector<E, ?, Optional<E>> getOnlyItemOrEmpty() {
