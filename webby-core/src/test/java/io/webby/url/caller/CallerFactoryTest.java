@@ -319,7 +319,7 @@ public class CallerFactoryTest {
         GenericFunction instance = "%d:%d:%d"::formatted;
         Caller caller = factory.create(instance, binding(instance), Map.of(), List.of("x", "y", "z"));
 
-        assertEquals("1:2:3",caller.call(get(), vars("x", 1, "y", 2, "z", 3)));
+        assertEquals("1:2:3", caller.call(get(), vars("x", 1, "y", 2, "z", 3)));
         assertEquals("0:9223372036854775807:127", caller.call(get(), vars("x", 0, "y", Long.MAX_VALUE, "z", 127)));
         assertEquals("-10:-9223372036854775808:-128", caller.call(get(), vars("x", -10, "y", Long.MIN_VALUE, "z", -128)));
 
@@ -393,8 +393,8 @@ public class CallerFactoryTest {
     @SuppressWarnings("UnstableApiUsage")
     private static Map<String, CharArray> vars(Object @NotNull ... items) {
         List<CharSequence> list = Streams.mapWithIndex(
-                Arrays.stream(items),
-                (item, i) -> (i % 2 == 0) ? item.toString() : new CharArray(item.toString())
+            Arrays.stream(items),
+            (item, i) -> (i % 2 == 0) ? item.toString() : new CharArray(item.toString())
         ).toList();
         return asMap(list);
     }
