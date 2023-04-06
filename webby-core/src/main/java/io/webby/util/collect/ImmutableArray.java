@@ -10,7 +10,9 @@ import java.util.function.Predicate;
 import java.util.function.UnaryOperator;
 
 /**
- * An immutable public version of a class backing {@code Arrays.asList()}. Supports the {@link ImmutableArray.Builder}.
+ * An immutable version of a {@link BaseArray}. Provides {@link ImmutableArray.Builder} for incremental construction.
+ *
+ * @see BaseArray
  */
 public final class ImmutableArray<E> extends BaseArray<E> {
     private ImmutableArray(@Nullable E @NotNull [] arr) {
