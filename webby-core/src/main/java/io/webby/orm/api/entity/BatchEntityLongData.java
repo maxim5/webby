@@ -13,6 +13,12 @@ import java.sql.PreparedStatement;
 import java.sql.SQLException;
 import java.util.List;
 
+/**
+ * A {@link BatchEntityData} implementation which stores the only-int row set using a single {@link LongContainer} and
+ * splits it into {@link LongArrayList} chunks.
+ * <p>
+ * The statement is updated via {@link PreparedStatement#setLong(int, long)} from index 0.
+ */
 public record BatchEntityLongData(@NotNull List<Column> columns,
                                   @NotNull LongContainer values) implements BatchEntityData<LongArrayList> {
     public BatchEntityLongData {

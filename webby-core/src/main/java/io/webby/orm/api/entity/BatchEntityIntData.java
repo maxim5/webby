@@ -13,6 +13,12 @@ import java.sql.PreparedStatement;
 import java.sql.SQLException;
 import java.util.List;
 
+/**
+ * A {@link BatchEntityData} implementation which stores the only-int row set using a single {@link IntContainer} and
+ * splits it into {@link IntArrayList} chunks.
+ * <p>
+ * The statement is updated via {@link PreparedStatement#setInt(int, int)} from index 0.
+ */
 public record BatchEntityIntData(@NotNull List<Column> columns,
                                  @NotNull IntContainer values) implements BatchEntityData<IntArrayList> {
     public BatchEntityIntData {
