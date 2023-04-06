@@ -23,14 +23,25 @@ import java.util.stream.Stream;
 import static io.webby.util.collect.ImmutableArrayList.toImmutableArrayList;
 
 /**
- * Holds the ordered list of arguments to be applied to JDBC queries.
+ * Holds the ordered list of arguments to be applied to JDBC queries. The list corresponds to all <code>"?"</code>
+ * in the query, i.e. all non-hardcoded values. The <code>"?"</code> usually appear in the query via {@link Variable}s.
  * <p>
- * Arguments can include constant values (ints, {@code String} literals, or arbitrary {@code Object}s) or
+ * Arguments can include constant values (e.g., ints, {@code String} literals, or arbitrary {@code Object}s) or
  * unresolved values (instances of {@link UnresolvedArg} class). Unresolved args are essentially named placeholders
- * that are unknown at the query construction time and will be replaced with real values before query execution.
+ * that are unknown at the query construction time (for example, a query may be a static constant) and will be replaced
+ * with real values just before query execution.
  * <p>
- * The class does it's best to optimize the memory necessary for the arguments.
- * Specially supported cases are all-ints (stores {@link IntArrayList}) and all-longs (stores {@link LongArrayList}).
+ * Usually each unit of a query inherits {@link HasArgs} interface and knows the number of required arguments, so asks
+ * them at construction time. Bigger units collect the {@link Args} from all individual constituent units. The final
+ * query has all {@link Args} (some maybe unresolved) in the right order.
+ * <p>
+ * The class does it's best to optimize the memory necessary for the values. Default is a simple {@link List<Object>}.
+ * Specially supported cases are all-ints (stored as {@link IntArrayList}) and all-longs (stored as {@link LongArrayList}).
+ * The mix of ints and {@link Object}s is stored in a default way.
+ *
+ * @see HasArgs
+ * @see Variable
+ * @see UnresolvedArg
  */
 @Immutable
 public final class Args {
