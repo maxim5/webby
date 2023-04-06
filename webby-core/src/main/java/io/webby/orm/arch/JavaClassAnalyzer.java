@@ -77,9 +77,9 @@ class JavaClassAnalyzer {
                                            fieldNames, paramNames);
                 } else {
                     log.at(Level.WARNING).log(
-                            "Parameter names aren't available in the compiled `%s` class. " +
-                            "Field matching can be incorrect. Generated code needs manual review.",
-                            klass.getSimpleName()
+                        "Parameter names aren't available in the compiled `%s` class. " +
+                        "Field matching can be incorrect. Generated code needs manual review.",
+                        klass.getSimpleName()
                     );
                     return true;
                 }
@@ -107,21 +107,21 @@ class JavaClassAnalyzer {
         String fieldName = field.getName();
 
         Map<String, Method> eligibleMethods = Arrays.stream(field.getDeclaringClass().getMethods())
-                .filter(method -> method.getReturnType() == fieldType &&
-                                  method.getParameterCount() == 0 &&
-                                  isPublic(method) &&
-                                  !isStatic(method))
-                .collect(ImmutableMap.toImmutableMap(Method::getName, Function.identity()));
+            .filter(method -> method.getReturnType() == fieldType &&
+                              method.getParameterCount() == 0 &&
+                              isPublic(method) &&
+                              !isStatic(method))
+            .collect(ImmutableMap.toImmutableMap(Method::getName, Function.identity()));
 
         return firstNonNullIfExist(List.of(
-                () -> eligibleMethods.get(fieldName),
-                () -> eligibleMethods.get("%s%s".formatted(
-                        fieldType == boolean.class ? "is" : "get",
-                        Naming.camelLowerToUpper(fieldName))),
-                () -> EasyIterables.getOnlyItem(eligibleMethods.values().stream().filter(method -> {
-                    String name = method.getName().toLowerCase();
-                    return name.startsWith("get") && name.contains(fieldName.toLowerCase());
-                })).orElse(null)
+            () -> eligibleMethods.get(fieldName),
+            () -> eligibleMethods.get("%s%s".formatted(
+                fieldType == boolean.class ? "is" : "get",
+                Naming.camelLowerToUpper(fieldName))),
+            () -> eligibleMethods.values().stream().filter(method -> {
+                String name = method.getName().toLowerCase();
+                return name.startsWith("get") && name.contains(fieldName.toLowerCase());
+            }).collect(EasyIterables.getOnlyItemOrEmpty()).orElse(null)
         ));
     }
 }
