@@ -3,6 +3,7 @@ package io.webby.orm.api.query;
 import com.carrotsearch.hppc.IntArrayList;
 import com.carrotsearch.hppc.LongArrayList;
 import com.google.errorprone.annotations.CanIgnoreReturnValue;
+import io.webby.util.collect.ImmutableArrayList;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import org.junit.jupiter.api.Test;
@@ -14,6 +15,7 @@ import java.util.stream.Collectors;
 
 import static com.google.common.truth.Truth.assertThat;
 import static io.webby.testing.AssertBasics.assertPrivateFieldClass;
+import static io.webby.testing.AssertBasics.getPrivateFieldValue;
 import static org.junit.jupiter.api.Assertions.*;
 
 public class ArgsTest {
@@ -294,6 +296,15 @@ public class ArgsTest {
     }
 
     @Test
+    public void resolveArgsByOrderedList_all_unresolved() {
+        Args args = Args.of(UNRESOLVED_A, UNRESOLVED_B);
+        List<?> resolved = List.of("foo", 10L);
+
+        assertThat(args.asList()).containsExactly(0, null).inOrder();
+        assertThat(args.resolveArgsByOrderedList(resolved).asList()).containsExactly("foo", 10L).inOrder();
+    }
+
+    @Test
     public void resolveArgsByOrderedList_missing_values() {
         Args args = Args.of(1, UNRESOLVED_A, "2");
 
@@ -329,7 +340,14 @@ public class ArgsTest {
         }
 
         public @NotNull ArgsAssert assertInternalConsistency() {
-            // FIX[norm]: check InternalType consistency
+            String type = getPrivateFieldValue(args, "type").toString();
+            Class<?> expectedClass = switch (type) {
+                case "INTS" -> IntArrayList.class;
+                case "LONGS" -> LongArrayList.class;
+                case "GENERIC_LIST" -> ImmutableArrayList.class;
+                default -> throw new AssertionError("Unexpected args.type: " + type);
+            };
+            assertInternalType(expectedClass);
             return this;
         }
 

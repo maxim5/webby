@@ -24,10 +24,17 @@ import static io.webby.util.collect.ImmutableArrayList.toImmutableArrayList;
 
 /**
  * Holds the ordered list of arguments to be applied to JDBC queries.
+ * <p>
+ * Arguments can include constant values (ints, {@code String} literals, or arbitrary {@code Object}s) or
+ * unresolved values (instances of {@link UnresolvedArg} class). Unresolved args are essentially named placeholders
+ * that are unknown at the query construction time and will be replaced with real values before query execution.
+ * <p>
+ * The class does it's best to optimize the memory necessary for the arguments.
+ * Specially supported cases are all-ints (stores {@link IntArrayList}) and all-longs (stores {@link LongArrayList}).
  */
 @Immutable
 public final class Args {
-    private final InternalType type;
+    private final InternalType type;     // used to optimize the storage (internal and external lists)
     private final Iterable<?> internal;  // original set of args, may contain unresolved
     private final Iterable<?> external;  // args for external use, all unresolved replaced with default values
 
@@ -98,20 +105,23 @@ public final class Args {
 
     public static @NotNull Args flattenArgsOf(@Nullable HasArgs @NotNull ... items) {
         return of(Arrays.stream(items)
-                      .filter(Objects::nonNull)
-                      .map(HasArgs::args)
-                      .flatMap(Args::internalStream)
-                      .collect(toImmutableArrayList()));
+            .filter(Objects::nonNull)
+            .map(HasArgs::args)
+            .flatMap(Args::internalStream)
+            .collect(toImmutableArrayList()));
     }
 
     public static @NotNull Args flattenArgsOf(@NotNull Collection<? extends HasArgs> items) {
         return of(items.stream()
-                      .filter(Objects::nonNull)
-                      .map(HasArgs::args)
-                      .flatMap(Args::internalStream)
-                      .collect(toImmutableArrayList()));
+            .filter(Objects::nonNull)
+            .map(HasArgs::args)
+            .flatMap(Args::internalStream)
+            .collect(toImmutableArrayList()));
     }
 
+    /**
+     * For internal use: when all {@code args} are resolved.
+     */
     private static @NotNull Args resolved(@NotNull Iterable<?> args) {
         // FIX[minor]: assert all resolved?
         return new Args(InternalType.GENERIC_LIST, ImmutableArrayList.copyOf(args), ImmutableArrayList.copyOf(args));
