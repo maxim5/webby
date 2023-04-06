@@ -36,7 +36,11 @@ public class EasyIterables {
     private static final Object MORE_THAN_ONE_ITEM = new Object();
     private static final Collector<Object, ?, Optional<Object>> ONLY_ITEM_OR_EMPTY = Collector.of(
         AtomicReference::new,
-        (ref, obj) -> ref.updateAndGet(cur -> cur != null ? MORE_THAN_ONE_ITEM : obj),
+        (ref, obj) -> {
+            if (obj != null) {
+                ref.updateAndGet(cur -> cur != null ? MORE_THAN_ONE_ITEM : obj);
+            }
+        },
         (ref1, ref2) -> {
             ref1.compareAndSet(null, ref2.get());
             return ref1;
@@ -44,6 +48,10 @@ public class EasyIterables {
         ref -> Optional.ofNullable(ref.get() == MORE_THAN_ONE_ITEM ? null : ref.get())
     );
 
+    /**
+     * Returns a collector that extracts a single non-null item from the stream or otherwise empty.
+     * Treats null items as if they didn't appear in the stream.
+     */
     public static <E> @NotNull Collector<E, ?, Optional<E>> getOnlyItemOrEmpty() {
         return castAny(ONLY_ITEM_OR_EMPTY);
     }
