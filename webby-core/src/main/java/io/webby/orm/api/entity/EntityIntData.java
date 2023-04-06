@@ -9,6 +9,10 @@ import java.sql.PreparedStatement;
 import java.sql.SQLException;
 import java.util.List;
 
+/**
+ * A {@link EntityData} implementation which stores the only-integers row using a {@link IntContainer}.
+ * The statement is updated via {@link PreparedStatement#setInt(int, int)} from index 0.
+ */
 public record EntityIntData(@NotNull List<Column> columns, @NotNull IntContainer data) implements EntityData<IntContainer> {
     public EntityIntData {
         assert !columns.isEmpty() : "Entity data is empty: " + this;

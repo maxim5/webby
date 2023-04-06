@@ -9,6 +9,10 @@ import java.sql.PreparedStatement;
 import java.sql.SQLException;
 import java.util.List;
 
+/**
+ * A {@link EntityData} implementation which stores the only-longs row using a {@link LongContainer}.
+ * The statement is updated via {@link PreparedStatement#setLong(int, long)} from index 0.
+ */
 public record EntityLongData(@NotNull List<Column> columns, @NotNull LongContainer data) implements EntityData<LongContainer> {
     public EntityLongData {
         assert !columns.isEmpty() : "Entity data is empty: " + this;

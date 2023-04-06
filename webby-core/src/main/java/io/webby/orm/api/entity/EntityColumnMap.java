@@ -9,6 +9,10 @@ import java.sql.SQLException;
 import java.util.EnumMap;
 import java.util.Set;
 
+/**
+ * A {@link EntityData} implementation which stores the arbitrary row using a {@link EnumMap}.
+ * The statement is updated via {@link PreparedStatement#setObject(int, Object)} from index 0.
+ */
 public record EntityColumnMap<E extends Enum<E> & Column>(@NotNull EnumMap<E, Object> map) implements EntityData<EnumMap<E, Object>> {
     public EntityColumnMap {
         assert !map.isEmpty() : "Entity data is empty: " + map;
