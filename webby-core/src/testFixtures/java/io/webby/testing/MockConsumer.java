@@ -15,6 +15,13 @@ import java.util.function.Consumer;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
+/**
+ * A {@link Consumer} and {@link ThrowConsumer} implementation that allows to set up expectations
+ * (how many times calls, what args, etc.) as well as track that all consumers are called up until the end.
+ *
+ * @param <T> type of items accepted by the consumer
+ * @param <E> exception to throw if a mock for {@link ThrowConsumer} is necessary.
+ */
 public class MockConsumer<T, E extends Throwable> implements Consumer<T>, ThrowConsumer<T, E>, AutoCloseable {
     private final List<T> items = new ArrayList<>();
     private List<T> expected;
@@ -36,7 +43,10 @@ public class MockConsumer<T, E extends Throwable> implements Consumer<T>, ThrowC
         return new MockConsumer<T, RuntimeException>().expect(expected);
     }
 
-    public class Throw {
+    /**
+     * To be used for {@code ThrowConsumer} mocks.
+     */
+    public static class Throw {
         @CheckReturnValue
         public static <T, E extends Throwable> MockConsumer<T, E> mock() {
             return new MockConsumer<>();
