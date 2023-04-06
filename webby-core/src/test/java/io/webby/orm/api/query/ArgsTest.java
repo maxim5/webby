@@ -236,6 +236,71 @@ public class ArgsTest {
             .assertUnresolved(UNRESOLVED_A, UNRESOLVED_B);
     }
 
+    @Test
+    public void resolveArgsByName_zero_unresolved() {
+        Args args = Args.of(1, "2");
+        assertThat(args.resolveArgsByName(Map.of())).isSameInstanceAs(args);
+    }
+
+    @Test
+    public void resolveArgsByName_one_unresolved() {
+        Args args = Args.of(1, UNRESOLVED_A, "2");
+        Map<String, ?> resolved = Map.of(UNRESOLVED_A.name(), "foo");
+
+        assertThat(args.asList()).containsExactly(1, 0, "2").inOrder();
+        assertThat(args.resolveArgsByName(resolved).asList()).containsExactly(1, "foo", "2").inOrder();
+    }
+
+    @Test
+    public void resolveArgsByName_two_unresolved() {
+        Args args = Args.of(1, UNRESOLVED_A, "2", UNRESOLVED_B);
+        Map<String, ?> resolved = Map.of(UNRESOLVED_A.name(), "foo", UNRESOLVED_B.name(), 10L);
+
+        assertThat(args.asList()).containsExactly(1, 0, "2", null).inOrder();
+        assertThat(args.resolveArgsByName(resolved).asList()).containsExactly(1, "foo", "2", 10L).inOrder();
+    }
+
+    @Test
+    public void resolveArgsByName_missing_values() {
+        Args args = Args.of(1, UNRESOLVED_A, "2");
+
+        assertThrows(AssertionError.class, () -> args.resolveArgsByName(Map.of()));
+        assertThrows(AssertionError.class, () -> args.resolveArgsByName(Map.of(UNRESOLVED_B.name(), "foo")));
+        assertThrows(AssertionError.class, () -> args.resolveArgsByName(Map.of(UNRESOLVED_A.name(), 1, UNRESOLVED_B.name(), 2)));
+    }
+
+    @Test
+    public void resolveArgsByOrderedList_zero_unresolved() {
+        Args args = Args.of(1, "2");
+        assertThat(args.resolveArgsByOrderedList(List.of())).isSameInstanceAs(args);
+    }
+
+    @Test
+    public void resolveArgsByOrderedList_one_unresolved() {
+        Args args = Args.of(1, UNRESOLVED_A, "2");
+        List<String> resolved = List.of("foo");
+
+        assertThat(args.asList()).containsExactly(1, 0, "2").inOrder();
+        assertThat(args.resolveArgsByOrderedList(resolved).asList()).containsExactly(1, "foo", "2").inOrder();
+    }
+
+    @Test
+    public void resolveArgsByOrderedList_two_unresolved() {
+        Args args = Args.of(1, UNRESOLVED_A, "2", UNRESOLVED_B);
+        List<?> resolved = List.of("foo", 10L);
+
+        assertThat(args.asList()).containsExactly(1, 0, "2", null).inOrder();
+        assertThat(args.resolveArgsByOrderedList(resolved).asList()).containsExactly(1, "foo", "2", 10L).inOrder();
+    }
+
+    @Test
+    public void resolveArgsByOrderedList_missing_values() {
+        Args args = Args.of(1, UNRESOLVED_A, "2");
+
+        assertThrows(AssertionError.class, () -> args.resolveArgsByOrderedList(List.of()));
+        assertThrows(AssertionError.class, () -> args.resolveArgsByOrderedList(List.of("foo", "bar")));
+    }
+
     private static @NotNull ArgsAssert with(@NotNull Args args) {
         return new ArgsAssert(args);
     }

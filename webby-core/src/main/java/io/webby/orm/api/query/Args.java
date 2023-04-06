@@ -5,6 +5,7 @@ import com.carrotsearch.hppc.IntContainer;
 import com.carrotsearch.hppc.LongArrayList;
 import com.carrotsearch.hppc.LongContainer;
 import com.google.common.collect.ImmutableMap;
+import com.google.errorprone.annotations.Immutable;
 import io.webby.orm.api.QueryRunner;
 import io.webby.util.base.EasyObjects;
 import io.webby.util.collect.ImmutableArrayList;
@@ -21,6 +22,10 @@ import java.util.stream.Stream;
 
 import static io.webby.util.collect.ImmutableArrayList.toImmutableArrayList;
 
+/**
+ * Holds the ordered list of arguments to be applied to JDBC queries.
+ */
+@Immutable
 public final class Args {
     private final InternalType type;
     private final Iterable<?> internal;  // original set of args, may contain unresolved
@@ -164,13 +169,20 @@ public final class Args {
         return internalList().stream();
     }
 
+    /**
+     * Used to transform raw {@code internal} values to {@code external}.
+     */
     private static @NotNull ImmutableArrayList<Object> unwrapArgs(@NotNull List<?> args) {
         return args.stream()
             .map(arg -> arg instanceof UnresolvedArg unresolved ? unresolved.defaultValue() : arg)
             .collect(toImmutableArrayList());
     }
 
-    // FIX[minor]: Use array or IntObjMap?
+    /**
+     * Returns a map of unresolved arguments of this instance: <code>position -> arg</code>.
+     * If all resolved, result is empty.
+     */
+    // FIX[minor]: Use array or IntObjMap to optimize storage?
     private @NotNull ImmutableMap<Integer, UnresolvedArg> unresolvedArgs() {
         if (type != InternalType.GENERIC_LIST) {
             return ImmutableMap.of();
@@ -187,6 +199,13 @@ public final class Args {
         return map != null ? ImmutableMap.copyOf(map) : ImmutableMap.of();
     }
 
+    /**
+     * Returns a copy of this {@code Args} in which all unresolved values are mapped to concrete ones.
+     * The mapping is done by matching {@link UnresolvedArg#name()} to a {@code resolved} dictionary.
+     * If all args are resolved, this instance is returned.
+     *
+     * @param resolved the map holding the values to be inserted for unresolved args
+     */
     /*package*/ @NotNull Args resolveArgsByName(@NotNull Map<String, ?> resolved) {
         Map<Integer, UnresolvedArg> unresolvedArgs = unresolvedArgs();
         assert unresolvedArgs.size() == resolved.size() :
@@ -211,6 +230,13 @@ public final class Args {
         return Args.resolved(result.toImmutableArrayList());
     }
 
+    /**
+     * Returns a copy of this {@code Args} in which all unresolved values are mapped to concrete ones.
+     * The mapping is done by taking values a {@code resolved} ordered list in the same order as the args.
+     * If all args are resolved, this instance is returned.
+     *
+     * @param resolved the list holding the values to be inserted for unresolved args
+     */
     /*package*/ @NotNull Args resolveArgsByOrderedList(@NotNull List<?> resolved) {
         Map<Integer, UnresolvedArg> unresolvedArgs = unresolvedArgs();
         assert unresolvedArgs.size() == resolved.size() :
