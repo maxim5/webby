@@ -2,6 +2,7 @@ package io.webby.orm.arch;
 
 import com.google.errorprone.annotations.Immutable;
 import io.webby.util.lazy.AtomicLazy;
+import io.webby.util.lazy.DelayedAccessLazy;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.List;
@@ -11,7 +12,7 @@ import java.util.Objects;
 public class PojoFieldAdapter extends PojoField {
     private final Class<?> adapter;
     private final AdapterApi adapterApi;
-    private final AtomicLazy<List<Column>> columnsRef = new AtomicLazy<>();
+    private final DelayedAccessLazy<List<Column>> columnsRef = AtomicLazy.emptyLazy();
 
     protected PojoFieldAdapter(@NotNull PojoParent parent, @NotNull ModelField field, @NotNull Class<?> adapter) {
         super(parent, field);

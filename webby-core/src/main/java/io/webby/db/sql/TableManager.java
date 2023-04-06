@@ -23,7 +23,7 @@ import static java.util.Objects.requireNonNull;
 
 public class TableManager implements HasEngine {
     private static final FluentLogger log = FluentLogger.forEnclosingClass();
-    private static final ResettableAtomicLazy<TableManager> SHARED_INSTANCE = new ResettableAtomicLazy<>();
+    private static final ResettableAtomicLazy<TableManager> SHARED_INSTANCE = ResettableAtomicLazy.emptyLazy();
 
     private final Connector connector;
     private final Engine engine;

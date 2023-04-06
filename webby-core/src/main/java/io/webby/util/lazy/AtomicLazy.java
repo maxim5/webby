@@ -8,15 +8,15 @@ import java.util.function.Supplier;
 
 import static java.util.Objects.requireNonNull;
 
+/**
+ * A single implementation of both {@link DelayedInitLazy} and {@code DelayedAccessLazy}
+ * using an {@link AtomicReference}.
+ */
 public class AtomicLazy<T> implements DelayedInitLazy<T>, DelayedAccessLazy<T> {
     protected final AtomicReference<T> ref;
 
-    public AtomicLazy(@Nullable T initValue) {
+    protected AtomicLazy(@Nullable T initValue) {
         ref = new AtomicReference<>(initValue);
-    }
-
-    public AtomicLazy() {
-        this(null);
     }
 
     public static <T> @NotNull DelayedAccessLazy<T> emptyLazy() {
@@ -25,10 +25,6 @@ public class AtomicLazy<T> implements DelayedInitLazy<T>, DelayedAccessLazy<T> {
 
     public static <T> @NotNull DelayedInitLazy<T> ofUninitialized() {
         return new AtomicLazy<>(null);
-    }
-
-    public static <T> @NotNull DelayedInitLazy<T> ofInitialized(@NotNull T value) {
-        return new AtomicLazy<>(value);
     }
 
     @Override
@@ -46,8 +42,8 @@ public class AtomicLazy<T> implements DelayedInitLazy<T>, DelayedAccessLazy<T> {
     public void initializeOrCompare(@NotNull T value) {
         boolean success = ref.compareAndSet(null, value);
         assert success || ref.get() == value :
-                "Invalid state. %s already initialized with another value: %s. New value: %s"
-                .formatted(getClass().getSimpleName(), ref.get(), value);
+            "Invalid state. %s already initialized with another value: %s. New value: %s"
+            .formatted(getClass().getSimpleName(), ref.get(), value);
     }
 
     @Override

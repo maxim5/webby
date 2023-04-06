@@ -8,9 +8,9 @@ public class ResettableAtomicLazy<T> extends AtomicLazy<T> {
         super(initValue);
     }
 
-    public ResettableAtomicLazy() {
+    public static <T> @NotNull ResettableAtomicLazy<T> emptyLazy() {
+        return new ResettableAtomicLazy<>(null);
     }
-
     public void reset() {
         ref.set(null);
     }
