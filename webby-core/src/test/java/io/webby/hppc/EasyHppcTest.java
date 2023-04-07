@@ -196,6 +196,24 @@ public class EasyHppcTest {
         assertIntsNoOrder(EasyHppc.subtract(IntHashSet.from(1, 2, 3), IntHashSet.from(4, 5)), 1, 2, 3);
     }
 
+    @Test
+    public void int_retain_all_copy() {
+        assertIntsNoOrder(EasyHppc.retainAllCopy(IntHashSet.from(), x -> x % 2 == 0));
+        assertIntsNoOrder(EasyHppc.retainAllCopy(IntHashSet.from(1), x -> x % 2 == 0));
+        assertIntsNoOrder(EasyHppc.retainAllCopy(IntHashSet.from(2), x -> x % 2 == 0), 2);
+        assertIntsNoOrder(EasyHppc.retainAllCopy(IntHashSet.from(1, 3), x -> x % 2 == 0));
+        assertIntsNoOrder(EasyHppc.retainAllCopy(IntHashSet.from(1, 2, 3), x -> x % 2 == 0), 2);
+    }
+
+    @Test
+    public void int_remove_all_copy() {
+        assertIntsNoOrder(EasyHppc.removeAllCopy(IntHashSet.from(), x -> x % 2 == 0));
+        assertIntsNoOrder(EasyHppc.removeAllCopy(IntHashSet.from(1), x -> x % 2 == 0), 1);
+        assertIntsNoOrder(EasyHppc.removeAllCopy(IntHashSet.from(2), x -> x % 2 == 0));
+        assertIntsNoOrder(EasyHppc.removeAllCopy(IntHashSet.from(1, 3), x -> x % 2 == 0), 1, 3);
+        assertIntsNoOrder(EasyHppc.removeAllCopy(IntHashSet.from(1, 2, 3), x -> x % 2 == 0), 1, 3);
+    }
+
     private static @NotNull IterableSubject assertIntStreamThat(@NotNull Stream<IntCursor> stream) {
         return assertThat(stream.map(cursor -> cursor.value).toList());
     }

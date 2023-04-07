@@ -6,6 +6,9 @@ import org.jetbrains.annotations.NotNull;
 import java.util.Map;
 import java.util.function.*;
 
+/**
+ * Can hold an immutable pair of nullable objects.
+ */
 @Immutable
 public record Pair<U, V>(U first, V second) implements Map.Entry<U, V> {
     public static <U, V> @NotNull Pair<U, V> of(U first, V second) {

@@ -10,8 +10,8 @@ import io.webby.netty.HttpConst;
 import io.webby.netty.intercept.attr.Attributes;
 import io.webby.netty.marshal.Json;
 import io.webby.url.convert.Constraint;
-import io.webby.util.lazy.AtomicLazy;
-import io.webby.util.lazy.DelayedAccessLazy;
+import io.webby.util.lazy.AtomicCacheCompute;
+import io.webby.util.lazy.CacheCompute;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
@@ -25,7 +25,7 @@ import java.util.Map;
 import static io.webby.util.base.EasyCast.castAny;
 
 public class DefaultHttpRequestEx extends DefaultFullHttpRequest implements MutableHttpRequestEx {
-    private final DelayedAccessLazy<QueryParams> params = AtomicLazy.emptyLazy();
+    private final CacheCompute<QueryParams> params = AtomicCacheCompute.createEmpty();
     private final Channel channel;
     private final Json json;
     private final Map<String, Constraint<?>> constraints;
@@ -90,7 +90,7 @@ public class DefaultHttpRequestEx extends DefaultFullHttpRequest implements Muta
 
     @Override
     public @NotNull QueryParams params() {
-        return params.lazyGet(this::parseQuery);
+        return params.getOrCompute(this::parseQuery);
     }
 
     @Override

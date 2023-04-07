@@ -32,7 +32,7 @@ public class DebugSql {
     }
 
     public static @NotNull String toDebugString(@NotNull List<Row> rows) {
-        return TabularFormatter.FORMATTER.formatIntoTableString(Row.toTabular(rows, true));
+        return TabularFormatter.ASCII_FORMATTER.formatIntoTableString(Row.toTabular(rows, true));
     }
 
     public static @NotNull Row getSingleDebugRowOrDie(@NotNull ResultSet resultSet) {

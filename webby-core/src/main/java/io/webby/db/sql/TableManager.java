@@ -8,7 +8,7 @@ import io.webby.app.Settings;
 import io.webby.common.ClasspathScanner;
 import io.webby.common.Lifetime;
 import io.webby.orm.api.*;
-import io.webby.util.lazy.ResettableAtomicLazy;
+import io.webby.util.lazy.ResettableAtomicLazyInit;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import org.jetbrains.annotations.VisibleForTesting;
@@ -23,7 +23,7 @@ import static java.util.Objects.requireNonNull;
 
 public class TableManager implements HasEngine {
     private static final FluentLogger log = FluentLogger.forEnclosingClass();
-    private static final ResettableAtomicLazy<TableManager> SHARED_INSTANCE = new ResettableAtomicLazy<>();
+    private static final ResettableAtomicLazyInit<TableManager> SHARED_INSTANCE = ResettableAtomicLazyInit.create();
 
     private final Connector connector;
     private final Engine engine;

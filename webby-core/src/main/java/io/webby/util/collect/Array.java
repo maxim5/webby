@@ -8,8 +8,13 @@ import java.util.Collection;
 import java.util.Comparator;
 import java.util.function.UnaryOperator;
 
+/**
+ * A mutable version of a {@link BaseArray}. Provides {@link Array.Builder} for incremental construction.
+ *
+ * @see BaseArray
+ */
 public final class Array<E> extends BaseArray<E> {
-    private Array(@Nullable E @NotNull[] arr) {
+    private Array(@Nullable E @NotNull [] arr) {
         super(arr);
     }
 

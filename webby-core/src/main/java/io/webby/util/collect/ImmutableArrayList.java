@@ -10,10 +10,22 @@ import java.util.stream.Collector;
 
 import static io.webby.util.base.EasyCast.castAny;
 
-// FIX[minor]: avoid extra copying - construct or create from Object[]
-// FIX[minor]: single entry list
+/**
+ * An immutable version of an {@code ArrayList}.
+ * <p>
+ * Differences from other collections backed by an array:
+ * <ul>
+ *     <li>Unlike a standard {@link ArrayList}, does not allow modifications after construction.</li>
+ *     <li>Unlike Guava's {@link com.google.common.collect.ImmutableList}, allows null values.</li>
+ *     <li>Unlike an {@link Array} and {@link ImmutableArray},
+ *     under the hood, stores the data in an Object array type ({@code Object[]}),
+ *     hence supports holding items of different types.</li>
+ * </ul>
+ */
 public class ImmutableArrayList<E> extends ArrayList<E> {
+    @SuppressWarnings("MismatchedQueryAndUpdateOfCollection")
     private static final ImmutableArrayList<?> EMPTY = new ImmutableArrayList<>();
+    // FIX[minor]: can also optimize a single entry list
     private static final ImmutableArrayList<?> SINGLE_NULL = ListBuilder.builder(1).add(null).toImmutableArrayList();
 
     private static final Collector<Object, ?, ImmutableArrayList<Object>> TO_IMMUTABLE_ARRAY_LIST = Collector.of(
@@ -30,7 +42,7 @@ public class ImmutableArrayList<E> extends ArrayList<E> {
         super(c.size());
         super.addAll(c);
     }
-    
+
     public static <E> @NotNull ImmutableArrayList<E> of() {
         return castAny(EMPTY);
     }
@@ -44,11 +56,12 @@ public class ImmutableArrayList<E> extends ArrayList<E> {
     }
 
     public static <E> @NotNull ImmutableArrayList<E> of(@Nullable E item1, @Nullable E item2, @Nullable E item3) {
-        return ListBuilder.<E>builder(2).add(item1).add(item2).add(item3).toImmutableArrayList();
+        return ListBuilder.<E>builder(3).add(item1).add(item2).add(item3).toImmutableArrayList();
     }
 
     @SafeVarargs
     public static <E> @NotNull ImmutableArrayList<E> copyOf(@Nullable E @NotNull ... items) {
+        // FIX[minor]: avoid extra copying - construct or create from Object[]
         return new ImmutableArrayList<>(Array.of(items));
     }
 

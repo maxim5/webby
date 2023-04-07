@@ -9,11 +9,33 @@ import java.util.StringJoiner;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
+/**
+ * Allows to format 2-dimensional table-like data to string. Allows to customize border delimiters. Examples:
+ * <p>
+ * Alignment:
+ * <pre>
+ *   -------
+ *   | foo |
+ *   -------
+ *   | 1   |
+ *   -------
+ * </pre>
+ * <p>
+ * Multi-lines support:
+ * <pre>
+ *   -----
+ *   | 1 |
+ *   | 2 |
+ *   -----
+ * </pre>
+ */
 public record TabularFormatter(@NotNull String cellPrefix,
                                @NotNull String cellDelim,
                                @NotNull String cellSuffix,
                                @NotNull String rowDelim) {
-    public static final TabularFormatter FORMATTER = of('|', '-', 1);
+    // Uses ASCII characters for boxing.
+    public static final TabularFormatter ASCII_FORMATTER = of('|', '-', 1);
+    // Uses UTF characters for boxing.
     public static final TabularFormatter UTF_FORMATTER = of('\u2502', '\u2014', 1);
 
     public static @NotNull TabularFormatter of(char columnDelim, char rowDelim, int padding) {

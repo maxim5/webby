@@ -1,16 +1,33 @@
 package io.webby.util.netty;
 
 import io.netty.buffer.ByteBuf;
+import io.netty.buffer.Unpooled;
+import org.jetbrains.annotations.NotNull;
 import org.junit.jupiter.api.Test;
 
-import static io.webby.testing.TestingBytes.asByteBuf;
-import static io.webby.testing.TestingBytes.assertByteBuf;
+import java.util.function.Consumer;
+
+import static io.webby.testing.TestingBytes.*;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
 
 public class EasyByteBufTest {
     public static final byte DASH = (byte) '-';
     public static final byte UNDER = (byte) '_';
+
+    @Test
+    public void copyToByteArray_simple() {
+        assertBytes(EasyByteBuf.copyToByteArray(asByteBuf("")), "");
+        assertBytes(EasyByteBuf.copyToByteArray(asByteBuf("foo")), "foo");
+        assertBytes(EasyByteBuf.copyToByteArray(asByteBuf("\0")), "\0");
+    }
+
+    @Test
+    public void copyToByteArray_copy() {
+        ByteBuf byteBuf = asByteBuf("foo");
+        assertBytes(EasyByteBuf.copyToByteArray(byteBuf), "foo");
+        assertByteBuf(byteBuf, "foo");
+    }
 
     @Test
     public void readUntil_simple() {
@@ -129,5 +146,25 @@ public class EasyByteBufTest {
 
         assertEquals(0, EasyByteBuf.parseLongSafe(asByteBuf("9223372036854775808"), 0));
         assertEquals(0, EasyByteBuf.parseLongSafe(asByteBuf("-9223372036854775809"), 0));
+    }
+
+    @Test
+    public void writeIntString_simple() {
+        assertByteBuf(withNewBuffer(content -> EasyByteBuf.writeIntString(0, content)), "0");
+        assertByteBuf(withNewBuffer(content -> EasyByteBuf.writeIntString(101, content)), "101");
+        assertByteBuf(withNewBuffer(content -> EasyByteBuf.writeIntString(-101, content)), "-101");
+    }
+
+    @Test
+    public void writeLongString_simple() {
+        assertByteBuf(withNewBuffer(content -> EasyByteBuf.writeLongString(0, content)), "0");
+        assertByteBuf(withNewBuffer(content -> EasyByteBuf.writeLongString(101, content)), "101");
+        assertByteBuf(withNewBuffer(content -> EasyByteBuf.writeLongString(-101, content)), "-101");
+    }
+
+    private static @NotNull ByteBuf withNewBuffer(@NotNull Consumer<ByteBuf> consumer) {
+        ByteBuf buffer = Unpooled.buffer(8);
+        consumer.accept(buffer);
+        return buffer;
     }
 }

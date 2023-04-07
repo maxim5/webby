@@ -6,6 +6,22 @@ import org.jetbrains.annotations.Nullable;
 import java.util.*;
 import java.util.function.Consumer;
 
+/**
+ * A base public version of a class backing {@link Arrays#asList(Object[])}.
+ * <p>
+ * Provides an {@link BaseArray.BaseBuilder} to support an incremental construction.
+ * But after construction, the size of an {@link BaseArray} gets fixed,
+ * and the methods {@code add}, {@code remove}, {@code clear} ... always throw.
+ * But a mutable {@link Array} allows to {@code set}, {@code replaceAll}, {@code sort}.
+ * <p>
+ * Under the hood, stores the data in a typed array {@code E[]}, which makes all operations highly efficient, but
+ * doesn't allow holding items of different types.
+ * <p>
+ * Allows null values.
+ *
+ * @see Array a mutable version
+ * @see ImmutableArray an immutable version
+ */
 public abstract class BaseArray<E> extends AbstractList<E> {
     protected final E[] arr;
 

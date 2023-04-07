@@ -9,6 +9,11 @@ import java.util.Comparator;
 import java.util.function.Predicate;
 import java.util.function.UnaryOperator;
 
+/**
+ * An immutable version of a {@link BaseArray}. Provides {@link ImmutableArray.Builder} for incremental construction.
+ *
+ * @see BaseArray
+ */
 public final class ImmutableArray<E> extends BaseArray<E> {
     private ImmutableArray(@Nullable E @NotNull [] arr) {
         super(arr);

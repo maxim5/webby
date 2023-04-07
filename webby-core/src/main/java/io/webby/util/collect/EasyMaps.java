@@ -20,7 +20,8 @@ public class EasyMaps {
         assert items.size() % 2 == 0 : "Invalid number of items: %d".formatted(items.size());
         LinkedHashMap<K, V> result = new LinkedHashMap<>();
         for (int i = 0; i < items.size(); i += 2) {
-            result.put(castAny(items.get(i)), castAny(items.get(i + 1)));
+            V previous = result.put(castAny(items.get(i)), castAny(items.get(i + 1)));
+            assert previous == null : "Multiple entries with the same key: " + items.get(i);
         }
         return result;
     }
