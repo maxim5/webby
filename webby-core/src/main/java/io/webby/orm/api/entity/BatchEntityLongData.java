@@ -34,7 +34,7 @@ public record BatchEntityLongData(@NotNull List<Column> columns,
         EasyHppc.iterateChunks(values, dataSize, chunk -> {
             QueryRunner.setPreparedParams(statement, chunk);
             if (contextual != null) {
-                contextual.resolveQueryArgs(chunk).setPreparedParams(statement, dataSize);
+                contextual.resolveQueryArgs(chunk).setPreparedParams(statement, /*index=*/ dataSize);
             }
             statement.addBatch();
         });

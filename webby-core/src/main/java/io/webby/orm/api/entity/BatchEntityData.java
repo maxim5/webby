@@ -28,6 +28,15 @@ import java.sql.SQLException;
  * <p>
  * This batch consists of 6 objects forming 3 rows by 2. The batch size (same as data size) is 2.
  * Given a statement, the parameters and {@link PreparedStatement#addBatch()} must be called 3 times.
+ * <p>
+ * In addition to the batch itself, it's possible to provide {@link Contextual} parameters to the statement.
+ * This is necessary to handle queries like <code>"UPDATE users SET name=?, age=? WHERE name = ?"</code>, where
+ * the parameter set includes not only the batch itself (<code>name</code>, <code>age</code>), but the context too
+ * (<code>name</code>) to be used in a filter clause. Note that the filter clause may have its own args too.
+ * <p>
+ * This is handled this way: the <code>WHERE</code> query uses unresolved arguments for each context parameter. Then
+ * for each batch, query args get resolved from the current batch and also added to the statement
+ * (before {@link PreparedStatement#addBatch()} call).
  *
  * @param <B> the type used by implementations for each chunk (i.e. each row)
  * @see io.webby.orm.api.BaseTable#insertDataBatch(BatchEntityData)
@@ -43,6 +52,9 @@ public interface BatchEntityData<B> extends ColumnSet {
 
     /**
      * Updates the JDBC {@code statement} with the parameters from the data of this instance.
+     * <p>
+     * Optionally, a {@code contextual} can be passed in as well. In this case, {@code contextual} unresolved
+     * args will be resolved from each chunk and added to the {@code statement}.
      */
     void provideBatchValues(@NotNull PreparedStatement statement,
                             @Nullable Contextual<?, B> contextual) throws SQLException;

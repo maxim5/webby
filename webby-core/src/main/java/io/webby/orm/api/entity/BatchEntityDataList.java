@@ -34,7 +34,7 @@ public record BatchEntityDataList<D>(@NotNull List<EntityData<D>> batch) impleme
         for (EntityData<D> entityData : batch) {
             entityData.provideValues(statement);
             if (contextual != null) {
-                contextual.resolveQueryArgs(entityData.data()).setPreparedParams(statement, dataSize);
+                contextual.resolveQueryArgs(entityData.data()).setPreparedParams(statement, /*index=*/ dataSize);
             }
             statement.addBatch();
         }
