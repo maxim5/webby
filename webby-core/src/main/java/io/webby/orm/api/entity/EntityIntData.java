@@ -20,7 +20,7 @@ public record EntityIntData(@NotNull List<Column> columns, @NotNull IntContainer
     }
 
     @Override
-    public void provideValues(@NotNull PreparedStatement statement) throws SQLException {
-        QueryRunner.setPreparedParams(statement, data);
+    public int provideValues(@NotNull PreparedStatement statement) throws SQLException {
+        return QueryRunner.setPreparedParams(statement, data);
     }
 }

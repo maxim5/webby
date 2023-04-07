@@ -245,50 +245,54 @@ public class QueryRunner {
 
     // Set params
 
-    public static void setPreparedParams(@NotNull PreparedStatement statement,
-                                         @Nullable Object @NotNull ... params) throws SQLException {
+    public static int setPreparedParams(@NotNull PreparedStatement statement,
+                                        @Nullable Object @NotNull ... params) throws SQLException {
         for (int i = 0; i < params.length; i++) {
             statement.setObject(i + 1, params[i]);
         }
+        return params.length;
     }
 
-    public static void setPreparedParams(@NotNull PreparedStatement statement,
-                                         @NotNull Iterable<?> params) throws SQLException {
-        setPreparedParams(statement, params, 0);
+    public static int setPreparedParams(@NotNull PreparedStatement statement,
+                                        @NotNull Iterable<?> params) throws SQLException {
+        return setPreparedParams(statement, params, 0);
     }
 
-    public static void setPreparedParams(@NotNull PreparedStatement statement,
-                                         @NotNull Iterable<?> params,
-                                         int index) throws SQLException {
+    public static int setPreparedParams(@NotNull PreparedStatement statement,
+                                        @NotNull Iterable<?> params,
+                                        int index) throws SQLException {
         for (Object value : params) {
             statement.setObject(++index, value);
         }
+        return index;
     }
 
-    public static void setPreparedParams(@NotNull PreparedStatement statement,
-                                         @NotNull IntContainer params) throws SQLException {
-        setPreparedParams(statement, params, 0);
+    public static int setPreparedParams(@NotNull PreparedStatement statement,
+                                        @NotNull IntContainer params) throws SQLException {
+        return setPreparedParams(statement, params, 0);
     }
 
-    public static void setPreparedParams(@NotNull PreparedStatement statement,
-                                         @NotNull IntContainer params,
-                                         int index) throws SQLException {
+    public static int setPreparedParams(@NotNull PreparedStatement statement,
+                                        @NotNull IntContainer params,
+                                        int index) throws SQLException {
         for (IntCursor cursor : params) {
             statement.setInt(++index, cursor.value);
         }
+        return index;
     }
 
-    public static void setPreparedParams(@NotNull PreparedStatement statement,
+    public static int setPreparedParams(@NotNull PreparedStatement statement,
                                          @NotNull LongContainer params) throws SQLException {
-        setPreparedParams(statement, params, 0);
+        return setPreparedParams(statement, params, 0);
     }
 
-    public static void setPreparedParams(@NotNull PreparedStatement statement,
+    public static int setPreparedParams(@NotNull PreparedStatement statement,
                                          @NotNull LongContainer params,
                                          int index) throws SQLException {
         for (LongCursor cursor : params) {
             statement.setLong(++index, cursor.value);
         }
+        return index;
     }
 
     // Run Updates

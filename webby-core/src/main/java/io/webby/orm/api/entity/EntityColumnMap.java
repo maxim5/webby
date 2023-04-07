@@ -29,7 +29,7 @@ public record EntityColumnMap<E extends Enum<E> & Column>(@NotNull EnumMap<E, Ob
     }
 
     @Override
-    public void provideValues(@NotNull PreparedStatement statement) throws SQLException {
-        QueryRunner.setPreparedParams(statement, map.values());
+    public int provideValues(@NotNull PreparedStatement statement) throws SQLException {
+        return QueryRunner.setPreparedParams(statement, map.values());
     }
 }

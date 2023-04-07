@@ -20,7 +20,7 @@ public record EntityLongData(@NotNull List<Column> columns, @NotNull LongContain
     }
 
     @Override
-    public void provideValues(@NotNull PreparedStatement statement) throws SQLException {
-        QueryRunner.setPreparedParams(statement, data);
+    public int provideValues(@NotNull PreparedStatement statement) throws SQLException {
+        return QueryRunner.setPreparedParams(statement, data);
     }
 }

@@ -166,16 +166,16 @@ public final class Args {
         return type != InternalType.GENERIC_LIST || ((List<?>) internal).stream().noneMatch(arg -> arg instanceof UnresolvedArg);
     }
 
-    public void setPreparedParams(@NotNull PreparedStatement statement) throws SQLException {
-        setPreparedParams(statement, 0);
+    public int setPreparedParams(@NotNull PreparedStatement statement) throws SQLException {
+        return setPreparedParams(statement, 0);
     }
 
-    public void setPreparedParams(@NotNull PreparedStatement statement, int index) throws SQLException {
-        switch (type) {
+    public int setPreparedParams(@NotNull PreparedStatement statement, int index) throws SQLException {
+        return switch (type) {
             case GENERIC_LIST -> QueryRunner.setPreparedParams(statement, external, index);
             case INTS -> QueryRunner.setPreparedParams(statement, (IntContainer) external, index);
             case LONGS -> QueryRunner.setPreparedParams(statement, (LongContainer) external, index);
-        }
+        };
     }
 
     private @NotNull List<?> internalList() {

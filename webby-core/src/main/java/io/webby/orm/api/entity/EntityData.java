@@ -31,6 +31,7 @@ public interface EntityData<D> extends ColumnSet {
 
     /**
      * Updates the JDBC {@code statement} with the parameters from the data of this instance.
+     * @return the number of added params.
      */
-    void provideValues(@NotNull PreparedStatement statement) throws SQLException;
+    int provideValues(@NotNull PreparedStatement statement) throws SQLException;
 }
