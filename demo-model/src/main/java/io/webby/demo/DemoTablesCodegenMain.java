@@ -39,6 +39,9 @@ public class DemoTablesCodegenMain {
         ModelInput.of(M2mLongModel.class),
         ModelInput.of(M2mIntLongModel.class),
 
+        ModelInput.of(IntsModel.class),
+        ModelInput.of(LongsModel.class),
+
         ModelInput.of(UserRateModel.class)
     );
 
