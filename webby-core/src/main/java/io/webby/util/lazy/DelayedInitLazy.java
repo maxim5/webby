@@ -3,7 +3,7 @@ package io.webby.util.lazy;
 import org.jetbrains.annotations.NotNull;
 
 /**
- * Allows to stores a lazy value. The clients should only provide a default non-null value.
+ * Allows to store a lazy value. The clients should only provide a default non-null value.
  * The clients are not expected to call initialize methods with different values,
  * as only the first supplied value is remembered for the whole lifetime.
  * <p>

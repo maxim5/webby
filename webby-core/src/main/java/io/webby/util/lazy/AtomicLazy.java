@@ -56,7 +56,7 @@ public class AtomicLazy<T> implements DelayedInitLazy<T>, DelayedAccessLazy<T> {
         return requireNonNull(ref.get());
     }
 
-    public static <T> @NotNull T setIfAbsent(@NotNull AtomicReference<T> reference, @NotNull Supplier<T> supplier) {
+    private static <T> @NotNull T setIfAbsent(@NotNull AtomicReference<T> reference, @NotNull Supplier<T> supplier) {
         T value = reference.get();
         if (value == null) {
             value = supplier.get();

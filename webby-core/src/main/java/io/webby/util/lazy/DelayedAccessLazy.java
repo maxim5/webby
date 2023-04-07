@@ -5,7 +5,7 @@ import org.jetbrains.annotations.NotNull;
 import java.util.function.Supplier;
 
 /**
- * Allows to stores a lazy value. The clients should only provide a way to supply the way.
+ * Allows to store a lazy value. The clients should only provide a way to supply the way.
  * The clients are not expected to call {@link #lazyGet(Supplier)} with different or non-idempotent suppliers,
  * as only the first supplied value is remembered for the whole lifetime.
  * <p>

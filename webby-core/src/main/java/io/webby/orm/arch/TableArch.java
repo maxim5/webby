@@ -5,8 +5,8 @@ import com.google.errorprone.annotations.Immutable;
 import io.webby.orm.api.ReadFollow;
 import io.webby.util.collect.Pair;
 import io.webby.util.lazy.AtomicLazy;
-import io.webby.util.lazy.AtomicLazyList;
 import io.webby.util.lazy.DelayedAccessLazy;
+import io.webby.util.lazy.DelayedInitLazy;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
@@ -22,7 +22,7 @@ import static io.webby.orm.arch.InvalidSqlModelException.create;
 
 @Immutable
 public final class TableArch implements JavaNameHolder, HasColumns, HasPrefixedColumns {
-    private final AtomicLazyList<TableField> fieldsRef = AtomicLazyList.ofUninitializedList();
+    private final DelayedInitLazy<ImmutableList<TableField>> fieldsRef = AtomicLazy.ofUninitialized();
     private final DelayedAccessLazy<Optional<TableField>> primaryKeyCache = AtomicLazy.emptyLazy();
 
     private final String sqlName;
