@@ -29,15 +29,18 @@ public final class TableArch implements JavaNameHolder, HasColumns, HasPrefixedC
     private final String sqlName;
     private final String javaName;
     private final Class<?> modelClass;
+    private final String modelName;
     private final M2mInfo m2mInfo;
 
     public TableArch(@NotNull String sqlName,
                      @NotNull String javaName,
                      @NotNull Class<?> modelClass,
+                     @NotNull String modelName,
                      @Nullable M2mInfo m2mInfo) {
         this.sqlName = sqlName;
         this.javaName = javaName;
         this.modelClass = modelClass;
+        this.modelName = modelName;
         this.m2mInfo = m2mInfo;
     }
 
@@ -56,6 +59,10 @@ public final class TableArch implements JavaNameHolder, HasColumns, HasPrefixedC
 
     public @NotNull Class<?> modelClass() {
         return modelClass;
+    }
+
+    public @NotNull String modelName() {
+        return modelName;
     }
 
     public @NotNull ImmutableList<TableField> fields() {
@@ -176,18 +183,19 @@ public final class TableArch implements JavaNameHolder, HasColumns, HasPrefixedC
     public boolean equals(Object obj) {
         return obj instanceof TableArch that &&
                Objects.equals(sqlName, that.sqlName) && Objects.equals(javaName, that.javaName) &&
-               Objects.equals(modelClass, that.modelClass) && Objects.equals(m2mInfo, that.m2mInfo) &&
+               Objects.equals(modelClass, that.modelClass) && Objects.equals(modelName, that.modelName) &&
+               Objects.equals(m2mInfo, that.m2mInfo) &&
                Objects.equals(fieldsRef, that.fieldsRef);
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(sqlName, javaName, modelClass, m2mInfo, fieldsRef);
+        return Objects.hash(sqlName, javaName, modelClass, modelName, m2mInfo, fieldsRef);
     }
 
     @Override
     public String toString() {
-        return "TableArch[sqlName=%s, javaName=%s, modelClass=%s, m2mInfo=%s]"
-                .formatted(sqlName, javaName, modelClass, m2mInfo);
+        return "TableArch[sqlName=%s, javaName=%s, modelClass=%s, modelName=%s, m2mInfo=%s]"
+                .formatted(sqlName, javaName, modelClass, modelName, m2mInfo);
     }
 }

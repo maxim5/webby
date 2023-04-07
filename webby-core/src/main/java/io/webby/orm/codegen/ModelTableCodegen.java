@@ -5,8 +5,7 @@ import com.google.common.collect.Streams;
 import com.google.common.primitives.Primitives;
 import com.google.mu.util.Optionals;
 import io.webby.orm.api.*;
-import io.webby.orm.api.entity.BatchEntityData;
-import io.webby.orm.api.entity.EntityData;
+import io.webby.orm.api.entity.*;
 import io.webby.orm.api.query.*;
 import io.webby.orm.arch.*;
 import io.webby.orm.arch.Column;
@@ -107,6 +106,7 @@ public class ModelTableCodegen extends BaseCodegen {
         internalMeta();
         columnsEnum();
         tableMeta();
+        dataFactoryMethods();
 
         appendLine("}");
     }
@@ -139,7 +139,10 @@ public class ModelTableCodegen extends BaseCodegen {
             Stream.of(
                 Connector.class, QueryRunner.class, QueryException.class, Engine.class, ReadFollow.class,
                 Filter.class, Where.class, Args.class, io.webby.orm.api.query.Column.class, TermType.class,
-                ResultSetIterator.class, TableMeta.class, EntityData.class, BatchEntityData.class, Contextual.class
+                ResultSetIterator.class, TableMeta.class,
+                EntityData.class, EntityIntData.class, EntityLongData.class, EntityColumnMap.class,
+                BatchEntityData.class, BatchEntityIntData.class, BatchEntityLongData.class,
+                Contextual.class
             ).map(FQN::of),
             customClasses.stream().map(FQN::of),
             customClasses.stream().map(adaptersScanner::locateAdapterFqn),
@@ -575,7 +578,7 @@ public class ModelTableCodegen extends BaseCodegen {
             "$model_id_assert", AssertModelIdMaker.makeAssert("$model_param", table).join(),
             "$sql_query_literal", wrapAsStringLiteral(query, INDENT2)
         );
-        
+
         appendCode("""
         @Override
         public int insert(@Nonnull $ModelClass $model_param) {
@@ -1065,12 +1068,19 @@ public class ModelTableCodegen extends BaseCodegen {
 
     private void columnsEnum() {
         Map<String, String> context = Map.of(
-            "$own_enum_values", ColumnEnumMaker.make(table.columns(ReadFollow.NO_FOLLOW)).join(Collectors.joining(",\n" + INDENT1))
+            "$own_enum_values", ColumnEnumMaker.make(table.columns(ReadFollow.NO_FOLLOW))
+                .join(Collectors.joining(",\n" + INDENT1)),
+            "$all_columns_list", table.columns().stream().map(column -> "OwnColumn.%s".formatted(column.sqlName()))
+                .collect(Collectors.joining(",\n" + INDENT2))
         );
 
         appendCode("""
         public enum OwnColumn implements Column {
             $own_enum_values;
+            
+            public static final List<Column> ALL_COLUMNS = List.of(
+                $all_columns_list
+            );
             
             private final TermType type;
             OwnColumn(TermType type) {
@@ -1086,7 +1096,7 @@ public class ModelTableCodegen extends BaseCodegen {
 
     private void tableMeta() {
         Map<String, String> context = Map.of(
-            "$column_meta", table.columnsWithFields().stream().map(pair -> {
+            "$column_meta_list", table.columnsWithFields().stream().map(pair -> {
                 TableField field = pair.first();
                 boolean primaryKey = field.isPrimaryKey() && field.columnsNumber() == 1;  // SQL doesn't allow multi-PK
                 boolean foreignKey = field.isForeignKey();
@@ -1111,7 +1121,7 @@ public class ModelTableCodegen extends BaseCodegen {
             @Override
             public @Nonnull List<ColumnMeta> sqlColumns() {
                 return List.of(
-                    $column_meta
+                    $column_meta_list
                 );
             }
         };
@@ -1119,6 +1129,51 @@ public class ModelTableCodegen extends BaseCodegen {
         @Override
         public @Nonnull TableMeta meta() {
             return META;
+        }\n
+        """, EasyMaps.merge(mainContext, context));
+    }
+
+    private void dataFactoryMethods() {
+        Map<String, String> context = Map.of(
+            "$columns_num", String.valueOf(table.columnsNumber()),
+            "$data_method_name", "new%sData".formatted(table.modelName()),
+            "$data_method_batch_name", "new%sBatch".formatted(table.modelName())
+        );
+
+        appendCode("""
+        public static @Nonnull EntityIntData $data_method_name(@Nonnull IntContainer data) {
+            assert data.size() == $columns_num :
+                "Provided $TableClass data does not match required columns: data=%s, columns=%s"
+                .formatted(data, OwnColumn.ALL_COLUMNS);
+            return new EntityIntData(OwnColumn.ALL_COLUMNS, data);
+        }
+        
+        public static @Nonnull EntityLongData $data_method_name(@Nonnull LongContainer data) {
+            assert data.size() == $columns_num :
+                "Provided $TableClass data does not match required columns: data=%s, columns=%s"
+                .formatted(data, OwnColumn.ALL_COLUMNS);
+            return new EntityLongData(OwnColumn.ALL_COLUMNS, data);
+        }
+        
+        public static @Nonnull EntityColumnMap<OwnColumn> $data_method_name(@Nonnull EnumMap<OwnColumn, Object> map) {
+            assert map.size() == $columns_num :
+                "Provided $TableClass data map does not match required columns: map=%s, columns=%s"
+                .formatted(map, OwnColumn.ALL_COLUMNS);
+            return new EntityColumnMap<>(map);
+        }
+        
+        public static @Nonnull BatchEntityIntData $data_method_batch_name(@Nonnull IntContainer data) {
+            assert data.size() % $columns_num == 0 :
+                "Provided $TableClass batch data does not match required columns: data=%s, columns=%s"
+                .formatted(data, OwnColumn.ALL_COLUMNS);
+            return new BatchEntityIntData(OwnColumn.ALL_COLUMNS, data);
+        }
+        
+        public static @Nonnull BatchEntityLongData $data_method_batch_name(@Nonnull LongContainer data) {
+            assert data.size() % $columns_num == 0 :
+                "Provided $TableClass batch data does not match required columns: data=%s, columns=%s"
+                .formatted(data, OwnColumn.ALL_COLUMNS);
+            return new BatchEntityLongData(OwnColumn.ALL_COLUMNS, data);
         }
         """, EasyMaps.merge(mainContext, context));
     }

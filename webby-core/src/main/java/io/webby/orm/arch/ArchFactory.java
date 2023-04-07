@@ -65,7 +65,10 @@ public class ArchFactory {
 
     @VisibleForTesting
     @NotNull TableArch buildShallowTable(@NotNull ModelInput input) {
-        return new TableArch(input.sqlName(), input.javaTableName(), input.modelClass(), M2mInfo.fromModelClass(input.modelClass()));
+        return new TableArch(
+            input.sqlName(), input.javaTableName(), input.modelClass(), input.javaModelName(),
+            M2mInfo.fromModelClass(input.modelClass())
+        );
     }
 
     @VisibleForTesting
