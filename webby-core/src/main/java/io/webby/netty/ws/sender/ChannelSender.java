@@ -55,6 +55,6 @@ public class ChannelSender implements AgentLifecycle, Sender {
     private enum State {
         NOT_INITIALIZED,
         READY,
-        CLOSED
+        CLOSED,
     }
 }

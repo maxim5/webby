@@ -146,6 +146,6 @@ public abstract class Lifetime {
     public enum Status {
         Alive,
         Terminating,
-        Terminated
+        Terminated,
     }
 }

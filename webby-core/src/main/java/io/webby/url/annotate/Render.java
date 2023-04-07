@@ -10,5 +10,5 @@ public enum Render {
     ROCKER,
     THYMELEAF,
     TRIMOU,
-    VELOCITY
+    VELOCITY,
 }
