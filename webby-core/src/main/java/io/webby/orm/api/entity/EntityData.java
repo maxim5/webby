@@ -1,5 +1,6 @@
 package io.webby.orm.api.entity;
 
+import io.webby.orm.api.query.HasArgs;
 import org.jetbrains.annotations.NotNull;
 
 import java.sql.PreparedStatement;
@@ -34,4 +35,14 @@ public interface EntityData<D> extends ColumnSet {
      * @return the number of added params.
      */
     int provideValues(@NotNull PreparedStatement statement) throws SQLException;
+
+    /**
+     * Updates the JDBC {@code statement} with the parameters from the data of this instance and then
+     * parameters of {@code hasArgs}.
+     * @return total number of added params.
+     */
+    default int provideValues(@NotNull PreparedStatement statement, @NotNull HasArgs hasArgs) throws SQLException {
+        int added = provideValues(statement);
+        return hasArgs.args().setPreparedParams(statement, added);
+    }
 }

@@ -7,8 +7,8 @@ import com.google.mu.util.Optionals;
 import io.webby.orm.api.*;
 import io.webby.orm.api.entity.*;
 import io.webby.orm.api.query.*;
-import io.webby.orm.arch.*;
 import io.webby.orm.arch.Column;
+import io.webby.orm.arch.*;
 import io.webby.util.collect.EasyMaps;
 import org.jetbrains.annotations.NotNull;
 
@@ -818,7 +818,7 @@ public class ModelTableCodegen extends BaseCodegen {
     
             String query = makeUpdateQueryForColumns(columns, where);
             try (PreparedStatement statement = runner().prepareQuery(query)) {
-                data.provideValues(statement);
+                data.provideValues(statement, where);
                 return statement.executeUpdate();
             } catch (SQLException e) {
                 throw new QueryException("Failed to update entities data in $TableClass by a filter", query, data, e);
