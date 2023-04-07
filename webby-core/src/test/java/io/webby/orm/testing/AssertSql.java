@@ -30,7 +30,11 @@ public class AssertSql {
     }
 
     public static void assertArgs(@NotNull HasArgs hasArgs, @NotNull Object @Nullable ... expected) {
-        assertThat(hasArgs.args().asList()).containsExactly(expected);
+        assertArgs(hasArgs.args(), expected);
+    }
+
+    public static void assertArgs(@NotNull Args args, @NotNull Object @Nullable ... expected) {
+        assertThat(args.asList()).containsExactly(expected);
     }
 
     public static void assertNoArgs(@NotNull HasArgs hasArgs) {
