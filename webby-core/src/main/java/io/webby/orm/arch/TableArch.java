@@ -4,9 +4,10 @@ import com.google.common.collect.ImmutableList;
 import com.google.errorprone.annotations.Immutable;
 import io.webby.orm.api.ReadFollow;
 import io.webby.util.collect.Pair;
-import io.webby.util.lazy.AtomicLazy;
-import io.webby.util.lazy.DelayedAccessLazy;
-import io.webby.util.lazy.DelayedInitLazy;
+import io.webby.util.lazy.AtomicCacheCompute;
+import io.webby.util.lazy.AtomicLazyInit;
+import io.webby.util.lazy.CacheCompute;
+import io.webby.util.lazy.LazyInit;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
@@ -22,8 +23,8 @@ import static io.webby.orm.arch.InvalidSqlModelException.create;
 
 @Immutable
 public final class TableArch implements JavaNameHolder, HasColumns, HasPrefixedColumns {
-    private final DelayedInitLazy<ImmutableList<TableField>> fieldsRef = AtomicLazy.ofUninitialized();
-    private final DelayedAccessLazy<Optional<TableField>> primaryKeyCache = AtomicLazy.emptyLazy();
+    private final LazyInit<ImmutableList<TableField>> fieldsRef = AtomicLazyInit.createUninitialized();
+    private final CacheCompute<Optional<TableField>> primaryKeyCache = AtomicCacheCompute.createEmpty();
 
     private final String sqlName;
     private final String javaName;
@@ -66,7 +67,7 @@ public final class TableArch implements JavaNameHolder, HasColumns, HasPrefixedC
     }
 
     public @Nullable TableField primaryKeyField() {
-        return primaryKeyCache.lazyGet(() -> fields().stream().filter(TableField::isPrimaryKey).findFirst()).orElse(null);
+        return primaryKeyCache.getOrCompute(() -> fields().stream().filter(TableField::isPrimaryKey).findFirst()).orElse(null);
     }
 
     public boolean isPrimaryKeyInt() {

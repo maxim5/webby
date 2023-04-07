@@ -1,8 +1,8 @@
 package io.webby.orm.arch;
 
 import com.google.common.collect.ImmutableList;
-import io.webby.util.lazy.AtomicLazy;
-import io.webby.util.lazy.DelayedAccessLazy;
+import io.webby.util.lazy.AtomicCacheCompute;
+import io.webby.util.lazy.CacheCompute;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.ArrayList;
@@ -13,7 +13,7 @@ import java.util.function.Consumer;
 public final class PojoArch implements HasColumns {
     private final @NotNull Class<?> pojoType;
     private final @NotNull ImmutableList<PojoField> fields;
-    private final DelayedAccessLazy<List<Column>> columnsRef = AtomicLazy.emptyLazy();
+    private final CacheCompute<List<Column>> columnsRef = AtomicCacheCompute.createEmpty();
 
     public PojoArch(@NotNull Class<?> pojoType, @NotNull ImmutableList<PojoField> fields) {
         this.pojoType = pojoType;
@@ -47,7 +47,7 @@ public final class PojoArch implements HasColumns {
 
     @Override
     public @NotNull List<Column> columns() {
-        return columnsRef.lazyGet(() -> {
+        return columnsRef.getOrCompute(() -> {
             ArrayList<Column> result = new ArrayList<>();
             iterateAllFields(field -> {
                 if (field instanceof PojoFieldNative fieldNative) {

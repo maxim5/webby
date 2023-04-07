@@ -1,9 +1,9 @@
 package io.webby.orm.arch;
 
 import com.google.errorprone.annotations.Immutable;
-import io.webby.util.lazy.AtomicLazy;
-import io.webby.util.lazy.DelayedInitLazy;
 import io.webby.util.collect.OneOf;
+import io.webby.util.lazy.AtomicLazyInit;
+import io.webby.util.lazy.LazyInit;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.Optional;
@@ -14,9 +14,9 @@ import static java.util.Objects.requireNonNull;
 public class PojoParent {
     public static final PojoParent DETACHED = new PojoParent(OneOf.ofFirst(Optional.empty()));
 
-    private final OneOf<Optional<TerminalData>, DelayedInitLazy<PojoField>> parent;
+    private final OneOf<Optional<TerminalData>, LazyInit<PojoField>> parent;
 
-    private PojoParent(@NotNull OneOf<Optional<TerminalData>, DelayedInitLazy<PojoField>> parent) {
+    private PojoParent(@NotNull OneOf<Optional<TerminalData>, LazyInit<PojoField>> parent) {
         this.parent = parent;
     }
 
@@ -26,7 +26,7 @@ public class PojoParent {
     }
 
     /*package*/ static @NotNull PojoParent ofUninitializedField() {
-        return new PojoParent(OneOf.ofSecond(AtomicLazy.ofUninitialized()));
+        return new PojoParent(OneOf.ofSecond(AtomicLazyInit.createUninitialized()));
     }
 
     /*package*/ void initializeOrDie(@NotNull PojoField field) {

@@ -4,8 +4,8 @@ import io.webby.db.codec.Codec;
 import io.webby.db.kv.DbOptions;
 import io.webby.db.kv.impl.BaseKeyValueFactory;
 import io.webby.util.base.Unchecked;
-import io.webby.util.lazy.AtomicLazy;
-import io.webby.util.lazy.DelayedAccessLazy;
+import io.webby.util.lazy.AtomicCacheCompute;
+import io.webby.util.lazy.CacheCompute;
 import org.cojen.tupl.*;
 import org.jetbrains.annotations.NotNull;
 
@@ -16,12 +16,12 @@ import java.util.concurrent.TimeUnit;
 import static io.webby.util.base.Unchecked.rethrow;
 
 public class TuplFactory extends BaseKeyValueFactory {
-    private final DelayedAccessLazy<Database> db = AtomicLazy.emptyLazy();
+    private final CacheCompute<Database> db = AtomicCacheCompute.createEmpty();
 
     @Override
     public @NotNull <K, V> TuplDb<K, V> getInternalDb(@NotNull DbOptions<K, V> options) {
         return cacheIfAbsent(options, () -> {
-            Database database = db.lazyGet(Unchecked.Suppliers.rethrow(() -> Database.open(getDatabaseConfig())));
+            Database database = db.getOrCompute(Unchecked.Suppliers.rethrow(() -> Database.open(getDatabaseConfig())));
 
             try {
                 Codec<K> keyCodec = keyCodecOrDie(options);

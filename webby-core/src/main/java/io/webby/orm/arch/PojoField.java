@@ -3,8 +3,8 @@ package io.webby.orm.arch;
 import com.google.common.collect.Streams;
 import com.google.errorprone.annotations.Immutable;
 import io.webby.util.collect.Pair;
-import io.webby.util.lazy.AtomicLazy;
-import io.webby.util.lazy.DelayedAccessLazy;
+import io.webby.util.lazy.AtomicCacheCompute;
+import io.webby.util.lazy.CacheCompute;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.*;
@@ -14,7 +14,7 @@ import java.util.stream.Collectors;
 public abstract class PojoField {
     protected final PojoParent parent;
     protected final ModelField field;
-    private final DelayedAccessLazy<String> lazyNameRef = AtomicLazy.emptyLazy();
+    private final CacheCompute<String> lazyNameRef = AtomicCacheCompute.createEmpty();
 
     protected PojoField(@NotNull PojoParent parent, @NotNull ModelField field) {
         this.parent = parent;
@@ -34,7 +34,7 @@ public abstract class PojoField {
     }
 
     public @NotNull String fullSqlName() {
-        return lazyNameRef.lazyGet(() -> {
+        return lazyNameRef.getOrCompute(() -> {
             Pair<Optional<String>, List<String>> fullPath = fullSqlPath();
             return Streams.concat(fullPath.first().stream(), fullPath.second().stream()).collect(Collectors.joining("_"));
         });

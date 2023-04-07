@@ -4,8 +4,8 @@ import com.google.mu.util.stream.BiStream;
 import io.webby.orm.adapter.JdbcAdapt;
 import io.webby.util.base.EasyPrimitives.MutableInt;
 import io.webby.util.collect.OneOf;
-import io.webby.util.lazy.AtomicLazy;
-import io.webby.util.lazy.DelayedAccessLazy;
+import io.webby.util.lazy.AtomicCacheCompute;
+import io.webby.util.lazy.CacheCompute;
 import io.webby.util.reflect.EasyAnnotations;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
@@ -18,8 +18,8 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.Optional;
 
-import static io.webby.util.reflect.EasyMembers.*;
 import static io.webby.orm.arch.InvalidSqlModelException.failIf;
+import static io.webby.util.reflect.EasyMembers.*;
 
 public class AdapterApi {
     public static final String CREATE_INSTANCE = "createInstance";
@@ -28,7 +28,7 @@ public class AdapterApi {
 
     private final @NotNull OneOf<Class<?>, PojoArch> oneOf;
 
-    private final DelayedAccessLazy<String> staticClassRef = AtomicLazy.emptyLazy();
+    private final CacheCompute<String> staticClassRef = AtomicCacheCompute.createEmpty();
 
     private AdapterApi(@NotNull OneOf<Class<?>, PojoArch> oneOf) {
         this.oneOf = oneOf;
@@ -43,7 +43,7 @@ public class AdapterApi {
     }
 
     public @NotNull String staticRef() {
-        return staticClassRef.lazyGet(() -> oneOf.mapToObj(AdapterApi::classToStaticRef, AdapterApi::signatureStaticRef));
+        return staticClassRef.getOrCompute(() -> oneOf.mapToObj(AdapterApi::classToStaticRef, AdapterApi::signatureStaticRef));
     }
 
     private static @NotNull String classToStaticRef(@NotNull Class<?> klass) {

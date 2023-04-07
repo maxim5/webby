@@ -4,27 +4,21 @@ import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.concurrent.atomic.AtomicReference;
-import java.util.function.Supplier;
 
 import static java.util.Objects.requireNonNull;
 
 /**
- * A single implementation of both {@link DelayedInitLazy} and {@code DelayedAccessLazy}
- * using an {@link AtomicReference}.
+ * An implementation of {@link LazyInit} using an {@link AtomicReference}.
  */
-public class AtomicLazy<T> implements DelayedInitLazy<T>, DelayedAccessLazy<T> {
+public class AtomicLazyInit<T> implements LazyInit<T> {
     protected final AtomicReference<T> ref;
 
-    protected AtomicLazy(@Nullable T initValue) {
+    protected AtomicLazyInit(@Nullable T initValue) {
         ref = new AtomicReference<>(initValue);
     }
 
-    public static <T> @NotNull DelayedAccessLazy<T> emptyLazy() {
-        return new AtomicLazy<>(null);
-    }
-
-    public static <T> @NotNull DelayedInitLazy<T> ofUninitialized() {
-        return new AtomicLazy<>(null);
+    public static <T> @NotNull LazyInit<T> createUninitialized() {
+        return new AtomicLazyInit<>(null);
     }
 
     @Override
@@ -47,23 +41,7 @@ public class AtomicLazy<T> implements DelayedInitLazy<T>, DelayedAccessLazy<T> {
     }
 
     @Override
-    public @NotNull T lazyGet(@NotNull Supplier<T> supplier) {
-        return setIfAbsent(ref, supplier);
-    }
-
-    @Override
     public @NotNull T getOrDie() {
         return requireNonNull(ref.get());
-    }
-
-    private static <T> @NotNull T setIfAbsent(@NotNull AtomicReference<T> reference, @NotNull Supplier<T> supplier) {
-        T value = reference.get();
-        if (value == null) {
-            value = supplier.get();
-            if (!reference.compareAndSet(null, value)) {
-                return reference.get();
-            }
-        }
-        return value;
     }
 }
