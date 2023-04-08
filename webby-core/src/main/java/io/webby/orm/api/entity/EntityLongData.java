@@ -15,8 +15,8 @@ import java.util.List;
  */
 public record EntityLongData(@NotNull List<Column> columns, @NotNull LongContainer data) implements EntityData<LongContainer> {
     public EntityLongData {
-        assert !columns.isEmpty() : "Entity data is empty: " + this;
-        assert columns.size() == data.size() : "Entity columns do not match the data: " + this;
+        assert !columns.isEmpty() : "Entity data is empty: columns=%s, data=%s".formatted(columns, data);
+        assert columns.size() == data.size() : "Entity columns do not match the data: %s vs %s".formatted(columns, data);
     }
 
     @Override

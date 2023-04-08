@@ -22,9 +22,10 @@ import java.util.List;
 public record BatchEntityIntData(@NotNull List<Column> columns,
                                  @NotNull IntContainer values) implements BatchEntityData<IntArrayList> {
     public BatchEntityIntData {
-        assert !columns.isEmpty() : "Entity data batch columns are empty: " + this;
-        assert !values.isEmpty() : "Entity data batch empty: " + this;
-        assert values.size() % columns.size() == 0 : "Entity values don't match the columns size: " + this;
+        assert !columns.isEmpty() : "Entity data batch columns are empty: columns=%s, data=%s".formatted(columns, values);
+        assert !values.isEmpty() : "Entity data batch empty: columns=%s, data=%s".formatted(columns, values);
+        assert values.size() % columns.size() == 0 :
+            "Entity values don't match the columns size: columns=%s, data=%s".formatted(columns, values);
     }
 
     @Override
