@@ -2,6 +2,9 @@ package io.webby.orm.api.query;
 
 import org.jetbrains.annotations.NotNull;
 
+/**
+ * Represents a term that can participate in boolean expressions. Has a {@link TermType#BOOL} type.
+ */
 public interface BoolTerm extends Term {
     @Override
     default @NotNull TermType type() {

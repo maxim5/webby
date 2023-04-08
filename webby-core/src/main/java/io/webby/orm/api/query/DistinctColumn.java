@@ -2,6 +2,9 @@ package io.webby.orm.api.query;
 
 import org.jetbrains.annotations.NotNull;
 
+/**
+ * Represents a <code>DISTINCT</code> column.
+ */
 public class DistinctColumn extends Unit implements Term {
     private final Column column;
 

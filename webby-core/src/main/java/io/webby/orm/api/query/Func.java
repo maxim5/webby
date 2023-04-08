@@ -12,6 +12,10 @@ import java.util.stream.IntStream;
 import static io.webby.orm.api.query.InvalidQueryException.assure;
 import static io.webby.orm.api.query.TermType.*;
 
+/**
+ * Represents an SQL function. May have one or more inputs and an output. All inputs and output have a type.
+ * Some functions are aggregate ({@link #isAggregate()}), hence can participate in {@link SelectGroupBy} queries.
+ */
 public enum Func implements Representable {
     COUNT("count", List.of(WILDCARD), NUMBER),
     SUM("sum", List.of(NUMBER), NUMBER),

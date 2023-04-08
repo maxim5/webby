@@ -3,6 +3,10 @@ package io.webby.orm.api.query;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
+/**
+ * A class for the variable occurrence in the SQL query. Is a {@link Term}.
+ * SQL repr: <code>?</code>.
+ */
 public class Variable extends Unit implements Term {
     private final TermType type;
 

@@ -6,7 +6,12 @@ import java.util.List;
 
 import static io.webby.orm.api.query.Args.flattenArgsOf;
 
-
+/**
+ * Represents a functional expression in SQL. Consists of a function {@link Func} and a number of input terms.
+ * The type of {@link FuncExpr} is the type of function output.
+ * If the function is aggregate, then the expression is also aggregate ({@link #isAggregate()}),
+ * then can be used in {@link SelectGroupBy} queries.
+ */
 public class FuncExpr extends Unit implements Term {
     private final Func func;
 
