@@ -2,7 +2,9 @@ package io.webby.demo.model;
 
 import com.carrotsearch.hppc.IntArrayList;
 import io.webby.orm.api.Connector;
+import io.webby.orm.api.entity.BatchEntityData;
 import io.webby.orm.api.entity.BatchEntityIntData;
+import io.webby.orm.api.entity.EntityData;
 import io.webby.orm.api.entity.EntityIntData;
 import io.webby.orm.api.query.Contextual;
 import io.webby.orm.api.query.TermType;
@@ -13,6 +15,7 @@ import io.webby.testing.SqlDbTableTest;
 import org.jetbrains.annotations.NotNull;
 import org.junit.jupiter.api.Test;
 
+import java.util.Collection;
 import java.util.List;
 import java.util.Map;
 
@@ -39,6 +42,38 @@ public class IntsModelTableTest
         assertThrows(AssertionError.class, () -> newIntsModelBatch(IntArrayList.from(1, 2, 3, 4)));
     }
 
+    /** {@link IntsModelTable#insert(IntsModel)} **/
+
+    @Test
+    public void insert_ok() {
+        assertEquals(table.insert(new IntsModel(1, 2, 3)), 1);
+        assertThat(table.fetchAll()).containsExactly(new IntsModel(1, 2, 3));
+    }
+
+    @Test
+    public void insert_duplicate_ok() {
+        assertEquals(table.insert(new IntsModel(1, 2, 3)), 1);
+        assertEquals(table.insert(new IntsModel(1, 2, 3)), 1);
+        assertThat(table.fetchAll()).containsExactly(new IntsModel(1, 2, 3), new IntsModel(1, 2, 3));
+    }
+
+    /** {@link IntsModelTable#insertIgnore(IntsModel)} **/
+
+    @Test
+    public void insert_ignore_ok() {
+        assertEquals(table.insertIgnore(new IntsModel(1, 2, 3)), 1);
+        assertThat(table.fetchAll()).containsExactly(new IntsModel(1, 2, 3));
+    }
+
+    @Test
+    public void insert_ignore_duplicate_ok() {
+        assertEquals(table.insertIgnore(new IntsModel(1, 2, 3)), 1);
+        assertEquals(table.insertIgnore(new IntsModel(1, 2, 3)), 1);
+        assertThat(table.fetchAll()).containsExactly(new IntsModel(1, 2, 3), new IntsModel(1, 2, 3));
+    }
+
+    /** {@link IntsModelTable#insertData(EntityData)} **/
+
     @Test
     public void insert_data_complete_ok() {
         EntityIntData data = newIntsModelData(IntArrayList.from(1, 2, 3));
@@ -60,6 +95,31 @@ public class IntsModelTableTest
         assertThat(table.fetchAll()).containsExactly(new IntsModel(0, 777, 0));
     }
 
+    /** {@link IntsModelTable#insertBatch(Collection)} **/
+
+    @Test
+    public void insert_batch_of_one_ok() {
+        List<IntsModel> batch = List.of(new IntsModel(1, 2, 3));
+        assertThat(table.insertBatch(batch)).asList().containsExactly(1);
+        assertThat(table.fetchAll()).containsExactly(new IntsModel(1, 2, 3));
+    }
+
+    @Test
+    public void insert_batch_of_two_different_ok() {
+        List<IntsModel> batch = List.of(new IntsModel(1, 2, 3), new IntsModel(4, 5, 6));
+        assertThat(table.insertBatch(batch)).asList().containsExactly(1, 1);
+        assertThat(table.fetchAll()).containsExactly(new IntsModel(1, 2, 3), new IntsModel(4, 5, 6));
+    }
+
+    @Test
+    public void insert_batch_of_two_duplicates_ok() {
+        List<IntsModel> batch = List.of(new IntsModel(1, 2, 3), new IntsModel(1, 2, 3));
+        assertThat(table.insertBatch(batch)).asList().containsExactly(1, 1);
+        assertThat(table.fetchAll()).containsExactly(new IntsModel(1, 2, 3), new IntsModel(1, 2, 3));
+    }
+
+    /** {@link IntsModelTable#insertDataBatch(BatchEntityData)} **/
+
     @Test
     public void insert_data_batch_complete_ok() {
         BatchEntityIntData batchData = newIntsModelBatch(IntArrayList.from(1, 2, 3, 4, 5, 6));
@@ -74,9 +134,49 @@ public class IntsModelTableTest
         assertThat(table.fetchAll()).containsExactly(new IntsModel(1, 2, 0), new IntsModel(4, 5, 0));
     }
 
+    /** {@link IntsModelTable#updateWhere(IntsModel, Where)} **/
+
+    @Test
+    public void update_where_ok() {
+        table.insert(new IntsModel(1, 2, 3));
+
+        int updated = table.updateWhere(
+            new IntsModel(1, 2, 333),
+            Where.and(lookupBy(foo, var(1)), lookupBy(bar, var(2)))
+        );
+        assertEquals(updated, 1);
+        assertThat(table.fetchAll()).containsExactly(new IntsModel(1, 2, 333));
+    }
+
+    @Test
+    public void update_where_does_not_match() {
+        table.insert(new IntsModel(1, 2, 3));
+
+        int updated = table.updateWhere(
+            new IntsModel(1, 2, 333),
+            Where.of(lookupBy(foo, var(111)))
+        );
+        assertEquals(updated, 0);
+        assertThat(table.fetchAll()).containsExactly(new IntsModel(1, 2, 3));
+    }
+
+    @Test
+    public void update_where_multiple_rows_match() {
+        table.insertBatch(List.of(new IntsModel(1, 2, 3), new IntsModel(1, 2, 3)));
+
+        int updated = table.updateWhere(
+            new IntsModel(1, 2, 333),
+            Where.of(lookupBy(foo, var(1)))
+        );
+        assertEquals(updated, 2);
+        assertThat(table.fetchAll()).containsExactly(new IntsModel(1, 2, 333), new IntsModel(1, 2, 333));
+    }
+
+    /** {@link IntsModelTable#updateDataWhere(EntityData, Where)} **/
+
     @Test
     public void update_data_where_complete_ok() {
-        table.insertBatch(List.of(new IntsModel(1, 2, 3)));
+        table.insert(new IntsModel(1, 2, 3));
 
         int updated = table.updateDataWhere(
             newIntsModelData(IntArrayList.from(1, 2, 333)),
@@ -88,7 +188,7 @@ public class IntsModelTableTest
 
     @Test
     public void update_data_where_incomplete_one_column_ok() {
-        table.insertBatch(List.of(new IntsModel(1, 2, 3)));
+        table.insert(new IntsModel(1, 2, 3));
 
         int updated = table.updateDataWhere(
             new EntityIntData(List.of(bar), IntArrayList.from(777)),
@@ -99,8 +199,8 @@ public class IntsModelTableTest
     }
 
     @Test
-    public void update_data_where_not_found() {
-        table.insertBatch(List.of(new IntsModel(1, 2, 3)));
+    public void update_data_where_does_not_match() {
+        table.insert(new IntsModel(1, 2, 3));
 
         int updated = table.updateDataWhere(
             newIntsModelData(IntArrayList.from(1, 2, 333)),
@@ -109,6 +209,64 @@ public class IntsModelTableTest
         assertEquals(updated, 0);
         assertThat(table.fetchAll()).containsExactly(new IntsModel(1, 2, 3));
     }
+
+    @Test
+    public void update_data_where_multiple_rows_match() {
+        table.insertBatch(List.of(new IntsModel(1, 2, 3), new IntsModel(1, 2, 3)));
+
+        int updated = table.updateDataWhere(
+            newIntsModelData(IntArrayList.from(1, 2, 333)),
+            Where.and(lookupBy(foo, var(1)), lookupBy(bar, var(2)))
+        );
+        assertEquals(updated, 2);
+        assertThat(table.fetchAll()).containsExactly(new IntsModel(1, 2, 333), new IntsModel(1, 2, 333));
+    }
+
+    /** {@link IntsModelTable#updateWhereBatch(Collection, Contextual)} **/
+
+    @Test
+    public void update_where_batch_ok() {
+        table.insertBatch(List.of(new IntsModel(1, 2, 3), new IntsModel(4, 5, 6)));
+
+        int[] updated = table.updateWhereBatch(
+            List.of(new IntsModel(1, 2, 333), new IntsModel(4, 5, 666)),
+            Contextual.resolvingByName(
+                Where.of(lookupBy(foo, unresolved("x", TermType.NUMBER))),
+                row -> Map.of("x", row.foo()))
+        );
+        assertThat(updated).asList().containsExactly(1, 1);
+        assertThat(table.fetchAll()).containsExactly(new IntsModel(1, 2, 333), new IntsModel(4, 5, 666));
+    }
+
+    @Test
+    public void update_where_batch_extra_values_ok() {
+        table.insertBatch(List.of(new IntsModel(1, 2, 3), new IntsModel(4, 5, 6)));
+
+        int[] updated = table.updateWhereBatch(
+            List.of(new IntsModel(1, 2, 333), new IntsModel(4, 5, 666), new IntsModel(7, 8, 9)),
+            Contextual.resolvingByName(
+                Where.and(lookupBy(foo, unresolved("x", TermType.NUMBER)), lookupBy(bar, unresolved("y", TermType.NUMBER))),
+                row -> Map.of("x", row.foo(), "y", row.bar()))
+        );
+        assertThat(updated).asList().containsExactly(1, 1, 0);
+        assertThat(table.fetchAll()).containsExactly(new IntsModel(1, 2, 333), new IntsModel(4, 5, 666));
+    }
+
+    @Test
+    public void update_where_batch_multiple_rows_match() {
+        table.insertBatch(List.of(new IntsModel(1, 2, 3), new IntsModel(1, 2, 3)));
+
+        int[] updated = table.updateWhereBatch(
+            List.of(new IntsModel(1, 2, 333)),
+            Contextual.resolvingByName(
+                Where.of(lookupBy(foo, unresolved("x", TermType.NUMBER))),
+                row -> Map.of("x", row.foo()))
+        );
+        assertThat(updated).asList().containsExactly(2);
+        assertThat(table.fetchAll()).containsExactly(new IntsModel(1, 2, 333), new IntsModel(1, 2, 333));
+    }
+
+    /** {@link IntsModelTable#updateDataWhereBatch(BatchEntityData, Contextual)} **/
 
     @Test
     public void update_data_where_batch_complete_ok() {
@@ -150,5 +308,19 @@ public class IntsModelTableTest
         );
         assertThat(updated).asList().containsExactly(1, 1);
         assertThat(table.fetchAll()).containsExactly(new IntsModel(1, 2, 333), new IntsModel(4, 5, 666));
+    }
+
+    @Test
+    public void update_data_where_batch_multiple_rows_match() {
+        table.insertBatch(List.of(new IntsModel(1, 2, 3), new IntsModel(1, 2, 3)));
+
+        int[] updated = table.updateDataWhereBatch(
+            newIntsModelBatch(IntArrayList.from(1, 2, 333)),
+            Contextual.resolvingByName(
+                Where.of(lookupBy(foo, unresolved("x", TermType.NUMBER))),
+                row -> Map.of("x", row.get(0)))
+        );
+        assertThat(updated).asList().containsExactly(2);
+        assertThat(table.fetchAll()).containsExactly(new IntsModel(1, 2, 333), new IntsModel(1, 2, 333));
     }
 }

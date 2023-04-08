@@ -9,6 +9,7 @@ import org.jetbrains.annotations.NotNull;
 import static io.webby.testing.TestingUtil.array;
 import static org.junit.jupiter.api.Assumptions.assumeTrue;
 
+// TODO: complex primary keys aren't supported right now (ComplexIdModel, needs tests in all DBs).
 public class ComplexIdModelTableTest
         extends SqlDbTableTest<ComplexIdModel, ComplexIdModelTable>
         implements PrimaryKeyTableTest<ComplexIdModel.Key, ComplexIdModel, ComplexIdModelTable> {
@@ -26,6 +27,16 @@ public class ComplexIdModelTableTest
     @Override
     public @NotNull ComplexIdModel createEntity(ComplexIdModel.@NotNull Key key, int version) {
         return new ComplexIdModel(key, version);
+    }
+
+    @Override
+    public void insert_entity_already_exists_throws() {
+        assumeTrue(false, "Complex ids are not unique, hence allow duplicate inserts");
+    }
+
+    @Override
+    public void insert_batch_of_two_duplicates() {
+        assumeTrue(false, "Complex ids are not unique, hence allow duplicate inserts");
     }
 
     @Override

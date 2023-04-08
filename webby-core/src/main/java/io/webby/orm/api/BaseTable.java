@@ -92,32 +92,82 @@ public interface BaseTable<E> extends Iterable<E>, HasEngine, HasRunner {
 
     // INSERT
 
+    /**
+     * Inserts the {@code entity} into the table.
+     * @return the number of affected rows in a table (1 if successful)
+     * @throws QueryException if the insertion failed, e.g. due to PK or FK conflict
+     */
     @CanIgnoreReturnValue
     int insert(@NotNull E entity);
 
+    /**
+     * Inserts the {@code entity} into the table, ignoring PK or FK conflicts.
+     * @return the number of affected rows in a table (1 if successful, 0 otherwise)
+     * @throws QueryException if the insertion failed unexpectedly
+     */
     @CanIgnoreReturnValue
     int insertIgnore(@NotNull E entity);
 
+    /**
+     * Inserts the {@code EntityData} into the table. The {@code data} row may or may not be complete.
+     * @return the number of affected rows in a table (1 if successful)
+     * @throws QueryException if the insertion failed, e.g. due to PK or FK conflict
+     */
     @CanIgnoreReturnValue
     int insertData(@NotNull EntityData<?> data);
 
+    /**
+     * Inserts multiple entities into the table in batch mode.
+     * @return the array holding the number of affected rows in a table (1 if successful)
+     * @throws QueryException if the insertion failed, e.g. due to PK or FK conflict
+     */
     @CanIgnoreReturnValue
     int[] insertBatch(@NotNull Collection<? extends E> batch);
 
+    /**
+     * Inserts the {@code BatchEntityData} into the table. The {@code batchData} rows may or may not be complete.
+     * @return the array holding the number of affected rows in a table (1 if successful)
+     * @throws QueryException if the insertion failed, e.g. due to PK or FK conflict
+     */
     @CanIgnoreReturnValue
     int[] insertDataBatch(@NotNull BatchEntityData<?> batchData);
 
     // UPDATE
 
-    @CanIgnoreReturnValue
-    int updateDataWhere(@NotNull EntityData<?> data, @NotNull Where where);
-
+    /**
+     * Updates the {@code entity} in the table given the {@code where} condition.
+     * @return the number of affected rows in a table (1 or more if successful)
+     * @throws QueryException if the update failed, e.g. due to PK or FK conflict
+     */
     @CanIgnoreReturnValue
     int updateWhere(@NotNull E entity, @NotNull Where where);
 
+    /**
+     * Updates the {@code EntityData} in the table given the {@code where} condition.
+     * @return the number of affected rows in a table (1 or more if successful)
+     * @throws QueryException if the update failed, e.g. due to PK or FK conflict
+     */
+    @CanIgnoreReturnValue
+    int updateDataWhere(@NotNull EntityData<?> data, @NotNull Where where);
+
+    /**
+     * Updates multiple rows in the table given the contextual {@code where} condition.
+     * In order to pass correct query params, the condition gets resolved from each entity in the {@code batch}.
+     * @return the array holding the number of affected rows in a table (1 if successful)
+     * @throws QueryException if the update failed, e.g. due to PK or FK conflict
+     * @see Contextual for arg resolution
+     */
     @CanIgnoreReturnValue
     int[] updateWhereBatch(@NotNull Collection<? extends E> batch, @NotNull Contextual<Where, E> where);
 
+    /**
+     * Updates multiple rows in the table given the contextual {@code where} condition.
+     * In order to pass correct query params, the condition gets resolved from each chunk in the {@code batchData}.
+     * @return the array holding the number of affected rows in a table (1 if successful)
+     * @throws QueryException if the update failed, e.g. due to PK or FK conflict
+     * @param <B> the type of batch used for context resolution
+     * @see Contextual for arg resolution
+     */
     @CanIgnoreReturnValue
     <B> int[] updateDataWhereBatch(@NotNull BatchEntityData<B> batchData, @NotNull Contextual<Where, B> where);
 

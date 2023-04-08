@@ -1,9 +1,6 @@
 package io.webby.testing;
 
-import io.webby.orm.api.Engine;
-import io.webby.orm.api.Page;
-import io.webby.orm.api.TableMeta;
-import io.webby.orm.api.TableObj;
+import io.webby.orm.api.*;
 import io.webby.orm.api.query.*;
 import io.webby.util.collect.ListBuilder;
 import org.jetbrains.annotations.NotNull;
@@ -11,6 +8,7 @@ import org.junit.jupiter.api.Test;
 
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collection;
 import java.util.List;
 
 import static com.google.common.truth.Truth.assertThat;
@@ -30,6 +28,8 @@ public interface PrimaryKeyTableTest<K, E, T extends TableObj<K, E>> extends Bas
         assertThat(table().fetchAll()).isEmpty();
     }
 
+    /** {@link TableObj#getBatchByPk(Collection)} **/
+
     @Test
     default void getBatchByPk() {
         assumeKeys(2);
@@ -45,6 +45,8 @@ public interface PrimaryKeyTableTest<K, E, T extends TableObj<K, E>> extends Bas
         assertEquals(1, table().insert(entity2));
         assertMapContents(table().getBatchByPk(List.of(key1, key2)), key1, entity1, key2, entity2);
     }
+
+    /** {@link TableObj#insert(Object)} **/
 
     @Test
     default void insert_entity() {
@@ -73,6 +75,16 @@ public interface PrimaryKeyTableTest<K, E, T extends TableObj<K, E>> extends Bas
     }
 
     @Test
+    default void insert_entity_already_exists_throws() {
+        assumeKeys(1);
+        E entity = createEntity(keys()[0]);
+        assertEquals(1, table().insert(entity));
+        assertThrows(QueryException.class, () -> table().insert(entity));
+    }
+
+    /** {@link TableObj#insertIgnore(Object)} **/
+
+    @Test
     default void insert_ignore() {
         // Ways to make it work in H2:
         // 1) URL: ";MODE=MYSQL"
@@ -91,6 +103,47 @@ public interface PrimaryKeyTableTest<K, E, T extends TableObj<K, E>> extends Bas
         assertTableNotContains(keys()[1]);
         assertTableAll(entity);
     }
+
+    /** {@link TableObj#insertBatch(Collection)} **/
+
+    @Test
+    default void insert_batch_of_one() {
+        assumeKeys(2);
+        E entity = createEntity(keys()[0]);
+        assertThat(table().insertBatch(List.of(entity))).asList().containsExactly(1);
+
+        assertTableCount(1);
+        assertTableContains(keys()[0], entity);
+        assertTableNotContains(keys()[1]);
+        assertTableAll(entity);
+    }
+
+    @Test
+    default void insert_batch_of_two_different() {
+        assumeKeys(2);
+        E entity1 = createEntity(keys()[0]);
+        E entity2 = createEntity(keys()[1]);
+        assertThat(table().insertBatch(List.of(entity1, entity2))).asList().containsExactly(1, 1);
+
+        assertTableCount(2);
+        assertTableContains(keys()[0], entity1);
+        assertTableContains(keys()[1], entity2);
+        assertTableAll(entity1, entity2);
+    }
+
+    @Test
+    default void insert_batch_of_two_duplicates() {
+        assumeKeys(2);
+        E entity = createEntity(keys()[0]);
+        assertThrows(QueryException.class, () -> table().insertBatch(List.of(entity, entity)));
+
+        assertTableCount(1);
+        assertTableContains(keys()[0], entity);
+        assertTableNotContains(keys()[1]);
+        assertTableAll(entity);
+    }
+
+    /** {@link TableObj#updateByPk(Object)} **/
 
     @Test
     default void update_by_pk() {
@@ -116,6 +169,8 @@ public interface PrimaryKeyTableTest<K, E, T extends TableObj<K, E>> extends Bas
         assertThat(table().fetchAll()).isEmpty();
     }
 
+    /** {@link TableObj#updateByPkOrInsert(Object)} **/
+
     @Test
     default void update_by_pk_or_insert_new_entity() {
         assumeKeys(2);
@@ -140,6 +195,8 @@ public interface PrimaryKeyTableTest<K, E, T extends TableObj<K, E>> extends Bas
         assertTableNotContains(keys()[1]);
         assertTableAll(entity);
     }
+
+    /** {@link TableObj#updateWhere(Object, Where)} **/
 
     @Test
     default void update_where_true() {
@@ -171,6 +228,8 @@ public interface PrimaryKeyTableTest<K, E, T extends TableObj<K, E>> extends Bas
         assertTableAll(entity);
     }
 
+    /** {@link TableObj#deleteByPk(Object)} **/
+
     @Test
     default void delete_by_pk() {
         assumeKeys(1);
@@ -191,6 +250,8 @@ public interface PrimaryKeyTableTest<K, E, T extends TableObj<K, E>> extends Bas
         assertTableNotContains(keys()[0]);
         assertThat(table().fetchAll()).isEmpty();
     }
+
+    /** {@link TableObj#deleteWhere(Where)} **/
 
         @Test
     default void delete_where_true() {
@@ -215,6 +276,8 @@ public interface PrimaryKeyTableTest<K, E, T extends TableObj<K, E>> extends Bas
         assertTableNotContains(keys()[1]);
         assertTableAll(entity);
     }
+
+    /** {@link TableObj#fetchPage(CompositeFilter)} **/
 
     @Test
     default void fetch_page() {
