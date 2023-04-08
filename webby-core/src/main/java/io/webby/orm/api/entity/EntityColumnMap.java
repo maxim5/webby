@@ -6,25 +6,28 @@ import org.jetbrains.annotations.NotNull;
 
 import java.sql.PreparedStatement;
 import java.sql.SQLException;
-import java.util.EnumMap;
+import java.util.Map;
 import java.util.Set;
 
 /**
- * A {@link EntityData} implementation which stores the arbitrary row using a {@link EnumMap}.
+ * A {@link EntityData} implementation which stores the arbitrary row using a {@link Map}.
+ * It is recommended use a deterministically-ordered map,
+ * such as {@link java.util.EnumMap} or {@link java.util.LinkedHashMap}, to avoid confusion with the params order.
+ * <p>
  * The statement is updated via {@link PreparedStatement#setObject(int, Object)} from index 0.
  */
-public record EntityColumnMap<E extends Enum<E> & Column>(@NotNull EnumMap<E, Object> map) implements EntityData<EnumMap<E, Object>> {
+public record EntityColumnMap<C extends Column>(@NotNull Map<C, ?> map) implements EntityData<Map<C, ?>> {
     public EntityColumnMap {
         assert !map.isEmpty() : "Entity data is empty: " + map;
     }
 
     @Override
-    public @NotNull Set<E> columns() {
+    public @NotNull Set<C> columns() {
         return map.keySet();
     }
 
     @Override
-    public @NotNull EnumMap<E, Object> data() {
+    public @NotNull Map<C, ?> data() {
         return map;
     }
 
