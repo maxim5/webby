@@ -3,6 +3,8 @@ package io.webby.orm.api.query;
 import com.carrotsearch.hppc.IntArrayList;
 import com.carrotsearch.hppc.LongArrayList;
 import com.google.errorprone.annotations.CanIgnoreReturnValue;
+import com.mockrunner.mock.jdbc.MockPreparedStatement;
+import io.webby.testing.TestingUtil;
 import io.webby.util.collect.ImmutableArrayList;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
@@ -14,8 +16,11 @@ import java.util.Map;
 import java.util.stream.Collectors;
 
 import static com.google.common.truth.Truth.assertThat;
+import static io.webby.orm.testing.MockingJdbc.assertThat;
+import static io.webby.orm.testing.MockingJdbc.mockPreparedStatement;
 import static io.webby.testing.AssertBasics.assertPrivateFieldClass;
 import static io.webby.testing.AssertBasics.getPrivateFieldValue;
+import static io.webby.util.base.Unchecked.Suppliers.runRethrow;
 import static org.junit.jupiter.api.Assertions.*;
 
 public class ArgsTest {
@@ -378,6 +383,30 @@ public class ArgsTest {
             assertEquals(expected.length, args.size());
             assertEquals(expected.length == 0, args.isEmpty());
             assertThat(args.asList()).containsExactlyElementsIn(expected).inOrder();
+
+            assertPreparedParams(expected);
+            assertPreparedParamsWithOffset(expected);
+
+            return this;
+        }
+
+        public @NotNull ArgsAssert assertPreparedParams(@Nullable Object @NotNull ... expected) {
+            MockPreparedStatement statement = mockPreparedStatement();
+            int added = runRethrow(() -> args.setPreparedParams(statement));
+            assertEquals(added, expected.length);
+            assertThat(statement).withParams().equalExactly(expected);
+            return this;
+        }
+
+        public @NotNull ArgsAssert assertPreparedParamsWithOffset(@Nullable Object @NotNull ... expected) {
+            MockPreparedStatement statement = mockPreparedStatement();
+            int added = runRethrow(() -> {
+                statement.setObject(1, null);
+                return args.setPreparedParams(statement, 1);
+            });
+            expected = TestingUtil.prependVarArg(null, expected);
+            assertEquals(added, expected.length);
+            assertThat(statement).withParams().equalExactly(expected);
             return this;
         }
 
