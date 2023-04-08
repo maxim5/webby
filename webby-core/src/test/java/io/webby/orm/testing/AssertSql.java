@@ -51,11 +51,11 @@ public class AssertSql {
 
     private static void assertRows(boolean ordered, @NotNull List<DebugSql.Row> result, @NotNull Object[] ... expected) {
         List<List<Object>> values = result.stream()
-                .map(row -> row.values().stream().map(DebugSql.RowValue::value).map(AssertSql::adjust).toList())
-                .toList();
+            .map(row -> row.values().stream().map(DebugSql.RowValue::value).map(AssertSql::adjust).toList())
+            .toList();
         List<List<Object>> expectedList = Arrays.stream(expected)
-                .map(row -> Arrays.stream(row).map(AssertSql::adjust).toList())
-                .toList();
+            .map(row -> Arrays.stream(row).map(AssertSql::adjust).toList())
+            .toList();
         if (ordered) {
             assertThat(values).containsExactlyElementsIn(expectedList).inOrder();
         } else {
