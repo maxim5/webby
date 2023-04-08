@@ -1,6 +1,7 @@
 package io.webby.orm.testing;
 
 import com.google.common.truth.Truth;
+import com.google.errorprone.annotations.CanIgnoreReturnValue;
 import com.google.errorprone.annotations.CheckReturnValue;
 import com.mockrunner.mock.jdbc.MockConnection;
 import com.mockrunner.mock.jdbc.MockParameterMap;
@@ -9,6 +10,7 @@ import com.mockrunner.mock.jdbc.ParameterIndex;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
+import java.sql.PreparedStatement;
 import java.util.List;
 
 import static io.webby.testing.AssertBasics.getPrivateFieldValue;
@@ -31,11 +33,27 @@ public class MockingJdbc {
         return new MockMockPreparedStatementSubject(statement);
     }
 
+    public static @NotNull MockMockPreparedStatementSubject assertThat(@NotNull PreparedStatement statement) {
+        return assertThat(((MockPreparedStatement) statement));
+    }
+
     public static @NotNull MockParameterMapSubject assertThat(@NotNull MockParameterMap parameterMap) {
         return new MockParameterMapSubject(parameterMap);
     }
 
     public record MockMockPreparedStatementSubject(@NotNull MockPreparedStatement statement) {
+        @CanIgnoreReturnValue
+        public @NotNull MockMockPreparedStatementSubject queryEquals(@NotNull String query) {
+            Truth.assertThat(statement.getSQL()).isEqualTo(query);
+            return this;
+        }
+
+        @CanIgnoreReturnValue
+        public @NotNull MockMockPreparedStatementSubject hasNoParams() {
+            withParams().equalExactly();
+            return this;
+        }
+
         @CheckReturnValue
         public @NotNull MockParameterMapSubject withParams() {
             return new MockParameterMapSubject(statement.getParameterMap());

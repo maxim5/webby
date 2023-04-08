@@ -32,6 +32,14 @@ public class TestingUtil {
         return result;
     }
 
+    @SafeVarargs
+    public static <T> @NotNull T[] prependVarArg(@Nullable T arg, @Nullable T @NotNull ... args) {
+        T[] result = Arrays.copyOf(args, args.length + 1);
+        result[0] = arg;
+        System.arraycopy(args, 0, result, 1, args.length);
+        return result;
+    }
+
     @CanIgnoreReturnValue
     public static boolean waitFor(long millis) {
         try {
