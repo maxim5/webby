@@ -85,12 +85,12 @@ public class QueryRunnerTest {
     public void runInTransaction_throws_other_exception() throws SQLException {
         mockedConnection.setAutoCommit(true);
 
-        Exception exception = assertThrows(Exception.class, () ->
+        AssertionError exception = assertThrows(AssertionError.class, () ->
             runner.runInTransaction(queryRunner -> {
                 throw new AssertionError("Fail");
             })
         );
-        assertThat(exception).hasMessageThat().contains("Fail");
+        assertThat(exception).hasMessageThat().isEqualTo("Fail");
 
         assertTrue(mockedConnection.getAutoCommit());
         assertEquals(mockedConnection.getNumberCommits(), 0);

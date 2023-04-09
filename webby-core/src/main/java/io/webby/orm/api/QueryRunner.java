@@ -37,7 +37,7 @@ public class QueryRunner {
         try {
             action.accept(this);
             connection.commit();
-        } catch (SQLException exception) {
+        } catch (SQLException | RuntimeException | Error exception) {
             connection.rollback();
             throw exception;
         } catch (Throwable throwable) {
