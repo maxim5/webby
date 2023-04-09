@@ -1,7 +1,6 @@
 package io.webby.testing;
 
 import com.google.errorprone.annotations.CheckReturnValue;
-import io.webby.util.base.Unchecked.Runnables;
 import io.webby.util.func.ThrowConsumer;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
@@ -44,17 +43,6 @@ public class MockConsumer<T, E extends Throwable> implements Consumer<T>, ThrowC
         return new MockConsumer<T, RuntimeException>().expect(expected);
     }
 
-    @CheckReturnValue
-    public static <T> MockConsumer<T, RuntimeException> wrap(@NotNull Consumer<T> delegate) {
-        return new MockConsumer<>() {
-            @Override
-            public void accept(T item) {
-                delegate.accept(item);
-                super.accept(item);
-            }
-        };
-    }
-
     /**
      * To be used for {@code ThrowConsumer} mocks.
      */
@@ -67,16 +55,6 @@ public class MockConsumer<T, E extends Throwable> implements Consumer<T>, ThrowC
         @CheckReturnValue
         public static <T, E extends Throwable> MockConsumer<T, E> expecting(@Nullable T @NotNull ... expected) {
             return new MockConsumer<T, E>().expect(expected);
-        }
-        @CheckReturnValue
-        public static <T, E extends Throwable> MockConsumer<T, E> wrap(@NotNull ThrowConsumer<T, E> delegate) {
-            return new MockConsumer<>() {
-                @Override
-                public void accept(T item) {
-                    Runnables.runRethrow(() -> delegate.accept(item));
-                    super.accept(item);
-                }
-            };
         }
     }
 
