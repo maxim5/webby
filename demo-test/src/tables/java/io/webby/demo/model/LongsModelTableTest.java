@@ -322,4 +322,56 @@ public class LongsModelTableTest
         assertThat(updated).asList().containsExactly(2);
         assertThat(table.fetchAll()).containsExactly(new LongsModel(1, 2, 333), new LongsModel(1, 2, 333));
     }
+
+    /** {@link IntsModelTable#updateWhereOrInsert(Object, Where)} **/
+
+    @Test
+    public void update_where_or_insert_updated() {
+        table.insert(new LongsModel(1, 2, 3));
+
+        int affected = table.updateWhereOrInsert(
+            new LongsModel(1, 2, 333),
+            Where.and(lookupBy(foo, var(1)), lookupBy(bar, var(2)))
+        );
+        assertEquals(affected, 1);
+        assertThat(table.fetchAll()).containsExactly(new LongsModel(1, 2, 333));
+    }
+
+    @Test
+    public void update_where_or_insert_inserted() {
+        table.insert(new LongsModel(1, 2, 3));
+
+        int affected = table.updateWhereOrInsert(
+            new LongsModel(111, 222, 333),
+            Where.and(lookupBy(foo, var(111)), lookupBy(bar, var(222)))
+        );
+        assertEquals(affected, 1);
+        assertThat(table.fetchAll()).containsExactly(new LongsModel(1, 2, 3), new LongsModel(111, 222, 333));
+    }
+
+    /** {@link LongsModelTable#updateWhereOrInsertData(EntityData, Where)} **/
+
+    @Test
+    public void update_where_or_insert_data_complete_updated() {
+        table.insert(new LongsModel(1, 2, 3));
+
+        int affected = table.updateWhereOrInsertData(
+            newLongsModelData(LongArrayList.from(1, 2, 333)),
+            Where.and(lookupBy(foo, var(1)), lookupBy(bar, var(2)))
+        );
+        assertEquals(affected, 1);
+        assertThat(table.fetchAll()).containsExactly(new LongsModel(1, 2, 333));
+    }
+
+    @Test
+    public void update_where_or_insert_data_complete_inserted() {
+        table.insert(new LongsModel(1, 2, 3));
+
+        int affected = table.updateWhereOrInsertData(
+            newLongsModelData(LongArrayList.from(111, 222, 333)),
+            Where.and(lookupBy(foo, var(111)), lookupBy(bar, var(222)))
+        );
+        assertEquals(affected, 1);
+        assertThat(table.fetchAll()).containsExactly(new LongsModel(1, 2, 3), new LongsModel(111, 222, 333));
+    }
 }

@@ -228,6 +228,39 @@ public interface PrimaryKeyTableTest<K, E, T extends TableObj<K, E>> extends Bas
         assertTableAll(entity);
     }
 
+    /** {@link TableObj#updateWhereOrInsert(Object, Where)} **/
+
+    @Test
+    default void update_where_or_insert_true() {
+        assumeKeys(2);
+        E entity = createEntity(keys()[0], 0);
+        table().insert(entity);
+
+        E newEntity = createEntity(keys()[0], 1);
+        assertEquals(1, table().updateWhereOrInsert(newEntity, Where.of(Shortcuts.TRUE)));
+
+        assertTableCount(1);
+        assertTableContains(keys()[0], newEntity);
+        assertTableNotContains(keys()[1]);
+        assertTableAll(newEntity);
+    }
+
+    @Test
+    default void update_where_or_insert_false() {
+        assumeKeys(2);
+        E entity = createEntity(keys()[0], 0);
+        table().insert(entity);
+
+        E newEntity = createEntity(keys()[1], 1);
+        assertEquals(1, table().updateWhereOrInsert(newEntity, Where.of(Shortcuts.FALSE)));
+
+        assertTableCount(2);
+        assertTableContains(keys()[0], entity);
+        assertTableContains(keys()[1], newEntity);
+        assertTableAll(entity, newEntity);
+    }
+
+
     /** {@link TableObj#deleteByPk(Object)} **/
 
     @Test
