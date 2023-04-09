@@ -9,6 +9,11 @@ import java.util.Arrays;
 import java.util.Map;
 import java.util.stream.Collectors;
 
+/**
+ * Represents the type of JDBC engine or DBMS.
+ * A JDBC {@link java.sql.Connection} has exactly one {@link Engine}.
+ * Unsupported engines are represented as {@link #Unknown}.
+ */
 public enum Engine {
     Derby("derby"),
     H2("h2"),
