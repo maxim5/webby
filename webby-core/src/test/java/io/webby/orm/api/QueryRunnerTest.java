@@ -2,10 +2,12 @@ package io.webby.orm.api;
 
 import com.carrotsearch.hppc.IntArrayList;
 import com.carrotsearch.hppc.LongArrayList;
+import com.mockrunner.mock.jdbc.MockConnection;
 import com.mockrunner.mock.jdbc.MockPreparedStatement;
 import io.webby.orm.api.query.Args;
 import io.webby.orm.api.query.SelectWhere;
 import io.webby.orm.api.query.UnresolvedArg;
+import io.webby.testing.MockConsumer;
 import io.webby.util.collect.Array;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -13,20 +15,86 @@ import org.junit.jupiter.api.Test;
 import java.sql.PreparedStatement;
 import java.sql.SQLException;
 
+import static com.google.common.truth.Truth.assertThat;
 import static io.webby.orm.api.query.Shortcuts.var;
-import static io.webby.orm.testing.MockingJdbc.*;
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertThrows;
+import static io.webby.orm.testing.MockingJdbc.assertThat;
+import static io.webby.orm.testing.MockingJdbc.mockConnection;
+import static io.webby.orm.testing.MockingJdbc.mockPreparedStatement;
+import static org.junit.jupiter.api.Assertions.*;
 
 public class QueryRunnerTest {
     private static final Object NULL = null;
     private static final UnresolvedArg UNRESOLVED_A = new UnresolvedArg("a", 0);
 
+    private MockConnection mockedConnection;
     private QueryRunner runner;
 
     @BeforeEach
     void setUp() {
-        runner = new QueryRunner(mockConnection());
+        mockedConnection = mockConnection();
+        runner = new QueryRunner(mockedConnection);
+    }
+
+    @Test
+    public void runInTransaction_success_with_autocommit() throws SQLException {
+        mockedConnection.setAutoCommit(true);
+
+        try (MockConsumer.Tracker ignored = MockConsumer.trackAllConsumersDone()) {
+            runner.runInTransaction(MockConsumer.Throw.wrap(queryRunner -> {
+                assertFalse(mockedConnection.getAutoCommit());
+            }));
+        }
+
+        assertTrue(mockedConnection.getAutoCommit());
+        assertEquals(mockedConnection.getNumberCommits(), 1);
+        assertEquals(mockedConnection.getNumberRollbacks(), 0);
+    }
+
+    @Test
+    public void runInTransaction_success_without_autocommit() throws SQLException {
+        mockedConnection.setAutoCommit(false);
+
+        try (MockConsumer.Tracker ignored = MockConsumer.trackAllConsumersDone()) {
+            runner.runInTransaction(MockConsumer.Throw.wrap(queryRunner -> {
+                assertFalse(mockedConnection.getAutoCommit());
+            }));
+        }
+
+        assertFalse(mockedConnection.getAutoCommit());
+        assertEquals(mockedConnection.getNumberCommits(), 1);
+        assertEquals(mockedConnection.getNumberRollbacks(), 0);
+    }
+
+    @Test
+    public void runInTransaction_throws_sql_exception() throws SQLException {
+        mockedConnection.setAutoCommit(true);
+
+        Exception exception = assertThrows(SQLException.class, () ->
+            runner.runInTransaction(queryRunner -> {
+                throw new SQLException("Fail");
+            })
+        );
+        assertThat(exception).hasMessageThat().isEqualTo("Fail");
+
+        assertTrue(mockedConnection.getAutoCommit());
+        assertEquals(mockedConnection.getNumberCommits(), 0);
+        assertEquals(mockedConnection.getNumberRollbacks(), 1);
+    }
+
+    @Test
+    public void runInTransaction_throws_other_exception() throws SQLException {
+        mockedConnection.setAutoCommit(true);
+
+        Exception exception = assertThrows(Exception.class, () ->
+            runner.runInTransaction(queryRunner -> {
+                throw new AssertionError("Fail");
+            })
+        );
+        assertThat(exception).hasMessageThat().contains("Fail");
+
+        assertTrue(mockedConnection.getAutoCommit());
+        assertEquals(mockedConnection.getNumberCommits(), 0);
+        assertEquals(mockedConnection.getNumberRollbacks(), 1);
     }
 
     @Test

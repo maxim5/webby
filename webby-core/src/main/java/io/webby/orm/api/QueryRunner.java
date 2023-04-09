@@ -10,6 +10,7 @@ import com.google.common.collect.Lists;
 import com.google.errorprone.annotations.MustBeClosed;
 import io.webby.orm.api.query.Args;
 import io.webby.orm.api.query.SelectQuery;
+import io.webby.util.base.Unchecked;
 import io.webby.util.func.ThrowConsumer;
 import io.webby.util.func.ThrowSupplier;
 import org.jetbrains.annotations.NotNull;
@@ -35,10 +36,14 @@ public class QueryRunner {
         connection.setAutoCommit(false);
         try {
             action.accept(this);
+            connection.commit();
+        } catch (SQLException exception) {
+            connection.rollback();
+            throw exception;
         } catch (Throwable throwable) {
             connection.rollback();
+            Unchecked.rethrow(throwable);
         } finally {
-            connection.commit();
             connection.setAutoCommit(autoCommit);
         }
     }
