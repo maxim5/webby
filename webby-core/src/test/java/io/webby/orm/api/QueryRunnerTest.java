@@ -2,6 +2,7 @@ package io.webby.orm.api;
 
 import com.carrotsearch.hppc.IntArrayList;
 import com.carrotsearch.hppc.LongArrayList;
+import com.google.common.collect.Iterators;
 import com.mockrunner.jdbc.PreparedStatementResultSetHandler;
 import com.mockrunner.mock.jdbc.MockConnection;
 import com.mockrunner.mock.jdbc.MockPreparedStatement;
@@ -9,13 +10,16 @@ import com.mockrunner.mock.jdbc.MockResultSet;
 import io.webby.orm.api.query.*;
 import io.webby.testing.CalledOnce;
 import io.webby.util.collect.Array;
+import io.webby.util.collect.Pair;
 import io.webby.util.func.ThrowConsumer;
+import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.util.ArrayList;
 import java.util.List;
 
 import static com.google.common.truth.Truth.assertThat;
@@ -24,6 +28,7 @@ import static io.webby.orm.testing.MockingJdbc.assertThat;
 import static io.webby.orm.testing.MockingJdbc.mockConnection;
 import static io.webby.orm.testing.MockingJdbc.mockPreparedStatement;
 import static io.webby.orm.testing.MockingJdbc.mockResultSet;
+import static io.webby.testing.TestingUtil.array;
 import static org.junit.jupiter.api.Assertions.*;
 
 // FIX[minor]: more tests: force .commit() or .rollback() to fail
@@ -43,6 +48,13 @@ public class QueryRunnerTest {
         resultSetHandler = mockedConnection.getPreparedStatementResultSetHandler();
         mockStatement = mockPreparedStatement();
         runner = new QueryRunner(mockedConnection);
+    }
+
+    @AfterEach
+    void tearDown() {
+        resultSetHandler.getPreparedStatements().forEach(statement -> {
+            assertTrue(statement.isClosed(), "Statement was not closed: \"%s\"".formatted(statement.getSQL()));
+        });
     }
 
     /** {@link QueryRunner#runInTransaction(ThrowConsumer)} **/
@@ -113,6 +125,8 @@ public class QueryRunnerTest {
 
         resultSetHandler.prepareResultSet("select null", mockResultSet(NULL));
         assertThat(runner.runAndGet(HardcodedSelectQuery.of("select null"))).isEqualTo(NULL);
+
+        assertThat(mockedConnection).executedQueries().containsExactly("select x", "select str", "select null");
     }
 
     @Test
@@ -122,6 +136,8 @@ public class QueryRunnerTest {
 
         resultSetHandler.prepareResultSet("select more", mockResultSet(NULL, "foo", "bar"));
         assertThat(runner.runAndGet(HardcodedSelectQuery.of("select more"))).isEqualTo(NULL);
+
+        assertThat(mockedConnection).executedQueries().containsExactly("select many", "select more");
     }
 
     @Test
@@ -132,6 +148,7 @@ public class QueryRunnerTest {
         );
         assertThat(exception.getQuery()).isEqualTo("select fail");
         assertThat(exception.getArgs()).isEmpty();
+        assertThat(mockedConnection).executedQueries().isEmpty();
     }
 
     /** {@link QueryRunner#runAndGetString(SelectQuery)} **/
@@ -146,6 +163,8 @@ public class QueryRunnerTest {
 
         resultSetHandler.prepareResultSet("select null", mockResultSet(NULL));
         assertThat(runner.runAndGetString(HardcodedSelectQuery.of("select null"))).isEqualTo(NULL);
+
+        assertThat(mockedConnection).executedQueries().containsExactly("select x", "select str", "select null");
     }
 
     @Test
@@ -155,6 +174,8 @@ public class QueryRunnerTest {
 
         resultSetHandler.prepareResultSet("select more", mockResultSet(NULL, "foo", "bar"));
         assertThat(runner.runAndGetString(HardcodedSelectQuery.of("select more"))).isEqualTo(NULL);
+
+        assertThat(mockedConnection).executedQueries().containsExactly("select many", "select more");
     }
 
     @Test
@@ -165,6 +186,7 @@ public class QueryRunnerTest {
         );
         assertThat(exception.getQuery()).isEqualTo("select fail");
         assertThat(exception.getArgs()).containsExactly(777);
+        assertThat(mockedConnection).executedQueries().isEmpty();
     }
 
     /** {@link QueryRunner#runAndGetInt(SelectQuery, int)} **/
@@ -179,6 +201,8 @@ public class QueryRunnerTest {
 
         resultSetHandler.prepareResultSet("select 0", mockResultSet(0));
         assertThat(runner.runAndGetInt(HardcodedSelectQuery.of("select 0"), -1)).isEqualTo(0);
+
+        assertThat(mockedConnection).executedQueries().containsExactly("select x", "select int", "select 0");
     }
 
     @Test
@@ -188,6 +212,8 @@ public class QueryRunnerTest {
 
         resultSetHandler.prepareResultSet("select more", mockResultSet(0, 111, 222));
         assertThat(runner.runAndGetInt(HardcodedSelectQuery.of("select more"), -1)).isEqualTo(0);
+
+        assertThat(mockedConnection).executedQueries().containsExactly("select many", "select more");
     }
 
     @Test
@@ -198,6 +224,7 @@ public class QueryRunnerTest {
         );
         assertThat(exception.getQuery()).isEqualTo("select fail");
         assertThat(exception.getArgs()).containsExactly(NULL);
+        assertThat(mockedConnection).executedQueries().isEmpty();
     }
 
     /** {@link QueryRunner#runAndGetLong(SelectQuery, long)} **/
@@ -207,11 +234,13 @@ public class QueryRunnerTest {
         resultSetHandler.clearResultSets();
         assertThat(runner.runAndGetLong(HardcodedSelectQuery.of("select x"), -1L)).isEqualTo(-1L);
 
-        resultSetHandler.prepareResultSet("select int", mockResultSet(555));
-        assertThat(runner.runAndGetLong(HardcodedSelectQuery.of("select int"), -1L)).isEqualTo(555);
+        resultSetHandler.prepareResultSet("select long", mockResultSet(555));
+        assertThat(runner.runAndGetLong(HardcodedSelectQuery.of("select long"), -1L)).isEqualTo(555);
 
         resultSetHandler.prepareResultSet("select 0", mockResultSet(0));
         assertThat(runner.runAndGetLong(HardcodedSelectQuery.of("select 0"), -1L)).isEqualTo(0);
+
+        assertThat(mockedConnection).executedQueries().containsExactly("select x", "select long", "select 0");
     }
 
     @Test
@@ -221,6 +250,8 @@ public class QueryRunnerTest {
 
         resultSetHandler.prepareResultSet("select more", mockResultSet(0, 111, 222));
         assertThat(runner.runAndGetLong(HardcodedSelectQuery.of("select more"), -1L)).isEqualTo(0);
+
+        assertThat(mockedConnection).executedQueries().containsExactly("select many", "select more");
     }
 
     @Test
@@ -231,6 +262,7 @@ public class QueryRunnerTest {
         );
         assertThat(exception.getQuery()).isEqualTo("select fail");
         assertThat(exception.getArgs()).containsExactly(777, "foo");
+        assertThat(mockedConnection).executedQueries().isEmpty();
     }
 
     /** {@link QueryRunner#run(SelectQuery, ThrowConsumer)} **/
@@ -243,6 +275,7 @@ public class QueryRunnerTest {
         CalledOnce<ResultSet, SQLException> calledOnce = new CalledOnce<>();
         runner.run(HardcodedSelectQuery.of("select me"), calledOnce);
         assertThat(calledOnce.getValue()).isIdenticalTo(resultSet);
+        assertThat(mockedConnection).executedQueries().containsExactly("select me");
     }
 
     @Test
@@ -253,6 +286,41 @@ public class QueryRunnerTest {
         );
         assertThat(exception.getQuery()).isEqualTo("select fail");
         assertThat(exception.getArgs()).containsExactly(777);
+        assertThat(mockedConnection).executedQueries().isEmpty();
+    }
+
+    /** {@link QueryRunner#forEach(SelectQuery, ThrowConsumer)} **/
+
+    @Test
+    public void forEach_simple() {
+        MockResultSet resultSet = mockResultSet(List.of(array(111, "foo"), array(222, "bar"), array(0, NULL)));
+        resultSetHandler.prepareResultSet("select all", resultSet);
+
+        List<Pair<Integer, String>> all = new ArrayList<>();
+        runner.forEach(HardcodedSelectQuery.of("select all"), set -> all.add(Pair.of(set.getInt(1), set.getString(2))));
+
+        assertThat(all).containsExactly(Pair.of(111, "foo"), Pair.of(222, "bar"), Pair.of(0, NULL));
+        assertThat(mockedConnection).executedQueries().containsExactly("select all");
+    }
+
+    /** {@link QueryRunner#iterate(SelectQuery, ResultSetIterator.Converter)} **/
+
+    @Test
+    public void iterate_simple() {
+        bugfixPatchConsistencyLevel();
+
+        MockResultSet resultSet = mockResultSet(List.of(array(111, "foo"), array(222, "bar"), array(0, NULL)));
+        resultSetHandler.prepareResultSet("select it", resultSet);
+
+        List<Pair<Integer, String>> all = new ArrayList<>();
+        try (ResultSetIterator<Pair<Integer, String>> iterator = runner.iterate(
+                HardcodedSelectQuery.of("select it"),
+                set -> Pair.of(set.getInt(1), set.getString(2)))) {
+            Iterators.addAll(all, iterator);
+        }
+
+        assertThat(all).containsExactly(Pair.of(111, "foo"), Pair.of(222, "bar"), Pair.of(0, NULL));
+        assertThat(mockedConnection).executedQueries().containsExactly("select it");
     }
 
     /** {@link QueryRunner#prepareQuery} **/
@@ -417,5 +485,20 @@ public class QueryRunnerTest {
         mockStatement.setDouble(1, 0.0d);
         assertEquals(QueryRunner.setPreparedParams(mockStatement, LongArrayList.from(111, 222, 333), 1), 4);
         assertThat(mockStatement).withParams().equalExactly(0.0d, 111L, 222L, 333L);
+    }
+
+    // A patch to fix a MockRunner bug:
+    // https://github.com/mockrunner/mockrunner/issues/84
+    // Which makes the MockResultSets lack the Statement, which breaks ResultSetIterator.
+    private void bugfixPatchConsistencyLevel() {
+        mockedConnection = new MockConnection() {
+            @Override
+            public PreparedStatement prepareStatement(String sql) throws SQLException {
+                // The last param is non-default. It will force MockStatement to clone result sets correctly.
+                return super.prepareStatement(sql, ResultSet.TYPE_FORWARD_ONLY, ResultSet.CONCUR_UPDATABLE);
+            }
+        };
+        resultSetHandler = mockedConnection.getPreparedStatementResultSetHandler();
+        runner = new QueryRunner(mockedConnection);
     }
 }

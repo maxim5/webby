@@ -1,5 +1,6 @@
 package io.webby.orm.testing;
 
+import com.google.common.truth.IterableSubject;
 import com.google.common.truth.Truth;
 import com.google.errorprone.annotations.CanIgnoreReturnValue;
 import com.mockrunner.mock.jdbc.*;
@@ -18,7 +19,7 @@ import static io.webby.util.base.EasyCast.castAny;
 
 public class MockingJdbc {
     public static @NotNull String uniqueId() {
-        return DateTimeFormatter.ofPattern("HH:mm:ss.SSSSSS").format(LocalTime.now());
+        return DateTimeFormatter.ofPattern("'['HH:mm:ss.SSSSSS']'").format(LocalTime.now());
     }
 
     public static @NotNull MockConnection mockConnection() {
@@ -36,6 +37,14 @@ public class MockingJdbc {
     public static @NotNull MockResultSet mockResultSet(@Nullable Object @NotNull ... row) {
         MockResultSet mockResultSet = new MockResultSet(uniqueId());
         mockResultSet.addRow(row);
+        return mockResultSet;
+    }
+
+    public static @NotNull MockResultSet mockResultSet(@NotNull List<Object[]> rows) {
+        MockResultSet mockResultSet = new MockResultSet(uniqueId());
+        for (Object[] row : rows) {
+            mockResultSet.addRow(row);
+        }
         return mockResultSet;
     }
 
@@ -65,6 +74,10 @@ public class MockingJdbc {
 
     @CanIgnoreReturnValue
     public record MockConnectionSubject(@NotNull MockConnection connection) {
+        public IterableSubject executedQueries() {
+            return Truth.assertThat(connection.getPreparedStatementResultSetHandler().getExecutedStatements());
+        }
+
         public @NotNull MockConnectionSubject hasAutocommit(boolean expected) {
             Truth.assertThat(Unchecked.Suppliers.runRethrow(connection::getAutoCommit)).isEqualTo(expected);
             return this;
