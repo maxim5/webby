@@ -3,17 +3,18 @@ package io.webby.testing;
 import com.carrotsearch.hppc.IntArrayList;
 import io.webby.db.model.IntAutoIdModel;
 import io.webby.orm.api.TableInt;
-import io.webby.orm.api.query.CompareType;
-import io.webby.orm.api.query.HardcodedNumericTerm;
-import io.webby.orm.api.query.Shortcuts;
-import io.webby.orm.api.query.Where;
+import io.webby.orm.api.TableMeta;
+import io.webby.orm.api.query.*;
 import org.jetbrains.annotations.NotNull;
 import org.junit.jupiter.api.Test;
 
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 
 import static com.google.common.truth.Truth.assertThat;
+import static io.webby.testing.AssertPrimitives.assertIntsNoOrder;
 import static io.webby.testing.TestingPrimitives.newIntObjectMap;
 import static io.webby.testing.TestingUtil.array;
 import static org.junit.jupiter.api.Assertions.*;
@@ -22,6 +23,22 @@ public interface TableIntTest<E, T extends TableInt<E>> extends PrimaryKeyTableT
     @Override
     default @NotNull Integer[] keys() {
         return array(1, 2, 3, 4, 5);
+    }
+
+    @Test
+    default void get_by_pk_int() {
+        assumeKeys(1);
+        int key = keys()[0];
+        E entity = createEntity(key);
+
+        assertThat(table().getByPkOrNull(key)).isNull();
+        assertThrows(NullPointerException.class, () -> table().getByPkOrDie(key));
+        assertThat(table().getOptionalByPk(key)).isEqualTo(Optional.empty());
+
+        assertEquals(1, table().insert(entity));
+        assertThat(table().getByPkOrNull(key)).isEqualTo(entity);
+        assertThat(table().getByPkOrDie(key)).isEqualTo(entity);
+        assertThat(table().getOptionalByPk(key)).isEqualTo(Optional.of(entity));
     }
 
     @Test
@@ -39,6 +56,26 @@ public interface TableIntTest<E, T extends TableInt<E>> extends PrimaryKeyTableT
         E entity2 = createEntity(key2);
         assertEquals(1, table().insert(entity2));
         assertEquals(table().getBatchByPk(batch), newIntObjectMap(key1, entity1, key2, entity2));
+    }
+
+    @Test
+    default void fetchPks_ints() {
+        assumeKeys(2);
+        int key1 = keys()[0];
+        int key2 = keys()[1];
+        E entity1 = createEntity(key1);
+        E entity2 = createEntity(key2);
+        table().insertBatch(List.of(entity1, entity2));
+        Column keyColumn = table().meta().sqlColumns().stream()
+                .filter(TableMeta.ColumnMeta::isPrimaryKey)
+                .findFirst()
+                .orElseThrow()
+                .column();
+
+        assertIntsNoOrder(table().fetchPks(Where.of(Shortcuts.TRUE)), key1, key2);
+        assertIntsNoOrder(table().fetchPks(Where.of(Shortcuts.lookupBy(keyColumn, key1))), key1);
+        assertIntsNoOrder(table().fetchPks(Where.of(Shortcuts.lookupBy(keyColumn, key2))), key2);
+        assertIntsNoOrder(table().fetchPks(Where.of(Shortcuts.FALSE)));
     }
 
     @Test
@@ -100,6 +137,15 @@ public interface TableIntTest<E, T extends TableInt<E>> extends PrimaryKeyTableT
         assertTableContains(keys()[0], entity);
         assertTableNotContains(keys()[1]);
         assertThat(table().fetchAll()).containsExactly(entity);
+    }
+
+    @Test
+    default void int_key_of() {
+        assumeKeys(1);
+        int key = keys()[0];
+        E entity = createEntity(key);
+        assertEquals(table().intKeyOf(entity), key);
+        assertEquals(table().keyOf(entity), key);
     }
 
     @NotNull E copyEntityWithId(@NotNull E entity, int autoId);
