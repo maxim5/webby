@@ -20,7 +20,7 @@ import java.util.List;
 public record BatchEntityDataList<D>(@NotNull List<EntityData<D>> batch) implements BatchEntityData<D> {
     public BatchEntityDataList {
         assert !batch.isEmpty() : "Entity batch is empty: " + batch;
-        assert !batch.stream().allMatch(data -> data.columns().equals(batch.get(0).columns())) :
+        assert batch.stream().allMatch(data -> data.columns().equals(batch.get(0).columns())) :
             "All batch data items must have the same columns: " + batch;
     }
 
