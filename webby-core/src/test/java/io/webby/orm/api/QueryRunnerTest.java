@@ -22,16 +22,19 @@ import static io.webby.orm.testing.MockingJdbc.mockConnection;
 import static io.webby.orm.testing.MockingJdbc.mockPreparedStatement;
 import static org.junit.jupiter.api.Assertions.*;
 
+// FIX[minor]: more tests: force .commit() or .rollback() to fail
 public class QueryRunnerTest {
     private static final Object NULL = null;
     private static final UnresolvedArg UNRESOLVED_A = new UnresolvedArg("a", 0);
 
     private MockConnection mockedConnection;
     private QueryRunner runner;
+    private MockPreparedStatement mockStatement;
 
     @BeforeEach
     void setUp() {
         mockedConnection = mockConnection();
+        mockStatement = mockPreparedStatement();
         runner = new QueryRunner(mockedConnection);
     }
 
@@ -214,53 +217,46 @@ public class QueryRunnerTest {
 
     @Test
     public void setPreparedParams_objects_array() throws SQLException {
-        MockPreparedStatement statement = mockPreparedStatement();
-        assertEquals(QueryRunner.setPreparedParams(statement, 1, "2", 3L, 4.0f, null), 5);
-        assertThat(statement).withParams().equalExactly(1, "2", 3L, 4.0f, null);
+        assertEquals(QueryRunner.setPreparedParams(mockStatement, 1, "2", 3L, 4.0f, null), 5);
+        assertThat(mockStatement).withParams().equalExactly(1, "2", 3L, 4.0f, null);
     }
 
     @Test
     public void setPreparedParams_objects_iterable() throws SQLException {
-        MockPreparedStatement statement = mockPreparedStatement();
-        assertEquals(QueryRunner.setPreparedParams(statement, Array.of(1, "2", 3L, 4.0f, null)), 5);
-        assertThat(statement).withParams().equalExactly(1, "2", 3L, 4.0f, null);
+        assertEquals(QueryRunner.setPreparedParams(mockStatement, Array.of(1, "2", 3L, 4.0f, null)), 5);
+        assertThat(mockStatement).withParams().equalExactly(1, "2", 3L, 4.0f, null);
     }
 
     @Test
     public void setPreparedParams_objects_iterable_with_offset() throws SQLException {
-        MockPreparedStatement statement = mockPreparedStatement();
-        statement.setDouble(1, 0.0d);
-        assertEquals(QueryRunner.setPreparedParams(statement, Array.of(1, "2", 3L, 4.0f, null), 1), 6);
-        assertThat(statement).withParams().equalExactly(0.0d, 1, "2", 3L, 4.0f, null);
+        mockStatement.setDouble(1, 0.0d);
+        assertEquals(QueryRunner.setPreparedParams(mockStatement, Array.of(1, "2", 3L, 4.0f, null), 1), 6);
+        assertThat(mockStatement).withParams().equalExactly(0.0d, 1, "2", 3L, 4.0f, null);
     }
 
     @Test
     public void setPreparedParams_int_array() throws SQLException {
-        MockPreparedStatement statement = mockPreparedStatement();
-        assertEquals(QueryRunner.setPreparedParams(statement, IntArrayList.from(111, 222, 333)), 3);
-        assertThat(statement).withParams().equalExactly(111, 222, 333);
+        assertEquals(QueryRunner.setPreparedParams(mockStatement, IntArrayList.from(111, 222, 333)), 3);
+        assertThat(mockStatement).withParams().equalExactly(111, 222, 333);
     }
 
     @Test
     public void setPreparedParams_int_array_with_offset() throws SQLException {
-        MockPreparedStatement statement = mockPreparedStatement();
-        statement.setDouble(1, 0.0d);
-        assertEquals(QueryRunner.setPreparedParams(statement, IntArrayList.from(111, 222, 333), 1), 4);
-        assertThat(statement).withParams().equalExactly(0.0d, 111, 222, 333);
+        mockStatement.setDouble(1, 0.0d);
+        assertEquals(QueryRunner.setPreparedParams(mockStatement, IntArrayList.from(111, 222, 333), 1), 4);
+        assertThat(mockStatement).withParams().equalExactly(0.0d, 111, 222, 333);
     }
 
     @Test
     public void setPreparedParams_long_array() throws SQLException {
-        MockPreparedStatement statement = mockPreparedStatement();
-        assertEquals(QueryRunner.setPreparedParams(statement, LongArrayList.from(111, 222, 333)), 3);
-        assertThat(statement).withParams().equalExactly(111L, 222L, 333L);
+        assertEquals(QueryRunner.setPreparedParams(mockStatement, LongArrayList.from(111, 222, 333)), 3);
+        assertThat(mockStatement).withParams().equalExactly(111L, 222L, 333L);
     }
 
     @Test
     public void setPreparedParams_long_array_with_offset() throws SQLException {
-        MockPreparedStatement statement = mockPreparedStatement();
-        statement.setDouble(1, 0.0d);
-        assertEquals(QueryRunner.setPreparedParams(statement, LongArrayList.from(111, 222, 333), 1), 4);
-        assertThat(statement).withParams().equalExactly(0.0d, 111L, 222L, 333L);
+        mockStatement.setDouble(1, 0.0d);
+        assertEquals(QueryRunner.setPreparedParams(mockStatement, LongArrayList.from(111, 222, 333), 1), 4);
+        assertThat(mockStatement).withParams().equalExactly(0.0d, 111L, 222L, 333L);
     }
 }
