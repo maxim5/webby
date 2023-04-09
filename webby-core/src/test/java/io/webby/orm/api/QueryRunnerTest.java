@@ -28,6 +28,8 @@ import static io.webby.orm.testing.MockingJdbc.assertThat;
 import static io.webby.orm.testing.MockingJdbc.mockConnection;
 import static io.webby.orm.testing.MockingJdbc.mockPreparedStatement;
 import static io.webby.orm.testing.MockingJdbc.mockResultSet;
+import static io.webby.testing.AssertPrimitives.assertIntsOrdered;
+import static io.webby.testing.AssertPrimitives.assertLongsOrdered;
 import static io.webby.testing.TestingUtil.array;
 import static org.junit.jupiter.api.Assertions.*;
 
@@ -321,6 +323,72 @@ public class QueryRunnerTest {
 
         assertThat(all).containsExactly(Pair.of(111, "foo"), Pair.of(222, "bar"), Pair.of(0, NULL));
         assertThat(mockedConnection).executedQueries().containsExactly("select it");
+    }
+
+    /** {@link QueryRunner#fetchAll(SelectQuery, ResultSetIterator.Converter)} **/
+
+    @Test
+    public void fetchAll_simple() {
+        bugfixPatchConsistencyLevel();
+
+        MockResultSet resultSet = mockResultSet(List.of(array(111, "foo"), array(222, "bar"), array(0, NULL)));
+        resultSetHandler.prepareResultSet("select fetch", resultSet);
+
+        List<Pair<Integer, String>> all = runner.fetchAll(
+            HardcodedSelectQuery.of("select fetch"),
+            set -> Pair.of(set.getInt(1), set.getString(2))
+        );
+
+        assertThat(all).containsExactly(Pair.of(111, "foo"), Pair.of(222, "bar"), Pair.of(0, NULL));
+        assertThat(mockedConnection).executedQueries().containsExactly("select fetch");
+    }
+
+    /** {@link QueryRunner#fetchIntColumn(SelectQuery)} **/
+
+    @Test
+    public void fetchIntColumn_one_column() {
+        MockResultSet resultSet = mockResultSet(List.of(array(111), array(222), array(0)));
+        resultSetHandler.prepareResultSet("select ints", resultSet);
+
+        IntArrayList fetched = runner.fetchIntColumn(HardcodedSelectQuery.of("select ints"));
+
+        assertIntsOrdered(fetched, 111, 222, 0);
+        assertThat(mockedConnection).executedQueries().containsExactly("select ints");
+    }
+
+    @Test
+    public void fetchIntColumn_two_columns() {
+        MockResultSet resultSet = mockResultSet(List.of(array(111, "foo"), array(222, "bar"), array(0, NULL)));
+        resultSetHandler.prepareResultSet("select ints", resultSet);
+
+        IntArrayList fetched = runner.fetchIntColumn(HardcodedSelectQuery.of("select ints"));
+
+        assertIntsOrdered(fetched, 111, 222, 0);
+        assertThat(mockedConnection).executedQueries().containsExactly("select ints");
+    }
+
+    /** {@link QueryRunner#fetchLongColumn(SelectQuery)} **/
+
+    @Test
+    public void fetchLongColumn_one_column() {
+        MockResultSet resultSet = mockResultSet(List.of(array(111), array(222), array(0)));
+        resultSetHandler.prepareResultSet("select longs", resultSet);
+
+        LongArrayList fetched = runner.fetchLongColumn(HardcodedSelectQuery.of("select longs"));
+
+        assertLongsOrdered(fetched, 111, 222, 0);
+        assertThat(mockedConnection).executedQueries().containsExactly("select longs");
+    }
+
+    @Test
+    public void fetchLongColumn_two_columns() {
+        MockResultSet resultSet = mockResultSet(List.of(array(111, "foo"), array(222, "bar"), array(0, NULL)));
+        resultSetHandler.prepareResultSet("select longs", resultSet);
+
+        LongArrayList fetched = runner.fetchLongColumn(HardcodedSelectQuery.of("select longs"));
+
+        assertLongsOrdered(fetched, 111, 222, 0);
+        assertThat(mockedConnection).executedQueries().containsExactly("select longs");
     }
 
     /** {@link QueryRunner#prepareQuery} **/
