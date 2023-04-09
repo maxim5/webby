@@ -13,27 +13,66 @@ import java.util.Collection;
 import java.util.List;
 import java.util.function.Consumer;
 
+/**
+ * A base interface providing common API for table operations. Each {@link BaseTable} instance is working in context
+ * of a JDBC {@link java.sql.Connection} or {@link Connector}. {@link BaseTable} implementations are stateless and
+ * essentially represent thin clients of DBMS API. Multiple instances of the same type can operate concurrently.
+ * <p>
+ * Most read/write operations are performed via <i>entity</i>, which is a Java representation of a row in the table.
+ * The implementation is responsible for constructing entities from JDBC objects and back.
+ * <p>
+ * Some high-performance operations are performed via <i>data</i> classes, which store the same information as entities,
+ * (though possibly incomplete) but in a more time and memory efficient way.
+ *
+ * @param <E> the entity type
+ *
+ * @see EntityData
+ * @see BatchEntityData
+ */
 public interface BaseTable<E> extends Iterable<E>, HasEngine, HasRunner {
     // Base
 
+    /**
+     * Returns the {@link TableMeta} of this table.
+     */
     @NotNull TableMeta meta();
 
+    /**
+     * Returns a copy of {@link BaseTable} instance with custom {@code follow} level for read operations in the table.
+     * Default value is {@link ReadFollow#NO_FOLLOW}.
+     */
     @NotNull BaseTable<E> withReferenceFollowOnRead(@NotNull ReadFollow follow);
 
     // Size
 
+    /**
+     * Returns the table size (result of <code>SELECT COUNT(*)</code> query).
+     */
     int count();
 
+    /**
+     * Returns the count of the rows matching the {@code filter}
+     * (result of <code>SELECT COUNT(*) ...[filter]</code> query).
+     */
     int count(@NotNull Filter filter);
 
+    /**
+     * Returns whether the table is empty, i.e. contains 0 rows.
+     */
     default boolean isEmpty() {
         return !isNotEmpty();
     }
 
+    /**
+     * Returns whether the table is not empty, i.e. contains at least 1 row.
+     */
     default boolean isNotEmpty() {
         return count() > 0;
     }
 
+    /**
+     * Returns whether the table contains at least one row matching the {@code where} condition.
+     */
     default boolean exists(@NotNull Where where) {
         return count(where) > 0;
     }
