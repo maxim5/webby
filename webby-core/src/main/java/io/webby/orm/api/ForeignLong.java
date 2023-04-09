@@ -6,6 +6,9 @@ import org.jetbrains.annotations.Nullable;
 import java.util.Objects;
 import java.util.concurrent.atomic.AtomicReference;
 
+/**
+ * A {@link Foreign} implementation for long FK.
+ */
 public final class ForeignLong<E> implements Foreign<Long, E> {
     private final long id;
     private final AtomicReference<E> entity;

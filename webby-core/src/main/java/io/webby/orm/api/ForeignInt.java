@@ -6,6 +6,9 @@ import org.jetbrains.annotations.Nullable;
 import java.util.Objects;
 import java.util.concurrent.atomic.AtomicReference;
 
+/**
+ * A {@link Foreign} implementation for integer FK.
+ */
 public final class ForeignInt<E> implements Foreign<Integer, E> {
     private final int id;
     private final AtomicReference<E> entity;

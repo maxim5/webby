@@ -6,6 +6,9 @@ import org.jetbrains.annotations.Nullable;
 import java.util.Objects;
 import java.util.concurrent.atomic.AtomicReference;
 
+/**
+ * A generic {@link Foreign} implementation for a non-primitive FK.
+ */
 public final class ForeignObj<I, E> implements Foreign<I, E> {
     private final I id;
     private final AtomicReference<E> entity;
