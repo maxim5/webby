@@ -28,6 +28,15 @@ public interface PrimaryKeyTableTest<K, E, T extends TableObj<K, E>> extends Bas
         assertThat(table().fetchAll()).isEmpty();
     }
 
+    @Test
+    default void exists() {
+        assumeKeys(1);
+        assertFalse(table().exists(Where.of(Shortcuts.TRUE)));
+        E entity = createEntity(keys()[0]);
+        assertEquals(1, table().insert(entity));
+        assertTrue(table().exists(Where.of(Shortcuts.TRUE)));
+    }
+
     /** {@link TableObj#getBatchByPk(Collection)} **/
 
     @Test
@@ -286,7 +295,7 @@ public interface PrimaryKeyTableTest<K, E, T extends TableObj<K, E>> extends Bas
 
     /** {@link TableObj#deleteWhere(Where)} **/
 
-        @Test
+    @Test
     default void delete_where_true() {
         assumeKeys(1);
         table().insert(createEntity(keys()[0], 0));
