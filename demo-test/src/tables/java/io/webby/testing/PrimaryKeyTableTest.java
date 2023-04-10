@@ -37,6 +37,13 @@ public interface PrimaryKeyTableTest<K, E, T extends TableObj<K, E>> extends Bas
         assertTrue(table().exists(Where.of(Shortcuts.TRUE)));
     }
 
+    @Test
+    default void keyOf() {
+        assumeKeys(1);
+        E entity = createEntity(keys()[0]);
+        assertEquals(table().keyOf(entity), keys()[0]);
+    }
+
     /** {@link TableObj#getBatchByPk(Collection)} **/
 
     @Test

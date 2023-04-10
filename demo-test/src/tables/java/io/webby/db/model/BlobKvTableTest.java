@@ -8,6 +8,7 @@ import io.webby.testing.SqlDbTableTest;
 import org.jetbrains.annotations.NotNull;
 import org.junit.jupiter.api.Test;
 
+import static io.webby.testing.TestingBytes.assertBytes;
 import static io.webby.testing.TestingUtil.array;
 import static org.junit.jupiter.api.Assumptions.assumeTrue;
 
@@ -28,6 +29,15 @@ public class BlobKvTableTest
     @Override
     public @NotNull BlobKv createEntity(byte @NotNull [] key, int version) {
         return new BlobKv(key, version == 0 ? null : Ints.toByteArray(version));
+    }
+
+    @Override
+    @Test
+    public void keyOf() {
+        assumeKeys(1);
+        byte[] key = keys()[0];
+        BlobKv entity = createEntity(key);
+        assertBytes(table().keyOf(entity), key);
     }
 
     @Override
