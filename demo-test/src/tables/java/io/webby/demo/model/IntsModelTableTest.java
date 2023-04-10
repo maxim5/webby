@@ -2,6 +2,7 @@ package io.webby.demo.model;
 
 import com.carrotsearch.hppc.IntArrayList;
 import io.webby.orm.api.Connector;
+import io.webby.orm.api.Engine;
 import io.webby.orm.api.entity.BatchEntityData;
 import io.webby.orm.api.entity.BatchEntityIntData;
 import io.webby.orm.api.entity.EntityData;
@@ -61,12 +62,14 @@ public class IntsModelTableTest
 
     @Test
     public void insert_ignore_ok() {
+        assumeOneOfEngines(Engine.SQLite, Engine.MySQL);
         assertEquals(table.insertIgnore(new IntsModel(1, 2, 3)), 1);
         assertThat(table.fetchAll()).containsExactly(new IntsModel(1, 2, 3));
     }
 
     @Test
     public void insert_ignore_duplicate_ok() {
+        assumeOneOfEngines(Engine.SQLite, Engine.MySQL);
         assertEquals(table.insertIgnore(new IntsModel(1, 2, 3)), 1);
         assertEquals(table.insertIgnore(new IntsModel(1, 2, 3)), 1);
         assertThat(table.fetchAll()).containsExactly(new IntsModel(1, 2, 3), new IntsModel(1, 2, 3));
