@@ -14,8 +14,8 @@ import java.time.Instant;
 public class Playground {
     public static void main(String[] args) throws Exception {
         // runH2();
-        runMysql();
-        // runSqlite();
+//        runMysql();
+         runSqlite();
     }
 
     private static void runMysql() throws SQLException {
@@ -62,9 +62,10 @@ public class Playground {
     private static void runSqlite() throws SQLException {
         try (Connection connection = SqlSettings.connect(SqlSettings.SQLITE_IN_MEMORY)) {
             QueryRepl main = new QueryRepl(connection);
-            sqliteTextForBlobPk(main);
+//            sqliteTextForBlobPk(main);
             // sqliteJoins(main);
             // sqliteBlobPk(main);
+            sqliteMisc(main);
         }
     }
 
@@ -161,6 +162,12 @@ public class Playground {
             LEFT JOIN song ON single.song_id = song.id
             LEFT JOIN user ON song.author_id = user.user_id;
         """);
+    }
+
+    private static void sqliteMisc(QueryRepl main) throws SQLException {
+        // https://stackoverflow.com/questions/2201170/how-to-select-multiple-rows-filled-with-constants
+        main.query("select 1, 2, 3, 4");
+        main.query("select 1, 2, 3 UNION ALL SELECT 4, 5, 6");
     }
 
     // REPL

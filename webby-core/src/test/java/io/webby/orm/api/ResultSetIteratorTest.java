@@ -3,6 +3,7 @@ package io.webby.orm.api;
 import com.google.common.collect.Lists;
 import io.webby.orm.api.debug.DebugSql;
 import io.webby.testing.ext.SqlDbSetupExtension;
+import io.webby.util.collect.Pair;
 import org.jetbrains.annotations.NotNull;
 import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
@@ -68,6 +69,25 @@ public class ResultSetIteratorTest {
                 assertTrue(resultSet.isClosed());
             }
             assertTrue(prepared.isClosed());
+        }
+    }
+
+    @Test
+    public void iterate_over_first_column() throws Exception {
+        try (PreparedStatement prepared = SQL.connection().prepareStatement("SELECT 1, 2, 3 UNION ALL SELECT 4, 5, 6");
+             ResultSet resultSet = prepared.executeQuery();
+             ResultSetIterator<Integer> iterator = ResultSetIterator.of(resultSet, ResultSetIterator.firstColumn())) {
+            assertThat(Lists.newArrayList(iterator)).containsExactly(1, 4);
+        }
+    }
+
+    @Test
+    public void iterate_over_first_two_columns() throws Exception {
+        try (PreparedStatement prepared = SQL.connection().prepareStatement("SELECT 1, 2, 3 UNION ALL SELECT 4, 5, 6");
+             ResultSet resultSet = prepared.executeQuery();
+             ResultSetIterator<Pair<Integer, Integer>> iterator =
+                 ResultSetIterator.of(resultSet, ResultSetIterator.twoColumns())) {
+            assertThat(Lists.newArrayList(iterator)).containsExactly(Pair.of(1, 2), Pair.of(4, 5));
         }
     }
 

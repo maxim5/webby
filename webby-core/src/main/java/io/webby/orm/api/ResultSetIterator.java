@@ -15,6 +15,12 @@ import java.util.concurrent.atomic.AtomicBoolean;
 
 import static io.webby.util.base.EasyCast.castAny;
 
+/**
+ * An adapter that allows to iterate over the JDBC {@link ResultSet} via {@link Iterator}.
+ * The {@link ResultSetIterator} takes in a {@code converter} to convert rows to {@code E} objects.
+ * Note that {@link ResultSetIterator} is {@link Closeable} and is recommended to be used
+ * with a <code>try-resource</code> syntax.
+ */
 public class ResultSetIterator<E> implements Iterator<E>, Closeable {
     private final ResultSet resultSet;
     private final boolean ownsStatement;
@@ -69,8 +75,9 @@ public class ResultSetIterator<E> implements Iterator<E>, Closeable {
     @Override
     public void close() {
         try {
-            // Calling the method close on a ResultSet object that is already closed is a no-op.
-            // Calling the method close on a Statement object that is already closed has no effect.
+            // Best-effort to close the statement (if owns). Notes:
+            // - Calling the method close on a ResultSet object that is already closed is a no-op.
+            // - Calling the method close on a Statement object that is already closed has no effect.
             Statement statement = ownsStatement ? getStatementOrNull() : null;
             if (statement != null) {
                 statement.close();
@@ -89,14 +96,23 @@ public class ResultSetIterator<E> implements Iterator<E>, Closeable {
         }
     }
 
+    /**
+     * A converter from a {@link ResultSet} to an {@code E} object.
+     */
     public interface Converter<E> {
         E convert(@NotNull ResultSet resultSet) throws SQLException;
     }
 
+    /**
+     * Returns the converter that takes the first column only (as an object).
+     */
     public static <A> @NotNull Converter<A> firstColumn() {
         return resultSet -> castAny(resultSet.getObject(1));
     }
 
+    /**
+     * Returns the converter that takes the first two columns only (as a pair of objects).
+     */
     public static <A, B> @NotNull Converter<Pair<A, B>> twoColumns() {
         return resultSet -> castAny(Pair.of(resultSet.getObject(1), resultSet.getObject(2)));
     }
