@@ -79,13 +79,34 @@ public interface BaseTable<E> extends Iterable<E>, HasEngine, HasRunner {
 
     // Iteration
 
+    /**
+     * Returns an iterator over all entries in the table.
+     * <b>Important</b>: the caller is responsible for closing the iterator:
+     * <pre>
+     *     try (ResultSetIterator&lt;Entity&gt; iterator = table.iterator()) {
+     *         iterator.forEachRemaining(action);
+     *     }
+     * </pre>
+     */
     @Override
     @MustBeClosed
     @NotNull ResultSetIterator<E> iterator();
 
+    /**
+     * Returns an iterator over the entries matching the {@code filter}.
+     * <b>Important</b>: the caller is responsible for closing the iterator:
+     * <pre>
+     *     try (ResultSetIterator&lt;Entity&gt; iterator = table.iterator(filter)) {
+     *         iterator.forEachRemaining(action);
+     *     }
+     * </pre>
+     */
     @MustBeClosed
     @NotNull ResultSetIterator<E> iterator(@NotNull Filter filter);
 
+    /**
+     * Iterates over all entries in the table and calls an {@code action} on each one.
+     */
     @Override
     default void forEach(@NotNull Consumer<? super E> action) {
         try (ResultSetIterator<E> iterator = iterator()) {
@@ -93,24 +114,37 @@ public interface BaseTable<E> extends Iterable<E>, HasEngine, HasRunner {
         }
     }
 
+    /**
+     * Iterates over the entries matching the {@code filter} and calls an {@code action} on each one.
+     */
     default void forEach(@NotNull Filter filter, @NotNull Consumer<? super E> action) {
         try (ResultSetIterator<E> iterator = iterator(filter)) {
             iterator.forEachRemaining(action);
         }
     }
 
+    /**
+     * Fetches the whole table into a list of entries.
+     */
     default @NotNull List<E> fetchAll() {
         try (ResultSetIterator<E> iterator = iterator()) {
             return Lists.newArrayList(iterator);
         }
     }
 
+    /**
+     * Fetches all rows matching the {@code filter} into a list of entries.
+     */
     default @NotNull List<E> fetchMatching(@NotNull Filter filter) {
         try (ResultSetIterator<E> iterator = iterator(filter)) {
             return Lists.newArrayList(iterator);
         }
     }
 
+    /**
+     * Fetches a single page of entries from the table. The page is determined by filtering params of the {@code clause}.
+     * The result can be empty, and may or may not have the next page.
+     */
     default @NotNull Page<E> fetchPage(@NotNull CompositeFilter clause) {
         List<E> items = fetchMatching(clause);
         Offset offset = clause.offset();
@@ -123,6 +157,9 @@ public interface BaseTable<E> extends Iterable<E>, HasEngine, HasRunner {
         return new Page<>(items, null);
     }
 
+    /**
+     * Returns a single entry matching the {@code filter}, or null if none match.
+     */
     default @Nullable E getFirstMatchingOrNull(@NotNull Filter filter) {
         try (ResultSetIterator<E> iterator = iterator(filter)) {
             return iterator.hasNext() ? iterator.next() : null;
