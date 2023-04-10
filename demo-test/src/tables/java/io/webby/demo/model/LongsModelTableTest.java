@@ -2,6 +2,7 @@ package io.webby.demo.model;
 
 import com.carrotsearch.hppc.LongArrayList;
 import io.webby.orm.api.Connector;
+import io.webby.orm.api.entity.BatchEntityData;
 import io.webby.orm.api.entity.BatchEntityLongData;
 import io.webby.orm.api.entity.EntityData;
 import io.webby.orm.api.entity.EntityLongData;
@@ -373,5 +374,34 @@ public class LongsModelTableTest
         );
         assertEquals(affected, 1);
         assertThat(table.fetchAll()).containsExactly(new LongsModel(1, 2, 3), new LongsModel(111, 222, 333));
+    }
+
+    /** {@link LongsModelTable#deleteWhere(Where)} **/
+
+    @Test
+    public void delete_where_by_id_found() {
+        table.insertBatch(List.of(new LongsModel(1, 2, 3), new LongsModel(4, 5, 6)));
+
+        int deleted = table.deleteWhere(Where.of(lookupBy(foo, 1)));
+        assertEquals(deleted, 1);
+        assertThat(table.fetchAll()).containsExactly(new LongsModel(4, 5, 6));
+    }
+
+    @Test
+    public void delete_where_by_id_not_found() {
+        table.insertBatch(List.of(new LongsModel(1, 2, 3), new LongsModel(4, 5, 6)));
+
+        int deleted = table.deleteWhere(Where.of(lookupBy(foo, 111)));
+        assertEquals(deleted, 0);
+        assertThat(table.fetchAll()).containsExactly(new LongsModel(1, 2, 3), new LongsModel(4, 5, 6));
+    }
+
+    @Test
+    public void delete_where_by_id_several_rows_match() {
+        table.insertBatch(List.of(new LongsModel(1, 2, 3), new LongsModel(111, 222, 3)));
+
+        int deleted = table.deleteWhere(Where.of(lookupBy(value, 3)));
+        assertEquals(deleted, 2);
+        assertThat(table.fetchAll()).isEmpty();
     }
 }

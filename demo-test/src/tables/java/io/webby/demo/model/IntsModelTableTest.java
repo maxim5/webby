@@ -375,4 +375,33 @@ public class IntsModelTableTest
         assertEquals(affected, 1);
         assertThat(table.fetchAll()).containsExactly(new IntsModel(1, 2, 3), new IntsModel(111, 222, 333));
     }
+
+    /** {@link IntsModelTable#deleteWhere(Where)} **/
+
+    @Test
+    public void delete_where_by_id_found() {
+        table.insertBatch(List.of(new IntsModel(1, 2, 3), new IntsModel(4, 5, 6)));
+
+        int deleted = table.deleteWhere(Where.of(lookupBy(foo, 1)));
+        assertEquals(deleted, 1);
+        assertThat(table.fetchAll()).containsExactly(new IntsModel(4, 5, 6));
+    }
+
+    @Test
+    public void delete_where_by_id_not_found() {
+        table.insertBatch(List.of(new IntsModel(1, 2, 3), new IntsModel(4, 5, 6)));
+
+        int deleted = table.deleteWhere(Where.of(lookupBy(foo, 111)));
+        assertEquals(deleted, 0);
+        assertThat(table.fetchAll()).containsExactly(new IntsModel(1, 2, 3), new IntsModel(4, 5, 6));
+    }
+
+    @Test
+    public void delete_where_by_id_several_rows_match() {
+        table.insertBatch(List.of(new IntsModel(1, 2, 3), new IntsModel(111, 222, 3)));
+
+        int deleted = table.deleteWhere(Where.of(lookupBy(value, 3)));
+        assertEquals(deleted, 2);
+        assertThat(table.fetchAll()).isEmpty();
+    }
 }

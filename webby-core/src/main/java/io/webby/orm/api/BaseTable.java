@@ -269,6 +269,10 @@ public interface BaseTable<E> extends Iterable<E>, HasEngine, HasRunner {
 
     // DELETE
 
+    /**
+     * Deletes the rows in the table matching the given {@code where} condition. Can delete all rows.
+     * @return the number of affected rows in a table
+     */
     @CanIgnoreReturnValue
     int deleteWhere(@NotNull Where where);
 }
