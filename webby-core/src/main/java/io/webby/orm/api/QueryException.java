@@ -8,6 +8,9 @@ import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 
+/**
+ * An exception for errors during SQL query preparation, execution or result processing.
+ */
 public class QueryException extends RuntimeException {
     private final String query;
     private final List<?> args;
@@ -34,10 +37,16 @@ public class QueryException extends RuntimeException {
         this.args = args;
     }
 
+    /**
+     * Returns the query that caused the failure.
+     */
     public String getQuery() {
         return query;
     }
 
+    /**
+     * Returns the list of arguments for the query.
+     */
     public List<?> getArgs() {
         return args;
     }

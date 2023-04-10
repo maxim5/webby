@@ -249,6 +249,12 @@ public interface BaseTable<E> extends Iterable<E>, HasEngine, HasRunner {
 
     // INSERT OR UPDATE
 
+    /**
+     * Updates if exists or otherwise inserts the {@code entity} in the table.
+     * The match is done via {@code where} condition. It is possible for the condition to match more than one row.
+     * @return the number of affected rows (either updated or inserted).
+     * @throws QueryException if the update failed, e.g. due to PK or FK conflict
+     */
     @CanIgnoreReturnValue
     default int updateWhereOrInsert(@NotNull E entity, @NotNull Where where) {
         int updated = updateWhere(entity, where);
@@ -258,6 +264,12 @@ public interface BaseTable<E> extends Iterable<E>, HasEngine, HasRunner {
         return updated;
     }
 
+    /**
+     * Updates if exists or otherwise inserts the {@link EntityData} in the table.
+     * The match is done via {@code where} condition. It is possible for the condition to match more than one row.
+     * @return the number of affected rows (either updated or inserted).
+     * @throws QueryException if the update failed, e.g. due to PK or FK conflict
+     */
     @CanIgnoreReturnValue
     default int updateWhereOrInsertData(@NotNull EntityData<?> data, @NotNull Where where) {
         int updated = updateDataWhere(data, where);
