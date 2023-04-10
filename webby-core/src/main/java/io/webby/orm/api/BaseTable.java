@@ -117,7 +117,7 @@ public interface BaseTable<E> extends Iterable<E>, HasEngine, HasRunner {
         LimitClause limit = clause.limit();
         boolean isFullPage = limit != null && items.size() == limit.limitValue();
         if (isFullPage) {
-            PageToken pageToken = new PageToken(null, (offset != null ? offset.offsetValue() : 0) + limit.limitValue());
+            PageToken pageToken = PageToken.ofOffset((offset != null ? offset.offsetValue() : 0) + limit.limitValue());
             return new Page<>(items, pageToken);
         }
         return new Page<>(items, null);
