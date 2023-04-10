@@ -8,6 +8,7 @@ import org.jetbrains.annotations.NotNull;
 public class BoolWrapper extends Unit implements BoolTerm {
     public BoolWrapper(@NotNull Term term) {
         super(term.repr(), term.args());
-        assert term.type() == TermType.BOOL : "Term can't be used for boolean: %s".formatted(term);
+        assert term.type() == TermType.BOOL || term.type() == TermType.WILDCARD :
+            "Term can't be used for boolean: %s".formatted(term);
     }
 }
