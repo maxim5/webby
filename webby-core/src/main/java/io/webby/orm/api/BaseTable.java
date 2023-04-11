@@ -135,7 +135,7 @@ public interface BaseTable<E> extends Iterable<E>, HasEngine, HasRunner {
     /**
      * Fetches all rows matching the {@code filter} into a list of entries.
      */
-    default @NotNull List<E> fetchMatching(@NotNull Filter filter) {
+    default @NotNull List<E> fetchAllMatching(@NotNull Filter filter) {
         try (ResultSetIterator<E> iterator = iterator(filter)) {
             return Lists.newArrayList(iterator);
         }
@@ -146,7 +146,7 @@ public interface BaseTable<E> extends Iterable<E>, HasEngine, HasRunner {
      * The result can be empty, and may or may not have the next page.
      */
     default @NotNull Page<E> fetchPage(@NotNull CompositeFilter clause) {
-        List<E> items = fetchMatching(clause);
+        List<E> items = fetchAllMatching(clause);
         Offset offset = clause.offset();
         LimitClause limit = clause.limit();
         boolean isFullPage = limit != null && items.size() == limit.limitValue();

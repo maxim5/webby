@@ -70,27 +70,27 @@ public class BlobTableDb<V, K> extends ByteArrayDb<K, V> implements KeyValueDb<K
         if (compare != null) {
             return table.count(Where.and(whereNamespace, compare)) > 0;
         }
-        return table.fetchMatching(whereNamespace).stream().map(BlobKv::value).map(this::asValue).anyMatch(value::equals);
+        return table.fetchAllMatching(whereNamespace).stream().map(BlobKv::value).map(this::asValue).anyMatch(value::equals);
     }
 
     @Override
     public @NotNull Iterable<K> keys() {
-        return table.fetchMatching(whereNamespace).stream().map(BlobKv::id).map(this::asKey).toList();
+        return table.fetchAllMatching(whereNamespace).stream().map(BlobKv::id).map(this::asKey).toList();
     }
 
     @Override
     public @NotNull Set<K> keySet() {
-        return table.fetchMatching(whereNamespace).stream().map(BlobKv::id).map(this::asKey).collect(Collectors.toSet());
+        return table.fetchAllMatching(whereNamespace).stream().map(BlobKv::id).map(this::asKey).collect(Collectors.toSet());
     }
 
     @Override
     public @NotNull Collection<V> values() {
-        return table.fetchMatching(whereNamespace).stream().map(BlobKv::value).map(this::asValue).toList();
+        return table.fetchAllMatching(whereNamespace).stream().map(BlobKv::value).map(this::asValue).toList();
     }
 
     @Override
     public @NotNull Set<Map.Entry<K, V>> entrySet() {
-        return table.fetchMatching(whereNamespace).stream()
+        return table.fetchAllMatching(whereNamespace).stream()
                 .map(entity -> new AbstractMap.SimpleEntry<>(asKey(entity.id()), asValue(entity.value())))
                 .collect(Collectors.toSet());
     }
