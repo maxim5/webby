@@ -168,6 +168,9 @@ public class Playground {
         // https://stackoverflow.com/questions/2201170/how-to-select-multiple-rows-filled-with-constants
         main.query("select 1, 2, 3, 4");
         main.query("select 1, 2, 3 UNION ALL SELECT 4, 5, 6");
+
+        main.update("CREATE TABLE a (id INTEGER, value INTEGER, PRIMARY KEY (id))");
+        main.query("SELECT * FROM a");
     }
 
     // REPL
