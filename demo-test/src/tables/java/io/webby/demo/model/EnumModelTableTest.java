@@ -25,12 +25,12 @@ public class EnumModelTableTest
     }
 
     @Override
-    public @NotNull EnumModel createEntity(EnumModel.@NotNull Foo key, int version) {
+    public @NotNull EnumModel createEntity(@NotNull EnumModel.Foo key, int version) {
         return new EnumModel(key, EnumModel.Foo.FIRST, new EnumModel.Nested(EnumModel.Foo.SECOND, String.valueOf(version)));
     }
 
     @Override
-    public @NotNull Variable keyToVar(EnumModel.@NotNull Foo key) {
+    public @NotNull Variable keyToVar(@NotNull EnumModel.Foo key) {
         return Shortcuts.var(key.ordinal());
     }
 }

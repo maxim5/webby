@@ -1172,7 +1172,7 @@ public class ModelTableCodegen extends BaseCodegen {
             return new EntityLongData(OwnColumn.ALL_COLUMNS, data);
         }
         
-        public static @Nonnull EntityColumnMap<OwnColumn> $data_method_name(@Nonnull EnumMap<OwnColumn, Object> map) {
+        public static @Nonnull EntityColumnMap<OwnColumn> $data_method_name(@Nonnull Map<OwnColumn, Object> map) {
             assert map.size() == $columns_num :
                 "Provided $TableClass data map does not match required columns: map=%s, columns=%s"
                 .formatted(map, OwnColumn.ALL_COLUMNS);
