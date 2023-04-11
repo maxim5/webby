@@ -1,6 +1,8 @@
 package io.webby.demo.model;
 
 import io.webby.orm.api.Connector;
+import io.webby.orm.api.query.Shortcuts;
+import io.webby.orm.api.query.Variable;
 import io.webby.orm.codegen.SqlSchemaMaker;
 import io.webby.testing.PrimaryKeyTableTest;
 import io.webby.testing.SqlDbTableTest;
@@ -25,5 +27,10 @@ public class EnumModelTableTest
     @Override
     public @NotNull EnumModel createEntity(EnumModel.@NotNull Foo key, int version) {
         return new EnumModel(key, EnumModel.Foo.FIRST, new EnumModel.Nested(EnumModel.Foo.SECOND, String.valueOf(version)));
+    }
+
+    @Override
+    public @NotNull Variable keyToVar(EnumModel.@NotNull Foo key) {
+        return Shortcuts.var(key.ordinal());
     }
 }

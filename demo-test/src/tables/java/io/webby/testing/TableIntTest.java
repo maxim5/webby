@@ -3,8 +3,9 @@ package io.webby.testing;
 import com.carrotsearch.hppc.IntArrayList;
 import io.webby.db.model.IntAutoIdModel;
 import io.webby.orm.api.TableInt;
-import io.webby.orm.api.TableMeta;
-import io.webby.orm.api.query.*;
+import io.webby.orm.api.query.CompareType;
+import io.webby.orm.api.query.Shortcuts;
+import io.webby.orm.api.query.Where;
 import org.jetbrains.annotations.NotNull;
 import org.junit.jupiter.api.Test;
 
@@ -66,15 +67,10 @@ public interface TableIntTest<E, T extends TableInt<E>> extends PrimaryKeyTableT
         E entity1 = createEntity(key1);
         E entity2 = createEntity(key2);
         table().insertBatch(List.of(entity1, entity2));
-        Column keyColumn = table().meta().sqlColumns().stream()
-                .filter(TableMeta.ColumnMeta::isPrimaryKey)
-                .findFirst()
-                .orElseThrow()
-                .column();
 
         assertIntsNoOrder(table().fetchPks(Where.of(Shortcuts.TRUE)), key1, key2);
-        assertIntsNoOrder(table().fetchPks(Where.of(Shortcuts.lookupBy(keyColumn, key1))), key1);
-        assertIntsNoOrder(table().fetchPks(Where.of(Shortcuts.lookupBy(keyColumn, key2))), key2);
+        assertIntsNoOrder(table().fetchPks(Where.of(Shortcuts.lookupBy(findPkColumnOrDie(), key1))), key1);
+        assertIntsNoOrder(table().fetchPks(Where.of(Shortcuts.lookupBy(findPkColumnOrDie(), key2))), key2);
         assertIntsNoOrder(table().fetchPks(Where.of(Shortcuts.FALSE)));
     }
 
@@ -130,7 +126,7 @@ public interface TableIntTest<E, T extends TableInt<E>> extends PrimaryKeyTableT
         table().insert(createEntity(keys()[0], 0));
 
         E entity = createEntity(keys()[0], 1);
-        Where where = Where.of(CompareType.EQ.compare(new HardcodedNumericTerm(findPkColumnOrDie()), Shortcuts.var(keys()[0])));
+        Where where = Where.of(CompareType.EQ.compare(findPkColumnOrDie(), Shortcuts.var(keys()[0])));
         assertEquals(1, table().updateWhere(entity, where));
 
         assertTableCount(1);

@@ -3,8 +3,9 @@ package io.webby.testing;
 import com.carrotsearch.hppc.LongArrayList;
 import io.webby.db.model.LongAutoIdModel;
 import io.webby.orm.api.TableLong;
-import io.webby.orm.api.TableMeta;
-import io.webby.orm.api.query.*;
+import io.webby.orm.api.query.CompareType;
+import io.webby.orm.api.query.Shortcuts;
+import io.webby.orm.api.query.Where;
 import org.jetbrains.annotations.NotNull;
 import org.junit.jupiter.api.Test;
 
@@ -14,7 +15,7 @@ import java.util.Map;
 import java.util.Optional;
 
 import static com.google.common.truth.Truth.assertThat;
-import static io.webby.testing.AssertPrimitives.*;
+import static io.webby.testing.AssertPrimitives.assertLongsNoOrder;
 import static io.webby.testing.TestingPrimitives.newLongObjectMap;
 import static io.webby.testing.TestingUtil.array;
 import static org.junit.jupiter.api.Assertions.*;
@@ -66,15 +67,10 @@ public interface TableLongTest<E, T extends TableLong<E>> extends PrimaryKeyTabl
         E entity1 = createEntity(key1);
         E entity2 = createEntity(key2);
         table().insertBatch(List.of(entity1, entity2));
-        Column keyColumn = table().meta().sqlColumns().stream()
-                .filter(TableMeta.ColumnMeta::isPrimaryKey)
-                .findFirst()
-                .orElseThrow()
-                .column();
 
         assertLongsNoOrder(table().fetchPks(Where.of(Shortcuts.TRUE)), key1, key2);
-        assertLongsNoOrder(table().fetchPks(Where.of(Shortcuts.lookupBy(keyColumn, key1))), key1);
-        assertLongsNoOrder(table().fetchPks(Where.of(Shortcuts.lookupBy(keyColumn, key2))), key2);
+        assertLongsNoOrder(table().fetchPks(Where.of(Shortcuts.lookupBy(findPkColumnOrDie(), key1))), key1);
+        assertLongsNoOrder(table().fetchPks(Where.of(Shortcuts.lookupBy(findPkColumnOrDie(), key2))), key2);
         assertLongsNoOrder(table().fetchPks(Where.of(Shortcuts.FALSE)));
     }
 
@@ -130,7 +126,7 @@ public interface TableLongTest<E, T extends TableLong<E>> extends PrimaryKeyTabl
         table().insert(createEntity(keys()[0], 0));
 
         E entity = createEntity(keys()[0], 1);
-        Where where = Where.of(CompareType.EQ.compare(new HardcodedNumericTerm(findPkColumnOrDie()), Shortcuts.var(keys()[0])));
+        Where where = Where.of(CompareType.EQ.compare(findPkColumnOrDie(), Shortcuts.var(keys()[0])));
         assertEquals(1, table().updateWhere(entity, where));
 
         assertTableCount(1);

@@ -30,6 +30,16 @@ public class ComplexIdModelTableTest
     }
 
     @Override
+    public void fetch_all_matching_entities() {
+        assumeTrue(false, "Complex ids don't generate a PK");
+    }
+
+    @Override
+    public void get_first_matching_entity() {
+        assumeTrue(false, "Complex ids don't generate a PK");
+    }
+
+    @Override
     public void insert_entity_already_exists_throws() {
         assumeTrue(false, "Complex ids are not unique, hence allow duplicate inserts");
     }
