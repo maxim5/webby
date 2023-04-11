@@ -1104,10 +1104,10 @@ public class ModelTableCodegen extends BaseCodegen {
                 String sqlName = column.sqlName();
                 Class<?> nativeType = column.type().jdbcType().nativeType();
                 String type = nativeType.isPrimitive() || nativeType == String.class ?
-                                nativeType.getSimpleName() :
-                                nativeType == byte[].class ?
-                                        "byte[]" :
-                                        nativeType.getName();
+                    nativeType.getSimpleName() :
+                    nativeType == byte[].class ?
+                        "byte[]" :
+                        nativeType.getName();
                 return "new ColumnMeta(OwnColumn.%s, %s.class, %s, %s)".formatted(sqlName, type, primaryKey, foreignKey);
             }).collect(Collectors.joining(",\n" + INDENT3))
         );

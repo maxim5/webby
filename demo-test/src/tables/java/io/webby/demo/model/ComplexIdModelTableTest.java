@@ -25,7 +25,7 @@ public class ComplexIdModelTableTest
     }
 
     @Override
-    public @NotNull ComplexIdModel createEntity(ComplexIdModel.@NotNull Key key, int version) {
+    public @NotNull ComplexIdModel createEntity(@NotNull ComplexIdModel.Key key, int version) {
         return new ComplexIdModel(key, version);
     }
 
