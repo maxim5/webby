@@ -1,6 +1,7 @@
 package io.webby.testing;
 
 import com.google.common.collect.Iterators;
+import com.google.common.collect.MoreCollectors;
 import io.webby.orm.api.*;
 import io.webby.orm.api.query.*;
 import io.webby.util.collect.ListBuilder;
@@ -462,7 +463,7 @@ public interface PrimaryKeyTableTest<K, E, T extends TableObj<K, E>> extends Bas
         return table().meta().sqlColumns().stream()
             .filter(TableMeta.ColumnMeta::isPrimaryKey)
             .map(TableMeta.ColumnMeta::column)
-            .findFirst().orElseThrow();
+            .collect(MoreCollectors.onlyElement());
     }
 
     default @NotNull Variable keyToVar(@NotNull K key) {
