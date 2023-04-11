@@ -583,6 +583,60 @@ public class SqlSchemaMakerTest {
     }
 
     @Test
+    public void create_table_ints_model() {
+        assertThat(makeCreateTableQuery(Engine.SQLite, IntsModelTable.class)).isEqualTo("""
+            CREATE TABLE IF NOT EXISTS ints_model (
+                foo INTEGER,
+                bar INTEGER,
+                value INTEGER
+            )
+            """);
+
+        assertThat(makeCreateTableQuery(Engine.H2, IntsModelTable.class)).isEqualTo("""
+            CREATE TABLE IF NOT EXISTS ints_model (
+                foo INTEGER,
+                bar INTEGER,
+                value INTEGER
+            )
+            """);
+
+        assertThat(makeCreateTableQuery(Engine.MySQL, IntsModelTable.class)).isEqualTo("""
+            CREATE TABLE IF NOT EXISTS ints_model (
+                foo INTEGER,
+                bar INTEGER,
+                value INTEGER
+            )
+            """);
+    }
+
+    @Test
+    public void create_table_longs_model() {
+        assertThat(makeCreateTableQuery(Engine.SQLite, LongsModelTable.class)).isEqualTo("""
+            CREATE TABLE IF NOT EXISTS longs_model (
+                foo INTEGER,
+                bar INTEGER,
+                value INTEGER
+            )
+            """);
+
+        assertThat(makeCreateTableQuery(Engine.H2, LongsModelTable.class)).isEqualTo("""
+            CREATE TABLE IF NOT EXISTS longs_model (
+                foo BIGINT,
+                bar BIGINT,
+                value BIGINT
+            )
+            """);
+
+        assertThat(makeCreateTableQuery(Engine.MySQL, LongsModelTable.class)).isEqualTo("""
+            CREATE TABLE IF NOT EXISTS longs_model (
+                foo BIGINT,
+                bar BIGINT,
+                value BIGINT
+            )
+            """);
+    }
+
+    @Test
     public void create_table_user_rate_model() {
         assertThat(makeCreateTableQuery(Engine.SQLite, UserRateModelTable.class)).isEqualTo("""
             CREATE TABLE IF NOT EXISTS user_rate_model (
