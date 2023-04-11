@@ -1098,7 +1098,7 @@ public class ModelTableCodegen extends BaseCodegen {
         Map<String, String> context = Map.of(
             "$column_meta_list", table.columnsWithFields().stream().map(pair -> {
                 TableField field = pair.first();
-                boolean primaryKey = field.isPrimaryKey() && field.columnsNumber() == 1;  // SQL doesn't allow multi-PK
+                boolean primaryKey = field.isPrimaryKey();
                 boolean foreignKey = field.isForeignKey();
                 Column column = pair.second();
                 String sqlName = column.sqlName();
@@ -1108,8 +1108,17 @@ public class ModelTableCodegen extends BaseCodegen {
                     nativeType == byte[].class ?
                         "byte[]" :
                         nativeType.getName();
-                return "new ColumnMeta(OwnColumn.%s, %s.class, %s, %s)".formatted(sqlName, type, primaryKey, foreignKey);
-            }).collect(Collectors.joining(",\n" + INDENT3))
+                return "new ColumnMeta(OwnColumn.%s, %s %s.class, %s %s, %s %s)".formatted(
+                    sqlName,
+                    "/*type=*/", type,
+                    "/*isPK=*/", primaryKey,
+                    "/*isFK=*/", foreignKey
+                );
+            }).collect(Collectors.joining(",\n" + INDENT3)),
+            "$primary_keys", table.columnsWithFields().stream().filter(pair -> pair.first().isPrimaryKey()).map(pair -> {
+                String column = pair.second().sqlName();
+                return "OwnColumn.%s".formatted(column);
+            }).collect(Collectors.joining(", "))
         );
 
         appendCode("""
@@ -1123,6 +1132,14 @@ public class ModelTableCodegen extends BaseCodegen {
                 return List.of(
                     $column_meta_list
                 );
+            }
+            @Override
+            public @Nonnull Constraint primaryKeys() {
+                return Constraint.of($primary_keys);
+            }
+            @Override
+            public @Nonnull Iterable<Constraint> unique() {
+                return List.of();
             }
         };
         

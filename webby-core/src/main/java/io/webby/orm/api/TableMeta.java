@@ -27,4 +27,23 @@ public interface TableMeta {
             return column.name();
         }
     }
+
+    /**
+     * Returns the primary key constraint.
+     */
+    @NotNull Constraint primaryKeys();
+
+    /**
+     * Returns the collection of unique constraints.
+     */
+    @NotNull Iterable<Constraint> unique();
+
+    /**
+     * Holds the constraint that spans across one or more columns.
+     */
+    record Constraint(@NotNull List<Column> columns, boolean isComposite) {
+        public static @NotNull Constraint of(@NotNull Column @NotNull ... columns) {
+            return new Constraint(List.of(columns), columns.length > 1);
+        }
+    }
 }

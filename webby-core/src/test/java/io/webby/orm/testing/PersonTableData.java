@@ -50,6 +50,16 @@ public class PersonTableData {
                 new ColumnMeta(PersonColumn.photo, byte[].class, false, false)
             );
         }
+
+        @Override
+        public @NotNull Constraint primaryKeys() {
+            return Constraint.of(PersonColumn.id);
+        }
+
+        @Override
+        public @NotNull Iterable<Constraint> unique() {
+            return List.of();
+        }
     };
 
     public static final boolean FEMALE = true;

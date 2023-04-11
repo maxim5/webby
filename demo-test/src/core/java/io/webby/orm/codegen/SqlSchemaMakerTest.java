@@ -134,7 +134,18 @@ public class SqlSchemaMakerTest {
                 id_x INTEGER,
                 id_y INTEGER,
                 id_z VARCHAR,
-                a INTEGER
+                a INTEGER,
+                PRIMARY KEY (id_x, id_y, id_z)
+            )
+            """);
+
+        assertThat(makeCreateTableQuery(Engine.H2, ComplexIdModelTable.class)).isEqualTo("""
+            CREATE TABLE IF NOT EXISTS complex_id_model (
+                id_x INTEGER,
+                id_y BIGINT,
+                id_z VARCHAR,
+                a INTEGER,
+                PRIMARY KEY (id_x, id_y, id_z)
             )
             """);
 
@@ -142,8 +153,9 @@ public class SqlSchemaMakerTest {
             CREATE TABLE IF NOT EXISTS complex_id_model (
                 id_x INTEGER,
                 id_y BIGINT,
-                id_z VARCHAR(4096),
-                a INTEGER
+                id_z VARCHAR(255),
+                a INTEGER,
+                PRIMARY KEY (id_x, id_y, id_z)
             )
             """);
     }

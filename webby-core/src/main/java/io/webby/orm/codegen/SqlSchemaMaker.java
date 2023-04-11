@@ -3,6 +3,7 @@ package io.webby.orm.codegen;
 import io.webby.orm.api.BaseTable;
 import io.webby.orm.api.Engine;
 import io.webby.orm.api.TableMeta;
+import io.webby.orm.api.query.Named;
 import io.webby.util.base.Unchecked;
 import io.webby.util.collect.EasyMaps;
 import org.jetbrains.annotations.NotNull;
@@ -10,6 +11,7 @@ import org.jetbrains.annotations.NotNull;
 import java.sql.Date;
 import java.sql.Time;
 import java.sql.Timestamp;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
@@ -33,22 +35,30 @@ public class SqlSchemaMaker {
 
     public static @NotNull String makeCreateTableQuery(@NotNull Engine engine, @NotNull TableMeta meta) {
         String tableName = meta.sqlTableName();
-        List<TableMeta.ColumnMeta> columns = meta.sqlColumns();
-        String definitions = columns.stream().map(column -> {
+        List<String> definitions = new ArrayList<>();
+
+        boolean inlinePk = !meta.primaryKeys().isComposite();
+
+        meta.sqlColumns().stream().map(column -> {
             boolean isPrimaryKey = column.isPrimaryKey();
             String sqlType = sqlTypeFor(column, engine);
             String def = "%s %s".formatted(column.name(), sqlType);
-            if (isPrimaryKey) {
+            if (isPrimaryKey && inlinePk) {
                 return "%s %s %s".formatted(def, "PRIMARY KEY", sqlAutoIncrement(column, engine)).trim();
             }
             return def;
-        }).collect(Collectors.joining(",\n    "));
+        }).forEachOrdered(definitions::add);
+
+        if (!inlinePk) {
+            String columns = meta.primaryKeys().columns().stream().map(Named::name).collect(Collectors.joining(", "));
+            definitions.add("PRIMARY KEY (%s)".formatted(columns));
+        }
 
         return """
         CREATE TABLE IF NOT EXISTS %s (
             %s
         )
-        """.formatted(tableName, definitions);
+        """.formatted(tableName, String.join(",\n    ", definitions));
     }
 
     public static @NotNull String makeDropTableQuery(@NotNull BaseTable<?> table) {
