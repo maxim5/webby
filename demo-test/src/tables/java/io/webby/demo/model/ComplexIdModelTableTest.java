@@ -1,15 +1,16 @@
 package io.webby.demo.model;
 
 import io.webby.orm.api.Connector;
+import io.webby.orm.api.query.Column;
+import io.webby.orm.api.query.Shortcuts;
+import io.webby.orm.api.query.Variable;
 import io.webby.orm.codegen.SqlSchemaMaker;
 import io.webby.testing.PrimaryKeyTableTest;
 import io.webby.testing.SqlDbTableTest;
 import org.jetbrains.annotations.NotNull;
 
 import static io.webby.testing.TestingUtil.array;
-import static org.junit.jupiter.api.Assumptions.assumeTrue;
 
-// TODO: complex primary keys aren't supported right now (ComplexIdModel, needs tests in all DBs).
 public class ComplexIdModelTableTest
         extends SqlDbTableTest<ComplexIdModel, ComplexIdModelTable>
         implements PrimaryKeyTableTest<ComplexIdModel.Key, ComplexIdModel, ComplexIdModelTable> {
@@ -30,27 +31,12 @@ public class ComplexIdModelTableTest
     }
 
     @Override
-    public void fetch_all_matching_entities() {
-        assumeTrue(false, "Complex ids don't generate a PK");
+    public @NotNull Column findPkColumnOrDie() {
+        return ComplexIdModelTable.OwnColumn.id_x;  // use only id.x
     }
 
     @Override
-    public void get_first_matching_entity() {
-        assumeTrue(false, "Complex ids don't generate a PK");
-    }
-
-    @Override
-    public void insert_entity_already_exists_throws() {
-        assumeTrue(false, "Complex ids are not unique, hence allow duplicate inserts");
-    }
-
-    @Override
-    public void insert_batch_of_two_duplicates() {
-        assumeTrue(false, "Complex ids are not unique, hence allow duplicate inserts");
-    }
-
-    @Override
-    public void insert_ignore() {
-        assumeTrue(false, "Complex ids are not unique, hence allow duplicate inserts");
+    public @NotNull Variable keyToVar(@NotNull ComplexIdModel.Key key) {
+        return Shortcuts.var(key.x());  // use only id.x
     }
 }
