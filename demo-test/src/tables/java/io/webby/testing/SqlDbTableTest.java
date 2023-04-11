@@ -45,12 +45,15 @@ public abstract class SqlDbTableTest<E, T extends BaseTable<E>> implements BaseT
         return switch (SQL.engine()) {
             case SQLite -> {
                 String sql = descTableInSqlite(name)
-                        .replaceAll("\\s+", " ")
-                        .replaceFirst(".*\\((.*?)\\)", "$1");
+                    .replaceAll("\\s+", " ")                            // trim spaces to one
+                    .replaceAll("PRIMARY KEY \\(.*?\\)", "")            // drop PRIMARY KEY line
+                    .replaceFirst("CREATE TABLE .*\\((.*?)\\)", "$1");  // get what's inside CREATE TABLE
+                // Not `sql` has the format "foo INTEGER, bar VARCHAR, ..."
                 yield Arrays.stream(sql.split(","))
-                        .map(String::trim)
-                        .map(line -> line.replaceFirst("(\\w+) .*", "$1"))
-                        .toList();
+                    .map(String::trim)
+                    .filter(line -> !line.isEmpty())
+                    .map(line -> line.replaceFirst("(\\w+) .*", "$1"))
+                    .toList();
             }
             case H2, MySQL -> SQL.runQuery("SHOW COLUMNS FROM " + name).stream()
                     .map(row -> row.getValueAt(0))
