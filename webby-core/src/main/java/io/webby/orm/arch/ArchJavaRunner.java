@@ -5,7 +5,6 @@ import io.webby.app.AppSettings;
 import io.webby.common.ClasspathScanner;
 import io.webby.orm.codegen.ModelAdapterCodegen;
 import io.webby.orm.codegen.ModelAdaptersScanner;
-import io.webby.orm.codegen.ModelInput;
 import io.webby.orm.codegen.ModelTableCodegen;
 import io.webby.util.base.TimeIt;
 import org.jetbrains.annotations.NotNull;
@@ -31,22 +30,22 @@ public class ArchJavaRunner {
         this(new ModelAdaptersScanner(new AppSettings(), new ClasspathScanner()));
     }
 
-    public void runGenerate(@NotNull String destinationDirectory, @NotNull Iterable<ModelInput> inputs) throws IOException {
-        destination = destinationDirectory;
+    public void runGenerate(@NotNull String destinationPath, @NotNull RunInputs inputs) throws IOException {
+        destination = destinationPath;
+        RunContext runContext = new RunContext(inputs, locator);
         TimeIt.timeItOrDie(() -> {
-            ArchFactory factory = new ArchFactory(locator, inputs);
+            ArchFactory factory = new ArchFactory(runContext);
             factory.build();
 
-            for (AdapterArch adapterArch : factory.getAdapterArches()) {
+            for (AdapterArch adapterArch : runContext.pojos().getAdapterArches()) {
                 generate(adapterArch);
             }
-            for (TableArch tableArch : factory.getTableArches()) {
+            for (TableArch tableArch : runContext.tables().getTableArches()) {
                 generate(tableArch);
             }
-            return factory;
-        }, (factory, millis) -> {
-            int adapters = factory.getAdapterArches().size();
-            int tables = factory.getTableArches().size();
+        }, millis -> {
+            int adapters = runContext.pojos().getAdapterArches().size();
+            int tables = runContext.tables().getTableArches().size();
             log.at(Level.INFO).log("Generated %d adapters and %d tables in %d millis", adapters, tables, millis);
         });
     }

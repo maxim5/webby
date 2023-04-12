@@ -50,8 +50,8 @@ public class ModelTableCodegen extends BaseCodegen {
         this.pkContext = primaryKeyField == null ? Map.of() : EasyMaps.asMap(
             "$pk_type", Naming.shortCanonicalJavaName(primaryKeyField.javaType()),
             "$PkClass", primaryKeyField.javaType().isPrimitive() ?
-                    Primitives.wrap(primaryKeyField.javaType()).getSimpleName() :
-                    Naming.shortCanonicalJavaName(primaryKeyField.javaType()),
+                Primitives.wrap(primaryKeyField.javaType()).getSimpleName() :
+                Naming.shortCanonicalJavaName(primaryKeyField.javaType()),
             "$pk_annotation", primaryKeyField.javaType().isPrimitive() ? "" : "@Nonnull ",
             "$pk_name", primaryKeyField.javaName()
         );
@@ -114,26 +114,26 @@ public class ModelTableCodegen extends BaseCodegen {
 
     private void imports() {
         List<Class<?>> customClasses = table.fields().stream()
-                .filter(TableField::isCustomSupportType)
-                .filter(Predicate.not(TableField::isForeignKey))
-                .map(TableField::javaType)
-                .collect(Collectors.toList());
+            .filter(TableField::isCustomSupportType)
+            .filter(Predicate.not(TableField::isForeignKey))
+            .map(TableField::javaType)
+            .collect(Collectors.toList());
 
         List<Class<?>> foreignKeyClasses = table.hasForeignKeyField() ?
-                List.of(Foreign.class, ForeignInt.class, ForeignLong.class, ForeignObj.class) :
-                List.of();
+            List.of(Foreign.class, ForeignInt.class, ForeignLong.class, ForeignObj.class) :
+            List.of();
         /*List<Class<?>> foreignKeyClasses = table.foreignFields(ReadFollow.FOLLOW_ALL).stream()
                 .map(TableField::javaType)
                 .collect(Collectors.toList());*/
         List<JavaNameHolder> foreignTableClasses = table.foreignFields(ReadFollow.FOLLOW_ALL).stream()
-                .map(ForeignTableField::getForeignTable)
-                .collect(Collectors.toList());
+            .map(ForeignTableField::getForeignTable)
+            .collect(Collectors.toList());
         List<Class<?>> foreignModelClasses = table.isM2M() ?
-                Stream.of(table.m2mLeftFieldOrDie(), table.m2mRightFieldOrDie())
-                        .map(ForeignTableField::getForeignTable)
-                        .map(TableArch::modelClass)
-                        .collect(Collectors.toList()) :
-                List.of();
+            Stream.of(table.m2mLeftFieldOrDie(), table.m2mRightFieldOrDie())
+                .map(ForeignTableField::getForeignTable)
+                .map(TableArch::modelClass)
+                .collect(Collectors.toList()) :
+            List.of();
 
         List<String> classesToImport = Streams.concat(
             baseTableClasses().stream().map(FQN::of),
@@ -330,10 +330,10 @@ public class ModelTableCodegen extends BaseCodegen {
 
     private void selectConstants() {
         String constants = Arrays.stream(ReadFollow.values())
-                .map(follow -> new SelectMaker(table).make(follow))
-                .map(snippet -> new Snippet().withLines(snippet))
-                .map(query -> wrapAsStringLiteral(query, INDENT1))
-                .collect(Collectors.joining(",\n" + INDENT1, INDENT1, ""));
+            .map(follow -> new SelectMaker(table).make(follow))
+            .map(snippet -> new Snippet().withLines(snippet))
+            .map(query -> wrapAsStringLiteral(query, INDENT1))
+            .collect(Collectors.joining(",\n" + INDENT1, INDENT1, ""));
 
         appendCode("""
         private static final String[] SELECT_ENTITY_ALL = {
@@ -411,9 +411,9 @@ public class ModelTableCodegen extends BaseCodegen {
         }
 
         List<String> primaryColumns = primaryField.columns(ReadFollow.NO_FOLLOW)
-                .stream()
-                .map(PrefixedColumn::sqlPrefixedName)
-                .toList();
+            .stream()
+            .map(PrefixedColumn::sqlPrefixedName)
+            .toList();
         if (primaryColumns.size() != 1) {
             return;  // will use a slow default implementation
         }
@@ -479,10 +479,10 @@ public class ModelTableCodegen extends BaseCodegen {
 
     private void fetchPks() {
         String primaryKeyColumn = Optional.ofNullable(table.primaryKeyField())
-                .map(HasColumns::columns)
-                .map(cols -> cols.get(0))
-                .map(Column::sqlName)
-                .orElse(null);
+            .map(HasColumns::columns)
+            .map(cols -> cols.get(0))
+            .map(Column::sqlName)
+            .orElse(null);
 
         Map<String, String> context = EasyMaps.asMap(
             "$pk_column", primaryKeyColumn
@@ -687,7 +687,7 @@ public class ModelTableCodegen extends BaseCodegen {
 
     private void updateWhere() {
         Snippet query = new Snippet()
-                .withLines(UpdateMaker.make(table, table.columns(Predicate.not(TableField::isPrimaryKey))));
+            .withLines(UpdateMaker.make(table, table.columns(Predicate.not(TableField::isPrimaryKey))));
         Map<String, String> context = EasyMaps.asMap(
             "$sql_query_literal", wrapAsStringLiteral(query, INDENT2)
         );
@@ -742,8 +742,8 @@ public class ModelTableCodegen extends BaseCodegen {
         }
 
         Snippet query = new Snippet()
-                .withLines(UpdateMaker.make(table, table.columns(Predicate.not(TableField::isPrimaryKey))))
-                .withLines(WhereMaker.makeForPrimaryColumns(table));
+            .withLines(UpdateMaker.make(table, table.columns(Predicate.not(TableField::isPrimaryKey))))
+            .withLines(WhereMaker.makeForPrimaryColumns(table));
         Map<String, String> context = EasyMaps.asMap(
             "$sql_query_literal", wrapAsStringLiteral(query, INDENT2)
         );
@@ -857,7 +857,7 @@ public class ModelTableCodegen extends BaseCodegen {
 
     private void updateWhereBatch() {
         Snippet query = new Snippet()
-                .withLines(UpdateMaker.make(table, table.columns(Predicate.not(TableField::isPrimaryKey))));
+            .withLines(UpdateMaker.make(table, table.columns(Predicate.not(TableField::isPrimaryKey))));
         Map<String, String> context = EasyMaps.asMap(
             "$sql_query_literal", wrapAsStringLiteral(query, INDENT2)
         );
@@ -920,8 +920,8 @@ public class ModelTableCodegen extends BaseCodegen {
         }
 
         Snippet query = new Snippet()
-                .withLines(DeleteMaker.make(table))
-                .withLines(WhereMaker.makeForPrimaryColumns(table));
+            .withLines(DeleteMaker.make(table))
+            .withLines(WhereMaker.makeForPrimaryColumns(table));
         Map<String, String> context = EasyMaps.asMap(
             "$sql_query_literal", wrapAsStringLiteral(query, INDENT2),
             "$pk_object", toKeyObject(requireNonNull(table.primaryKeyField()), "$pk_name")

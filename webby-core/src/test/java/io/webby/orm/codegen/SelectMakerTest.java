@@ -2,20 +2,18 @@ package io.webby.orm.codegen;
 
 import io.webby.orm.api.ForeignInt;
 import io.webby.orm.arch.ArchFactory;
+import io.webby.orm.arch.ArchTesting;
+import io.webby.orm.arch.RunContext;
 import io.webby.orm.arch.TableArch;
-import io.webby.orm.testing.FakeModelAdaptersScanner;
 import org.jetbrains.annotations.NotNull;
 import org.junit.jupiter.api.Test;
 
-import java.util.Arrays;
 import java.util.Map;
 
 import static io.webby.orm.api.ReadFollow.*;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
 public class SelectMakerTest {
-    private final ModelAdaptersScanner locator = new FakeModelAdaptersScanner();
-
     @Test
     public void one_level() {
         record User(int userId, String name) {}
@@ -64,9 +62,9 @@ public class SelectMakerTest {
     }
 
     private @NotNull Map<Class<?>, TableArch> buildArch(@NotNull Class<?> @NotNull ...  models) {
-        ArchFactory factory = new ArchFactory(locator, Arrays.stream(models).map(ModelInput::of).toList());
-        factory.build();
-        return factory.getAllTables();
+        RunContext runContext = ArchTesting.newRunContext(models);
+        new ArchFactory(runContext).build();
+        return runContext.tables().getAllTables();
     }
 
     private static void assertMaker(@NotNull SelectMaker selectMaker, @NotNull String expected) {

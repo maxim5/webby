@@ -1,13 +1,12 @@
 package io.webby.orm.codegen;
 
-import io.webby.orm.arch.InvalidSqlModelException;
 import io.webby.orm.arch.ArchFactory;
-import io.webby.orm.testing.FakeModelAdaptersScanner;
+import io.webby.orm.arch.ArchTesting;
+import io.webby.orm.arch.InvalidSqlModelException;
 import org.jetbrains.annotations.NotNull;
 import org.junit.jupiter.api.Test;
 
 import java.io.Serializable;
-import java.util.Arrays;
 import java.util.Collection;
 import java.util.List;
 import java.util.Set;
@@ -15,8 +14,6 @@ import java.util.Set;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 
 public class ModelTableCodegenTest {
-    private final ModelAdaptersScanner locator = new FakeModelAdaptersScanner();
-
     @Test
     public void invalid_list_field() {
         record ListModel(List<Object> value) {}
@@ -42,10 +39,8 @@ public class ModelTableCodegenTest {
     }
 
     private void assertInvalidModel(@NotNull Class<?> ... models) {
-        assertThrows(InvalidSqlModelException.class, () -> {
-            List<ModelInput> inputs = Arrays.stream(models).map(ModelInput::of).toList();
-            ArchFactory factory = new ArchFactory(locator, inputs);
-            factory.build();
-        });
+        assertThrows(InvalidSqlModelException.class, () ->
+            new ArchFactory(ArchTesting.newRunContext(models)).build()
+        );
     }
 }
