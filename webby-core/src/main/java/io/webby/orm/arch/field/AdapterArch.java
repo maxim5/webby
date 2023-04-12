@@ -1,5 +1,6 @@
-package io.webby.orm.arch;
+package io.webby.orm.arch.field;
 
+import io.webby.orm.arch.JavaNameHolder;
 import org.jetbrains.annotations.NotNull;
 
 public record AdapterArch(@NotNull PojoArch pojoArch) implements JavaNameHolder {

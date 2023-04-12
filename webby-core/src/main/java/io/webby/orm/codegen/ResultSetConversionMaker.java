@@ -3,7 +3,12 @@ package io.webby.orm.codegen;
 import io.webby.orm.api.Foreign;
 import io.webby.orm.api.ForeignObj;
 import io.webby.orm.api.ReadFollow;
-import io.webby.orm.arch.*;
+import io.webby.orm.arch.Column;
+import io.webby.orm.arch.Naming;
+import io.webby.orm.arch.field.ForeignTableField;
+import io.webby.orm.arch.field.OneColumnTableField;
+import io.webby.orm.arch.field.TableArch;
+import io.webby.orm.arch.field.TableField;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.Arrays;
@@ -11,8 +16,8 @@ import java.util.Set;
 import java.util.stream.Stream;
 
 import static io.webby.orm.api.ReadFollow.*;
-import static io.webby.orm.codegen.Joining.COMMA_JOINER;
 import static io.webby.orm.codegen.JavaSupport.INDENT1;
+import static io.webby.orm.codegen.Joining.COMMA_JOINER;
 import static java.util.Objects.requireNonNull;
 
 class ResultSetConversionMaker {

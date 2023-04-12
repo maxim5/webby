@@ -1,7 +1,10 @@
-package io.webby.orm.arch;
+package io.webby.orm.arch.field;
 
 import com.google.errorprone.annotations.Immutable;
 import io.webby.orm.api.ReadFollow;
+import io.webby.orm.arch.HasColumns;
+import io.webby.orm.arch.HasPrefixedColumns;
+import io.webby.orm.arch.PrefixedColumn;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
@@ -75,10 +78,10 @@ public abstract class TableField implements HasColumns, HasPrefixedColumns {
     @Override
     public String toString() {
         return "%s(%s::%s, primary:%s)".formatted(
-                getClass().getSimpleName(),
-                parent.javaName(),
-                field.name(),
-                primaryKey
+            getClass().getSimpleName(),
+            parent.javaName(),
+            field.name(),
+            primaryKey
         );
     }
 }

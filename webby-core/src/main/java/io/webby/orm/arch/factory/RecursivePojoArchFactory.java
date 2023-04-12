@@ -1,6 +1,8 @@
-package io.webby.orm.arch;
+package io.webby.orm.arch.factory;
 
 import com.google.common.collect.ImmutableList;
+import io.webby.orm.arch.JdbcType;
+import io.webby.orm.arch.field.*;
 import org.jetbrains.annotations.NotNull;
 
 import java.lang.reflect.Field;

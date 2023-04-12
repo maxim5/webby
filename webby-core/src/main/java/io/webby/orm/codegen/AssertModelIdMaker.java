@@ -1,6 +1,6 @@
 package io.webby.orm.codegen;
 
-import io.webby.orm.arch.TableArch;
+import io.webby.orm.arch.field.TableArch;
 import org.jetbrains.annotations.NotNull;
 
 import static java.util.Objects.requireNonNull;

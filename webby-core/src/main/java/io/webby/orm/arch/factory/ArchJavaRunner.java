@@ -1,8 +1,11 @@
-package io.webby.orm.arch;
+package io.webby.orm.arch.factory;
 
 import com.google.common.flogger.FluentLogger;
 import io.webby.app.AppSettings;
 import io.webby.common.ClasspathScanner;
+import io.webby.orm.arch.JavaNameHolder;
+import io.webby.orm.arch.field.AdapterArch;
+import io.webby.orm.arch.field.TableArch;
 import io.webby.orm.codegen.ModelAdapterCodegen;
 import io.webby.orm.codegen.ModelAdaptersScanner;
 import io.webby.orm.codegen.ModelTableCodegen;

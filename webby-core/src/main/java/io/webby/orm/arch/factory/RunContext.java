@@ -1,4 +1,4 @@
-package io.webby.orm.arch;
+package io.webby.orm.arch.factory;
 
 import io.webby.orm.codegen.ModelAdaptersScanner;
 import org.jetbrains.annotations.NotNull;

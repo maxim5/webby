@@ -1,8 +1,9 @@
-package io.webby.orm.arch;
+package io.webby.orm.arch.field;
 
 import com.google.common.collect.ImmutableList;
 import com.google.errorprone.annotations.Immutable;
 import io.webby.orm.api.ReadFollow;
+import io.webby.orm.arch.*;
 import io.webby.util.collect.Pair;
 import io.webby.util.lazy.AtomicCacheCompute;
 import io.webby.util.lazy.AtomicLazyInit;
@@ -164,15 +165,15 @@ public final class TableArch implements JavaNameHolder, HasColumns, HasPrefixedC
         return modelClass.getSimpleName();
     }
 
-    /*package*/ boolean isInitialized() {
+    public boolean isInitialized() {
         return fieldsRef.isInitialized();
     }
 
-    /*package*/ void initializeOrDie(@NotNull ImmutableList<TableField> fields) {
+    public void initializeOrDie(@NotNull ImmutableList<TableField> fields) {
         fieldsRef.initializeOrDie(fields);
     }
 
-    /*package*/ void validate() {
+    public void validate() {
         if (isM2M()) {
             m2mLeftFieldOrDie();
             m2mRightFieldOrDie();

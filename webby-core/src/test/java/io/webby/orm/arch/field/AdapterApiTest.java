@@ -1,6 +1,9 @@
-package io.webby.orm.arch;
+package io.webby.orm.arch.field;
 
 import io.webby.orm.adapter.time.*;
+import io.webby.orm.arch.Column;
+import io.webby.orm.arch.ColumnType;
+import io.webby.orm.arch.JdbcType;
 import org.junit.jupiter.api.Test;
 
 import java.util.List;

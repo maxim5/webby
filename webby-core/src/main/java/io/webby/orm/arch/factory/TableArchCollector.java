@@ -1,6 +1,7 @@
-package io.webby.orm.arch;
+package io.webby.orm.arch.factory;
 
 import com.google.common.collect.ImmutableMap;
+import io.webby.orm.arch.field.TableArch;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 

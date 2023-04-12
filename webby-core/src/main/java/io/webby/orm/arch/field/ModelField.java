@@ -1,5 +1,6 @@
-package io.webby.orm.arch;
+package io.webby.orm.arch.field;
 
+import io.webby.orm.arch.Naming;
 import org.jetbrains.annotations.NotNull;
 
 import java.lang.reflect.Field;

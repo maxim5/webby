@@ -1,4 +1,4 @@
-package io.webby.orm.arch;
+package io.webby.orm.arch.factory;
 
 import io.webby.util.reflect.EasyMembers;
 import org.jetbrains.annotations.NotNull;

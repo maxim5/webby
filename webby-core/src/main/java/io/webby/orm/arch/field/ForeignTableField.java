@@ -1,7 +1,9 @@
-package io.webby.orm.arch;
+package io.webby.orm.arch.field;
 
 import com.google.errorprone.annotations.Immutable;
 import io.webby.orm.api.ReadFollow;
+import io.webby.orm.arch.Column;
+import io.webby.orm.arch.PrefixedColumn;
 import io.webby.util.collect.ListBuilder;
 import org.jetbrains.annotations.NotNull;
 

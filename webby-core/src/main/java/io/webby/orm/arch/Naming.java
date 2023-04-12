@@ -104,12 +104,12 @@ public class Naming {
     }
 
     @SuppressWarnings("ConstantConditions")
-    static @NotNull String camelUpperToLower(@NotNull String s) {
+    public static @NotNull String camelUpperToLower(@NotNull String s) {
         return CaseFormat.UPPER_CAMEL.converterTo(CaseFormat.LOWER_CAMEL).convert(s);
     }
 
     @SuppressWarnings("ConstantConditions")
-    static @NotNull String camelLowerToUpper(@NotNull String s) {
+    public static @NotNull String camelLowerToUpper(@NotNull String s) {
         return CaseFormat.LOWER_CAMEL.converterTo(CaseFormat.UPPER_CAMEL).convert(s);
     }
 }

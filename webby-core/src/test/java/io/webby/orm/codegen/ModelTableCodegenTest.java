@@ -1,8 +1,8 @@
 package io.webby.orm.codegen;
 
-import io.webby.orm.arch.ArchFactory;
-import io.webby.orm.arch.ArchTesting;
 import io.webby.orm.arch.InvalidSqlModelException;
+import io.webby.orm.arch.factory.ArchFactory;
+import io.webby.orm.arch.factory.ArchTesting;
 import org.jetbrains.annotations.NotNull;
 import org.junit.jupiter.api.Test;
 

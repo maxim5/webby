@@ -4,8 +4,8 @@ import io.webby.auth.session.Session;
 import io.webby.auth.user.DefaultUser;
 import io.webby.db.model.BlobKv;
 import io.webby.demo.model.*;
-import io.webby.orm.arch.ArchJavaRunner;
-import io.webby.orm.arch.RunInputs;
+import io.webby.orm.arch.factory.ArchJavaRunner;
+import io.webby.orm.arch.factory.RunInputs;
 import io.webby.orm.codegen.ModelInput;
 
 public class DemoTablesCodegenMain {

@@ -1,4 +1,4 @@
-package io.webby.orm.arch;
+package io.webby.orm.arch.factory;
 
 import com.google.common.collect.Streams;
 import io.webby.orm.codegen.ModelInput;

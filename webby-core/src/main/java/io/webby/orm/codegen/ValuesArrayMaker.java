@@ -1,7 +1,7 @@
 package io.webby.orm.codegen;
 
+import io.webby.orm.arch.field.TableField;
 import io.webby.util.func.ObjIntBiFunction;
-import io.webby.orm.arch.TableField;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.ArrayList;

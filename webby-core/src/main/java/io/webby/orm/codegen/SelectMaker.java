@@ -1,10 +1,10 @@
 package io.webby.orm.codegen;
 
 import io.webby.orm.api.ReadFollow;
-import io.webby.orm.arch.ForeignTableField;
-import io.webby.orm.arch.OneColumnTableField;
 import io.webby.orm.arch.PrefixedColumn;
-import io.webby.orm.arch.TableArch;
+import io.webby.orm.arch.field.ForeignTableField;
+import io.webby.orm.arch.field.OneColumnTableField;
+import io.webby.orm.arch.field.TableArch;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.VisibleForTesting;
 

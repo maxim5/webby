@@ -1,4 +1,4 @@
-package io.webby.orm.arch;
+package io.webby.orm.arch.field;
 
 import com.google.common.collect.Streams;
 import com.google.errorprone.annotations.Immutable;
