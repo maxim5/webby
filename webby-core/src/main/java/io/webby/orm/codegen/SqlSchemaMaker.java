@@ -40,7 +40,7 @@ public class SqlSchemaMaker {
                 "%s %s".formatted(column.name(), sqlType),
                 column.primaryKey().isSingle() ? "PRIMARY KEY" : "",
                 column.primaryKey().isSingle() ? sqlAutoIncrement(column, engine) : "",
-                column.unique().isSingle() ? "UNIQUE" : ""
+                column.unique().isSingle() ? sqlUnique(column, engine) : ""
             ).joinNonEmpty(" ");
         }));
 
@@ -131,6 +131,17 @@ public class SqlSchemaMaker {
             return switch (engine) {
                 case H2, MySQL -> "AUTO_INCREMENT";
                 case SQLite -> "";  // Not recommended by https://www.sqlite.org/autoinc.html
+                default -> throw new IllegalArgumentException("Engine not supported for table creation: " + engine);
+            };
+        }
+        return "";
+    }
+
+    private static @NotNull String sqlUnique(@NotNull TableMeta.ColumnMeta columnMeta, @NotNull Engine engine) {
+        if (columnMeta.isUnique()) {
+            return switch (engine) {
+                case SQLite, MySQL -> "UNIQUE";
+                case H2 -> columnMeta.type() == byte[].class ? "" : "UNIQUE";  // Index on BLOB or CLOB column not supported
                 default -> throw new IllegalArgumentException("Engine not supported for table creation: " + engine);
             };
         }
