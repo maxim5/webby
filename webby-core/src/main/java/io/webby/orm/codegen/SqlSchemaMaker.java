@@ -3,7 +3,6 @@ package io.webby.orm.codegen;
 import io.webby.orm.api.BaseTable;
 import io.webby.orm.api.Engine;
 import io.webby.orm.api.TableMeta;
-import io.webby.orm.api.query.Named;
 import io.webby.util.base.Unchecked;
 import io.webby.util.collect.EasyMaps;
 import org.jetbrains.annotations.NotNull;
@@ -34,24 +33,24 @@ public class SqlSchemaMaker {
     public static @NotNull String makeCreateTableQuery(@NotNull Engine engine, @NotNull TableMeta meta) {
         Snippet snippet = new Snippet();
 
-        snippet.withLines(meta.sqlColumns().stream().map(column -> {
-            String sqlType = sqlTypeFor(column, engine);
-            return SnippetLine.of(
-                "%s %s".formatted(column.name(), sqlType),
+        meta.sqlColumns().forEach(column -> {
+            String definition = SnippetLine.of(
+                "%s %s".formatted(column.name(), sqlTypeFor(column, engine)),
                 column.primaryKey().isSingle() ? "PRIMARY KEY" : "",
                 column.primaryKey().isSingle() ? sqlAutoIncrement(column, engine) : "",
                 column.unique().isSingle() ? sqlUnique(column, engine) : ""
             ).joinNonEmpty(" ");
-        }));
+            snippet.withLine(definition);
+        });
 
         if (meta.primaryKeys().isComposite()) {
-            String columns = meta.primaryKeys().columns().stream().map(Named::name).collect(Collectors.joining(", "));
+            String columns = SnippetLine.from(meta.primaryKeys().columns()).join(", ");
             snippet.withLine("PRIMARY KEY (%s)".formatted(columns));
         }
 
         meta.unique().forEach(constraint -> {
             if (constraint.isComposite()) {
-                String columns = constraint.columns().stream().map(Named::name).collect(Collectors.joining(", "));
+                String columns = SnippetLine.from(constraint.columns()).join(", ");
                 snippet.withLine("UNIQUE (%s)".formatted(columns));
             }
         });

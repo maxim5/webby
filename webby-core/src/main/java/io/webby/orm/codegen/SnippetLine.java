@@ -4,6 +4,7 @@ import com.google.errorprone.annotations.CheckReturnValue;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.List;
 import java.util.stream.Stream;
 
@@ -18,12 +19,16 @@ class SnippetLine {
         this.pieces = pieces;
     }
 
-    public static @NotNull SnippetLine of(@NotNull String ... pieces) {
+    public static @NotNull SnippetLine of(@NotNull String @NotNull ... pieces) {
         return new SnippetLine(List.of(pieces));
     }
 
-    public static @NotNull SnippetLine of(@NotNull Object ... pieces) {
+    public static @NotNull SnippetLine of(@NotNull Object @NotNull ... pieces) {
         return new SnippetLine(Stream.of(pieces).map(Object::toString).toList());
+    }
+
+    public static @NotNull SnippetLine from(@NotNull Collection<?> pieces) {
+        return new SnippetLine(pieces.stream().map(Object::toString).toList());
     }
 
     @CheckReturnValue
