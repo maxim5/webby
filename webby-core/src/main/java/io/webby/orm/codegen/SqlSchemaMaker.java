@@ -31,14 +31,15 @@ public class SqlSchemaMaker {
     }
 
     public static @NotNull String makeCreateTableQuery(@NotNull Engine engine, @NotNull TableMeta meta) {
+        SchemaSupport support = SchemaSupport.of(engine);
         Snippet snippet = new Snippet();
 
         meta.sqlColumns().forEach(column -> {
             String definition = SnippetLine.of(
-                "%s %s".formatted(column.name(), sqlTypeFor(column, engine)),
-                column.primaryKey().isSingle() ? "PRIMARY KEY" : "",
-                column.primaryKey().isSingle() ? sqlAutoIncrement(column, engine) : "",
-                column.unique().isSingle() ? sqlUnique(column, engine) : ""
+                "%s %s".formatted(column.name(), support.columnTypeFor(column)),
+                column.primaryKey().isSingle() ? support.inlinePrimaryKeyFor(column) : "",
+                column.primaryKey().isSingle() ? support.inlineAutoIncrementFor(column) : "",
+                column.unique().isSingle() ? support.inlineUniqueFor(column) : ""
             ).joinNonEmpty(" ");
             snippet.withLine(definition);
         });
@@ -74,76 +75,109 @@ public class SqlSchemaMaker {
         return "DROP TABLE IF EXISTS %s".formatted(table);
     }
 
-    private static final Map<Class<?>, String> DEFAULT_DATA_TYPES = EasyMaps.asMap(
-        boolean.class, "BOOLEAN",
-        byte.class, "TINYINT",
-        short.class, "SMALLINT",
-        int.class, "INTEGER",
-        long.class, "BIGINT",
-        float.class, "REAL",
-        double.class, "DOUBLE",
-        String.class, "VARCHAR",
-        byte[].class, "BLOB",
-        Time.class, "TIME",
-        Date.class, "DATE",
-        Timestamp.class, "TIMESTAMP"
-    );
+    private interface SchemaSupport {
+        @NotNull String columnTypeFor(@NotNull TableMeta.ColumnMeta columnMeta);
 
-    private static final Map<Class<?>, String> H2_PK_DATA_TYPES = EasyMaps.merge(DEFAULT_DATA_TYPES, EasyMaps.asMap(
-        byte[].class, "VARCHAR"
-    ));
+        default @NotNull String inlineUniqueFor(@NotNull TableMeta.ColumnMeta columnMeta) {
+            return columnMeta.isUnique() ? "UNIQUE" : "";
+        }
 
-    private static final Map<Class<?>, String> MYSQL_DATA_TYPES = EasyMaps.merge(DEFAULT_DATA_TYPES, EasyMaps.asMap(
-        String.class, "VARCHAR(4096)",
-        byte[].class, "BLOB",
-        Timestamp.class, "TIMESTAMP(3)"
-    ));
-    // https://stackoverflow.com/questions/29292353/whats-the-difference-between-varchar-binary-and-varbinary-in-mysql
-    private static final Map<Class<?>, String> MYSQL_PK_DATA_TYPES = EasyMaps.merge(MYSQL_DATA_TYPES, EasyMaps.asMap(
-        String.class, "VARCHAR(255)",
-        byte[].class, "VARBINARY(255)"
-    ));
+        default @NotNull String inlinePrimaryKeyFor(@NotNull TableMeta.ColumnMeta columnMeta) {
+            return columnMeta.isPrimaryKey() ? "PRIMARY KEY" : "";
+        }
 
-    private static final Map<Class<?>, String> SQLITE_DATA_TYPES = EasyMaps.asMap(
-        float.class, "REAL",
-        double.class, "REAL",
-        String.class, "VARCHAR",
-        byte[].class, "BLOB"
-    );
-    private static final Map<Class<?>, String> SQLITE_PK_DATA_TYPES = EasyMaps.merge(SQLITE_DATA_TYPES, EasyMaps.asMap(
-        byte[].class, "VARCHAR"
-    ));
+        default @NotNull String inlineAutoIncrementFor(@NotNull TableMeta.ColumnMeta columnMeta) {
+            if (columnMeta.isPrimaryKey() && (columnMeta.type() == int.class || columnMeta.type() == long.class)) {
+                return "AUTO_INCREMENT";
+            }
+            return "";
+        }
 
-    private static @NotNull String sqlTypeFor(@NotNull TableMeta.ColumnMeta columnMeta, @NotNull Engine engine) {
-        boolean isPrimaryKey = columnMeta.isPrimaryKey() || columnMeta.isForeignKey();
-        Class<?> columnType = columnMeta.type();
-        return switch (engine) {
-            case H2 -> (isPrimaryKey ? H2_PK_DATA_TYPES : DEFAULT_DATA_TYPES).get(columnType);
-            case MySQL -> (isPrimaryKey ? MYSQL_PK_DATA_TYPES : MYSQL_DATA_TYPES).get(columnType);
-            case SQLite -> (isPrimaryKey ? SQLITE_PK_DATA_TYPES : SQLITE_DATA_TYPES).getOrDefault(columnType, "INTEGER");
-            default -> throw new IllegalArgumentException("Engine not supported for table creation: " + engine);
-        };
-    }
-
-    private static @NotNull String sqlAutoIncrement(@NotNull TableMeta.ColumnMeta columnMeta, @NotNull Engine engine) {
-        if (columnMeta.isPrimaryKey() && (columnMeta.type() == int.class || columnMeta.type() == long.class)) {
+        static @NotNull SchemaSupport of(@NotNull Engine engine) {
             return switch (engine) {
-                case H2, MySQL -> "AUTO_INCREMENT";
-                case SQLite -> "";  // Not recommended by https://www.sqlite.org/autoinc.html
+                case SQLite -> new SqliteSchemaSupport();
+                case MySQL -> new MySqlSchemaSupport();
+                case H2 -> new H2SchemaSupport();
                 default -> throw new IllegalArgumentException("Engine not supported for table creation: " + engine);
             };
         }
-        return "";
     }
 
-    private static @NotNull String sqlUnique(@NotNull TableMeta.ColumnMeta columnMeta, @NotNull Engine engine) {
-        if (columnMeta.isUnique()) {
-            return switch (engine) {
-                case SQLite, MySQL -> "UNIQUE";
-                case H2 -> columnMeta.type() == byte[].class ? "" : "UNIQUE";  // Index on BLOB or CLOB column not supported
-                default -> throw new IllegalArgumentException("Engine not supported for table creation: " + engine);
-            };
+    private abstract static class DefaultSchemaSupport implements SchemaSupport {
+        protected static final Map<Class<?>, String> DEFAULT_DATA_TYPES = EasyMaps.asMap(
+            boolean.class, "BOOLEAN",
+            byte.class, "TINYINT",
+            short.class, "SMALLINT",
+            int.class, "INTEGER",
+            long.class, "BIGINT",
+            float.class, "REAL",
+            double.class, "DOUBLE",
+            String.class, "VARCHAR",
+            byte[].class, "BLOB",
+            Time.class, "TIME",
+            Date.class, "DATE",
+            Timestamp.class, "TIMESTAMP"
+        );
+
+        protected static boolean isKey(TableMeta.@NotNull ColumnMeta columnMeta) {
+            return columnMeta.isPrimaryKey() || columnMeta.isForeignKey();
         }
-        return "";
+    }
+
+    private static class SqliteSchemaSupport extends DefaultSchemaSupport {
+        private static final Map<Class<?>, String> SQLITE_DATA_TYPES = EasyMaps.asMap(
+            float.class, "REAL",
+            double.class, "REAL",
+            String.class, "VARCHAR",
+            byte[].class, "BLOB"
+        );
+        private static final Map<Class<?>, String> SQLITE_PK_DATA_TYPES = EasyMaps.merge(SQLITE_DATA_TYPES, EasyMaps.asMap(
+            byte[].class, "VARCHAR"
+        ));
+
+        @Override
+        public @NotNull String columnTypeFor(TableMeta.@NotNull ColumnMeta columnMeta) {
+            return (isKey(columnMeta) ? SQLITE_PK_DATA_TYPES : SQLITE_DATA_TYPES).getOrDefault(columnMeta.type(), "INTEGER");
+        }
+
+        @Override
+        public @NotNull String inlineAutoIncrementFor(TableMeta.@NotNull ColumnMeta columnMeta) {
+            return "";  // Not recommended by https://www.sqlite.org/autoinc.html
+        }
+    }
+
+    private static class MySqlSchemaSupport extends DefaultSchemaSupport {
+        private static final Map<Class<?>, String> MYSQL_DATA_TYPES = EasyMaps.merge(DEFAULT_DATA_TYPES, EasyMaps.asMap(
+            String.class, "VARCHAR(4096)",
+            byte[].class, "BLOB",
+            Timestamp.class, "TIMESTAMP(3)"
+        ));
+        // https://stackoverflow.com/questions/29292353/whats-the-difference-between-varchar-binary-and-varbinary-in-mysql
+        private static final Map<Class<?>, String> MYSQL_PK_DATA_TYPES = EasyMaps.merge(MYSQL_DATA_TYPES, EasyMaps.asMap(
+            String.class, "VARCHAR(255)",
+            byte[].class, "VARBINARY(255)"
+        ));
+
+        @Override
+        public @NotNull String columnTypeFor(TableMeta.@NotNull ColumnMeta columnMeta) {
+            return (isKey(columnMeta) ? MYSQL_PK_DATA_TYPES : MYSQL_DATA_TYPES).get(columnMeta.type());
+        }
+    }
+
+    private static class H2SchemaSupport extends DefaultSchemaSupport {
+        private static final Map<Class<?>, String> H2_PK_DATA_TYPES = EasyMaps.merge(DEFAULT_DATA_TYPES, EasyMaps.asMap(
+            byte[].class, "VARCHAR"
+        ));
+
+        @Override
+        public @NotNull String columnTypeFor(TableMeta.@NotNull ColumnMeta columnMeta) {
+            return (isKey(columnMeta) ? H2_PK_DATA_TYPES : DEFAULT_DATA_TYPES).get(columnMeta.type());
+        }
+
+        @Override
+        public @NotNull String inlineUniqueFor(TableMeta.@NotNull ColumnMeta columnMeta) {
+            // Index on BLOB or CLOB column not supported
+            return !columnMeta.isUnique() || columnMeta.type() == byte[].class ? "" : "UNIQUE";
+        }
     }
 }
