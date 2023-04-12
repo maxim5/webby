@@ -5,6 +5,7 @@ import com.google.common.collect.Streams;
 import com.google.common.primitives.Primitives;
 import com.google.mu.util.Optionals;
 import io.webby.orm.api.*;
+import io.webby.orm.api.TableMeta.ConstraintStatus;
 import io.webby.orm.api.entity.*;
 import io.webby.orm.api.query.*;
 import io.webby.orm.arch.Column;
@@ -396,7 +397,7 @@ public class ModelTableCodegen extends BaseCodegen {
             return paramName;
         }
         AdapterApi adapterApi = requireNonNull(field.adapterApi());
-        if (field.columnsNumber() == 1) {
+        if (field.isSingleColumn()) {
             return "%s.toValueObject(%s)".formatted(adapterApi.staticRef(), paramName);
         } else {
             return "%s.toNewValuesArray(%s)".formatted(adapterApi.staticRef(), paramName);
@@ -1098,8 +1099,6 @@ public class ModelTableCodegen extends BaseCodegen {
         Map<String, String> context = Map.of(
             "$column_meta_list", table.columnsWithFields().stream().map(pair -> {
                 TableField field = pair.first();
-                boolean primaryKey = field.isPrimaryKey();
-                boolean foreignKey = field.isForeignKey();
                 Column column = pair.second();
                 String sqlName = column.sqlName();
                 Class<?> nativeType = column.type().jdbcType().nativeType();
@@ -1108,17 +1107,31 @@ public class ModelTableCodegen extends BaseCodegen {
                     nativeType == byte[].class ?
                         "byte[]" :
                         nativeType.getName();
-                return "new ColumnMeta(OwnColumn.%s, %s %s.class, %s %s, %s %s)".formatted(
-                    sqlName,
-                    "/*type=*/", type,
-                    "/*isPK=*/", primaryKey,
-                    "/*isFK=*/", foreignKey
-                );
+
+                record Piece(String method, boolean value, boolean isMultiColumn) {
+                    @Override
+                    public @NotNull String toString() {
+                        ConstraintStatus status = isMultiColumn ? ConstraintStatus.COMPOSITE : ConstraintStatus.SINGLE_COLUMN;
+                        return value ? "%s(ConstraintStatus.%s)".formatted(method, status) : "";
+                    }
+                }
+
+                return SnippetLine.of(
+                    "ColumnMeta.of(OwnColumn.%s, %s.class)".formatted(sqlName, type),
+                    new Piece(".withPrimaryKey", field.isPrimaryKey(), field.isMultiColumn()),
+                    new Piece(".withUnique", field.isUnique(), field.isMultiColumn()),
+                    new Piece(".withForeignKey", field.isForeignKey(), field.isMultiColumn())
+                ).join();
             }).collect(Collectors.joining(",\n" + INDENT3)),
             "$primary_keys", table.columnsWithFields().stream().filter(pair -> pair.first().isPrimaryKey()).map(pair -> {
                 String column = pair.second().sqlName();
                 return "OwnColumn.%s".formatted(column);
-            }).collect(Collectors.joining(", "))
+            }).collect(Collectors.joining(", ")),
+            "$unique_keys", table.fields().stream().filter(TableField::isUnique).map(field -> {
+                String columns = field.columns().stream().map(Column::sqlName).map("OwnColumn.%s"::formatted)
+                    .collect(Collectors.joining(", "));
+                return "Constraint.of(%s)".formatted(columns);
+            }).collect(Collectors.joining(",\n" + INDENT3))
         );
 
         appendCode("""
@@ -1139,7 +1152,9 @@ public class ModelTableCodegen extends BaseCodegen {
             }
             @Override
             public @Nonnull Iterable<Constraint> unique() {
-                return List.of();
+                return List.of(
+                    $unique_keys
+                );
             }
         };
         

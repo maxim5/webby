@@ -66,7 +66,7 @@ public class ModelAdapterCodegen extends BaseCodegen {
     }
 
     private @NotNull Class<?> getBaseClass() {
-        return adapter.pojoArch().columnsNumber() == 1 ? JdbcSingleValueAdapter.class : JdbcArrayAdapter.class;
+        return adapter.pojoArch().isSingleColumn() ? JdbcSingleValueAdapter.class : JdbcArrayAdapter.class;
     }
 
     private @NotNull List<Class<?>> getNestedAdapters() {
@@ -167,7 +167,7 @@ public class ModelAdapterCodegen extends BaseCodegen {
 
     private void toValueObject() {
         PojoArch pojo = adapter.pojoArch();
-        if (pojo.columnsNumber() != 1) {
+        if (pojo.isMultiColumn()) {
             return;
         }
 
@@ -199,7 +199,7 @@ public class ModelAdapterCodegen extends BaseCodegen {
 
     private void fillArrayValues() {
         PojoArch pojo = adapter.pojoArch();
-        if (pojo.columnsNumber() == 1) {
+        if (pojo.isSingleColumn()) {
             return;
         }
 

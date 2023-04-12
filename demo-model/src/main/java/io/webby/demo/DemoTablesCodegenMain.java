@@ -34,6 +34,7 @@ public class DemoTablesCodegenMain {
         ModelInput.of(ForeignKeyModel.InnerLong.class),
         ModelInput.of(ForeignKeyModel.InnerString.class),
         ModelInput.of(ForeignKeyModel.class),
+        ModelInput.of(ConstraintsModel.class),
 
         ModelInput.of(M2mIntModel.class),
         ModelInput.of(M2mLongModel.class),

@@ -161,6 +161,42 @@ public class SqlSchemaMakerTest {
     }
 
     @Test
+    public void create_table_constraints_model() {
+        assertThat(makeCreateTableQuery(Engine.SQLite, ConstraintsModelTable.class)).isEqualTo("""
+            CREATE TABLE IF NOT EXISTS constraints_model (
+                key INTEGER PRIMARY KEY,
+                fprint INTEGER UNIQUE,
+                range_from INTEGER,
+                range_to INTEGER,
+                name VARCHAR,
+                UNIQUE (range_from, range_to)
+            )
+            """);
+
+        assertThat(makeCreateTableQuery(Engine.H2, ConstraintsModelTable.class)).isEqualTo("""
+            CREATE TABLE IF NOT EXISTS constraints_model (
+                key INTEGER PRIMARY KEY AUTO_INCREMENT,
+                fprint INTEGER UNIQUE,
+                range_from INTEGER,
+                range_to INTEGER,
+                name VARCHAR,
+                UNIQUE (range_from, range_to)
+            )
+            """);
+
+        assertThat(makeCreateTableQuery(Engine.MySQL, ConstraintsModelTable.class)).isEqualTo("""
+            CREATE TABLE IF NOT EXISTS constraints_model (
+                key INTEGER PRIMARY KEY AUTO_INCREMENT,
+                fprint INTEGER UNIQUE,
+                range_from INTEGER,
+                range_to INTEGER,
+                name VARCHAR(4096),
+                UNIQUE (range_from, range_to)
+            )
+            """);
+    }
+
+    @Test
     public void create_table_deep_nested_model() {
         assertThat(makeCreateTableQuery(Engine.SQLite, DeepNestedModelTable.class)).isEqualTo("""
             CREATE TABLE IF NOT EXISTS deep_nested_model (

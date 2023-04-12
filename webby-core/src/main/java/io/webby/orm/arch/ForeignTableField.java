@@ -19,7 +19,7 @@ public class ForeignTableField extends TableField {
                              @NotNull ModelField field,
                              @NotNull TableArch foreignTable,
                              @NotNull Column foreignKeyColumn) {
-        super(parent, field, false, null);
+        super(parent, field, false, false, null);
         this.foreignTable = foreignTable;
         this.foreignKeyColumn = foreignKeyColumn;
     }
@@ -59,5 +59,15 @@ public class ForeignTableField extends TableField {
     @Override
     public int columnsNumber() {
         return 1;
+    }
+
+    @Override
+    public boolean isMultiColumn() {
+        return false;
+    }
+
+    @Override
+    public boolean isSingleColumn() {
+        return true;
     }
 }

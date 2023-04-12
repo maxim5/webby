@@ -10,4 +10,12 @@ public interface HasColumns {
     default int columnsNumber() {
         return columns().size();
     }
+
+    default boolean isMultiColumn() {
+        return columnsNumber() > 1;
+    }
+
+    default boolean isSingleColumn() {
+        return columnsNumber() == 1;
+    }
 }

@@ -84,6 +84,7 @@ public class ArchFactory {
     @NotNull TableField buildTableField(@NotNull TableArch table, @NotNull Field field, @NotNull ModelInput input) {
         Method getter = JavaClassAnalyzer.findGetterMethodOrDie(field);
         boolean isPrimaryKey = isPrimaryKeyField(field, input);
+        boolean isUnique = isUniqueField(field);
 
         FieldInference inference = inferFieldArch(field);
         if (inference.isForeignTable()) {
@@ -95,12 +96,14 @@ public class ArchFactory {
             return new OneColumnTableField(table,
                                            ModelField.of(field, getter),
                                            isPrimaryKey,
+                                           isUnique,
                                            inference.adapterApi(),
                                            requireNonNull(inference.singleColumn()));
         } else {
             return new MultiColumnTableField(table,
                                              ModelField.of(field, getter),
                                              isPrimaryKey,
+                                             isUnique,
                                              requireNonNull(inference.adapterApi()),
                                              requireNonNull(inference.multiColumns()));
         }
@@ -273,6 +276,10 @@ public class ArchFactory {
                fieldName.equals(Naming.idJavaName(input.modelClass())) ||
                (input.modelInterface() != null && fieldName.equals(Naming.idJavaName(input.modelInterface()))) ||
                EasyAnnotations.getOptionalAnnotation(field, Sql.class).map(Sql::primary).orElse(false);
+    }
+
+    private boolean isUniqueField(@NotNull Field field) {
+        return EasyAnnotations.getOptionalAnnotation(field, Sql.class).map(Sql::unique).orElse(false);
     }
 
     private static void validateFieldForPojo(@NotNull Field field) {

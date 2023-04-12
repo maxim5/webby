@@ -11,14 +11,26 @@ public class MultiColumnTableField extends TableField {
     public MultiColumnTableField(@NotNull TableArch parent,
                                  @NotNull ModelField field,
                                  boolean primaryKey,
+                                 boolean unique,
                                  @NotNull AdapterApi adapterApi,
                                  @NotNull ImmutableList<Column> columns) {
-        super(parent, field, primaryKey, adapterApi);
+        super(parent, field, primaryKey, unique, adapterApi);
+        assert columns.size() > 1 : "MultiColumnTableField `%s` constructed from a single column %s".formatted(field.name(), columns);
         this.columns = columns;
     }
 
     @Override
     public @NotNull ImmutableList<Column> columns() {
         return columns;
+    }
+
+    @Override
+    public boolean isMultiColumn() {
+        return true;
+    }
+
+    @Override
+    public boolean isSingleColumn() {
+        return false;
     }
 }

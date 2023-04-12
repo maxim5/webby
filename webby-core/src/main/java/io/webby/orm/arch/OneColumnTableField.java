@@ -14,9 +14,10 @@ public class OneColumnTableField extends TableField {
     public OneColumnTableField(@NotNull TableArch parent,
                                @NotNull ModelField field,
                                boolean primaryKey,
+                               boolean unique,
                                @Nullable AdapterApi adapterApi,
                                @NotNull Column column) {
-        super(parent, field, primaryKey, adapterApi);
+        super(parent, field, primaryKey, unique, adapterApi);
         this.column = column;
     }
 
@@ -32,5 +33,15 @@ public class OneColumnTableField extends TableField {
     @Override
     public int columnsNumber() {
         return 1;
+    }
+
+    @Override
+    public boolean isMultiColumn() {
+        return false;
+    }
+
+    @Override
+    public boolean isSingleColumn() {
+        return true;
     }
 }

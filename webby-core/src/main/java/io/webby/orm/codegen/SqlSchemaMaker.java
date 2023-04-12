@@ -11,8 +11,6 @@ import org.jetbrains.annotations.NotNull;
 import java.sql.Date;
 import java.sql.Time;
 import java.sql.Timestamp;
-import java.util.ArrayList;
-import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
 
@@ -34,31 +32,35 @@ public class SqlSchemaMaker {
     }
 
     public static @NotNull String makeCreateTableQuery(@NotNull Engine engine, @NotNull TableMeta meta) {
-        String tableName = meta.sqlTableName();
-        List<String> definitions = new ArrayList<>();
+        Snippet snippet = new Snippet();
 
-        boolean inlinePk = !meta.primaryKeys().isComposite();
-
-        meta.sqlColumns().stream().map(column -> {
-            boolean isPrimaryKey = column.isPrimaryKey();
+        snippet.withLines(meta.sqlColumns().stream().map(column -> {
             String sqlType = sqlTypeFor(column, engine);
-            String def = "%s %s".formatted(column.name(), sqlType);
-            if (isPrimaryKey && inlinePk) {
-                return "%s %s %s".formatted(def, "PRIMARY KEY", sqlAutoIncrement(column, engine)).trim();
-            }
-            return def;
-        }).forEachOrdered(definitions::add);
+            return SnippetLine.of(
+                "%s %s".formatted(column.name(), sqlType),
+                column.primaryKey().isSingle() ? "PRIMARY KEY" : "",
+                column.primaryKey().isSingle() ? sqlAutoIncrement(column, engine) : "",
+                column.unique().isSingle() ? "UNIQUE" : ""
+            ).joinNonEmpty(" ");
+        }));
 
-        if (!inlinePk) {
+        if (meta.primaryKeys().isComposite()) {
             String columns = meta.primaryKeys().columns().stream().map(Named::name).collect(Collectors.joining(", "));
-            definitions.add("PRIMARY KEY (%s)".formatted(columns));
+            snippet.withLine("PRIMARY KEY (%s)".formatted(columns));
         }
+
+        meta.unique().forEach(constraint -> {
+            if (constraint.isComposite()) {
+                String columns = constraint.columns().stream().map(Named::name).collect(Collectors.joining(", "));
+                snippet.withLine("UNIQUE (%s)".formatted(columns));
+            }
+        });
 
         return """
         CREATE TABLE IF NOT EXISTS %s (
             %s
         )
-        """.formatted(tableName, String.join(",\n    ", definitions));
+        """.formatted(meta.sqlTableName(), snippet.join(Collectors.joining(",\n    ")));
     }
 
     public static @NotNull String makeDropTableQuery(@NotNull BaseTable<?> table) {

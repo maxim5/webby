@@ -12,15 +12,18 @@ public abstract class TableField implements HasColumns, HasPrefixedColumns {
     protected final TableArch parent;
     protected final ModelField field;
     protected final boolean primaryKey;
+    protected final boolean unique;
     protected final AdapterApi adapterApi;
 
     public TableField(@NotNull TableArch parent,
                       @NotNull ModelField field,
                       boolean primaryKey,
+                      boolean unique,
                       @Nullable AdapterApi adapterApi) {
         this.parent = parent;
         this.field = field;
         this.primaryKey = primaryKey;
+        this.unique = unique;
         this.adapterApi = adapterApi;
     }
 
@@ -42,6 +45,10 @@ public abstract class TableField implements HasColumns, HasPrefixedColumns {
 
     public boolean isPrimaryKey() {
         return primaryKey;
+    }
+
+    public boolean isUnique() {
+        return unique;
     }
 
     public boolean isForeignKey() {
