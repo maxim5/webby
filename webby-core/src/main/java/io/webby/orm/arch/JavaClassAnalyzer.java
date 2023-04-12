@@ -2,7 +2,10 @@ package io.webby.orm.arch;
 
 import com.google.common.collect.ImmutableMap;
 import com.google.common.flogger.FluentLogger;
+import io.webby.orm.api.annotate.Sql;
+import io.webby.orm.codegen.ModelInput;
 import io.webby.util.collect.EasyIterables;
+import io.webby.util.reflect.EasyAnnotations;
 import io.webby.util.reflect.EasyMembers;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
@@ -123,5 +126,18 @@ class JavaClassAnalyzer {
                 return name.startsWith("get") && name.contains(fieldName.toLowerCase());
             }).collect(EasyIterables.getOnlyItemOrEmpty()).orElse(null)
         ));
+    }
+
+    public static boolean isPrimaryKeyField(@NotNull Field field, @NotNull ModelInput input) {
+        String fieldName = field.getName();
+        return fieldName.equals("id") ||
+            fieldName.equals(Naming.idJavaName(input.javaModelName())) ||
+            fieldName.equals(Naming.idJavaName(input.modelClass())) ||
+            (input.modelInterface() != null && fieldName.equals(Naming.idJavaName(input.modelInterface()))) ||
+            EasyAnnotations.getOptionalAnnotation(field, Sql.class).map(Sql::primary).orElse(false);
+    }
+
+    public static boolean isUniqueField(@NotNull Field field) {
+        return EasyAnnotations.getOptionalAnnotation(field, Sql.class).map(Sql::unique).orElse(false);
     }
 }
