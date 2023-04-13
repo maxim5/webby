@@ -4,7 +4,7 @@ import com.carrotsearch.hppc.IntArrayList;
 import com.carrotsearch.hppc.LongArrayList;
 import com.google.errorprone.annotations.CanIgnoreReturnValue;
 import com.mockrunner.mock.jdbc.MockPreparedStatement;
-import io.webby.testing.TestingUtil;
+import io.webby.testing.TestingBasics;
 import io.webby.util.collect.ImmutableArrayList;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
@@ -404,7 +404,7 @@ public class ArgsTest {
                 statement.setObject(1, null);
                 return args.setPreparedParams(statement, 1);
             });
-            expected = TestingUtil.prependVarArg(null, expected);
+            expected = TestingBasics.prependVarArg(null, expected);
             assertEquals(added, expected.length);
             assertThat(statement).withParams().equalExactly(expected);
             return this;

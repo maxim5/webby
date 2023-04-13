@@ -7,8 +7,8 @@ import java.util.Optional;
 import java.util.stream.Stream;
 
 import static com.google.common.truth.Truth.assertThat;
-import static io.webby.testing.TestingUtil.iterable;
-import static io.webby.testing.TestingUtil.sortedSetOf;
+import static io.webby.testing.TestingBasics.iterable;
+import static io.webby.testing.TestingBasics.sortedSetOf;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
 public class EasyIterablesTest {

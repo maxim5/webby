@@ -9,7 +9,7 @@ import java.util.TreeSet;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
-public class TestingUtil {
+public class TestingBasics {
     @SafeVarargs
     public static <T> T[] array(@Nullable T @NotNull ... items) {
         return items;

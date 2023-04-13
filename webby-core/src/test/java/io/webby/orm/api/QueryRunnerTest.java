@@ -30,7 +30,7 @@ import static io.webby.orm.testing.MockingJdbc.mockPreparedStatement;
 import static io.webby.orm.testing.MockingJdbc.mockResultSet;
 import static io.webby.testing.AssertPrimitives.assertIntsOrdered;
 import static io.webby.testing.AssertPrimitives.assertLongsOrdered;
-import static io.webby.testing.TestingUtil.array;
+import static io.webby.testing.TestingBasics.array;
 import static org.junit.jupiter.api.Assertions.*;
 
 // FIX[minor]: more tests: force .commit() or .rollback() to fail

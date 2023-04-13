@@ -16,8 +16,8 @@ import java.util.Optional;
 
 import static com.google.common.truth.Truth.assertThat;
 import static io.webby.testing.AssertPrimitives.assertLongsNoOrder;
+import static io.webby.testing.TestingBasics.array;
 import static io.webby.testing.TestingPrimitives.newLongObjectMap;
-import static io.webby.testing.TestingUtil.array;
 import static org.junit.jupiter.api.Assertions.*;
 
 public interface TableLongTest<E, T extends TableLong<E>> extends PrimaryKeyTableTest<Long, E, T> {

@@ -2,12 +2,12 @@ package io.webby.demo.model;
 
 import io.webby.orm.api.Connector;
 import io.webby.orm.codegen.SqlSchemaMaker;
+import io.webby.testing.MaliciousTableTest;
 import io.webby.testing.PrimaryKeyTableTest;
 import io.webby.testing.SqlDbTableTest;
-import io.webby.testing.MaliciousTableTest;
 import org.jetbrains.annotations.NotNull;
 
-import static io.webby.testing.TestingUtil.array;
+import static io.webby.testing.TestingBasics.array;
 
 public class NullableModelTableTest
         extends SqlDbTableTest<NullableModel, NullableModelTable>

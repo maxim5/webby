@@ -6,8 +6,8 @@ import io.webby.app.AppSettings;
 import io.webby.auth.session.Session;
 import io.webby.auth.session.SessionManager;
 import io.webby.auth.user.DefaultUser;
-import io.webby.auth.user.UserModel;
 import io.webby.auth.user.UserAccess;
+import io.webby.auth.user.UserModel;
 import io.webby.db.kv.chronicle.ChronicleDb;
 import io.webby.db.kv.chronicle.ChronicleFactory;
 import io.webby.db.kv.impl.AgnosticKeyValueFactory;
@@ -38,7 +38,7 @@ import java.util.stream.Stream;
 import static com.google.common.truth.Truth.assertThat;
 import static io.webby.testing.FakeRequests.getEx;
 import static io.webby.testing.FakeRequests.postEx;
-import static io.webby.testing.TestingUtil.array;
+import static io.webby.testing.TestingBasics.array;
 import static org.junit.jupiter.api.Assertions.*;
 
 @Tags({@Tag("sql"), @Tag("slow")})

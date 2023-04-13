@@ -1,7 +1,7 @@
 package io.webby.benchmarks.stress;
 
 import com.google.common.flogger.FluentLogger;
-import io.webby.testing.TestingUtil;
+import io.webby.testing.TestingBasics;
 import org.jetbrains.annotations.NotNull;
 
 import java.time.Instant;
@@ -61,7 +61,7 @@ public class MemoryMonitor implements Runnable {
                 add(next);
                 previous = next;
             }
-            TestingUtil.waitFor(samplePauseMillis);
+            TestingBasics.waitFor(samplePauseMillis);
         }
     }
 

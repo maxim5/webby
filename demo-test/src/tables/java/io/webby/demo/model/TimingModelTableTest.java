@@ -12,7 +12,7 @@ import java.sql.Timestamp;
 import java.time.*;
 import java.time.temporal.ChronoUnit;
 
-import static io.webby.testing.TestingUtil.array;
+import static io.webby.testing.TestingBasics.array;
 
 public class TimingModelTableTest
         extends SqlDbTableTest<TimingModel, TimingModelTable>

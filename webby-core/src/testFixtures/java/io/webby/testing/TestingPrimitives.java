@@ -4,7 +4,7 @@ import com.carrotsearch.hppc.*;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
-import static io.webby.testing.TestingUtil.array;
+import static io.webby.testing.TestingBasics.array;
 import static io.webby.util.base.EasyCast.castAny;
 
 public class TestingPrimitives {

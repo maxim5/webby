@@ -3,8 +3,8 @@ package io.webby.netty;
 import com.google.common.flogger.FluentLogger;
 import io.webby.Webby;
 import io.webby.app.AppSettings;
+import io.webby.testing.TestingBasics;
 import io.webby.testing.TestingModules;
-import io.webby.testing.TestingUtil;
 import org.jetbrains.annotations.NotNull;
 import org.junit.jupiter.api.extension.AfterAllCallback;
 import org.junit.jupiter.api.extension.BeforeAllCallback;
@@ -40,7 +40,7 @@ public class StandaloneNettyExtension implements BeforeAllCallback, AfterAllCall
     public void beforeAll(ExtensionContext context) {
         log.at(Level.INFO).log("Bootstrapping standalone server...");
         serverThread.start();
-        TestingUtil.waitFor(300);
+        TestingBasics.waitFor(300);
     }
 
     @Override

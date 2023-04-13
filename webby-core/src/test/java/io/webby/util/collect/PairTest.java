@@ -7,7 +7,7 @@ import org.junit.jupiter.api.Test;
 
 import java.util.AbstractMap;
 
-import static io.webby.testing.TestingUtil.array;
+import static io.webby.testing.TestingBasics.array;
 import static org.junit.Assert.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 

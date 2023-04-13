@@ -16,8 +16,6 @@ import org.jetbrains.annotations.Nullable;
 import java.util.Queue;
 import java.util.function.Consumer;
 
-import static io.webby.testing.FakeRequests.request;
-
 public abstract class BaseHttpIntegrationTest extends BaseChannelTest {
     protected <T> @NotNull HttpSetup<T> testSetup(@NotNull Class<T> klass) {
         return testSetup(klass, settings -> {});
@@ -27,11 +25,11 @@ public abstract class BaseHttpIntegrationTest extends BaseChannelTest {
                                                   @NotNull Consumer<AppSettings> consumer,
                                                   @NotNull Module... modules) {
         Injector injector = Testing.testStartup(
-                DEFAULT_SETTINGS
+            DEFAULT_SETTINGS
                         .andThen(settings -> settings.handlerFilter().setSingleClassOnly(klass))
                         .andThen(consumer),
-                // Make sure the initialized handler will be the same instance in tests as in endpoints
-                TestingUtil.appendVarArg(TestingModules.singleton(klass), modules)
+            // Make sure the initialized handler will be the same instance in tests as in endpoints
+            TestingBasics.appendVarArg(TestingModules.singleton(klass), modules)
         );
         return new HttpSetup<>(injector, klass);
     }

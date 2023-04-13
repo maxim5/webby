@@ -8,7 +8,7 @@ import io.webby.testing.PrimaryKeyTableTest;
 import io.webby.testing.SqlDbTableTest;
 import org.jetbrains.annotations.NotNull;
 
-import static io.webby.testing.TestingUtil.array;
+import static io.webby.testing.TestingBasics.array;
 
 public class EnumModelTableTest
         extends SqlDbTableTest<EnumModel, EnumModelTable>

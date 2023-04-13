@@ -8,8 +8,8 @@ import io.webby.app.AppLifetime;
 import io.webby.app.AppSettings;
 import io.webby.common.Lifetime;
 import io.webby.db.cache.FlushMode;
-import io.webby.db.kv.KeyValueSettings;
 import io.webby.db.kv.DbType;
+import io.webby.db.kv.KeyValueSettings;
 import io.webby.orm.api.Engine;
 import io.webby.testing.Testing;
 import io.webby.testing.TestingProps;
@@ -29,7 +29,7 @@ import java.util.Arrays;
 import java.util.Collections;
 
 import static com.google.common.truth.Truth.assertThat;
-import static io.webby.testing.TestingUtil.array;
+import static io.webby.testing.TestingBasics.array;
 
 @Tags({@Tag("sql"), @Tag("slow")})
 public class KeyEventStoreIntegrationTest {

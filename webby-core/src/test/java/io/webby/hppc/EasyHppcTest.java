@@ -15,8 +15,8 @@ import java.util.stream.Stream;
 
 import static com.google.common.truth.Truth.assertThat;
 import static io.webby.testing.AssertPrimitives.*;
+import static io.webby.testing.TestingBasics.array;
 import static io.webby.testing.TestingPrimitives.ints;
-import static io.webby.testing.TestingUtil.array;
 
 public class EasyHppcTest {
     @Test
