@@ -6,60 +6,65 @@ import org.junit.jupiter.api.Test;
 
 import static io.webby.orm.api.query.Shortcuts.*;
 import static io.webby.orm.api.query.TermType.*;
-import static io.webby.orm.testing.AssertSql.assertRepr;
 import static io.webby.orm.testing.AssertSql.assertReprThrows;
+import static io.webby.orm.testing.AssertSql.assertTerm;
 
 public class FuncTest {
     @Test
     public void aggregations() {
-        assertRepr(Func.COUNT.apply(FakeColumn.FOO), "count(foo)", NUMBER);
-        assertRepr(Func.COUNT.apply(FakeColumn.INT), "count(i)", NUMBER);
-        assertRepr(Func.COUNT.apply(FakeColumn.STR), "count(s)", NUMBER);
+        assertTerm(Func.COUNT.apply(FakeColumn.FOO)).matches("count(foo)").hasType(NUMBER);
+        assertTerm(Func.COUNT.apply(FakeColumn.INT)).matches("count(i)").hasType(NUMBER);
+        assertTerm(Func.COUNT.apply(FakeColumn.STR)).matches("count(s)").hasType(NUMBER);
 
-        assertRepr(Func.SUM.apply(FakeColumn.FOO), "sum(foo)", NUMBER);
-        assertRepr(Func.SUM.apply(FakeColumn.INT), "sum(i)", NUMBER);
+        assertTerm(Func.SUM.apply(FakeColumn.FOO)).matches("sum(foo)").hasType(NUMBER);
+        assertTerm(Func.SUM.apply(FakeColumn.INT)).matches("sum(i)").hasType(NUMBER);
         assertReprThrows(() -> Func.SUM.apply(FakeColumn.STR));
 
-        assertRepr(Func.AVG.apply(FakeColumn.FOO), "avg(foo)", NUMBER);
-        assertRepr(Func.AVG.apply(FakeColumn.INT), "avg(i)", NUMBER);
+        assertTerm(Func.AVG.apply(FakeColumn.FOO)).matches("avg(foo)").hasType(NUMBER);
+        assertTerm(Func.AVG.apply(FakeColumn.INT)).matches("avg(i)").hasType(NUMBER);
         assertReprThrows(() -> Func.AVG.apply(FakeColumn.STR));
 
-        assertRepr(Func.MIN.apply(FakeColumn.FOO), "min(foo)", NUMBER);
-        assertRepr(Func.MIN.apply(FakeColumn.INT), "min(i)", NUMBER);
+        assertTerm(Func.MIN.apply(FakeColumn.FOO)).matches("min(foo)").hasType(NUMBER);
+        assertTerm(Func.MIN.apply(FakeColumn.INT)).matches("min(i)").hasType(NUMBER);
         assertReprThrows(() -> Func.MIN.apply(FakeColumn.STR));
 
-        assertRepr(Func.MAX.apply(FakeColumn.FOO), "max(foo)", NUMBER);
-        assertRepr(Func.MAX.apply(FakeColumn.INT), "max(i)", NUMBER);
+        assertTerm(Func.MAX.apply(FakeColumn.FOO)).matches("max(foo)").hasType(NUMBER);
+        assertTerm(Func.MAX.apply(FakeColumn.INT)).matches("max(i)").hasType(NUMBER);
         assertReprThrows(() -> Func.MAX.apply(FakeColumn.STR));
 
-        assertRepr(Func.FIRST.apply(FakeColumn.FOO), "first(foo)", WILDCARD);
-        assertRepr(Func.FIRST_NUM.apply(FakeColumn.INT), "first(i)", NUMBER);
-        assertRepr(Func.FIRST_STR.apply(FakeColumn.STR), "first(s)", STRING);
+        assertTerm(Func.FIRST.apply(FakeColumn.FOO)).matches("first(foo)").hasType(WILDCARD);
+        assertTerm(Func.FIRST_NUM.apply(FakeColumn.INT)).matches("first(i)").hasType(NUMBER);
+        assertTerm(Func.FIRST_STR.apply(FakeColumn.STR)).matches("first(s)").hasType(STRING);
 
-        assertRepr(Func.LAST.apply(FakeColumn.FOO), "last(foo)", WILDCARD);
-        assertRepr(Func.LAST_NUM.apply(FakeColumn.INT), "last(i)", NUMBER);
-        assertRepr(Func.LAST_STR.apply(FakeColumn.STR), "last(s)", STRING);
+        assertTerm(Func.LAST.apply(FakeColumn.FOO)).matches("last(foo)").hasType(WILDCARD);
+        assertTerm(Func.LAST_NUM.apply(FakeColumn.INT)).matches("last(i)").hasType(NUMBER);
+        assertTerm(Func.LAST_STR.apply(FakeColumn.STR)).matches("last(s)").hasType(STRING);
     }
 
     @Test
     public void strings_case() {
-        assertRepr(Func.LOWER.apply(literal("ABC")), "lower('ABC')", STRING);
+        assertTerm(Func.LOWER.apply(literal("ABC"))).matches("lower('ABC')").hasType(STRING);
         assertReprThrows(() -> Func.LOWER.apply(FakeColumn.INT));
 
-        assertRepr(Func.LCASE.apply(literal("ABC")), "lcase('ABC')", STRING);
+        assertTerm(Func.LCASE.apply(literal("ABC"))).matches("lcase('ABC')").hasType(STRING);
         assertReprThrows(() -> Func.LCASE.apply(FakeColumn.INT));
 
-        assertRepr(Func.UPPER.apply(literal("ABC")), "upper('ABC')", STRING);
+        assertTerm(Func.UPPER.apply(literal("ABC"))).matches("upper('ABC')").hasType(STRING);
         assertReprThrows(() -> Func.UPPER.apply(FakeColumn.INT));
 
-        assertRepr(Func.UCASE.apply(literal("ABC")), "ucase('ABC')", STRING);
+        assertTerm(Func.UCASE.apply(literal("ABC"))).matches("ucase('ABC')").hasType(STRING);
         assertReprThrows(() -> Func.UCASE.apply(FakeColumn.INT));
     }
 
     @Test
     public void strings_substring() {
-        assertRepr(Func.SUBSTRING.apply(FakeColumn.STR, num(1), num(2)), "substring(s, 1, 2)", STRING);
-        assertRepr(Func.SUBSTRING.apply(literal("ABC"), num(1), num(3)), "substring('ABC', 1, 3)", STRING);
+        assertTerm(Func.SUBSTRING.apply(FakeColumn.STR, num(1), num(2)))
+            .matches("substring(s, 1, 2)")
+            .hasType(STRING);
+        assertTerm(Func.SUBSTRING.apply(literal("ABC"), num(1), num(3)))
+            .matches("substring('ABC', 1, 3)")
+            .hasType(STRING);
+
         assertReprThrows(() -> Func.SUBSTRING.apply(num(0), num(1), num(3)));
         assertReprThrows(() -> Func.SUBSTRING.apply(FakeColumn.STR, FakeColumn.STR, FakeColumn.STR));
         assertReprThrows(() -> Func.SUBSTRING.apply(literal("ABC")));
@@ -68,8 +73,13 @@ public class FuncTest {
 
     @Test
     public void strings_translate() {
-        assertRepr(Func.TRANSLATE.apply(FakeColumn.STR, literal("x"), literal("y")), "translate(s, 'x', 'y')", STRING);
-        assertRepr(Func.TRANSLATE.apply(literal("X"), FakeColumn.STR, FakeColumn.FOO), "translate('X', s, foo)", STRING);
+        assertTerm(Func.TRANSLATE.apply(FakeColumn.STR, literal("x"), literal("y")))
+            .matches("translate(s, 'x', 'y')")
+            .hasType(STRING);
+        assertTerm(Func.TRANSLATE.apply(literal("X"), FakeColumn.STR, FakeColumn.FOO))
+            .matches("translate('X', s, foo)")
+            .hasType(STRING);
+
         assertReprThrows(() -> Func.TRANSLATE.apply(literal("ABC"), num(1), num(3)));
         assertReprThrows(() -> Func.TRANSLATE.apply(num(0), num(1), num(3)));
         assertReprThrows(() -> Func.TRANSLATE.apply(literal("ABC")));
@@ -79,26 +89,34 @@ public class FuncTest {
 
     @Test
     public void string_length() {
-        assertRepr(Func.LENGTH.apply(FakeColumn.STR), "length(s)", NUMBER);
+        assertTerm(Func.LENGTH.apply(FakeColumn.STR)).matches("length(s)").hasType(NUMBER);
         assertReprThrows(() -> Func.LENGTH.apply(PersonColumn.birthday));
     }
 
     @Test
     public void cast_as() {
-        assertRepr(Func.CAST_AS.apply(NULL, new HardcodedStringTerm("TEXT")), "CAST(NULL AS TEXT)", WILDCARD);
-        assertRepr(Func.CAST_AS_SIGNED.apply(FakeColumn.FOO), "CAST(foo AS SIGNED)", NUMBER);
-        assertRepr(Func.CAST_AS_SIGNED.apply(FakeColumn.INT), "CAST(i AS SIGNED)", NUMBER);
-        assertRepr(Func.CAST_AS_SIGNED.apply(FakeColumn.STR), "CAST(s AS SIGNED)", NUMBER);
-        assertRepr(Func.CAST_AS_CHAR.apply(FakeColumn.FOO), "CAST(foo AS CHAR)", STRING);
-        assertRepr(Func.CAST_AS_CHAR.apply(FakeColumn.INT), "CAST(i AS CHAR)", STRING);
-        assertRepr(Func.CAST_AS_CHAR.apply(FakeColumn.STR), "CAST(s AS CHAR)", STRING);
+        assertTerm(Func.CAST_AS.apply(NULL, new HardcodedStringTerm("TEXT"))).matches("CAST(NULL AS TEXT)").hasType(WILDCARD);
+        assertTerm(Func.CAST_AS_SIGNED.apply(FakeColumn.FOO)).matches("CAST(foo AS SIGNED)").hasType(NUMBER);
+        assertTerm(Func.CAST_AS_SIGNED.apply(FakeColumn.INT)).matches("CAST(i AS SIGNED)").hasType(NUMBER);
+        assertTerm(Func.CAST_AS_SIGNED.apply(FakeColumn.STR)).matches("CAST(s AS SIGNED)").hasType(NUMBER);
+        assertTerm(Func.CAST_AS_CHAR.apply(FakeColumn.FOO)).matches("CAST(foo AS CHAR)").hasType(STRING);
+        assertTerm(Func.CAST_AS_CHAR.apply(FakeColumn.INT)).matches("CAST(i AS CHAR)").hasType(STRING);
+        assertTerm(Func.CAST_AS_CHAR.apply(FakeColumn.STR)).matches("CAST(s AS CHAR)").hasType(STRING);
     }
 
     @Test
     public void coalesce() {
-        assertRepr(Func.COALESCE.apply(NULL, num(1)), "coalesce(NULL, 1)", WILDCARD);
-        assertRepr(Func.COALESCE3.apply(NULL, num(1), literal("foo")), "coalesce(NULL, 1, 'foo')", WILDCARD);
-        assertRepr(Func.COALESCE4.apply(NULL, NULL, num(1), FakeColumn.FOO), "coalesce(NULL, NULL, 1, foo)", WILDCARD);
-        assertRepr(Func.COALESCE5.apply(NULL, NULL, num(1), NULL, FakeColumn.FOO), "coalesce(NULL, NULL, 1, NULL, foo)", WILDCARD);
+        assertTerm(Func.COALESCE.apply(NULL, num(1)))
+            .matches("coalesce(NULL, 1)")
+            .hasType(WILDCARD);
+        assertTerm(Func.COALESCE3.apply(NULL, num(1), literal("foo")))
+            .matches("coalesce(NULL, 1, 'foo')")
+            .hasType(WILDCARD);
+        assertTerm(Func.COALESCE4.apply(NULL, NULL, num(1), FakeColumn.FOO))
+            .matches("coalesce(NULL, NULL, 1, foo)")
+            .hasType(WILDCARD);
+        assertTerm(Func.COALESCE5.apply(NULL, NULL, num(1), NULL, FakeColumn.FOO))
+            .matches("coalesce(NULL, NULL, 1, NULL, foo)")
+            .hasType(WILDCARD);
     }
 }

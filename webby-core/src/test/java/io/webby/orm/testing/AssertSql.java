@@ -1,5 +1,8 @@
 package io.webby.orm.testing;
 
+import com.google.common.truth.Ordered;
+import com.google.common.truth.Truth;
+import com.google.errorprone.annotations.CanIgnoreReturnValue;
 import io.webby.orm.api.debug.DebugSql;
 import io.webby.orm.api.query.*;
 import org.jetbrains.annotations.NotNull;
@@ -11,69 +14,141 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.function.Supplier;
 
-import static com.google.common.truth.Truth.assertThat;
-import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 
 public class AssertSql {
-    public static void assertRepr(@NotNull Representable repr, @NotNull String expected) {
-        assertEquals(expected.trim(), repr.repr().trim());
+    public static @NotNull SqlSubject assertThatSql(@NotNull String query) {
+        return new SqlSubject(query);
     }
 
-    public static void assertRepr(@NotNull Term term, @NotNull String expected, @NotNull TermType expectedType) {
-        assertRepr(term, expected);
-        assertEquals(expectedType, term.type());
+    public static @NotNull ArgsSubject assertThat(@NotNull Args args) {
+        return new ArgsSubject(args);
+    }
+
+    public static @NotNull RepresentableSubject assertThat(@NotNull Representable repr) {
+        return new RepresentableSubject(repr);
+    }
+
+    public static @NotNull UnitSubject assertThat(@NotNull Unit unit) {
+        return new UnitSubject(unit);
+    }
+
+    public static @NotNull TermSubject assertTerm(@NotNull Term term) {
+        return new TermSubject(term);
+    }
+
+    public static @NotNull RowsSubject assertRows(@NotNull List<DebugSql.Row> rows) {
+        return new RowsSubject(rows);
     }
 
     public static void assertReprThrows(@NotNull Supplier<Representable> repr) {
         assertThrows(InvalidQueryException.class, repr::get);
     }
 
-    public static void assertArgs(@NotNull HasArgs hasArgs, @NotNull Object @Nullable ... expected) {
-        assertArgs(hasArgs.args(), expected);
-    }
-
-    public static void assertArgs(@NotNull Args args, @NotNull Object @Nullable ... expected) {
-        assertThat(args.asList()).containsExactly(expected);
-    }
-
-    public static void assertNoArgs(@NotNull HasArgs hasArgs) {
-        assertArgs(hasArgs);
-    }
-
-    public static void assertRows(@NotNull List<DebugSql.Row> result, @NotNull Object[] ... expected) {
-        assertRows(false, result, expected);
-    }
-
-    public static void assertOrderedRows(@NotNull List<DebugSql.Row> result, @NotNull Object[] ... expected) {
-        assertRows(true, result, expected);
-    }
-
-    private static void assertRows(boolean ordered, @NotNull List<DebugSql.Row> result, @NotNull Object[] ... expected) {
-        List<List<Object>> values = result.stream()
-            .map(row -> row.values().stream().map(DebugSql.RowValue::value).map(AssertSql::adjust).toList())
-            .toList();
-        List<List<Object>> expectedList = Arrays.stream(expected)
-            .map(row -> Arrays.stream(row).map(AssertSql::adjust).toList())
-            .toList();
-        if (ordered) {
-            assertThat(values).containsExactlyElementsIn(expectedList).inOrder();
-        } else {
-            assertThat(values).containsExactlyElementsIn(expectedList);
+    @CanIgnoreReturnValue
+    public record SqlSubject(@NotNull String query) {
+        public @NotNull SqlSubject matches(@NotNull String expected) {
+            Truth.assertThat(query.trim()).isEqualTo(expected.trim());
+            return this;
         }
     }
 
-    private static @Nullable Object adjust(@Nullable Object val) {
-        if (val instanceof Boolean) {
-            return val == Boolean.TRUE ? 1 : 0;
+    @CanIgnoreReturnValue
+    public record ArgsSubject(@NotNull Args args) {
+        public @NotNull ArgsSubject containsArgsExactly(@NotNull Object @Nullable ... expected) {
+            Truth.assertThat(args.asList()).containsExactly(expected);
+            return this;
         }
-        if (val instanceof Number number && (long) (number.intValue()) == number.longValue() &&
-            (val instanceof Long || val instanceof BigInteger)) {
-            return number.intValue();
+
+        public @NotNull ArgsSubject containsNoArgs() {
+            Truth.assertThat(args.asList()).isEmpty();
+            return this;
         }
-        if (val instanceof BigDecimal decimal) {
-            return decimal.doubleValue();
+
+        public @NotNull ArgsSubject allArgsResolved() {
+            Truth.assertThat(args.isAllResolved()).isTrue();
+            return this;
         }
-        return val;
+
+        public @NotNull ArgsSubject containsUnresolved() {
+            Truth.assertThat(args.isAllResolved()).isFalse();
+            return this;
+        }
+    }
+
+    @CanIgnoreReturnValue
+    public record RepresentableSubject(@NotNull Representable repr) {
+        public @NotNull RepresentableSubject matches(@NotNull String expected) {
+            assertThatSql(repr.repr()).matches(expected);
+            return this;
+        }
+    }
+
+    @CanIgnoreReturnValue
+    public record UnitSubject(@NotNull Unit unit) {
+        public @NotNull UnitSubject matches(@NotNull String expected) {
+            assertThatSql(unit.repr()).matches(expected);
+            return this;
+        }
+
+        public @NotNull UnitSubject containsArgsExactly(@NotNull Object @Nullable ... expected) {
+            assertThat(unit.args()).containsArgsExactly(expected);
+            return this;
+        }
+
+        public @NotNull UnitSubject containsNoArgs() {
+            assertThat(unit.args()).containsNoArgs();
+            return this;
+        }
+
+        public @NotNull UnitSubject allArgsResolved() {
+            Truth.assertThat(unit.args().isAllResolved()).isTrue();
+            return this;
+        }
+
+        public @NotNull UnitSubject containsUnresolved() {
+            Truth.assertThat(unit.args().isAllResolved()).isFalse();
+            return this;
+        }
+    }
+
+    @CanIgnoreReturnValue
+    public record TermSubject(@NotNull Term term) {
+        public @NotNull TermSubject matches(@NotNull String expected) {
+            assertThat(term).matches(expected);
+            return this;
+        }
+
+        public @NotNull TermSubject hasType(@NotNull TermType type) {
+            Truth.assertThat(term.type()).isEqualTo(type);
+            return this;
+        }
+    }
+
+    @CanIgnoreReturnValue
+    public record RowsSubject(@NotNull List<DebugSql.Row> rows) {
+        public @NotNull Ordered containsExactly(@NotNull Object[] ... expected) {
+            List<List<Object>> values = rows.stream()
+                .map(row -> row.values().stream().map(DebugSql.RowValue::value).map(RowsSubject::adjust).toList())
+                .toList();
+            List<List<Object>> expectedList = Arrays.stream(expected)
+                .map(row -> Arrays.stream(row).map(RowsSubject::adjust).toList())
+                .toList();
+            return Truth.assertThat(values).containsExactlyElementsIn(expectedList);
+        }
+
+        private static @Nullable Object adjust(@Nullable Object val) {
+            if (val instanceof Boolean) {
+                return val == Boolean.TRUE ? 1 : 0;
+            }
+            if (val instanceof Number number && (long) (number.intValue()) == number.longValue() &&
+                (val instanceof Long || val instanceof BigInteger)) {
+                return number.intValue();
+            }
+            if (val instanceof BigDecimal decimal) {
+                return decimal.doubleValue();
+            }
+            return val;
+        }
     }
 }

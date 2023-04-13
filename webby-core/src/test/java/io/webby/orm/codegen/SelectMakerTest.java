@@ -12,7 +12,7 @@ import org.junit.jupiter.api.Test;
 import java.util.Map;
 
 import static io.webby.orm.api.ReadFollow.*;
-import static org.junit.jupiter.api.Assertions.assertEquals;
+import static io.webby.orm.testing.AssertSql.assertThatSql;
 
 public class SelectMakerTest {
     @Test
@@ -75,17 +75,17 @@ public class SelectMakerTest {
     @CanIgnoreReturnValue
     private record SelectMakerSubject(@NotNull SelectMaker selectMaker) {
         public @NotNull SelectMakerSubject assertNoFollow(@NotNull String expected) {
-            assertEquals(expected.strip(), selectMaker.make(NO_FOLLOW).join().strip());
+            assertThatSql(selectMaker.make(NO_FOLLOW).join()).matches(expected);
             return this;
         }
 
         public @NotNull SelectMakerSubject assertFollowOneLevel(@NotNull String expected) {
-            assertEquals(expected.strip(), selectMaker.make(FOLLOW_ONE_LEVEL).join().strip());
+            assertThatSql(selectMaker.make(FOLLOW_ONE_LEVEL).join()).matches(expected);
             return this;
         }
 
         public @NotNull SelectMakerSubject assertFollowAll(@NotNull String expected) {
-            assertEquals(expected.strip(), selectMaker.make(FOLLOW_ALL).join().strip());
+            assertThatSql(selectMaker.make(FOLLOW_ALL).join()).matches(expected);
             return this;
         }
 
