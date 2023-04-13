@@ -40,7 +40,9 @@ public class TestingArch {
 
     @CanIgnoreReturnValue
     public record TableArchSubject(@NotNull TableArch tableArch) {
-        public @NotNull TableArchSubject hasTableName(@NotNull String sqlName, @NotNull String packageName, @NotNull String javaName) {
+        public @NotNull TableArchSubject hasTableName(@NotNull String sqlName,
+                                                      @NotNull String packageName,
+                                                      @NotNull String javaName) {
             Truth.assertThat(tableArch.sqlName()).isEqualTo(sqlName);
             Truth.assertThat(tableArch.packageName()).isEqualTo(packageName);
             Truth.assertThat(tableArch.javaName()).isEqualTo(javaName);
