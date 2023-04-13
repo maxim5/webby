@@ -1,6 +1,9 @@
 package io.webby.orm.arch.factory;
 
 import com.google.errorprone.annotations.CanIgnoreReturnValue;
+import io.webby.orm.api.annotate.Model;
+import io.webby.orm.api.annotate.Sql;
+import io.webby.orm.codegen.ModelInput;
 import io.webby.util.reflect.EasyMembers;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
@@ -150,34 +153,76 @@ public class JavaClassAnalyzerTest {
             .doesNotFindMethod("baz");
     }
 
+    @Test
+    public void isPrimaryKeyField_default_ids() {
+        record FooPojo(int id, int fooPojoId, int pojoId, int foo_pojo_id, int foo, int bar) {}
+
+        assertJavaClass(FooPojo.class)
+            .hasPrimaryKeyField("id")
+            .hasPrimaryKeyField("fooPojoId")
+            .hasNotPrimaryKeyField("pojoId")
+            .hasNotPrimaryKeyField("foo_pojo_id")
+            .hasNotPrimaryKeyField("foo")
+            .hasNotPrimaryKeyField("bar");
+    }
+
+    @Test
+    public void isPrimaryKeyField_annotation() {
+        @Model(javaName = "Pojo")
+        record FooPojo(@Sql(primary = true) int foo, int pojoId) {}
+
+        assertJavaClass(FooPojo.class)
+            .hasPrimaryKeyField("foo")
+            .hasPrimaryKeyField("pojoId");
+    }
+
     private static void assertFields(@NotNull List<Field> fields, @NotNull String ... names) {
         assertThat(fields.stream().map(Field::getName).toList()).containsExactlyElementsIn(names);
     }
 
-    private static @NotNull ClassSubject assertJavaClass(@NotNull Class<?> klass) {
-        return new ClassSubject(klass);
+    private static @NotNull JavaClassAnalyzerSubject assertJavaClass(@NotNull Class<?> klass) {
+        return new JavaClassAnalyzerSubject(klass);
     }
 
     @CanIgnoreReturnValue
-    private record ClassSubject(@NotNull Class<?> klass) {
-        public @NotNull ClassSubject findsMethod(@NotNull String name, @NotNull String expected) {
+    private record JavaClassAnalyzerSubject(@NotNull Class<?> klass) {
+        public @NotNull JavaClassAnalyzerSubject findsMethod(@NotNull String name, @NotNull String expected) {
             Method getterMethod = findGetterMethod(name);
             assertNotNull(getterMethod);
             assertThat(getterMethod.getName()).isEqualTo(expected);
             return this;
         }
 
-        public @NotNull ClassSubject doesNotFindMethod(@NotNull String name) {
+        public @NotNull JavaClassAnalyzerSubject doesNotFindMethod(@NotNull String name) {
             Method getterMethod = findGetterMethod(name);
             assertThat(getterMethod).isNull();
             return this;
         }
 
+        public @NotNull JavaClassAnalyzerSubject hasPrimaryKeyField(@NotNull String name) {
+            Field field = getFieldByName(name);
+            boolean isPrimaryKey = JavaClassAnalyzer.isPrimaryKeyField(field, ModelInput.of(klass));
+            assertThat(isPrimaryKey).isTrue();
+            return this;
+        }
+
+        public @NotNull JavaClassAnalyzerSubject hasNotPrimaryKeyField(@NotNull String name) {
+            Field field = getFieldByName(name);
+            boolean isPrimaryKey = JavaClassAnalyzer.isPrimaryKeyField(field, ModelInput.of(klass));
+            assertThat(isPrimaryKey).isFalse();
+            return this;
+        }
+
         @Nullable
         private Method findGetterMethod(@NotNull String name) {
+            return JavaClassAnalyzer.findGetterMethod(getFieldByName(name));
+        }
+
+        @NotNull
+        private Field getFieldByName(@NotNull String name) {
             Field field = EasyMembers.findField(klass, name);
             assertNotNull(field);
-            return JavaClassAnalyzer.findGetterMethod(field);
+            return field;
         }
     }
 }
