@@ -19,10 +19,10 @@ class RecursivePojoArchFactory {
     }
 
     public @NotNull PojoArch buildPojoArchFor(@NotNull Field field) {
-        return runContext.pojos().getOrCompute(field.getType(), () -> buildArchForPojoFieldImpl(field));
+        return runContext.pojos().getOrCompute(field.getType(), () -> buildPojoArchForImpl(field));
     }
 
-    private @NotNull PojoArch buildArchForPojoFieldImpl(@NotNull Field field) {
+    private @NotNull PojoArch buildPojoArchForImpl(@NotNull Field field) {
         validateFieldForPojo(field);
         Class<?> type = field.getType();
 
