@@ -5,7 +5,7 @@ import io.webby.orm.api.ForeignInt;
 import io.webby.orm.api.ForeignLong;
 import io.webby.orm.api.ForeignObj;
 import io.webby.orm.arch.JdbcType;
-import io.webby.orm.arch.field.TableArch;
+import io.webby.orm.arch.model.TableArch;
 import io.webby.orm.codegen.ModelInput;
 import io.webby.util.collect.Pair;
 import org.jetbrains.annotations.NotNull;

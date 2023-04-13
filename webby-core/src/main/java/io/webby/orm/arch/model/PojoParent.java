@@ -1,4 +1,4 @@
-package io.webby.orm.arch.field;
+package io.webby.orm.arch.model;
 
 import com.google.errorprone.annotations.Immutable;
 import io.webby.util.collect.OneOf;

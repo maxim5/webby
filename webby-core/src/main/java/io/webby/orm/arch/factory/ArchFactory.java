@@ -2,8 +2,8 @@ package io.webby.orm.arch.factory;
 
 import com.google.common.collect.ImmutableList;
 import io.webby.orm.arch.M2mInfo;
-import io.webby.orm.arch.field.TableArch;
-import io.webby.orm.arch.field.TableField;
+import io.webby.orm.arch.model.TableArch;
+import io.webby.orm.arch.model.TableField;
 import io.webby.orm.codegen.ModelInput;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.VisibleForTesting;

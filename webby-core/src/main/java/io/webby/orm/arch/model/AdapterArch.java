@@ -1,4 +1,4 @@
-package io.webby.orm.arch.field;
+package io.webby.orm.arch.model;
 
 import io.webby.orm.arch.JavaNameHolder;
 import org.jetbrains.annotations.NotNull;

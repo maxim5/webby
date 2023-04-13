@@ -6,7 +6,7 @@ import io.webby.orm.adapter.JdbcArrayAdapter;
 import io.webby.orm.adapter.JdbcSingleValueAdapter;
 import io.webby.orm.arch.Column;
 import io.webby.orm.arch.Naming;
-import io.webby.orm.arch.field.*;
+import io.webby.orm.arch.model.*;
 import io.webby.util.collect.EasyMaps;
 import org.jetbrains.annotations.NotNull;
 

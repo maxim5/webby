@@ -1,4 +1,4 @@
-package io.webby.orm.arch.field;
+package io.webby.orm.arch.model;
 
 import io.webby.orm.adapter.time.*;
 import io.webby.orm.arch.Column;

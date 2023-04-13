@@ -1,7 +1,7 @@
 package io.webby.orm.codegen;
 
 import io.webby.orm.arch.Column;
-import io.webby.orm.arch.field.TableArch;
+import io.webby.orm.arch.model.TableArch;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.List;

@@ -5,10 +5,10 @@ import io.webby.orm.api.ForeignObj;
 import io.webby.orm.api.ReadFollow;
 import io.webby.orm.arch.Column;
 import io.webby.orm.arch.Naming;
-import io.webby.orm.arch.field.ForeignTableField;
-import io.webby.orm.arch.field.OneColumnTableField;
-import io.webby.orm.arch.field.TableArch;
-import io.webby.orm.arch.field.TableField;
+import io.webby.orm.arch.model.ForeignTableField;
+import io.webby.orm.arch.model.OneColumnTableField;
+import io.webby.orm.arch.model.TableArch;
+import io.webby.orm.arch.model.TableField;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.Arrays;

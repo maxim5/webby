@@ -1,4 +1,4 @@
-package io.webby.orm.arch.field;
+package io.webby.orm.arch.model;
 
 import com.google.mu.util.stream.BiStream;
 import io.webby.orm.adapter.JdbcAdapt;

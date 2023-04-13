@@ -1,7 +1,7 @@
 package io.webby.orm.arch.factory;
 
-import io.webby.orm.arch.field.AdapterArch;
-import io.webby.orm.arch.field.PojoArch;
+import io.webby.orm.arch.model.AdapterArch;
+import io.webby.orm.arch.model.PojoArch;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.Collection;

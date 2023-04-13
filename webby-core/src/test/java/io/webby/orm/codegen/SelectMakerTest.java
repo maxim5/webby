@@ -5,7 +5,7 @@ import io.webby.orm.api.ForeignInt;
 import io.webby.orm.arch.factory.ArchFactory;
 import io.webby.orm.arch.factory.ArchTesting;
 import io.webby.orm.arch.factory.RunContext;
-import io.webby.orm.arch.field.TableArch;
+import io.webby.orm.arch.model.TableArch;
 import org.jetbrains.annotations.NotNull;
 import org.junit.jupiter.api.Test;
 

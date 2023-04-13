@@ -10,10 +10,10 @@ import io.webby.orm.api.entity.*;
 import io.webby.orm.api.query.*;
 import io.webby.orm.arch.Column;
 import io.webby.orm.arch.*;
-import io.webby.orm.arch.field.AdapterApi;
-import io.webby.orm.arch.field.ForeignTableField;
-import io.webby.orm.arch.field.TableArch;
-import io.webby.orm.arch.field.TableField;
+import io.webby.orm.arch.model.AdapterApi;
+import io.webby.orm.arch.model.ForeignTableField;
+import io.webby.orm.arch.model.TableArch;
+import io.webby.orm.arch.model.TableField;
 import io.webby.util.collect.EasyMaps;
 import org.jetbrains.annotations.NotNull;
 
