@@ -10,7 +10,6 @@ import io.webby.orm.codegen.ModelInput;
 import io.webby.util.collect.Pair;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
-import org.jetbrains.annotations.VisibleForTesting;
 
 import java.lang.reflect.Field;
 import java.lang.reflect.Method;
@@ -40,8 +39,7 @@ class TableFieldArchFactory {
         this.foreignTableArchResolver = new ForeignTableArchResolver(runContext);
     }
 
-    @VisibleForTesting
-    @NotNull TableField buildTableField() {
+    public @NotNull TableField buildTableField() {
         Method getter = JavaClassAnalyzer.findGetterMethodOrDie(field);
         boolean isPrimaryKey = JavaClassAnalyzer.isPrimaryKeyField(field, input);
         boolean isUnique = JavaClassAnalyzer.isUniqueField(field);

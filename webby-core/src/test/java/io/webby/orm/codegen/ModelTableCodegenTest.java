@@ -38,7 +38,7 @@ public class ModelTableCodegenTest {
         assertInvalidModel(SerializableModel.class);
     }
 
-    private void assertInvalidModel(@NotNull Class<?> ... models) {
+    private static void assertInvalidModel(@NotNull Class<?> ... models) {
         assertThrows(InvalidSqlModelException.class, () ->
             new ArchFactory(TestingArch.newRunContext(models)).build()
         );

@@ -62,7 +62,7 @@ public class SelectMakerTest {
                 """);
     }
 
-    private @NotNull Map<Class<?>, TableArch> buildArch(@NotNull Class<?> @NotNull ...  models) {
+    private static @NotNull Map<Class<?>, TableArch> buildArch(@NotNull Class<?> @NotNull ...  models) {
         RunContext runContext = TestingArch.newRunContext(models);
         new ArchFactory(runContext).build();
         return runContext.tables().getAllTables();

@@ -96,12 +96,12 @@ public final class TableArch implements JavaNameHolder, HasColumns, HasPrefixedC
         return switch (follow) {
             case NO_FOLLOW -> List.of();
             case FOLLOW_ONE_LEVEL -> fields().stream()
-                    .filter(TableField::isForeignKey)
-                    .map(field -> (ForeignTableField) field).toList();
+                .filter(TableField::isForeignKey)
+                .map(field -> (ForeignTableField) field).toList();
             case FOLLOW_ALL -> foreignFields(FOLLOW_ONE_LEVEL).stream()
-                    .flatMap(field -> Stream.concat(Stream.of(field),
-                                                    field.getForeignTable().foreignFields(FOLLOW_ALL).stream()))
-                    .toList();
+                .flatMap(field -> Stream.concat(Stream.of(field),
+                                                field.getForeignTable().foreignFields(FOLLOW_ALL).stream()))
+                .toList();
         };
     }
 
