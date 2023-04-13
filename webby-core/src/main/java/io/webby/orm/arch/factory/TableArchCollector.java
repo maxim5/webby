@@ -12,7 +12,7 @@ import java.util.Map;
 import static io.webby.orm.arch.InvalidSqlModelException.assure;
 import static java.util.Objects.requireNonNull;
 
-public class TableArchCollector {
+class TableArchCollector {
     private final Map<Class<?>, TableArch> tables = new LinkedHashMap<>();
 
     public @NotNull ImmutableMap<Class<?>, TableArch> getAllTables() {

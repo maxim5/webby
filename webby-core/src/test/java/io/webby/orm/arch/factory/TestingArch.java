@@ -8,6 +8,7 @@ import io.webby.orm.arch.JdbcType;
 import io.webby.orm.arch.model.*;
 import io.webby.orm.codegen.ModelInput;
 import io.webby.orm.testing.FakeModelAdaptersScanner;
+import io.webby.util.collect.ListBuilder;
 import io.webby.util.collect.Pair;
 import org.jetbrains.annotations.NotNull;
 
@@ -17,6 +18,18 @@ import java.util.List;
 import static io.webby.orm.arch.factory.TestingArch.FieldConstraints.*;
 
 public class TestingArch {
+    public static @NotNull TableArch buildTableArch(@NotNull Class<?> model) {
+        RunContext runContext = TestingArch.newRunContext(model);
+        new ArchFactory(runContext).build();
+        return runContext.tables().getTableOrDie(model);
+    }
+
+    public static @NotNull TableArch buildTableArch(@NotNull Class<?> model, @NotNull List<Class<?>> rest) {
+        RunContext runContext = TestingArch.newRunContext(ListBuilder.concatOne(rest, model));
+        new ArchFactory(runContext).build();
+        return runContext.tables().getTableOrDie(model);
+    }
+
     public static @NotNull RunContext newRunContext(@NotNull Class<?> @NotNull ... models) {
         return new RunContext(newRunInputs(List.of(models)), new FakeModelAdaptersScanner());
     }

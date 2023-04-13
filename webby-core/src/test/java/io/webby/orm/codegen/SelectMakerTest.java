@@ -2,16 +2,14 @@ package io.webby.orm.codegen;
 
 import com.google.errorprone.annotations.CanIgnoreReturnValue;
 import io.webby.orm.api.ForeignInt;
-import io.webby.orm.arch.factory.ArchFactory;
-import io.webby.orm.arch.factory.RunContext;
-import io.webby.orm.arch.factory.TestingArch;
 import io.webby.orm.arch.model.TableArch;
 import org.jetbrains.annotations.NotNull;
 import org.junit.jupiter.api.Test;
 
-import java.util.Map;
+import java.util.List;
 
 import static io.webby.orm.api.ReadFollow.*;
+import static io.webby.orm.arch.factory.TestingArch.buildTableArch;
 import static io.webby.orm.testing.AssertSql.assertThatSql;
 
 public class SelectMakerTest {
@@ -20,8 +18,8 @@ public class SelectMakerTest {
         record User(int userId, String name) {}
         record Song(ForeignInt<User> author) {}
 
-        Map<Class<?>, TableArch> archMap = buildArch(User.class, Song.class);
-        SelectMaker selectMaker = new SelectMaker(archMap.get(Song.class));
+        TableArch tableArch = buildTableArch(Song.class, List.of(User.class));
+        SelectMaker selectMaker = new SelectMaker(tableArch);
 
         assertThat(selectMaker)
             .assertNoFollow("""
@@ -41,8 +39,8 @@ public class SelectMakerTest {
         record Song(int songId, ForeignInt<User> author) {}
         record Single(ForeignInt<Song> hitSong) {}
 
-        Map<Class<?>, TableArch> archMap = buildArch(User.class, Song.class, Single.class);
-        SelectMaker selectMaker = new SelectMaker(archMap.get(Single.class));
+        TableArch tableArch = buildTableArch(Single.class, List.of(User.class, Song.class));
+        SelectMaker selectMaker = new SelectMaker(tableArch);
 
         assertThat(selectMaker)
             .assertNoFollow("""
@@ -60,12 +58,6 @@ public class SelectMakerTest {
                 LEFT JOIN song ON single.hit_song_id = song.song_id
                 LEFT JOIN user ON song.author_id = user.user_id
                 """);
-    }
-
-    private static @NotNull Map<Class<?>, TableArch> buildArch(@NotNull Class<?> @NotNull ...  models) {
-        RunContext runContext = TestingArch.newRunContext(models);
-        new ArchFactory(runContext).build();
-        return runContext.tables().getAllTables();
     }
 
     private static @NotNull SelectMakerSubject assertThat(@NotNull SelectMaker selectMaker) {
