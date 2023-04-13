@@ -31,11 +31,11 @@ public class TestingArch {
     }
 
     public static @NotNull RunContext newRunContext(@NotNull Class<?> @NotNull ... models) {
-        return new RunContext(newRunInputs(List.of(models)), new FakeModelAdaptersScanner());
+        return new RunContext(newRunInputs(List.of(models)), FakeModelAdaptersScanner.DEFAULT_SCANNER);
     }
 
     public static @NotNull RunContext newRunContext(@NotNull Collection<Class<?>> models) {
-        return new RunContext(newRunInputs(models), new FakeModelAdaptersScanner());
+        return new RunContext(newRunInputs(models), FakeModelAdaptersScanner.DEFAULT_SCANNER);
     }
 
     private static @NotNull RunInputs newRunInputs(@NotNull Collection<Class<?>> models) {

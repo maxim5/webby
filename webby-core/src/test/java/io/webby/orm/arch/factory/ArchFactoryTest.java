@@ -107,6 +107,19 @@ public class ArchFactoryTest {
     }
 
     @Test
+    void single_field_char() {
+        record User(char foo) {}
+
+        assertThat(buildTableArch(User.class)).hasFields(HAS_NO_KEY_FIELDS).hasSingleFieldThat("foo")
+            .isFromTable("user")
+            .hasInJava(char.class, "foo")
+            .isSingleColumn("foo", JdbcType.String)
+            .hasConstraints(USUAL_NOT_NULL)
+            .isCustomSupportedType()
+            .usesAdapter("CharacterJdbcAdapter");
+    }
+
+    @Test
     void single_field_int_renamed() {
         record User(@Sql("bar") int foo) {}
 
