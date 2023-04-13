@@ -1,7 +1,12 @@
 package io.webby.orm.codegen;
 
 import com.google.errorprone.annotations.CanIgnoreReturnValue;
+import io.webby.orm.api.annotate.Sql;
 import io.webby.orm.arch.model.TableArch;
+import io.webby.util.base.EasyPrimitives.MutableBool;
+import io.webby.util.base.EasyPrimitives.MutableInt;
+import io.webby.util.base.EasyPrimitives.MutableLong;
+import io.webby.util.base.EasyPrimitives.OptionalBool;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import org.junit.jupiter.api.Test;
@@ -53,6 +58,53 @@ public class ValuesArrayMakerTest {
                 """)
             .matchesConvertValues("""
                 CharacterJdbcAdapter.fillArrayValues($param.ch(), array, 5);
+                """);
+    }
+
+    @Test
+    public void columns_with_adapters() {
+        // Point?
+        record Adapters(MutableInt i, MutableBool bool, MutableLong l, OptionalBool optional) {}
+
+        TableArch tableArch = buildTableArch(Adapters.class);
+        ValuesArrayMaker maker = new ValuesArrayMaker("$param", tableArch.fields());
+        assertThat(maker)
+            .matchesInitValues("""
+                null,
+                null,
+                null,
+                null,
+                """)
+            .matchesConvertValues("""
+                EasyPrimitives_MutableInt_JdbcAdapter.ADAPTER.fillArrayValues($param.i(), array, 0);
+                EasyPrimitives_MutableBool_JdbcAdapter.ADAPTER.fillArrayValues($param.bool(), array, 1);
+                EasyPrimitives_MutableLong_JdbcAdapter.ADAPTER.fillArrayValues($param.l(), array, 2);
+                EasyPrimitives_OptionalBool_JdbcAdapter.ADAPTER.fillArrayValues($param.optional(), array, 3);
+                """);
+    }
+
+    @Test
+    public void columns_with_nullable_adapters() {
+        // Point?
+        record Adapters(@Nullable MutableInt i,
+                        @javax.annotation.Nullable MutableBool bool,
+                        @org.checkerframework.checker.nullness.qual.Nullable MutableLong l,
+                        @Sql() OptionalBool optional) {}
+
+        TableArch tableArch = buildTableArch(Adapters.class);
+        ValuesArrayMaker maker = new ValuesArrayMaker("$param", tableArch.fields());
+        assertThat(maker)
+            .matchesInitValues("""
+                null,
+                null,
+                null,
+                null,
+                """)
+            .matchesConvertValues("""
+                EasyPrimitives_MutableInt_JdbcAdapter.ADAPTER.fillArrayValues($param.i(), array, 0);
+                EasyPrimitives_MutableBool_JdbcAdapter.ADAPTER.fillArrayValues($param.bool(), array, 1);
+                EasyPrimitives_MutableLong_JdbcAdapter.ADAPTER.fillArrayValues($param.l(), array, 2);
+                EasyPrimitives_OptionalBool_JdbcAdapter.ADAPTER.fillArrayValues($param.optional(), array, 3);
                 """);
     }
 
