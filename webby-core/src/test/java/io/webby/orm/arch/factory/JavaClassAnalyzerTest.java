@@ -1,10 +1,12 @@
 package io.webby.orm.arch.factory;
 
+import com.google.errorprone.annotations.CanIgnoreReturnValue;
 import io.webby.util.reflect.EasyMembers;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import org.junit.jupiter.api.Test;
 
+import java.awt.*;
 import java.io.Serializable;
 import java.lang.reflect.Field;
 import java.lang.reflect.Method;
@@ -16,10 +18,16 @@ import static org.junit.jupiter.api.Assertions.*;
 @SuppressWarnings({"unused", "FieldCanBeLocal"})
 public class JavaClassAnalyzerTest {
     @Test
+    public void getAllFieldsOrdered_class() {
+        assertFields(JavaClassAnalyzer.getAllFieldsOrdered(Point.class), "x", "y");
+    }
+
+    @Test
     public void getAllFieldsOrdered_class_implements_interface() {
         assertFields(JavaClassAnalyzer.getAllFieldsOrdered(FooClassInterface.class), "i");
     }
 
+    @SuppressWarnings("FieldMayBeFinal")
     static class FooClassInterface implements Serializable {
         private int i;
         public FooClassInterface(int i) {
@@ -31,9 +39,10 @@ public class JavaClassAnalyzerTest {
     public void findGetterMethod_record_plain() {
         record FooRecord(int i, long l, String s) {}
 
-        assertMethod(findGetterMethod(FooRecord.class, "i"), "i");
-        assertMethod(findGetterMethod(FooRecord.class, "l"), "l");
-        assertMethod(findGetterMethod(FooRecord.class, "s"), "s");
+        assertJavaClass(FooRecord.class)
+            .findsMethod("i", "i")
+            .findsMethod("l", "l")
+            .findsMethod("s", "s");
     }
 
     @Test
@@ -43,9 +52,10 @@ public class JavaClassAnalyzerTest {
             public String getS() { return s; }
         }
 
-        assertMethod(findGetterMethod(FooRecord.class, "i"), "i");
-        assertMethod(findGetterMethod(FooRecord.class, "l"), "l");
-        assertMethod(findGetterMethod(FooRecord.class, "s"), "s");
+        assertJavaClass(FooRecord.class)
+            .findsMethod("i", "i")
+            .findsMethod("l", "l")
+            .findsMethod("s", "s");
     }
 
     @Test
@@ -60,9 +70,17 @@ public class JavaClassAnalyzerTest {
             public String getS() { return s; }
         }
 
-        assertMethod(findGetterMethod(FooPojo.class, "i"), "getI");
-        assertMethod(findGetterMethod(FooPojo.class, "l"), "getL");
-        assertMethod(findGetterMethod(FooPojo.class, "s"), "getS");
+        assertJavaClass(FooPojo.class)
+            .findsMethod("i", "getI")
+            .findsMethod("l", "getL")
+            .findsMethod("s", "getS");
+    }
+
+    @Test
+    public void findGetterMethod_pojo_standard_point() {
+        assertJavaClass(Point.class)
+            .doesNotFindMethod("x")
+            .doesNotFindMethod("y");
     }
 
     @Test
@@ -77,9 +95,10 @@ public class JavaClassAnalyzerTest {
             public boolean getOff() { return off; }
         }
 
-        assertMethod(findGetterMethod(FooPojo.class, "enabled"), "isEnabled");
-        assertMethod(findGetterMethod(FooPojo.class, "disabled"), "disabled");
-        assertMethod(findGetterMethod(FooPojo.class, "off"), "getOff");
+        assertJavaClass(FooPojo.class)
+            .findsMethod("enabled", "isEnabled")
+            .findsMethod("disabled", "disabled")
+            .findsMethod("off", "getOff");
     }
 
     @Test
@@ -94,9 +113,10 @@ public class JavaClassAnalyzerTest {
             public String s() { return s; }
         }
 
-        assertMethod(findGetterMethod(FooPojo.class, "i"), "i");
-        assertMethod(findGetterMethod(FooPojo.class, "l"), "l");
-        assertMethod(findGetterMethod(FooPojo.class, "s"), "s");
+        assertJavaClass(FooPojo.class)
+            .findsMethod("i", "i")
+            .findsMethod("l", "l")
+            .findsMethod("s", "s");
     }
 
     @Test
@@ -104,10 +124,12 @@ public class JavaClassAnalyzerTest {
         class FooPojo {
             private int i;
             private String s;
+            // hashCode() and toString()
         }
 
-        assertNull(findGetterMethod(FooPojo.class, "i"));
-        assertNull(findGetterMethod(FooPojo.class, "s"));
+        assertJavaClass(FooPojo.class)
+            .doesNotFindMethod("i")
+            .doesNotFindMethod("s");
     }
 
     @Test
@@ -122,23 +144,40 @@ public class JavaClassAnalyzerTest {
             public String bazValue() { return baz; }
         }
 
-        assertNull(findGetterMethod(FooPojo.class, "foo"));
-        assertNull(findGetterMethod(FooPojo.class, "bar"));
-        assertNull(findGetterMethod(FooPojo.class, "baz"));
+        assertJavaClass(FooPojo.class)
+            .doesNotFindMethod("foo")
+            .doesNotFindMethod("bar")
+            .doesNotFindMethod("baz");
     }
 
     private static void assertFields(@NotNull List<Field> fields, @NotNull String ... names) {
         assertThat(fields.stream().map(Field::getName).toList()).containsExactlyElementsIn(names);
     }
 
-    private static @Nullable Method findGetterMethod(@NotNull Class<?> klass, @NotNull String name) {
-        Field field = EasyMembers.findField(klass, name);
-        assertNotNull(field);
-        return JavaClassAnalyzer.findGetterMethod(field);
+    private static @NotNull ClassSubject assertJavaClass(@NotNull Class<?> klass) {
+        return new ClassSubject(klass);
     }
 
-    private static void assertMethod(@Nullable Method method, @NotNull String name) {
-        assertNotNull(method);
-        assertEquals(name, method.getName());
+    @CanIgnoreReturnValue
+    private record ClassSubject(@NotNull Class<?> klass) {
+        public @NotNull ClassSubject findsMethod(@NotNull String name, @NotNull String expected) {
+            Method getterMethod = findGetterMethod(name);
+            assertNotNull(getterMethod);
+            assertThat(getterMethod.getName()).isEqualTo(expected);
+            return this;
+        }
+
+        public @NotNull ClassSubject doesNotFindMethod(@NotNull String name) {
+            Method getterMethod = findGetterMethod(name);
+            assertThat(getterMethod).isNull();
+            return this;
+        }
+
+        @Nullable
+        private Method findGetterMethod(@NotNull String name) {
+            Field field = EasyMembers.findField(klass, name);
+            assertNotNull(field);
+            return JavaClassAnalyzer.findGetterMethod(field);
+        }
     }
 }
