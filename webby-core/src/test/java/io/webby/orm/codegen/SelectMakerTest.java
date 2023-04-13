@@ -3,8 +3,8 @@ package io.webby.orm.codegen;
 import com.google.errorprone.annotations.CanIgnoreReturnValue;
 import io.webby.orm.api.ForeignInt;
 import io.webby.orm.arch.factory.ArchFactory;
-import io.webby.orm.arch.factory.ArchTesting;
 import io.webby.orm.arch.factory.RunContext;
+import io.webby.orm.arch.factory.TestingArch;
 import io.webby.orm.arch.model.TableArch;
 import org.jetbrains.annotations.NotNull;
 import org.junit.jupiter.api.Test;
@@ -63,7 +63,7 @@ public class SelectMakerTest {
     }
 
     private @NotNull Map<Class<?>, TableArch> buildArch(@NotNull Class<?> @NotNull ...  models) {
-        RunContext runContext = ArchTesting.newRunContext(models);
+        RunContext runContext = TestingArch.newRunContext(models);
         new ArchFactory(runContext).build();
         return runContext.tables().getAllTables();
     }

@@ -7,7 +7,7 @@ import org.jetbrains.annotations.NotNull;
 import java.util.Arrays;
 import java.util.List;
 
-public class ArchTesting {
+public class TestingArch {
     public static @NotNull RunContext newRunContext(@NotNull Class<?> ... models) {
         return new RunContext(newRunInputs(models), new FakeModelAdaptersScanner());
     }

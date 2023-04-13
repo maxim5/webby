@@ -2,7 +2,7 @@ package io.webby.orm.codegen;
 
 import io.webby.orm.arch.InvalidSqlModelException;
 import io.webby.orm.arch.factory.ArchFactory;
-import io.webby.orm.arch.factory.ArchTesting;
+import io.webby.orm.arch.factory.TestingArch;
 import org.jetbrains.annotations.NotNull;
 import org.junit.jupiter.api.Test;
 
@@ -40,7 +40,7 @@ public class ModelTableCodegenTest {
 
     private void assertInvalidModel(@NotNull Class<?> ... models) {
         assertThrows(InvalidSqlModelException.class, () ->
-            new ArchFactory(ArchTesting.newRunContext(models)).build()
+            new ArchFactory(TestingArch.newRunContext(models)).build()
         );
     }
 }
