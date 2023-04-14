@@ -1,6 +1,7 @@
 package io.webby.orm.codegen;
 
 import com.google.errorprone.annotations.CanIgnoreReturnValue;
+import io.webby.orm.api.ForeignInt;
 import io.webby.orm.api.annotate.Sql;
 import io.webby.orm.arch.model.TableArch;
 import io.webby.util.base.EasyPrimitives.MutableBool;
@@ -10,6 +11,8 @@ import io.webby.util.base.EasyPrimitives.OptionalBool;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import org.junit.jupiter.api.Test;
+
+import java.util.List;
 
 import static io.webby.orm.arch.factory.TestingArch.buildTableArch;
 import static io.webby.orm.testing.AssertSql.assertThatSql;
@@ -21,6 +24,7 @@ public class ValuesArrayMakerTest {
 
         TableArch tableArch = buildTableArch(Primitives.class);
         ValuesArrayMaker maker = new ValuesArrayMaker("$param", tableArch.fields());
+
         assertThat(maker)
             .matchesInitValues("""
                 $param.id(),
@@ -44,6 +48,7 @@ public class ValuesArrayMakerTest {
 
         TableArch tableArch = buildTableArch(Wrappers.class);
         ValuesArrayMaker maker = new ValuesArrayMaker("$param", tableArch.fields());
+
         assertThat(maker)
             .matchesInitValues("""
                 $param.id(),
@@ -68,6 +73,7 @@ public class ValuesArrayMakerTest {
 
         TableArch tableArch = buildTableArch(Adapters.class);
         ValuesArrayMaker maker = new ValuesArrayMaker("$param", tableArch.fields());
+
         assertThat(maker)
             .matchesInitValues("""
                 null,
@@ -92,6 +98,7 @@ public class ValuesArrayMakerTest {
 
         TableArch tableArch = buildTableArch(Adapters.class);
         ValuesArrayMaker maker = new ValuesArrayMaker("$param", tableArch.fields());
+
         assertThat(maker)
             .matchesInitValues("""
                 null,
@@ -121,6 +128,7 @@ public class ValuesArrayMakerTest {
 
         TableArch tableArch = buildTableArch(NullableModel.class);
         ValuesArrayMaker maker = new ValuesArrayMaker("$param", tableArch.fields());
+
         assertThat(maker)
             .matchesInitValues("""
                 $param.id(),
@@ -134,6 +142,22 @@ public class ValuesArrayMakerTest {
                 CharacterJdbcAdapter.fillArrayValues($param.ch(), array, 3);
                 Optional.ofNullable($param.nest()).ifPresent(nest ->\
                  NestedJdbcAdapter.ADAPTER.fillArrayValues(nest, array, 4));
+                """);
+    }
+
+    @Test
+    public void foreign_key_columns() {
+        record User(int userId, String name) {}
+        record Song(ForeignInt<User> author) {}
+
+        TableArch tableArch = buildTableArch(Song.class, List.of(User.class));
+        ValuesArrayMaker maker = new ValuesArrayMaker("$param", tableArch.fields());
+
+        assertThat(maker)
+            .matchesInitValues("""
+                $param.author().getFk(),
+                """)
+            .matchesConvertValues("""
                 """);
     }
 
