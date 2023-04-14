@@ -45,9 +45,9 @@ public class PersonTableData {
                 ColumnMeta.of(PersonColumn.country, String.class),
                 ColumnMeta.of(PersonColumn.sex, boolean.class),
                 ColumnMeta.of(PersonColumn.birthday, Timestamp.class),
-                ColumnMeta.of(PersonColumn.iq, int.class),
+                ColumnMeta.of(PersonColumn.iq, int.class).withUnique(ConstraintStatus.SINGLE_COLUMN),
                 ColumnMeta.of(PersonColumn.height, double.class),
-                ColumnMeta.of(PersonColumn.photo, byte[].class).withUnique(ConstraintStatus.SINGLE_COLUMN)
+                ColumnMeta.of(PersonColumn.photo, byte[].class)
             );
         }
 
