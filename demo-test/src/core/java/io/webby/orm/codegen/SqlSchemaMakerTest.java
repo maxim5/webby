@@ -364,6 +364,7 @@ public class SqlSchemaMakerTest {
                 id VARCHAR PRIMARY KEY,
                 str VARCHAR,
                 timestamp INTEGER,
+                ch VARCHAR,
                 nested_id INTEGER,
                 nested_s VARCHAR
             )
@@ -374,6 +375,7 @@ public class SqlSchemaMakerTest {
                 id VARCHAR PRIMARY KEY,
                 str VARCHAR,
                 timestamp TIMESTAMP,
+                ch VARCHAR,
                 nested_id INTEGER,
                 nested_s VARCHAR
             )
@@ -384,6 +386,7 @@ public class SqlSchemaMakerTest {
                 id VARCHAR(255) PRIMARY KEY,
                 str VARCHAR(4096),
                 timestamp TIMESTAMP(3),
+                ch VARCHAR(4096),
                 nested_id INTEGER,
                 nested_s VARCHAR(4096)
             )
