@@ -43,6 +43,7 @@ class TableFieldArchFactory {
         Method getter = JavaClassAnalyzer.findGetterMethodOrDie(field);
         boolean isPrimaryKey = JavaClassAnalyzer.isPrimaryKeyField(field, input);
         boolean isUnique = JavaClassAnalyzer.isUniqueField(field);
+        boolean isNullable = JavaClassAnalyzer.isNullableField(field);
 
         FieldInference inference = inferFieldArch();
         if (inference.isForeignTable()) {
@@ -55,6 +56,7 @@ class TableFieldArchFactory {
                                            ModelField.of(field, getter),
                                            isPrimaryKey,
                                            isUnique,
+                                           isNullable,
                                            inference.adapterApi(),
                                            requireNonNull(inference.singleColumn()));
         } else {
@@ -62,6 +64,7 @@ class TableFieldArchFactory {
                                              ModelField.of(field, getter),
                                              isPrimaryKey,
                                              isUnique,
+                                             isNullable,
                                              requireNonNull(inference.adapterApi()),
                                              requireNonNull(inference.multiColumns()));
         }

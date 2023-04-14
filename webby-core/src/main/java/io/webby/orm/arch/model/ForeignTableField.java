@@ -21,7 +21,7 @@ public class ForeignTableField extends TableField {
                              @NotNull ModelField field,
                              @NotNull TableArch foreignTable,
                              @NotNull Column foreignKeyColumn) {
-        super(parent, field, false, false, null);
+        super(parent, field, false, false, false, null);
         this.foreignTable = foreignTable;
         this.foreignKeyColumn = foreignKeyColumn;
     }

@@ -1,5 +1,6 @@
 package io.webby.orm.codegen;
 
+import com.google.common.primitives.Primitives;
 import io.webby.orm.arch.model.TableField;
 import io.webby.util.func.ObjIntBiFunction;
 import org.jetbrains.annotations.NotNull;
@@ -64,8 +65,15 @@ class ValuesArrayMaker {
             if (field.isForeignKey()) {
                 return "";
             }
-            return "%s.fillArrayValues(%s.%s(), array, %d);"
-                    .formatted(requireNonNull(field.adapterApi()).staticRef(), param, field.javaGetter(), columnIndex);
+            // Special case: `char` type. Has a custom support, but shouldn't be handled for null.
+            String staticRef = requireNonNull(field.adapterApi()).staticRef();
+            if (field.isNotNull() || Primitives.allPrimitiveTypes().contains(field.javaType())) {
+                return "%s.fillArrayValues(%s.%s(), array, %d);"
+                    .formatted(staticRef, param, field.javaGetter(), columnIndex);
+            } else {
+                return "Optional.ofNullable(%s.%s()).ifPresent(%s -> %s.fillArrayValues(%s, array, %d));"
+                    .formatted(param, field.javaGetter(), field.javaName(), staticRef, field.javaName(), columnIndex);
+            }
         }
     }
 }

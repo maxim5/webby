@@ -31,7 +31,6 @@ public class NullableModelTableTest
 
     @Override
     public @NotNull NullableModel createEntity(@NotNull String key, int version) {
-        // TODO: nullable nested
-        return new NullableModel(key, null, null, new NullableModel.Nested(version, null));
+        return new NullableModel(key, null, null, '\0', version == 0 ? null : new NullableModel.Nested(version, null));
     }
 }

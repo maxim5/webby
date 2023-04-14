@@ -16,17 +16,20 @@ public abstract class TableField implements HasColumns, HasPrefixedColumns {
     protected final ModelField field;
     protected final boolean primaryKey;
     protected final boolean unique;
+    protected final boolean nullable;
     protected final AdapterApi adapterApi;
 
     public TableField(@NotNull TableArch parent,
                       @NotNull ModelField field,
                       boolean primaryKey,
                       boolean unique,
+                      boolean nullable,
                       @Nullable AdapterApi adapterApi) {
         this.parent = parent;
         this.field = field;
         this.primaryKey = primaryKey;
         this.unique = unique;
+        this.nullable = nullable;
         this.adapterApi = adapterApi;
     }
 
@@ -54,6 +57,14 @@ public abstract class TableField implements HasColumns, HasPrefixedColumns {
         return unique;
     }
 
+    public boolean isNullable() {
+        return nullable;
+    }
+
+    public boolean isNotNull() {
+        return !nullable;
+    }
+
     public boolean isForeignKey() {
         return false;
     }
@@ -77,11 +88,13 @@ public abstract class TableField implements HasColumns, HasPrefixedColumns {
 
     @Override
     public String toString() {
-        return "%s(%s::%s, primary:%s)".formatted(
+        return "%s(%s::%s, primary:%s, unique:%s, null:%s)".formatted(
             getClass().getSimpleName(),
             parent.javaName(),
             field.name(),
-            primaryKey
+            primaryKey,
+            unique,
+            nullable
         );
     }
 }

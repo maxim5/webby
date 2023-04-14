@@ -13,9 +13,10 @@ public class MultiColumnTableField extends TableField {
                                  @NotNull ModelField field,
                                  boolean primaryKey,
                                  boolean unique,
+                                 boolean nullable,
                                  @NotNull AdapterApi adapterApi,
                                  @NotNull ImmutableList<Column> columns) {
-        super(parent, field, primaryKey, unique, adapterApi);
+        super(parent, field, primaryKey, unique, nullable, adapterApi);
         assert columns.size() > 1 : "MultiColumnTableField `%s` constructed from a single column %s".formatted(field.name(), columns);
         this.columns = columns;
     }

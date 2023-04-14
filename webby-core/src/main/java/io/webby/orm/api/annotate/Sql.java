@@ -14,12 +14,17 @@ public @interface Sql {
     String value() default "";
 
     /**
-     * Indicates whether this field corresponds to a PRIMARY KEY column (or a composite PRIMARY KEY)
+     * Indicates whether this field corresponds to a PRIMARY KEY column (or a composite PRIMARY KEY).
      */
     boolean primary() default false;
 
     /**
-     * Indicates whether this field corresponds to a UNIQUE column (or a composite UNIQUE)
+     * Indicates whether this field corresponds to a UNIQUE column (or a composite UNIQUE).
      */
     boolean unique() default false;
+
+    /**
+     * Indicates whether this field corresponds to a NULL column.
+     */
+    boolean nullable() default false;
 }

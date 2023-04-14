@@ -1,5 +1,6 @@
 package io.webby.orm.arch.factory;
 
+import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
 import com.google.common.flogger.FluentLogger;
 import io.webby.orm.api.annotate.Sql;
@@ -13,6 +14,7 @@ import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import org.jetbrains.annotations.VisibleForTesting;
 
+import java.lang.annotation.Annotation;
 import java.lang.reflect.*;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -141,5 +143,20 @@ class JavaClassAnalyzer {
 
     public static boolean isUniqueField(@NotNull Field field) {
         return EasyAnnotations.getOptionalAnnotation(field, Sql.class).map(Sql::unique).orElse(false);
+    }
+
+    private static final ImmutableList<Class<? extends Annotation>> NULLABLE_ANNOTATIONS = ImmutableList.of(
+        javax.annotation.Nullable.class,
+        org.checkerframework.checker.nullness.qual.Nullable.class,
+        Nullable.class  // retention policy: CLASS
+    );
+
+    public static boolean isNullableField(@NotNull Field field) {
+        for (Class<? extends Annotation> annotation : NULLABLE_ANNOTATIONS) {
+            if (EasyAnnotations.getOptionalAnnotation(field, annotation).isPresent()) {
+                return true;
+            }
+        }
+        return EasyAnnotations.getOptionalAnnotation(field, Sql.class).map(Sql::nullable).orElse(false);
     }
 }
