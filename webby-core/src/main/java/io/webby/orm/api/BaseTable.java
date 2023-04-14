@@ -25,7 +25,6 @@ import java.util.function.Consumer;
  * (though possibly incomplete) but in a more time and memory efficient way.
  *
  * @param <E> the entity type
- *
  * @see EntityData
  * @see BatchEntityData
  */
@@ -170,6 +169,7 @@ public interface BaseTable<E> extends Iterable<E>, HasEngine, HasRunner {
 
     /**
      * Inserts the {@code entity} into the table.
+     *
      * @return the number of affected rows in a table (1 if successful)
      * @throws QueryException if the insertion failed, e.g. due to PK or FK conflict
      */
@@ -178,6 +178,7 @@ public interface BaseTable<E> extends Iterable<E>, HasEngine, HasRunner {
 
     /**
      * Inserts the {@code entity} into the table, ignoring PK or FK conflicts.
+     *
      * @return the number of affected rows in a table (1 if successful, 0 otherwise)
      * @throws QueryException if the insertion failed unexpectedly
      */
@@ -186,6 +187,7 @@ public interface BaseTable<E> extends Iterable<E>, HasEngine, HasRunner {
 
     /**
      * Inserts the {@code EntityData} into the table. The {@code data} row may or may not be complete.
+     *
      * @return the number of affected rows in a table (1 if successful)
      * @throws QueryException if the insertion failed, e.g. due to PK or FK conflict
      */
@@ -194,6 +196,7 @@ public interface BaseTable<E> extends Iterable<E>, HasEngine, HasRunner {
 
     /**
      * Inserts multiple entities into the table in batch mode.
+     *
      * @return the array holding the number of affected rows in a table (1 if successful)
      * @throws QueryException if the insertion failed, e.g. due to PK or FK conflict
      */
@@ -202,6 +205,7 @@ public interface BaseTable<E> extends Iterable<E>, HasEngine, HasRunner {
 
     /**
      * Inserts the {@code BatchEntityData} into the table. The {@code batchData} rows may or may not be complete.
+     *
      * @return the array holding the number of affected rows in a table (1 if successful)
      * @throws QueryException if the insertion failed, e.g. due to PK or FK conflict
      */
@@ -212,6 +216,7 @@ public interface BaseTable<E> extends Iterable<E>, HasEngine, HasRunner {
 
     /**
      * Updates the {@code entity} in the table given the {@code where} condition.
+     *
      * @return the number of affected rows in a table (1 or more if successful)
      * @throws QueryException if the update failed, e.g. due to PK or FK conflict
      */
@@ -220,6 +225,7 @@ public interface BaseTable<E> extends Iterable<E>, HasEngine, HasRunner {
 
     /**
      * Updates the {@code EntityData} in the table given the {@code where} condition.
+     *
      * @return the number of affected rows in a table (1 or more if successful)
      * @throws QueryException if the update failed, e.g. due to PK or FK conflict
      */
@@ -229,6 +235,7 @@ public interface BaseTable<E> extends Iterable<E>, HasEngine, HasRunner {
     /**
      * Updates multiple rows in the table given the contextual {@code where} condition.
      * In order to pass correct query params, the condition gets resolved from each entity in the {@code batch}.
+     *
      * @return the array holding the number of affected rows in a table (1 if successful)
      * @throws QueryException if the update failed, e.g. due to PK or FK conflict
      * @see Contextual for arg resolution
@@ -239,9 +246,10 @@ public interface BaseTable<E> extends Iterable<E>, HasEngine, HasRunner {
     /**
      * Updates multiple rows in the table given the contextual {@code where} condition.
      * In order to pass correct query params, the condition gets resolved from each chunk in the {@code batchData}.
+     *
+     * @param <B> the type of batch used for context resolution
      * @return the array holding the number of affected rows in a table (1 if successful)
      * @throws QueryException if the update failed, e.g. due to PK or FK conflict
-     * @param <B> the type of batch used for context resolution
      * @see Contextual for arg resolution
      */
     @CanIgnoreReturnValue
@@ -252,6 +260,7 @@ public interface BaseTable<E> extends Iterable<E>, HasEngine, HasRunner {
     /**
      * Updates if exists or otherwise inserts the {@code entity} in the table.
      * The match is done via {@code where} condition. It is possible for the condition to match more than one row.
+     *
      * @return the number of affected rows (either updated or inserted).
      * @throws QueryException if the update failed, e.g. due to PK or FK conflict
      */
@@ -267,6 +276,7 @@ public interface BaseTable<E> extends Iterable<E>, HasEngine, HasRunner {
     /**
      * Updates if exists or otherwise inserts the {@link EntityData} in the table.
      * The match is done via {@code where} condition. It is possible for the condition to match more than one row.
+     *
      * @return the number of affected rows (either updated or inserted).
      * @throws QueryException if the update failed, e.g. due to PK or FK conflict
      */
@@ -283,6 +293,7 @@ public interface BaseTable<E> extends Iterable<E>, HasEngine, HasRunner {
 
     /**
      * Deletes the rows in the table matching the given {@code where} condition. Can delete all rows.
+     *
      * @return the number of affected rows in a table
      */
     @CanIgnoreReturnValue
