@@ -5,6 +5,7 @@ import com.carrotsearch.hppc.IntContainer;
 import com.carrotsearch.hppc.LongArrayList;
 import com.carrotsearch.hppc.LongContainer;
 import com.google.common.collect.ImmutableMap;
+import com.google.common.flogger.FluentLogger;
 import com.google.errorprone.annotations.Immutable;
 import io.webby.orm.api.QueryRunner;
 import io.webby.util.base.EasyObjects;
@@ -17,6 +18,7 @@ import org.jetbrains.annotations.Nullable;
 import java.sql.PreparedStatement;
 import java.sql.SQLException;
 import java.util.*;
+import java.util.logging.Level;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
@@ -45,11 +47,14 @@ import static io.webby.util.collect.ImmutableArrayList.toImmutableArrayList;
  */
 @Immutable
 public final class Args {
+    private static final FluentLogger log = FluentLogger.forEnclosingClass();
+
     private final InternalType type;     // used to optimize the storage (internal and external lists)
     private final Iterable<?> internal;  // original set of args, may contain unresolved
     private final Iterable<?> external;  // args for external use, all unresolved replaced with default values
 
     private Args(@NotNull InternalType type, @NotNull Iterable<?> internal) {
+        assert type != InternalType.GENERIC_LIST || warnAboutPotentialBugs(internal) : "This is Impossible?!";
         this.type = type;
         this.internal = internal;
         this.external = type == InternalType.GENERIC_LIST ? unwrapArgs((List<?>) internal) : internal;
@@ -296,6 +301,20 @@ public final class Args {
     @Override
     public String toString() {
         return internal.toString();
+    }
+
+    private static boolean warnAboutPotentialBugs(@NotNull Iterable<?> args) {
+        if (!log.at(Level.WARNING).isEnabled()) {
+            return true;
+        }
+        for (Object arg : args) {
+            if (arg instanceof Variable) {
+                log.at(Level.WARNING).log("Variable `%s` passed in as an arg. Did you forget to call `.args()`?", arg);
+            } else if (arg instanceof HasArgs) {
+                log.at(Level.WARNING).log("HasArgs instance `%s` passed in as an arg. Did you forget to call `.args()`?", arg);
+            }
+        }
+        return true;
     }
 
     private enum InternalType {
