@@ -104,16 +104,16 @@ public class ResultSetIterator<E> implements Iterator<E>, Closeable {
     }
 
     /**
-     * Returns the converter that takes the first column only (as an object).
+     * Returns the converter that takes the first column only (as an {@link Object}).
      */
-    public static <A> @NotNull Converter<A> firstColumn() {
-        return resultSet -> castAny(resultSet.getObject(1));
+    public static @NotNull Converter<Object> firstColumn() {
+        return resultSet -> resultSet.getObject(1);
     }
 
     /**
-     * Returns the converter that takes the first two columns only (as a pair of objects).
+     * Returns the converter that takes the first two columns only (as a pair of {@link Object}s).
      */
-    public static <A, B> @NotNull Converter<Pair<A, B>> twoColumns() {
+    public static @NotNull Converter<Pair<Object, Object>> twoColumns() {
         return resultSet -> castAny(Pair.of(resultSet.getObject(1), resultSet.getObject(2)));
     }
 }

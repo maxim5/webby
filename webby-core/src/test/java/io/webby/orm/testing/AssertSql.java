@@ -14,6 +14,7 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.function.Supplier;
 
+import static io.webby.util.base.EasyCast.castAny;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 
 public class AssertSql {
@@ -150,5 +151,9 @@ public class AssertSql {
             }
             return val;
         }
+    }
+
+    public static <T> @Nullable T adjustType(@Nullable Object val) {
+        return castAny(RowsSubject.adjust(val));
     }
 }
