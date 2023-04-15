@@ -26,10 +26,12 @@ class RecursivePojoArchFactory {
 
     private @NotNull PojoArch buildPojoArchForImpl(@NotNull Field field) {
         validateFieldForPojo(field);
-        Class<?> type = field.getType();
 
-        if (type.isEnum()) {
-            return new PojoArch(type, ImmutableList.of(PojoFieldNative.ofEnum(type)));
+        Class<?> type = field.getType();
+        for (FastTrackPojoBuilder builder : FAST_TRACK_POJO_BUILDERS) {
+            if (builder.matches(type)) {
+                return builder.buildPojo(field);
+            }
         }
 
         ImmutableList<PojoField> pojoFields = JavaClassAnalyzer.getAllFieldsOrdered(type).stream().map(subField -> {
@@ -48,6 +50,27 @@ class RecursivePojoArchFactory {
             };
         }).collect(ImmutableList.toImmutableList());
         return new PojoArch(type, pojoFields);
+    }
+
+    private static final ImmutableList<FastTrackPojoBuilder> FAST_TRACK_POJO_BUILDERS = ImmutableList.of(
+        new EnumPojoBuilder()
+    );
+
+    private interface FastTrackPojoBuilder {
+        boolean matches(@NotNull Class<?> type);
+
+        @NotNull PojoArch buildPojo(@NotNull Field field);
+    }
+
+    private static class EnumPojoBuilder implements FastTrackPojoBuilder {
+        @Override
+        public boolean matches(@NotNull Class<?> type) {
+            return type.isEnum();
+        }
+        @Override
+        public @NotNull PojoArch buildPojo(@NotNull Field field) {
+            return new PojoArch(field.getType(), ImmutableList.of(PojoFieldNative.ofEnum(field.getType())));
+        }
     }
 
     private static void validateFieldForPojo(@NotNull Field field) {
