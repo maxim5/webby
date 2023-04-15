@@ -29,6 +29,8 @@ public interface PrimaryKeyTableTest<K, E, T extends TableObj<K, E>> extends Bas
         assertTableAll();
     }
 
+    /** {@link TableObj#exists} **/
+
     @Test
     default void exists() {
         assumeKeys(1);
@@ -37,6 +39,8 @@ public interface PrimaryKeyTableTest<K, E, T extends TableObj<K, E>> extends Bas
         assertEquals(1, table().insert(entity));
         assertTrue(table().exists(Where.of(Shortcuts.TRUE)));
     }
+
+    /** {@link TableObj#keyOf(Object)} **/
 
     @Test
     default void keyOf() {

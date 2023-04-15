@@ -15,6 +15,10 @@ import static java.util.Objects.requireNonNull;
  * @param <E> the entity type
  */
 public interface TableObj<K, E> extends BaseTable<E> {
+    /**
+     * Returns a copy of {@link TableObj} instance with custom {@code follow} level for read operations in the table.
+     * Default value is {@link ReadFollow#NO_FOLLOW}.
+     */
     @Override
     @NotNull TableObj<K, E> withReferenceFollowOnRead(@NotNull ReadFollow follow);
 
