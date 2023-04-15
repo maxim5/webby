@@ -28,9 +28,10 @@ public interface TableMeta {
                       @NotNull Class<?> type,
                       @NotNull ConstraintStatus primaryKey,
                       @NotNull ConstraintStatus unique,
-                      @NotNull ConstraintStatus foreignKey) {
+                      boolean foreignKey,
+                      boolean nullable) {
         public static @NotNull ColumnMeta of(@NotNull Column column, @NotNull Class<?> type) {
-            return new ColumnMeta(column, type, NO_CONSTRAINT, NO_CONSTRAINT, NO_CONSTRAINT);
+            return new ColumnMeta(column, type, NO_CONSTRAINT, NO_CONSTRAINT, false, false);
         }
 
         public @NotNull String name() {
@@ -46,19 +47,31 @@ public interface TableMeta {
         }
 
         public boolean isForeignKey() {
-            return foreignKey != NO_CONSTRAINT;
+            return foreignKey;
+        }
+
+        public boolean isNullable() {
+            return nullable;
+        }
+
+        public boolean isNotNull() {
+            return !nullable;
         }
 
         public @NotNull ColumnMeta withPrimaryKey(@NotNull ConstraintStatus status) {
-            return new ColumnMeta(column, type, status, unique, foreignKey);
+            return new ColumnMeta(column, type, status, unique, foreignKey, nullable);
         }
 
         public @NotNull ColumnMeta withUnique(@NotNull ConstraintStatus status) {
-            return new ColumnMeta(column, type, primaryKey, status, foreignKey);
+            return new ColumnMeta(column, type, primaryKey, status, foreignKey, nullable);
         }
 
-        public @NotNull ColumnMeta withForeignKey(@NotNull ConstraintStatus status) {
-            return new ColumnMeta(column, type, primaryKey, unique, status);
+        public @NotNull ColumnMeta withForeignKey(boolean foreignKey) {
+            return new ColumnMeta(column, type, primaryKey, unique, foreignKey, nullable);
+        }
+
+        public @NotNull ColumnMeta withNullable(boolean nullable) {
+            return new ColumnMeta(column, type, primaryKey, unique, foreignKey, nullable);
         }
     }
 

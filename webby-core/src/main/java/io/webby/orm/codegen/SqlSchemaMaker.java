@@ -37,6 +37,7 @@ public class SqlSchemaMaker {
         meta.sqlColumns().forEach(column -> {
             String definition = SnippetLine.of(
                 "%s %s".formatted(column.name(), support.columnTypeFor(column)),
+                column.isNotNull() ? support.inlineNotNull(column) : "",
                 column.primaryKey().isSingle() ? support.inlinePrimaryKeyFor(column) : "",
                 column.primaryKey().isSingle() ? support.inlineAutoIncrementFor(column) : "",
                 column.unique().isSingle() ? support.inlineUniqueFor(column) : ""
@@ -77,6 +78,10 @@ public class SqlSchemaMaker {
 
     private interface SchemaSupport {
         @NotNull String columnTypeFor(@NotNull TableMeta.ColumnMeta columnMeta);
+
+        default @NotNull String inlineNotNull(@NotNull TableMeta.ColumnMeta columnMeta) {
+            return columnMeta.isNotNull() ? "NOT NULL" : "";
+        }
 
         default @NotNull String inlineUniqueFor(@NotNull TableMeta.ColumnMeta columnMeta) {
             return columnMeta.isUnique() ? "UNIQUE" : "";

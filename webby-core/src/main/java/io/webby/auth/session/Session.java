@@ -5,6 +5,7 @@ import io.webby.auth.user.UserModel;
 import io.webby.netty.HttpConst;
 import io.webby.netty.request.HttpRequestEx;
 import io.webby.orm.api.ForeignInt;
+import io.webby.orm.api.annotate.Sql;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
@@ -14,7 +15,7 @@ public record Session(long sessionId,
                       @NotNull ForeignInt<UserModel> user,
                       @NotNull Instant createdAt,
                       @NotNull String userAgent,
-                      @Nullable String ipAddress) {
+                      @Sql(nullable = true) @Nullable String ipAddress) {
     public static final String DB_NAME = "session";
 
     public static @NotNull Session fromRequest(long sessionId, @NotNull HttpRequestEx request) {

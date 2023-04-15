@@ -5,7 +5,6 @@ import com.google.common.collect.Streams;
 import com.google.common.primitives.Primitives;
 import com.google.mu.util.Optionals;
 import io.webby.orm.api.*;
-import io.webby.orm.api.TableMeta.ConstraintStatus;
 import io.webby.orm.api.entity.*;
 import io.webby.orm.api.query.*;
 import io.webby.orm.arch.Column;
@@ -1101,32 +1100,9 @@ public class ModelTableCodegen extends BaseCodegen {
 
     private void tableMeta() {
         Map<String, String> context = Map.of(
-            "$column_meta_list", table.columnsWithFields().stream().map(pair -> {
-                TableField field = pair.first();
-                Column column = pair.second();
-                String sqlName = column.sqlName();
-                Class<?> nativeType = column.type().jdbcType().nativeType();
-                String type = nativeType.isPrimitive() || nativeType == String.class ?
-                    nativeType.getSimpleName() :
-                    nativeType == byte[].class ?
-                        "byte[]" :
-                        nativeType.getName();
-
-                record Piece(String method, boolean value, boolean isMultiColumn) {
-                    @Override
-                    public @NotNull String toString() {
-                        ConstraintStatus status = isMultiColumn ? ConstraintStatus.COMPOSITE : ConstraintStatus.SINGLE_COLUMN;
-                        return value ? "%s(ConstraintStatus.%s)".formatted(method, status) : "";
-                    }
-                }
-
-                return SnippetLine.of(
-                    "ColumnMeta.of(OwnColumn.%s, %s.class)".formatted(sqlName, type),
-                    new Piece(".withPrimaryKey", field.isPrimaryKey(), field.isMultiColumn()),
-                    new Piece(".withUnique", field.isUnique(), field.isMultiColumn()),
-                    new Piece(".withForeignKey", field.isForeignKey(), field.isMultiColumn())
-                ).join();
-            }).collect(Collectors.joining(",\n" + INDENT3)),
+            "$column_meta_list", table.columnsWithFields().stream()
+                .map(pair -> ColumnMetaMaker.makeColumnMeta(pair.first(), pair.second()))
+                .collect(Collectors.joining(",\n" + INDENT3)),
             "$primary_keys", table.columnsWithFields().stream().filter(pair -> pair.first().isPrimaryKey()).map(pair -> {
                 String column = pair.second().sqlName();
                 return "OwnColumn.%s".formatted(column);
