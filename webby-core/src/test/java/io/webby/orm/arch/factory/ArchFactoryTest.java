@@ -9,6 +9,7 @@ import io.webby.orm.arch.JdbcType;
 import io.webby.util.collect.Pair;
 import org.junit.jupiter.api.Test;
 
+import java.awt.*;
 import java.util.List;
 
 import static io.webby.orm.arch.factory.TestingArch.FieldConstraints.*;
@@ -64,7 +65,7 @@ public class ArchFactoryTest {
 
         assertThat(buildTableArch(User.class)).hasFields(HAS_NO_KEY_FIELDS).hasSingleFieldThat("foo")
             .isFromTable("user")
-            .hasInJava(int.class, "foo")
+            .hasInJava(int.class, "foo()")
             .isSingleColumn("foo", JdbcType.Int)
             .hasConstraints(USUAL_NOT_NULL)
             .doesNotHaveDefault()
@@ -77,7 +78,7 @@ public class ArchFactoryTest {
 
         assertThat(buildTableArch(User.class)).hasFields(HAS_NO_KEY_FIELDS).hasSingleFieldThat("foo")
             .isFromTable("user")
-            .hasInJava(long.class, "foo")
+            .hasInJava(long.class, "foo()")
             .isSingleColumn("foo", JdbcType.Long)
             .hasConstraints(USUAL_NOT_NULL)
             .doesNotHaveDefault()
@@ -90,7 +91,7 @@ public class ArchFactoryTest {
 
         assertThat(buildTableArch(User.class)).hasFields(HAS_NO_KEY_FIELDS).hasSingleFieldThat("foo")
             .isFromTable("user")
-            .hasInJava(String.class, "foo")
+            .hasInJava(String.class, "foo()")
             .isSingleColumn("foo", JdbcType.String)
             .hasConstraints(USUAL_NOT_NULL)
             .doesNotHaveDefault()
@@ -103,7 +104,7 @@ public class ArchFactoryTest {
 
         assertThat(buildTableArch(User.class)).hasFields(HAS_NO_KEY_FIELDS).hasSingleFieldThat("foo")
             .isFromTable("user")
-            .hasInJava(Integer.class, "foo")
+            .hasInJava(Integer.class, "foo()")
             .isSingleColumn("foo", JdbcType.Int)
             .hasConstraints(USUAL_NOT_NULL)
             .doesNotHaveDefault()
@@ -116,7 +117,7 @@ public class ArchFactoryTest {
 
         assertThat(buildTableArch(User.class)).hasFields(HAS_NO_KEY_FIELDS).hasSingleFieldThat("foo")
             .isFromTable("user")
-            .hasInJava(char.class, "foo")
+            .hasInJava(char.class, "foo()")
             .isSingleColumn("foo", JdbcType.String)
             .hasConstraints(USUAL_NOT_NULL)
             .doesNotHaveDefault()
@@ -130,7 +131,7 @@ public class ArchFactoryTest {
 
         assertThat(buildTableArch(User.class)).hasFields(HAS_NO_KEY_FIELDS).hasSingleFieldThat("foo")
             .isFromTable("user")
-            .hasInJava(int.class, "foo")
+            .hasInJava(int.class, "foo()")
             .isSingleColumn("bar", JdbcType.Int)
             .doesNotHaveDefault()
             .hasConstraints(USUAL_NOT_NULL)
@@ -144,13 +145,28 @@ public class ArchFactoryTest {
 
         assertThat(buildTableArch(User.class)).hasFields(HAS_NO_KEY_FIELDS).hasSingleFieldThat("foo")
             .isFromTable("user")
-            .hasInJava(Tuple.class, "foo")
+            .hasInJava(Tuple.class, "foo()")
             .hasColumns(Pair.of("foo_a", JdbcType.Int), Pair.of("foo_b", JdbcType.String))
             .hasConstraints(USUAL_NOT_NULL)
             .doesNotHaveAnyDefaults()
             .isCustomSupportedType()
             .usesAdapter("TupleJdbcAdapter.ADAPTER");
     }
+
+    @Test
+    void single_field_complex_standard_point() {
+        record User(Point point) {}
+
+        assertThat(buildTableArch(User.class)).hasFields(HAS_NO_KEY_FIELDS).hasSingleFieldThat("point")
+            .isFromTable("user")
+            .hasInJava(Point.class, "point()")
+            .hasColumns(Pair.of("point_x", JdbcType.Int), Pair.of("point_y", JdbcType.Int))
+            .hasConstraints(USUAL_NOT_NULL)
+            .doesNotHaveAnyDefaults()
+            .isCustomSupportedType()
+            .usesAdapter("PointJdbcAdapter.ADAPTER");
+    }
+
 
     /** Single primary key field **/
 
@@ -160,7 +176,7 @@ public class ArchFactoryTest {
 
         assertThat(buildTableArch(User.class)).hasFields(HAS_PRIMARY_INT).hasSingleFieldThat("userId")
             .isFromTable("user")
-            .hasInJava(int.class, "userId")
+            .hasInJava(int.class, "userId()")
             .isSingleColumn("user_id", JdbcType.Int)
             .hasConstraints(PRIMARY_NOT_NULL)
             .doesNotHaveDefault()
@@ -173,7 +189,7 @@ public class ArchFactoryTest {
 
         assertThat(buildTableArch(User.class)).hasFields(HAS_PRIMARY_INT).hasSingleFieldThat("id")
             .isFromTable("user")
-            .hasInJava(int.class, "id")
+            .hasInJava(int.class, "id()")
             .isSingleColumn("id", JdbcType.Int)
             .hasConstraints(PRIMARY_NOT_NULL)
             .doesNotHaveDefault()
@@ -186,7 +202,7 @@ public class ArchFactoryTest {
 
         assertThat(buildTableArch(User.class)).hasFields(HAS_PRIMARY_LONG).hasSingleFieldThat("userId")
             .isFromTable("user")
-            .hasInJava(long.class, "userId")
+            .hasInJava(long.class, "userId()")
             .isSingleColumn("user_id", JdbcType.Long)
             .hasConstraints(PRIMARY_NOT_NULL)
             .doesNotHaveDefault()
@@ -199,7 +215,7 @@ public class ArchFactoryTest {
 
         assertThat(buildTableArch(User.class)).hasFields(HAS_PRIMARY).hasSingleFieldThat("userId")
             .isFromTable("user")
-            .hasInJava(String.class, "userId")
+            .hasInJava(String.class, "userId()")
             .isSingleColumn("user_id", JdbcType.String)
             .hasConstraints(PRIMARY_NOT_NULL)
             .doesNotHaveDefault()
@@ -212,7 +228,7 @@ public class ArchFactoryTest {
 
         assertThat(buildTableArch(User.class)).hasFields(HAS_PRIMARY).hasSingleFieldThat("userId")
             .isFromTable("user")
-            .hasInJava(Integer.class, "userId")
+            .hasInJava(Integer.class, "userId()")
             .isSingleColumn("user_id", JdbcType.Int)
             .hasConstraints(PRIMARY_NOT_NULL)
             .doesNotHaveDefault()
@@ -225,7 +241,7 @@ public class ArchFactoryTest {
 
         assertThat(buildTableArch(User.class)).hasFields(HAS_PRIMARY_INT).hasSingleFieldThat("userKey")
             .isFromTable("user")
-            .hasInJava(int.class, "userKey")
+            .hasInJava(int.class, "userKey()")
             .isSingleColumn("user_key", JdbcType.Int)
             .hasConstraints(PRIMARY_NOT_NULL)
             .doesNotHaveDefault()
@@ -241,7 +257,7 @@ public class ArchFactoryTest {
 
         assertThat(buildTableArch(User.class, List.of(Type.class))).hasFields(HAS_FOREIGN).hasSingleFieldThat("type")
             .isFromTable("user")
-            .hasInJava(ForeignInt.class, "type")
+            .hasInJava(ForeignInt.class, "type()")
             .isSingleColumn("type_id", JdbcType.Int)
             .isForeign("type_id", "type")
             .hasConstraints(FOREIGN_KEY_NOT_NULL)
@@ -256,7 +272,7 @@ public class ArchFactoryTest {
 
         assertThat(buildTableArch(User.class, List.of(Type.class))).hasFields(HAS_FOREIGN).hasSingleFieldThat("type")
             .isFromTable("user")
-            .hasInJava(ForeignLong.class, "type")
+            .hasInJava(ForeignLong.class, "type()")
             .isSingleColumn("type_id", JdbcType.Long)
             .isForeign("type_id", "type")
             .hasConstraints(FOREIGN_KEY_NOT_NULL)
@@ -271,7 +287,7 @@ public class ArchFactoryTest {
 
         assertThat(buildTableArch(User.class, List.of(Type.class))).hasFields(HAS_FOREIGN).hasSingleFieldThat("type")
             .isFromTable("user")
-            .hasInJava(ForeignObj.class, "type")
+            .hasInJava(ForeignObj.class, "type()")
             .isSingleColumn("type_id", JdbcType.String)
             .isForeign("type_id", "type")
             .hasConstraints(FOREIGN_KEY_NOT_NULL)
@@ -287,7 +303,7 @@ public class ArchFactoryTest {
 
         assertThat(buildTableArch(User.class)).hasFields(HAS_NO_KEY_FIELDS).hasSingleFieldThat("foo")
             .isFromTable("user")
-            .hasInJava(int.class, "foo")
+            .hasInJava(int.class, "foo()")
             .isSingleColumn("foo", JdbcType.Int)
             .hasConstraints(USUAL_NOT_NULL)
             .hasDefault("0")
@@ -300,7 +316,7 @@ public class ArchFactoryTest {
 
         assertThat(buildTableArch(User.class)).hasFields(HAS_NO_KEY_FIELDS).hasSingleFieldThat("foo")
             .isFromTable("user")
-            .hasInJava(long.class, "foo")
+            .hasInJava(long.class, "foo()")
             .isSingleColumn("foo", JdbcType.Long)
             .hasConstraints(USUAL_NOT_NULL)
             .hasDefault("-1")
@@ -313,7 +329,7 @@ public class ArchFactoryTest {
 
         assertThat(buildTableArch(User.class)).hasFields(HAS_NO_KEY_FIELDS).hasSingleFieldThat("foo")
             .isFromTable("user")
-            .hasInJava(String.class, "foo")
+            .hasInJava(String.class, "foo()")
             .isSingleColumn("foo", JdbcType.String)
             .hasConstraints(USUAL_NOT_NULL)
             .hasDefault("")
@@ -326,7 +342,7 @@ public class ArchFactoryTest {
 
         assertThat(buildTableArch(User.class)).hasFields(HAS_PRIMARY_INT).hasSingleFieldThat("userKey")
             .isFromTable("user")
-            .hasInJava(int.class, "userKey")
+            .hasInJava(int.class, "userKey()")
             .isSingleColumn("user_key", JdbcType.Int)
             .hasConstraints(PRIMARY_NOT_NULL)
             .hasDefault("-1")
@@ -340,7 +356,7 @@ public class ArchFactoryTest {
 
         assertThat(buildTableArch(User.class)).hasFields(HAS_NO_KEY_FIELDS).hasSingleFieldThat("foo")
             .isFromTable("user")
-            .hasInJava(Tuple.class, "foo")
+            .hasInJava(Tuple.class, "foo()")
             .hasColumns(Pair.of("foo_a", JdbcType.Int), Pair.of("foo_b", JdbcType.String))
             .hasConstraints(USUAL_NOT_NULL)
             .hasDefault("foo_a", "0")

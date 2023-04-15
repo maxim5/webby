@@ -11,7 +11,6 @@ import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
 import java.lang.reflect.Field;
-import java.lang.reflect.Method;
 import java.util.List;
 
 import static java.util.Objects.requireNonNull;
@@ -36,7 +35,7 @@ class TableFieldArchFactory {
     }
 
     public @NotNull TableField buildTableField() {
-        Method getter = JavaClassAnalyzer.findGetterMethodOrDie(field);
+        ModelField modelField = JavaClassAnalyzer.toModelField(field);
         boolean isPrimaryKey = JavaClassAnalyzer.isPrimaryKeyField(field, input);
         boolean isUnique = JavaClassAnalyzer.isUniqueField(field);
         boolean isNullable = JavaClassAnalyzer.isNullableField(field);
@@ -45,13 +44,13 @@ class TableFieldArchFactory {
         FieldInference inference = inferFieldArch();
         if (inference.isForeignTable()) {
             return new ForeignTableField(table,
-                                         ModelField.of(field, getter),
+                                         modelField,
                                          Defaults.ofOneColumn(defaults),
                                          requireNonNull(inference.foreignTable()),
                                          requireNonNull(inference.singleColumn()));
         } else if (inference.isSingleColumn()) {
             return new OneColumnTableField(table,
-                                           ModelField.of(field, getter),
+                                           modelField,
                                            isPrimaryKey,
                                            isUnique,
                                            isNullable,
@@ -60,7 +59,7 @@ class TableFieldArchFactory {
                                            requireNonNull(inference.singleColumn()));
         } else {
             return new MultiColumnTableField(table,
-                                             ModelField.of(field, getter),
+                                             modelField,
                                              isPrimaryKey,
                                              isUnique,
                                              isNullable,

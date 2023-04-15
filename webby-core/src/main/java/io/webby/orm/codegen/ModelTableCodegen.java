@@ -427,7 +427,7 @@ public class ModelTableCodegen extends BaseCodegen {
                  ResultSet result = statement.executeQuery()) {
                 while (result.next()) {
                     $ModelClass entity = fromRow(result, follow, 0);
-                    map.put(entity.$pk_getter(), entity);
+                    map.put(entity.$pk_getter, entity);
                 }
             } catch (SQLException e) {
                 throw new QueryException("Failed to find by PK batch in $TableClass", query, keys, e);
@@ -437,7 +437,7 @@ public class ModelTableCodegen extends BaseCodegen {
         Map<String, String> context = EasyMaps.asMap(
             "$query_execution", queryExecution,
             "$pk_column", primaryColumns.get(0),
-            "$pk_getter", primaryField.javaGetter()
+            "$pk_getter", primaryField.javaAccessor()
         );
 
         appendCode("""
@@ -526,13 +526,13 @@ public class ModelTableCodegen extends BaseCodegen {
 
         Map<String, String> context = EasyMaps.asMap(
             "$KeyOfMethod", table.isPrimaryKeyInt() ? "intKeyOf" : table.isPrimaryKeyLong() ? "longKeyOf" : "keyOf",
-            "$pk_getter", requireNonNull(table.primaryKeyField()).javaGetter()
+            "$pk_getter", requireNonNull(table.primaryKeyField()).javaAccessor()
         );
 
         appendCode("""
         @Override
         public $pk_annotation$pk_type $KeyOfMethod(@Nonnull $ModelClass $model_param) {
-            return $model_param.$pk_getter();
+            return $model_param.$pk_getter;
         }\n
         """, EasyMaps.merge(context, mainContext, pkContext));
     }

@@ -29,8 +29,8 @@ public abstract class PojoField {
         return field.name();
     }
 
-    public @NotNull String javaGetter() {
-        return field.getter();
+    public @NotNull String javaAccessor() {
+        return field.accessor();
     }
 
     public @NotNull String fullSqlName() {

@@ -50,10 +50,10 @@ class ValuesArrayMaker {
 
         public @NotNull Stream<String> initLines() {
             if (field.isNativelySupportedType()) {
-                return Stream.of("%s.%s(),".formatted(param, field.javaGetter()));
+                return Stream.of("%s.%s,".formatted(param, field.javaAccessor()));
             }
             if (field.isForeignKey()) {
-                return Stream.of("%s.%s().getFk(),".formatted(param, field.javaGetter()));
+                return Stream.of("%s.%s.getFk(),".formatted(param, field.javaAccessor()));
             }
             return Stream.generate(() -> "null,").limit(field.columnsNumber());
         }
@@ -68,11 +68,11 @@ class ValuesArrayMaker {
             // Special case: `char` type. Has a custom support, but shouldn't be handled for null.
             String staticRef = requireNonNull(field.adapterApi()).staticRef();
             if (field.isNotNull() || Primitives.allPrimitiveTypes().contains(field.javaType())) {
-                return "%s.fillArrayValues(%s.%s(), array, %d);"
-                    .formatted(staticRef, param, field.javaGetter(), columnIndex);
+                return "%s.fillArrayValues(%s.%s, array, %d);"
+                    .formatted(staticRef, param, field.javaAccessor(), columnIndex);
             } else {
-                return "Optional.ofNullable(%s.%s()).ifPresent(%s -> %s.fillArrayValues(%s, array, %d));"
-                    .formatted(param, field.javaGetter(), field.javaName(), staticRef, field.javaName(), columnIndex);
+                return "Optional.ofNullable(%s.%s).ifPresent(%s -> %s.fillArrayValues(%s, array, %d));"
+                    .formatted(param, field.javaAccessor(), field.javaName(), staticRef, field.javaName(), columnIndex);
             }
         }
     }

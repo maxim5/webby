@@ -6,7 +6,6 @@ import io.webby.orm.arch.model.*;
 import org.jetbrains.annotations.NotNull;
 
 import java.lang.reflect.Field;
-import java.lang.reflect.Method;
 import java.util.Collection;
 
 import static io.webby.orm.arch.InvalidSqlModelException.failIf;
@@ -35,9 +34,7 @@ class RecursivePojoArchFactory {
         }
 
         ImmutableList<PojoField> pojoFields = JavaClassAnalyzer.getAllFieldsOrdered(type).stream().map(subField -> {
-            Method getter = JavaClassAnalyzer.findGetterMethodOrDie(subField);
-            ModelField modelField = ModelField.of(subField, getter);
-
+            ModelField modelField = JavaClassAnalyzer.toModelField(subField);
             ResolveResult resolved = fieldResolver.resolve(subField);
             return switch (resolved.type()) {
                 case NATIVE -> PojoFieldNative.ofNative(modelField, resolved.jdbcType());

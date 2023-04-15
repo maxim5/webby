@@ -45,8 +45,8 @@ public abstract class TableField implements HasColumns, HasPrefixedColumns {
         return field.name();
     }
 
-    public @NotNull String javaGetter() {
-        return field.getter();
+    public @NotNull String javaAccessor() {
+        return field.accessor();
     }
 
     public @NotNull Class<?> javaType() {

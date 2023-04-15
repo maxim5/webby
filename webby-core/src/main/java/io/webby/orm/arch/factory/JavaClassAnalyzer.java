@@ -6,6 +6,7 @@ import com.google.common.flogger.FluentLogger;
 import io.webby.orm.api.annotate.Sql;
 import io.webby.orm.arch.InvalidSqlModelException;
 import io.webby.orm.arch.Naming;
+import io.webby.orm.arch.model.ModelField;
 import io.webby.orm.codegen.ModelInput;
 import io.webby.util.collect.EasyIterables;
 import io.webby.util.reflect.EasyAnnotations;
@@ -27,7 +28,8 @@ import java.util.stream.Collectors;
 
 import static io.webby.orm.arch.InvalidSqlModelException.failIf;
 import static io.webby.util.base.EasyObjects.firstNonNullIfExist;
-import static io.webby.util.reflect.EasyMembers.*;
+import static io.webby.util.reflect.EasyMembers.isPrivate;
+import static io.webby.util.reflect.EasyMembers.isStatic;
 
 class JavaClassAnalyzer {
     private static final FluentLogger log = FluentLogger.forEnclosingClass();
@@ -101,7 +103,31 @@ class JavaClassAnalyzer {
         return Arrays.stream(klass.getDeclaredFields()).filter(Predicate.not(EasyMembers::isStatic)).toList();
     }
 
-    public static @NotNull Method findGetterMethodOrDie(@NotNull Field field) {
+    public static @NotNull ModelField toModelField(@NotNull Field field) {
+        return new ModelField(
+            field.getName(),
+            findAccessorOrDie(field).value(),
+            Naming.fieldSqlName(field),
+            field.getType(),
+            field.getDeclaringClass());
+    }
+
+    @VisibleForTesting
+    static @NotNull Accessor findAccessorOrDie(@NotNull Field field) {
+        if (!isPrivate(field)) {
+            return Accessor.ofJavaField(field);
+        }
+
+        Method getter = findGetterMethodOrDie(field);
+        assert field.getType() == getter.getReturnType() :
+            "Incompatible field and getter types: `%s` vs `%s`".formatted(field, getter);
+        assert field.getDeclaringClass() == getter.getDeclaringClass() :
+            "Incompatible field and getter container classes: `%s` vs `%s`".formatted(field, getter);
+        return Accessor.ofJavaMethod(getter);
+    }
+
+    @VisibleForTesting
+    static @NotNull Method findGetterMethodOrDie(@NotNull Field field) {
         Method getter = findGetterMethod(field);
         failIf(getter == null, "Model class `%s` exposes no getter field: %s",
                field.getDeclaringClass().getSimpleName(), field.getName());
@@ -116,7 +142,7 @@ class JavaClassAnalyzer {
         Map<String, Method> eligibleMethods = Arrays.stream(field.getDeclaringClass().getMethods())
             .filter(method -> method.getReturnType() == fieldType &&
                               method.getParameterCount() == 0 &&
-                              isPublic(method) &&
+                              !isPrivate(method) &&
                               !isStatic(method))
             .collect(ImmutableMap.toImmutableMap(Method::getName, Function.identity()));
 

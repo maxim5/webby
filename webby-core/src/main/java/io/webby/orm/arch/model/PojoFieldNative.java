@@ -23,7 +23,7 @@ public class PojoFieldNative extends PojoField {
 
     public static @NotNull PojoField ofEnum(@NotNull Class<?> type) {
         assert type.isEnum() : "Type is not an enum: %s".formatted(type);
-        ModelField field = new ModelField("ord", "ordinal", "ord", type, type);
+        ModelField field = new ModelField("ord", "ordinal()", "ord", type, type);
         return ofNative(field, JdbcType.Int);
     }
 

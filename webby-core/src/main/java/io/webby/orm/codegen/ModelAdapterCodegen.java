@@ -190,12 +190,12 @@ public class ModelAdapterCodegen extends BaseCodegen {
         assert fields.size() == 1 : "Expected a single pojo field, but found: %s".formatted(fields);
 
         PojoField field = fields.get(0);
-        String getter = "instance.%s()".formatted(field.javaGetter());
+        String accessor = "instance.%s".formatted(field.javaAccessor());
         if (field.isNativelySupported()) {
-            return getter;
+            return accessor;
         } else {
             AdapterApi info = field.adapterInfo();
-            return "%s.toValueObject(%s);".formatted(info.staticRef(), getter);
+            return "%s.toValueObject(%s);".formatted(info.staticRef(), accessor);
         }
     }
 
@@ -222,7 +222,7 @@ public class ModelAdapterCodegen extends BaseCodegen {
         int index = 0;
         for (PojoField field : pojo.fields()) {
             String arrayIndex = index == 0 ? "start" : "start+%d".formatted(index);
-            String getter = "instance.%s()".formatted(field.javaGetter());
+            String getter = "instance.%s".formatted(field.javaAccessor());
 
             if (field.isNativelySupported()) {
                 result.add("array[%s] = %s;".formatted(arrayIndex, getter));

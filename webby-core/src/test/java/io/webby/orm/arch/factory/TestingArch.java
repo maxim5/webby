@@ -116,9 +116,9 @@ public class TestingArch {
             return this;
         }
 
-        public @NotNull TableFieldSubject hasInJava(@NotNull Class<?> javaType, @NotNull String getter) {
+        public @NotNull TableFieldSubject hasInJava(@NotNull Class<?> javaType, @NotNull String accessor) {
             Truth.assertThat(tableField.javaType()).isEqualTo(javaType);
-            Truth.assertThat(tableField.javaGetter()).isEqualTo(getter);
+            Truth.assertThat(tableField.javaAccessor()).isEqualTo(accessor);
             return this;
         }
 
