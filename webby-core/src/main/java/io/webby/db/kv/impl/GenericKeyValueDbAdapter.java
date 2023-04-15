@@ -2,7 +2,7 @@ package io.webby.db.kv.impl;
 
 import com.google.common.collect.Streams;
 import io.webby.db.kv.KeyValueDb;
-import io.webby.util.func.ReversibleFunction;
+import io.webby.util.func.Reversible;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
@@ -14,12 +14,12 @@ import java.util.stream.Collectors;
 
 public class GenericKeyValueDbAdapter<K1, V1, K2, V2> implements KeyValueDb<K1, V1> {
     private final KeyValueDb<K2, V2> delegate;
-    private final ReversibleFunction<K1, K2> keyFunc;
-    private final ReversibleFunction<V1, V2> valueFunc;
+    private final Reversible<K1, K2> keyFunc;
+    private final Reversible<V1, V2> valueFunc;
 
     public GenericKeyValueDbAdapter(@NotNull KeyValueDb<K2, V2> delegate,
-                                    @NotNull ReversibleFunction<K1, K2> keyFunc,
-                                    @NotNull ReversibleFunction<V1, V2> valueFunc) {
+                                    @NotNull Reversible<K1, K2> keyFunc,
+                                    @NotNull Reversible<V1, V2> valueFunc) {
         this.delegate = delegate;
         this.keyFunc = keyFunc;
         this.valueFunc = valueFunc;
@@ -32,12 +32,12 @@ public class GenericKeyValueDbAdapter<K1, V1, K2, V2> implements KeyValueDb<K1, 
 
     @Override
     public @Nullable V1 get(@NotNull K1 key) {
-        return valueFunc.reverse().apply(delegate.get(keyFunc.applyNotNull(key)));
+        return valueFunc.backwardNullable(delegate.get(keyFunc.forward(key)));
     }
 
     @Override
     public boolean containsValue(@NotNull V1 value) {
-        return delegate.containsValue(valueFunc.applyNotNull(value));
+        return delegate.containsValue(valueFunc.forward(value));
     }
 
     @Override
@@ -58,19 +58,20 @@ public class GenericKeyValueDbAdapter<K1, V1, K2, V2> implements KeyValueDb<K1, 
     @Override
     public @NotNull Set<Map.Entry<K1, V1>> entrySet() {
         return delegate.entrySet().stream()
-                .map(entry -> new AbstractMap.SimpleEntry<>(keyFunc.reverse().apply(entry.getKey()),
-                                                            valueFunc.reverse().apply(entry.getValue())))
-                .collect(Collectors.toSet());
+            .map(entry -> new AbstractMap.SimpleEntry<>(
+                keyFunc.backwardNullable(entry.getKey()),
+                valueFunc.backwardNullable(entry.getValue())))
+            .collect(Collectors.toSet());
     }
 
     @Override
     public void set(@NotNull K1 key, @NotNull V1 value) {
-        delegate.set(keyFunc.applyNotNull(key), valueFunc.applyNotNull(value));
+        delegate.set(keyFunc.forward(key), valueFunc.forward(value));
     }
 
     @Override
     public void delete(@NotNull K1 key) {
-        delegate.delete(keyFunc.applyNotNull(key));
+        delegate.delete(keyFunc.forward(key));
     }
 
     @Override
