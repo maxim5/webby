@@ -45,10 +45,9 @@ public abstract class SqlDbTableTest<E, T extends BaseTable<E>> implements BaseT
         return switch (SQL.engine()) {
             case SQLite -> {
                 String sql = descTableInSqlite(name)
-                    .replaceAll("\\s+", " ")                            // trim spaces to one
-                    .replaceAll("PRIMARY KEY \\(.*?\\)", "")            // drop PRIMARY KEY line
-                    .replaceAll("UNIQUE \\(.*?\\)", "")                 // drop UNIQUE line
-                    .replaceFirst("CREATE TABLE .*\\((.*?)\\)", "$1");  // get what's inside CREATE TABLE
+                    .replaceAll("\\s+", " ")                                    // trim spaces to one
+                    .replaceAll("(PRIMARY KEY|UNIQUE|DEFAULT) \\(.*?\\)", "")   // drop constraints
+                    .replaceFirst("CREATE TABLE .*\\((.*?)\\)", "$1");          // get what's inside CREATE TABLE
                 // Not `sql` has the format "foo INTEGER, bar VARCHAR, ..."
                 yield Arrays.stream(sql.split(","))
                     .map(String::trim)

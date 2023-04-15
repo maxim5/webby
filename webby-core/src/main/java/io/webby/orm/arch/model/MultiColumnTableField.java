@@ -14,10 +14,14 @@ public class MultiColumnTableField extends TableField {
                                  boolean primaryKey,
                                  boolean unique,
                                  boolean nullable,
+                                 @NotNull Defaults defaults,
                                  @NotNull AdapterApi adapterApi,
                                  @NotNull ImmutableList<Column> columns) {
-        super(parent, field, primaryKey, unique, nullable, adapterApi);
-        assert columns.size() > 1 : "MultiColumnTableField `%s` constructed from a single column %s".formatted(field.name(), columns);
+        super(parent, field, primaryKey, unique, nullable, defaults, adapterApi);
+        assert columns.size() > 1 : "MultiColumnTableField `%s` constructed from a single column %s"
+            .formatted(field.name(), columns);
+        assert columns.size() == defaults.size() : "Columns of `%s` don't match the defaults: columns=%s, defaults=%s"
+            .formatted(field.name(), columns, defaults);
         this.columns = columns;
     }
 

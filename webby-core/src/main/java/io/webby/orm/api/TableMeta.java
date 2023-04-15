@@ -2,6 +2,7 @@ package io.webby.orm.api;
 
 import io.webby.orm.api.query.Column;
 import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 
 import java.util.List;
 
@@ -29,9 +30,10 @@ public interface TableMeta {
                       @NotNull ConstraintStatus primaryKey,
                       @NotNull ConstraintStatus unique,
                       boolean foreignKey,
-                      boolean nullable) {
+                      boolean nullable,
+                      @Nullable String defaultValue) {
         public static @NotNull ColumnMeta of(@NotNull Column column, @NotNull Class<?> type) {
-            return new ColumnMeta(column, type, NO_CONSTRAINT, NO_CONSTRAINT, false, false);
+            return new ColumnMeta(column, type, NO_CONSTRAINT, NO_CONSTRAINT, false, false, null);
         }
 
         public @NotNull String name() {
@@ -58,20 +60,28 @@ public interface TableMeta {
             return !nullable;
         }
 
+        public boolean hasDefault() {
+            return defaultValue != null;
+        }
+
         public @NotNull ColumnMeta withPrimaryKey(@NotNull ConstraintStatus status) {
-            return new ColumnMeta(column, type, status, unique, foreignKey, nullable);
+            return new ColumnMeta(column, type, status, unique, foreignKey, nullable, defaultValue);
         }
 
         public @NotNull ColumnMeta withUnique(@NotNull ConstraintStatus status) {
-            return new ColumnMeta(column, type, primaryKey, status, foreignKey, nullable);
+            return new ColumnMeta(column, type, primaryKey, status, foreignKey, nullable, defaultValue);
         }
 
         public @NotNull ColumnMeta withForeignKey(boolean foreignKey) {
-            return new ColumnMeta(column, type, primaryKey, unique, foreignKey, nullable);
+            return new ColumnMeta(column, type, primaryKey, unique, foreignKey, nullable, defaultValue);
         }
 
         public @NotNull ColumnMeta withNullable(boolean nullable) {
-            return new ColumnMeta(column, type, primaryKey, unique, foreignKey, nullable);
+            return new ColumnMeta(column, type, primaryKey, unique, foreignKey, nullable, defaultValue);
+        }
+
+        public @NotNull ColumnMeta withDefault(@NotNull String defaultValue) {
+            return new ColumnMeta(column, type, primaryKey, unique, foreignKey, nullable, defaultValue);
         }
     }
 

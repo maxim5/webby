@@ -1,4 +1,8 @@
 package io.webby.demo.model;
 
-public record IntsModel(int foo, int bar, int value) {
+import io.webby.orm.api.annotate.Sql;
+
+public record IntsModel(@Sql(defaults = "0") int foo,
+                        @Sql(defaults = "0") int bar,
+                        @Sql(defaults = "0") int value) {
 }

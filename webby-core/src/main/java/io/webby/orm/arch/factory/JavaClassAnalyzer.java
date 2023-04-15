@@ -159,4 +159,8 @@ class JavaClassAnalyzer {
         }
         return EasyAnnotations.getOptionalAnnotation(field, Sql.class).map(Sql::nullable).orElse(false);
     }
+
+    public static @Nullable String @Nullable [] getDefaults(@NotNull Field field) {
+        return EasyAnnotations.getOptionalAnnotation(field, Sql.class).map(Sql::defaults).orElse(null);
+    }
 }

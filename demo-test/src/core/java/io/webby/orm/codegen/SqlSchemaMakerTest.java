@@ -637,25 +637,25 @@ public class SqlSchemaMakerTest {
     public void create_table_ints_model() {
         assertThat(makeCreateTableQuery(Engine.SQLite, IntsModelTable.class)).isEqualTo("""
             CREATE TABLE IF NOT EXISTS ints_model (
-                foo INTEGER NOT NULL,
-                bar INTEGER NOT NULL,
-                value INTEGER NOT NULL
+                foo INTEGER NOT NULL DEFAULT (0),
+                bar INTEGER NOT NULL DEFAULT (0),
+                value INTEGER NOT NULL DEFAULT (0)
             )
             """);
 
         assertThat(makeCreateTableQuery(Engine.H2, IntsModelTable.class)).isEqualTo("""
             CREATE TABLE IF NOT EXISTS ints_model (
-                foo INTEGER NOT NULL,
-                bar INTEGER NOT NULL,
-                value INTEGER NOT NULL
+                foo INTEGER NOT NULL DEFAULT (0),
+                bar INTEGER NOT NULL DEFAULT (0),
+                value INTEGER NOT NULL DEFAULT (0)
             )
             """);
 
         assertThat(makeCreateTableQuery(Engine.MySQL, IntsModelTable.class)).isEqualTo("""
             CREATE TABLE IF NOT EXISTS ints_model (
-                foo INTEGER NOT NULL,
-                bar INTEGER NOT NULL,
-                value INTEGER NOT NULL
+                foo INTEGER NOT NULL DEFAULT (0),
+                bar INTEGER NOT NULL DEFAULT (0),
+                value INTEGER NOT NULL DEFAULT (0)
             )
             """);
     }
@@ -664,25 +664,25 @@ public class SqlSchemaMakerTest {
     public void create_table_longs_model() {
         assertThat(makeCreateTableQuery(Engine.SQLite, LongsModelTable.class)).isEqualTo("""
             CREATE TABLE IF NOT EXISTS longs_model (
-                foo INTEGER NOT NULL,
-                bar INTEGER NOT NULL,
-                value INTEGER NOT NULL
+                foo INTEGER NOT NULL DEFAULT (0),
+                bar INTEGER NOT NULL DEFAULT (0),
+                value INTEGER NOT NULL DEFAULT (0)
             )
             """);
 
         assertThat(makeCreateTableQuery(Engine.H2, LongsModelTable.class)).isEqualTo("""
             CREATE TABLE IF NOT EXISTS longs_model (
-                foo BIGINT NOT NULL,
-                bar BIGINT NOT NULL,
-                value BIGINT NOT NULL
+                foo BIGINT NOT NULL DEFAULT (0),
+                bar BIGINT NOT NULL DEFAULT (0),
+                value BIGINT NOT NULL DEFAULT (0)
             )
             """);
 
         assertThat(makeCreateTableQuery(Engine.MySQL, LongsModelTable.class)).isEqualTo("""
             CREATE TABLE IF NOT EXISTS longs_model (
-                foo BIGINT NOT NULL,
-                bar BIGINT NOT NULL,
-                value BIGINT NOT NULL
+                foo BIGINT NOT NULL DEFAULT (0),
+                bar BIGINT NOT NULL DEFAULT (0),
+                value BIGINT NOT NULL DEFAULT (0)
             )
             """);
     }

@@ -11,10 +11,12 @@ import io.webby.orm.testing.FakeModelAdaptersScanner;
 import io.webby.util.collect.ListBuilder;
 import io.webby.util.collect.Pair;
 import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 
 import java.util.Collection;
 import java.util.List;
 
+import static com.google.common.collect.MoreCollectors.onlyElement;
 import static io.webby.orm.arch.factory.TestingArch.FieldConstraints.*;
 
 public class TestingArch {
@@ -170,6 +172,27 @@ public class TestingArch {
             Truth.assertThat(((ForeignTableField) tableField).getForeignTable()).isNotNull();
             Truth.assertThat(((ForeignTableField) tableField).getForeignTable().sqlName()).isEqualTo(table);
             return this;
+        }
+
+        public @NotNull TableFieldSubject hasDefault(@NotNull String column, @Nullable String value) {
+            Column col = tableField.columns().stream().filter(c -> c.sqlName().equals(column)).collect(onlyElement());
+            Truth.assertThat(tableField.columnDefault(col)).isEqualTo(value);
+            return this;
+        }
+
+        public @NotNull TableFieldSubject doesNotHaveAnyDefaults() {
+            tableField.columns().forEach(column -> Truth.assertThat(tableField.columnDefault(column)).isNull());
+            return this;
+        }
+
+        public @NotNull TableFieldSubject hasDefault(@Nullable String value) {
+            hasSize(1);
+            Truth.assertThat(tableField.columnDefault(tableField.columns().get(0))).isEqualTo(value);
+            return this;
+        }
+
+        public @NotNull TableFieldSubject doesNotHaveDefault() {
+            return hasDefault(null);
         }
 
         public @NotNull TableFieldSubject isNativelySupportedType() {

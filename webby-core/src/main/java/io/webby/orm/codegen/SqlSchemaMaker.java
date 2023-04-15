@@ -3,6 +3,7 @@ package io.webby.orm.codegen;
 import io.webby.orm.api.BaseTable;
 import io.webby.orm.api.Engine;
 import io.webby.orm.api.TableMeta;
+import io.webby.orm.api.TableMeta.ColumnMeta;
 import io.webby.util.base.Unchecked;
 import io.webby.util.collect.EasyMaps;
 import org.jetbrains.annotations.NotNull;
@@ -40,7 +41,8 @@ public class SqlSchemaMaker {
                 column.isNotNull() ? support.inlineNotNull(column) : "",
                 column.primaryKey().isSingle() ? support.inlinePrimaryKeyFor(column) : "",
                 column.primaryKey().isSingle() ? support.inlineAutoIncrementFor(column) : "",
-                column.unique().isSingle() ? support.inlineUniqueFor(column) : ""
+                column.unique().isSingle() ? support.inlineUniqueFor(column) : "",
+                column.hasDefault() ? support.inlineDefaultFor(column) : ""
             ).joinNonEmpty(" ");
             snippet.withLine(definition);
         });
@@ -77,25 +79,30 @@ public class SqlSchemaMaker {
     }
 
     private interface SchemaSupport {
-        @NotNull String columnTypeFor(@NotNull TableMeta.ColumnMeta columnMeta);
+        @NotNull String columnTypeFor(@NotNull ColumnMeta columnMeta);
 
-        default @NotNull String inlineNotNull(@NotNull TableMeta.ColumnMeta columnMeta) {
+        default @NotNull String inlineNotNull(@NotNull ColumnMeta columnMeta) {
             return columnMeta.isNotNull() ? "NOT NULL" : "";
         }
 
-        default @NotNull String inlineUniqueFor(@NotNull TableMeta.ColumnMeta columnMeta) {
+        default @NotNull String inlineUniqueFor(@NotNull ColumnMeta columnMeta) {
             return columnMeta.isUnique() ? "UNIQUE" : "";
         }
 
-        default @NotNull String inlinePrimaryKeyFor(@NotNull TableMeta.ColumnMeta columnMeta) {
+        default @NotNull String inlinePrimaryKeyFor(@NotNull ColumnMeta columnMeta) {
             return columnMeta.isPrimaryKey() ? "PRIMARY KEY" : "";
         }
 
-        default @NotNull String inlineAutoIncrementFor(@NotNull TableMeta.ColumnMeta columnMeta) {
-            if (columnMeta.isPrimaryKey() && (columnMeta.type() == int.class || columnMeta.type() == long.class)) {
-                return "AUTO_INCREMENT";
-            }
-            return "";
+        default @NotNull String inlineAutoIncrementFor(@NotNull ColumnMeta columnMeta) {
+            return isAutoIncrement(columnMeta) ? "AUTO_INCREMENT" : "";
+        }
+
+        static boolean isAutoIncrement(@NotNull ColumnMeta columnMeta) {
+            return columnMeta.isPrimaryKey() && (columnMeta.type() == int.class || columnMeta.type() == long.class);
+        }
+
+        default @NotNull String inlineDefaultFor(@NotNull ColumnMeta column) {
+            return column.hasDefault() && !isAutoIncrement(column) ? "DEFAULT (%s)".formatted(column.defaultValue()) : "";
         }
 
         static @NotNull SchemaSupport of(@NotNull Engine engine) {
@@ -124,7 +131,7 @@ public class SqlSchemaMaker {
             Timestamp.class, "TIMESTAMP"
         );
 
-        protected static boolean isKey(TableMeta.@NotNull ColumnMeta columnMeta) {
+        protected static boolean isKey(@NotNull ColumnMeta columnMeta) {
             return columnMeta.isPrimaryKey() || columnMeta.isForeignKey();
         }
     }
@@ -141,12 +148,12 @@ public class SqlSchemaMaker {
         ));
 
         @Override
-        public @NotNull String columnTypeFor(TableMeta.@NotNull ColumnMeta columnMeta) {
+        public @NotNull String columnTypeFor(@NotNull ColumnMeta columnMeta) {
             return (isKey(columnMeta) ? SQLITE_PK_DATA_TYPES : SQLITE_DATA_TYPES).getOrDefault(columnMeta.type(), "INTEGER");
         }
 
         @Override
-        public @NotNull String inlineAutoIncrementFor(TableMeta.@NotNull ColumnMeta columnMeta) {
+        public @NotNull String inlineAutoIncrementFor(@NotNull ColumnMeta columnMeta) {
             return "";  // Not recommended by https://www.sqlite.org/autoinc.html
         }
     }
@@ -164,7 +171,7 @@ public class SqlSchemaMaker {
         ));
 
         @Override
-        public @NotNull String columnTypeFor(TableMeta.@NotNull ColumnMeta columnMeta) {
+        public @NotNull String columnTypeFor(@NotNull ColumnMeta columnMeta) {
             return (isKey(columnMeta) ? MYSQL_PK_DATA_TYPES : MYSQL_DATA_TYPES).get(columnMeta.type());
         }
     }
@@ -175,12 +182,12 @@ public class SqlSchemaMaker {
         ));
 
         @Override
-        public @NotNull String columnTypeFor(TableMeta.@NotNull ColumnMeta columnMeta) {
+        public @NotNull String columnTypeFor(@NotNull ColumnMeta columnMeta) {
             return (isKey(columnMeta) ? H2_PK_DATA_TYPES : DEFAULT_DATA_TYPES).get(columnMeta.type());
         }
 
         @Override
-        public @NotNull String inlineUniqueFor(TableMeta.@NotNull ColumnMeta columnMeta) {
+        public @NotNull String inlineUniqueFor(@NotNull ColumnMeta columnMeta) {
             // Index on BLOB or CLOB column not supported
             return !columnMeta.isUnique() || columnMeta.type() == byte[].class ? "" : "UNIQUE";
         }

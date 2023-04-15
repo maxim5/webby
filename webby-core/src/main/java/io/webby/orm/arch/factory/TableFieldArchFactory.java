@@ -44,11 +44,13 @@ class TableFieldArchFactory {
         boolean isPrimaryKey = JavaClassAnalyzer.isPrimaryKeyField(field, input);
         boolean isUnique = JavaClassAnalyzer.isUniqueField(field);
         boolean isNullable = JavaClassAnalyzer.isNullableField(field);
+        String[] defaults = JavaClassAnalyzer.getDefaults(field);
 
         FieldInference inference = inferFieldArch();
         if (inference.isForeignTable()) {
             return new ForeignTableField(table,
                                          ModelField.of(field, getter),
+                                         Defaults.ofOneColumn(defaults),
                                          requireNonNull(inference.foreignTable()),
                                          requireNonNull(inference.singleColumn()));
         } else if (inference.isSingleColumn()) {
@@ -57,6 +59,7 @@ class TableFieldArchFactory {
                                            isPrimaryKey,
                                            isUnique,
                                            isNullable,
+                                           Defaults.ofOneColumn(defaults),
                                            inference.adapterApi(),
                                            requireNonNull(inference.singleColumn()));
         } else {
@@ -65,6 +68,7 @@ class TableFieldArchFactory {
                                              isPrimaryKey,
                                              isUnique,
                                              isNullable,
+                                             Defaults.ofMultiColumns(inference.columnsNumber(), defaults),
                                              requireNonNull(inference.adapterApi()),
                                              requireNonNull(inference.multiColumns()));
         }
@@ -129,6 +133,10 @@ class TableFieldArchFactory {
 
         public boolean isSingleColumn() {
             return singleColumn != null;
+        }
+
+        public int columnsNumber() {
+            return multiColumns != null ? multiColumns.size() : 1;
         }
     }
 }

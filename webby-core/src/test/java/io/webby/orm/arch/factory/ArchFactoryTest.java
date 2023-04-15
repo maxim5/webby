@@ -67,6 +67,7 @@ public class ArchFactoryTest {
             .hasInJava(int.class, "foo")
             .isSingleColumn("foo", JdbcType.Int)
             .hasConstraints(USUAL_NOT_NULL)
+            .doesNotHaveDefault()
             .isNativelySupportedType();
     }
 
@@ -79,6 +80,7 @@ public class ArchFactoryTest {
             .hasInJava(long.class, "foo")
             .isSingleColumn("foo", JdbcType.Long)
             .hasConstraints(USUAL_NOT_NULL)
+            .doesNotHaveDefault()
             .isNativelySupportedType();
     }
 
@@ -91,6 +93,7 @@ public class ArchFactoryTest {
             .hasInJava(String.class, "foo")
             .isSingleColumn("foo", JdbcType.String)
             .hasConstraints(USUAL_NOT_NULL)
+            .doesNotHaveDefault()
             .isNativelySupportedType();
     }
 
@@ -103,6 +106,7 @@ public class ArchFactoryTest {
             .hasInJava(Integer.class, "foo")
             .isSingleColumn("foo", JdbcType.Int)
             .hasConstraints(USUAL_NOT_NULL)
+            .doesNotHaveDefault()
             .isNativelySupportedType();
     }
 
@@ -115,6 +119,7 @@ public class ArchFactoryTest {
             .hasInJava(char.class, "foo")
             .isSingleColumn("foo", JdbcType.String)
             .hasConstraints(USUAL_NOT_NULL)
+            .doesNotHaveDefault()
             .isCustomSupportedType()
             .usesAdapter("CharacterJdbcAdapter");
     }
@@ -127,6 +132,7 @@ public class ArchFactoryTest {
             .isFromTable("user")
             .hasInJava(int.class, "foo")
             .isSingleColumn("bar", JdbcType.Int)
+            .doesNotHaveDefault()
             .hasConstraints(USUAL_NOT_NULL)
             .isNativelySupportedType();
     }
@@ -141,6 +147,7 @@ public class ArchFactoryTest {
             .hasInJava(Tuple.class, "foo")
             .hasColumns(Pair.of("foo_a", JdbcType.Int), Pair.of("foo_b", JdbcType.String))
             .hasConstraints(USUAL_NOT_NULL)
+            .doesNotHaveAnyDefaults()
             .isCustomSupportedType()
             .usesAdapter("TupleJdbcAdapter.ADAPTER");
     }
@@ -156,6 +163,7 @@ public class ArchFactoryTest {
             .hasInJava(int.class, "userId")
             .isSingleColumn("user_id", JdbcType.Int)
             .hasConstraints(PRIMARY_NOT_NULL)
+            .doesNotHaveDefault()
             .isNativelySupportedType();
     }
 
@@ -168,6 +176,7 @@ public class ArchFactoryTest {
             .hasInJava(int.class, "id")
             .isSingleColumn("id", JdbcType.Int)
             .hasConstraints(PRIMARY_NOT_NULL)
+            .doesNotHaveDefault()
             .isNativelySupportedType();
     }
 
@@ -180,6 +189,7 @@ public class ArchFactoryTest {
             .hasInJava(long.class, "userId")
             .isSingleColumn("user_id", JdbcType.Long)
             .hasConstraints(PRIMARY_NOT_NULL)
+            .doesNotHaveDefault()
             .isNativelySupportedType();
     }
 
@@ -192,6 +202,7 @@ public class ArchFactoryTest {
             .hasInJava(String.class, "userId")
             .isSingleColumn("user_id", JdbcType.String)
             .hasConstraints(PRIMARY_NOT_NULL)
+            .doesNotHaveDefault()
             .isNativelySupportedType();
     }
 
@@ -204,6 +215,7 @@ public class ArchFactoryTest {
             .hasInJava(Integer.class, "userId")
             .isSingleColumn("user_id", JdbcType.Int)
             .hasConstraints(PRIMARY_NOT_NULL)
+            .doesNotHaveDefault()
             .isNativelySupportedType();
     }
 
@@ -216,6 +228,7 @@ public class ArchFactoryTest {
             .hasInJava(int.class, "userKey")
             .isSingleColumn("user_key", JdbcType.Int)
             .hasConstraints(PRIMARY_NOT_NULL)
+            .doesNotHaveDefault()
             .isNativelySupportedType();
     }
 
@@ -232,6 +245,7 @@ public class ArchFactoryTest {
             .isSingleColumn("type_id", JdbcType.Int)
             .isForeign("type_id", "type")
             .hasConstraints(FOREIGN_KEY_NOT_NULL)
+            .doesNotHaveDefault()
             .isCustomSupportedType();
     }
 
@@ -246,6 +260,7 @@ public class ArchFactoryTest {
             .isSingleColumn("type_id", JdbcType.Long)
             .isForeign("type_id", "type")
             .hasConstraints(FOREIGN_KEY_NOT_NULL)
+            .doesNotHaveDefault()
             .isCustomSupportedType();
     }
 
@@ -260,6 +275,77 @@ public class ArchFactoryTest {
             .isSingleColumn("type_id", JdbcType.String)
             .isForeign("type_id", "type")
             .hasConstraints(FOREIGN_KEY_NOT_NULL)
+            .doesNotHaveDefault()
             .isCustomSupportedType();
+    }
+
+    /** Single field with default **/
+
+    @Test
+    void single_field_int_with_default() {
+        record User(@Sql(defaults = "0") int foo) {}
+
+        assertThat(buildTableArch(User.class)).hasFields(HAS_NO_KEY_FIELDS).hasSingleFieldThat("foo")
+            .isFromTable("user")
+            .hasInJava(int.class, "foo")
+            .isSingleColumn("foo", JdbcType.Int)
+            .hasConstraints(USUAL_NOT_NULL)
+            .hasDefault("0")
+            .isNativelySupportedType();
+    }
+
+    @Test
+    void single_field_long_with_default() {
+        record User(@Sql(defaults = "-1") long foo) {}
+
+        assertThat(buildTableArch(User.class)).hasFields(HAS_NO_KEY_FIELDS).hasSingleFieldThat("foo")
+            .isFromTable("user")
+            .hasInJava(long.class, "foo")
+            .isSingleColumn("foo", JdbcType.Long)
+            .hasConstraints(USUAL_NOT_NULL)
+            .hasDefault("-1")
+            .isNativelySupportedType();
+    }
+
+    @Test
+    void single_field_string_with_default() {
+        record User(@Sql(defaults = "") String foo) {}
+
+        assertThat(buildTableArch(User.class)).hasFields(HAS_NO_KEY_FIELDS).hasSingleFieldThat("foo")
+            .isFromTable("user")
+            .hasInJava(String.class, "foo")
+            .isSingleColumn("foo", JdbcType.String)
+            .hasConstraints(USUAL_NOT_NULL)
+            .hasDefault("")
+            .isNativelySupportedType();
+    }
+
+    @Test
+    void single_field_int_pk_annotated_with_default() {
+        record User(@Sql(primary = true, defaults = "-1") int userKey) {}
+
+        assertThat(buildTableArch(User.class)).hasFields(HAS_PRIMARY_INT).hasSingleFieldThat("userKey")
+            .isFromTable("user")
+            .hasInJava(int.class, "userKey")
+            .isSingleColumn("user_key", JdbcType.Int)
+            .hasConstraints(PRIMARY_NOT_NULL)
+            .hasDefault("-1")
+            .isNativelySupportedType();
+    }
+
+    @Test
+    void single_field_complex_with_default() {
+        record Tuple(int a, String b) {}
+        record User(@Sql(defaults = {"0", ""}) Tuple foo) {}
+
+        assertThat(buildTableArch(User.class)).hasFields(HAS_NO_KEY_FIELDS).hasSingleFieldThat("foo")
+            .isFromTable("user")
+            .hasInJava(Tuple.class, "foo")
+            .hasColumns(Pair.of("foo_a", JdbcType.Int), Pair.of("foo_b", JdbcType.String))
+            .hasConstraints(USUAL_NOT_NULL)
+            .hasDefault("foo_a", "0")
+            .hasDefault("foo_b", "")
+            .isCustomSupportedType()
+            .usesAdapter("TupleJdbcAdapter.ADAPTER");
     }
 }

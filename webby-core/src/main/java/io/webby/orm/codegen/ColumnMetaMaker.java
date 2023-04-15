@@ -4,6 +4,7 @@ import io.webby.orm.api.TableMeta.ConstraintStatus;
 import io.webby.orm.arch.Column;
 import io.webby.orm.arch.model.TableField;
 import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 
 class ColumnMetaMaker {
     public static @NotNull String makeColumnMeta(@NotNull TableField field, @NotNull Column column) {
@@ -20,7 +21,8 @@ class ColumnMetaMaker {
             toConstraintStatus(".withPrimaryKey", field.isPrimaryKey(), field.isMultiColumn()),
             toConstraintStatus(".withUnique", field.isUnique(), field.isMultiColumn()),
             toBooleanStatus(".withForeignKey", field.isForeignKey()),
-            toBooleanStatus(".withNullable", field.isNullable())
+            toBooleanStatus(".withNullable", field.isNullable()),
+            toStringStatus(".withDefault", field.columnDefault(column))
         ).join();
     }
 
@@ -31,5 +33,9 @@ class ColumnMetaMaker {
 
     private static @NotNull String toBooleanStatus(@NotNull String method, boolean value) {
         return value ? "%s(true)".formatted(method) : "";
+    }
+
+    private static @NotNull String toStringStatus(@NotNull String method, @Nullable String value) {
+        return value != null ? "%s(\"%s\")".formatted(method, value) : "";
     }
 }
