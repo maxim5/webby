@@ -37,7 +37,7 @@ class ForeignTableArchResolver {
                fieldType == ForeignLong.class || fieldType == ForeignObj.class,
                "Invalid foreign key reference type: `%s`. Supported types: Foreign, ForeignInt, ForeignLong, ForeignObj",
                fieldType.getSimpleName());
-        Type[] actualTypeArguments = ((ParameterizedType) field.getGenericType()).getActualTypeArguments();
+        Type[] actualTypeArguments = JavaClassAnalyzer.getGenericTypeArguments(field);
         Class<?> keyType =
             fieldType == ForeignInt.class ?
                 int.class :

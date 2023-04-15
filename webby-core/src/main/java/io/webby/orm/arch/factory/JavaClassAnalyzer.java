@@ -132,6 +132,13 @@ class JavaClassAnalyzer {
         ));
     }
 
+    public static @NotNull Type[] getGenericTypeArguments(@NotNull Field field) {
+        if (field.getGenericType() instanceof ParameterizedType parameterizedType) {
+            return parameterizedType.getActualTypeArguments();
+        }
+        return new Type[0];
+    }
+
     public static boolean isPrimaryKeyField(@NotNull Field field, @NotNull ModelInput input) {
         String fieldName = field.getName();
         return fieldName.equals("id") ||

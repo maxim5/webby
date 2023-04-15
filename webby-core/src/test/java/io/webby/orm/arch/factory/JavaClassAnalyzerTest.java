@@ -1,6 +1,7 @@
 package io.webby.orm.arch.factory;
 
 import com.google.errorprone.annotations.CanIgnoreReturnValue;
+import com.google.inject.internal.MoreTypes;
 import io.webby.orm.api.annotate.Model;
 import io.webby.orm.api.annotate.Sql;
 import io.webby.orm.codegen.ModelInput;
@@ -13,10 +14,12 @@ import java.awt.*;
 import java.io.Serializable;
 import java.lang.reflect.Field;
 import java.lang.reflect.Method;
+import java.lang.reflect.Type;
 import java.util.List;
+import java.util.Optional;
 
 import static com.google.common.truth.Truth.assertThat;
-import static org.junit.jupiter.api.Assertions.*;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
 
 @SuppressWarnings({"unused", "FieldCanBeLocal"})
 public class JavaClassAnalyzerTest {
@@ -154,6 +157,18 @@ public class JavaClassAnalyzerTest {
     }
 
     @Test
+    public void getGenericTypeArguments_optional() {
+        record Foo(Optional<Integer> ints, Optional<String> str, Optional<Object> obj, Optional<?> wild, Optional opt) {}
+
+        assertJavaClass(Foo.class)
+            .findsGenericTypeArguments("ints", Integer.class)
+            .findsGenericTypeArguments("str", String.class)
+            .findsGenericTypeArguments("obj", Object.class)
+            .findsGenericTypeArguments("wild", getWildcardType())
+            .findsGenericTypeArguments("opt");
+    }
+
+    @Test
     public void isPrimaryKeyField_default_ids() {
         record FooPojo(int id, int fooPojoId, int pojoId, int foo_pojo_id, int foo, int bar) {}
 
@@ -199,6 +214,13 @@ public class JavaClassAnalyzerTest {
             return this;
         }
 
+        public @NotNull JavaClassAnalyzerSubject findsGenericTypeArguments(@NotNull String name, @NotNull Type ... types) {
+            Field field = getFieldByName(name);
+            Type[] typeArguments = JavaClassAnalyzer.getGenericTypeArguments(field);
+            assertThat(typeArguments).asList().containsExactly((Object[]) types).inOrder();
+            return this;
+        }
+
         public @NotNull JavaClassAnalyzerSubject hasPrimaryKeyField(@NotNull String name) {
             Field field = getFieldByName(name);
             boolean isPrimaryKey = JavaClassAnalyzer.isPrimaryKeyField(field, ModelInput.of(klass));
@@ -224,5 +246,9 @@ public class JavaClassAnalyzerTest {
             assertNotNull(field);
             return field;
         }
+    }
+
+    private static @NotNull Type getWildcardType() {
+        return new MoreTypes.WildcardTypeImpl(new Type[]{Object.class}, new Type[0]);
     }
 }
