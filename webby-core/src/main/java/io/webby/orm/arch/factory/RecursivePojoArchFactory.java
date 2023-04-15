@@ -1,7 +1,7 @@
 package io.webby.orm.arch.factory;
 
 import com.google.common.collect.ImmutableList;
-import io.webby.orm.arch.JdbcType;
+import io.webby.orm.arch.factory.FieldResolver.ResolveResult;
 import io.webby.orm.arch.model.*;
 import org.jetbrains.annotations.NotNull;
 
@@ -13,9 +13,11 @@ import static io.webby.orm.arch.InvalidSqlModelException.failIf;
 
 class RecursivePojoArchFactory {
     private final RunContext runContext;
+    private final FieldResolver fieldResolver;
 
     public RecursivePojoArchFactory(@NotNull RunContext runContext) {
         this.runContext = runContext;
+        this.fieldResolver = new FieldResolver(runContext);
     }
 
     public @NotNull PojoArch buildPojoArchFor(@NotNull Field field) {
@@ -34,19 +36,16 @@ class RecursivePojoArchFactory {
             Method getter = JavaClassAnalyzer.findGetterMethodOrDie(subField);
             ModelField modelField = ModelField.of(subField, getter);
 
-            Class<?> subFieldType = subField.getType();
-            JdbcType jdbcType = JdbcType.findByMatchingNativeType(subFieldType);
-            if (jdbcType != null) {
-                return PojoFieldNative.ofNative(modelField, jdbcType);
-            }
-
-            Class<?> adapterClass = runContext.adaptersScanner().locateAdapterClass(subFieldType);
-            if (adapterClass != null) {
-                return PojoFieldAdapter.ofAdapter(modelField, adapterClass);
-            }
-
-            PojoArch nestedPojo = buildPojoArchFor(subField);
-            return PojoFieldNested.ofNestedPojo(modelField, nestedPojo);
+            ResolveResult resolved = fieldResolver.resolve(subField);
+            return switch (resolved.type()) {
+                case NATIVE -> PojoFieldNative.ofNative(modelField, resolved.jdbcType());
+                case FOREIGN_KEY -> null;
+                case ADAPTER -> PojoFieldAdapter.ofAdapter(modelField, resolved.adapterClass());
+                case POJO -> {
+                    PojoArch nestedPojo = buildPojoArchFor(subField);
+                    yield PojoFieldNested.ofNestedPojo(modelField, nestedPojo);
+                }
+            };
         }).collect(ImmutableList.toImmutableList());
         return new PojoArch(type, pojoFields);
     }
