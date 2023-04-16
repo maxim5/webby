@@ -12,7 +12,6 @@ import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
 import java.lang.reflect.Field;
-import java.lang.reflect.ParameterizedType;
 import java.lang.reflect.Type;
 import java.util.Optional;
 
@@ -37,7 +36,7 @@ class ForeignTableArchResolver {
                fieldType == ForeignLong.class || fieldType == ForeignObj.class,
                "Invalid foreign key reference type: `%s`. Supported types: Foreign, ForeignInt, ForeignLong, ForeignObj",
                fieldType.getSimpleName());
-        Type[] actualTypeArguments = JavaClassAnalyzer.getGenericTypeArguments(field);
+        Type[] actualTypeArguments = JavaClassAnalyzer.getGenericTypeArgumentsOfField(field);
         Class<?> keyType =
             fieldType == ForeignInt.class ?
                 int.class :

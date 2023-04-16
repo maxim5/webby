@@ -5,6 +5,7 @@ import com.google.inject.internal.MoreTypes;
 import io.webby.orm.api.annotate.Model;
 import io.webby.orm.api.annotate.Sql;
 import io.webby.orm.codegen.ModelInput;
+import io.webby.util.func.Reversible;
 import io.webby.util.reflect.EasyMembers;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
@@ -157,15 +158,38 @@ public class JavaClassAnalyzerTest {
     }
 
     @Test
-    public void getGenericTypeArguments_optional() {
+    public void getGenericTypeArgumentsOfField_optional() {
         record Foo(Optional<Integer> ints, Optional<String> str, Optional<Object> obj, Optional<?> wild, Optional opt) {}
 
         assertJavaClass(Foo.class)
-            .findsGenericTypeArguments("ints", Integer.class)
-            .findsGenericTypeArguments("str", String.class)
-            .findsGenericTypeArguments("obj", Object.class)
-            .findsGenericTypeArguments("wild", getWildcardType())
-            .findsGenericTypeArguments("opt");
+            .findsGenericTypeArgumentsForField("ints", Integer.class)
+            .findsGenericTypeArgumentsForField("str", String.class)
+            .findsGenericTypeArgumentsForField("obj", Object.class)
+            .findsGenericTypeArgumentsForField("wild", getWildcardType())
+            .findsGenericTypeArgumentsForField("opt");
+    }
+
+    @Test
+    public void getGenericTypeArgumentsOfInterface_implements_interface_directly() {
+        class Foo implements Reversible<String, Integer> {
+            @Override public @NotNull Integer forward(@NotNull String s) { return 0; }
+            @Override public @NotNull String backward(@NotNull Integer integer) { return ""; }
+        }
+
+        assertJavaClass(Foo.class)
+            .findsGenericTypeArgumentsForInterface(Reversible.class, String.class, Integer.class);
+    }
+
+    @Test
+    public void getGenericTypeArgumentsOfInterface_implements_interface_chain_with_args() {
+        interface Foo<T> extends Reversible<String, T> {}
+        class Bar implements Foo<Integer> {
+            @Override public @NotNull Integer forward(@NotNull String s) { return 0; }
+            @Override public @NotNull String backward(@NotNull Integer integer) { return ""; }
+        }
+
+        assertJavaClass(Bar.class)
+            .findsGenericTypeArgumentsForInterface(Reversible.class, String.class, Integer.class);
     }
 
     @Test
@@ -214,9 +238,17 @@ public class JavaClassAnalyzerTest {
             return this;
         }
 
-        public @NotNull JavaClassAnalyzerSubject findsGenericTypeArguments(@NotNull String name, @NotNull Type ... types) {
+        public @NotNull JavaClassAnalyzerSubject findsGenericTypeArgumentsForField(@NotNull String name,
+                                                                                   @NotNull Type ... types) {
             Field field = getFieldByName(name);
-            Type[] typeArguments = JavaClassAnalyzer.getGenericTypeArguments(field);
+            Type[] typeArguments = JavaClassAnalyzer.getGenericTypeArgumentsOfField(field);
+            assertThat(typeArguments).asList().containsExactly((Object[]) types).inOrder();
+            return this;
+        }
+
+        public @NotNull JavaClassAnalyzerSubject findsGenericTypeArgumentsForInterface(@NotNull Class<?> interfaceType,
+                                                                                       @NotNull Type ... types) {
+            Type[] typeArguments = JavaClassAnalyzer.getGenericTypeArgumentsOfInterface(klass, interfaceType);
             assertThat(typeArguments).asList().containsExactly((Object[]) types).inOrder();
             return this;
         }

@@ -3,6 +3,7 @@ package io.webby.orm.arch.factory;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
 import com.google.common.flogger.FluentLogger;
+import com.google.common.reflect.TypeToken;
 import io.webby.orm.api.annotate.Sql;
 import io.webby.orm.arch.InvalidSqlModelException;
 import io.webby.orm.arch.Naming;
@@ -158,11 +159,23 @@ class JavaClassAnalyzer {
         ));
     }
 
-    public static @NotNull Type[] getGenericTypeArguments(@NotNull Field field) {
-        if (field.getGenericType() instanceof ParameterizedType parameterizedType) {
-            return parameterizedType.getActualTypeArguments();
-        }
-        return new Type[0];
+    public static @NotNull Type[] getGenericTypeArgumentsOfField(@NotNull Field field) {
+        return getGenericTypeArguments(field.getGenericType());
+    }
+
+    @SuppressWarnings("UnstableApiUsage")
+    public static @Nullable Type[] getGenericTypeArgumentsOfInterface(@NotNull Class<?> klass,
+                                                                      @NotNull Class<?> interfaceClass) {
+        return TypeToken.of(klass).getTypes().interfaces().stream()
+            .filter(token -> token.getRawType() == interfaceClass)
+            .findFirst()
+            .map(TypeToken::getType)
+            .map(JavaClassAnalyzer::getGenericTypeArguments)
+            .orElse(null);
+    }
+
+    private static @NotNull Type[] getGenericTypeArguments(@NotNull Type type) {
+        return type instanceof ParameterizedType parameterized ? parameterized.getActualTypeArguments() : new Type[0];
     }
 
     public static boolean isPrimaryKeyField(@NotNull Field field, @NotNull ModelInput input) {
