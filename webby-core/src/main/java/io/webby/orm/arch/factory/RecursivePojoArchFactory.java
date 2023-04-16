@@ -6,9 +6,6 @@ import io.webby.orm.arch.model.*;
 import org.jetbrains.annotations.NotNull;
 
 import java.lang.reflect.Field;
-import java.util.Collection;
-
-import static io.webby.orm.arch.InvalidSqlModelException.failIf;
 
 class RecursivePojoArchFactory {
     private final RunContext runContext;
@@ -24,8 +21,6 @@ class RecursivePojoArchFactory {
     }
 
     private @NotNull PojoArch buildPojoArchForImpl(@NotNull Field field) {
-        validateFieldForPojo(field);
-
         Class<?> type = field.getType();
         for (FastTrackPojoBuilder builder : FAST_TRACK_POJO_BUILDERS) {
             if (builder.matches(type)) {
@@ -39,7 +34,7 @@ class RecursivePojoArchFactory {
             return switch (resolved.type()) {
                 case NATIVE -> PojoFieldNative.ofNative(modelField, resolved.jdbcType());
                 case FOREIGN_KEY -> null;
-                case ADAPTER -> PojoFieldAdapter.ofAdapter(modelField, resolved.adapterClass());
+                case HAS_ADAPTER -> PojoFieldAdapter.ofAdapter(modelField, resolved.adapterClass());
                 case POJO -> {
                     PojoArch nestedPojo = buildPojoArchFor(subField);
                     yield PojoFieldNested.ofNestedPojo(modelField, nestedPojo);
@@ -68,21 +63,5 @@ class RecursivePojoArchFactory {
         public @NotNull PojoArch buildPojo(@NotNull Field field) {
             return new PojoArch(field.getType(), ImmutableList.of(PojoFieldNative.ofEnum(field.getType())));
         }
-    }
-
-    private static void validateFieldForPojo(@NotNull Field field) {
-        Class<?> modelClass = field.getDeclaringClass();
-        Class<?> fieldType = field.getType();
-        String fieldName = field.getName();
-        String typeName = fieldType.getSimpleName();
-
-        failIf(fieldType.isInterface(), "Model class `%s` contains an interface field `%s` without a matching adapter: %s",
-               modelClass, typeName, fieldName);
-        failIf(Collection.class.isAssignableFrom(fieldType), "Model class `%s` contains a collection field: %s",
-               modelClass, fieldName);
-        failIf(fieldType.isArray(), "Model class `%s` contains an array field `%s` without a matching adapter: %s",
-               modelClass, typeName, fieldName);
-        failIf(fieldType == Object.class, "Model class `%s` contains a `%s` field: %s",
-               modelClass, typeName, fieldName);
     }
 }

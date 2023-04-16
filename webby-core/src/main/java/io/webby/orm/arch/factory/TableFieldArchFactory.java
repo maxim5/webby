@@ -84,7 +84,7 @@ class TableFieldArchFactory {
                 Column column = new Column(foreignIdSqlName, new ColumnType(resolved.foreignTable().second()));
                 yield FieldInference.ofForeignKey(column, resolved.foreignTable().first());
             }
-            case ADAPTER -> {
+            case HAS_ADAPTER -> {
                 AdapterApi adapterApi = AdapterApi.ofClass(resolved.adapterClass());
                 List<Column> columns = adapterApi.adapterColumns(fieldSqlName);
                 yield FieldInference.ofColumns(columns, adapterApi);

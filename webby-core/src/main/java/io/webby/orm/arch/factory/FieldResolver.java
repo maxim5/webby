@@ -7,7 +7,9 @@ import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
 import java.lang.reflect.Field;
+import java.util.Collection;
 
+import static io.webby.orm.arch.InvalidSqlModelException.failIf;
 import static java.util.Objects.requireNonNull;
 
 class FieldResolver {
@@ -35,6 +37,7 @@ class FieldResolver {
             return ResolveResult.ofAdapter(adapterClass);
         }
 
+        validateFieldForPojo(field);
         return ResolveResult.ofPojo();
     }
 
@@ -51,7 +54,7 @@ class FieldResolver {
         }
 
         public static @NotNull FieldResolver.ResolveResult ofAdapter(@NotNull Class<?> adapterClass) {
-            return new ResolveResult(ResultType.ADAPTER, null, null, adapterClass);
+            return new ResolveResult(ResultType.HAS_ADAPTER, null, null, adapterClass);
         }
 
         public static @NotNull FieldResolver.ResolveResult ofPojo() {
@@ -72,6 +75,22 @@ class FieldResolver {
     }
 
     enum ResultType {
-        NATIVE, FOREIGN_KEY, ADAPTER, POJO,
+        NATIVE, FOREIGN_KEY, HAS_ADAPTER, POJO,
+    }
+
+    private static void validateFieldForPojo(@NotNull Field field) {
+        Class<?> modelClass = field.getDeclaringClass();
+        Class<?> fieldType = field.getType();
+        String fieldName = field.getName();
+        String typeName = fieldType.getSimpleName();
+
+        failIf(fieldType.isInterface(), "Model class `%s` contains an interface field `%s` without a matching adapter: %s",
+               modelClass, typeName, fieldName);
+        failIf(Collection.class.isAssignableFrom(fieldType), "Model class `%s` contains a collection field: %s",
+               modelClass, fieldName);
+        failIf(fieldType.isArray(), "Model class `%s` contains an array field `%s` without a matching adapter: %s",
+               modelClass, typeName, fieldName);
+        failIf(fieldType == Object.class, "Model class `%s` contains a `%s` field: %s",
+               modelClass, typeName, fieldName);
     }
 }
