@@ -403,7 +403,7 @@ public class ModelTableCodegen extends BaseCodegen {
         return switch (field.typeSupport()) {
             case NATIVE -> paramName;
             case FOREIGN_KEY -> throw new AssertionError("Primary key and foreign key field: " + field);
-            case MAPPER_API -> field.mapperApiOrDie().expr().jdbcToField(paramName);
+            case MAPPER_API -> field.mapperApiOrDie().expr().fieldToJdbc(paramName);
             case ADAPTER_API -> {
                 if (field.isSingleColumn()) {
                     yield field.adapterApiOrDie().expr().toValueObject(paramName);
