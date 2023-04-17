@@ -5,8 +5,6 @@ import io.webby.orm.adapter.JdbcAdapt;
 import io.webby.orm.arch.*;
 import io.webby.util.base.EasyPrimitives.MutableInt;
 import io.webby.util.collect.OneOf;
-import io.webby.util.lazy.AtomicCacheCompute;
-import io.webby.util.lazy.CacheCompute;
 import io.webby.util.reflect.EasyAnnotations;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
@@ -28,10 +26,11 @@ public class AdapterApi implements ApiFormatter<AdapterApi.AdapterApiCallFormatt
     private static final String NEW_ARRAY = "toNewValuesArray";
 
     private final @NotNull OneOf<Class<?>, PojoArch> oneOf;
-    private final CacheCompute<String> staticClassRef = AtomicCacheCompute.createEmpty();
+    private final String staticRef;
 
     private AdapterApi(@NotNull OneOf<Class<?>, PojoArch> oneOf) {
         this.oneOf = oneOf;
+        this.staticRef = oneOf.mapToObj(AdapterApi::classToStaticRef, AdapterApi::signatureStaticRef);
     }
 
     public static @Nullable AdapterApi ofClass(@Nullable Class<?> adapterClass) {
@@ -46,29 +45,29 @@ public class AdapterApi implements ApiFormatter<AdapterApi.AdapterApiCallFormatt
         return new AdapterApiCallFormatter() {
             @Override
             public @NotNull String fillArrayValues(@NotNull String instance, @NotNull String array, @NotNull Object index) {
-                return "%s.fillArrayValues(%s, %s, %s)".formatted(staticRef(), instance, array, index) + mode.eol();
+                return "%s.fillArrayValues(%s, %s, %s)".formatted(staticRef, instance, array, index) + mode.eol();
             }
 
             @Override
             public @NotNull String createInstance(@NotNull String params) {
-                return "%s.createInstance(%s)".formatted(staticRef(), params) + mode.eol();
+                return "%s.createInstance(%s)".formatted(staticRef, params) + mode.eol();
             }
 
             @Override
             public @NotNull String toValueObject(@NotNull String param) {
-                return "%s.toValueObject(%s)".formatted(staticRef(), param) + mode.eol();
+                return "%s.toValueObject(%s)".formatted(staticRef, param) + mode.eol();
             }
 
             @Override
             public @NotNull String toNewValuesArray(@NotNull String param) {
-                return "%s.toNewValuesArray(%s)".formatted(staticRef(), param) + mode.eol();
+                return "%s.toNewValuesArray(%s)".formatted(staticRef, param) + mode.eol();
             }
         };
     }
 
     @VisibleForTesting
     public @NotNull String staticRef() {
-        return staticClassRef.getOrCompute(() -> oneOf.mapToObj(AdapterApi::classToStaticRef, AdapterApi::signatureStaticRef));
+        return staticRef;
     }
 
     private static @NotNull String classToStaticRef(@NotNull Class<?> klass) {
