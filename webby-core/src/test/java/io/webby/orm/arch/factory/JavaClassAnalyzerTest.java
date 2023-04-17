@@ -1,11 +1,10 @@
 package io.webby.orm.arch.factory;
 
 import com.google.errorprone.annotations.CanIgnoreReturnValue;
-import com.google.inject.internal.MoreTypes;
 import io.webby.orm.api.annotate.Model;
 import io.webby.orm.api.annotate.Sql;
+import io.webby.orm.api.annotate.Via;
 import io.webby.orm.codegen.ModelInput;
-import io.webby.util.func.Reversible;
 import io.webby.util.reflect.EasyMembers;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
@@ -13,11 +12,10 @@ import org.junit.jupiter.api.Test;
 
 import java.awt.*;
 import java.io.Serializable;
+import java.lang.reflect.AnnotatedElement;
 import java.lang.reflect.Field;
 import java.lang.reflect.Method;
-import java.lang.reflect.Type;
 import java.util.List;
-import java.util.Optional;
 
 import static com.google.common.truth.Truth.assertThat;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
@@ -158,41 +156,6 @@ public class JavaClassAnalyzerTest {
     }
 
     @Test
-    public void getGenericTypeArgumentsOfField_optional() {
-        record Foo(Optional<Integer> ints, Optional<String> str, Optional<Object> obj, Optional<?> wild, Optional opt) {}
-
-        assertJavaClass(Foo.class)
-            .findsGenericTypeArgumentsForField("ints", Integer.class)
-            .findsGenericTypeArgumentsForField("str", String.class)
-            .findsGenericTypeArgumentsForField("obj", Object.class)
-            .findsGenericTypeArgumentsForField("wild", getWildcardType())
-            .findsGenericTypeArgumentsForField("opt");
-    }
-
-    @Test
-    public void getGenericTypeArgumentsOfInterface_implements_interface_directly() {
-        class Foo implements Reversible<String, Integer> {
-            @Override public @NotNull Integer forward(@NotNull String s) { return 0; }
-            @Override public @NotNull String backward(@NotNull Integer integer) { return ""; }
-        }
-
-        assertJavaClass(Foo.class)
-            .findsGenericTypeArgumentsForInterface(Reversible.class, String.class, Integer.class);
-    }
-
-    @Test
-    public void getGenericTypeArgumentsOfInterface_implements_interface_chain_with_args() {
-        interface Foo<T> extends Reversible<String, T> {}
-        class Bar implements Foo<Integer> {
-            @Override public @NotNull Integer forward(@NotNull String s) { return 0; }
-            @Override public @NotNull String backward(@NotNull Integer integer) { return ""; }
-        }
-
-        assertJavaClass(Bar.class)
-            .findsGenericTypeArgumentsForInterface(Reversible.class, String.class, Integer.class);
-    }
-
-    @Test
     public void isPrimaryKeyField_default_ids() {
         record FooPojo(int id, int fooPojoId, int pojoId, int foo_pojo_id, int foo, int bar) {}
 
@@ -215,12 +178,25 @@ public class JavaClassAnalyzerTest {
             .hasPrimaryKeyField("pojoId");
     }
 
+    @Test
+    public void getViaClass_simple() {
+        record Foo(String foo, @Via(Object.class) String bar, @Via String baz) {}
+
+        assertJavaClass(Foo.class).ofField("foo").hasNoViaClass();
+        assertJavaClass(Foo.class).ofField("bar").hasViaClass(Object.class);
+        assertJavaClass(Foo.class).ofField("baz").hasNoViaClass();
+    }
+
     private static void assertFields(@NotNull List<Field> fields, @NotNull String ... names) {
         assertThat(fields.stream().map(Field::getName).toList()).containsExactlyElementsIn(names);
     }
 
     private static @NotNull JavaClassAnalyzerSubject assertJavaClass(@NotNull Class<?> klass) {
         return new JavaClassAnalyzerSubject(klass);
+    }
+
+    private static @NotNull AnnotatedElementSubject assertAnnotation(@NotNull AnnotatedElement element) {
+        return new AnnotatedElementSubject(element);
     }
 
     @CanIgnoreReturnValue
@@ -238,19 +214,9 @@ public class JavaClassAnalyzerTest {
             return this;
         }
 
-        public @NotNull JavaClassAnalyzerSubject findsGenericTypeArgumentsForField(@NotNull String name,
-                                                                                   @NotNull Type ... types) {
+        public @NotNull AnnotatedElementSubject ofField(@NotNull String name) {
             Field field = getFieldByName(name);
-            Type[] typeArguments = JavaClassAnalyzer.getGenericTypeArgumentsOfField(field);
-            assertThat(typeArguments).asList().containsExactly((Object[]) types).inOrder();
-            return this;
-        }
-
-        public @NotNull JavaClassAnalyzerSubject findsGenericTypeArgumentsForInterface(@NotNull Class<?> interfaceType,
-                                                                                       @NotNull Type ... types) {
-            Type[] typeArguments = JavaClassAnalyzer.getGenericTypeArgumentsOfInterface(klass, interfaceType);
-            assertThat(typeArguments).asList().containsExactly((Object[]) types).inOrder();
-            return this;
+            return assertAnnotation(field);
         }
 
         public @NotNull JavaClassAnalyzerSubject hasPrimaryKeyField(@NotNull String name) {
@@ -280,7 +246,18 @@ public class JavaClassAnalyzerTest {
         }
     }
 
-    private static @NotNull Type getWildcardType() {
-        return new MoreTypes.WildcardTypeImpl(new Type[]{Object.class}, new Type[0]);
+    @CanIgnoreReturnValue
+    private record AnnotatedElementSubject(@NotNull AnnotatedElement element) {
+        public @NotNull AnnotatedElementSubject hasViaClass(@NotNull Class<?> klass) {
+            Class<?> viaClass = JavaClassAnalyzer.getViaClass(element);
+            assertThat(viaClass).isEqualTo(klass);
+            return this;
+        }
+
+        public @NotNull AnnotatedElementSubject hasNoViaClass() {
+            Class<?> viaClass = JavaClassAnalyzer.getViaClass(element);
+            assertThat(viaClass).isNull();
+            return this;
+        }
     }
 }

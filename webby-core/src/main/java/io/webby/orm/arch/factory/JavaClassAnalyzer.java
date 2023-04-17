@@ -3,8 +3,8 @@ package io.webby.orm.arch.factory;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
 import com.google.common.flogger.FluentLogger;
-import com.google.common.reflect.TypeToken;
 import io.webby.orm.api.annotate.Sql;
+import io.webby.orm.api.annotate.Via;
 import io.webby.orm.arch.InvalidSqlModelException;
 import io.webby.orm.arch.Naming;
 import io.webby.orm.arch.model.ModelField;
@@ -159,25 +159,6 @@ class JavaClassAnalyzer {
         ));
     }
 
-    public static @NotNull Type[] getGenericTypeArgumentsOfField(@NotNull Field field) {
-        return getGenericTypeArguments(field.getGenericType());
-    }
-
-    @SuppressWarnings("UnstableApiUsage")
-    public static @Nullable Type[] getGenericTypeArgumentsOfInterface(@NotNull Class<?> klass,
-                                                                      @NotNull Class<?> interfaceClass) {
-        return TypeToken.of(klass).getTypes().interfaces().stream()
-            .filter(token -> token.getRawType() == interfaceClass)
-            .findFirst()
-            .map(TypeToken::getType)
-            .map(JavaClassAnalyzer::getGenericTypeArguments)
-            .orElse(null);
-    }
-
-    private static @NotNull Type[] getGenericTypeArguments(@NotNull Type type) {
-        return type instanceof ParameterizedType parameterized ? parameterized.getActualTypeArguments() : new Type[0];
-    }
-
     public static boolean isPrimaryKeyField(@NotNull Field field, @NotNull ModelInput input) {
         String fieldName = field.getName();
         return fieldName.equals("id") ||
@@ -206,7 +187,13 @@ class JavaClassAnalyzer {
         return EasyAnnotations.getOptionalAnnotation(field, Sql.class).map(Sql::nullable).orElse(false);
     }
 
-    public static @Nullable String @Nullable [] getDefaults(@NotNull Field field) {
-        return EasyAnnotations.getOptionalAnnotation(field, Sql.class).map(Sql::defaults).orElse(null);
+    public static @Nullable String @Nullable [] getDefaults(@NotNull AnnotatedElement element) {
+        return EasyAnnotations.getOptionalAnnotation(element, Sql.class).map(Sql::defaults).orElse(null);
+    }
+
+    public static @Nullable Class<?> getViaClass(@NotNull AnnotatedElement element) {
+        return EasyAnnotations.getOptionalAnnotation(element, Via.class).map(Via::value)
+            .filter(klass -> klass != Void.class)
+            .orElse(null);
     }
 }
