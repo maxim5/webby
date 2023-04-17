@@ -18,9 +18,10 @@ public class OneColumnTableField extends TableField {
                                boolean unique,
                                boolean nullable,
                                @NotNull Defaults defaults,
+                               @Nullable MapperApi mapperApi,
                                @Nullable AdapterApi adapterApi,
                                @NotNull Column column) {
-        super(parent, field, primaryKey, unique, nullable, defaults, adapterApi);
+        super(parent, field, primaryKey, unique, nullable, defaults, mapperApi, adapterApi);
         assert defaults.size() == 1 : "Columns of `%s` don't match the defaults: column=%s, defaults=%s"
             .formatted(field.name(), column, defaults);
         this.column = column;

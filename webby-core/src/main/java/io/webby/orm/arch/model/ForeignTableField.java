@@ -22,16 +22,11 @@ public class ForeignTableField extends TableField {
                              @NotNull Defaults defaults,
                              @NotNull TableArch foreignTable,
                              @NotNull Column foreignKeyColumn) {
-        super(parent, field, false, false, false, defaults, null);
+        super(parent, field, false, false, false, defaults, null, null);
         assert defaults.size() == 1 : "Columns of `%s` don't match the defaults: column=%s, defaults=%s"
             .formatted(field.name(), foreignKeyColumn, defaults);
         this.foreignTable = foreignTable;
         this.foreignKeyColumn = foreignKeyColumn;
-    }
-
-    @Override
-    public boolean isNativelySupportedType() {
-        return false;
     }
 
     public boolean isForeignKey() {

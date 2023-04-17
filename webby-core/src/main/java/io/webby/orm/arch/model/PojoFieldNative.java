@@ -13,7 +13,7 @@ public class PojoFieldNative extends PojoField {
     private final JdbcType jdbcType;
 
     private PojoFieldNative(@NotNull PojoParent parent, @NotNull ModelField field, @NotNull JdbcType jdbcType) {
-        super(parent, field);
+        super(parent, field, TypeSupport.NATIVE);
         this.jdbcType = jdbcType;
     }
 
@@ -27,22 +27,12 @@ public class PojoFieldNative extends PojoField {
         return ofNative(field, JdbcType.Int);
     }
 
-    @Override
-    public boolean isNativelySupported() {
-        return true;
-    }
-
     public @NotNull JdbcType jdbcType() {
         return jdbcType;
     }
 
     public @NotNull Column column() {
         return new Column(fullSqlName(), new ColumnType(jdbcType));
-    }
-
-    @Override
-    public @NotNull AdapterApi adapterInfo() {
-        throw new IllegalStateException("Internal error. Native field does not have an adapter: " + this);
     }
 
     @Override

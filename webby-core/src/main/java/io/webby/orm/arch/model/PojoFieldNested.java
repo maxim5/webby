@@ -10,7 +10,7 @@ public class PojoFieldNested extends PojoField {
     private final PojoArch pojo;
 
     protected PojoFieldNested(@NotNull PojoParent parent, @NotNull ModelField field, @NotNull PojoArch pojo) {
-        super(parent, field);
+        super(parent, field, TypeSupport.ADAPTER_API);
         this.pojo = pojo;
     }
 
@@ -23,7 +23,7 @@ public class PojoFieldNested extends PojoField {
     }
 
     @Override
-    public @NotNull AdapterApi adapterInfo() {
+    public @NotNull AdapterApi adapterApiOrDie() {
         return AdapterApi.ofSignature(pojo());
     }
 

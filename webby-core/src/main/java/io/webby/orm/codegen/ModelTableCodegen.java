@@ -9,7 +9,6 @@ import io.webby.orm.api.entity.*;
 import io.webby.orm.api.query.*;
 import io.webby.orm.arch.Column;
 import io.webby.orm.arch.*;
-import io.webby.orm.arch.model.AdapterApi;
 import io.webby.orm.arch.model.ForeignTableField;
 import io.webby.orm.arch.model.TableArch;
 import io.webby.orm.arch.model.TableField;
@@ -116,9 +115,12 @@ public class ModelTableCodegen extends BaseCodegen {
     }
 
     private void imports() {
-        List<Class<?>> customClasses = table.fields().stream()
-            .filter(TableField::isCustomSupportType)
-            .filter(Predicate.not(TableField::isForeignKey))
+        List<Class<?>> mapperTypes = table.fields().stream()
+            .filter(TableField::isMapperSupportedType)
+            .map(TableField::javaType)
+            .collect(Collectors.toList());
+        List<Class<?>> adapterClasses = table.fields().stream()
+            .filter(TableField::isAdapterSupportType)
             .map(TableField::javaType)
             .collect(Collectors.toList());
 
@@ -148,8 +150,9 @@ public class ModelTableCodegen extends BaseCodegen {
                 BatchEntityData.class, BatchEntityIntData.class, BatchEntityLongData.class,
                 Contextual.class
             ).map(FQN::of),
-            customClasses.stream().map(FQN::of),
-            customClasses.stream().map(adaptersScanner::locateAdapterFqn),
+            mapperTypes.stream().map(FQN::of),
+            adapterClasses.stream().map(FQN::of),
+            adapterClasses.stream().map(adaptersScanner::locateAdapterFqn),
             foreignKeyClasses.stream().map(FQN::of),
             foreignTableClasses.stream().map(FQN::of),
             foreignModelClasses.stream().map(FQN::of)
@@ -353,7 +356,7 @@ public class ModelTableCodegen extends BaseCodegen {
         Snippet where = new Snippet().withLines(WhereMaker.makeForPrimaryColumns(table));
         Map<String, String> context = EasyMaps.asMap(
             "$sql_where_literal", wrapAsStringLiteral(where, INDENT2),
-            "$pk_object", toKeyObject(requireNonNull(table.primaryKeyField()), "$pk_name")
+            "$pk_object", toPrimaryKeyObject(requireNonNull(table.primaryKeyField()), "$pk_name")
         );
 
         appendCode("""
@@ -378,7 +381,7 @@ public class ModelTableCodegen extends BaseCodegen {
         Snippet where = new Snippet().withLines(WhereMaker.makeForPrimaryColumns(table));
         Map<String, String> context = EasyMaps.asMap(
             "$sql_where_literal", wrapAsStringLiteral(where, INDENT2),
-            "$pk_object", toKeyObject(requireNonNull(table.primaryKeyField()), "$pk_name")
+            "$pk_object", toPrimaryKeyObject(requireNonNull(table.primaryKeyField()), "$pk_name")
         );
 
         appendCode("""
@@ -395,16 +398,20 @@ public class ModelTableCodegen extends BaseCodegen {
         """, EasyMaps.merge(context, mainContext, pkContext));
     }
 
-    private static @NotNull String toKeyObject(@NotNull TableField field, @NotNull String paramName) {
-        if (field.isNativelySupportedType()) {
-            return paramName;
-        }
-        AdapterApi adapterApi = requireNonNull(field.adapterApi());
-        if (field.isSingleColumn()) {
-            return "%s.toValueObject(%s)".formatted(adapterApi.staticRef(), paramName);
-        } else {
-            return "%s.toNewValuesArray(%s)".formatted(adapterApi.staticRef(), paramName);
-        }
+    private static @NotNull String toPrimaryKeyObject(@NotNull TableField field, @NotNull String paramName) {
+        assert field.isPrimaryKey() : "Primary key field expected: " + field;
+        return switch (field.typeSupport()) {
+            case NATIVE -> paramName;
+            case FOREIGN_KEY -> throw new AssertionError("Primary key and foreign key field: " + field);
+            case MAPPER_API -> field.mapperApiOrDie().expr().jdbcToField(paramName);
+            case ADAPTER_API -> {
+                if (field.isSingleColumn()) {
+                    yield field.adapterApiOrDie().expr().toValueObject(paramName);
+                } else {
+                    yield field.adapterApiOrDie().expr().toNewValuesArray(paramName);
+                }
+            }
+        };
     }
 
     private void getBatchByPk() {
@@ -927,7 +934,7 @@ public class ModelTableCodegen extends BaseCodegen {
             .withLines(WhereMaker.makeForPrimaryColumns(table));
         Map<String, String> context = EasyMaps.asMap(
             "$sql_query_literal", wrapAsStringLiteral(query, INDENT2),
-            "$pk_object", toKeyObject(requireNonNull(table.primaryKeyField()), "$pk_name")
+            "$pk_object", toPrimaryKeyObject(requireNonNull(table.primaryKeyField()), "$pk_name")
         );
 
         appendCode("""

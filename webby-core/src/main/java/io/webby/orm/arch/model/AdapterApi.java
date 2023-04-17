@@ -22,13 +22,12 @@ import java.util.Optional;
 import static io.webby.orm.arch.InvalidSqlModelException.failIf;
 import static io.webby.util.reflect.EasyMembers.*;
 
-public class AdapterApi {
-    public static final String CREATE_INSTANCE = "createInstance";
-    public static final String FILL_VALUES = "fillArrayValues";
-    public static final String NEW_ARRAY = "toNewValuesArray";
+public class AdapterApi implements ApiFormatter<AdapterApi.AdapterApiCallFormatter> {
+    private static final String CREATE_INSTANCE = "createInstance";
+    private static final String FILL_VALUES = "fillArrayValues";
+    private static final String NEW_ARRAY = "toNewValuesArray";
 
     private final @NotNull OneOf<Class<?>, PojoArch> oneOf;
-
     private final CacheCompute<String> staticClassRef = AtomicCacheCompute.createEmpty();
 
     private AdapterApi(@NotNull OneOf<Class<?>, PojoArch> oneOf) {
@@ -43,6 +42,31 @@ public class AdapterApi {
         return new AdapterApi(OneOf.ofSecond(pojoArch));
     }
 
+    public @NotNull AdapterApiCallFormatter formatter(@NotNull FormatMode mode) {
+        return new AdapterApiCallFormatter() {
+            @Override
+            public @NotNull String fillArrayValues(@NotNull String instance, @NotNull String array, @NotNull Object index) {
+                return "%s.fillArrayValues(%s, %s, %s)".formatted(staticRef(), instance, array, index) + mode.eol();
+            }
+
+            @Override
+            public @NotNull String createInstance(@NotNull String params) {
+                return "%s.createInstance(%s)".formatted(staticRef(), params) + mode.eol();
+            }
+
+            @Override
+            public @NotNull String toValueObject(@NotNull String param) {
+                return "%s.toValueObject(%s)".formatted(staticRef(), param) + mode.eol();
+            }
+
+            @Override
+            public @NotNull String toNewValuesArray(@NotNull String param) {
+                return "%s.toNewValuesArray(%s)".formatted(staticRef(), param) + mode.eol();
+            }
+        };
+    }
+
+    @VisibleForTesting
     public @NotNull String staticRef() {
         return staticClassRef.getOrCompute(() -> oneOf.mapToObj(AdapterApi::classToStaticRef, AdapterApi::signatureStaticRef));
     }
@@ -108,5 +132,12 @@ public class AdapterApi {
         Method method = findMethod(adapterClass, Scope.DECLARED, CREATE_INSTANCE);
         failIf(method == null, "JDBC adapter does not implement `%s` method: %s", CREATE_INSTANCE, adapterClass);
         return method.getParameters();
+    }
+
+    public interface AdapterApiCallFormatter {
+        @NotNull String fillArrayValues(@NotNull String instance, @NotNull String array, @NotNull Object index);
+        @NotNull String createInstance(@NotNull String params);
+        @NotNull String toValueObject(@NotNull String param);
+        @NotNull String toNewValuesArray(@NotNull String param);
     }
 }

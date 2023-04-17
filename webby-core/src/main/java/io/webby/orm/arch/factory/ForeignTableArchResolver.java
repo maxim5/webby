@@ -17,6 +17,7 @@ import java.util.Optional;
 
 import static io.webby.orm.arch.InvalidSqlModelException.assure;
 import static io.webby.orm.arch.InvalidSqlModelException.failIf;
+import static io.webby.util.reflect.EasyGenerics.getGenericTypeArgumentsOfField;
 import static java.util.Objects.requireNonNull;
 
 class ForeignTableArchResolver {
@@ -36,7 +37,7 @@ class ForeignTableArchResolver {
                fieldType == ForeignLong.class || fieldType == ForeignObj.class,
                "Invalid foreign key reference type: `%s`. Supported types: Foreign, ForeignInt, ForeignLong, ForeignObj",
                fieldType.getSimpleName());
-        Type[] actualTypeArguments = JavaClassAnalyzer.getGenericTypeArgumentsOfField(field);
+        Type[] actualTypeArguments = getGenericTypeArgumentsOfField(field);
         Class<?> keyType =
             fieldType == ForeignInt.class ?
                 int.class :

@@ -11,6 +11,8 @@ import org.jetbrains.annotations.Nullable;
 
 import java.util.List;
 
+import static java.util.Objects.requireNonNull;
+
 @Immutable
 public abstract class TableField implements HasColumns, HasPrefixedColumns {
     protected final TableArch parent;
@@ -19,7 +21,9 @@ public abstract class TableField implements HasColumns, HasPrefixedColumns {
     protected final boolean unique;
     protected final boolean nullable;
     protected final Defaults defaults;
+    protected final MapperApi mapperApi;
     protected final AdapterApi adapterApi;
+    protected final TypeSupport typeSupport;
 
     public TableField(@NotNull TableArch parent,
                       @NotNull ModelField field,
@@ -27,14 +31,18 @@ public abstract class TableField implements HasColumns, HasPrefixedColumns {
                       boolean unique,
                       boolean nullable,
                       @NotNull Defaults defaults,
+                      @Nullable MapperApi mapperApi,
                       @Nullable AdapterApi adapterApi) {
+        assert !(mapperApi != null && adapterApi != null) : "Field can't have both mapper and adapter: " + field;
         this.parent = parent;
         this.field = field;
         this.primaryKey = primaryKey;
         this.unique = unique;
         this.nullable = nullable;
         this.defaults = defaults;
+        this.mapperApi = mapperApi;
         this.adapterApi = adapterApi;
+        this.typeSupport = TypeSupport.detectFrom(isForeignKey(), mapperApi, adapterApi);
     }
 
     public @NotNull TableArch parent() {
@@ -83,16 +91,28 @@ public abstract class TableField implements HasColumns, HasPrefixedColumns {
         return defaults.at(index);
     }
 
+    public @NotNull TypeSupport typeSupport() {
+        return typeSupport;
+    }
+
     public boolean isNativelySupportedType() {
-        return adapterApi == null;
+        return typeSupport == TypeSupport.NATIVE;
     }
 
-    public boolean isCustomSupportType() {
-        return !isNativelySupportedType();
+    public boolean isMapperSupportedType() {
+        return typeSupport == TypeSupport.MAPPER_API;
     }
 
-    public @Nullable AdapterApi adapterApi() {
-        return adapterApi;
+    public boolean isAdapterSupportType() {
+        return typeSupport == TypeSupport.ADAPTER_API;
+    }
+
+    public @NotNull MapperApi mapperApiOrDie() {
+        return requireNonNull(mapperApi);
+    }
+
+    public @NotNull AdapterApi adapterApiOrDie() {
+        return requireNonNull(adapterApi);
     }
 
     @Override
@@ -111,5 +131,25 @@ public abstract class TableField implements HasColumns, HasPrefixedColumns {
             nullable,
             defaults
         );
+    }
+
+    public enum TypeSupport {
+        NATIVE,
+        FOREIGN_KEY,
+        MAPPER_API,
+        ADAPTER_API;
+
+        static @NotNull TypeSupport detectFrom(boolean isForeignKey, @Nullable MapperApi mapper, @Nullable AdapterApi adapter) {
+            if (mapper != null) {
+                return TypeSupport.MAPPER_API;
+            }
+            if (adapter != null) {
+                return TypeSupport.ADAPTER_API;
+            }
+            if (isForeignKey) {
+                return TypeSupport.FOREIGN_KEY;
+            }
+            return TypeSupport.NATIVE;
+        }
     }
 }

@@ -14,11 +14,13 @@ import java.util.stream.Collectors;
 public abstract class PojoField {
     protected final PojoParent parent;
     protected final ModelField field;
+    protected final TypeSupport typeSupport;
     private final CacheCompute<String> lazyNameRef = AtomicCacheCompute.createEmpty();
 
-    protected PojoField(@NotNull PojoParent parent, @NotNull ModelField field) {
+    protected PojoField(@NotNull PojoParent parent, @NotNull ModelField field, @NotNull TypeSupport typeSupport) {
         this.parent = parent;
         this.field = field;
+        this.typeSupport = typeSupport;
     }
 
     public @NotNull PojoParent parent() {
@@ -56,21 +58,34 @@ public abstract class PojoField {
         }
     }
 
-    public boolean isNativelySupported() {
-        return false;
+    public @NotNull TypeSupport typeSupport() {
+        return typeSupport;
     }
 
-    public abstract @NotNull AdapterApi adapterInfo();
+    public @NotNull MapperApi mapperApiOrDie() {
+        throw new IllegalStateException("Internal error. Field does not have a mapper: " + this);
+    }
+
+    public @NotNull AdapterApi adapterApiOrDie() {
+        throw new IllegalStateException("Internal error. Field does not have an adapter: " + this);
+    }
 
     public abstract @NotNull PojoField reattachedTo(@NotNull PojoParent parent);
 
     @Override
     public boolean equals(Object obj) {
-        return obj instanceof PojoField that && Objects.equals(this.parent, that.parent) && Objects.equals(this.field, that.field);
+        return obj instanceof PojoField that && Objects.equals(this.parent, that.parent) &&
+            Objects.equals(this.field, that.field) && Objects.equals(this.typeSupport, that.typeSupport);
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(parent, field);
+        return Objects.hash(parent, field, typeSupport);
+    }
+
+    public enum TypeSupport {
+        NATIVE,
+        MAPPER_API,
+        ADAPTER_API,
     }
 }

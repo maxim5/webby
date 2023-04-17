@@ -121,7 +121,7 @@ public class ArchFactoryTest {
             .isSingleColumn("foo", JdbcType.String)
             .hasConstraints(USUAL_NOT_NULL)
             .doesNotHaveDefault()
-            .isCustomSupportedType()
+            .isAdapterSupportedType()
             .usesAdapter("CharacterJdbcAdapter");
     }
 
@@ -149,7 +149,7 @@ public class ArchFactoryTest {
             .hasColumns(Pair.of("foo_a", JdbcType.Int), Pair.of("foo_b", JdbcType.String))
             .hasConstraints(USUAL_NOT_NULL)
             .doesNotHaveAnyDefaults()
-            .isCustomSupportedType()
+            .isAdapterSupportedType()
             .usesAdapter("TupleJdbcAdapter.ADAPTER");
     }
 
@@ -163,7 +163,7 @@ public class ArchFactoryTest {
             .hasColumns(Pair.of("point_x", JdbcType.Int), Pair.of("point_y", JdbcType.Int))
             .hasConstraints(USUAL_NOT_NULL)
             .doesNotHaveAnyDefaults()
-            .isCustomSupportedType()
+            .isAdapterSupportedType()
             .usesAdapter("PointJdbcAdapter.ADAPTER");
     }
 
@@ -261,8 +261,7 @@ public class ArchFactoryTest {
             .isSingleColumn("type_id", JdbcType.Int)
             .isForeign("type_id", "type")
             .hasConstraints(FOREIGN_KEY_NOT_NULL)
-            .doesNotHaveDefault()
-            .isCustomSupportedType();
+            .doesNotHaveDefault();
     }
 
     @Test
@@ -276,8 +275,7 @@ public class ArchFactoryTest {
             .isSingleColumn("type_id", JdbcType.Long)
             .isForeign("type_id", "type")
             .hasConstraints(FOREIGN_KEY_NOT_NULL)
-            .doesNotHaveDefault()
-            .isCustomSupportedType();
+            .doesNotHaveDefault();
     }
 
     @Test
@@ -291,8 +289,7 @@ public class ArchFactoryTest {
             .isSingleColumn("type_id", JdbcType.String)
             .isForeign("type_id", "type")
             .hasConstraints(FOREIGN_KEY_NOT_NULL)
-            .doesNotHaveDefault()
-            .isCustomSupportedType();
+            .doesNotHaveDefault();
     }
 
     /** Single field with default **/
@@ -361,7 +358,7 @@ public class ArchFactoryTest {
             .hasConstraints(USUAL_NOT_NULL)
             .hasDefault("foo_a", "0")
             .hasDefault("foo_b", "")
-            .isCustomSupportedType()
+            .isAdapterSupportedType()
             .usesAdapter("TupleJdbcAdapter.ADAPTER");
     }
 }

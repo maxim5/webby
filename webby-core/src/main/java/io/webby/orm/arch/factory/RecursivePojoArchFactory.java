@@ -34,6 +34,10 @@ class RecursivePojoArchFactory {
             return switch (resolved.type()) {
                 case NATIVE -> PojoFieldNative.ofNative(modelField, resolved.jdbcType());
                 case FOREIGN_KEY -> null;
+                case HAS_MAPPER -> {
+                    MapperApi mapperApi = MapperApi.ofExistingMapper(resolved.mapperClass(), subField.getGenericType());
+                    yield PojoFieldMapper.ofMapper(modelField, mapperApi);
+                }
                 case HAS_ADAPTER -> PojoFieldAdapter.ofAdapter(modelField, resolved.adapterClass());
                 case POJO -> {
                     PojoArch nestedPojo = buildPojoArchFor(subField);

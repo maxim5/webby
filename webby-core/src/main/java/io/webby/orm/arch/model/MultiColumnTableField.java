@@ -17,7 +17,7 @@ public class MultiColumnTableField extends TableField {
                                  @NotNull Defaults defaults,
                                  @NotNull AdapterApi adapterApi,
                                  @NotNull ImmutableList<Column> columns) {
-        super(parent, field, primaryKey, unique, nullable, defaults, adapterApi);
+        super(parent, field, primaryKey, unique, nullable, defaults, null, adapterApi);
         assert columns.size() > 1 : "MultiColumnTableField `%s` constructed from a single column %s"
             .formatted(field.name(), columns);
         assert columns.size() == defaults.size() : "Columns of `%s` don't match the defaults: columns=%s, defaults=%s"

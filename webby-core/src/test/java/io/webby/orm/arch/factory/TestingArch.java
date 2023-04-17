@@ -171,6 +171,7 @@ public class TestingArch {
             Truth.assertThat(((ForeignTableField) tableField).foreignKeyColumn().sqlName()).isEqualTo(column);
             Truth.assertThat(((ForeignTableField) tableField).getForeignTable()).isNotNull();
             Truth.assertThat(((ForeignTableField) tableField).getForeignTable().sqlName()).isEqualTo(table);
+            Truth.assertThat(tableField.typeSupport()).isEqualTo(TableField.TypeSupport.FOREIGN_KEY);
             return this;
         }
 
@@ -196,20 +197,23 @@ public class TestingArch {
         }
 
         public @NotNull TableFieldSubject isNativelySupportedType() {
+            Truth.assertThat(tableField.typeSupport()).isEqualTo(TableField.TypeSupport.NATIVE);
             Truth.assertThat(tableField.isNativelySupportedType()).isTrue();
-            Truth.assertThat(tableField.isCustomSupportType()).isFalse();
+            Truth.assertThat(tableField.isMapperSupportedType()).isFalse();
+            Truth.assertThat(tableField.isAdapterSupportType()).isFalse();
             return this;
         }
 
-        public @NotNull TableFieldSubject isCustomSupportedType() {
+        public @NotNull TableFieldSubject isAdapterSupportedType() {
+            Truth.assertThat(tableField.typeSupport()).isEqualTo(TableField.TypeSupport.ADAPTER_API);
+            Truth.assertThat(tableField.isAdapterSupportType()).isTrue();
             Truth.assertThat(tableField.isNativelySupportedType()).isFalse();
-            Truth.assertThat(tableField.isCustomSupportType()).isTrue();
+            Truth.assertThat(tableField.isMapperSupportedType()).isFalse();
             return this;
         }
 
         public @NotNull TableFieldSubject usesAdapter(@NotNull String staticRef) {
-            Truth.assertThat(tableField.adapterApi()).isNotNull();
-            Truth.assertThat(tableField.adapterApi().staticRef()).isEqualTo(staticRef);
+            Truth.assertThat(tableField.adapterApiOrDie().staticRef()).isEqualTo(staticRef);
             return this;
         }
     }

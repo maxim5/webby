@@ -16,7 +16,7 @@ public class PojoFieldAdapter extends PojoField {
     private final CacheCompute<List<Column>> columnsRef = AtomicCacheCompute.createEmpty();
 
     protected PojoFieldAdapter(@NotNull PojoParent parent, @NotNull ModelField field, @NotNull Class<?> adapter) {
-        super(parent, field);
+        super(parent, field, TypeSupport.ADAPTER_API);
         this.adapterApi = AdapterApi.ofClass(adapter);
         this.adapter = adapter;
     }
@@ -30,7 +30,7 @@ public class PojoFieldAdapter extends PojoField {
     }
 
     @Override
-    public @NotNull AdapterApi adapterInfo() {
+    public @NotNull AdapterApi adapterApiOrDie() {
         return adapterApi;
     }
 

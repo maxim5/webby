@@ -32,6 +32,11 @@ class FieldResolver {
             return ResolveResult.ofForeignKey(foreignTableInfo);
         }
 
+        Class<?> mapperClass = JavaClassAnalyzer.getViaClass(field);
+        if (mapperClass != null) {
+            return ResolveResult.ofMapper(mapperClass);
+        }
+
         Class<?> adapterClass = runContext.adaptersScanner().locateAdapterClass(field.getType());
         if (adapterClass != null) {
             return ResolveResult.ofAdapter(adapterClass);
@@ -44,21 +49,26 @@ class FieldResolver {
     record ResolveResult(@NotNull ResultType type,
                          @Nullable JdbcType jdbcType,
                          @Nullable Pair<TableArch, JdbcType> foreignTable,
+                         @Nullable Class<?> mapperClass,
                          @Nullable Class<?> adapterClass) {
         public static @NotNull FieldResolver.ResolveResult ofNative(@NotNull JdbcType jdbcType) {
-            return new ResolveResult(ResultType.NATIVE, jdbcType, null, null);
+            return new ResolveResult(ResultType.NATIVE, jdbcType, null, null, null);
         }
 
         public static @NotNull FieldResolver.ResolveResult ofForeignKey(@NotNull Pair<TableArch, JdbcType> foreignTable) {
-            return new ResolveResult(ResultType.FOREIGN_KEY, null, foreignTable, null);
+            return new ResolveResult(ResultType.FOREIGN_KEY, null, foreignTable, null, null);
         }
 
         public static @NotNull FieldResolver.ResolveResult ofAdapter(@NotNull Class<?> adapterClass) {
-            return new ResolveResult(ResultType.HAS_ADAPTER, null, null, adapterClass);
+            return new ResolveResult(ResultType.HAS_ADAPTER, null, null, null, adapterClass);
+        }
+
+        public static @NotNull FieldResolver.ResolveResult ofMapper(@NotNull Class<?> mapperClass) {
+            return new ResolveResult(ResultType.HAS_MAPPER, null, null, mapperClass, null);
         }
 
         public static @NotNull FieldResolver.ResolveResult ofPojo() {
-            return new ResolveResult(ResultType.POJO, null, null, null);
+            return new ResolveResult(ResultType.POJO, null, null, null, null);
         }
 
         public @NotNull JdbcType jdbcType() {
@@ -69,13 +79,17 @@ class FieldResolver {
             return requireNonNull(foreignTable);
         }
 
+        public @NotNull Class<?> mapperClass() {
+            return requireNonNull(mapperClass);
+        }
+
         public @NotNull Class<?> adapterClass() {
             return requireNonNull(adapterClass);
         }
     }
 
     enum ResultType {
-        NATIVE, FOREIGN_KEY, HAS_ADAPTER, POJO,
+        NATIVE, FOREIGN_KEY, HAS_MAPPER, HAS_ADAPTER, POJO,
     }
 
     private static void validateFieldForPojo(@NotNull Field field) {

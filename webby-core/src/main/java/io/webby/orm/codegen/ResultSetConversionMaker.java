@@ -18,7 +18,6 @@ import java.util.stream.Stream;
 import static io.webby.orm.api.ReadFollow.*;
 import static io.webby.orm.codegen.JavaSupport.INDENT1;
 import static io.webby.orm.codegen.Joining.COMMA_JOINER;
-import static java.util.Objects.requireNonNull;
 
 class ResultSetConversionMaker {
     private static final Set<Class<?>> FULL_NAME_CLASSES = Set.of(java.util.Date.class, java.sql.Date.class);
@@ -46,17 +45,25 @@ class ResultSetConversionMaker {
     }
 
     private @NotNull String fieldCreateExpr(@NotNull TableField field) {
-        if (field.isForeignKey()) {
-            assert field instanceof ForeignTableField : "Expected a foreign key field, but found %s".formatted(field);
-            return foreignFieldSwitchExpr((ForeignTableField) field);
-        } else if (field.isNativelySupportedType()) {
-            assert field instanceof OneColumnTableField : "Native field is not one column: %s".formatted(field);
-            return resultSetGetterExpr(((OneColumnTableField) field).column());
-        } else {
-            String staticRef = requireNonNull(field.adapterApi()).staticRef();
-            String params = field.columns().stream().map(this::resultSetGetterExpr).collect(COMMA_JOINER);
-            return "%s.createInstance(%s)".formatted(staticRef, params);
-        }
+        return switch (field.typeSupport()) {
+            case NATIVE -> {
+                assert field instanceof OneColumnTableField : "Native field is not one column: %s".formatted(field);
+                yield resultSetGetterExpr(((OneColumnTableField) field).column());
+            }
+            case FOREIGN_KEY -> {
+                assert field instanceof ForeignTableField : "Expected a foreign key field, but found %s".formatted(field);
+                yield foreignFieldSwitchExpr((ForeignTableField) field);
+            }
+            case MAPPER_API -> {
+                assert field instanceof OneColumnTableField : "Mapped field is not one column: %s".formatted(field);
+                String resultSetGetterExpr = resultSetGetterExpr(((OneColumnTableField) field).column());
+                yield field.mapperApiOrDie().expr().jdbcToField(resultSetGetterExpr);
+            }
+            case ADAPTER_API -> {
+                String params = field.columns().stream().map(this::resultSetGetterExpr).collect(COMMA_JOINER);
+                yield field.adapterApiOrDie().expr().createInstance(params);
+            }
+        };
     }
 
     private @NotNull String foreignFieldSwitchExpr(@NotNull ForeignTableField field) {

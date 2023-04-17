@@ -55,6 +55,7 @@ class TableFieldArchFactory {
                                            isUnique,
                                            isNullable,
                                            Defaults.ofOneColumn(defaults),
+                                           inference.mapperApi(),
                                            inference.adapterApi(),
                                            requireNonNull(inference.singleColumn()));
         } else {
@@ -84,6 +85,11 @@ class TableFieldArchFactory {
                 Column column = new Column(foreignIdSqlName, new ColumnType(resolved.foreignTable().second()));
                 yield FieldInference.ofForeignKey(column, resolved.foreignTable().first());
             }
+            case HAS_MAPPER -> {
+                MapperApi mapperApi = MapperApi.ofExistingMapper(resolved.mapperClass(), field.getGenericType());
+                Column column = mapperApi.mapperColumn(fieldSqlName);
+                yield FieldInference.ofSingleColumn(column, mapperApi);
+            }
             case HAS_ADAPTER -> {
                 AdapterApi adapterApi = AdapterApi.ofClass(resolved.adapterClass());
                 List<Column> columns = adapterApi.adapterColumns(fieldSqlName);
@@ -99,26 +105,31 @@ class TableFieldArchFactory {
 
     private record FieldInference(@Nullable Column singleColumn,
                                   @Nullable ImmutableList<Column> multiColumns,
+                                  @Nullable MapperApi mapperApi,
                                   @Nullable AdapterApi adapterApi,
                                   @Nullable TableArch foreignTable) {
         public static FieldInference ofNativeColumn(@NotNull Column column) {
-            return new FieldInference(column, null, null, null);
+            return new FieldInference(column, null, null, null, null);
         }
 
         public static FieldInference ofColumns(@NotNull List<Column> columns, @NotNull AdapterApi adapterApi) {
             return columns.size() == 1 ? ofSingleColumn(columns.get(0), adapterApi) : ofMultiColumns(columns, adapterApi);
         }
 
+        public static FieldInference ofSingleColumn(@NotNull Column column, @NotNull MapperApi mapperApi) {
+            return new FieldInference(column, null, mapperApi, null, null);
+        }
+
         public static FieldInference ofSingleColumn(@NotNull Column column, @NotNull AdapterApi adapterApi) {
-            return new FieldInference(column, null, adapterApi, null);
+            return new FieldInference(column, null, null, adapterApi, null);
         }
 
         public static FieldInference ofMultiColumns(@NotNull List<Column> columns, @NotNull AdapterApi adapterApi) {
-            return new FieldInference(null, ImmutableList.copyOf(columns), adapterApi, null);
+            return new FieldInference(null, ImmutableList.copyOf(columns), null, adapterApi, null);
         }
 
         public static FieldInference ofForeignKey(@NotNull Column column, @NotNull TableArch foreignTable) {
-            return new FieldInference(column, null, null, foreignTable);
+            return new FieldInference(column, null, null, null, foreignTable);
         }
 
         public boolean isForeignTable() {

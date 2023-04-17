@@ -55,6 +55,8 @@ public final class PojoArch implements HasColumns {
             iterateAllFields(field -> {
                 if (field instanceof PojoFieldNative fieldNative) {
                     result.add(fieldNative.column());
+                } else if (field instanceof PojoFieldMapper fieldMapper) {
+                    result.add(fieldMapper.column());
                 } else if (field instanceof PojoFieldAdapter fieldAdapter) {
                     result.addAll(fieldAdapter.columns());
                 } else if (field instanceof PojoFieldNested ignore) {
