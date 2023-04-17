@@ -23,6 +23,8 @@ public class DemoTablesCodegenMain {
         ModelInput.of(EnumModel.class),
         ModelInput.of(NestedModel.class),
         ModelInput.of(DeepNestedModel.class),
+        ModelInput.of(MapperModel.class),
+        ModelInput.of(PojoWithMapperModel.class),
         ModelInput.of(PojoWithAdapterModel.class),
         ModelInput.of(NullableModel.class),
         ModelInput.of(InheritedModel.class),
