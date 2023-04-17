@@ -30,6 +30,7 @@ public class DemoTablesCodegenMain {
         ModelInput.of(InheritedModel.class),
         ModelInput.of(ComplexIdModel.class),
         ModelInput.of(AtomicModel.class),
+        ModelInput.of(OptionalModel.class),
 
         ModelInput.of(ForeignKeyModel.InnerInt.class),
         ModelInput.of(ForeignKeyModel.InnerLong.class),

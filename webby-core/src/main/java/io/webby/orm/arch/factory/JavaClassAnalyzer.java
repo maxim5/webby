@@ -18,10 +18,7 @@ import org.jetbrains.annotations.VisibleForTesting;
 
 import java.lang.annotation.Annotation;
 import java.lang.reflect.*;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 import java.util.function.Function;
 import java.util.function.Predicate;
 import java.util.logging.Level;
@@ -183,6 +180,9 @@ class JavaClassAnalyzer {
             if (EasyAnnotations.getOptionalAnnotation(field, annotation).isPresent()) {
                 return true;
             }
+        }
+        if (field.getType() == Optional.class) {
+            return true;
         }
         return EasyAnnotations.getOptionalAnnotation(field, Sql.class).map(Sql::nullable).orElse(false);
     }
