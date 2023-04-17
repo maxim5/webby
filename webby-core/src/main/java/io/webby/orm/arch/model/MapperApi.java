@@ -22,11 +22,13 @@ public class MapperApi implements ApiFormatter<MapperApi.MapperCallFormatter> {
         this.formatter = formatter;
     }
 
-    public static @NotNull MapperApi ofExistingMapper(@NotNull Class<?> mapperClass, @NotNull Type fieldType) {
+    public static @NotNull MapperApi ofExistingMapper(@NotNull Class<?> mapperClass,
+                                                      @NotNull Type fieldType,
+                                                      boolean nullable) {
         String staticRef = classToStaticRef(mapperClass);
         MapperClassInference inference = infer(mapperClass, fieldType);
-        String forwardCall = inference.isJdbcFirstArgument() ? "backward" : "forward";
-        String backwardCall = inference.isJdbcFirstArgument() ? "forward" : "backward";
+        String forwardCall = (inference.isJdbcFirstArgument() ? "backward" : "forward") + (nullable ? "Nullable" : "");
+        String backwardCall = (inference.isJdbcFirstArgument() ? "forward" : "backward") + (nullable ? "Nullable" : "");
         MapperCallFormatter formatter = new MapperCallFormatter() {
             @Override
             public @NotNull String jdbcToField(@NotNull String jdbcParam) {

@@ -86,7 +86,8 @@ class TableFieldArchFactory {
                 yield FieldInference.ofForeignKey(column, resolved.foreignTable().first());
             }
             case HAS_MAPPER -> {
-                MapperApi mapperApi = MapperApi.ofExistingMapper(resolved.mapperClass(), field.getGenericType());
+                boolean nullable = JavaClassAnalyzer.isNullableField(field);
+                MapperApi mapperApi = MapperApi.ofExistingMapper(resolved.mapperClass(), field.getGenericType(), nullable);
                 Column column = mapperApi.mapperColumn(fieldSqlName);
                 yield FieldInference.ofSingleColumn(column, mapperApi);
             }
