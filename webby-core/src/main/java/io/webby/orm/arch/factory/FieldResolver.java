@@ -1,6 +1,7 @@
 package io.webby.orm.arch.factory;
 
 import io.webby.orm.arch.JdbcType;
+import io.webby.orm.arch.model.MapperApi;
 import io.webby.orm.arch.model.TableArch;
 import io.webby.util.collect.Pair;
 import org.jetbrains.annotations.NotNull;
@@ -37,6 +38,11 @@ class FieldResolver {
             return ResolveResult.ofMapper(mapperClass);
         }
 
+        MapperApi inlineMapperApi = InlineMappers.tryInlineMapperIfSupported(field);
+        if (inlineMapperApi != null) {
+            return ResolveResult.ofInlineMapper(inlineMapperApi);
+        }
+
         Class<?> adapterClass = runContext.adaptersScanner().locateAdapterClass(field.getType());
         if (adapterClass != null) {
             return ResolveResult.ofAdapter(adapterClass);
@@ -50,25 +56,30 @@ class FieldResolver {
                          @Nullable JdbcType jdbcType,
                          @Nullable Pair<TableArch, JdbcType> foreignTable,
                          @Nullable Class<?> mapperClass,
+                         @Nullable MapperApi mapperApi,
                          @Nullable Class<?> adapterClass) {
         public static @NotNull FieldResolver.ResolveResult ofNative(@NotNull JdbcType jdbcType) {
-            return new ResolveResult(ResultType.NATIVE, jdbcType, null, null, null);
+            return new ResolveResult(ResultType.NATIVE, jdbcType, null, null, null, null);
         }
 
         public static @NotNull FieldResolver.ResolveResult ofForeignKey(@NotNull Pair<TableArch, JdbcType> foreignTable) {
-            return new ResolveResult(ResultType.FOREIGN_KEY, null, foreignTable, null, null);
+            return new ResolveResult(ResultType.FOREIGN_KEY, null, foreignTable, null, null, null);
         }
 
         public static @NotNull FieldResolver.ResolveResult ofAdapter(@NotNull Class<?> adapterClass) {
-            return new ResolveResult(ResultType.HAS_ADAPTER, null, null, null, adapterClass);
+            return new ResolveResult(ResultType.HAS_ADAPTER, null, null, null, null, adapterClass);
         }
 
         public static @NotNull FieldResolver.ResolveResult ofMapper(@NotNull Class<?> mapperClass) {
-            return new ResolveResult(ResultType.HAS_MAPPER, null, null, mapperClass, null);
+            return new ResolveResult(ResultType.HAS_MAPPER, null, null, mapperClass, null, null);
+        }
+
+        public static @NotNull FieldResolver.ResolveResult ofInlineMapper(@NotNull MapperApi mapperApi) {
+            return new ResolveResult(ResultType.INLINE_MAPPER, null, null, null, mapperApi, null);
         }
 
         public static @NotNull FieldResolver.ResolveResult ofPojo() {
-            return new ResolveResult(ResultType.POJO, null, null, null, null);
+            return new ResolveResult(ResultType.POJO, null, null, null, null, null);
         }
 
         public @NotNull JdbcType jdbcType() {
@@ -83,13 +94,22 @@ class FieldResolver {
             return requireNonNull(mapperClass);
         }
 
+        public @NotNull MapperApi mapperApi() {
+            return requireNonNull(mapperApi);
+        }
+
         public @NotNull Class<?> adapterClass() {
             return requireNonNull(adapterClass);
         }
     }
 
     enum ResultType {
-        NATIVE, FOREIGN_KEY, HAS_MAPPER, HAS_ADAPTER, POJO,
+        NATIVE,
+        FOREIGN_KEY,
+        HAS_MAPPER,
+        INLINE_MAPPER,
+        HAS_ADAPTER,
+        POJO,
     }
 
     private static void validateFieldForPojo(@NotNull Field field) {

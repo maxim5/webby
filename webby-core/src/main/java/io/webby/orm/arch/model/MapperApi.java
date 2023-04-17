@@ -42,6 +42,10 @@ public class MapperApi implements ApiFormatter<MapperApi.MapperCallFormatter> {
         return new MapperApi(inference.jdbcType(), formatter);
     }
 
+    public static @NotNull MapperApi ofInlineMapper(@NotNull JdbcType jdbcType, @NotNull MapperCallFormatter formatter) {
+        return new MapperApi(jdbcType, formatter);
+    }
+
     private record MapperClassInference(@NotNull JdbcType jdbcType, boolean isJdbcFirstArgument) {}
 
     private static @NotNull MapperClassInference infer(@NotNull Class<?> mapperClass, @NotNull Type fieldType) {

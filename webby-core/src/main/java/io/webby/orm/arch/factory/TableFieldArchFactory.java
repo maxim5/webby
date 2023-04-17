@@ -91,6 +91,10 @@ class TableFieldArchFactory {
                 Column column = mapperApi.mapperColumn(fieldSqlName);
                 yield FieldInference.ofSingleColumn(column, mapperApi);
             }
+            case INLINE_MAPPER -> {
+                Column column = resolved.mapperApi().mapperColumn(fieldSqlName);
+                yield FieldInference.ofSingleColumn(column, resolved.mapperApi());
+            }
             case HAS_ADAPTER -> {
                 AdapterApi adapterApi = AdapterApi.ofClass(resolved.adapterClass());
                 List<Column> columns = adapterApi.adapterColumns(fieldSqlName);

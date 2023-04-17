@@ -35,10 +35,6 @@ public final class PojoArch implements HasColumns {
         return Naming.defaultAdapterName(pojoType);
     }
 
-    public boolean isEnum() {
-        return pojoType.isEnum();
-    }
-
     public void iterateAllFields(@NotNull Consumer<PojoField> consumer) {
         for (PojoField field : fields) {
             consumer.accept(field);

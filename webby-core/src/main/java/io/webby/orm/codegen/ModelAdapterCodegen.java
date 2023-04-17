@@ -142,12 +142,6 @@ public class ModelAdapterCodegen extends BaseCodegen {
                                                     @NotNull Map<PojoField, Column> nativeFieldsColumns,
                                                     @NotNull StringBuilder builder) {
         String canonicalName = Naming.shortCanonicalJavaName(pojo.pojoType());
-
-        if (pojo.isEnum()) {
-            String name = nativeFieldsColumns.get(pojo.fields().get(0)).sqlName();
-            return builder.append(canonicalName).append(".values()[").append(name).append("]").toString();
-        }
-
         builder.append("new ").append(canonicalName).append("(");
         for (PojoField field : pojo.fields()) {
             if (field instanceof PojoFieldNative) {

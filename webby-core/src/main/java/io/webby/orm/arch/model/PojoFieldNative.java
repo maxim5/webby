@@ -21,12 +21,6 @@ public class PojoFieldNative extends PojoField {
         return new PojoFieldNative(PojoParent.DETACHED, field, jdbcType);
     }
 
-    public static @NotNull PojoField ofEnum(@NotNull Class<?> type) {
-        assert type.isEnum() : "Type is not an enum: %s".formatted(type);
-        ModelField field = new ModelField("ord", "ordinal()", "ord", type, type);
-        return ofNative(field, JdbcType.Int);
-    }
-
     public @NotNull JdbcType jdbcType() {
         return jdbcType;
     }
