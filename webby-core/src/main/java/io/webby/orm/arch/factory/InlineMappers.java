@@ -11,6 +11,7 @@ import org.jetbrains.annotations.Nullable;
 import java.lang.reflect.Field;
 import java.lang.reflect.Type;
 import java.util.Optional;
+import java.util.concurrent.atomic.AtomicReference;
 import java.util.function.Function;
 import java.util.function.Predicate;
 
@@ -20,7 +21,8 @@ import static java.util.Objects.requireNonNull;
 public class InlineMappers {
     private static final ImmutableList<Inliner> SUPPORTED_INLINERS = ImmutableList.of(
         wrap(field -> field.getType().isEnum(), InlineMappers::ofEnum),
-        wrap(field -> field.getType() == Optional.class && hasNativeArgument(field), InlineMappers::ofOptional)
+        wrap(field -> field.getType() == Optional.class && hasNativeArgument(field), InlineMappers::ofOptional),
+        wrap(field -> field.getType() == AtomicReference.class && hasNativeArgument(field), InlineMappers::ofAtomicReference)
     );
 
     public static @Nullable MapperApi tryInlineMapperIfSupported(@NotNull Field field) {
@@ -58,6 +60,22 @@ public class InlineMappers {
             @Override
             public @NotNull String fieldToJdbc(@NotNull String fieldParam) {
                 return "%s.orElse(null)".formatted(fieldParam);
+            }
+        };
+        return MapperApi.ofInlineMapper(requireNonNull(jdbcType), formatter);
+    }
+
+    public static @NotNull MapperApi ofAtomicReference(@NotNull Field field) {
+        assert field.getType() == AtomicReference.class : "Field is not an AtomicReference: %s".formatted(field);
+        JdbcType jdbcType = getJdbcTypeFromGenericTypeArguments(field);
+        MapperCallFormatter formatter = new MapperCallFormatter() {
+            @Override
+            public @NotNull String jdbcToField(@NotNull String jdbcParam) {
+                return "new AtomicReference<>(%s)".formatted(jdbcParam);
+            }
+            @Override
+            public @NotNull String fieldToJdbc(@NotNull String fieldParam) {
+                return "%s.get()".formatted(fieldParam);
             }
         };
         return MapperApi.ofInlineMapper(requireNonNull(jdbcType), formatter);

@@ -19,6 +19,7 @@ import org.jetbrains.annotations.VisibleForTesting;
 import java.lang.annotation.Annotation;
 import java.lang.reflect.*;
 import java.util.*;
+import java.util.concurrent.atomic.AtomicReference;
 import java.util.function.Function;
 import java.util.function.Predicate;
 import java.util.logging.Level;
@@ -174,6 +175,7 @@ class JavaClassAnalyzer {
         org.checkerframework.checker.nullness.qual.Nullable.class,
         Nullable.class  // retention policy: CLASS
     );
+    private static final ImmutableList<Class<?>> NULLABLE_TYPES = ImmutableList.of(Optional.class, AtomicReference.class);
 
     public static boolean isNullableField(@NotNull Field field) {
         for (Class<? extends Annotation> annotation : NULLABLE_ANNOTATIONS) {
@@ -181,7 +183,7 @@ class JavaClassAnalyzer {
                 return true;
             }
         }
-        if (field.getType() == Optional.class) {
+        if (NULLABLE_TYPES.contains(field.getType())) {
             return true;
         }
         return EasyAnnotations.getOptionalAnnotation(field, Sql.class).map(Sql::nullable).orElse(false);

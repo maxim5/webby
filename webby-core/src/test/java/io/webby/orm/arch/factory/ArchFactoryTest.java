@@ -8,11 +8,14 @@ import io.webby.orm.api.annotate.Sql;
 import io.webby.orm.arch.JdbcType;
 import io.webby.util.base.EasyPrimitives.OptionalBool;
 import io.webby.util.collect.Pair;
+import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 
 import java.awt.*;
 import java.util.List;
 import java.util.Optional;
+import java.util.concurrent.atomic.AtomicInteger;
+import java.util.concurrent.atomic.AtomicReference;
 
 import static io.webby.orm.arch.factory.TestingArch.FieldConstraints.*;
 import static io.webby.orm.arch.factory.TestingArch.TableFieldsStatus.*;
@@ -203,6 +206,33 @@ public class ArchFactoryTest {
             .isFromTable("user")
             .hasInJava(Optional.class, "opt()")
             .isSingleColumn("opt", JdbcType.Int)
+            .hasConstraints(USUAL_NULLABLE)
+            .doesNotHaveAnyDefaults()
+            .isMapperSupportedType();
+    }
+
+    @Test
+    @Disabled("Needs to patch FakeModelAdaptersScanner (add an AtomicInteger adapter)")
+    void single_field_atomic_integer() {
+        record User(AtomicInteger atomic) {}
+
+        assertThat(buildTableArch(User.class)).hasFields(HAS_NO_KEY_FIELDS).hasSingleFieldThat("atomic")
+            .isFromTable("user")
+            .hasInJava(AtomicInteger.class, "atomic()")
+            .isSingleColumn("atomic", JdbcType.Int)
+            .hasConstraints(USUAL_NULLABLE)
+            .doesNotHaveAnyDefaults()
+            .isAdapterSupportedType();
+    }
+
+    @Test
+    void single_field_atomic_reference() {
+        record User(AtomicReference<Integer> atomic) {}
+
+        assertThat(buildTableArch(User.class)).hasFields(HAS_NO_KEY_FIELDS).hasSingleFieldThat("atomic")
+            .isFromTable("user")
+            .hasInJava(AtomicReference.class, "atomic()")
+            .isSingleColumn("atomic", JdbcType.Int)
             .hasConstraints(USUAL_NULLABLE)
             .doesNotHaveAnyDefaults()
             .isMapperSupportedType();

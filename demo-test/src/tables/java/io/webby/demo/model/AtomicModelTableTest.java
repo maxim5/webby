@@ -9,6 +9,7 @@ import org.jetbrains.annotations.NotNull;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.atomic.AtomicLong;
+import java.util.concurrent.atomic.AtomicReference;
 
 public class AtomicModelTableTest
         extends SqlDbTableTest<AtomicModel, AtomicModelTable>
@@ -21,11 +22,12 @@ public class AtomicModelTableTest
 
     @Override
     public @NotNull AtomicModel createEntity(@NotNull Integer key, int version) {
-        return new AtomicModel(key, new AtomicInteger(version), new AtomicLong(version), new AtomicBoolean(version > 0));
+        return new AtomicModel(key, new AtomicInteger(version), new AtomicLong(version), new AtomicBoolean(version > 0),
+                               new AtomicReference<>(version > 0 ? String.valueOf(version) : null));
     }
 
     @Override
     public @NotNull AtomicModel copyEntityWithId(@NotNull AtomicModel entity, int autoId) {
-        return new AtomicModel(autoId, entity.i(), entity.l(), entity.b());
+        return new AtomicModel(autoId, entity.i(), entity.l(), entity.b(), entity.s());
     }
 }
