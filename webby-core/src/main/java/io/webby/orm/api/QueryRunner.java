@@ -20,6 +20,10 @@ import java.sql.*;
 import java.util.Collection;
 import java.util.List;
 
+/**
+ * A utility wrapper-class of a {@code Connection} which provides a more convenient API methods for
+ * query preparation and running.
+ */
 public class QueryRunner {
     private final Connection connection;
 
