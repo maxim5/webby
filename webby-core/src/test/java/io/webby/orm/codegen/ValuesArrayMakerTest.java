@@ -79,13 +79,12 @@ public class ValuesArrayMakerTest {
                 null,
                 null,
                 null,
-                null,
+                $param.optional().ordinal(),
                 """)
             .matchesConvertValues("""
                 EasyPrimitives_MutableInt_JdbcAdapter.ADAPTER.fillArrayValues($param.i(), array, 0);
                 EasyPrimitives_MutableBool_JdbcAdapter.ADAPTER.fillArrayValues($param.bool(), array, 1);
                 EasyPrimitives_MutableLong_JdbcAdapter.ADAPTER.fillArrayValues($param.l(), array, 2);
-                EasyPrimitives_OptionalBool_JdbcAdapter.ADAPTER.fillArrayValues($param.optional(), array, 3);
                 """);
     }
 
@@ -104,15 +103,13 @@ public class ValuesArrayMakerTest {
                 null,
                 null,
                 null,
-                null,
+                $param.optional().ordinal(),
                 """)
             .matchesConvertValues("""
                 EasyPrimitives_MutableInt_JdbcAdapter.ADAPTER.fillArrayValues($param.i(), array, 0);
                 Optional.ofNullable($param.bool()).ifPresent(bool ->\
                  EasyPrimitives_MutableBool_JdbcAdapter.ADAPTER.fillArrayValues(bool, array, 1));
                 EasyPrimitives_MutableLong_JdbcAdapter.ADAPTER.fillArrayValues($param.l(), array, 2);
-                Optional.ofNullable($param.optional()).ifPresent(optional ->\
-                 EasyPrimitives_OptionalBool_JdbcAdapter.ADAPTER.fillArrayValues(optional, array, 3));
                 """);
     }
 

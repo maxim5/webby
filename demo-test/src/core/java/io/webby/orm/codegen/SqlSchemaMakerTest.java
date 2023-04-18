@@ -233,18 +233,27 @@ public class SqlSchemaMakerTest {
     public void create_table_enum_model() {
         assertThat(makeCreateTableQuery(Engine.SQLite, EnumModelTable.class)).isEqualTo("""
             CREATE TABLE IF NOT EXISTS enum_model (
-                id_ord INTEGER NOT NULL PRIMARY KEY,
-                foo_ord INTEGER NOT NULL,
-                nested_foo_ord INTEGER NOT NULL,
+                id INTEGER NOT NULL PRIMARY KEY,
+                foo INTEGER NOT NULL,
+                nested_foo INTEGER NOT NULL,
+                nested_s VARCHAR NOT NULL
+            )
+            """);
+
+        assertThat(makeCreateTableQuery(Engine.H2, EnumModelTable.class)).isEqualTo("""
+            CREATE TABLE IF NOT EXISTS enum_model (
+                id INTEGER NOT NULL PRIMARY KEY AUTO_INCREMENT,
+                foo INTEGER NOT NULL,
+                nested_foo INTEGER NOT NULL,
                 nested_s VARCHAR NOT NULL
             )
             """);
 
         assertThat(makeCreateTableQuery(Engine.MySQL, EnumModelTable.class)).isEqualTo("""
             CREATE TABLE IF NOT EXISTS enum_model (
-                id_ord INTEGER NOT NULL PRIMARY KEY AUTO_INCREMENT,
-                foo_ord INTEGER NOT NULL,
-                nested_foo_ord INTEGER NOT NULL,
+                id INTEGER NOT NULL PRIMARY KEY AUTO_INCREMENT,
+                foo INTEGER NOT NULL,
+                nested_foo INTEGER NOT NULL,
                 nested_s VARCHAR(4096) NOT NULL
             )
             """);
@@ -318,6 +327,15 @@ public class SqlSchemaMakerTest {
             )
             """);
 
+        assertThat(makeCreateTableQuery(Engine.H2, InheritedModelTable.class)).isEqualTo("""
+            CREATE TABLE IF NOT EXISTS inherited_model (
+                str VARCHAR NOT NULL,
+                int_value INTEGER NOT NULL,
+                inherited_model_id INTEGER NOT NULL PRIMARY KEY AUTO_INCREMENT,
+                bool_value BOOLEAN NOT NULL
+            )
+            """);
+
         assertThat(makeCreateTableQuery(Engine.MySQL, InheritedModelTable.class)).isEqualTo("""
             CREATE TABLE IF NOT EXISTS inherited_model (
                 str VARCHAR(4096) NOT NULL,
@@ -339,6 +357,19 @@ public class SqlSchemaMakerTest {
                 level1_id INTEGER NOT NULL,
                 level1_simple_id INTEGER NOT NULL,
                 level1_simple_a INTEGER NOT NULL,
+                level1_simple_b VARCHAR NOT NULL
+            )
+            """);
+
+        assertThat(makeCreateTableQuery(Engine.H2, NestedModelTable.class)).isEqualTo("""
+            CREATE TABLE IF NOT EXISTS nested_model (
+                id BIGINT NOT NULL PRIMARY KEY AUTO_INCREMENT,
+                simple_id INTEGER NOT NULL,
+                simple_a BIGINT NOT NULL,
+                simple_b VARCHAR NOT NULL,
+                level1_id INTEGER NOT NULL,
+                level1_simple_id INTEGER NOT NULL,
+                level1_simple_a BIGINT NOT NULL,
                 level1_simple_b VARCHAR NOT NULL
             )
             """);
@@ -394,6 +425,36 @@ public class SqlSchemaMakerTest {
     }
 
     @Test
+    public void create_table_optional_model() {
+        assertThat(makeCreateTableQuery(Engine.SQLite, OptionalModelTable.class)).isEqualTo("""
+            CREATE TABLE IF NOT EXISTS optional_model (
+                id INTEGER NOT NULL PRIMARY KEY,
+                i INTEGER,
+                l INTEGER,
+                str VARCHAR
+            )
+            """);
+
+        assertThat(makeCreateTableQuery(Engine.H2, OptionalModelTable.class)).isEqualTo("""
+            CREATE TABLE IF NOT EXISTS optional_model (
+                id INTEGER NOT NULL PRIMARY KEY AUTO_INCREMENT,
+                i INTEGER,
+                l BIGINT,
+                str VARCHAR
+            )
+            """);
+
+        assertThat(makeCreateTableQuery(Engine.MySQL, OptionalModelTable.class)).isEqualTo("""
+            CREATE TABLE IF NOT EXISTS optional_model (
+                id INTEGER NOT NULL PRIMARY KEY AUTO_INCREMENT,
+                i INTEGER,
+                l BIGINT,
+                str VARCHAR(4096)
+            )
+            """);
+    }
+
+    @Test
     public void create_table_pojo_with_adapter_model() {
         assertThat(makeCreateTableQuery(Engine.SQLite, PojoWithAdapterModelTable.class)).isEqualTo("""
             CREATE TABLE IF NOT EXISTS pojo_with_adapter_model (
@@ -416,6 +477,30 @@ public class SqlSchemaMakerTest {
                 id INTEGER NOT NULL PRIMARY KEY AUTO_INCREMENT,
                 pojo_id INTEGER NOT NULL,
                 pojo_buf VARCHAR(4096) NOT NULL
+            )
+            """);
+    }
+
+    @Test
+    public void create_table_pojo_with_mapper_model() {
+        assertThat(makeCreateTableQuery(Engine.SQLite, PojoWithMapperModelTable.class)).isEqualTo("""
+            CREATE TABLE IF NOT EXISTS pojo_with_mapper_model (
+                id INTEGER NOT NULL PRIMARY KEY,
+                pojo_coordinates INTEGER NOT NULL
+            )
+            """);
+
+        assertThat(makeCreateTableQuery(Engine.H2, PojoWithMapperModelTable.class)).isEqualTo("""
+            CREATE TABLE IF NOT EXISTS pojo_with_mapper_model (
+                id INTEGER NOT NULL PRIMARY KEY AUTO_INCREMENT,
+                pojo_coordinates BIGINT NOT NULL
+            )
+            """);
+
+        assertThat(makeCreateTableQuery(Engine.MySQL, PojoWithMapperModelTable.class)).isEqualTo("""
+            CREATE TABLE IF NOT EXISTS pojo_with_mapper_model (
+                id INTEGER NOT NULL PRIMARY KEY AUTO_INCREMENT,
+                pojo_coordinates BIGINT NOT NULL
             )
             """);
     }
