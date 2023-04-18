@@ -104,7 +104,8 @@ public class SqlSchemaMakerTest {
                 id INTEGER NOT NULL PRIMARY KEY,
                 i INTEGER NOT NULL,
                 l INTEGER NOT NULL,
-                b INTEGER NOT NULL
+                b INTEGER NOT NULL,
+                s VARCHAR
             )
             """);
 
@@ -113,7 +114,8 @@ public class SqlSchemaMakerTest {
                 id INTEGER NOT NULL PRIMARY KEY AUTO_INCREMENT,
                 i INTEGER NOT NULL,
                 l BIGINT NOT NULL,
-                b BOOLEAN NOT NULL
+                b BOOLEAN NOT NULL,
+                s VARCHAR
             )
             """);
 
@@ -122,7 +124,8 @@ public class SqlSchemaMakerTest {
                 id INTEGER NOT NULL PRIMARY KEY AUTO_INCREMENT,
                 i INTEGER NOT NULL,
                 l BIGINT NOT NULL,
-                b BOOLEAN NOT NULL
+                b BOOLEAN NOT NULL,
+                s VARCHAR(4096)
             )
             """);
     }
