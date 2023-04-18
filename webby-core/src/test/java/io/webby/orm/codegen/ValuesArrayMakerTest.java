@@ -1,6 +1,7 @@
 package io.webby.orm.codegen;
 
 import com.google.errorprone.annotations.CanIgnoreReturnValue;
+import io.webby.orm.api.Engine;
 import io.webby.orm.api.ForeignInt;
 import io.webby.orm.api.annotate.Sql;
 import io.webby.orm.arch.model.TableArch;
@@ -13,6 +14,7 @@ import org.jetbrains.annotations.Nullable;
 import org.junit.jupiter.api.Test;
 
 import java.util.List;
+import java.util.Optional;
 
 import static io.webby.orm.arch.factory.TestingArch.buildTableArch;
 import static io.webby.orm.testing.AssertSql.assertThatSql;
@@ -67,9 +69,39 @@ public class ValuesArrayMakerTest {
     }
 
     @Test
+    public void enum_columns() {
+        record Adapters(Engine engine, OptionalBool bool) {}
+
+        TableArch tableArch = buildTableArch(Adapters.class);
+        ValuesArrayMaker maker = new ValuesArrayMaker("$param", tableArch.fields());
+
+        assertThat(maker)
+            .matchesInitValues("""
+                $param.engine().ordinal(),
+                $param.bool().ordinal(),
+                """)
+            .matchesConvertValues("""
+                """);
+    }
+
+    @Test
+    public void columns_with_mappers() {
+        record Adapters(Optional<String> str) {}
+
+        TableArch tableArch = buildTableArch(Adapters.class);
+        ValuesArrayMaker maker = new ValuesArrayMaker("$param", tableArch.fields());
+
+        assertThat(maker)
+            .matchesInitValues("""
+                $param.str().orElse(null),
+                """)
+            .matchesConvertValues("""
+                """);
+    }
+
+    @Test
     public void columns_with_adapters() {
-        // Point?
-        record Adapters(MutableInt i, MutableBool bool, MutableLong l, OptionalBool optional) {}
+        record Adapters(MutableInt i, MutableBool bool, MutableLong l, java.awt.Point point) {}
 
         TableArch tableArch = buildTableArch(Adapters.class);
         ValuesArrayMaker maker = new ValuesArrayMaker("$param", tableArch.fields());
@@ -79,12 +111,14 @@ public class ValuesArrayMakerTest {
                 null,
                 null,
                 null,
-                $param.optional().ordinal(),
+                null,
+                null,
                 """)
             .matchesConvertValues("""
                 EasyPrimitives_MutableInt_JdbcAdapter.ADAPTER.fillArrayValues($param.i(), array, 0);
                 EasyPrimitives_MutableBool_JdbcAdapter.ADAPTER.fillArrayValues($param.bool(), array, 1);
                 EasyPrimitives_MutableLong_JdbcAdapter.ADAPTER.fillArrayValues($param.l(), array, 2);
+                PointJdbcAdapter.ADAPTER.fillArrayValues($param.point(), array, 3);
                 """);
     }
 
@@ -93,7 +127,7 @@ public class ValuesArrayMakerTest {
         record Adapters(@Nullable MutableInt i,
                         @javax.annotation.Nullable MutableBool bool,
                         @org.checkerframework.checker.nullness.qual.Nullable MutableLong l,
-                        @Sql(nullable = true) OptionalBool optional) {}
+                        @Sql(nullable = true) java.awt.Point point) {}
 
         TableArch tableArch = buildTableArch(Adapters.class);
         ValuesArrayMaker maker = new ValuesArrayMaker("$param", tableArch.fields());
@@ -103,13 +137,16 @@ public class ValuesArrayMakerTest {
                 null,
                 null,
                 null,
-                $param.optional().ordinal(),
+                null,
+                null,
                 """)
             .matchesConvertValues("""
                 EasyPrimitives_MutableInt_JdbcAdapter.ADAPTER.fillArrayValues($param.i(), array, 0);
                 Optional.ofNullable($param.bool()).ifPresent(bool ->\
                  EasyPrimitives_MutableBool_JdbcAdapter.ADAPTER.fillArrayValues(bool, array, 1));
                 EasyPrimitives_MutableLong_JdbcAdapter.ADAPTER.fillArrayValues($param.l(), array, 2);
+                Optional.ofNullable($param.point()).ifPresent(point ->\
+                 PointJdbcAdapter.ADAPTER.fillArrayValues(point, array, 3));
                 """);
     }
 
