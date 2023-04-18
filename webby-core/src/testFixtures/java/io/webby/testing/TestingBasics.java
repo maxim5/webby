@@ -5,9 +5,12 @@ import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.Arrays;
+import java.util.BitSet;
 import java.util.TreeSet;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
+
+import static io.webby.util.base.EasyCast.castAny;
 
 public class TestingBasics {
     @SafeVarargs
@@ -47,6 +50,20 @@ public class TestingBasics {
             return true;
         } catch (InterruptedException ignore) {
             return false;
+        }
+    }
+
+    public static class SimpleBitSet<T extends SimpleBitSet<T>> {
+        protected final BitSet bitSet = new BitSet();
+
+        protected @NotNull T setBit(int bitIndex) {
+            bitSet.set(bitIndex);
+            return castAny(this);
+        }
+
+        protected @NotNull T unsetBit(int bitIndex) {
+            bitSet.clear(bitIndex);
+            return castAny(this);
         }
     }
 }

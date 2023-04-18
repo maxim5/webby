@@ -8,6 +8,7 @@ import io.webby.orm.arch.JdbcType;
 import io.webby.orm.arch.model.*;
 import io.webby.orm.codegen.ModelInput;
 import io.webby.orm.testing.FakeModelAdaptersScanner;
+import io.webby.testing.TestingBasics.SimpleBitSet;
 import io.webby.util.collect.ListBuilder;
 import io.webby.util.collect.Pair;
 import org.jetbrains.annotations.NotNull;
@@ -17,17 +18,16 @@ import java.util.Collection;
 import java.util.List;
 
 import static com.google.common.collect.MoreCollectors.onlyElement;
-import static io.webby.orm.arch.factory.TestingArch.FieldConstraints.*;
 
 public class TestingArch {
     public static @NotNull TableArch buildTableArch(@NotNull Class<?> model) {
-        RunContext runContext = TestingArch.newRunContext(model);
+        RunContext runContext = newRunContext(model);
         new ArchFactory(runContext).build();
         return runContext.tables().getTableOrDie(model);
     }
 
     public static @NotNull TableArch buildTableArch(@NotNull Class<?> model, @NotNull List<Class<?>> rest) {
-        RunContext runContext = TestingArch.newRunContext(ListBuilder.concatOne(rest, model));
+        RunContext runContext = newRunContext(ListBuilder.concatOne(rest, model));
         new ArchFactory(runContext).build();
         return runContext.tables().getTableOrDie(model);
     }
@@ -71,10 +71,10 @@ public class TestingArch {
         }
 
         public @NotNull TableArchSubject hasFields(@NotNull TableFieldsStatus status) {
-            Truth.assertThat(tableArch.hasPrimaryKeyField()).isEqualTo(status.hasPK);
-            Truth.assertThat(tableArch.isPrimaryKeyInt()).isEqualTo(status.hasIntPK);
-            Truth.assertThat(tableArch.isPrimaryKeyLong()).isEqualTo(status.hasLongPK);
-            Truth.assertThat(tableArch.hasForeignKeyField()).isEqualTo(status.hasFK);
+            Truth.assertThat(tableArch.hasPrimaryKeyField()).isEqualTo(status.hasPrimaryField());
+            Truth.assertThat(tableArch.isPrimaryKeyInt()).isEqualTo(status.hasPrimaryIntField());
+            Truth.assertThat(tableArch.isPrimaryKeyLong()).isEqualTo(status.hasPrimaryLongField());
+            Truth.assertThat(tableArch.hasForeignKeyField()).isEqualTo(status.hasForeignField());
             return this;
         }
 
@@ -92,21 +92,22 @@ public class TestingArch {
         }
     }
 
-    public enum TableFieldsStatus {
-        HAS_PRIMARY(true, false, false, false),
-        HAS_PRIMARY_INT(true, true, false, false),
-        HAS_PRIMARY_LONG(true, false, true, false),
-        HAS_FOREIGN(false, false, false, true),
-        HAS_NO_KEY_FIELDS(false, false, false, false);
+    public static class TableFieldsStatus extends SimpleBitSet<TableFieldsStatus> {
+        public static @NotNull TableFieldsStatus ONLY_ORDINARY = new TableFieldsStatus();
+        public static @NotNull TableFieldsStatus PRIMARY_OBJ = new TableFieldsStatus().withPrimaryObj();
+        public static @NotNull TableFieldsStatus PRIMARY_INT = new TableFieldsStatus().withPrimaryInt();
+        public static @NotNull TableFieldsStatus PRIMARY_LONG = new TableFieldsStatus().withPrimaryLong();
+        public static @NotNull TableFieldsStatus FOREIGN = new TableFieldsStatus().withForeign();
 
-        private final boolean hasPK, hasIntPK, hasLongPK, hasFK;
+        public @NotNull TableFieldsStatus withPrimaryObj() { return setBit(0); }
+        public @NotNull TableFieldsStatus withPrimaryInt() { return setBit(0).setBit(1); }
+        public @NotNull TableFieldsStatus withPrimaryLong() { return setBit(0).setBit(2); }
+        public @NotNull TableFieldsStatus withForeign() { return setBit(3); }
 
-        TableFieldsStatus(boolean hasPK, boolean hasIntPK, boolean hasLongPK, boolean hasFK) {
-            this.hasPK = hasPK;
-            this.hasIntPK = hasIntPK;
-            this.hasLongPK = hasLongPK;
-            this.hasFK = hasFK;
-        }
+        public boolean hasPrimaryField() { return bitSet.get(0); }
+        public boolean hasPrimaryIntField() { return bitSet.get(1); }
+        public boolean hasPrimaryLongField() { return bitSet.get(2); }
+        public boolean hasForeignField() { return bitSet.get(3); }
     }
 
     @CanIgnoreReturnValue
@@ -159,10 +160,10 @@ public class TestingArch {
         }
 
         public @NotNull TableFieldSubject hasConstraints(@NotNull FieldConstraints constraints) {
-            Truth.assertThat(tableField.isPrimaryKey()).isEqualTo(constraints == PRIMARY_NOT_NULL);
-            Truth.assertThat(tableField.isUnique()).isEqualTo(constraints == UNIQUE_NOT_NULL);
-            Truth.assertThat(tableField.isForeignKey()).isEqualTo(constraints == FOREIGN_KEY_NOT_NULL);
-            Truth.assertThat(tableField.isNullable()).isEqualTo(constraints == USUAL_NULLABLE);
+            Truth.assertThat(tableField.isPrimaryKey()).isEqualTo(constraints.isPrimaryKey());
+            Truth.assertThat(tableField.isUnique()).isEqualTo(constraints.isUnique());
+            Truth.assertThat(tableField.isForeignKey()).isEqualTo(constraints.isForeignKey());
+            Truth.assertThat(tableField.isNullable()).isEqualTo(constraints.isNullable());
             Truth.assertThat(tableField instanceof ForeignTableField).isEqualTo(tableField.isForeignKey());
             return this;
         }
@@ -227,11 +228,21 @@ public class TestingArch {
         }
     }
 
-    public enum FieldConstraints {
-        PRIMARY_NOT_NULL,
-        UNIQUE_NOT_NULL,
-        FOREIGN_KEY_NOT_NULL,
-        USUAL_NOT_NULL,
-        USUAL_NULLABLE,
+    public static class FieldConstraints extends SimpleBitSet<FieldConstraints> {
+        public static @NotNull FieldConstraints ORDINARY = new FieldConstraints();
+        public static @NotNull FieldConstraints PRIMARY_KEY = new FieldConstraints().primaryKey();
+        public static @NotNull FieldConstraints FOREIGN_KEY = new FieldConstraints().foreignKey();
+        public static @NotNull FieldConstraints UNIQUE = new FieldConstraints().unique();
+
+        public @NotNull FieldConstraints primaryKey() { return setBit(0); }
+        public @NotNull FieldConstraints foreignKey() { return setBit(1); }
+        public @NotNull FieldConstraints unique() { return setBit(2); }
+        public @NotNull FieldConstraints nullable() { return setBit(3); }
+        public @NotNull FieldConstraints nonnull() { return unsetBit(3); }
+
+        public boolean isPrimaryKey() { return bitSet.get(0); }
+        public boolean isForeignKey() { return bitSet.get(1); }
+        public boolean isUnique() { return bitSet.get(2); }
+        public boolean isNullable() { return bitSet.get(3); }
     }
 }
