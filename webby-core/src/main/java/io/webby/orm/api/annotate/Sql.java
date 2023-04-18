@@ -11,7 +11,7 @@ public @interface Sql {
     /**
      * Indicates the name to be used in SQL definition.
      */
-    String value() default "";
+    String name() default "";
 
     /**
      * Indicates whether this field corresponds to a PRIMARY KEY column.
@@ -45,6 +45,15 @@ public @interface Sql {
      * @see io.webby.orm.arch.JdbcType
      */
     Class<?> via() default Void.class;
+
+    /**
+     * A shortcut for {@link Sql#name()}.
+     */
+    @Retention(RetentionPolicy.RUNTIME)
+    @Target({ElementType.FIELD, ElementType.PARAMETER})
+    @interface Name {
+        String value() default "";
+    }
 
     /**
      * A shortcut for {@link Sql#primary()}.

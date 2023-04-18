@@ -147,7 +147,7 @@ public class ArchFactoryTest {
 
     @Test
     void single_field_int_renamed() {
-        record User(@Sql("bar") int foo) {}
+        record User(@Sql(name = "bar") int foo) {}
 
         assertThat(buildTableArch(User.class)).hasFields(ONLY_ORDINARY).hasSingleFieldThat("foo")
             .isFromTable("user")

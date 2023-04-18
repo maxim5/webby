@@ -25,7 +25,10 @@ public class AnnotationsAnalyzer {
     private static final ImmutableList<Class<?>> NULLABLE_TYPES = ImmutableList.of(Optional.class, AtomicReference.class);
 
     public static @NotNull Optional<String> getSqlName(@NotNull AnnotatedElement elem) {
-        return getOptionalAnnotation(elem, Sql.class).map(Sql::value).flatMap(EasyStrings::ofNonEmpty);
+        Optional<String> name1 = getOptionalAnnotation(elem, Sql.class).map(Sql::name).flatMap(EasyStrings::ofNonEmpty);
+        Optional<String> name2 = getOptionalAnnotation(elem, Sql.Name.class).map(Sql.Name::value).flatMap(EasyStrings::ofNonEmpty);
+        failIf(name1.isPresent() && name2.isPresent(), "Element contains ambiguous annotations: %s", elem);
+        return name1.or(() -> name2);
     }
 
     public static boolean isPrimaryKeyField(@NotNull Field field, @NotNull ModelInput input) {
@@ -54,8 +57,10 @@ public class AnnotationsAnalyzer {
     }
 
     public static @Nullable String @Nullable [] getDefaults(@NotNull AnnotatedElement elem) {
-        Optional<String[]> defaults1 = getOptionalAnnotation(elem, Sql.class).map(Sql::defaults);
-        Optional<String[]> defaults2 = getOptionalAnnotation(elem, Sql.Default.class).map(Sql.Default::value);
+        Optional<String[]> defaults1 =
+            getOptionalAnnotation(elem, Sql.class).map(Sql::defaults).filter(array -> array.length > 0);
+        Optional<String[]> defaults2 =
+            getOptionalAnnotation(elem, Sql.Default.class).map(Sql.Default::value).filter(array -> array.length > 0);
         failIf(defaults1.isPresent() && defaults2.isPresent(), "Element contains ambiguous annotations: %s", elem);
         return defaults1.or(() -> defaults2).orElse(null);
     }
@@ -63,8 +68,10 @@ public class AnnotationsAnalyzer {
     public static @Nullable Class<?> getViaClass(@NotNull AnnotatedElement elem) {
         Optional<Class<?>> via1 = getOptionalAnnotation(elem, Sql.class).map(Sql::via);
         Optional<Class<?>> via2 = getOptionalAnnotation(elem, Sql.Via.class).map(Sql.Via::value);
-        failIf(via1.isPresent() && via2.isPresent(), "Element contains ambiguous annotations: %s", elem);
-        return via1.or(() -> via2).filter(klass -> klass != Void.class).orElse(null);
+        Optional<Class<?>> clean1 = via1.filter(klass -> klass != Void.class);
+        Optional<Class<?>> clean2 = via2.filter(klass -> klass != Void.class);
+        failIf(clean1.isPresent() && clean2.isPresent(), "Element contains ambiguous annotations: %s", elem);
+        return clean1.or(() -> clean2).orElse(null);
     }
 
     @SuppressWarnings("OptionalUsedAsFieldOrParameterType")
