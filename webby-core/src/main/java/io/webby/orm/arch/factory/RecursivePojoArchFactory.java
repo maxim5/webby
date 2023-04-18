@@ -1,6 +1,7 @@
 package io.webby.orm.arch.factory;
 
 import com.google.common.collect.ImmutableList;
+import io.webby.orm.arch.InvalidSqlModelException;
 import io.webby.orm.arch.factory.FieldResolver.ResolveResult;
 import io.webby.orm.arch.model.*;
 import org.jetbrains.annotations.NotNull;
@@ -26,7 +27,8 @@ class RecursivePojoArchFactory {
             ResolveResult resolved = fieldResolver.resolve(subField);
             return switch (resolved.type()) {
                 case NATIVE -> PojoFieldNative.ofNative(modelField, resolved.jdbcType());
-                case FOREIGN_KEY -> null;
+                case FOREIGN_KEY ->
+                    throw new InvalidSqlModelException("Foreign keys in nested classes are not supported: %s", field);
                 case HAS_MAPPER -> {
                     MapperApi mapperApi = MapperApi.ofExistingMapper(resolved.mapperClass(),
                                                                      subField.getGenericType(),
