@@ -4,11 +4,11 @@ import io.webby.orm.api.Foreign;
 import io.webby.orm.api.ForeignObj;
 import io.webby.orm.api.ReadFollow;
 import io.webby.orm.arch.Column;
-import io.webby.orm.arch.Naming;
 import io.webby.orm.arch.model.ForeignTableField;
 import io.webby.orm.arch.model.OneColumnTableField;
 import io.webby.orm.arch.model.TableArch;
 import io.webby.orm.arch.model.TableField;
+import io.webby.orm.arch.util.Naming;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.Arrays;

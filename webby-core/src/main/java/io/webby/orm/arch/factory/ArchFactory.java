@@ -4,6 +4,7 @@ import com.google.common.collect.ImmutableList;
 import io.webby.orm.arch.M2mInfo;
 import io.webby.orm.arch.model.TableArch;
 import io.webby.orm.arch.model.TableField;
+import io.webby.orm.arch.util.JavaClassAnalyzer;
 import io.webby.orm.codegen.ModelInput;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.VisibleForTesting;

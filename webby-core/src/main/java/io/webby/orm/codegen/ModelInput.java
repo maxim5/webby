@@ -1,7 +1,7 @@
 package io.webby.orm.codegen;
 
 import io.webby.orm.api.annotate.Model;
-import io.webby.orm.arch.Naming;
+import io.webby.orm.arch.util.Naming;
 import io.webby.util.base.EasyStrings;
 import io.webby.util.reflect.EasyAnnotations;
 import org.jetbrains.annotations.NotNull;

@@ -4,6 +4,8 @@ import com.google.common.collect.ImmutableList;
 import io.webby.orm.arch.InvalidSqlModelException;
 import io.webby.orm.arch.factory.FieldResolver.ResolveResult;
 import io.webby.orm.arch.model.*;
+import io.webby.orm.arch.util.AnnotationsAnalyzer;
+import io.webby.orm.arch.util.JavaClassAnalyzer;
 import org.jetbrains.annotations.NotNull;
 
 import java.lang.reflect.Field;
@@ -32,7 +34,7 @@ class RecursivePojoArchFactory {
                 case HAS_MAPPER -> {
                     MapperApi mapperApi = MapperApi.ofExistingMapper(resolved.mapperClass(),
                                                                      subField.getGenericType(),
-                                                                     JavaClassAnalyzer.isNullableField(subField));
+                                                                     AnnotationsAnalyzer.isNullableField(subField));
                     yield PojoFieldMapper.ofMapper(modelField, mapperApi);
                 }
                 case INLINE_MAPPER -> PojoFieldMapper.ofMapper(modelField, resolved.mapperApi());

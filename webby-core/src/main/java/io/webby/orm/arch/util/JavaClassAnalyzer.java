@@ -1,23 +1,20 @@
-package io.webby.orm.arch.factory;
+package io.webby.orm.arch.util;
 
-import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
 import com.google.common.flogger.FluentLogger;
-import io.webby.orm.api.annotate.Sql;
 import io.webby.orm.arch.InvalidSqlModelException;
-import io.webby.orm.arch.Naming;
 import io.webby.orm.arch.model.ModelField;
-import io.webby.orm.codegen.ModelInput;
 import io.webby.util.collect.EasyIterables;
 import io.webby.util.reflect.EasyMembers;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import org.jetbrains.annotations.VisibleForTesting;
 
-import java.lang.annotation.Annotation;
 import java.lang.reflect.*;
-import java.util.*;
-import java.util.concurrent.atomic.AtomicReference;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
+import java.util.Map;
 import java.util.function.Function;
 import java.util.function.Predicate;
 import java.util.logging.Level;
@@ -25,11 +22,10 @@ import java.util.stream.Collectors;
 
 import static io.webby.orm.arch.InvalidSqlModelException.failIf;
 import static io.webby.util.base.EasyObjects.firstNonNullIfExist;
-import static io.webby.util.reflect.EasyAnnotations.getOptionalAnnotation;
 import static io.webby.util.reflect.EasyMembers.isPrivate;
 import static io.webby.util.reflect.EasyMembers.isStatic;
 
-class JavaClassAnalyzer {
+public class JavaClassAnalyzer {
     private static final FluentLogger log = FluentLogger.forEnclosingClass();
 
     public static @NotNull List<Field> getAllFieldsOrdered(@NotNull Class<?> klass) {
@@ -154,56 +150,5 @@ class JavaClassAnalyzer {
                 return name.startsWith("get") && name.contains(fieldName.toLowerCase());
             }).collect(EasyIterables.getOnlyItemOrEmpty()).orElse(null)
         ));
-    }
-
-    public static boolean isPrimaryKeyField(@NotNull Field field, @NotNull ModelInput input) {
-        String fieldName = field.getName();
-        return fieldName.equals("id") ||
-            fieldName.equals(Naming.idJavaName(input.javaModelName())) ||
-            fieldName.equals(Naming.idJavaName(input.modelClass())) ||
-            (input.modelInterface() != null && fieldName.equals(Naming.idJavaName(input.modelInterface()))) ||
-            merge(getOptionalAnnotation(field, Sql.class).map(Sql::primary), getOptionalAnnotation(field, Sql.PK.class));
-    }
-
-    public static boolean isUniqueField(@NotNull Field field) {
-        return merge(getOptionalAnnotation(field, Sql.class).map(Sql::unique), getOptionalAnnotation(field, Sql.Unique.class));
-    }
-
-    private static final ImmutableList<Class<? extends Annotation>> NULLABLE_ANNOTATIONS = ImmutableList.of(
-        javax.annotation.Nullable.class,
-        org.checkerframework.checker.nullness.qual.Nullable.class,
-        Nullable.class  // retention policy: CLASS
-    );
-    private static final ImmutableList<Class<?>> NULLABLE_TYPES = ImmutableList.of(Optional.class, AtomicReference.class);
-
-    public static boolean isNullableField(@NotNull Field field) {
-        for (Class<? extends Annotation> annotation : NULLABLE_ANNOTATIONS) {
-            if (getOptionalAnnotation(field, annotation).isPresent()) {
-                return true;
-            }
-        }
-        if (NULLABLE_TYPES.contains(field.getType())) {
-            return true;
-        }
-        return merge(getOptionalAnnotation(field, Sql.class).map(Sql::nullable), getOptionalAnnotation(field, Sql.Null.class));
-    }
-
-    public static @Nullable String @Nullable [] getDefaults(@NotNull AnnotatedElement element) {
-        Optional<String[]> defaults1 = getOptionalAnnotation(element, Sql.class).map(Sql::defaults);
-        Optional<String[]> defaults2 = getOptionalAnnotation(element, Sql.Default.class).map(Sql.Default::value);
-        failIf(defaults1.isPresent() && defaults2.isPresent(), "Element contains ambiguous annotations: %s", element);
-        return defaults1.or(() -> defaults2).orElse(null);
-    }
-
-    public static @Nullable Class<?> getViaClass(@NotNull AnnotatedElement element) {
-        Optional<Class<?>> via1 = getOptionalAnnotation(element, Sql.class).map(Sql::via);
-        Optional<Class<?>> via2 = getOptionalAnnotation(element, Sql.Via.class).map(Sql.Via::value);
-        failIf(via1.isPresent() && via2.isPresent(), "Element contains ambiguous annotations: %s", element);
-        return via1.or(() -> via2).filter(klass -> klass != Void.class).orElse(null);
-    }
-
-    @SuppressWarnings("OptionalUsedAsFieldOrParameterType")
-    private static boolean merge(@NotNull Optional<Boolean> first, @NotNull Optional<?> second) {
-        return first.orElseGet(second::isPresent);
     }
 }

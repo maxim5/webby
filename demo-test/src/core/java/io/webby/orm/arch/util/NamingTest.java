@@ -1,4 +1,4 @@
-package io.webby.orm.arch;
+package io.webby.orm.arch.util;
 
 import io.webby.auth.session.Session;
 import io.webby.auth.user.UserModel;

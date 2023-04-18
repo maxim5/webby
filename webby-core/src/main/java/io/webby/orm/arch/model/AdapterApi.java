@@ -2,7 +2,11 @@ package io.webby.orm.arch.model;
 
 import com.google.mu.util.stream.BiStream;
 import io.webby.orm.adapter.JdbcAdapt;
-import io.webby.orm.arch.*;
+import io.webby.orm.arch.Column;
+import io.webby.orm.arch.ColumnType;
+import io.webby.orm.arch.HasColumns;
+import io.webby.orm.arch.JdbcType;
+import io.webby.orm.arch.util.Naming;
 import io.webby.util.base.EasyPrimitives.MutableInt;
 import io.webby.util.collect.OneOf;
 import io.webby.util.reflect.EasyAnnotations;

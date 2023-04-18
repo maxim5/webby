@@ -1,4 +1,4 @@
-package io.webby.orm.arch.factory;
+package io.webby.orm.arch.util;
 
 import org.jetbrains.annotations.NotNull;
 

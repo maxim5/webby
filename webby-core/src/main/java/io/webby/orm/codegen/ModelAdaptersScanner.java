@@ -6,7 +6,7 @@ import io.webby.app.ClassFilter;
 import io.webby.app.Settings;
 import io.webby.common.ClasspathScanner;
 import io.webby.orm.adapter.JdbcAdapt;
-import io.webby.orm.arch.Naming;
+import io.webby.orm.arch.util.Naming;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 

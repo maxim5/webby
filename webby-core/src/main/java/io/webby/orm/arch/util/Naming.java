@@ -1,28 +1,20 @@
-package io.webby.orm.arch;
+package io.webby.orm.arch.util;
 
 import com.google.common.base.CaseFormat;
-import io.webby.orm.api.annotate.Sql;
 import io.webby.util.base.EasyStrings;
-import io.webby.util.reflect.EasyAnnotations;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.VisibleForTesting;
 
-import java.lang.reflect.AnnotatedElement;
 import java.lang.reflect.Field;
 import java.lang.reflect.Parameter;
-import java.util.Optional;
 
 public class Naming {
-    public static @NotNull Optional<String> annotatedSqlName(@NotNull AnnotatedElement element) {
-        return EasyAnnotations.getOptionalAnnotation(element, Sql.class).map(Sql::value).flatMap(EasyStrings::ofNonEmpty);
-    }
-
     public static @NotNull String fieldSqlName(@NotNull Field field) {
-         return annotatedSqlName(field).orElseGet(() -> fieldSqlName(field.getName()));
+         return AnnotationsAnalyzer.getSqlName(field).orElseGet(() -> fieldSqlName(field.getName()));
     }
 
     public static @NotNull String fieldSqlName(@NotNull Parameter param) {
-         return annotatedSqlName(param).orElseGet(() -> fieldSqlName(param.getName()));
+         return AnnotationsAnalyzer.getSqlName(param).orElseGet(() -> fieldSqlName(param.getName()));
     }
 
     public static @NotNull String fieldSqlName(@NotNull String fieldName) {

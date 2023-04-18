@@ -3,7 +3,7 @@ package io.webby.orm.arch.factory;
 import io.webby.orm.codegen.ModelAdaptersScanner;
 import org.jetbrains.annotations.NotNull;
 
-public class RunContext {
+class RunContext {
     private final RunInputs inputs;
     private final ModelAdaptersScanner adaptersScanner;
     private final PojoArchCollector pojos;

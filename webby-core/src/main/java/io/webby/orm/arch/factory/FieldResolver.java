@@ -3,6 +3,7 @@ package io.webby.orm.arch.factory;
 import io.webby.orm.arch.JdbcType;
 import io.webby.orm.arch.model.MapperApi;
 import io.webby.orm.arch.model.TableArch;
+import io.webby.orm.arch.util.AnnotationsAnalyzer;
 import io.webby.util.collect.Pair;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
@@ -33,7 +34,7 @@ class FieldResolver {
             return ResolveResult.ofForeignKey(foreignTableInfo);
         }
 
-        Class<?> mapperClass = JavaClassAnalyzer.getViaClass(field);
+        Class<?> mapperClass = AnnotationsAnalyzer.getViaClass(field);
         if (mapperClass != null) {
             return ResolveResult.ofMapper(mapperClass);
         }

@@ -3,9 +3,11 @@ package io.webby.orm.arch.factory;
 import com.google.common.collect.ImmutableList;
 import io.webby.orm.arch.Column;
 import io.webby.orm.arch.ColumnType;
-import io.webby.orm.arch.Naming;
 import io.webby.orm.arch.factory.FieldResolver.ResolveResult;
 import io.webby.orm.arch.model.*;
+import io.webby.orm.arch.util.AnnotationsAnalyzer;
+import io.webby.orm.arch.util.JavaClassAnalyzer;
+import io.webby.orm.arch.util.Naming;
 import io.webby.orm.codegen.ModelInput;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
@@ -36,10 +38,10 @@ class TableFieldArchFactory {
 
     public @NotNull TableField buildTableField() {
         ModelField modelField = JavaClassAnalyzer.toModelField(field);
-        boolean isPrimaryKey = JavaClassAnalyzer.isPrimaryKeyField(field, input);
-        boolean isUnique = JavaClassAnalyzer.isUniqueField(field);
-        boolean isNullable = JavaClassAnalyzer.isNullableField(field);
-        String[] defaults = JavaClassAnalyzer.getDefaults(field);
+        boolean isPrimaryKey = AnnotationsAnalyzer.isPrimaryKeyField(field, input);
+        boolean isUnique = AnnotationsAnalyzer.isUniqueField(field);
+        boolean isNullable = AnnotationsAnalyzer.isNullableField(field);
+        String[] defaults = AnnotationsAnalyzer.getDefaults(field);
 
         FieldInference inference = inferFieldArch();
         if (inference.isForeignTable()) {
@@ -80,13 +82,13 @@ class TableFieldArchFactory {
                 yield FieldInference.ofNativeColumn(column);
             }
             case FOREIGN_KEY -> {
-                String foreignIdSqlName = Naming.annotatedSqlName(field)
+                String foreignIdSqlName = AnnotationsAnalyzer.getSqlName(field)
                     .orElseGet(() -> Naming.concatSqlNames(fieldSqlName, "id"));
                 Column column = new Column(foreignIdSqlName, new ColumnType(resolved.foreignTable().second()));
                 yield FieldInference.ofForeignKey(column, resolved.foreignTable().first());
             }
             case HAS_MAPPER -> {
-                boolean nullable = JavaClassAnalyzer.isNullableField(field);
+                boolean nullable = AnnotationsAnalyzer.isNullableField(field);
                 MapperApi mapperApi = MapperApi.ofExistingMapper(resolved.mapperClass(), field.getGenericType(), nullable);
                 Column column = mapperApi.mapperColumn(fieldSqlName);
                 yield FieldInference.ofSingleColumn(column, mapperApi);

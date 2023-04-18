@@ -6,6 +6,8 @@ import io.webby.orm.api.ForeignLong;
 import io.webby.orm.api.ForeignObj;
 import io.webby.orm.arch.JdbcType;
 import io.webby.orm.arch.model.TableArch;
+import io.webby.orm.arch.util.AnnotationsAnalyzer;
+import io.webby.orm.arch.util.JavaClassAnalyzer;
 import io.webby.orm.codegen.ModelInput;
 import io.webby.util.collect.Pair;
 import org.jetbrains.annotations.NotNull;
@@ -64,7 +66,7 @@ class ForeignTableArchResolver {
             Class<?> foreignModelClass = field.getDeclaringClass();
             ModelInput foreignInput = runContext.inputs().findInputByModel(foreignModelClass).orElseThrow();
             Optional<Field> foreignPrimaryKeyField = JavaClassAnalyzer.getAllFieldsOrdered(foreignModelClass).stream()
-                .filter(f -> JavaClassAnalyzer.isPrimaryKeyField(f, foreignInput))
+                .filter(f -> AnnotationsAnalyzer.isPrimaryKeyField(f, foreignInput))
                 .findFirst();
             assure(foreignPrimaryKeyField.isPresent(),
                    "Foreign model `%s` does not have a primary key. Expected key type: `%s`",

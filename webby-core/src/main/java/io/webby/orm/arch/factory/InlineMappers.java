@@ -2,9 +2,9 @@ package io.webby.orm.arch.factory;
 
 import com.google.common.collect.ImmutableList;
 import io.webby.orm.arch.JdbcType;
-import io.webby.orm.arch.Naming;
 import io.webby.orm.arch.model.MapperApi;
 import io.webby.orm.arch.model.MapperApi.MapperCallFormatter;
+import io.webby.orm.arch.util.Naming;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
@@ -18,7 +18,7 @@ import java.util.function.Predicate;
 import static io.webby.util.reflect.EasyGenerics.getGenericTypeArgumentsOfField;
 import static java.util.Objects.requireNonNull;
 
-public class InlineMappers {
+class InlineMappers {
     private static final ImmutableList<Inliner> SUPPORTED_INLINERS = ImmutableList.of(
         wrap(field -> field.getType().isEnum(), InlineMappers::ofEnum),
         wrap(field -> field.getType() == Optional.class && hasNativeArgument(field), InlineMappers::ofOptional),

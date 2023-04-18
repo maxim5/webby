@@ -8,10 +8,13 @@ import io.webby.orm.api.*;
 import io.webby.orm.api.entity.*;
 import io.webby.orm.api.query.*;
 import io.webby.orm.arch.Column;
-import io.webby.orm.arch.*;
+import io.webby.orm.arch.HasColumns;
+import io.webby.orm.arch.JavaNameHolder;
+import io.webby.orm.arch.PrefixedColumn;
 import io.webby.orm.arch.model.ForeignTableField;
 import io.webby.orm.arch.model.TableArch;
 import io.webby.orm.arch.model.TableField;
+import io.webby.orm.arch.util.Naming;
 import io.webby.util.collect.EasyMaps;
 import org.jetbrains.annotations.NotNull;
 
