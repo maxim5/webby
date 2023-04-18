@@ -162,6 +162,7 @@ public class TestingArch {
             Truth.assertThat(tableField.isPrimaryKey()).isEqualTo(constraints == PRIMARY_NOT_NULL);
             Truth.assertThat(tableField.isUnique()).isEqualTo(constraints == UNIQUE_NOT_NULL);
             Truth.assertThat(tableField.isForeignKey()).isEqualTo(constraints == FOREIGN_KEY_NOT_NULL);
+            Truth.assertThat(tableField.isNullable()).isEqualTo(constraints == USUAL_NULLABLE);
             Truth.assertThat(tableField instanceof ForeignTableField).isEqualTo(tableField.isForeignKey());
             return this;
         }
@@ -212,6 +213,14 @@ public class TestingArch {
             return this;
         }
 
+        public @NotNull TableFieldSubject isMapperSupportedType() {
+            Truth.assertThat(tableField.typeSupport()).isEqualTo(TableField.TypeSupport.MAPPER_API);
+            Truth.assertThat(tableField.isAdapterSupportType()).isFalse();
+            Truth.assertThat(tableField.isNativelySupportedType()).isFalse();
+            Truth.assertThat(tableField.isMapperSupportedType()).isTrue();
+            return this;
+        }
+
         public @NotNull TableFieldSubject usesAdapter(@NotNull String staticRef) {
             Truth.assertThat(tableField.adapterApiOrDie().staticRef()).isEqualTo(staticRef);
             return this;
@@ -223,5 +232,6 @@ public class TestingArch {
         UNIQUE_NOT_NULL,
         FOREIGN_KEY_NOT_NULL,
         USUAL_NOT_NULL,
+        USUAL_NULLABLE,
     }
 }

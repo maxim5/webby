@@ -6,11 +6,13 @@ import io.webby.orm.api.ForeignObj;
 import io.webby.orm.api.annotate.Model;
 import io.webby.orm.api.annotate.Sql;
 import io.webby.orm.arch.JdbcType;
+import io.webby.util.base.EasyPrimitives.OptionalBool;
 import io.webby.util.collect.Pair;
 import org.junit.jupiter.api.Test;
 
 import java.awt.*;
 import java.util.List;
+import java.util.Optional;
 
 import static io.webby.orm.arch.factory.TestingArch.FieldConstraints.*;
 import static io.webby.orm.arch.factory.TestingArch.TableFieldsStatus.*;
@@ -86,6 +88,19 @@ public class ArchFactoryTest {
     }
 
     @Test
+    void single_field_boolean() {
+        record User(boolean foo) {}
+
+        assertThat(buildTableArch(User.class)).hasFields(HAS_NO_KEY_FIELDS).hasSingleFieldThat("foo")
+            .isFromTable("user")
+            .hasInJava(boolean.class, "foo()")
+            .isSingleColumn("foo", JdbcType.Boolean)
+            .hasConstraints(USUAL_NOT_NULL)
+            .doesNotHaveDefault()
+            .isNativelySupportedType();
+    }
+
+    @Test
     void single_field_string() {
         record User(String foo) {}
 
@@ -139,6 +154,19 @@ public class ArchFactoryTest {
     }
 
     @Test
+    void single_field_enum() {
+        record User(OptionalBool bool) {}
+
+        assertThat(buildTableArch(User.class)).hasFields(HAS_NO_KEY_FIELDS).hasSingleFieldThat("bool")
+            .isFromTable("user")
+            .hasInJava(OptionalBool.class, "bool()")
+            .isSingleColumn("bool", JdbcType.Int)
+            .hasConstraints(USUAL_NOT_NULL)
+            .doesNotHaveAnyDefaults()
+            .isMapperSupportedType();
+    }
+
+    @Test
     void single_field_complex() {
         record Tuple(int a, String b) {}
         record User(Tuple foo) {}
@@ -167,6 +195,18 @@ public class ArchFactoryTest {
             .usesAdapter("PointJdbcAdapter.ADAPTER");
     }
 
+    @Test
+    void single_field_optional() {
+        record User(Optional<Integer> opt) {}
+
+        assertThat(buildTableArch(User.class)).hasFields(HAS_NO_KEY_FIELDS).hasSingleFieldThat("opt")
+            .isFromTable("user")
+            .hasInJava(Optional.class, "opt()")
+            .isSingleColumn("opt", JdbcType.Int)
+            .hasConstraints(USUAL_NULLABLE)
+            .doesNotHaveAnyDefaults()
+            .isMapperSupportedType();
+    }
 
     /** Single primary key field **/
 
