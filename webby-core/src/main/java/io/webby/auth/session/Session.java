@@ -15,7 +15,7 @@ public record Session(long sessionId,
                       @NotNull ForeignInt<UserModel> user,
                       @NotNull Instant createdAt,
                       @NotNull String userAgent,
-                      @Sql(nullable = true) @Nullable String ipAddress) {
+                      @Nullable @Sql.Null String ipAddress) {
     public static final String DB_NAME = "session";
 
     public static @NotNull Session fromRequest(long sessionId, @NotNull HttpRequestEx request) {

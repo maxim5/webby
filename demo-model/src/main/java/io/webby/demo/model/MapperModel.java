@@ -1,6 +1,7 @@
 package io.webby.demo.model;
 
-import io.webby.orm.api.annotate.Via;
+import io.webby.orm.api.annotate.Sql;
+import io.webby.orm.api.annotate.Sql.Via;
 import io.webby.util.collect.Pair;
 import io.webby.util.func.Reversible;
 import org.jetbrains.annotations.NotNull;
@@ -10,7 +11,7 @@ import java.util.List;
 
 public record MapperModel(int id,
                           @Via(PathMapper.class) List<String> path,
-                          @Via(PairMapper.class) Pair<Long, Long> pair) {
+                          @Sql(via = PairMapper.class) Pair<Long, Long> pair) {
     static class PathMapper implements Reversible<String, List<String>> {
         public static final PathMapper INSTANCE = new PathMapper();
         @Override

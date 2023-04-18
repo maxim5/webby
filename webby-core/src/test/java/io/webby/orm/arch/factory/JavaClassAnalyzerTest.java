@@ -3,7 +3,11 @@ package io.webby.orm.arch.factory;
 import com.google.errorprone.annotations.CanIgnoreReturnValue;
 import io.webby.orm.api.annotate.Model;
 import io.webby.orm.api.annotate.Sql;
-import io.webby.orm.api.annotate.Via;
+import io.webby.orm.api.annotate.Sql.Null;
+import io.webby.orm.api.annotate.Sql.PK;
+import io.webby.orm.api.annotate.Sql.Unique;
+import io.webby.orm.api.annotate.Sql.Via;
+import io.webby.orm.arch.InvalidSqlModelException;
 import io.webby.orm.codegen.ModelInput;
 import io.webby.util.reflect.EasyMembers;
 import org.jetbrains.annotations.NotNull;
@@ -19,6 +23,7 @@ import java.util.List;
 
 import static com.google.common.truth.Truth.assertThat;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 
 @SuppressWarnings({"unused", "FieldCanBeLocal"})
 public class JavaClassAnalyzerTest {
@@ -169,22 +174,53 @@ public class JavaClassAnalyzerTest {
     }
 
     @Test
-    public void isPrimaryKeyField_annotation() {
+    public void isPrimaryKeyField_annotations() {
         @Model(javaName = "Pojo")
-        record FooPojo(@Sql(primary = true) int foo, int pojoId) {}
+        record FooPojo(@Sql(primary = true) int foo, @PK int bar, int pojoId) {}
 
         assertJavaClass(FooPojo.class)
             .hasPrimaryKeyField("foo")
+            .hasPrimaryKeyField("bar")
             .hasPrimaryKeyField("pojoId");
     }
 
     @Test
-    public void getViaClass_simple() {
-        record Foo(String foo, @Via(Object.class) String bar, @Via String baz) {}
+    public void isUniqueField_annotations() {
+        @Model(javaName = "Pojo")
+        record FooPojo(@Sql(unique = true) int foo, @Unique int bar, int baz) {}
 
-        assertJavaClass(Foo.class).ofField("foo").hasNoViaClass();
-        assertJavaClass(Foo.class).ofField("bar").hasViaClass(Object.class);
-        assertJavaClass(Foo.class).ofField("baz").hasNoViaClass();
+        assertJavaClass(FooPojo.class)
+            .hasUniqueField("foo")
+            .hasUniqueField("bar")
+            .hasNotUniqueField("baz");
+    }
+
+    @Test
+    public void isNullableField_annotations() {
+        @Model(javaName = "Pojo")
+        record FooPojo(@Sql(nullable = true) int foo, @Null int bar, @javax.annotation.Nullable Long baz) {}
+
+        assertJavaClass(FooPojo.class)
+            .hasNullableField("foo")
+            .hasNullableField("bar")
+            .hasNullableField("baz");
+    }
+
+    @Test
+    public void getViaClass_annotations() {
+        record Foo(int a, @Via(Object.class) int b, @Via int c, @Sql(via = Object.class) int d) {}
+
+        assertJavaClass(Foo.class).ofField("a").hasNoViaClass();
+        assertJavaClass(Foo.class).ofField("b").hasViaClass(Object.class);
+        assertJavaClass(Foo.class).ofField("c").hasNoViaClass();
+        assertJavaClass(Foo.class).ofField("d").hasViaClass(Object.class);
+    }
+
+    @Test
+    public void getViaClass_invalid() {
+        record Foo(@Sql(via = Object.class) @Via(Object.class) int invalid) {}
+
+        assertJavaClass(Foo.class).ofField("invalid").viaClassThrows();
     }
 
     private static void assertFields(@NotNull List<Field> fields, @NotNull String ... names) {
@@ -220,16 +256,38 @@ public class JavaClassAnalyzerTest {
         }
 
         public @NotNull JavaClassAnalyzerSubject hasPrimaryKeyField(@NotNull String name) {
-            Field field = getFieldByName(name);
-            boolean isPrimaryKey = JavaClassAnalyzer.isPrimaryKeyField(field, ModelInput.of(klass));
+            boolean isPrimaryKey = JavaClassAnalyzer.isPrimaryKeyField(getFieldByName(name), ModelInput.of(klass));
             assertThat(isPrimaryKey).isTrue();
             return this;
         }
 
         public @NotNull JavaClassAnalyzerSubject hasNotPrimaryKeyField(@NotNull String name) {
-            Field field = getFieldByName(name);
-            boolean isPrimaryKey = JavaClassAnalyzer.isPrimaryKeyField(field, ModelInput.of(klass));
+            boolean isPrimaryKey = JavaClassAnalyzer.isPrimaryKeyField(getFieldByName(name), ModelInput.of(klass));
             assertThat(isPrimaryKey).isFalse();
+            return this;
+        }
+
+        public @NotNull JavaClassAnalyzerSubject hasUniqueField(@NotNull String name) {
+            boolean isUnique = JavaClassAnalyzer.isUniqueField(getFieldByName(name));
+            assertThat(isUnique).isTrue();
+            return this;
+        }
+
+        public @NotNull JavaClassAnalyzerSubject hasNotUniqueField(@NotNull String name) {
+            boolean isUnique = JavaClassAnalyzer.isUniqueField(getFieldByName(name));
+            assertThat(isUnique).isFalse();
+            return this;
+        }
+
+        public @NotNull JavaClassAnalyzerSubject hasNullableField(@NotNull String name) {
+            boolean isNullable = JavaClassAnalyzer.isNullableField(getFieldByName(name));
+            assertThat(isNullable).isTrue();
+            return this;
+        }
+
+        public @NotNull JavaClassAnalyzerSubject hasNotNullableField(@NotNull String name) {
+            boolean isNullable = JavaClassAnalyzer.isNullableField(getFieldByName(name));
+            assertThat(isNullable).isFalse();
             return this;
         }
 
@@ -257,6 +315,11 @@ public class JavaClassAnalyzerTest {
         public @NotNull AnnotatedElementSubject hasNoViaClass() {
             Class<?> viaClass = JavaClassAnalyzer.getViaClass(element);
             assertThat(viaClass).isNull();
+            return this;
+        }
+
+        public @NotNull AnnotatedElementSubject viaClassThrows() {
+            assertThrows(InvalidSqlModelException.class, () -> JavaClassAnalyzer.getViaClass(element));
             return this;
         }
     }

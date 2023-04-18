@@ -6,7 +6,7 @@ import org.jetbrains.annotations.Nullable;
 
 import java.util.Arrays;
 
-public record BlobKv(byte @NotNull [] id, @Sql(nullable = true) byte @Nullable [] value) {
+public record BlobKv(byte @NotNull [] id, @Sql.Null byte @Nullable [] value) {
     public static final String DB_NAME = "blob_kv";
 
     @Override

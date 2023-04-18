@@ -17,6 +17,8 @@ import java.util.Optional;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.atomic.AtomicReference;
 
+import static io.webby.orm.api.annotate.Sql.Default;
+import static io.webby.orm.api.annotate.Sql.PK;
 import static io.webby.orm.arch.factory.TestingArch.FieldConstraints.*;
 import static io.webby.orm.arch.factory.TestingArch.TableFieldsStatus.*;
 import static io.webby.orm.arch.factory.TestingArch.assertThat;
@@ -318,6 +320,19 @@ public class ArchFactoryTest {
             .isNativelySupportedType();
     }
 
+    @Test
+    void single_field_string_pk_annotated() {
+        record User(@PK String userKey) {}
+
+        assertThat(buildTableArch(User.class)).hasFields(PRIMARY_OBJ).hasSingleFieldThat("userKey")
+            .isFromTable("user")
+            .hasInJava(String.class, "userKey()")
+            .isSingleColumn("user_key", JdbcType.String)
+            .hasConstraints(PRIMARY_KEY.nonnull())
+            .doesNotHaveDefault()
+            .isNativelySupportedType();
+    }
+
     /** Single foreign key field **/
 
     @Test
@@ -366,7 +381,7 @@ public class ArchFactoryTest {
 
     @Test
     void single_field_int_with_default() {
-        record User(@Sql(defaults = "0") int foo) {}
+        record User(@Default("0") int foo) {}
 
         assertThat(buildTableArch(User.class)).hasFields(ONLY_ORDINARY).hasSingleFieldThat("foo")
             .isFromTable("user")
@@ -379,7 +394,7 @@ public class ArchFactoryTest {
 
     @Test
     void single_field_long_with_default() {
-        record User(@Sql(defaults = "-1") long foo) {}
+        record User(@Default("-1") long foo) {}
 
         assertThat(buildTableArch(User.class)).hasFields(ONLY_ORDINARY).hasSingleFieldThat("foo")
             .isFromTable("user")
@@ -392,7 +407,7 @@ public class ArchFactoryTest {
 
     @Test
     void single_field_string_with_default() {
-        record User(@Sql(defaults = "") String foo) {}
+        record User(@Default("") String foo) {}
 
         assertThat(buildTableArch(User.class)).hasFields(ONLY_ORDINARY).hasSingleFieldThat("foo")
             .isFromTable("user")

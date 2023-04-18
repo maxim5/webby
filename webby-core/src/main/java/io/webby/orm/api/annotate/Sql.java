@@ -36,4 +36,55 @@ public @interface Sql {
      * In case of multiple columns, the size of an array must match the number of columns.
      */
     String[] defaults() default {};
+
+    /**
+     * Indicates the mapper that should be used to convert this field.
+     * The mapper class must implement a {@link io.webby.util.func.Reversible} interface with
+     * one argument matching the field class and the other argument matching a JDBC supported type.
+     *
+     * @see io.webby.orm.arch.JdbcType
+     */
+    Class<?> via() default Void.class;
+
+    /**
+     * A shortcut for {@link Sql#primary()}.
+     */
+    @Retention(RetentionPolicy.RUNTIME)
+    @Target({ElementType.FIELD, ElementType.PARAMETER})
+    @interface PK {
+    }
+
+    /**
+     * A shortcut for {@link Sql#unique()}.
+     */
+    @Retention(RetentionPolicy.RUNTIME)
+    @Target({ElementType.FIELD, ElementType.PARAMETER})
+    @interface Unique {
+    }
+
+    /**
+     * A shortcut for {@link Sql#nullable()}.
+     */
+    @Retention(RetentionPolicy.RUNTIME)
+    @Target({ElementType.FIELD, ElementType.PARAMETER})
+    @interface Null {
+    }
+
+    /**
+     * A shortcut for {@link Sql#defaults()}.
+     */
+    @Retention(RetentionPolicy.RUNTIME)
+    @Target({ElementType.FIELD, ElementType.PARAMETER})
+    @interface Default {
+        String[] value() default {};
+    }
+
+    /**
+     * A shortcut for {@link Sql#via()}.
+     */
+    @Retention(RetentionPolicy.RUNTIME)
+    @Target({ElementType.FIELD, ElementType.PARAMETER})
+    @interface Via {
+        Class<?> value() default Void.class;
+    }
 }

@@ -4,13 +4,11 @@ import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
 import com.google.common.flogger.FluentLogger;
 import io.webby.orm.api.annotate.Sql;
-import io.webby.orm.api.annotate.Via;
 import io.webby.orm.arch.InvalidSqlModelException;
 import io.webby.orm.arch.Naming;
 import io.webby.orm.arch.model.ModelField;
 import io.webby.orm.codegen.ModelInput;
 import io.webby.util.collect.EasyIterables;
-import io.webby.util.reflect.EasyAnnotations;
 import io.webby.util.reflect.EasyMembers;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
@@ -27,6 +25,7 @@ import java.util.stream.Collectors;
 
 import static io.webby.orm.arch.InvalidSqlModelException.failIf;
 import static io.webby.util.base.EasyObjects.firstNonNullIfExist;
+import static io.webby.util.reflect.EasyAnnotations.getOptionalAnnotation;
 import static io.webby.util.reflect.EasyMembers.isPrivate;
 import static io.webby.util.reflect.EasyMembers.isStatic;
 
@@ -163,11 +162,11 @@ class JavaClassAnalyzer {
             fieldName.equals(Naming.idJavaName(input.javaModelName())) ||
             fieldName.equals(Naming.idJavaName(input.modelClass())) ||
             (input.modelInterface() != null && fieldName.equals(Naming.idJavaName(input.modelInterface()))) ||
-            EasyAnnotations.getOptionalAnnotation(field, Sql.class).map(Sql::primary).orElse(false);
+            merge(getOptionalAnnotation(field, Sql.class).map(Sql::primary), getOptionalAnnotation(field, Sql.PK.class));
     }
 
     public static boolean isUniqueField(@NotNull Field field) {
-        return EasyAnnotations.getOptionalAnnotation(field, Sql.class).map(Sql::unique).orElse(false);
+        return merge(getOptionalAnnotation(field, Sql.class).map(Sql::unique), getOptionalAnnotation(field, Sql.Unique.class));
     }
 
     private static final ImmutableList<Class<? extends Annotation>> NULLABLE_ANNOTATIONS = ImmutableList.of(
@@ -179,23 +178,32 @@ class JavaClassAnalyzer {
 
     public static boolean isNullableField(@NotNull Field field) {
         for (Class<? extends Annotation> annotation : NULLABLE_ANNOTATIONS) {
-            if (EasyAnnotations.getOptionalAnnotation(field, annotation).isPresent()) {
+            if (getOptionalAnnotation(field, annotation).isPresent()) {
                 return true;
             }
         }
         if (NULLABLE_TYPES.contains(field.getType())) {
             return true;
         }
-        return EasyAnnotations.getOptionalAnnotation(field, Sql.class).map(Sql::nullable).orElse(false);
+        return merge(getOptionalAnnotation(field, Sql.class).map(Sql::nullable), getOptionalAnnotation(field, Sql.Null.class));
     }
 
     public static @Nullable String @Nullable [] getDefaults(@NotNull AnnotatedElement element) {
-        return EasyAnnotations.getOptionalAnnotation(element, Sql.class).map(Sql::defaults).orElse(null);
+        Optional<String[]> defaults1 = getOptionalAnnotation(element, Sql.class).map(Sql::defaults);
+        Optional<String[]> defaults2 = getOptionalAnnotation(element, Sql.Default.class).map(Sql.Default::value);
+        failIf(defaults1.isPresent() && defaults2.isPresent(), "Element contains ambiguous annotations: %s", element);
+        return defaults1.or(() -> defaults2).orElse(null);
     }
 
     public static @Nullable Class<?> getViaClass(@NotNull AnnotatedElement element) {
-        return EasyAnnotations.getOptionalAnnotation(element, Via.class).map(Via::value)
-            .filter(klass -> klass != Void.class)
-            .orElse(null);
+        Optional<Class<?>> via1 = getOptionalAnnotation(element, Sql.class).map(Sql::via);
+        Optional<Class<?>> via2 = getOptionalAnnotation(element, Sql.Via.class).map(Sql.Via::value);
+        failIf(via1.isPresent() && via2.isPresent(), "Element contains ambiguous annotations: %s", element);
+        return via1.or(() -> via2).filter(klass -> klass != Void.class).orElse(null);
+    }
+
+    @SuppressWarnings("OptionalUsedAsFieldOrParameterType")
+    private static boolean merge(@NotNull Optional<Boolean> first, @NotNull Optional<?> second) {
+        return first.orElseGet(second::isPresent);
     }
 }

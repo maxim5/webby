@@ -1,8 +1,6 @@
 package io.webby.demo.model;
 
-import io.webby.orm.api.annotate.Sql;
+import io.webby.orm.api.annotate.Sql.Default;
 
-public record LongsModel(@Sql(defaults = "0") long foo,
-                         @Sql(defaults = "0") long bar,
-                         @Sql(defaults = "0") long value) {
+public record LongsModel(@Default("0") long foo, @Default("0") long bar, @Default("0") long value) {
 }
