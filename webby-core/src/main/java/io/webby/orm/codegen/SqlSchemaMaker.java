@@ -41,8 +41,8 @@ public class SqlSchemaMaker {
                 column.isNotNull() ? support.inlineNotNull(column) : "",
                 column.primaryKey().isSingle() ? support.inlinePrimaryKeyFor(column) : "",
                 column.primaryKey().isSingle() ? support.inlineAutoIncrementFor(column) : "",
-                column.unique().isSingle() ? support.inlineUniqueFor(column) : "",
-                column.hasDefault() ? support.inlineDefaultFor(column) : ""
+                column.hasDefault() ? support.inlineDefaultFor(column) : "",
+                column.unique().isSingle() ? support.inlineUniqueFor(column) : ""
             ).joinNonEmpty(" ");
             snippet.withLine(definition);
         });
