@@ -7,9 +7,8 @@ import com.google.inject.Inject;
 import io.webby.app.Settings;
 import io.webby.common.GuiceCompleteEvent;
 import io.webby.orm.api.Connector;
-import io.webby.orm.api.Engine;
+import io.webby.orm.api.DbAdmin;
 import io.webby.orm.api.TableMeta;
-import io.webby.orm.codegen.SqlSchemaMaker;
 import org.jetbrains.annotations.NotNull;
 
 import java.sql.SQLException;
@@ -63,13 +62,11 @@ public class DDL {
             log.at(Level.WARNING).log("Automatic SQL table creation called in production");
         }
 
-        Engine engine = connector().engine();
         try {
             connector().runner().runInTransaction(runner -> {
+                DbAdmin admin = DbAdmin.ofFixed(runner);
                 for (TableMeta meta : getAllTables()) {
-                    log.at(Level.INFO).log("Creating SQL table if not exists: `%s`...", meta.sqlTableName());
-                    String query = SqlSchemaMaker.makeCreateTableQuery(engine, meta);
-                    runner.runUpdate(query);
+                    admin.createTableIfNotExists(meta);
                 }
             });
         } catch (SQLException e) {

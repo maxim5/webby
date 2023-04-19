@@ -9,6 +9,7 @@ import com.carrotsearch.hppc.cursors.LongCursor;
 import com.google.common.collect.Lists;
 import com.google.errorprone.annotations.MustBeClosed;
 import io.webby.orm.api.query.Args;
+import io.webby.orm.api.query.DataDefinitionQuery;
 import io.webby.orm.api.query.SelectQuery;
 import io.webby.util.base.Unchecked;
 import io.webby.util.func.ThrowConsumer;
@@ -310,6 +311,10 @@ public class QueryRunner {
         try (Statement statement = connection.createStatement()) {
             return statement.executeUpdate(sql);
         }
+    }
+
+    public int runUpdate(@NotNull DataDefinitionQuery query) throws SQLException {
+        return runUpdate(query.repr(), query.args());
     }
 
     public int runUpdate(@NotNull String sql) throws SQLException {

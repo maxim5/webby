@@ -66,18 +66,6 @@ public class SqlSchemaMaker {
         """.formatted(meta.sqlTableName(), snippet.join(Collectors.joining(",\n    ")));
     }
 
-    public static @NotNull String makeDropTableQuery(@NotNull BaseTable<?> table) {
-        return makeDropTableQuery(table.meta());
-    }
-
-    public static @NotNull String makeDropTableQuery(@NotNull TableMeta meta) {
-        return makeDropTableQuery(meta.sqlTableName());
-    }
-
-    public static @NotNull String makeDropTableQuery(@NotNull String table) {
-        return "DROP TABLE IF EXISTS %s".formatted(table);
-    }
-
     private interface SchemaSupport {
         @NotNull String columnTypeFor(@NotNull ColumnMeta columnMeta);
 

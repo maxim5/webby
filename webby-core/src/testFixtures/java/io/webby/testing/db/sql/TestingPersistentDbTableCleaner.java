@@ -1,24 +1,21 @@
 package io.webby.testing.db.sql;
 
 import com.google.common.eventbus.EventBus;
-import com.google.common.flogger.FluentLogger;
 import com.google.inject.Inject;
 import com.google.inject.Injector;
 import io.webby.app.Settings;
 import io.webby.db.sql.DDL;
 import io.webby.db.sql.TableManager;
+import io.webby.orm.api.DbAdmin;
 import io.webby.orm.api.TableMeta;
-import io.webby.orm.codegen.SqlSchemaMaker;
+import io.webby.orm.api.query.DropTableQuery;
 import org.jetbrains.annotations.NotNull;
 
 import java.sql.SQLException;
-import java.util.logging.Level;
 
 import static io.webby.util.base.Unchecked.rethrow;
 
 public class TestingPersistentDbTableCleaner {
-    private static final FluentLogger log = FluentLogger.forEnclosingClass();
-
     @Inject
     public TestingPersistentDbTableCleaner(@NotNull Settings settings, @NotNull EventBus eventBus, @NotNull Injector injector) {
         if (settings.storageSettings().isSqlEnabled()) {
@@ -33,9 +30,9 @@ public class TestingPersistentDbTableCleaner {
                 private void dropAllTablesIfExist() {
                     try {
                         connector().runner().runInTransaction(runner -> {
+                            DbAdmin admin = DbAdmin.ofFixed(runner);
                             for (TableMeta meta : getAllTables()) {
-                                log.at(Level.INFO).log("Deleting SQL table if exists: `%s`...", meta.sqlTableName());
-                                runner.runUpdate(SqlSchemaMaker.makeDropTableQuery(meta));
+                                admin.dropTable(DropTableQuery.of(meta).ifExists().build());
                             }
                         });
                     } catch (SQLException e) {
