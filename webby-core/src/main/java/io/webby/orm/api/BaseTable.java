@@ -37,6 +37,11 @@ public interface BaseTable<E> extends Iterable<E>, HasEngine, HasRunner {
     @NotNull TableMeta meta();
 
     /**
+     * Returns the admin interface which can control this and other tables and system in general.
+     */
+    @NotNull DbAdmin admin();
+
+    /**
      * Returns a copy of {@link BaseTable} instance with custom {@code follow} level for read operations in the table.
      * Default value is {@link ReadFollow#NO_FOLLOW}.
      */

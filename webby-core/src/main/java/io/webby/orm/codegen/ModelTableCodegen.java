@@ -69,6 +69,7 @@ public class ModelTableCodegen extends BaseCodegen {
         constructors();
         withFollowOnRead();
 
+        admin();
         getters();
         count();
         exists();
@@ -146,7 +147,7 @@ public class ModelTableCodegen extends BaseCodegen {
         List<String> classesToImport = Streams.concat(
             baseTableClasses().stream().map(FQN::of),
             Stream.of(
-                Connector.class, QueryRunner.class, QueryException.class, Engine.class, ReadFollow.class,
+                Connector.class, QueryRunner.class, QueryException.class, Engine.class, ReadFollow.class, DbAdmin.class,
                 Filter.class, Where.class, Args.class, io.webby.orm.api.query.Column.class, TermType.class,
                 ResultSetIterator.class, TableMeta.class,
                 EntityData.class, EntityIntData.class, EntityLongData.class, EntityColumnMap.class,
@@ -269,6 +270,15 @@ public class ModelTableCodegen extends BaseCodegen {
             }\n
             """;
         appendCode(code, mainContext);
+    }
+
+    private void admin() {
+        appendCode("""
+        @Override
+        public @Nonnull DbAdmin admin() {
+            return new DbAdmin(connector);
+        }\n
+        """);
     }
 
     private void getters() {
