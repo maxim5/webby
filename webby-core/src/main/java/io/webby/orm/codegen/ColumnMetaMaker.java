@@ -4,6 +4,7 @@ import io.webby.orm.api.TableMeta.ConstraintStatus;
 import io.webby.orm.arch.Column;
 import io.webby.orm.arch.model.ForeignTableField;
 import io.webby.orm.arch.model.TableField;
+import io.webby.util.base.SimpleJoin;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
@@ -17,7 +18,7 @@ class ColumnMetaMaker {
                 "byte[]" :
                 nativeType.getName();
 
-        return SnippetLine.of(
+        return SimpleJoin.of(
             "ColumnMeta.of(OwnColumn.%s, %s.class)".formatted(sqlName, type),
             toConstraintStatus(".withPrimaryKey", field.isPrimaryKey(), field.isMultiColumn()),
             toConstraintStatus(".withUnique", field.isUnique(), field.isMultiColumn()),

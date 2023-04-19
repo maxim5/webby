@@ -3,6 +3,7 @@ package io.webby.orm.codegen;
 import io.webby.orm.api.Engine;
 import io.webby.orm.api.TableMeta;
 import io.webby.orm.api.TableMeta.ColumnMeta;
+import io.webby.util.base.SimpleJoin;
 import io.webby.util.collect.EasyMaps;
 import org.jetbrains.annotations.NotNull;
 
@@ -18,25 +19,25 @@ public class SqlSchemaMaker {
         Snippet snippet = new Snippet();
 
         meta.sqlColumns().forEach(column -> {
-            String definition = SnippetLine.of(
+            String definition = SimpleJoin.of(
                 "%s %s".formatted(column.name(), support.columnTypeFor(column)),
                 column.isNotNull() ? support.inlineNotNull(column) : "",
                 column.primaryKey().isSingle() ? support.inlinePrimaryKeyFor(column) : "",
                 column.primaryKey().isSingle() ? support.inlineAutoIncrementFor(column) : "",
                 column.hasDefault() ? support.inlineDefaultFor(column) : "",
                 column.unique().isSingle() ? support.inlineUniqueFor(column) : ""
-            ).joinNonEmpty(" ");
+            ).onlyNonEmpty().join(" ");
             snippet.withLine(definition);
         });
 
         if (meta.primaryKeys().isComposite()) {
-            String columns = SnippetLine.from(meta.primaryKeys().columns()).join(", ");
+            String columns = SimpleJoin.from(meta.primaryKeys().columns()).join(", ");
             snippet.withLine("PRIMARY KEY (%s)".formatted(columns));
         }
 
         meta.unique().forEach(constraint -> {
             if (constraint.isComposite()) {
-                String columns = SnippetLine.from(constraint.columns()).join(", ");
+                String columns = SimpleJoin.from(constraint.columns()).join(", ");
                 snippet.withLine("UNIQUE (%s)".formatted(columns));
             }
         });
