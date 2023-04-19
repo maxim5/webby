@@ -13,7 +13,7 @@ import static io.webby.orm.codegen.SqlSchemaMaker.makeCreateTableQuery;
 public class SqlSchemaMakerTest {
     @Test
     public void create_table_user() {
-        assertThat(makeCreateTableQuery(Engine.SQLite, UserTable.class)).isEqualTo("""
+        assertThat(makeCreateTableQuery(Engine.SQLite, UserTable.META)).isEqualTo("""
             CREATE TABLE IF NOT EXISTS user (
                 user_id INTEGER NOT NULL PRIMARY KEY,
                 created_at INTEGER NOT NULL,
@@ -21,7 +21,7 @@ public class SqlSchemaMakerTest {
             )
             """);
 
-        assertThat(makeCreateTableQuery(Engine.H2, UserTable.class)).isEqualTo("""
+        assertThat(makeCreateTableQuery(Engine.H2, UserTable.META)).isEqualTo("""
             CREATE TABLE IF NOT EXISTS user (
                 user_id INTEGER NOT NULL PRIMARY KEY AUTO_INCREMENT,
                 created_at TIMESTAMP NOT NULL,
@@ -29,7 +29,7 @@ public class SqlSchemaMakerTest {
             )
             """);
 
-        assertThat(makeCreateTableQuery(Engine.MySQL, UserTable.class)).isEqualTo("""
+        assertThat(makeCreateTableQuery(Engine.MySQL, UserTable.META)).isEqualTo("""
             CREATE TABLE IF NOT EXISTS user (
                 user_id INTEGER NOT NULL PRIMARY KEY AUTO_INCREMENT,
                 created_at TIMESTAMP(3) NOT NULL,
@@ -40,7 +40,7 @@ public class SqlSchemaMakerTest {
 
     @Test
     public void create_table_session() {
-        assertThat(makeCreateTableQuery(Engine.SQLite, SessionTable.class)).isEqualTo("""
+        assertThat(makeCreateTableQuery(Engine.SQLite, SessionTable.META)).isEqualTo("""
             CREATE TABLE IF NOT EXISTS session (
                 session_id INTEGER NOT NULL PRIMARY KEY,
                 user_id INTEGER NOT NULL,
@@ -50,7 +50,7 @@ public class SqlSchemaMakerTest {
             )
             """);
 
-        assertThat(makeCreateTableQuery(Engine.H2, SessionTable.class)).isEqualTo("""
+        assertThat(makeCreateTableQuery(Engine.H2, SessionTable.META)).isEqualTo("""
             CREATE TABLE IF NOT EXISTS session (
                 session_id BIGINT NOT NULL PRIMARY KEY AUTO_INCREMENT,
                 user_id INTEGER NOT NULL,
@@ -60,7 +60,7 @@ public class SqlSchemaMakerTest {
             )
             """);
 
-        assertThat(makeCreateTableQuery(Engine.MySQL, SessionTable.class)).isEqualTo("""
+        assertThat(makeCreateTableQuery(Engine.MySQL, SessionTable.META)).isEqualTo("""
             CREATE TABLE IF NOT EXISTS session (
                 session_id BIGINT NOT NULL PRIMARY KEY AUTO_INCREMENT,
                 user_id INTEGER NOT NULL,
@@ -73,21 +73,21 @@ public class SqlSchemaMakerTest {
 
     @Test
     public void create_table_blob_kv() {
-        assertThat(makeCreateTableQuery(Engine.SQLite, BlobKvTable.class)).isEqualTo("""
+        assertThat(makeCreateTableQuery(Engine.SQLite, BlobKvTable.META)).isEqualTo("""
             CREATE TABLE IF NOT EXISTS blob_kv (
                 id VARCHAR NOT NULL PRIMARY KEY,
                 value BLOB
             )
             """);
 
-        assertThat(makeCreateTableQuery(Engine.H2, BlobKvTable.class)).isEqualTo("""
+        assertThat(makeCreateTableQuery(Engine.H2, BlobKvTable.META)).isEqualTo("""
             CREATE TABLE IF NOT EXISTS blob_kv (
                 id VARCHAR NOT NULL PRIMARY KEY,
                 value BLOB
             )
             """);
 
-        assertThat(makeCreateTableQuery(Engine.MySQL, BlobKvTable.class)).isEqualTo("""
+        assertThat(makeCreateTableQuery(Engine.MySQL, BlobKvTable.META)).isEqualTo("""
             CREATE TABLE IF NOT EXISTS blob_kv (
                 id VARBINARY(255) NOT NULL PRIMARY KEY,
                 value BLOB
@@ -99,7 +99,7 @@ public class SqlSchemaMakerTest {
 
     @Test
     public void create_table_atomic_model() {
-        assertThat(makeCreateTableQuery(Engine.SQLite, AtomicModelTable.class)).isEqualTo("""
+        assertThat(makeCreateTableQuery(Engine.SQLite, AtomicModelTable.META)).isEqualTo("""
             CREATE TABLE IF NOT EXISTS atomic_model (
                 id INTEGER NOT NULL PRIMARY KEY,
                 i INTEGER NOT NULL,
@@ -109,7 +109,7 @@ public class SqlSchemaMakerTest {
             )
             """);
 
-        assertThat(makeCreateTableQuery(Engine.H2, AtomicModelTable.class)).isEqualTo("""
+        assertThat(makeCreateTableQuery(Engine.H2, AtomicModelTable.META)).isEqualTo("""
             CREATE TABLE IF NOT EXISTS atomic_model (
                 id INTEGER NOT NULL PRIMARY KEY AUTO_INCREMENT,
                 i INTEGER NOT NULL,
@@ -119,7 +119,7 @@ public class SqlSchemaMakerTest {
             )
             """);
 
-        assertThat(makeCreateTableQuery(Engine.MySQL, AtomicModelTable.class)).isEqualTo("""
+        assertThat(makeCreateTableQuery(Engine.MySQL, AtomicModelTable.META)).isEqualTo("""
             CREATE TABLE IF NOT EXISTS atomic_model (
                 id INTEGER NOT NULL PRIMARY KEY AUTO_INCREMENT,
                 i INTEGER NOT NULL,
@@ -132,7 +132,7 @@ public class SqlSchemaMakerTest {
 
     @Test
     public void create_table_complex_id_model() {
-        assertThat(makeCreateTableQuery(Engine.SQLite, ComplexIdModelTable.class)).isEqualTo("""
+        assertThat(makeCreateTableQuery(Engine.SQLite, ComplexIdModelTable.META)).isEqualTo("""
             CREATE TABLE IF NOT EXISTS complex_id_model (
                 id_x INTEGER NOT NULL,
                 id_y INTEGER NOT NULL,
@@ -142,7 +142,7 @@ public class SqlSchemaMakerTest {
             )
             """);
 
-        assertThat(makeCreateTableQuery(Engine.H2, ComplexIdModelTable.class)).isEqualTo("""
+        assertThat(makeCreateTableQuery(Engine.H2, ComplexIdModelTable.META)).isEqualTo("""
             CREATE TABLE IF NOT EXISTS complex_id_model (
                 id_x INTEGER NOT NULL,
                 id_y BIGINT NOT NULL,
@@ -152,7 +152,7 @@ public class SqlSchemaMakerTest {
             )
             """);
 
-        assertThat(makeCreateTableQuery(Engine.MySQL, ComplexIdModelTable.class)).isEqualTo("""
+        assertThat(makeCreateTableQuery(Engine.MySQL, ComplexIdModelTable.META)).isEqualTo("""
             CREATE TABLE IF NOT EXISTS complex_id_model (
                 id_x INTEGER NOT NULL,
                 id_y BIGINT NOT NULL,
@@ -165,7 +165,7 @@ public class SqlSchemaMakerTest {
 
     @Test
     public void create_table_constraints_model() {
-        assertThat(makeCreateTableQuery(Engine.SQLite, ConstraintsModelTable.class)).isEqualTo("""
+        assertThat(makeCreateTableQuery(Engine.SQLite, ConstraintsModelTable.META)).isEqualTo("""
             CREATE TABLE IF NOT EXISTS constraints_model (
                 key_id INTEGER NOT NULL PRIMARY KEY,
                 fprint INTEGER NOT NULL DEFAULT (0) UNIQUE,
@@ -177,7 +177,7 @@ public class SqlSchemaMakerTest {
             )
             """);
 
-        assertThat(makeCreateTableQuery(Engine.H2, ConstraintsModelTable.class)).isEqualTo("""
+        assertThat(makeCreateTableQuery(Engine.H2, ConstraintsModelTable.META)).isEqualTo("""
             CREATE TABLE IF NOT EXISTS constraints_model (
                 key_id INTEGER NOT NULL PRIMARY KEY AUTO_INCREMENT,
                 fprint INTEGER NOT NULL DEFAULT (0) UNIQUE,
@@ -189,7 +189,7 @@ public class SqlSchemaMakerTest {
             )
             """);
 
-        assertThat(makeCreateTableQuery(Engine.MySQL, ConstraintsModelTable.class)).isEqualTo("""
+        assertThat(makeCreateTableQuery(Engine.MySQL, ConstraintsModelTable.META)).isEqualTo("""
             CREATE TABLE IF NOT EXISTS constraints_model (
                 key_id INTEGER NOT NULL PRIMARY KEY AUTO_INCREMENT,
                 fprint INTEGER NOT NULL DEFAULT (0) UNIQUE,
@@ -204,7 +204,7 @@ public class SqlSchemaMakerTest {
 
     @Test
     public void create_table_deep_nested_model() {
-        assertThat(makeCreateTableQuery(Engine.SQLite, DeepNestedModelTable.class)).isEqualTo("""
+        assertThat(makeCreateTableQuery(Engine.SQLite, DeepNestedModelTable.META)).isEqualTo("""
             CREATE TABLE IF NOT EXISTS deep_nested_model (
                 id INTEGER NOT NULL PRIMARY KEY,
                 d_id INTEGER NOT NULL,
@@ -219,7 +219,7 @@ public class SqlSchemaMakerTest {
             )
             """);
 
-        assertThat(makeCreateTableQuery(Engine.MySQL, DeepNestedModelTable.class)).isEqualTo("""
+        assertThat(makeCreateTableQuery(Engine.MySQL, DeepNestedModelTable.META)).isEqualTo("""
             CREATE TABLE IF NOT EXISTS deep_nested_model (
                 id INTEGER NOT NULL PRIMARY KEY AUTO_INCREMENT,
                 d_id INTEGER NOT NULL,
@@ -237,7 +237,7 @@ public class SqlSchemaMakerTest {
 
     @Test
     public void create_table_enum_model() {
-        assertThat(makeCreateTableQuery(Engine.SQLite, EnumModelTable.class)).isEqualTo("""
+        assertThat(makeCreateTableQuery(Engine.SQLite, EnumModelTable.META)).isEqualTo("""
             CREATE TABLE IF NOT EXISTS enum_model (
                 id INTEGER NOT NULL PRIMARY KEY,
                 foo INTEGER NOT NULL,
@@ -246,7 +246,7 @@ public class SqlSchemaMakerTest {
             )
             """);
 
-        assertThat(makeCreateTableQuery(Engine.H2, EnumModelTable.class)).isEqualTo("""
+        assertThat(makeCreateTableQuery(Engine.H2, EnumModelTable.META)).isEqualTo("""
             CREATE TABLE IF NOT EXISTS enum_model (
                 id INTEGER NOT NULL PRIMARY KEY AUTO_INCREMENT,
                 foo INTEGER NOT NULL,
@@ -255,7 +255,7 @@ public class SqlSchemaMakerTest {
             )
             """);
 
-        assertThat(makeCreateTableQuery(Engine.MySQL, EnumModelTable.class)).isEqualTo("""
+        assertThat(makeCreateTableQuery(Engine.MySQL, EnumModelTable.META)).isEqualTo("""
             CREATE TABLE IF NOT EXISTS enum_model (
                 id INTEGER NOT NULL PRIMARY KEY AUTO_INCREMENT,
                 foo INTEGER NOT NULL,
@@ -267,25 +267,25 @@ public class SqlSchemaMakerTest {
 
     @Test
     public void create_table_foreign_key_model() {
-        assertThat(makeCreateTableQuery(Engine.SQLite, FKIntTable.class)).isEqualTo("""
+        assertThat(makeCreateTableQuery(Engine.SQLite, FKIntTable.META)).isEqualTo("""
             CREATE TABLE IF NOT EXISTS f_k_int (
                 id INTEGER NOT NULL PRIMARY KEY,
                 value INTEGER NOT NULL
             )
             """);
-        assertThat(makeCreateTableQuery(Engine.SQLite, FKLongTable.class)).isEqualTo("""
+        assertThat(makeCreateTableQuery(Engine.SQLite, FKLongTable.META)).isEqualTo("""
             CREATE TABLE IF NOT EXISTS f_k_long (
                 id INTEGER NOT NULL PRIMARY KEY,
                 value INTEGER NOT NULL
             )
             """);
-        assertThat(makeCreateTableQuery(Engine.SQLite, FKStringTable.class)).isEqualTo("""
+        assertThat(makeCreateTableQuery(Engine.SQLite, FKStringTable.META)).isEqualTo("""
             CREATE TABLE IF NOT EXISTS f_k_string (
                 id VARCHAR NOT NULL PRIMARY KEY,
                 value VARCHAR NOT NULL
             )
             """);
-        assertThat(makeCreateTableQuery(Engine.SQLite, ForeignKeyModelTable.class)).isEqualTo("""
+        assertThat(makeCreateTableQuery(Engine.SQLite, ForeignKeyModelTable.META)).isEqualTo("""
             CREATE TABLE IF NOT EXISTS foreign_key_model (
                 id INTEGER NOT NULL PRIMARY KEY,
                 inner_int_id INTEGER NOT NULL,
@@ -294,25 +294,25 @@ public class SqlSchemaMakerTest {
             )
             """);
 
-        assertThat(makeCreateTableQuery(Engine.MySQL, FKIntTable.class)).isEqualTo("""
+        assertThat(makeCreateTableQuery(Engine.MySQL, FKIntTable.META)).isEqualTo("""
             CREATE TABLE IF NOT EXISTS f_k_int (
                 id INTEGER NOT NULL PRIMARY KEY AUTO_INCREMENT,
                 value INTEGER NOT NULL
             )
             """);
-        assertThat(makeCreateTableQuery(Engine.MySQL, FKLongTable.class)).isEqualTo("""
+        assertThat(makeCreateTableQuery(Engine.MySQL, FKLongTable.META)).isEqualTo("""
             CREATE TABLE IF NOT EXISTS f_k_long (
                 id BIGINT NOT NULL PRIMARY KEY AUTO_INCREMENT,
                 value BIGINT NOT NULL
             )
             """);
-        assertThat(makeCreateTableQuery(Engine.MySQL, FKStringTable.class)).isEqualTo("""
+        assertThat(makeCreateTableQuery(Engine.MySQL, FKStringTable.META)).isEqualTo("""
             CREATE TABLE IF NOT EXISTS f_k_string (
                 id VARCHAR(255) NOT NULL PRIMARY KEY,
                 value VARCHAR(4096) NOT NULL
             )
             """);
-        assertThat(makeCreateTableQuery(Engine.MySQL, ForeignKeyModelTable.class)).isEqualTo("""
+        assertThat(makeCreateTableQuery(Engine.MySQL, ForeignKeyModelTable.META)).isEqualTo("""
             CREATE TABLE IF NOT EXISTS foreign_key_model (
                 id BIGINT NOT NULL PRIMARY KEY AUTO_INCREMENT,
                 inner_int_id INTEGER NOT NULL,
@@ -324,7 +324,7 @@ public class SqlSchemaMakerTest {
 
     @Test
     public void create_table_inherited_model() {
-        assertThat(makeCreateTableQuery(Engine.SQLite, InheritedModelTable.class)).isEqualTo("""
+        assertThat(makeCreateTableQuery(Engine.SQLite, InheritedModelTable.META)).isEqualTo("""
             CREATE TABLE IF NOT EXISTS inherited_model (
                 str VARCHAR NOT NULL,
                 int_value INTEGER NOT NULL,
@@ -333,7 +333,7 @@ public class SqlSchemaMakerTest {
             )
             """);
 
-        assertThat(makeCreateTableQuery(Engine.H2, InheritedModelTable.class)).isEqualTo("""
+        assertThat(makeCreateTableQuery(Engine.H2, InheritedModelTable.META)).isEqualTo("""
             CREATE TABLE IF NOT EXISTS inherited_model (
                 str VARCHAR NOT NULL,
                 int_value INTEGER NOT NULL,
@@ -342,7 +342,7 @@ public class SqlSchemaMakerTest {
             )
             """);
 
-        assertThat(makeCreateTableQuery(Engine.MySQL, InheritedModelTable.class)).isEqualTo("""
+        assertThat(makeCreateTableQuery(Engine.MySQL, InheritedModelTable.META)).isEqualTo("""
             CREATE TABLE IF NOT EXISTS inherited_model (
                 str VARCHAR(4096) NOT NULL,
                 int_value INTEGER NOT NULL,
@@ -354,7 +354,7 @@ public class SqlSchemaMakerTest {
 
     @Test
     public void create_table_nested_model() {
-        assertThat(makeCreateTableQuery(Engine.SQLite, NestedModelTable.class)).isEqualTo("""
+        assertThat(makeCreateTableQuery(Engine.SQLite, NestedModelTable.META)).isEqualTo("""
             CREATE TABLE IF NOT EXISTS nested_model (
                 id INTEGER NOT NULL PRIMARY KEY,
                 simple_id INTEGER NOT NULL,
@@ -367,7 +367,7 @@ public class SqlSchemaMakerTest {
             )
             """);
 
-        assertThat(makeCreateTableQuery(Engine.H2, NestedModelTable.class)).isEqualTo("""
+        assertThat(makeCreateTableQuery(Engine.H2, NestedModelTable.META)).isEqualTo("""
             CREATE TABLE IF NOT EXISTS nested_model (
                 id BIGINT NOT NULL PRIMARY KEY AUTO_INCREMENT,
                 simple_id INTEGER NOT NULL,
@@ -380,7 +380,7 @@ public class SqlSchemaMakerTest {
             )
             """);
 
-        assertThat(makeCreateTableQuery(Engine.MySQL, NestedModelTable.class)).isEqualTo("""
+        assertThat(makeCreateTableQuery(Engine.MySQL, NestedModelTable.META)).isEqualTo("""
             CREATE TABLE IF NOT EXISTS nested_model (
                 id BIGINT NOT NULL PRIMARY KEY AUTO_INCREMENT,
                 simple_id INTEGER NOT NULL,
@@ -396,7 +396,7 @@ public class SqlSchemaMakerTest {
 
     @Test
     public void create_table_nullable_model() {
-        assertThat(makeCreateTableQuery(Engine.SQLite, NullableModelTable.class)).isEqualTo("""
+        assertThat(makeCreateTableQuery(Engine.SQLite, NullableModelTable.META)).isEqualTo("""
             CREATE TABLE IF NOT EXISTS nullable_model (
                 id VARCHAR PRIMARY KEY,
                 str VARCHAR,
@@ -407,7 +407,7 @@ public class SqlSchemaMakerTest {
             )
             """);
 
-        assertThat(makeCreateTableQuery(Engine.H2, NullableModelTable.class)).isEqualTo("""
+        assertThat(makeCreateTableQuery(Engine.H2, NullableModelTable.META)).isEqualTo("""
             CREATE TABLE IF NOT EXISTS nullable_model (
                 id VARCHAR PRIMARY KEY,
                 str VARCHAR,
@@ -418,7 +418,7 @@ public class SqlSchemaMakerTest {
             )
             """);
 
-        assertThat(makeCreateTableQuery(Engine.MySQL, NullableModelTable.class)).isEqualTo("""
+        assertThat(makeCreateTableQuery(Engine.MySQL, NullableModelTable.META)).isEqualTo("""
             CREATE TABLE IF NOT EXISTS nullable_model (
                 id VARCHAR(255) PRIMARY KEY,
                 str VARCHAR(4096),
@@ -432,7 +432,7 @@ public class SqlSchemaMakerTest {
 
     @Test
     public void create_table_optional_model() {
-        assertThat(makeCreateTableQuery(Engine.SQLite, OptionalModelTable.class)).isEqualTo("""
+        assertThat(makeCreateTableQuery(Engine.SQLite, OptionalModelTable.META)).isEqualTo("""
             CREATE TABLE IF NOT EXISTS optional_model (
                 id INTEGER NOT NULL PRIMARY KEY,
                 i INTEGER,
@@ -441,7 +441,7 @@ public class SqlSchemaMakerTest {
             )
             """);
 
-        assertThat(makeCreateTableQuery(Engine.H2, OptionalModelTable.class)).isEqualTo("""
+        assertThat(makeCreateTableQuery(Engine.H2, OptionalModelTable.META)).isEqualTo("""
             CREATE TABLE IF NOT EXISTS optional_model (
                 id INTEGER NOT NULL PRIMARY KEY AUTO_INCREMENT,
                 i INTEGER,
@@ -450,7 +450,7 @@ public class SqlSchemaMakerTest {
             )
             """);
 
-        assertThat(makeCreateTableQuery(Engine.MySQL, OptionalModelTable.class)).isEqualTo("""
+        assertThat(makeCreateTableQuery(Engine.MySQL, OptionalModelTable.META)).isEqualTo("""
             CREATE TABLE IF NOT EXISTS optional_model (
                 id INTEGER NOT NULL PRIMARY KEY AUTO_INCREMENT,
                 i INTEGER,
@@ -462,7 +462,7 @@ public class SqlSchemaMakerTest {
 
     @Test
     public void create_table_pojo_with_adapter_model() {
-        assertThat(makeCreateTableQuery(Engine.SQLite, PojoWithAdapterModelTable.class)).isEqualTo("""
+        assertThat(makeCreateTableQuery(Engine.SQLite, PojoWithAdapterModelTable.META)).isEqualTo("""
             CREATE TABLE IF NOT EXISTS pojo_with_adapter_model (
                 id INTEGER NOT NULL PRIMARY KEY,
                 pojo_id INTEGER NOT NULL,
@@ -470,7 +470,7 @@ public class SqlSchemaMakerTest {
             )
             """);
 
-        assertThat(makeCreateTableQuery(Engine.H2, PojoWithAdapterModelTable.class)).isEqualTo("""
+        assertThat(makeCreateTableQuery(Engine.H2, PojoWithAdapterModelTable.META)).isEqualTo("""
             CREATE TABLE IF NOT EXISTS pojo_with_adapter_model (
                 id INTEGER NOT NULL PRIMARY KEY AUTO_INCREMENT,
                 pojo_id INTEGER NOT NULL,
@@ -478,7 +478,7 @@ public class SqlSchemaMakerTest {
             )
             """);
 
-        assertThat(makeCreateTableQuery(Engine.MySQL, PojoWithAdapterModelTable.class)).isEqualTo("""
+        assertThat(makeCreateTableQuery(Engine.MySQL, PojoWithAdapterModelTable.META)).isEqualTo("""
             CREATE TABLE IF NOT EXISTS pojo_with_adapter_model (
                 id INTEGER NOT NULL PRIMARY KEY AUTO_INCREMENT,
                 pojo_id INTEGER NOT NULL,
@@ -489,21 +489,21 @@ public class SqlSchemaMakerTest {
 
     @Test
     public void create_table_pojo_with_mapper_model() {
-        assertThat(makeCreateTableQuery(Engine.SQLite, PojoWithMapperModelTable.class)).isEqualTo("""
+        assertThat(makeCreateTableQuery(Engine.SQLite, PojoWithMapperModelTable.META)).isEqualTo("""
             CREATE TABLE IF NOT EXISTS pojo_with_mapper_model (
                 id INTEGER NOT NULL PRIMARY KEY,
                 pojo_coordinates INTEGER NOT NULL
             )
             """);
 
-        assertThat(makeCreateTableQuery(Engine.H2, PojoWithMapperModelTable.class)).isEqualTo("""
+        assertThat(makeCreateTableQuery(Engine.H2, PojoWithMapperModelTable.META)).isEqualTo("""
             CREATE TABLE IF NOT EXISTS pojo_with_mapper_model (
                 id INTEGER NOT NULL PRIMARY KEY AUTO_INCREMENT,
                 pojo_coordinates BIGINT NOT NULL
             )
             """);
 
-        assertThat(makeCreateTableQuery(Engine.MySQL, PojoWithMapperModelTable.class)).isEqualTo("""
+        assertThat(makeCreateTableQuery(Engine.MySQL, PojoWithMapperModelTable.META)).isEqualTo("""
             CREATE TABLE IF NOT EXISTS pojo_with_mapper_model (
                 id INTEGER NOT NULL PRIMARY KEY AUTO_INCREMENT,
                 pojo_coordinates BIGINT NOT NULL
@@ -513,7 +513,7 @@ public class SqlSchemaMakerTest {
 
     @Test
     public void create_table_primitive_model() {
-        assertThat(makeCreateTableQuery(Engine.SQLite, PrimitiveModelTable.class)).isEqualTo("""
+        assertThat(makeCreateTableQuery(Engine.SQLite, PrimitiveModelTable.META)).isEqualTo("""
             CREATE TABLE IF NOT EXISTS primitive_model (
                 id INTEGER NOT NULL PRIMARY KEY,
                 i INTEGER NOT NULL,
@@ -527,7 +527,7 @@ public class SqlSchemaMakerTest {
             )
             """);
 
-        assertThat(makeCreateTableQuery(Engine.H2, PrimitiveModelTable.class)).isEqualTo("""
+        assertThat(makeCreateTableQuery(Engine.H2, PrimitiveModelTable.META)).isEqualTo("""
             CREATE TABLE IF NOT EXISTS primitive_model (
                 id INTEGER NOT NULL PRIMARY KEY AUTO_INCREMENT,
                 i INTEGER NOT NULL,
@@ -541,7 +541,7 @@ public class SqlSchemaMakerTest {
             )
             """);
 
-        assertThat(makeCreateTableQuery(Engine.MySQL, PrimitiveModelTable.class)).isEqualTo("""
+        assertThat(makeCreateTableQuery(Engine.MySQL, PrimitiveModelTable.META)).isEqualTo("""
             CREATE TABLE IF NOT EXISTS primitive_model (
                 id INTEGER NOT NULL PRIMARY KEY AUTO_INCREMENT,
                 i INTEGER NOT NULL,
@@ -558,7 +558,7 @@ public class SqlSchemaMakerTest {
 
     @Test
     public void create_table_string_model() {
-        assertThat(makeCreateTableQuery(Engine.SQLite, StringModelTable.class)).isEqualTo("""
+        assertThat(makeCreateTableQuery(Engine.SQLite, StringModelTable.META)).isEqualTo("""
             CREATE TABLE IF NOT EXISTS string_model (
                 id VARCHAR NOT NULL PRIMARY KEY,
                 sequence VARCHAR NOT NULL,
@@ -567,7 +567,7 @@ public class SqlSchemaMakerTest {
             )
             """);
 
-        assertThat(makeCreateTableQuery(Engine.H2, StringModelTable.class)).isEqualTo("""
+        assertThat(makeCreateTableQuery(Engine.H2, StringModelTable.META)).isEqualTo("""
             CREATE TABLE IF NOT EXISTS string_model (
                 id VARCHAR NOT NULL PRIMARY KEY,
                 sequence VARCHAR NOT NULL,
@@ -576,7 +576,7 @@ public class SqlSchemaMakerTest {
             )
             """);
 
-        assertThat(makeCreateTableQuery(Engine.MySQL, StringModelTable.class)).isEqualTo("""
+        assertThat(makeCreateTableQuery(Engine.MySQL, StringModelTable.META)).isEqualTo("""
             CREATE TABLE IF NOT EXISTS string_model (
                 id VARCHAR(255) NOT NULL PRIMARY KEY,
                 sequence VARCHAR(4096) NOT NULL,
@@ -588,7 +588,7 @@ public class SqlSchemaMakerTest {
 
     @Test
     public void create_table_timing_model() {
-        assertThat(makeCreateTableQuery(Engine.SQLite, TimingModelTable.class)).isEqualTo("""
+        assertThat(makeCreateTableQuery(Engine.SQLite, TimingModelTable.META)).isEqualTo("""
             CREATE TABLE IF NOT EXISTS timing_model (
                 id INTEGER NOT NULL PRIMARY KEY,
                 util_date INTEGER NOT NULL,
@@ -610,7 +610,7 @@ public class SqlSchemaMakerTest {
             )
             """);
 
-        assertThat(makeCreateTableQuery(Engine.H2, TimingModelTable.class)).isEqualTo("""
+        assertThat(makeCreateTableQuery(Engine.H2, TimingModelTable.META)).isEqualTo("""
             CREATE TABLE IF NOT EXISTS timing_model (
                 id TIMESTAMP NOT NULL PRIMARY KEY,
                 util_date DATE NOT NULL,
@@ -632,7 +632,7 @@ public class SqlSchemaMakerTest {
             )
             """);
 
-        assertThat(makeCreateTableQuery(Engine.MySQL, TimingModelTable.class)).isEqualTo("""
+        assertThat(makeCreateTableQuery(Engine.MySQL, TimingModelTable.META)).isEqualTo("""
             CREATE TABLE IF NOT EXISTS timing_model (
                 id TIMESTAMP(3) NOT NULL PRIMARY KEY,
                 util_date DATE NOT NULL,
@@ -657,7 +657,7 @@ public class SqlSchemaMakerTest {
 
     @Test
     public void create_table_wrappers_model() {
-        assertThat(makeCreateTableQuery(Engine.SQLite, WrappersModelTable.class)).isEqualTo("""
+        assertThat(makeCreateTableQuery(Engine.SQLite, WrappersModelTable.META)).isEqualTo("""
             CREATE TABLE IF NOT EXISTS wrappers_model (
                 id INTEGER NOT NULL PRIMARY KEY,
                 i INTEGER NOT NULL,
@@ -671,7 +671,7 @@ public class SqlSchemaMakerTest {
             )
             """);
 
-        assertThat(makeCreateTableQuery(Engine.H2, WrappersModelTable.class)).isEqualTo("""
+        assertThat(makeCreateTableQuery(Engine.H2, WrappersModelTable.META)).isEqualTo("""
             CREATE TABLE IF NOT EXISTS wrappers_model (
                 id INTEGER NOT NULL PRIMARY KEY AUTO_INCREMENT,
                 i INTEGER NOT NULL,
@@ -685,7 +685,7 @@ public class SqlSchemaMakerTest {
             )
             """);
 
-        assertThat(makeCreateTableQuery(Engine.MySQL, WrappersModelTable.class)).isEqualTo("""
+        assertThat(makeCreateTableQuery(Engine.MySQL, WrappersModelTable.META)).isEqualTo("""
             CREATE TABLE IF NOT EXISTS wrappers_model (
                 id INTEGER NOT NULL PRIMARY KEY AUTO_INCREMENT,
                 i INTEGER NOT NULL,
@@ -702,21 +702,21 @@ public class SqlSchemaMakerTest {
 
     @Test
     public void create_table_m2m_int_model() {
-        assertThat(makeCreateTableQuery(Engine.SQLite, M2mIntModelTable.class)).isEqualTo("""
+        assertThat(makeCreateTableQuery(Engine.SQLite, M2mIntModelTable.META)).isEqualTo("""
             CREATE TABLE IF NOT EXISTS m2m_int_model (
                 foo_id INTEGER NOT NULL,
                 bar_id INTEGER NOT NULL
             )
             """);
 
-        assertThat(makeCreateTableQuery(Engine.H2, M2mIntModelTable.class)).isEqualTo("""
+        assertThat(makeCreateTableQuery(Engine.H2, M2mIntModelTable.META)).isEqualTo("""
             CREATE TABLE IF NOT EXISTS m2m_int_model (
                 foo_id INTEGER NOT NULL,
                 bar_id INTEGER NOT NULL
             )
             """);
 
-        assertThat(makeCreateTableQuery(Engine.MySQL, M2mIntModelTable.class)).isEqualTo("""
+        assertThat(makeCreateTableQuery(Engine.MySQL, M2mIntModelTable.META)).isEqualTo("""
             CREATE TABLE IF NOT EXISTS m2m_int_model (
                 foo_id INTEGER NOT NULL,
                 bar_id INTEGER NOT NULL
@@ -726,7 +726,7 @@ public class SqlSchemaMakerTest {
 
     @Test
     public void create_table_ints_model() {
-        assertThat(makeCreateTableQuery(Engine.SQLite, IntsModelTable.class)).isEqualTo("""
+        assertThat(makeCreateTableQuery(Engine.SQLite, IntsModelTable.META)).isEqualTo("""
             CREATE TABLE IF NOT EXISTS ints_model (
                 foo INTEGER NOT NULL DEFAULT (0),
                 bar INTEGER NOT NULL DEFAULT (0),
@@ -734,7 +734,7 @@ public class SqlSchemaMakerTest {
             )
             """);
 
-        assertThat(makeCreateTableQuery(Engine.H2, IntsModelTable.class)).isEqualTo("""
+        assertThat(makeCreateTableQuery(Engine.H2, IntsModelTable.META)).isEqualTo("""
             CREATE TABLE IF NOT EXISTS ints_model (
                 foo INTEGER NOT NULL DEFAULT (0),
                 bar INTEGER NOT NULL DEFAULT (0),
@@ -742,7 +742,7 @@ public class SqlSchemaMakerTest {
             )
             """);
 
-        assertThat(makeCreateTableQuery(Engine.MySQL, IntsModelTable.class)).isEqualTo("""
+        assertThat(makeCreateTableQuery(Engine.MySQL, IntsModelTable.META)).isEqualTo("""
             CREATE TABLE IF NOT EXISTS ints_model (
                 foo INTEGER NOT NULL DEFAULT (0),
                 bar INTEGER NOT NULL DEFAULT (0),
@@ -753,7 +753,7 @@ public class SqlSchemaMakerTest {
 
     @Test
     public void create_table_longs_model() {
-        assertThat(makeCreateTableQuery(Engine.SQLite, LongsModelTable.class)).isEqualTo("""
+        assertThat(makeCreateTableQuery(Engine.SQLite, LongsModelTable.META)).isEqualTo("""
             CREATE TABLE IF NOT EXISTS longs_model (
                 foo INTEGER NOT NULL DEFAULT (0),
                 bar INTEGER NOT NULL DEFAULT (0),
@@ -761,7 +761,7 @@ public class SqlSchemaMakerTest {
             )
             """);
 
-        assertThat(makeCreateTableQuery(Engine.H2, LongsModelTable.class)).isEqualTo("""
+        assertThat(makeCreateTableQuery(Engine.H2, LongsModelTable.META)).isEqualTo("""
             CREATE TABLE IF NOT EXISTS longs_model (
                 foo BIGINT NOT NULL DEFAULT (0),
                 bar BIGINT NOT NULL DEFAULT (0),
@@ -769,7 +769,7 @@ public class SqlSchemaMakerTest {
             )
             """);
 
-        assertThat(makeCreateTableQuery(Engine.MySQL, LongsModelTable.class)).isEqualTo("""
+        assertThat(makeCreateTableQuery(Engine.MySQL, LongsModelTable.META)).isEqualTo("""
             CREATE TABLE IF NOT EXISTS longs_model (
                 foo BIGINT NOT NULL DEFAULT (0),
                 bar BIGINT NOT NULL DEFAULT (0),
@@ -780,7 +780,7 @@ public class SqlSchemaMakerTest {
 
     @Test
     public void create_table_user_rate_model() {
-        assertThat(makeCreateTableQuery(Engine.SQLite, UserRateModelTable.class)).isEqualTo("""
+        assertThat(makeCreateTableQuery(Engine.SQLite, UserRateModelTable.META)).isEqualTo("""
             CREATE TABLE IF NOT EXISTS user_rate_model (
                 user_id INTEGER NOT NULL,
                 content_id INTEGER NOT NULL,
@@ -788,7 +788,7 @@ public class SqlSchemaMakerTest {
             )
             """);
 
-        assertThat(makeCreateTableQuery(Engine.H2, UserRateModelTable.class)).isEqualTo("""
+        assertThat(makeCreateTableQuery(Engine.H2, UserRateModelTable.META)).isEqualTo("""
             CREATE TABLE IF NOT EXISTS user_rate_model (
                 user_id INTEGER NOT NULL,
                 content_id INTEGER NOT NULL,
@@ -796,7 +796,7 @@ public class SqlSchemaMakerTest {
             )
             """);
 
-        assertThat(makeCreateTableQuery(Engine.MySQL, UserRateModelTable.class)).isEqualTo("""
+        assertThat(makeCreateTableQuery(Engine.MySQL, UserRateModelTable.META)).isEqualTo("""
             CREATE TABLE IF NOT EXISTS user_rate_model (
                 user_id INTEGER NOT NULL,
                 content_id INTEGER NOT NULL,

@@ -5,7 +5,6 @@ import io.webby.demo.model.DeepNestedModel.B;
 import io.webby.demo.model.DeepNestedModel.C;
 import io.webby.demo.model.DeepNestedModel.D;
 import io.webby.orm.api.Connector;
-import io.webby.orm.codegen.SqlSchemaMaker;
 import io.webby.testing.SqlDbTableTest;
 import io.webby.testing.TableIntTest;
 import org.jetbrains.annotations.NotNull;
@@ -16,7 +15,7 @@ public class DeepNestedModelTableTest
     @Override
     protected void setUp(@NotNull Connector connector) throws Exception {
         table = new DeepNestedModelTable(connector);
-        connector().runner().runUpdate(SqlSchemaMaker.makeCreateTableQuery(table));
+        table.admin().createTableIfNotExists(table.meta());
     }
 
     @Override

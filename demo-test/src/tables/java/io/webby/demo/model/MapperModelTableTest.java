@@ -1,7 +1,6 @@
 package io.webby.demo.model;
 
 import io.webby.orm.api.Connector;
-import io.webby.orm.codegen.SqlSchemaMaker;
 import io.webby.testing.SqlDbTableTest;
 import io.webby.testing.TableIntTest;
 import io.webby.util.collect.Pair;
@@ -15,7 +14,7 @@ public class MapperModelTableTest
     @Override
     protected void setUp(@NotNull Connector connector) throws Exception {
         table = new MapperModelTable(connector);
-        connector().runner().runUpdate(SqlSchemaMaker.makeCreateTableQuery(table));
+        table.admin().createTableIfNotExists(table.meta());
     }
 
     @Override

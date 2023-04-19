@@ -1,10 +1,8 @@
 package io.webby.orm.codegen;
 
-import io.webby.orm.api.BaseTable;
 import io.webby.orm.api.Engine;
 import io.webby.orm.api.TableMeta;
 import io.webby.orm.api.TableMeta.ColumnMeta;
-import io.webby.util.base.Unchecked;
 import io.webby.util.collect.EasyMaps;
 import org.jetbrains.annotations.NotNull;
 
@@ -14,23 +12,7 @@ import java.sql.Timestamp;
 import java.util.Map;
 import java.util.stream.Collectors;
 
-import static io.webby.util.base.EasyCast.castAny;
-
 public class SqlSchemaMaker {
-    public static @NotNull String makeCreateTableQuery(@NotNull Engine engine,
-                                                       @NotNull Class<? extends BaseTable<?>> tableClass) {
-        try {
-            TableMeta meta = castAny(tableClass.getField("META").get(null));
-            return makeCreateTableQuery(engine, meta);
-        } catch (Throwable e) {
-            return Unchecked.rethrow(e);
-        }
-    }
-
-    public static @NotNull String makeCreateTableQuery(@NotNull BaseTable<?> table) {
-        return makeCreateTableQuery(table.engine(), table.meta());
-    }
-
     public static @NotNull String makeCreateTableQuery(@NotNull Engine engine, @NotNull TableMeta meta) {
         SchemaSupport support = SchemaSupport.of(engine);
         Snippet snippet = new Snippet();

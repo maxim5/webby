@@ -8,7 +8,6 @@ import io.webby.db.model.LongAutoIdModel;
 import io.webby.orm.api.Connector;
 import io.webby.orm.api.ForeignInt;
 import io.webby.orm.api.ForeignLong;
-import io.webby.orm.codegen.SqlSchemaMaker;
 import io.webby.testing.ManyToManyTableTest;
 import io.webby.testing.SqlDbTableTest;
 import io.webby.testing.TestingModels;
@@ -33,9 +32,9 @@ public class M2mIntLongModelTableTest
         table = new M2mIntLongModelTable(connector);
         users = new UserTable(connector);
         sessions = new SessionTable(connector);
-        connector().runner().runUpdate(SqlSchemaMaker.makeCreateTableQuery(table));
-        connector().runner().runUpdate(SqlSchemaMaker.makeCreateTableQuery(users));
-        connector().runner().runUpdate(SqlSchemaMaker.makeCreateTableQuery(sessions));
+        table.admin().createTableIfNotExists(table.meta());
+        users.admin().createTableIfNotExists(users.meta());
+        sessions.admin().createTableIfNotExists(sessions.meta());
     }
 
     @Override

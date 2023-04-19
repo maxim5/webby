@@ -2,7 +2,6 @@ package io.webby.db.model;
 
 import com.google.common.primitives.Ints;
 import io.webby.orm.api.Connector;
-import io.webby.orm.codegen.SqlSchemaMaker;
 import io.webby.testing.PrimaryKeyTableTest;
 import io.webby.testing.SqlDbTableTest;
 import org.jetbrains.annotations.NotNull;
@@ -18,7 +17,7 @@ public class BlobKvTableTest
     @Override
     protected void setUp(@NotNull Connector connector) throws Exception {
         table = new BlobKvTable(connector);
-        connector().runner().runUpdate(SqlSchemaMaker.makeCreateTableQuery(table));
+        table.admin().createTableIfNotExists(table.meta());
     }
 
     @Override

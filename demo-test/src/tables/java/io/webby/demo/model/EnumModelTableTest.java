@@ -3,7 +3,6 @@ package io.webby.demo.model;
 import io.webby.orm.api.Connector;
 import io.webby.orm.api.query.Shortcuts;
 import io.webby.orm.api.query.Variable;
-import io.webby.orm.codegen.SqlSchemaMaker;
 import io.webby.testing.PrimaryKeyTableTest;
 import io.webby.testing.SqlDbTableTest;
 import org.jetbrains.annotations.NotNull;
@@ -16,7 +15,7 @@ public class EnumModelTableTest
     @Override
     protected void setUp(@NotNull Connector connector) throws Exception {
         table = new EnumModelTable(connector);
-        connector().runner().runUpdate(SqlSchemaMaker.makeCreateTableQuery(table));
+        table.admin().createTableIfNotExists(table.meta());
     }
 
     @Override

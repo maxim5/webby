@@ -10,7 +10,6 @@ import io.webby.orm.api.entity.EntityIntData;
 import io.webby.orm.api.query.Contextual;
 import io.webby.orm.api.query.TermType;
 import io.webby.orm.api.query.Where;
-import io.webby.orm.codegen.SqlSchemaMaker;
 import io.webby.testing.BaseTableTest;
 import io.webby.testing.SqlDbTableTest;
 import org.jetbrains.annotations.NotNull;
@@ -34,7 +33,7 @@ public class IntsModelTableTest
     @Override
     protected void setUp(@NotNull Connector connector) throws Exception {
         table = new IntsModelTable(connector);
-        connector().runner().runUpdate(SqlSchemaMaker.makeCreateTableQuery(table));
+        table.admin().createTableIfNotExists(table.meta());
     }
 
     @Test

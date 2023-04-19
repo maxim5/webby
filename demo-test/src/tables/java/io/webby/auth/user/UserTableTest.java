@@ -1,9 +1,8 @@
 package io.webby.auth.user;
 
 import io.webby.orm.api.Connector;
-import io.webby.orm.codegen.SqlSchemaMaker;
-import io.webby.testing.TableIntTest;
 import io.webby.testing.SqlDbTableTest;
+import io.webby.testing.TableIntTest;
 import org.jetbrains.annotations.NotNull;
 
 import java.time.Instant;
@@ -15,7 +14,7 @@ public class UserTableTest
     @Override
     protected void setUp(@NotNull Connector connector) throws Exception {
         table = new UserTable(connector);
-        connector().runner().runUpdate(SqlSchemaMaker.makeCreateTableQuery(table));
+        table.admin().createTableIfNotExists(table.meta());
     }
 
     @Override
