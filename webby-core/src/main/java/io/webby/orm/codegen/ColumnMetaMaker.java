@@ -2,6 +2,7 @@ package io.webby.orm.codegen;
 
 import io.webby.orm.api.TableMeta.ConstraintStatus;
 import io.webby.orm.arch.Column;
+import io.webby.orm.arch.model.ForeignTableField;
 import io.webby.orm.arch.model.TableField;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
@@ -20,7 +21,7 @@ class ColumnMetaMaker {
             "ColumnMeta.of(OwnColumn.%s, %s.class)".formatted(sqlName, type),
             toConstraintStatus(".withPrimaryKey", field.isPrimaryKey(), field.isMultiColumn()),
             toConstraintStatus(".withUnique", field.isUnique(), field.isMultiColumn()),
-            toBooleanStatus(".withForeignKey", field.isForeignKey()),
+            toForeignColumn(".withForeignColumn", field),
             toBooleanStatus(".withNullable", field.isNullable()),
             toStringStatus(".withDefault", field.columnDefault(column))
         ).join();
@@ -29,6 +30,16 @@ class ColumnMetaMaker {
     private static @NotNull String toConstraintStatus(@NotNull String method, boolean value, boolean isMultiColumn) {
         ConstraintStatus status = isMultiColumn ? ConstraintStatus.COMPOSITE : ConstraintStatus.SINGLE_COLUMN;
         return value ? "%s(ConstraintStatus.%s)".formatted(method, status) : "";
+    }
+
+    private static @NotNull String toForeignColumn(@NotNull String method, @NotNull TableField field) {
+        if (field.isForeignKey()) {
+            ForeignTableField foreignField = (ForeignTableField) field;
+            String tableName = foreignField.getForeignTable().javaName();
+            String columnName = foreignField.primaryKeyColumnInForeignTable().sqlName();
+            return "%s(%s.META, %s.OwnColumn.%s)".formatted(method, tableName, tableName, columnName);
+        }
+        return "";
     }
 
     private static @NotNull String toBooleanStatus(@NotNull String method, boolean value) {

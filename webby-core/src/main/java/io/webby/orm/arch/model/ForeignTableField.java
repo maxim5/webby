@@ -51,6 +51,17 @@ public class ForeignTableField extends TableField {
         return foreignKeyColumn;
     }
 
+    public @NotNull OneColumnTableField primaryKeyFieldInForeignTable() {
+        TableField primaryKeyField = foreignTable.primaryKeyField();
+        assert primaryKeyField instanceof OneColumnTableField :
+            "Internal error. Primary key in foreign table does not match the foreign key: " + this;
+        return (OneColumnTableField) primaryKeyField;
+    }
+
+    public @NotNull Column primaryKeyColumnInForeignTable() {
+        return primaryKeyFieldInForeignTable().column();
+    }
+
     @Override
     public @NotNull List<Column> columns() {
         return List.of(foreignKeyColumn);

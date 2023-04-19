@@ -3,7 +3,6 @@ package io.webby.orm.codegen;
 import io.webby.orm.api.ReadFollow;
 import io.webby.orm.arch.PrefixedColumn;
 import io.webby.orm.arch.model.ForeignTableField;
-import io.webby.orm.arch.model.OneColumnTableField;
 import io.webby.orm.arch.model.TableArch;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.VisibleForTesting;
@@ -41,12 +40,11 @@ class SelectMaker {
     @VisibleForTesting
     record LeftJoin(@NotNull String table, @NotNull String on) {
         public static @NotNull LeftJoin from(@NotNull ForeignTableField field) {
-            TableArch foreignTable = field.getForeignTable();
             String on = "%s.%s = %s.%s".formatted(field.parent().sqlName(),
                                                   field.foreignKeyColumn().sqlName(),
-                                                  foreignTable.sqlName(),
-                                                  ((OneColumnTableField) foreignTable.primaryKeyField()).column().sqlName());
-            return new LeftJoin(foreignTable.sqlName(), on);
+                                                  field.getForeignTable().sqlName(),
+                                                  field.primaryKeyColumnInForeignTable().sqlName());
+            return new LeftJoin(field.getForeignTable().sqlName(), on);
         }
     }
 }

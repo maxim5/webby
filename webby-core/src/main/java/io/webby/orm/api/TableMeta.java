@@ -29,11 +29,11 @@ public interface TableMeta {
                       @NotNull Class<?> type,
                       @NotNull ConstraintStatus primaryKey,
                       @NotNull ConstraintStatus unique,
-                      boolean foreignKey,
+                      @Nullable ForeignColumn foreignColumn,
                       boolean nullable,
                       @Nullable String defaultValue) {
         public static @NotNull ColumnMeta of(@NotNull Column column, @NotNull Class<?> type) {
-            return new ColumnMeta(column, type, NO_CONSTRAINT, NO_CONSTRAINT, false, false, null);
+            return new ColumnMeta(column, type, NO_CONSTRAINT, NO_CONSTRAINT, null, false, null);
         }
 
         public @NotNull String name() {
@@ -49,7 +49,7 @@ public interface TableMeta {
         }
 
         public boolean isForeignKey() {
-            return foreignKey;
+            return foreignColumn != null;
         }
 
         public boolean isNullable() {
@@ -65,26 +65,33 @@ public interface TableMeta {
         }
 
         public @NotNull ColumnMeta withPrimaryKey(@NotNull ConstraintStatus status) {
-            return new ColumnMeta(column, type, status, unique, foreignKey, nullable, defaultValue);
+            return new ColumnMeta(column, type, status, unique, foreignColumn, nullable, defaultValue);
         }
 
         public @NotNull ColumnMeta withUnique(@NotNull ConstraintStatus status) {
-            return new ColumnMeta(column, type, primaryKey, status, foreignKey, nullable, defaultValue);
+            return new ColumnMeta(column, type, primaryKey, status, foreignColumn, nullable, defaultValue);
         }
 
-        public @NotNull ColumnMeta withForeignKey(boolean foreignKey) {
-            return new ColumnMeta(column, type, primaryKey, unique, foreignKey, nullable, defaultValue);
+        public @NotNull ColumnMeta withForeignColumn(@NotNull ForeignColumn foreignColumn) {
+            return new ColumnMeta(column, type, primaryKey, unique, foreignColumn, nullable, defaultValue);
+        }
+
+        public @NotNull ColumnMeta withForeignColumn(@NotNull TableMeta meta, @NotNull Column column) {
+            return withForeignColumn(new ForeignColumn(meta, column));
         }
 
         public @NotNull ColumnMeta withNullable(boolean nullable) {
-            return new ColumnMeta(column, type, primaryKey, unique, foreignKey, nullable, defaultValue);
+            return new ColumnMeta(column, type, primaryKey, unique, foreignColumn, nullable, defaultValue);
         }
 
         public @NotNull ColumnMeta withDefault(@NotNull String defaultValue) {
-            return new ColumnMeta(column, type, primaryKey, unique, foreignKey, nullable, defaultValue);
+            return new ColumnMeta(column, type, primaryKey, unique, foreignColumn, nullable, defaultValue);
         }
     }
 
+    /**
+     * Represents the type of column constraint.
+     */
     enum ConstraintStatus {
         NO_CONSTRAINT, SINGLE_COLUMN, COMPOSITE;
 
@@ -92,6 +99,11 @@ public interface TableMeta {
             return this == SINGLE_COLUMN;
         }
     }
+
+    /**
+     * Holds the data about the column in another table referenced by a foreign key.
+     */
+    record ForeignColumn(@NotNull TableMeta meta, @NotNull Column column) {}
 
     /**
      * Returns the primary key constraint.
