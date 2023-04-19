@@ -168,10 +168,11 @@ public class SqlSchemaMakerTest {
         assertThat(makeCreateTableQuery(Engine.SQLite, ConstraintsModelTable.class)).isEqualTo("""
             CREATE TABLE IF NOT EXISTS constraints_model (
                 key_id INTEGER NOT NULL PRIMARY KEY,
-                fprint INTEGER NOT NULL UNIQUE,
+                fprint INTEGER NOT NULL DEFAULT (0) UNIQUE,
                 range_from INTEGER NOT NULL,
                 range_to INTEGER NOT NULL,
                 name VARCHAR NOT NULL,
+                s VARCHAR,
                 UNIQUE (range_from, range_to)
             )
             """);
@@ -179,10 +180,11 @@ public class SqlSchemaMakerTest {
         assertThat(makeCreateTableQuery(Engine.H2, ConstraintsModelTable.class)).isEqualTo("""
             CREATE TABLE IF NOT EXISTS constraints_model (
                 key_id INTEGER NOT NULL PRIMARY KEY AUTO_INCREMENT,
-                fprint INTEGER NOT NULL UNIQUE,
+                fprint INTEGER NOT NULL DEFAULT (0) UNIQUE,
                 range_from INTEGER NOT NULL,
                 range_to INTEGER NOT NULL,
                 name VARCHAR NOT NULL,
+                s VARCHAR,
                 UNIQUE (range_from, range_to)
             )
             """);
@@ -190,10 +192,11 @@ public class SqlSchemaMakerTest {
         assertThat(makeCreateTableQuery(Engine.MySQL, ConstraintsModelTable.class)).isEqualTo("""
             CREATE TABLE IF NOT EXISTS constraints_model (
                 key_id INTEGER NOT NULL PRIMARY KEY AUTO_INCREMENT,
-                fprint INTEGER NOT NULL UNIQUE,
+                fprint INTEGER NOT NULL DEFAULT (0) UNIQUE,
                 range_from INTEGER NOT NULL,
                 range_to INTEGER NOT NULL,
                 name VARCHAR(4096) NOT NULL,
+                s VARCHAR(4096),
                 UNIQUE (range_from, range_to)
             )
             """);

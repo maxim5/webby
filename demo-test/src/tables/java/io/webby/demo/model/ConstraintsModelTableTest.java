@@ -18,11 +18,11 @@ public class ConstraintsModelTableTest
     @Override
     public @NotNull ConstraintsModel createEntity(@NotNull Integer key, int version) {
         int unique = 11 * key + 7 * version;
-        return new ConstraintsModel(key, unique, new ConstraintsModel.Range(unique, unique), String.valueOf(version));
+        return new ConstraintsModel(key, unique, new ConstraintsModel.Range(unique, unique), String.valueOf(version), "");
     }
 
     @Override
     public @NotNull ConstraintsModel copyEntityWithId(@NotNull ConstraintsModel entity, int autoId) {
-        return new ConstraintsModel(autoId, entity.fprint(), entity.range(), entity.displayName());
+        return new ConstraintsModel(autoId, entity.fprint(), entity.range(), entity.displayName(), entity.s());
     }
 }
