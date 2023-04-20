@@ -12,6 +12,10 @@ public class InvalidSqlModelException extends AppConfigException {
         super(message);
     }
 
+    public InvalidSqlModelException(@NotNull String message, @Nullable Throwable cause) {
+        super(message, cause);
+    }
+
     public InvalidSqlModelException(@NotNull String message, @Nullable Object @NotNull ... args) {
         super(message.formatted(args));
     }

@@ -35,20 +35,20 @@ public class ArchJavaRunner {
 
     public void runGenerate(@NotNull String destinationPath, @NotNull RunInputs inputs) throws IOException {
         destination = destinationPath;
-        RunContext runContext = new RunContext(inputs, locator);
         TimeIt.timeItOrDie(() -> {
-            ArchFactory factory = new ArchFactory(runContext);
-            factory.build();
+            RunResult runResult = new ArchFactory(locator).build(inputs);
 
-            for (AdapterArch adapterArch : runContext.pojos().getAdapterArches()) {
+            for (AdapterArch adapterArch : runResult.adapters()) {
                 generate(adapterArch);
             }
-            for (TableArch tableArch : runContext.tables().getTableArches()) {
+            for (TableArch tableArch : runResult.tables()) {
                 generate(tableArch);
             }
-        }, millis -> {
-            int adapters = runContext.pojos().getAdapterArches().size();
-            int tables = runContext.tables().getTableArches().size();
+
+            return runResult;
+        }, (runResult, millis) -> {
+            int adapters = runResult.adapters().size();
+            int tables = runResult.tables().size();
             log.at(Level.INFO).log("Generated %d adapters and %d tables in %d millis", adapters, tables, millis);
         });
     }

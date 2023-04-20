@@ -5,7 +5,6 @@ import io.webby.orm.arch.model.TableArch;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
-import java.util.Collection;
 import java.util.LinkedHashMap;
 import java.util.Map;
 
@@ -17,10 +16,6 @@ class TableArchCollector {
 
     public @NotNull ImmutableMap<Class<?>, TableArch> getAllTables() {
         return ImmutableMap.copyOf(tables);
-    }
-
-    public @NotNull Collection<TableArch> getTableArches() {
-        return tables.values();
     }
 
     public void putTable(@NotNull Class<?> key, @NotNull TableArch table) {

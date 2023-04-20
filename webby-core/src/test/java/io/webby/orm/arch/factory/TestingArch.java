@@ -14,6 +14,7 @@ import io.webby.util.collect.Pair;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
+import java.util.Arrays;
 import java.util.Collection;
 import java.util.List;
 
@@ -21,26 +22,23 @@ import static com.google.common.collect.MoreCollectors.onlyElement;
 
 public class TestingArch {
     public static @NotNull TableArch buildTableArch(@NotNull Class<?> model) {
-        RunContext runContext = newRunContext(model);
-        new ArchFactory(runContext).build();
-        return runContext.tables().getTableOrDie(model);
+        RunInputs inputs = newRunInputs(model);
+        RunResult runResult = new ArchFactory(FakeModelAdaptersScanner.DEFAULT_SCANNER).build(inputs);
+        return runResult.getTableOrDie(model);
     }
 
     public static @NotNull TableArch buildTableArch(@NotNull Class<?> model, @NotNull List<Class<?>> rest) {
-        RunContext runContext = newRunContext(ListBuilder.concatOne(rest, model));
-        new ArchFactory(runContext).build();
-        return runContext.tables().getTableOrDie(model);
+        RunInputs inputs = newRunInputs(ListBuilder.concatOne(rest, model));
+        RunResult runResult = new ArchFactory(FakeModelAdaptersScanner.DEFAULT_SCANNER).build(inputs);
+        return runResult.getTableOrDie(model);
     }
 
-    public static @NotNull RunContext newRunContext(@NotNull Class<?> @NotNull ... models) {
-        return new RunContext(newRunInputs(List.of(models)), FakeModelAdaptersScanner.DEFAULT_SCANNER);
+    public static @NotNull RunInputs newRunInputs(@NotNull Class<?> @NotNull ... models) {
+        List<ModelInput> modelInputs = Arrays.stream(models).map(ModelInput::of).toList();
+        return new RunInputs(modelInputs);
     }
 
-    public static @NotNull RunContext newRunContext(@NotNull Collection<Class<?>> models) {
-        return new RunContext(newRunInputs(models), FakeModelAdaptersScanner.DEFAULT_SCANNER);
-    }
-
-    private static @NotNull RunInputs newRunInputs(@NotNull Collection<Class<?>> models) {
+    public static @NotNull RunInputs newRunInputs(@NotNull Collection<Class<?>> models) {
         List<ModelInput> modelInputs = models.stream().map(ModelInput::of).toList();
         return new RunInputs(modelInputs);
     }

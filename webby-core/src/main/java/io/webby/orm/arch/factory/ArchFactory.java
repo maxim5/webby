@@ -5,39 +5,47 @@ import io.webby.orm.arch.M2mInfo;
 import io.webby.orm.arch.model.TableArch;
 import io.webby.orm.arch.model.TableField;
 import io.webby.orm.arch.util.JavaClassAnalyzer;
+import io.webby.orm.codegen.ModelAdaptersScanner;
 import io.webby.orm.codegen.ModelInput;
 import org.jetbrains.annotations.NotNull;
-import org.jetbrains.annotations.VisibleForTesting;
 
 public class ArchFactory {
-    private final RunContext runContext;
+    private final ModelAdaptersScanner locator;
 
-    public ArchFactory(@NotNull RunContext runContext) {
-        this.runContext = runContext;
+    public ArchFactory(@NotNull ModelAdaptersScanner locator) {
+        this.locator = locator;
     }
 
-    public void build() {
-        for (ModelInput input : runContext.inputs()) {
-            TableArch table = buildShallowTable(input);
-            input.keys().forEach(key -> runContext.tables().putTable(key, table));
-        }
-        for (ModelInput input : runContext.inputs()) {
-            completeTable(input, runContext.tables().getTableOrDie(input.modelClass()));
+    public @NotNull RunResult build(@NotNull RunInputs inputs) {
+        final RunContext runContext = new RunContext(inputs, locator);
+        try (runContext) {
+            for (ModelInput input : runContext.inputs()) {
+                TableArch table = buildShallowTable(input);
+                input.keys().forEach(key -> runContext.tables().putTable(key, table));
+            }
+            for (ModelInput input : runContext.inputs()) {
+                completeTable(input, runContext);
+            }
+            return new RunResult(runContext.tables().getAllTables(), runContext.pojos().getAdapterArches());
+        } catch (RuntimeException e) {
+            throw runContext.errorHandler().handleRuntimeException(e);
         }
     }
 
-    @VisibleForTesting
-    @NotNull TableArch buildShallowTable(@NotNull ModelInput input) {
+    private @NotNull TableArch buildShallowTable(@NotNull ModelInput input) {
         return new TableArch(
             input.sqlName(), input.javaTableName(), input.modelClass(), input.javaModelName(),
             M2mInfo.fromModelClass(input.modelClass())
         );
     }
 
-    @VisibleForTesting
-    void completeTable(@NotNull ModelInput input, @NotNull TableArch table) {
+    private void completeTable(@NotNull ModelInput input, @NotNull RunContext runContext) {
+        TableArch table = runContext.tables().getTableOrDie(input.modelClass());
         ImmutableList<TableField> fields = JavaClassAnalyzer.getAllFieldsOrdered(input.modelClass()).stream()
-            .map(field -> new TableFieldArchFactory(runContext, table, field, input).buildTableField())
+            .map(field -> {
+                runContext.errorHandler().setCurrentField(field);
+                return new TableFieldArchFactory(runContext, table, field, input).buildTableField();
+            })
             .collect(ImmutableList.toImmutableList());
         table.initializeOrDie(fields);
         table.validate();

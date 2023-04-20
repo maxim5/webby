@@ -1,19 +1,28 @@
 package io.webby.orm.arch.factory;
 
+import com.google.common.truth.ThrowableSubject;
+import com.google.common.truth.Truth;
+import com.google.errorprone.annotations.CanIgnoreReturnValue;
 import io.webby.orm.api.ForeignInt;
 import io.webby.orm.api.ForeignLong;
 import io.webby.orm.api.ForeignObj;
 import io.webby.orm.api.annotate.Model;
 import io.webby.orm.api.annotate.Sql;
+import io.webby.orm.arch.InvalidSqlModelException;
 import io.webby.orm.arch.JdbcType;
+import io.webby.orm.testing.FakeModelAdaptersScanner;
 import io.webby.util.base.EasyPrimitives.OptionalBool;
 import io.webby.util.collect.Pair;
+import org.jetbrains.annotations.NotNull;
 import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 
 import java.awt.*;
+import java.io.Serializable;
+import java.util.Collection;
 import java.util.List;
 import java.util.Optional;
+import java.util.Set;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.atomic.AtomicReference;
 
@@ -23,6 +32,7 @@ import static io.webby.orm.arch.factory.TestingArch.FieldConstraints.*;
 import static io.webby.orm.arch.factory.TestingArch.TableFieldsStatus.*;
 import static io.webby.orm.arch.factory.TestingArch.assertThat;
 import static io.webby.orm.arch.factory.TestingArch.buildTableArch;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 
 public class ArchFactoryTest {
     /** Generic tables **/
@@ -445,5 +455,45 @@ public class ArchFactoryTest {
             .hasDefault("foo_b", "")
             .isAdapterSupportedType()
             .usesAdapter("TupleJdbcAdapter.ADAPTER");
+    }
+
+    /** Invalid models **/
+
+    @Test
+    public void invalid_list_field() {
+        record ListModel(List<Object> value) {}
+        assertInvalidModel(ListModel.class);
+    }
+
+    @Test
+    public void invalid_set_field() {
+        record SetModel(Set<String> value) {}
+        assertInvalidModel(SetModel.class);
+    }
+
+    @Test
+    public void invalid_collection_field() {
+        record CollectionModel(Collection<String> value) {}
+        assertInvalidModel(CollectionModel.class);
+    }
+
+    @Test
+    public void invalid_interface_field() {
+        record SerializableModel(Serializable value) {}
+        assertInvalidModel(SerializableModel.class);
+    }
+
+    @Test
+    public void invalid_object_field() {
+        record ObjectModel(Object object) {}
+        assertInvalidModel(ObjectModel.class);
+    }
+
+    @CanIgnoreReturnValue
+    private static @NotNull ThrowableSubject assertInvalidModel(@NotNull Class<?> @NotNull ... models) {
+        InvalidSqlModelException exception = assertThrows(InvalidSqlModelException.class, () ->
+            new ArchFactory(FakeModelAdaptersScanner.DEFAULT_SCANNER).build(TestingArch.newRunInputs(models))
+        );
+        return Truth.assertThat(exception);
     }
 }

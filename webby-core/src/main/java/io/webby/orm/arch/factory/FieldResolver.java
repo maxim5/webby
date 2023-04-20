@@ -114,18 +114,13 @@ class FieldResolver {
     }
 
     private static void validateFieldForPojo(@NotNull Field field) {
-        Class<?> modelClass = field.getDeclaringClass();
         Class<?> fieldType = field.getType();
-        String fieldName = field.getName();
-        String typeName = fieldType.getSimpleName();
+        String typeName = field.getGenericType().getTypeName();
 
-        failIf(fieldType.isInterface(), "Model class `%s` contains an interface field `%s` without a matching adapter: %s",
-               modelClass, typeName, fieldName);
-        failIf(Collection.class.isAssignableFrom(fieldType), "Model class `%s` contains a collection field: %s",
-               modelClass, fieldName);
-        failIf(fieldType.isArray(), "Model class `%s` contains an array field `%s` without a matching adapter: %s",
-               modelClass, typeName, fieldName);
-        failIf(fieldType == Object.class, "Model class `%s` contains a `%s` field: %s",
-               modelClass, typeName, fieldName);
+        failIf(fieldType.isInterface(), "Model holds an interface `%s` without a mapper or adapter", typeName);
+        failIf(Collection.class.isAssignableFrom(fieldType),
+               "Model holds a collection `%s` without a mapper or adapter", typeName);
+        failIf(fieldType.isArray(), "Model holds an array `%s` without a mapper or adapter", typeName);
+        failIf(fieldType == Object.class, "Model holds a raw `%s` field without a mapper or adapter", typeName);
     }
 }
