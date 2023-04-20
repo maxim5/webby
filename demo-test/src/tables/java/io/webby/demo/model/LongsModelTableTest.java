@@ -33,7 +33,7 @@ public class LongsModelTableTest
     @Override
     protected void setUp(@NotNull Connector connector) throws Exception {
         table = new LongsModelTable(connector);
-        table.admin().createTableIfNotExists(table.meta());
+        table.admin().createTable(table.meta()).ifNotExists().run();
     }
 
     @Test

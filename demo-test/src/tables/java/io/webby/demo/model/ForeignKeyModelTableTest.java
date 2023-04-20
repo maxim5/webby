@@ -16,10 +16,10 @@ public class ForeignKeyModelTableTest
     @Override
     protected void setUp(@NotNull Connector connector) throws Exception {
         table = new ForeignKeyModelTable(connector);
-        table.admin().createTableIfNotExists(FKIntTable.META);
-        table.admin().createTableIfNotExists(FKLongTable.META);
-        table.admin().createTableIfNotExists(FKStringTable.META);
-        table.admin().createTableIfNotExists(ForeignKeyModelTable.META);
+        table.admin().createTable(FKIntTable.META).ifNotExists().run();
+        table.admin().createTable(FKLongTable.META).ifNotExists().run();
+        table.admin().createTable(FKStringTable.META).ifNotExists().run();
+        table.admin().createTable(ForeignKeyModelTable.META).ifNotExists().run();
     }
 
     @Override

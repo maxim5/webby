@@ -32,9 +32,9 @@ public class M2mIntLongModelTableTest
         table = new M2mIntLongModelTable(connector);
         users = new UserTable(connector);
         sessions = new SessionTable(connector);
-        table.admin().createTableIfNotExists(table.meta());
-        users.admin().createTableIfNotExists(users.meta());
-        sessions.admin().createTableIfNotExists(sessions.meta());
+        table.admin().createTable(table.meta()).ifNotExists().run();
+        users.admin().createTable(users.meta()).ifNotExists().run();
+        sessions.admin().createTable(sessions.meta()).ifNotExists().run();
     }
 
     @Override

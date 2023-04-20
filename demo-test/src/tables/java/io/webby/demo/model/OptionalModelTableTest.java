@@ -13,7 +13,7 @@ public class OptionalModelTableTest
     @Override
     protected void setUp(@NotNull Connector connector) throws Exception {
         table = new OptionalModelTable(connector);
-        table.admin().createTableIfNotExists(table.meta());
+        table.admin().createTable(table.meta()).ifNotExists().run();
     }
 
     @Override

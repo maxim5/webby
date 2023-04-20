@@ -25,8 +25,8 @@ public class M2mLongModelTableTest
     protected void setUp(@NotNull Connector connector) throws Exception {
         table = new M2mLongModelTable(connector);
         sessions = new SessionTable(connector);
-        table.admin().createTableIfNotExists(table.meta());
-        sessions.admin().createTableIfNotExists(sessions.meta());
+        table.admin().createTable(table.meta()).ifNotExists().run();
+        sessions.admin().createTable(sessions.meta()).ifNotExists().run();
     }
 
     @Override

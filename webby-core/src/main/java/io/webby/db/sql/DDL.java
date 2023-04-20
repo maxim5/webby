@@ -65,8 +65,8 @@ public class DDL {
         try {
             connector().runner().runInTransaction(runner -> {
                 DbAdmin admin = DbAdmin.ofFixed(runner);
-                for (TableMeta meta : getAllTables()) {
-                    admin.createTableIfNotExists(meta);
+                for (TableMeta table : getAllTables()) {
+                    admin.createTable(table).ifNotExists().run();
                 }
             });
         } catch (SQLException e) {

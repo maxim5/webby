@@ -11,7 +11,7 @@ public class PojoWithAdapterModelTableTest
     @Override
     protected void setUp(@NotNull Connector connector) throws Exception {
         table = new PojoWithAdapterModelTable(connector);
-        table.admin().createTableIfNotExists(table.meta());
+        table.admin().createTable(table.meta()).ifNotExists().run();
     }
 
     @Override

@@ -25,8 +25,8 @@ public class M2mIntModelTableTest
     protected void setUp(@NotNull Connector connector) throws Exception {
         table = new M2mIntModelTable(connector);
         users = new UserTable(connector);
-        table.admin().createTableIfNotExists(table.meta());
-        users.admin().createTableIfNotExists(users.meta());
+        table.admin().createTable(table.meta()).ifNotExists().run();
+        users.admin().createTable(users.meta()).ifNotExists().run();
     }
 
     @Override

@@ -1,10 +1,12 @@
 package io.webby.orm.api;
 
 import com.google.common.flogger.FluentLogger;
+import com.google.errorprone.annotations.CheckReturnValue;
 import io.webby.orm.api.query.CreateTableQuery;
 import io.webby.orm.api.query.DropTableQuery;
 import io.webby.orm.api.query.HardcodedSelectQuery;
 import io.webby.util.base.Unchecked;
+import io.webby.util.func.ThrowRunnable;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
@@ -53,8 +55,9 @@ public class DbAdmin {
         log.at(Level.FINER).log("Query OK, %d rows affected", rows);
     }
 
-    public void createTableIfNotExists(@NotNull TableMeta meta) throws SQLException {
-        createTable(CreateTableQuery.of(meta, engine()).ifNotExists().build());
+    @CheckReturnValue
+    public @NotNull CreateTableRunnable createTable(@NotNull TableMeta meta) {
+        return new CreateTableRunnable(CreateTableQuery.of(meta, engine()));
     }
 
     public void dropTable(@NotNull DropTableQuery query) throws SQLException {
@@ -63,11 +66,59 @@ public class DbAdmin {
         log.at(Level.FINER).log("Query OK, %d rows affected", rows);
     }
 
+    @CheckReturnValue
+    public @NotNull DropTableRunnable dropTable(@NotNull TableMeta meta) {
+        return new DropTableRunnable(DropTableQuery.bestEffortOf(meta, engine()));
+    }
+
     private @NotNull Engine engine() {
         return connector.engine();
     }
 
     private @NotNull QueryRunner runner() {
         return connector.runner();
+    }
+
+    @CheckReturnValue
+    public class CreateTableRunnable implements ThrowRunnable<SQLException> {
+        private final CreateTableQuery.Builder builder;
+
+        public CreateTableRunnable(@NotNull CreateTableQuery.Builder builder) {
+            this.builder = builder;
+        }
+
+        public @NotNull CreateTableRunnable ifNotExists() {
+            builder.ifNotExists();
+            return this;
+        }
+
+        @Override
+        public void run() throws SQLException {
+            createTable(builder.build());
+        }
+    }
+
+    @CheckReturnValue
+    public class DropTableRunnable implements ThrowRunnable<SQLException> {
+        private final DropTableQuery.Builder builder;
+
+        public DropTableRunnable(@NotNull DropTableQuery.Builder builder) {
+            this.builder = builder;
+        }
+
+        public @NotNull DropTableRunnable ifExists() {
+            builder.ifExists();
+            return this;
+        }
+
+        public @NotNull DropTableRunnable cascade() {
+            builder.cascade();
+            return this;
+        }
+
+        @Override
+        public void run() throws SQLException {
+            dropTable(builder.build());
+        }
     }
 }

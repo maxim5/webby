@@ -13,7 +13,7 @@ public class PojoWithMapperModelTableTest
     @Override
     protected void setUp(@NotNull Connector connector) throws Exception {
         table = new PojoWithMapperModelTable(connector);
-        table.admin().createTableIfNotExists(table.meta());
+        table.admin().createTable(table.meta()).ifNotExists().run();
     }
 
     @Override

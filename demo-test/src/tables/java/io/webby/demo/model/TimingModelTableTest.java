@@ -19,7 +19,7 @@ public class TimingModelTableTest
     @Override
     protected void setUp(@NotNull Connector connector) throws Exception {
         table = new TimingModelTable(connector);
-        table.admin().createTableIfNotExists(table.meta());
+        table.admin().createTable(table.meta()).ifNotExists().run();
     }
 
     @Override
