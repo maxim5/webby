@@ -1,9 +1,9 @@
 package io.webby.orm.api;
 
 import com.google.common.flogger.FluentLogger;
+import io.webby.orm.api.query.CreateTableQuery;
 import io.webby.orm.api.query.DropTableQuery;
 import io.webby.orm.api.query.HardcodedSelectQuery;
-import io.webby.orm.codegen.SqlSchemaMaker;
 import io.webby.util.base.Unchecked;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
@@ -47,11 +47,14 @@ public class DbAdmin {
         };
     }
 
-    public void createTableIfNotExists(@NotNull TableMeta meta) throws SQLException {
-        log.at(Level.INFO).log("Creating SQL table if not exists: `%s`...", meta.sqlTableName());
-        String query = SqlSchemaMaker.makeCreateTableQuery(engine(), meta);
+    public void createTable(@NotNull CreateTableQuery query) throws SQLException {
+        log.at(Level.INFO).log("Creating SQL table: `%s`...", query.tableName());
         int rows = runner().runUpdate(query);
         log.at(Level.FINER).log("Query OK, %d rows affected", rows);
+    }
+
+    public void createTableIfNotExists(@NotNull TableMeta meta) throws SQLException {
+        createTable(CreateTableQuery.of(meta, engine()).ifNotExists().build());
     }
 
     public void dropTable(@NotNull DropTableQuery query) throws SQLException {

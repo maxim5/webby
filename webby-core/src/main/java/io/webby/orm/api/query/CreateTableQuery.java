@@ -1,4 +1,4 @@
-package io.webby.orm.codegen;
+package io.webby.orm.api.query;
 
 import io.webby.orm.api.Engine;
 import io.webby.orm.api.TableMeta;
@@ -10,43 +10,76 @@ import org.jetbrains.annotations.NotNull;
 import java.sql.Date;
 import java.sql.Time;
 import java.sql.Timestamp;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Map;
-import java.util.stream.Collectors;
 
-public class SqlSchemaMaker {
-    public static @NotNull String makeCreateTableQuery(@NotNull Engine engine, @NotNull TableMeta meta) {
-        SchemaSupport support = SchemaSupport.of(engine);
-        Snippet snippet = new Snippet();
+public class CreateTableQuery extends Unit implements DataDefinitionQuery {
+    private final String tableName;
 
-        meta.sqlColumns().forEach(column -> {
-            String definition = SimpleJoin.of(
-                "%s %s".formatted(column.name(), support.columnTypeFor(column)),
-                column.isNotNull() ? support.inlineNotNull(column) : "",
-                column.primaryKey().isSingle() ? support.inlinePrimaryKeyFor(column) : "",
-                column.primaryKey().isSingle() ? support.inlineAutoIncrementFor(column) : "",
-                column.hasDefault() ? support.inlineDefaultFor(column) : "",
-                column.unique().isSingle() ? support.inlineUniqueFor(column) : ""
-            ).onlyNonEmpty().join(" ");
-            snippet.withLine(definition);
-        });
+    private CreateTableQuery(@NotNull String query, @NotNull String tableName) {
+        super(query);
+        this.tableName = tableName;
+    }
 
-        if (meta.primaryKeys().isComposite()) {
-            String columns = SimpleJoin.from(meta.primaryKeys().columns()).join(", ");
-            snippet.withLine("PRIMARY KEY (%s)".formatted(columns));
+    public @NotNull String tableName() {
+        return tableName;
+    }
+
+    public static @NotNull Builder of(@NotNull TableMeta meta, @NotNull Engine engine) {
+        return new Builder(meta, engine);
+    }
+
+    public static class Builder {
+        private final TableMeta meta;
+        private final Engine engine;
+        private boolean ifNotExists;
+
+        Builder(@NotNull TableMeta meta, @NotNull Engine engine) {
+            this.meta = meta;
+            this.engine = engine;
         }
 
-        meta.unique().forEach(constraint -> {
-            if (constraint.isComposite()) {
-                String columns = SimpleJoin.from(constraint.columns()).join(", ");
-                snippet.withLine("UNIQUE (%s)".formatted(columns));
-            }
-        });
+        public @NotNull Builder ifNotExists() {
+            ifNotExists = true;
+            return this;
+        }
 
-        return """
-        CREATE TABLE IF NOT EXISTS %s (
-            %s
-        )
-        """.formatted(meta.sqlTableName(), snippet.join(Collectors.joining(",\n    ")));
+        public @NotNull CreateTableQuery build() {
+            SchemaSupport support = SchemaSupport.of(engine);
+            List<String> lines = new ArrayList<>();
+
+            meta.sqlColumns().forEach(column -> {
+                String definition = SimpleJoin.of(
+                    "%s %s".formatted(column.name(), support.columnTypeFor(column)),
+                    column.isNotNull() ? support.inlineNotNull(column) : "",
+                    column.primaryKey().isSingle() ? support.inlinePrimaryKeyFor(column) : "",
+                    column.primaryKey().isSingle() ? support.inlineAutoIncrementFor(column) : "",
+                    column.hasDefault() ? support.inlineDefaultFor(column) : "",
+                    column.unique().isSingle() ? support.inlineUniqueFor(column) : ""
+                ).onlyNonEmpty().join(" ");
+                lines.add(definition);
+            });
+
+            if (meta.primaryKeys().isComposite()) {
+                String columns = SimpleJoin.from(meta.primaryKeys().columns()).join(", ");
+                lines.add("PRIMARY KEY (%s)".formatted(columns));
+            }
+
+            meta.unique().forEach(constraint -> {
+                if (constraint.isComposite()) {
+                    String columns = SimpleJoin.from(constraint.columns()).join(", ");
+                    lines.add("UNIQUE (%s)".formatted(columns));
+                }
+            });
+
+            String query = """
+                CREATE TABLE %s%s (
+                    %s
+                )
+                """.formatted(ifNotExists ? "IF NOT EXISTS " : "", meta.sqlTableName(), String.join(",\n    ", lines));
+            return new CreateTableQuery(query, meta.sqlTableName());
+        }
     }
 
     private interface SchemaSupport {
