@@ -8,6 +8,7 @@ import io.webby.orm.api.entity.BatchEntityIntData;
 import io.webby.orm.api.entity.EntityData;
 import io.webby.orm.api.entity.EntityIntData;
 import io.webby.orm.api.query.Contextual;
+import io.webby.orm.api.query.CreateTableQuery;
 import io.webby.orm.api.query.TermType;
 import io.webby.orm.api.query.Where;
 import io.webby.testing.BaseTableTest;
@@ -33,7 +34,7 @@ public class IntsModelTableTest
     @Override
     protected void setUp(@NotNull Connector connector) throws Exception {
         table = new IntsModelTable(connector);
-        table.admin().createTable(table.meta()).ifNotExists().run();
+        table.admin().createTable(CreateTableQuery.of(table).ifNotExists());
     }
 
     @Test

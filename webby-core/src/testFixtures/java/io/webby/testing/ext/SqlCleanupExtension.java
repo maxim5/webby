@@ -3,6 +3,8 @@ package io.webby.testing.ext;
 import io.webby.orm.api.Connector;
 import io.webby.orm.api.DbAdmin;
 import io.webby.orm.api.TableMeta;
+import io.webby.orm.api.query.CreateTableQuery;
+import io.webby.orm.api.query.DropTableQuery;
 import org.jetbrains.annotations.NotNull;
 import org.junit.jupiter.api.extension.BeforeAllCallback;
 import org.junit.jupiter.api.extension.BeforeEachCallback;
@@ -29,8 +31,8 @@ public class SqlCleanupExtension implements BeforeAllCallback, BeforeEachCallbac
         connector.runner().runInTransaction(runner -> {
             DbAdmin admin = DbAdmin.ofFixed(runner);
             for (TableMeta table : tables) {
-                admin.dropTable(table).ifExists().cascade().run();
-                admin.createTable(table).ifNotExists().run();
+                admin.dropTable(DropTableQuery.of(table).ifExists());
+                admin.createTable(CreateTableQuery.of(table).ifNotExists());
             }
         });
     }

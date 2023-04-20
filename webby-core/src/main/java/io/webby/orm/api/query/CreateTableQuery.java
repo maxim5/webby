@@ -1,5 +1,6 @@
 package io.webby.orm.api.query;
 
+import io.webby.orm.api.BaseTable;
 import io.webby.orm.api.Engine;
 import io.webby.orm.api.TableMeta;
 import io.webby.orm.api.TableMeta.ColumnMeta;
@@ -26,18 +27,20 @@ public class CreateTableQuery extends Unit implements DataDefinitionQuery {
         return tableName;
     }
 
-    public static @NotNull Builder of(@NotNull TableMeta meta, @NotNull Engine engine) {
-        return new Builder(meta, engine);
+    public static @NotNull Builder of(@NotNull TableMeta meta) {
+        return new Builder(meta);
+    }
+
+    public static @NotNull Builder of(@NotNull BaseTable<?> table) {
+        return of(table.meta());
     }
 
     public static class Builder {
         private final TableMeta meta;
-        private final Engine engine;
         private boolean ifNotExists;
 
-        Builder(@NotNull TableMeta meta, @NotNull Engine engine) {
+        Builder(@NotNull TableMeta meta) {
             this.meta = meta;
-            this.engine = engine;
         }
 
         public @NotNull Builder ifNotExists() {
@@ -45,7 +48,7 @@ public class CreateTableQuery extends Unit implements DataDefinitionQuery {
             return this;
         }
 
-        public @NotNull CreateTableQuery build() {
+        public @NotNull CreateTableQuery build(@NotNull Engine engine) {
             SchemaSupport support = SchemaSupport.of(engine);
             List<String> lines = new ArrayList<>();
 

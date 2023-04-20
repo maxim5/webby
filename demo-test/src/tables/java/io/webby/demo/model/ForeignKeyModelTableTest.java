@@ -4,6 +4,7 @@ import io.webby.orm.api.Connector;
 import io.webby.orm.api.ForeignInt;
 import io.webby.orm.api.ForeignLong;
 import io.webby.orm.api.ForeignObj;
+import io.webby.orm.api.query.CreateTableQuery;
 import io.webby.testing.ForeignKeyTableTest;
 import io.webby.testing.SqlDbTableTest;
 import io.webby.testing.TableLongTest;
@@ -16,10 +17,10 @@ public class ForeignKeyModelTableTest
     @Override
     protected void setUp(@NotNull Connector connector) throws Exception {
         table = new ForeignKeyModelTable(connector);
-        table.admin().createTable(FKIntTable.META).ifNotExists().run();
-        table.admin().createTable(FKLongTable.META).ifNotExists().run();
-        table.admin().createTable(FKStringTable.META).ifNotExists().run();
-        table.admin().createTable(ForeignKeyModelTable.META).ifNotExists().run();
+        table.admin().createTable(CreateTableQuery.of(FKIntTable.META).ifNotExists());
+        table.admin().createTable(CreateTableQuery.of(FKLongTable.META).ifNotExists());
+        table.admin().createTable(CreateTableQuery.of(FKStringTable.META).ifNotExists());
+        table.admin().createTable(CreateTableQuery.of(ForeignKeyModelTable.META).ifNotExists());
     }
 
     @Override

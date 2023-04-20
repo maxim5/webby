@@ -8,6 +8,7 @@ import io.webby.db.sql.DDL;
 import io.webby.db.sql.TableManager;
 import io.webby.orm.api.DbAdmin;
 import io.webby.orm.api.TableMeta;
+import io.webby.orm.api.query.DropTableQuery;
 import org.jetbrains.annotations.NotNull;
 
 import java.sql.SQLException;
@@ -31,7 +32,7 @@ public class TestingPersistentDbTableCleaner {
                         connector().runner().runInTransaction(runner -> {
                             DbAdmin admin = DbAdmin.ofFixed(runner);
                             for (TableMeta table : getAllTables()) {
-                                admin.dropTable(table).ifExists().cascade().run();
+                                admin.dropTable(DropTableQuery.of(table).ifExists().cascade());
                             }
                         });
                     } catch (SQLException e) {

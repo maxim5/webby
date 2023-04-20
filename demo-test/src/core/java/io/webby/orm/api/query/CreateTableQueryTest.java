@@ -807,6 +807,6 @@ public class CreateTableQueryTest {
     }
 
     private static @NotNull String createTableIfNotExists(@NotNull Engine engine, @NotNull TableMeta meta) {
-        return CreateTableQuery.of(meta, engine).ifNotExists().build().repr();
+        return CreateTableQuery.of(meta).ifNotExists().build(engine).repr();
     }
 }

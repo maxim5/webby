@@ -4,6 +4,7 @@ import io.webby.auth.session.Session;
 import io.webby.auth.session.SessionTable;
 import io.webby.orm.api.Connector;
 import io.webby.orm.api.ForeignLong;
+import io.webby.orm.api.query.CreateTableQuery;
 import io.webby.testing.ManyToManyTableTest;
 import io.webby.testing.SqlDbTableTest;
 import io.webby.testing.TestingModels;
@@ -25,8 +26,8 @@ public class M2mLongModelTableTest
     protected void setUp(@NotNull Connector connector) throws Exception {
         table = new M2mLongModelTable(connector);
         sessions = new SessionTable(connector);
-        table.admin().createTable(table.meta()).ifNotExists().run();
-        sessions.admin().createTable(sessions.meta()).ifNotExists().run();
+        table.admin().createTable(CreateTableQuery.of(table).ifNotExists());
+        sessions.admin().createTable(CreateTableQuery.of(sessions).ifNotExists());
     }
 
     @Override

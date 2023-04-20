@@ -1,6 +1,7 @@
 package io.webby.demo.model;
 
 import io.webby.orm.api.Connector;
+import io.webby.orm.api.query.CreateTableQuery;
 import io.webby.orm.api.query.Shortcuts;
 import io.webby.orm.api.query.Variable;
 import io.webby.testing.PrimaryKeyTableTest;
@@ -15,7 +16,7 @@ public class EnumModelTableTest
     @Override
     protected void setUp(@NotNull Connector connector) throws Exception {
         table = new EnumModelTable(connector);
-        table.admin().createTable(table.meta()).ifNotExists().run();
+        table.admin().createTable(CreateTableQuery.of(table).ifNotExists());
     }
 
     @Override

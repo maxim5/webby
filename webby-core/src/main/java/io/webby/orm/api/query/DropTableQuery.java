@@ -1,5 +1,6 @@
 package io.webby.orm.api.query;
 
+import io.webby.orm.api.BaseTable;
 import io.webby.orm.api.Engine;
 import io.webby.orm.api.TableMeta;
 import org.jetbrains.annotations.NotNull;
@@ -24,24 +25,17 @@ public class DropTableQuery extends Unit implements DataDefinitionQuery {
         return of(meta.sqlTableName());
     }
 
-    public static @NotNull Builder bestEffortOf(@NotNull TableMeta meta, @NotNull Engine engine) {
-        return new Builder(meta.sqlTableName(), engine);
+    public static @NotNull Builder of(@NotNull BaseTable<?> table) {
+        return of(table.meta());
     }
 
     public static class Builder {
         private final String tableName;
-        private final Engine engine;
         private boolean ifExists;
         private boolean cascade;
 
         Builder(@NotNull String tableName) {
             this.tableName = tableName;
-            this.engine = Engine.Unknown;
-        }
-
-        Builder(@NotNull String tableName, @NotNull Engine engine) {
-            this.tableName = tableName;
-            this.engine = engine;
         }
 
         public @NotNull Builder ifExists() {
@@ -50,27 +44,22 @@ public class DropTableQuery extends Unit implements DataDefinitionQuery {
         }
 
         public @NotNull Builder cascade() {
-            if (engine != Engine.SQLite) {
-                cascade = true;
-            }
+            cascade = true;
             return this;
         }
 
-        public @NotNull DropTableQuery build() {
-            return new DropTableQuery(buildToQuery(), tableName);
-        }
-
-        private @NotNull String buildToQuery() {
+        public @NotNull DropTableQuery build(@NotNull Engine engine) {
             StringBuilder builder = new StringBuilder();
             builder.append("DROP TABLE ");
             if (ifExists) {
                 builder.append("IF EXISTS ");
             }
             builder.append(tableName);
-            if (cascade) {
+            if (cascade && engine != Engine.SQLite) {
                 builder.append(" CASCADE");
             }
-            return builder.toString();
+            String query = builder.toString();
+            return new DropTableQuery(query, tableName);
         }
     }
 }

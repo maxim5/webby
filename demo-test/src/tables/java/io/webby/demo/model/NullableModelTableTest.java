@@ -1,6 +1,7 @@
 package io.webby.demo.model;
 
 import io.webby.orm.api.Connector;
+import io.webby.orm.api.query.CreateTableQuery;
 import io.webby.testing.MaliciousTableTest;
 import io.webby.testing.PrimaryKeyTableTest;
 import io.webby.testing.SqlDbTableTest;
@@ -15,7 +16,7 @@ public class NullableModelTableTest
     @Override
     protected void setUp(@NotNull Connector connector) throws Exception {
         table = new NullableModelTable(connector);
-        table.admin().createTable(table.meta()).ifNotExists().run();
+        table.admin().createTable(CreateTableQuery.of(table).ifNotExists());
     }
 
     @Override

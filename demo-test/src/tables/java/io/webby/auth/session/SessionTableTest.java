@@ -2,6 +2,7 @@ package io.webby.auth.session;
 
 import io.webby.orm.api.Connector;
 import io.webby.orm.api.ForeignInt;
+import io.webby.orm.api.query.CreateTableQuery;
 import io.webby.testing.SqlDbTableTest;
 import io.webby.testing.TableLongTest;
 import org.jetbrains.annotations.NotNull;
@@ -15,7 +16,7 @@ public class SessionTableTest
     @Override
     protected void setUp(@NotNull Connector connector) throws Exception {
         table = new SessionTable(connector);
-        table.admin().createTable(table.meta()).ifNotExists().run();
+        table.admin().createTable(CreateTableQuery.of(table).ifNotExists());
     }
 
     @Override

@@ -4,6 +4,7 @@ import io.webby.auth.user.DefaultUser;
 import io.webby.auth.user.UserTable;
 import io.webby.orm.api.Connector;
 import io.webby.orm.api.ForeignInt;
+import io.webby.orm.api.query.CreateTableQuery;
 import io.webby.testing.ManyToManyTableTest;
 import io.webby.testing.SqlDbTableTest;
 import io.webby.testing.TestingModels;
@@ -25,8 +26,8 @@ public class M2mIntModelTableTest
     protected void setUp(@NotNull Connector connector) throws Exception {
         table = new M2mIntModelTable(connector);
         users = new UserTable(connector);
-        table.admin().createTable(table.meta()).ifNotExists().run();
-        users.admin().createTable(users.meta()).ifNotExists().run();
+        table.admin().createTable(CreateTableQuery.of(table).ifNotExists());
+        users.admin().createTable(CreateTableQuery.of(users).ifNotExists());
     }
 
     @Override

@@ -9,6 +9,7 @@ import io.webby.common.GuiceCompleteEvent;
 import io.webby.orm.api.Connector;
 import io.webby.orm.api.DbAdmin;
 import io.webby.orm.api.TableMeta;
+import io.webby.orm.api.query.CreateTableQuery;
 import org.jetbrains.annotations.NotNull;
 
 import java.sql.SQLException;
@@ -66,7 +67,7 @@ public class DDL {
             connector().runner().runInTransaction(runner -> {
                 DbAdmin admin = DbAdmin.ofFixed(runner);
                 for (TableMeta table : getAllTables()) {
-                    admin.createTable(table).ifNotExists().run();
+                    admin.createTable(CreateTableQuery.of(table).ifNotExists());
                 }
             });
         } catch (SQLException e) {
