@@ -7,7 +7,6 @@ import com.google.inject.Inject;
 import io.webby.app.Settings;
 import io.webby.common.GuiceCompleteEvent;
 import io.webby.orm.api.Connector;
-import io.webby.orm.api.DbAdmin;
 import io.webby.orm.api.TableMeta;
 import io.webby.orm.api.query.CreateTableQuery;
 import org.jetbrains.annotations.NotNull;
@@ -64,8 +63,7 @@ public class DDL {
         }
 
         try {
-            connector().runner().runInTransaction(runner -> {
-                DbAdmin admin = DbAdmin.ofFixed(runner);
+            connector().runner().runAdminInTransaction(admin -> {
                 for (TableMeta table : getAllTables()) {
                     admin.createTable(CreateTableQuery.of(table).ifNotExists());
                 }

@@ -53,6 +53,10 @@ public class QueryRunner {
         }
     }
 
+    public void runAdminInTransaction(@NotNull ThrowConsumer<DbAdmin, SQLException> action) throws SQLException {
+        runInTransaction(runner -> action.accept(DbAdmin.ofFixed(runner)));
+    }
+
     // Run SelectQuery
 
     public @Nullable Object runAndGet(@NotNull SelectQuery query) {

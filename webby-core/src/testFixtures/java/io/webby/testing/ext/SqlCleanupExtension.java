@@ -1,7 +1,6 @@
 package io.webby.testing.ext;
 
 import io.webby.orm.api.Connector;
-import io.webby.orm.api.DbAdmin;
 import io.webby.orm.api.TableMeta;
 import io.webby.orm.api.query.CreateTableQuery;
 import io.webby.orm.api.query.DropTableQuery;
@@ -29,8 +28,7 @@ public class SqlCleanupExtension implements BeforeAllCallback, BeforeEachCallbac
 
     @Override
     public void beforeAll(ExtensionContext context) throws SQLException {
-        connector.runner().runInTransaction(runner -> {
-            DbAdmin admin = DbAdmin.ofFixed(runner);
+        connector.runner().runAdminInTransaction(admin -> {
             for (TableMeta table : tables) {
                 admin.dropTable(DropTableQuery.of(table).ifExists());
                 admin.createTable(CreateTableQuery.of(table).ifNotExists());
@@ -40,8 +38,7 @@ public class SqlCleanupExtension implements BeforeAllCallback, BeforeEachCallbac
 
     @Override
     public void beforeEach(ExtensionContext context) throws SQLException {
-        connector.runner().runInTransaction(runner -> {
-            DbAdmin admin = DbAdmin.ofFixed(runner);
+        connector.runner().runAdminInTransaction(admin -> {
             for (TableMeta table : tables) {
                 admin.truncateTable(TruncateTableQuery.of(table));
             }

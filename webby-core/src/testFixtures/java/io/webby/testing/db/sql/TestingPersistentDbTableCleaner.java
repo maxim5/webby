@@ -6,7 +6,6 @@ import com.google.inject.Injector;
 import io.webby.app.Settings;
 import io.webby.db.sql.DDL;
 import io.webby.db.sql.TableManager;
-import io.webby.orm.api.DbAdmin;
 import io.webby.orm.api.TableMeta;
 import io.webby.orm.api.query.DropTableQuery;
 import org.jetbrains.annotations.NotNull;
@@ -29,8 +28,7 @@ public class TestingPersistentDbTableCleaner {
 
                 private void dropAllTablesIfExist() {
                     try {
-                        connector().runner().runInTransaction(runner -> {
-                            DbAdmin admin = DbAdmin.ofFixed(runner);
+                        connector().runner().runAdminInTransaction(admin -> {
                             for (TableMeta table : getAllTables()) {
                                 admin.dropTable(DropTableQuery.of(table).ifExists().cascade());
                             }
