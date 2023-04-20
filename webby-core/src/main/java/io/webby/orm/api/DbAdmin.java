@@ -4,6 +4,7 @@ import com.google.common.flogger.FluentLogger;
 import io.webby.orm.api.query.CreateTableQuery;
 import io.webby.orm.api.query.DropTableQuery;
 import io.webby.orm.api.query.HardcodedSelectQuery;
+import io.webby.orm.api.query.TruncateTableQuery;
 import io.webby.util.base.Unchecked;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
@@ -65,6 +66,16 @@ public class DbAdmin {
 
     public void dropTable(@NotNull DropTableQuery.Builder builder) throws SQLException {
         dropTable(builder.build(engine()));
+    }
+
+    public void truncateTable(@NotNull TruncateTableQuery query) throws SQLException {
+        log.at(Level.INFO).log("Truncating SQL table: `%s`...", query.tableName());
+        int rows = runner().runUpdate(query);
+        log.at(Level.FINER).log("Query OK, %d rows affected", rows);
+    }
+
+    public void truncateTable(@NotNull TruncateTableQuery.Builder builder) throws SQLException {
+        truncateTable(builder.build(engine()));
     }
 
     private @NotNull Engine engine() {
