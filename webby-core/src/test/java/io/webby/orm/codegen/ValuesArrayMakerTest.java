@@ -246,6 +246,71 @@ public class ValuesArrayMakerTest {
                 """);
     }
 
+    @Test
+    public void foreign_int_column_nullable() {
+        record User(int userId, String name) {}
+        record Song(@Sql.Null ForeignInt<User> author) {}
+
+        TableArch tableArch = buildTableArch(Song.class, List.of(User.class));
+        ValuesArrayMaker maker = new ValuesArrayMaker("$param", tableArch.fields());
+
+        assertThat(maker)
+            .matchesInitValues("""
+                $param.author().getFk(),
+                """)
+            .matchesConvertValues("""
+                """);
+    }
+
+    @Test
+    public void foreign_long_column_nullable() {
+        record User(long userId, String name) {}
+        record Song(@Sql.Null ForeignLong<User> author) {}
+
+        TableArch tableArch = buildTableArch(Song.class, List.of(User.class));
+        ValuesArrayMaker maker = new ValuesArrayMaker("$param", tableArch.fields());
+
+        assertThat(maker)
+            .matchesInitValues("""
+                $param.author().getFk(),
+                """)
+            .matchesConvertValues("""
+                """);
+    }
+
+    @Test
+    public void foreign_string_column_nullable() {
+        record User(String userId, int age) {}
+        record Song(@Sql.Null ForeignObj<String, User> author) {}
+
+        TableArch tableArch = buildTableArch(Song.class, List.of(User.class));
+        ValuesArrayMaker maker = new ValuesArrayMaker("$param", tableArch.fields());
+
+        assertThat(maker)
+            .matchesInitValues("""
+                $param.author().getFk(),
+                """)
+            .matchesConvertValues("""
+                """);
+    }
+
+    @Test
+    public void foreign_int_column_two_levels_nullable() {
+        record User(int userId, String name) {}
+        record Song(int songId, @Sql.Null ForeignInt<User> author) {}
+        record Single(@Sql.Null ForeignInt<Song> hitSong) {}
+
+        TableArch tableArch = buildTableArch(Single.class, List.of(Song.class, User.class));
+        ValuesArrayMaker maker = new ValuesArrayMaker("$param", tableArch.fields());
+
+        assertThat(maker)
+            .matchesInitValues("""
+                $param.hitSong().getFk(),
+                """)
+            .matchesConvertValues("""
+                """);
+    }
+
     private static @NotNull ValuesArrayMakerSubject assertThat(@NotNull ValuesArrayMaker valuesArrayMaker) {
         return new ValuesArrayMakerSubject(valuesArrayMaker);
     }

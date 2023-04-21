@@ -32,9 +32,12 @@ public abstract class SqlDbTableTest<E, T extends BaseTable<E>> implements BaseT
     void setUp() throws Exception {
         setUp(connector());
         SQL.savepoint();
+        fillUp(connector());
     }
 
     protected abstract void setUp(@NotNull Connector connector) throws Exception;
+
+    protected void fillUp(@NotNull Connector connector) throws Exception {}
 
     @Test
     public void engine() {

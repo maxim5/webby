@@ -31,12 +31,13 @@ public class DemoTablesCodegenMain {
         ModelInput.of(ComplexIdModel.class),
         ModelInput.of(AtomicModel.class),
         ModelInput.of(OptionalModel.class),
+        ModelInput.of(ConstraintsModel.class),
 
         ModelInput.of(ForeignKeyModel.InnerInt.class),
         ModelInput.of(ForeignKeyModel.InnerLong.class),
         ModelInput.of(ForeignKeyModel.InnerString.class),
         ModelInput.of(ForeignKeyModel.class),
-        ModelInput.of(ConstraintsModel.class),
+        ModelInput.of(ForeignKeyModel.Nullable.class),
 
         ModelInput.of(M2mIntModel.class),
         ModelInput.of(M2mLongModel.class),

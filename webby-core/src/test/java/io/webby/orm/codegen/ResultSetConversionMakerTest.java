@@ -189,6 +189,139 @@ class ResultSetConversionMakerTest {
         """);
     }
 
+    @Test
+    public void foreign_int_column_nullable() {
+        record User(int userId, String name) {}
+        record Song(@Sql.Null ForeignInt<User> author) {}
+
+        TableArch tableArch = buildTableArch(Song.class, List.of(User.class));
+        assertThatSql(new ResultSetConversionMaker("$resultSet", "$follow", "$index").make(tableArch)).matches("""
+            ForeignInt author = switch ($follow) {
+                case NO_FOLLOW -> ForeignInt.ofId($resultSet.getInt(++$index));
+                case FOLLOW_ONE_LEVEL -> {
+                    int _author = $resultSet.getInt(++$index);
+                    if (_author == 0) {
+                        $index += 2;
+                        yield ForeignInt.empty();
+                    } else {
+                        yield ForeignInt.ofEntity(_author, UserTable.fromRow($resultSet, ReadFollow.NO_FOLLOW, ($index += 2) - 2));
+                    }
+                }
+                case FOLLOW_ALL -> {
+                    int _author = $resultSet.getInt(++$index);
+                    if (_author == 0) {
+                        $index += 2;
+                        yield ForeignInt.empty();
+                    } else {
+                        yield ForeignInt.ofEntity(_author, UserTable.fromRow($resultSet, ReadFollow.FOLLOW_ALL, ($index += 2) - 2));
+                    }
+                }
+            };
+        """);
+    }
+
+    @Test
+    public void foreign_long_column_nullable() {
+        record User(long userId, String name) {}
+        record Song(@Sql.Null ForeignLong<User> author) {}
+
+        TableArch tableArch = buildTableArch(Song.class, List.of(User.class));
+        assertThatSql(new ResultSetConversionMaker("$resultSet", "$follow", "$index").make(tableArch)).matches("""
+            ForeignLong author = switch ($follow) {
+                case NO_FOLLOW -> ForeignLong.ofId($resultSet.getLong(++$index));
+                case FOLLOW_ONE_LEVEL -> {
+                    long _author = $resultSet.getLong(++$index);
+                    if (_author == 0) {
+                        $index += 2;
+                        yield ForeignLong.empty();
+                    } else {
+                        yield ForeignLong.ofEntity(_author, UserTable.fromRow($resultSet, ReadFollow.NO_FOLLOW, ($index += 2) - 2));
+                    }
+                }
+                case FOLLOW_ALL -> {
+                    long _author = $resultSet.getLong(++$index);
+                    if (_author == 0) {
+                        $index += 2;
+                        yield ForeignLong.empty();
+                    } else {
+                        yield ForeignLong.ofEntity(_author, UserTable.fromRow($resultSet, ReadFollow.FOLLOW_ALL, ($index += 2) - 2));
+                    }
+                }
+            };
+        """);
+    }
+
+    @Test
+    public void foreign_string_column_nullable() {
+        record User(String userId, int age) {}
+        record Song(@Sql.Null ForeignObj<String, User> author) {}
+
+        TableArch tableArch = buildTableArch(Song.class, List.of(User.class));
+        assertThatSql(new ResultSetConversionMaker("$resultSet", "$follow", "$index").make(tableArch)).matches("""
+            ForeignObj author = switch ($follow) {
+                case NO_FOLLOW -> {
+                    String _author = $resultSet.getString(++$index);
+                    if (_author == null) {
+                        /* no need to increment `$index` */;
+                        yield ForeignObj.empty();
+                    } else {
+                        yield ForeignObj.ofId(_author);
+                    }
+                }
+                case FOLLOW_ONE_LEVEL -> {
+                    String _author = $resultSet.getString(++$index);
+                    if (_author == null) {
+                        $index += 2;
+                        yield ForeignObj.empty();
+                    } else {
+                        yield ForeignObj.ofEntity(_author, UserTable.fromRow($resultSet, ReadFollow.NO_FOLLOW, ($index += 2) - 2));
+                    }
+                }
+                case FOLLOW_ALL -> {
+                    String _author = $resultSet.getString(++$index);
+                    if (_author == null) {
+                        $index += 2;
+                        yield ForeignObj.empty();
+                    } else {
+                        yield ForeignObj.ofEntity(_author, UserTable.fromRow($resultSet, ReadFollow.FOLLOW_ALL, ($index += 2) - 2));
+                    }
+                }
+            };
+        """);
+    }
+
+    @Test
+    public void foreign_int_column_two_levels_nullable() {
+        record User(int userId, String name) {}
+        record Song(int songId, @Sql.Null ForeignInt<User> author) {}
+        record Single(@Sql.Null ForeignInt<Song> hitSong) {}
+
+        TableArch tableArch = buildTableArch(Single.class, List.of(Song.class, User.class));
+        assertThatSql(new ResultSetConversionMaker("$resultSet", "$follow", "$index").make(tableArch)).matches("""
+            ForeignInt hitSong = switch ($follow) {
+                case NO_FOLLOW -> ForeignInt.ofId($resultSet.getInt(++$index));
+                case FOLLOW_ONE_LEVEL -> {
+                    int _hitSong = $resultSet.getInt(++$index);
+                    if (_hitSong == 0) {
+                        $index += 2;
+                        yield ForeignInt.empty();
+                    } else {
+                        yield ForeignInt.ofEntity(_hitSong, SongTable.fromRow($resultSet, ReadFollow.NO_FOLLOW, ($index += 2) - 2));
+                    }
+                }
+                case FOLLOW_ALL -> {
+                    int _hitSong = $resultSet.getInt(++$index);
+                    if (_hitSong == 0) {
+                        $index += 4;
+                        yield ForeignInt.empty();
+                    } else {
+                        yield ForeignInt.ofEntity(_hitSong, SongTable.fromRow($resultSet, ReadFollow.FOLLOW_ALL, ($index += 4) - 4));
+                    }
+                }
+            };
+        """);
+    }
+
     private static @NotNull SqlSubject assertThatSql(@NotNull Snippet snippet) {
         return AssertSql.assertThatSql(snippet.join());
     }

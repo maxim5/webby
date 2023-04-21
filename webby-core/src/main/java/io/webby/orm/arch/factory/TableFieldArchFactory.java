@@ -47,6 +47,7 @@ class TableFieldArchFactory {
         if (inference.isForeignTable()) {
             return new ForeignTableField(table,
                                          modelField,
+                                         isNullable,
                                          Defaults.ofOneColumn(defaults),
                                          requireNonNull(inference.foreignTable()),
                                          requireNonNull(inference.singleColumn()));

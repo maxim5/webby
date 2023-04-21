@@ -9,6 +9,10 @@ import org.jetbrains.annotations.Nullable;
  * In case Table API retrieves a full entity (following foreign references), the {@link Foreign} instance in addition
  * contains the referenced entity of type {@link E} (which too can be shallow or full).
  * <p>
+ * If the column does not permit <code>NULL</code>s, then the id is always going to be set. Otherwise, it's possible
+ * to have an empty {@link Foreign} which corresponds to <code>NULL</code> value in the DB.
+ * If the key is <code>null</code>, then the entity must be <code>null</code>.
+ * <p>
  * Instances of {@link Foreign} are essentially immutable, but can be changed from shallow to full, i.e. updated with
  * an entity reference.
  *
@@ -19,14 +23,39 @@ import org.jetbrains.annotations.Nullable;
  */
 public interface Foreign<I, E> {
     /**
-     * Returns the foreign key (id). Is always set.
+     * Returns the foreign key (id). If the column does not permit <code>NULL</code>s, it is always set.
      */
-    @NotNull I getFk();
+    @Nullable I getFk();
+
+    /**
+     * Returns the non-null foreign key (id). Applicable to cases when the column does not permit <code>NULL</code>s.
+     */
+    default @NotNull I getFkOrDie() {
+        I result = getFk();
+        assert result != null : "The foreign is empty: " + this;
+        return result;
+    }
 
     /**
      * Returns the nullable foreign entity, if it is set.
      */
     @Nullable E getEntity();
+
+    /**
+     * Returns whether this instance doesn't hold any reference.
+     * If the column does not permit <code>NULL</code>s, it's always false.
+     */
+    default boolean isEmpty() {
+        return getFk() == null;
+    }
+
+    /**
+     * Returns whether this instance holds any reference.
+     * If the column does not permit <code>NULL</code>s, it's always true.
+     */
+    default boolean isPresent() {
+        return !isEmpty();
+    }
 
     /**
      * Returns whether the foreign entity is present.
