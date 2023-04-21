@@ -117,9 +117,9 @@ class FieldResolver {
         Class<?> fieldType = field.getType();
         String typeName = field.getGenericType().getTypeName();
 
-        failIf(fieldType.isInterface(), "Model holds an interface `%s` without a mapper or adapter", typeName);
         failIf(Collection.class.isAssignableFrom(fieldType),
                "Model holds a collection `%s` without a mapper or adapter", typeName);
+        failIf(fieldType.isInterface(), "Model holds an interface `%s` without a mapper or adapter", typeName);
         failIf(fieldType.isArray(), "Model holds an array `%s` without a mapper or adapter", typeName);
         failIf(fieldType == Object.class, "Model holds a raw `%s` field without a mapper or adapter", typeName);
     }

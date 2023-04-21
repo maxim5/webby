@@ -19,7 +19,7 @@ class TableArchCollector {
     }
 
     public void putTable(@NotNull Class<?> key, @NotNull TableArch table) {
-        assure(tables.put(key, table) == null, "Duplicate input: " + key);
+        assure(tables.put(key, table) == null, "Duplicate input: %s", key);
     }
 
     public @Nullable TableArch getTable(@NotNull Class<?> key) {

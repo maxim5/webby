@@ -40,13 +40,17 @@ public class ArchFactory {
     }
 
     private void completeTable(@NotNull ModelInput input, @NotNull RunContext runContext) {
+        runContext.errorHandler().setCurrentModel(input);
         TableArch table = runContext.tables().getTableOrDie(input.modelClass());
+
         ImmutableList<TableField> fields = JavaClassAnalyzer.getAllFieldsOrdered(input.modelClass()).stream()
             .map(field -> {
                 runContext.errorHandler().setCurrentField(field);
                 return new TableFieldArchFactory(runContext, table, field, input).buildTableField();
             })
             .collect(ImmutableList.toImmutableList());
+        runContext.errorHandler().dropCurrentField();
+
         table.initializeOrDie(fields);
         table.validate();
     }

@@ -1,6 +1,5 @@
 package io.webby.orm.arch.factory;
 
-import com.google.common.truth.ThrowableSubject;
 import com.google.common.truth.Truth;
 import com.google.errorprone.annotations.CanIgnoreReturnValue;
 import io.webby.orm.api.ForeignInt;
@@ -462,38 +461,61 @@ public class ArchFactoryTest {
     @Test
     public void invalid_list_field() {
         record ListModel(List<Object> value) {}
-        assertInvalidModel(ListModel.class);
+
+        InvalidSqlModelException e = assertInvalidModel(ListModel.class);
+        Truth.assertThat(e).hasMessageThat().contains("ListModel.value");
+        Truth.assertThat(e).hasCauseThat().hasMessageThat().containsMatch("a collection.*java.util.List<java.lang.Object>");
     }
 
     @Test
     public void invalid_set_field() {
         record SetModel(Set<String> value) {}
-        assertInvalidModel(SetModel.class);
+
+        InvalidSqlModelException e = assertInvalidModel(SetModel.class);
+        Truth.assertThat(e).hasMessageThat().contains("SetModel.value");
+        Truth.assertThat(e).hasCauseThat().hasMessageThat().containsMatch("a collection.*java.util.Set<java.lang.String>");
     }
 
     @Test
     public void invalid_collection_field() {
         record CollectionModel(Collection<String> value) {}
-        assertInvalidModel(CollectionModel.class);
+
+        InvalidSqlModelException e = assertInvalidModel(CollectionModel.class);
+        Truth.assertThat(e).hasMessageThat().contains("CollectionModel.value");
+        Truth.assertThat(e).hasCauseThat().hasMessageThat().containsMatch("a collection.*java.util.Collection<java.lang.String>");
     }
 
     @Test
     public void invalid_interface_field() {
         record SerializableModel(Serializable value) {}
-        assertInvalidModel(SerializableModel.class);
+
+        InvalidSqlModelException e = assertInvalidModel(SerializableModel.class);
+        Truth.assertThat(e).hasMessageThat().contains("SerializableModel.value");
+        Truth.assertThat(e).hasCauseThat().hasMessageThat().containsMatch("an interface.*java.io.Serializable");
+    }
+
+    @Test
+    public void invalid_array_field() {
+        record ArrayModel(int[] array) {}
+
+        InvalidSqlModelException e = assertInvalidModel(ArrayModel.class);
+        Truth.assertThat(e).hasMessageThat().contains("ArrayModel.array");
+        Truth.assertThat(e).hasCauseThat().hasMessageThat().containsMatch("array.*int\\[]");
     }
 
     @Test
     public void invalid_object_field() {
         record ObjectModel(Object object) {}
-        assertInvalidModel(ObjectModel.class);
+
+        InvalidSqlModelException e = assertInvalidModel(ObjectModel.class);
+        Truth.assertThat(e).hasMessageThat().contains("ObjectModel.object");
+        Truth.assertThat(e).hasCauseThat().hasMessageThat().containsMatch("a raw.*java.lang.Object");
     }
 
     @CanIgnoreReturnValue
-    private static @NotNull ThrowableSubject assertInvalidModel(@NotNull Class<?> @NotNull ... models) {
-        InvalidSqlModelException exception = assertThrows(InvalidSqlModelException.class, () ->
+    private static @NotNull InvalidSqlModelException assertInvalidModel(@NotNull Class<?> @NotNull ... models) {
+        return assertThrows(InvalidSqlModelException.class, () ->
             new ArchFactory(FakeModelAdaptersScanner.DEFAULT_SCANNER).build(TestingArch.newRunInputs(models))
         );
-        return Truth.assertThat(exception);
     }
 }
