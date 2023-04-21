@@ -2,6 +2,8 @@ package io.webby.orm.codegen;
 
 import io.webby.orm.api.Engine;
 import io.webby.orm.api.ForeignInt;
+import io.webby.orm.api.ForeignLong;
+import io.webby.orm.api.ForeignObj;
 import io.webby.orm.api.annotate.Sql;
 import io.webby.orm.arch.model.TableArch;
 import io.webby.orm.testing.AssertSql;
@@ -127,18 +129,64 @@ class ResultSetConversionMakerTest {
     }
 
     @Test
-    public void foreign_int_columns() {
+    public void foreign_int_column() {
         record User(int userId, String name) {}
         record Song(ForeignInt<User> author) {}
 
         TableArch tableArch = buildTableArch(Song.class, List.of(User.class));
         assertThatSql(new ResultSetConversionMaker("$resultSet", "$follow", "$index").make(tableArch)).matches("""
             ForeignInt author = switch ($follow) {
-                    case NO_FOLLOW -> ForeignInt.ofId($resultSet.getInt(++$index));
-                    case FOLLOW_ONE_LEVEL -> ForeignInt.ofEntity($resultSet.getInt(++$index), UserTable.fromRow($resultSet, ReadFollow.NO_FOLLOW, ($index += 2) - 2));
-                    case FOLLOW_ALL -> ForeignInt.ofEntity($resultSet.getInt(++$index), UserTable.fromRow($resultSet, ReadFollow.FOLLOW_ALL, ($index += 2) - 2));
-                };
-            """);
+                case NO_FOLLOW -> ForeignInt.ofId($resultSet.getInt(++$index));
+                case FOLLOW_ONE_LEVEL -> ForeignInt.ofEntity($resultSet.getInt(++$index), UserTable.fromRow($resultSet, ReadFollow.NO_FOLLOW, ($index += 2) - 2));
+                case FOLLOW_ALL -> ForeignInt.ofEntity($resultSet.getInt(++$index), UserTable.fromRow($resultSet, ReadFollow.FOLLOW_ALL, ($index += 2) - 2));
+            };
+        """);
+    }
+
+    @Test
+    public void foreign_long_column() {
+        record User(long userId, String name) {}
+        record Song(ForeignLong<User> author) {}
+
+        TableArch tableArch = buildTableArch(Song.class, List.of(User.class));
+        assertThatSql(new ResultSetConversionMaker("$resultSet", "$follow", "$index").make(tableArch)).matches("""
+            ForeignLong author = switch ($follow) {
+                case NO_FOLLOW -> ForeignLong.ofId($resultSet.getLong(++$index));
+                case FOLLOW_ONE_LEVEL -> ForeignLong.ofEntity($resultSet.getLong(++$index), UserTable.fromRow($resultSet, ReadFollow.NO_FOLLOW, ($index += 2) - 2));
+                case FOLLOW_ALL -> ForeignLong.ofEntity($resultSet.getLong(++$index), UserTable.fromRow($resultSet, ReadFollow.FOLLOW_ALL, ($index += 2) - 2));
+            };
+        """);
+    }
+
+    @Test
+    public void foreign_string_column() {
+        record User(String userId, int age) {}
+        record Song(ForeignObj<String, User> author) {}
+
+        TableArch tableArch = buildTableArch(Song.class, List.of(User.class));
+        assertThatSql(new ResultSetConversionMaker("$resultSet", "$follow", "$index").make(tableArch)).matches("""
+            ForeignObj author = switch ($follow) {
+                case NO_FOLLOW -> ForeignObj.ofId($resultSet.getString(++$index));
+                case FOLLOW_ONE_LEVEL -> ForeignObj.ofEntity($resultSet.getString(++$index), UserTable.fromRow($resultSet, ReadFollow.NO_FOLLOW, ($index += 2) - 2));
+                case FOLLOW_ALL -> ForeignObj.ofEntity($resultSet.getString(++$index), UserTable.fromRow($resultSet, ReadFollow.FOLLOW_ALL, ($index += 2) - 2));
+            };
+        """);
+    }
+
+    @Test
+    public void foreign_int_column_two_levels() {
+        record User(int userId, String name) {}
+        record Song(int songId, ForeignInt<User> author) {}
+        record Single(ForeignInt<Song> hitSong) {}
+
+        TableArch tableArch = buildTableArch(Single.class, List.of(Song.class, User.class));
+        assertThatSql(new ResultSetConversionMaker("$resultSet", "$follow", "$index").make(tableArch)).matches("""
+            ForeignInt hitSong = switch ($follow) {
+                case NO_FOLLOW -> ForeignInt.ofId($resultSet.getInt(++$index));
+                case FOLLOW_ONE_LEVEL -> ForeignInt.ofEntity($resultSet.getInt(++$index), SongTable.fromRow($resultSet, ReadFollow.NO_FOLLOW, ($index += 2) - 2));
+                case FOLLOW_ALL -> ForeignInt.ofEntity($resultSet.getInt(++$index), SongTable.fromRow($resultSet, ReadFollow.FOLLOW_ALL, ($index += 4) - 4));
+            };
+        """);
     }
 
     private static @NotNull SqlSubject assertThatSql(@NotNull Snippet snippet) {

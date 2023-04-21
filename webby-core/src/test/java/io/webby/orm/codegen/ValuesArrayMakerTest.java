@@ -3,6 +3,8 @@ package io.webby.orm.codegen;
 import com.google.errorprone.annotations.CanIgnoreReturnValue;
 import io.webby.orm.api.Engine;
 import io.webby.orm.api.ForeignInt;
+import io.webby.orm.api.ForeignLong;
+import io.webby.orm.api.ForeignObj;
 import io.webby.orm.api.annotate.Sql;
 import io.webby.orm.arch.model.TableArch;
 import io.webby.util.base.EasyPrimitives.MutableBool;
@@ -180,7 +182,7 @@ public class ValuesArrayMakerTest {
     }
 
     @Test
-    public void foreign_int_columns() {
+    public void foreign_int_column() {
         record User(int userId, String name) {}
         record Song(ForeignInt<User> author) {}
 
@@ -190,6 +192,55 @@ public class ValuesArrayMakerTest {
         assertThat(maker)
             .matchesInitValues("""
                 $param.author().getFk(),
+                """)
+            .matchesConvertValues("""
+                """);
+    }
+
+    @Test
+    public void foreign_long_column() {
+        record User(long userId, String name) {}
+        record Song(ForeignLong<User> author) {}
+
+        TableArch tableArch = buildTableArch(Song.class, List.of(User.class));
+        ValuesArrayMaker maker = new ValuesArrayMaker("$param", tableArch.fields());
+
+        assertThat(maker)
+            .matchesInitValues("""
+                $param.author().getFk(),
+                """)
+            .matchesConvertValues("""
+                """);
+    }
+
+    @Test
+    public void foreign_string_column() {
+        record User(String userId, int age) {}
+        record Song(ForeignObj<String, User> author) {}
+
+        TableArch tableArch = buildTableArch(Song.class, List.of(User.class));
+        ValuesArrayMaker maker = new ValuesArrayMaker("$param", tableArch.fields());
+
+        assertThat(maker)
+            .matchesInitValues("""
+                $param.author().getFk(),
+                """)
+            .matchesConvertValues("""
+                """);
+    }
+
+    @Test
+    public void foreign_int_column_two_levels() {
+        record User(int userId, String name) {}
+        record Song(int songId, ForeignInt<User> author) {}
+        record Single(ForeignInt<Song> hitSong) {}
+
+        TableArch tableArch = buildTableArch(Single.class, List.of(Song.class, User.class));
+        ValuesArrayMaker maker = new ValuesArrayMaker("$param", tableArch.fields());
+
+        assertThat(maker)
+            .matchesInitValues("""
+                $param.hitSong().getFk(),
                 """)
             .matchesConvertValues("""
                 """);
