@@ -8,9 +8,7 @@ import io.webby.orm.api.*;
 import io.webby.orm.api.entity.*;
 import io.webby.orm.api.query.*;
 import io.webby.orm.arch.Column;
-import io.webby.orm.arch.HasColumns;
-import io.webby.orm.arch.JavaNameHolder;
-import io.webby.orm.arch.PrefixedColumn;
+import io.webby.orm.arch.*;
 import io.webby.orm.arch.model.ForeignTableField;
 import io.webby.orm.arch.model.TableArch;
 import io.webby.orm.arch.model.TableField;
@@ -1166,46 +1164,58 @@ public class ModelTableCodegen extends BaseCodegen {
     }
 
     private void dataFactoryMethods() {
+        List<JdbcType> allTypes = table.columns().stream().map(Column::type).map(ColumnType::jdbcType).toList();
+        boolean isAllInts = allTypes.stream().allMatch(x -> x == JdbcType.Int);
+        boolean isAllLongs = allTypes.stream().allMatch(x -> x == JdbcType.Long);
+
         Map<String, String> context = Map.of(
             "$columns_num", String.valueOf(table.columnsNumber()),
             "$data_method_name", "new%sData".formatted(table.modelName()),
             "$data_method_batch_name", "new%sBatch".formatted(table.modelName())
         );
 
+        if (isAllInts) {
+            appendCode("""
+            public static @Nonnull EntityIntData $data_method_name(@Nonnull IntContainer data) {
+                assert data.size() == $columns_num :
+                    "Provided $TableClass data does not match required columns: data=%s, columns=%s"
+                    .formatted(data, OwnColumn.ALL_COLUMNS);
+                return new EntityIntData(OwnColumn.ALL_COLUMNS, data);
+            }
+    
+            public static @Nonnull BatchEntityIntData $data_method_batch_name(@Nonnull IntContainer data) {
+                assert data.size() % $columns_num == 0 :
+                    "Provided $TableClass batch data does not match required columns: data=%s, columns=%s"
+                    .formatted(data, OwnColumn.ALL_COLUMNS);
+                return new BatchEntityIntData(OwnColumn.ALL_COLUMNS, data);
+            }\n
+            """, EasyMaps.merge(mainContext, context));
+        }
+
+        if (isAllLongs) {
+            appendCode("""
+            public static @Nonnull EntityLongData $data_method_name(@Nonnull LongContainer data) {
+                assert data.size() == $columns_num :
+                    "Provided $TableClass data does not match required columns: data=%s, columns=%s"
+                    .formatted(data, OwnColumn.ALL_COLUMNS);
+                return new EntityLongData(OwnColumn.ALL_COLUMNS, data);
+            }
+            
+            public static @Nonnull BatchEntityLongData $data_method_batch_name(@Nonnull LongContainer data) {
+                assert data.size() % $columns_num == 0 :
+                    "Provided $TableClass batch data does not match required columns: data=%s, columns=%s"
+                    .formatted(data, OwnColumn.ALL_COLUMNS);
+                return new BatchEntityLongData(OwnColumn.ALL_COLUMNS, data);
+            }\n
+            """, EasyMaps.merge(mainContext, context));
+        }
+
         appendCode("""
-        public static @Nonnull EntityIntData $data_method_name(@Nonnull IntContainer data) {
-            assert data.size() == $columns_num :
-                "Provided $TableClass data does not match required columns: data=%s, columns=%s"
-                .formatted(data, OwnColumn.ALL_COLUMNS);
-            return new EntityIntData(OwnColumn.ALL_COLUMNS, data);
-        }
-        
-        public static @Nonnull EntityLongData $data_method_name(@Nonnull LongContainer data) {
-            assert data.size() == $columns_num :
-                "Provided $TableClass data does not match required columns: data=%s, columns=%s"
-                .formatted(data, OwnColumn.ALL_COLUMNS);
-            return new EntityLongData(OwnColumn.ALL_COLUMNS, data);
-        }
-        
         public static @Nonnull EntityColumnMap<OwnColumn> $data_method_name(@Nonnull Map<OwnColumn, Object> map) {
             assert map.size() == $columns_num :
                 "Provided $TableClass data map does not match required columns: map=%s, columns=%s"
                 .formatted(map, OwnColumn.ALL_COLUMNS);
             return new EntityColumnMap<>(map);
-        }
-        
-        public static @Nonnull BatchEntityIntData $data_method_batch_name(@Nonnull IntContainer data) {
-            assert data.size() % $columns_num == 0 :
-                "Provided $TableClass batch data does not match required columns: data=%s, columns=%s"
-                .formatted(data, OwnColumn.ALL_COLUMNS);
-            return new BatchEntityIntData(OwnColumn.ALL_COLUMNS, data);
-        }
-        
-        public static @Nonnull BatchEntityLongData $data_method_batch_name(@Nonnull LongContainer data) {
-            assert data.size() % $columns_num == 0 :
-                "Provided $TableClass batch data does not match required columns: data=%s, columns=%s"
-                .formatted(data, OwnColumn.ALL_COLUMNS);
-            return new BatchEntityLongData(OwnColumn.ALL_COLUMNS, data);
         }
         """, EasyMaps.merge(mainContext, context));
     }
