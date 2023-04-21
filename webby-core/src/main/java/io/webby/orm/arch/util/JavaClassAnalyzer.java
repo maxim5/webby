@@ -123,7 +123,7 @@ public class JavaClassAnalyzer {
     @VisibleForTesting
     static @NotNull Method findGetterMethodOrDie(@NotNull Field field) {
         Method getter = findGetterMethod(field);
-        failIf(getter == null, "Model class `%s` exposes no getter field: %s",
+        failIf(getter == null, "Model class `%s` exposes no getter for field `%s`",
                field.getDeclaringClass().getSimpleName(), field.getName());
         return getter;
     }

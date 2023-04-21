@@ -70,9 +70,9 @@ public class ValuesArrayMakerTest {
 
     @Test
     public void enum_columns() {
-        record Adapters(Engine engine, OptionalBool bool) {}
+        record Enums(Engine engine, OptionalBool bool) {}
 
-        TableArch tableArch = buildTableArch(Adapters.class);
+        TableArch tableArch = buildTableArch(Enums.class);
         ValuesArrayMaker maker = new ValuesArrayMaker("$param", tableArch.fields());
 
         assertThat(maker)
@@ -86,9 +86,9 @@ public class ValuesArrayMakerTest {
 
     @Test
     public void columns_with_mappers() {
-        record Adapters(Optional<String> str) {}
+        record Mappers(Optional<String> str) {}
 
-        TableArch tableArch = buildTableArch(Adapters.class);
+        TableArch tableArch = buildTableArch(Mappers.class);
         ValuesArrayMaker maker = new ValuesArrayMaker("$param", tableArch.fields());
 
         assertThat(maker)
@@ -180,7 +180,7 @@ public class ValuesArrayMakerTest {
     }
 
     @Test
-    public void foreign_key_columns() {
+    public void foreign_int_columns() {
         record User(int userId, String name) {}
         record Song(ForeignInt<User> author) {}
 
