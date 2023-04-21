@@ -30,12 +30,12 @@ public class M2mIntLongModelTableTest
 
     @Override
     protected void setUp(@NotNull Connector connector) throws Exception {
-        table = new M2mIntLongModelTable(connector);
         users = new UserTable(connector);
         sessions = new SessionTable(connector);
-        table.admin().createTable(CreateTableQuery.of(table).ifNotExists());
+        table = new M2mIntLongModelTable(connector);
         users.admin().createTable(CreateTableQuery.of(users).ifNotExists());
         sessions.admin().createTable(CreateTableQuery.of(sessions).ifNotExists());
+        table.admin().createTable(CreateTableQuery.of(table).ifNotExists());
     }
 
     @Override

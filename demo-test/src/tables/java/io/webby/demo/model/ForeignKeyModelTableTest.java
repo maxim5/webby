@@ -33,6 +33,11 @@ public class ForeignKeyModelTableTest
     }
 
     @Override
+    public int maxSupportedVersion() {
+        return 1;
+    }
+
+    @Override
     public @NotNull ForeignKeyModel createEntity(@NotNull Long key, int version) {
         return new ForeignKeyModel(key, ForeignInt.ofId(version + 1), ForeignLong.ofId(7), ForeignObj.ofId("555"));
     }

@@ -32,6 +32,11 @@ public class ForeignKeyNullableModelTableTest
     }
 
     @Override
+    public int maxSupportedVersion() {
+        return 1;
+    }
+
+    @Override
     public @NotNull ForeignKeyModel.Nullable createEntity(@NotNull Integer key, int version) {
         return version == 0 ?
             new ForeignKeyModel.Nullable(key, ForeignInt.empty(), ForeignLong.empty(), ForeignObj.empty()) :

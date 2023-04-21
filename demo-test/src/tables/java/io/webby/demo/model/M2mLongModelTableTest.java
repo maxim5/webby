@@ -2,6 +2,7 @@ package io.webby.demo.model;
 
 import io.webby.auth.session.Session;
 import io.webby.auth.session.SessionTable;
+import io.webby.auth.user.UserTable;
 import io.webby.orm.api.Connector;
 import io.webby.orm.api.ForeignLong;
 import io.webby.orm.api.query.CreateTableQuery;
@@ -24,10 +25,12 @@ public class M2mLongModelTableTest
 
     @Override
     protected void setUp(@NotNull Connector connector) throws Exception {
-        table = new M2mLongModelTable(connector);
+        UserTable users = new UserTable(connector);
         sessions = new SessionTable(connector);
-        table.admin().createTable(CreateTableQuery.of(table).ifNotExists());
+        table = new M2mLongModelTable(connector);
+        users.admin().createTable(CreateTableQuery.of(users).ifNotExists());
         sessions.admin().createTable(CreateTableQuery.of(sessions).ifNotExists());
+        table.admin().createTable(CreateTableQuery.of(table).ifNotExists());
     }
 
     @Override

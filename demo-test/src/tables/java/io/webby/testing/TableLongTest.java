@@ -26,6 +26,10 @@ public interface TableLongTest<E, T extends TableLong<E>> extends PrimaryKeyTabl
         return array(1L, 2L, 3L, 4L, 5L);
     }
 
+    default int maxSupportedVersion() {
+        return 2;
+    }
+
     @Test
     default void get_by_pk_long() {
         assumeKeys(1);
@@ -104,7 +108,7 @@ public interface TableLongTest<E, T extends TableLong<E>> extends PrimaryKeyTabl
     @Test
     default void insert_several_auto_ids() {
         Map<Long, E> entities = new HashMap<>();
-        int num = 3;
+        int num = maxSupportedVersion() + 1;  // start from 0
         for (int version = 0; version < num; version++) {
             E entity = createEntity(LongAutoIdModel.AUTO_ID, version);
             long autoId = table().insertAutoIncPk(entity);

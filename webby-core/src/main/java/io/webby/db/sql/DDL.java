@@ -65,7 +65,7 @@ public class DDL {
         try {
             connector().runner().runAdminInTransaction(admin -> {
                 for (TableMeta table : getAllTables()) {
-                    admin.createTable(CreateTableQuery.of(table).ifNotExists());
+                    admin.createTable(CreateTableQuery.of(table).ifNotExists().withEnforceForeignKey(false));
                 }
             });
         } catch (SQLException e) {

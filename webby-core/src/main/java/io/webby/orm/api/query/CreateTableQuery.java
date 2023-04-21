@@ -38,6 +38,7 @@ public class CreateTableQuery extends Unit implements DataDefinitionQuery {
     public static class Builder {
         private final TableMeta meta;
         private boolean ifNotExists;
+        private boolean enforceForeignKey = true;
 
         Builder(@NotNull TableMeta meta) {
             this.meta = meta;
@@ -48,8 +49,15 @@ public class CreateTableQuery extends Unit implements DataDefinitionQuery {
             return this;
         }
 
+        public @NotNull Builder withEnforceForeignKey(boolean value) {
+            enforceForeignKey = value;
+            return this;
+        }
+
         public @NotNull CreateTableQuery build(@NotNull Engine engine) {
             SchemaSupport support = SchemaSupport.of(engine);
+            boolean inlineForeignKeys = enforceForeignKey && support.canInlineForeignKey();
+            boolean outlineForeignKeys = enforceForeignKey && !support.canInlineForeignKey();
             List<String> lines = new ArrayList<>();
 
             meta.sqlColumns().forEach(column -> {
@@ -58,6 +66,7 @@ public class CreateTableQuery extends Unit implements DataDefinitionQuery {
                     column.isNotNull() ? support.inlineNotNull(column) : "",
                     column.primaryKey().isSingle() ? support.inlinePrimaryKeyFor(column) : "",
                     column.primaryKey().isSingle() ? support.inlineAutoIncrementFor(column) : "",
+                    column.isForeignKey() && inlineForeignKeys ? support.inlineForeignKey(column) : "",
                     column.hasDefault() ? support.inlineDefaultFor(column) : "",
                     column.unique().isSingle() ? support.inlineUniqueFor(column) : ""
                 ).onlyNonEmpty().join(" ");
@@ -67,6 +76,12 @@ public class CreateTableQuery extends Unit implements DataDefinitionQuery {
             if (meta.primaryKeys().isComposite()) {
                 String columns = SimpleJoin.from(meta.primaryKeys().columns()).join(", ");
                 lines.add("PRIMARY KEY (%s)".formatted(columns));
+            }
+
+            if (outlineForeignKeys) {
+                meta.sqlColumns().stream().filter(ColumnMeta::isForeignKey).forEach(column ->
+                    lines.add(support.foreignKeyConstraint(column))
+                );
             }
 
             meta.unique().forEach(constraint -> {
@@ -110,6 +125,22 @@ public class CreateTableQuery extends Unit implements DataDefinitionQuery {
 
         default @NotNull String inlineDefaultFor(@NotNull ColumnMeta column) {
             return column.hasDefault() && !isAutoIncrement(column) ? "DEFAULT (%s)".formatted(column.defaultValue()) : "";
+        }
+
+        default boolean canInlineForeignKey() {
+            return false;
+        }
+
+        default @NotNull String inlineForeignKey(@NotNull ColumnMeta column) {
+            TableMeta.ForeignColumn foreignColumn = column.foreignColumn();
+            return foreignColumn == null ? "" :
+                "FOREIGN KEY REFERENCES %s(%s)".formatted(foreignColumn.meta().sqlTableName(), foreignColumn.column());
+        }
+
+        default @NotNull String foreignKeyConstraint(@NotNull ColumnMeta column) {
+            TableMeta.ForeignColumn foreign = column.foreignColumn();
+            return foreign == null ? "" :
+                "FOREIGN KEY(%s) REFERENCES %s(%s)".formatted(column.name(), foreign.meta().sqlTableName(), foreign.column());
         }
 
         static @NotNull SchemaSupport of(@NotNull Engine engine) {

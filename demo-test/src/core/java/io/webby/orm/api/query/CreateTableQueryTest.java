@@ -47,7 +47,8 @@ public class CreateTableQueryTest {
                 user_id INTEGER,
                 created_at INTEGER NOT NULL,
                 user_agent VARCHAR NOT NULL,
-                ip_address VARCHAR
+                ip_address VARCHAR,
+                FOREIGN KEY(user_id) REFERENCES user(user_id)
             )
             """);
 
@@ -57,7 +58,8 @@ public class CreateTableQueryTest {
                 user_id INTEGER,
                 created_at TIMESTAMP NOT NULL,
                 user_agent VARCHAR NOT NULL,
-                ip_address VARCHAR
+                ip_address VARCHAR,
+                FOREIGN KEY(user_id) REFERENCES user(user_id)
             )
             """);
 
@@ -67,7 +69,8 @@ public class CreateTableQueryTest {
                 user_id INTEGER,
                 created_at TIMESTAMP(3) NOT NULL,
                 user_agent VARCHAR(4096) NOT NULL,
-                ip_address VARCHAR(4096)
+                ip_address VARCHAR(4096),
+                FOREIGN KEY(user_id) REFERENCES user(user_id)
             )
             """);
     }
@@ -291,7 +294,10 @@ public class CreateTableQueryTest {
                 id INTEGER NOT NULL PRIMARY KEY,
                 inner_int_id INTEGER NOT NULL,
                 inner_long_id INTEGER NOT NULL,
-                inner_string_id VARCHAR NOT NULL
+                inner_string_id VARCHAR NOT NULL,
+                FOREIGN KEY(inner_int_id) REFERENCES f_k_int(id),
+                FOREIGN KEY(inner_long_id) REFERENCES f_k_long(id),
+                FOREIGN KEY(inner_string_id) REFERENCES f_k_string(id)
             )
             """);
 
@@ -318,7 +324,37 @@ public class CreateTableQueryTest {
                 id BIGINT NOT NULL PRIMARY KEY AUTO_INCREMENT,
                 inner_int_id INTEGER NOT NULL,
                 inner_long_id BIGINT NOT NULL,
-                inner_string_id VARCHAR(255) NOT NULL
+                inner_string_id VARCHAR(255) NOT NULL,
+                FOREIGN KEY(inner_int_id) REFERENCES f_k_int(id),
+                FOREIGN KEY(inner_long_id) REFERENCES f_k_long(id),
+                FOREIGN KEY(inner_string_id) REFERENCES f_k_string(id)
+            )
+            """);
+    }
+
+    @Test
+    public void create_table_foreign_key_nullable_model() {
+        assertThat(createTableIfNotExists(Engine.SQLite, ForeignKeyNullableModelTable.META)).isEqualTo("""
+            CREATE TABLE IF NOT EXISTS foreign_key_nullable_model (
+                id INTEGER NOT NULL PRIMARY KEY,
+                inner_int_id INTEGER,
+                inner_long_id INTEGER,
+                inner_string_id VARCHAR,
+                FOREIGN KEY(inner_int_id) REFERENCES f_k_int(id),
+                FOREIGN KEY(inner_long_id) REFERENCES f_k_long(id),
+                FOREIGN KEY(inner_string_id) REFERENCES f_k_string(id)
+            )
+            """);
+
+        assertThat(createTableIfNotExists(Engine.MySQL, ForeignKeyNullableModelTable.META)).isEqualTo("""
+            CREATE TABLE IF NOT EXISTS foreign_key_nullable_model (
+                id INTEGER NOT NULL PRIMARY KEY AUTO_INCREMENT,
+                inner_int_id INTEGER,
+                inner_long_id BIGINT,
+                inner_string_id VARCHAR(255),
+                FOREIGN KEY(inner_int_id) REFERENCES f_k_int(id),
+                FOREIGN KEY(inner_long_id) REFERENCES f_k_long(id),
+                FOREIGN KEY(inner_string_id) REFERENCES f_k_string(id)
             )
             """);
     }
@@ -706,21 +742,27 @@ public class CreateTableQueryTest {
         assertThat(createTableIfNotExists(Engine.SQLite, M2mIntModelTable.META)).isEqualTo("""
             CREATE TABLE IF NOT EXISTS m2m_int_model (
                 foo_id INTEGER NOT NULL,
-                bar_id INTEGER NOT NULL
+                bar_id INTEGER NOT NULL,
+                FOREIGN KEY(foo_id) REFERENCES user(user_id),
+                FOREIGN KEY(bar_id) REFERENCES user(user_id)
             )
             """);
 
         assertThat(createTableIfNotExists(Engine.H2, M2mIntModelTable.META)).isEqualTo("""
             CREATE TABLE IF NOT EXISTS m2m_int_model (
                 foo_id INTEGER NOT NULL,
-                bar_id INTEGER NOT NULL
+                bar_id INTEGER NOT NULL,
+                FOREIGN KEY(foo_id) REFERENCES user(user_id),
+                FOREIGN KEY(bar_id) REFERENCES user(user_id)
             )
             """);
 
         assertThat(createTableIfNotExists(Engine.MySQL, M2mIntModelTable.META)).isEqualTo("""
             CREATE TABLE IF NOT EXISTS m2m_int_model (
                 foo_id INTEGER NOT NULL,
-                bar_id INTEGER NOT NULL
+                bar_id INTEGER NOT NULL,
+                FOREIGN KEY(foo_id) REFERENCES user(user_id),
+                FOREIGN KEY(bar_id) REFERENCES user(user_id)
             )
             """);
     }

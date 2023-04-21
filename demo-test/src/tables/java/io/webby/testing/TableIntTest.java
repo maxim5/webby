@@ -26,6 +26,10 @@ public interface TableIntTest<E, T extends TableInt<E>> extends PrimaryKeyTableT
         return array(1, 2, 3, 4, 5);
     }
 
+    default int maxSupportedVersion() {
+        return 2;
+    }
+
     @Test
     default void get_by_pk_int() {
         assumeKeys(1);
@@ -104,7 +108,7 @@ public interface TableIntTest<E, T extends TableInt<E>> extends PrimaryKeyTableT
     @Test
     default void insert_several_auto_ids() {
         Map<Integer, E> entities = new HashMap<>();
-        int num = 3;
+        int num = maxSupportedVersion() + 1;  // start from 0
         for (int version = 0; version < num; version++) {
             E entity = createEntity(IntAutoIdModel.AUTO_ID, version);
             int autoId = table().insertAutoIncPk(entity);

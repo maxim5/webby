@@ -50,6 +50,7 @@ public abstract class SqlDbTableTest<E, T extends BaseTable<E>> implements BaseT
                 String sql = descTableInSqlite(name)
                     .replaceAll("\\s+", " ")                                    // trim spaces to one
                     .replaceAll("(PRIMARY KEY|UNIQUE|DEFAULT) \\(.*?\\)", "")   // drop constraints
+                    .replaceAll("FOREIGN KEY.*REFERENCES .*\\(.*?\\)", "")      // drop FOREIGN KEY
                     .replaceFirst("CREATE TABLE .*\\((.*?)\\)", "$1");          // get what's inside CREATE TABLE
                 // Not `sql` has the format "foo INTEGER, bar VARCHAR, ..."
                 yield Arrays.stream(sql.split(","))
