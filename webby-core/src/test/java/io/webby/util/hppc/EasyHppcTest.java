@@ -1,11 +1,10 @@
-package io.webby.hppc;
+package io.webby.util.hppc;
 
 import com.carrotsearch.hppc.*;
 import com.carrotsearch.hppc.cursors.IntCursor;
 import com.carrotsearch.hppc.cursors.LongCursor;
 import com.google.common.truth.IterableSubject;
 import io.webby.testing.MockConsumer;
-import io.webby.util.hppc.EasyHppc;
 import org.jetbrains.annotations.NotNull;
 import org.junit.Test;
 
