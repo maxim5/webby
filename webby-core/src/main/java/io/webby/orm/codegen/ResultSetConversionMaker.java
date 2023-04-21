@@ -39,8 +39,8 @@ class ResultSetConversionMaker {
     private @NotNull String assignFieldLine(@NotNull TableField field) {
         Class<?> fieldType = field.javaType();
         String fieldClassName = FULL_NAME_CLASSES.contains(fieldType) ?
-                fieldType.getName() :
-                Naming.shortCanonicalJavaName(fieldType);
+            fieldType.getName() :
+            Naming.shortCanonicalJavaName(fieldType);
         return "%s %s = %s;".formatted(fieldClassName, field.javaName(), fieldCreateExpr(field));
     }
 
@@ -76,28 +76,33 @@ class ResultSetConversionMaker {
                     params = fkParam;
                     factoryMethod = "ofId";
                 } else {
-                    int columnsNumber = field.columnsNumber(follow) - 1;  // exclude FK columns
-                    params = "%s, %s.fromRow(%s, %s.%s, (%s += %d) - %d)".formatted(
-                        fkParam,
-                        field.getForeignTable().javaName(),
-                        resultSetParam,
-                        ReadFollow.class.getSimpleName(),
-                        follow == FOLLOW_ONE_LEVEL ? NO_FOLLOW : FOLLOW_ALL,
-                        indexParam, columnsNumber, columnsNumber
-                    );
+                    int columnsNum = field.columnsNumber(follow) - 1;  // exclude FK columns
+                    String fromRow = fromRowExpr(field, follow == FOLLOW_ONE_LEVEL ? NO_FOLLOW : FOLLOW_ALL, columnsNum);
+                    params = "%s, %s".formatted(fkParam, fromRow);
                     factoryMethod = "ofEntity";
                 }
                 Class<?> factoryClass = field.javaType() == Foreign.class ? ForeignObj.class : field.javaType();
                 return "case %s -> %s.%s(%s);".formatted(follow, factoryClass.getSimpleName(), factoryMethod, params);
             });
         return new Snippet()
-                .withFormattedLine("switch (%s) {", followParam)
-                .withLines(cases.map(line -> INDENT1 + line))
-                .withLine("}").join(INDENT1);
+            .withFormattedLine("switch (%s) {", followParam)
+            .withLines(cases.map(line -> INDENT1 + line))
+            .withLine("}").join(INDENT1);
     }
 
+    // Example: ForeignTable.fromRow(result, ReadFollow.NO_FOLLOW, (start += 2) - 2)
+    private @NotNull String fromRowExpr(@NotNull ForeignTableField field, @NotNull ReadFollow follow, int columnsNum) {
+        return "%s.fromRow(%s, %s.%s, (%s += %d) - %d)".formatted(
+            field.getForeignTable().javaName(),
+            resultSetParam,
+            ReadFollow.class.getSimpleName(), follow,
+            indexParam, columnsNum, columnsNum
+        );
+    }
+
+    // Example: result.getLong(++start)
     private @NotNull String resultSetGetterExpr(@NotNull Column column) {
-        String getter = column.type().jdbcType().getterMethod();
-        return "%s.%s(++%s)".formatted(resultSetParam, getter, indexParam);
+        String resultSetGetter = column.type().jdbcType().getterMethod();
+        return "%s.%s(++%s)".formatted(resultSetParam, resultSetGetter, indexParam);
     }
 }
