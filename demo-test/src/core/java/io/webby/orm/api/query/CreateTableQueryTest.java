@@ -44,7 +44,7 @@ public class CreateTableQueryTest {
         assertThat(createTableIfNotExists(Engine.SQLite, SessionTable.META)).isEqualTo("""
             CREATE TABLE IF NOT EXISTS session (
                 session_id INTEGER NOT NULL PRIMARY KEY,
-                user_id INTEGER NOT NULL,
+                user_id INTEGER,
                 created_at INTEGER NOT NULL,
                 user_agent VARCHAR NOT NULL,
                 ip_address VARCHAR
@@ -54,7 +54,7 @@ public class CreateTableQueryTest {
         assertThat(createTableIfNotExists(Engine.H2, SessionTable.META)).isEqualTo("""
             CREATE TABLE IF NOT EXISTS session (
                 session_id BIGINT NOT NULL PRIMARY KEY AUTO_INCREMENT,
-                user_id INTEGER NOT NULL,
+                user_id INTEGER,
                 created_at TIMESTAMP NOT NULL,
                 user_agent VARCHAR NOT NULL,
                 ip_address VARCHAR
@@ -64,7 +64,7 @@ public class CreateTableQueryTest {
         assertThat(createTableIfNotExists(Engine.MySQL, SessionTable.META)).isEqualTo("""
             CREATE TABLE IF NOT EXISTS session (
                 session_id BIGINT NOT NULL PRIMARY KEY AUTO_INCREMENT,
-                user_id INTEGER NOT NULL,
+                user_id INTEGER,
                 created_at TIMESTAMP(3) NOT NULL,
                 user_agent VARCHAR(4096) NOT NULL,
                 ip_address VARCHAR(4096)

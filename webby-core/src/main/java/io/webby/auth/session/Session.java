@@ -12,7 +12,7 @@ import org.jetbrains.annotations.Nullable;
 import java.time.Instant;
 
 public record Session(long sessionId,
-                      @NotNull ForeignInt<UserModel> user,
+                      @NotNull @Sql.Null ForeignInt<UserModel> user,
                       @NotNull Instant createdAt,
                       @NotNull String userAgent,
                       @Nullable @Sql.Null String ipAddress) {
@@ -22,7 +22,7 @@ public record Session(long sessionId,
         HttpHeaders headers = request.headers();
         String userAgent = headers.get(HttpConst.USER_AGENT, "");
         String ipAddress = request.remoteIPAddress();
-        return new Session(sessionId, ForeignInt.ofId(UserModel.NO_USER_ID), Instant.now(), userAgent, ipAddress);
+        return new Session(sessionId, ForeignInt.empty(), Instant.now(), userAgent, ipAddress);
     }
 
     public int userId() {
@@ -30,7 +30,7 @@ public record Session(long sessionId,
     }
 
     public boolean hasUser() {
-        return userId() != UserModel.NO_USER_ID;
+        return user.isPresent();
     }
 
     public @NotNull Session withUser(@NotNull UserModel user) {

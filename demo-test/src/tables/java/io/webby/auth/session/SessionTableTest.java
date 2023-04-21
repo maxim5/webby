@@ -1,5 +1,8 @@
 package io.webby.auth.session;
 
+import io.webby.auth.user.DefaultUser;
+import io.webby.auth.user.UserAccess;
+import io.webby.auth.user.UserTable;
 import io.webby.orm.api.Connector;
 import io.webby.orm.api.ForeignInt;
 import io.webby.orm.api.query.CreateTableQuery;
@@ -17,6 +20,13 @@ public class SessionTableTest
     protected void setUp(@NotNull Connector connector) throws Exception {
         table = new SessionTable(connector);
         table.admin().createTable(CreateTableQuery.of(table).ifNotExists());
+        table.admin().createTable(CreateTableQuery.of(UserTable.META).ifNotExists());
+    }
+
+    @Override
+    protected void fillUp(@NotNull Connector connector) {
+        // These contents support any entity version (below).
+        new UserTable(connector).insert(new DefaultUser(1, Instant.now(), UserAccess.Simple));
     }
 
     @Override
