@@ -98,6 +98,6 @@ class ResultSetConversionMaker {
 
     private @NotNull String resultSetGetterExpr(@NotNull Column column) {
         String getter = column.type().jdbcType().getterMethod();
-        return "result.%s(++%s)".formatted(getter, indexParam);
+        return "%s.%s(++%s)".formatted(resultSetParam, getter, indexParam);
     }
 }
