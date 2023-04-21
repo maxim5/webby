@@ -512,6 +512,17 @@ public class ArchFactoryTest {
         Truth.assertThat(e).hasCauseThat().hasMessageThat().containsMatch("a raw.*java.lang.Object");
     }
 
+    @Test
+    public void invalid_foreign_key_mismatch() {
+        record User(int userId, String name) {}
+        record Song(ForeignLong<User> author) {}
+
+        InvalidSqlModelException e = assertInvalidModel(User.class, Song.class);
+        Truth.assertThat(e).hasMessageThat().contains("Song.author");
+        Truth.assertThat(e).hasCauseThat().hasMessageThat()
+            .isEqualTo("Foreign model `User` primary key `int` doesn't match the foreign key");
+    }
+
     @CanIgnoreReturnValue
     private static @NotNull InvalidSqlModelException assertInvalidModel(@NotNull Class<?> @NotNull ... models) {
         return assertThrows(InvalidSqlModelException.class, () ->

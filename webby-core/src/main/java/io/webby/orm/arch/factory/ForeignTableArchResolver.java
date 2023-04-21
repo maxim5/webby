@@ -75,7 +75,7 @@ class ForeignTableArchResolver {
         }
 
         assure(primaryKeyType == keyType,
-               "Foreign model `%s` primary key `%s` does match the foreign key",
+               "Foreign model `%s` primary key `%s` doesn't match the foreign key",
                entityType.getSimpleName(), primaryKeyType, keyType);
 
         JdbcType jdbcType = JdbcType.findByMatchingNativeType(primaryKeyType);
