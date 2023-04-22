@@ -13,13 +13,13 @@ import static io.webby.orm.api.query.Args.flattenArgsOf;
 import static io.webby.orm.api.query.Representables.joinWithLines;
 
 public class SelectGroupBy extends Unit implements SelectQuery {
-    private final int columnsNumber;
+    private final ImmutableList<Term> columnTerms;
 
     public SelectGroupBy(@NotNull SelectFrom selectFrom, @Nullable Where where,
                          @NotNull GroupBy groupBy, @Nullable Having having, @Nullable OrderBy orderBy) {
         super(joinWithLines(selectFrom, where, groupBy, having, orderBy),
               flattenArgsOf(selectFrom, where, groupBy, having, orderBy));
-        columnsNumber = selectFrom.termsNumber();
+        columnTerms = selectFrom.terms();
     }
 
     public static @NotNull Builder from(@NotNull String table) {
@@ -36,7 +36,7 @@ public class SelectGroupBy extends Unit implements SelectQuery {
 
     @Override
     public int columnsNumber() {
-        return columnsNumber;
+        return columnTerms.size();
     }
 
     public static class Builder {

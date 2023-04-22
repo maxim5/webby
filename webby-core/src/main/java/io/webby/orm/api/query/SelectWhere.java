@@ -12,11 +12,11 @@ import static io.webby.orm.api.query.Args.flattenArgsOf;
 import static io.webby.orm.api.query.Representables.joinWithLines;
 
 public class SelectWhere extends Unit implements SelectQuery {
-    private final int columnsNumber;
+    private final ImmutableList<Term> columnTerms;
 
     public SelectWhere(@NotNull SelectFrom selectFrom, @NotNull CompositeFilter clause) {
         super(joinWithLines(selectFrom, clause), flattenArgsOf(selectFrom, clause));
-        columnsNumber = selectFrom.termsNumber();
+        columnTerms = selectFrom.terms();
     }
 
     public static @NotNull Builder from(@NotNull String table) {
@@ -33,7 +33,7 @@ public class SelectWhere extends Unit implements SelectQuery {
 
     @Override
     public int columnsNumber() {
-        return columnsNumber;
+        return columnTerms.size();
     }
 
     public static class Builder {

@@ -25,8 +25,4 @@ public class SelectFrom extends Unit {
     public @NotNull ImmutableList<Term> terms() {
         return terms;
     }
-
-    public int termsNumber() {
-        return terms.size();
-    }
 }
