@@ -390,6 +390,42 @@ public class CreateTableQueryTest {
     }
 
     @Test
+    public void create_table_mapped_model() {
+        assertThat(createTableIfNotExists(Engine.SQLite, MapperModelTable.META)).isEqualTo("""
+            CREATE TABLE IF NOT EXISTS mapper_model (
+                id INTEGER NOT NULL PRIMARY KEY,
+                path VARCHAR NOT NULL,
+                pair VARCHAR NOT NULL,
+                ints BLOB NOT NULL,
+                time BLOB NOT NULL,
+                bits BLOB NOT NULL
+            )
+            """);
+
+        assertThat(createTableIfNotExists(Engine.H2, MapperModelTable.META)).isEqualTo("""
+            CREATE TABLE IF NOT EXISTS mapper_model (
+                id INTEGER NOT NULL PRIMARY KEY AUTO_INCREMENT,
+                path VARCHAR NOT NULL,
+                pair VARCHAR NOT NULL,
+                ints BLOB NOT NULL,
+                time BLOB NOT NULL,
+                bits BLOB NOT NULL
+            )
+            """);
+
+        assertThat(createTableIfNotExists(Engine.MySQL, MapperModelTable.META)).isEqualTo("""
+            CREATE TABLE IF NOT EXISTS mapper_model (
+                id INTEGER NOT NULL PRIMARY KEY AUTO_INCREMENT,
+                path VARCHAR(4096) NOT NULL,
+                pair VARCHAR(4096) NOT NULL,
+                ints BLOB NOT NULL,
+                time BLOB NOT NULL,
+                bits BLOB NOT NULL
+            )
+            """);
+    }
+
+    @Test
     public void create_table_nested_model() {
         assertThat(createTableIfNotExists(Engine.SQLite, NestedModelTable.META)).isEqualTo("""
             CREATE TABLE IF NOT EXISTS nested_model (
