@@ -1,6 +1,7 @@
 package io.webby.orm.api.query;
 
 import com.google.common.collect.ImmutableList;
+import com.google.errorprone.annotations.Immutable;
 import io.webby.orm.api.BaseTable;
 import io.webby.orm.api.TableMeta;
 import org.jetbrains.annotations.NotNull;
@@ -10,8 +11,10 @@ import java.util.List;
 import java.util.function.Consumer;
 
 import static io.webby.orm.api.query.Args.flattenArgsOf;
+import static io.webby.orm.api.query.InvalidQueryException.assure;
 import static io.webby.orm.api.query.Representables.joinWithLines;
 
+@Immutable
 public class SelectGroupBy extends Unit implements SelectQuery {
     private final ImmutableList<Term> columnTerms;
 
@@ -59,8 +62,8 @@ public class SelectGroupBy extends Unit implements SelectQuery {
         }
     
         public @NotNull Builder aggregate(@NotNull FuncExpr aggregate) {
-            assert funcExpr == null : "Aggregate function already set: %s".formatted(funcExpr);
-            assert aggregate.isAggregate() : "Non-aggregate function supplied: %s".formatted(aggregate);
+            assure(funcExpr == null, "Aggregate function already set: %s", funcExpr);
+            assure(aggregate.isAggregate(), "Non-aggregate function supplied: %s", aggregate);
             funcExpr = aggregate;
             return this;
         }
