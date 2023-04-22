@@ -1,5 +1,6 @@
 package io.webby.netty.marshal;
 
+import io.webby.util.func.Reversible;
 import org.jetbrains.annotations.NotNull;
 
 import java.io.*;
@@ -26,5 +27,19 @@ public interface TextMarshaller {
         } catch (IOException impossible) {
             return rethrow(impossible);
         }
+    }
+
+    default <T> @NotNull Reversible<String, T> toStringReversible(@NotNull Class<T> klass) {
+        return new Reversible<>() {
+            @Override
+            public @NotNull T forward(@NotNull String str) {
+                return readString(str, klass);
+            }
+
+            @Override
+            public @NotNull String backward(@NotNull T t) {
+                return writeString(t);
+            }
+        };
     }
 }
