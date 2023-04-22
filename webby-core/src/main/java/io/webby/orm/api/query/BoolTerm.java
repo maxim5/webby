@@ -10,4 +10,8 @@ public interface BoolTerm extends Term {
     default @NotNull TermType type() {
         return TermType.BOOL;
     }
+
+    default @NotNull BoolTerm not() {
+        return Not.not(this);
+    }
 }

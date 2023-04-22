@@ -25,7 +25,7 @@ public class BoolOp extends Unit implements BoolTerm {
         }).collect(type.joiner());
     }
 
-    private static boolean isComposite(@NotNull BoolTerm term) {
+    static boolean isComposite(@NotNull BoolTerm term) {
         if (term instanceof BoolOp boolOp) {
             return boolOp.terms.size() > 1;
         }
