@@ -7,9 +7,11 @@ import io.webby.orm.arch.JdbcType;
 import io.webby.orm.arch.util.Naming;
 import io.webby.util.func.Reversible;
 import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 
 import java.lang.reflect.Field;
 import java.lang.reflect.Type;
+import java.util.Optional;
 
 import static io.webby.orm.arch.InvalidSqlModelException.failIf;
 import static io.webby.util.reflect.EasyGenerics.getGenericTypeArgumentsOfInterface;
@@ -20,10 +22,12 @@ import static java.util.Objects.requireNonNull;
 public class MapperApi implements ApiFormatter<MapperApi.MapperCallFormatter> {
     private final JdbcType jdbcType;
     private final MapperCallFormatter formatter;
+    private final Optional<Class<?>> importedClass;
 
-    private MapperApi(@NotNull JdbcType jdbcType, @NotNull MapperCallFormatter formatter) {
+    private MapperApi(@NotNull JdbcType jdbcType, @NotNull MapperCallFormatter formatter, @Nullable Class<?> importedClass) {
         this.jdbcType = jdbcType;
         this.formatter = formatter;
+        this.importedClass = Optional.ofNullable(importedClass);
     }
 
     public static @NotNull MapperApi ofExistingMapper(@NotNull Class<?> mapperClass,
@@ -43,11 +47,11 @@ public class MapperApi implements ApiFormatter<MapperApi.MapperCallFormatter> {
                 return "%s.%s(%s)".formatted(staticRef, backwardCall, fieldParam);
             }
         };
-        return new MapperApi(inference.jdbcType(), formatter);
+        return new MapperApi(inference.jdbcType(), formatter, mapperClass);
     }
 
     public static @NotNull MapperApi ofInlineMapper(@NotNull JdbcType jdbcType, @NotNull MapperCallFormatter formatter) {
-        return new MapperApi(jdbcType, formatter);
+        return new MapperApi(jdbcType, formatter, null);
     }
 
     private record MapperClassInference(@NotNull JdbcType jdbcType, boolean isJdbcFirstArgument) {}
@@ -80,6 +84,10 @@ public class MapperApi implements ApiFormatter<MapperApi.MapperCallFormatter> {
 
     public @NotNull JdbcType jdbcType() {
         return jdbcType;
+    }
+
+    public @NotNull Optional<Class<?>> importedClass() {
+        return importedClass;
     }
 
     public @NotNull Column mapperColumn(@NotNull String fieldSqlName) {

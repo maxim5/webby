@@ -1,5 +1,6 @@
 package io.webby.orm.codegen;
 
+import com.google.common.collect.ImmutableSet;
 import com.google.common.collect.Iterables;
 import com.google.common.collect.Streams;
 import com.google.common.primitives.Primitives;
@@ -117,10 +118,14 @@ public class ModelTableCodegen extends BaseCodegen {
     }
 
     private void imports() {
-        List<Class<?>> mapperTypes = table.fields().stream()
+        List<Class<?>> mappedTypes = table.fields().stream()
             .filter(TableField::isMapperSupportedType)
             .map(TableField::javaType)
             .collect(Collectors.toList());
+        List<Class<?>> mapperTypes = table.fields().stream()
+            .filter(TableField::isMapperSupportedType)
+            .flatMap(field -> field.mapperApiOrDie().importedClass().stream())
+            .toList();
         List<Class<?>> adapterClasses = table.fields().stream()
             .filter(TableField::isAdapterSupportType)
             .map(TableField::javaType)
@@ -152,13 +157,14 @@ public class ModelTableCodegen extends BaseCodegen {
                 BatchEntityData.class, BatchEntityIntData.class, BatchEntityLongData.class,
                 Contextual.class
             ).map(FQN::of),
+            mappedTypes.stream().map(FQN::of),
             mapperTypes.stream().map(FQN::of),
             adapterClasses.stream().map(FQN::of),
             adapterClasses.stream().map(adaptersScanner::locateAdapterFqn),
             foreignKeyClasses.stream().map(FQN::of),
             foreignTableClasses.stream().map(FQN::of),
             foreignModelClasses.stream().map(FQN::of)
-        ).filter(fqn -> !isSkippablePackage(fqn.packageName())).map(FQN::importName).sorted().distinct().toList();
+        ).filter(fqn -> !isSkippable(fqn)).map(FQN::importName).sorted().distinct().toList();
 
         Map<String, String> context = Map.of(
             "$package", table.packageName(),
@@ -180,8 +186,12 @@ public class ModelTableCodegen extends BaseCodegen {
         """, context);
     }
 
-    private boolean isSkippablePackage(@NotNull String packageName) {
-        return packageName.equals(table.packageName()) || packageName.equals("java.util") || packageName.equals("java.lang");
+    private static final ImmutableSet<String> IMPORTED_BY_STAR = ImmutableSet.of("java.lang", "java.sql", "java.util");
+
+    private boolean isSkippable(@NotNull FQN fqn) {
+        // BitSet is in both `java.util` and `hppc`.
+        return !fqn.className().equals("BitSet") &&
+            (fqn.packageName().equals(table.packageName()) || IMPORTED_BY_STAR.contains(fqn.packageName()));
     }
 
     private void classDef() {
