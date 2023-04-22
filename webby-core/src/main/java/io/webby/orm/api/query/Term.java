@@ -31,4 +31,18 @@ public interface Term extends Representable, HasArgs {
     default @NotNull OrderTerm ordered(@NotNull Order order) {
         return new OrderTerm(this, order);
     }
+
+    /**
+     * Converts this term to a boolean expression that it is not null.
+     */
+    default @NotNull IsNotNull isNotNull() {
+        return IsNotNull.isNotNull(this);
+    }
+
+    /**
+     * Converts this term to a boolean expression that it is not null.
+     */
+    default @NotNull IsNull isNull() {
+        return IsNull.isNull(this);
+    }
 }
