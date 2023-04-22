@@ -1,5 +1,6 @@
 package io.webby.orm.api.query;
 
+import com.google.errorprone.annotations.Immutable;
 import io.webby.orm.api.Engine;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
@@ -13,6 +14,7 @@ import static io.webby.orm.api.query.InvalidQueryException.assure;
 import static io.webby.orm.api.query.Representables.joinWithLines;
 import static java.util.Objects.requireNonNull;
 
+@Immutable
 public class CompositeFilter extends Unit implements Filter {
     private final Where where;
     private final OrderBy orderBy;
@@ -50,11 +52,25 @@ public class CompositeFilter extends Unit implements Filter {
         return offset;
     }
 
+    public @NotNull Builder toBuilder() {
+        return new Builder(where, orderBy, limit, offset);
+    }
+
     public static class Builder {
         private Where where;
         private OrderBy orderBy;
         private LimitClause limit;
         private Offset offset;
+
+        Builder() {
+        }
+
+        Builder(@NotNull Where where, @NotNull OrderBy orderBy, @NotNull LimitClause limit, @NotNull Offset offset) {
+            this.where = where;
+            this.orderBy = orderBy;
+            this.limit = limit;
+            this.offset = offset;
+        }
 
         public @NotNull Builder with(@NotNull Where where) {
             this.where = this.where == null ? where : this.where.andTerm(where.term());

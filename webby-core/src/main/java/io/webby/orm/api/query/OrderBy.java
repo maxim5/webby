@@ -1,6 +1,7 @@
 package io.webby.orm.api.query;
 
 import com.google.common.collect.ImmutableList;
+import com.google.errorprone.annotations.Immutable;
 import io.webby.util.collect.ListBuilder;
 import org.jetbrains.annotations.NotNull;
 
@@ -10,6 +11,7 @@ import java.util.List;
 import static io.webby.orm.api.query.Args.flattenArgsOf;
 import static io.webby.orm.api.query.Representables.joinWithCommas;
 
+@Immutable
 public class OrderBy extends Unit implements Filter, Representable {
     private final ImmutableList<OrderTerm> terms;
 

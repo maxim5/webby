@@ -1,5 +1,8 @@
 package io.webby.orm.api.query;
 
+import com.google.errorprone.annotations.Immutable;
+
+@Immutable
 public class Offset extends Unit implements Filter, Representable {
     private final int offset;
 

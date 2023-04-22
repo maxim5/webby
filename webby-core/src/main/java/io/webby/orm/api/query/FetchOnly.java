@@ -1,7 +1,9 @@
 package io.webby.orm.api.query;
 
+import com.google.errorprone.annotations.Immutable;
 import org.jetbrains.annotations.NotNull;
 
+@Immutable
 public class FetchOnly extends Unit implements LimitClause {
     private final int value;
 

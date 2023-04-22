@@ -1,20 +1,17 @@
 package io.webby.orm.api.query;
 
+import com.google.errorprone.annotations.Immutable;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.List;
 
+@Immutable
 public class Where extends Unit implements Filter, Representable {
     private final BoolTerm term;
 
     public Where(@NotNull BoolTerm term) {
         super("WHERE %s".formatted(term.repr()), term.args());
         this.term = term;
-    }
-    
-    protected Where(@NotNull String repr, @NotNull Args args) {
-        super("WHERE %s".formatted(repr), args);
-        this.term = new HardcodedBoolTerm(repr);
     }
 
     public static @NotNull Where of(@NotNull BoolTerm term) {
@@ -46,7 +43,7 @@ public class Where extends Unit implements Filter, Representable {
     }
 
     public static @NotNull Where hardcoded(@NotNull String raw, @NotNull Args args) {
-        return new Where(raw, args);
+        return of(new HardcodedBoolTerm(raw, args));
     }
 
     public @NotNull Where andTerm(@NotNull BoolTerm term) {
