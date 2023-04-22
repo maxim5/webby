@@ -1,6 +1,7 @@
 package io.webby.orm.api.query;
 
 import com.google.common.collect.ImmutableList;
+import com.google.errorprone.annotations.Immutable;
 import io.webby.orm.api.BaseTable;
 import io.webby.orm.api.Engine;
 import io.webby.orm.api.TableMeta;
@@ -11,12 +12,15 @@ import java.util.function.Consumer;
 import static io.webby.orm.api.query.Args.flattenArgsOf;
 import static io.webby.orm.api.query.Representables.joinWithLines;
 
+@Immutable
 public class SelectWhere extends Unit implements SelectQuery {
-    private final ImmutableList<Term> columnTerms;
+    private final SelectFrom selectFrom;
+    private final CompositeFilter clause;
 
     public SelectWhere(@NotNull SelectFrom selectFrom, @NotNull CompositeFilter clause) {
         super(joinWithLines(selectFrom, clause), flattenArgsOf(selectFrom, clause));
-        columnTerms = selectFrom.terms();
+        this.selectFrom = selectFrom;
+        this.clause = clause;
     }
 
     public static @NotNull Builder from(@NotNull String table) {
@@ -31,20 +35,35 @@ public class SelectWhere extends Unit implements SelectQuery {
         return from(table.meta());
     }
 
+    public @NotNull SelectUnion union(@NotNull SelectQuery query) {
+        return SelectUnion.builder().with(this).with(query).build();
+    }
+
     @Override
     public int columnsNumber() {
-        return columnTerms.size();
+        return selectFrom.terms().size();
+    }
+
+    public @NotNull Builder toBuilder() {
+        return new Builder(selectFrom, clause);
     }
 
     public static class Builder {
         private final String table;
         private final ImmutableList.Builder<Term> terms = ImmutableList.builder();
-        private final CompositeFilter.Builder filter = new CompositeFilter.Builder();
+        private final CompositeFilter.Builder filter;
     
         public Builder(@NotNull String table) {
             this.table = table;
+            this.filter = new CompositeFilter.Builder();
         }
-    
+
+        public Builder(@NotNull SelectFrom selectFrom, @NotNull CompositeFilter clause) {
+            this.table = selectFrom.table();
+            this.terms.addAll(selectFrom.terms());
+            this.filter = clause.toBuilder();
+        }
+
         public @NotNull Builder select(@NotNull Term term) {
             terms.add(term);
             return this;
@@ -93,6 +112,10 @@ public class SelectWhere extends Unit implements SelectQuery {
         public @NotNull Builder applying(@NotNull Consumer<Builder> consumer) {
             consumer.accept(this);
             return this;
+        }
+
+        public @NotNull SelectUnion.Builder union(@NotNull SelectQuery query) {
+            return build().union(query).toBuilder();
         }
     
         public @NotNull SelectWhere build() {

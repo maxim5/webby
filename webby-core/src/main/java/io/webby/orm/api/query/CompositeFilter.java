@@ -110,6 +110,22 @@ public class CompositeFilter extends Unit implements Filter {
             return this;
         }
 
+        public @NotNull Builder with(@NotNull CompositeFilter filter) {
+            if (filter.where != null) {
+                with(filter.where);
+            }
+            if (filter.orderBy != null) {
+                with(filter.orderBy);
+            }
+            if (filter.limit != null) {
+                with(filter.limit);
+            }
+            if (filter.offset != null) {
+                with(filter.offset);
+            }
+            return this;
+        }
+
         public @NotNull CompositeFilter build() {
             return new CompositeFilter(where, orderBy, limit, offset);
         }
