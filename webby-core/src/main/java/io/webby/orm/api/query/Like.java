@@ -11,4 +11,8 @@ public class Like extends Unit implements BoolTerm {
         assure(TermType.match(lhs.type(), rhs.type(), TermType.STRING),
                "Incompatible types to like: lhs=%s rhs=%s", lhs, rhs);
     }
+
+    public static @NotNull Like like(@NotNull Term lhs, @NotNull Term rhs) {
+        return new Like(lhs, rhs);
+    }
 }

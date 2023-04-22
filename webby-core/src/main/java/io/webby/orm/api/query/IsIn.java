@@ -16,4 +16,12 @@ public class IsIn extends Unit implements BoolTerm {
             assure(TermType.match(lhs.type(), term.type()), "Incompatible types for IN clause: lhs=%s rhs=%s", lhs, term);
         }
     }
+
+    public static @NotNull IsIn isIn(@NotNull Term lhs, @NotNull Term @NotNull ... terms) {
+        return new IsIn(lhs, List.of(terms));
+    }
+
+    public static @NotNull IsIn isIn(@NotNull Term lhs, @NotNull List<? extends Term> terms) {
+        return new IsIn(lhs, terms);
+    }
 }

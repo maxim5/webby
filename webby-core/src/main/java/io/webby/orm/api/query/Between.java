@@ -11,4 +11,8 @@ public class Between extends Unit implements BoolTerm {
         assure(TermType.match(term.type(), left.type(), right.type()),
                "Incompatible types to filter between: term=%s left=%s right=%s", term, left, right);
     }
+
+    public static @NotNull Between between(@NotNull Term term, @NotNull Term left, @NotNull Term right) {
+        return new Between(term, left, right);
+    }
 }
