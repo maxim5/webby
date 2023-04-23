@@ -37,6 +37,10 @@ public class SelectGroupBy extends Unit implements SelectQuery {
         return from(table.meta());
     }
 
+    public @NotNull SelectUnion union(@NotNull SelectQuery query) {
+        return SelectUnion.builder().with(this).with(query).build();
+    }
+
     @Override
     public int columnsNumber() {
         return columnTerms.size();
@@ -106,6 +110,10 @@ public class SelectGroupBy extends Unit implements SelectQuery {
         public @NotNull Builder applying(@NotNull Consumer<Builder> consumer) {
             consumer.accept(this);
             return this;
+        }
+
+        public @NotNull SelectUnion.Builder union(@NotNull SelectQuery query) {
+            return build().union(query).toBuilder();
         }
     
         public @NotNull SelectGroupBy build() {
