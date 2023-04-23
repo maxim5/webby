@@ -12,7 +12,7 @@ public class SelectUnion extends Unit implements SelectQuery {
     private final ImmutableList<SelectQuery> selects;
 
     public SelectUnion(@NotNull ImmutableList<SelectQuery> selects) {
-        super(selects.stream().map(Representable::repr).collect(Collectors.joining("UNION\n")), flattenArgsOf(selects));
+        super(selects.stream().map(Representables::trimmed).collect(Collectors.joining("\nUNION\n")), flattenArgsOf(selects));
         assure(!selects.isEmpty(), "No select queries provided");
         assure(selects.size() > 1, "A single select query provided for a union");
         this.selects = selects;
