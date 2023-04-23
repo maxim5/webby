@@ -1,7 +1,6 @@
 package io.webby.orm.api.query;
 
 import io.webby.orm.testing.AssertSql;
-import io.webby.orm.testing.AssertSql.UnitSubject;
 import io.webby.orm.testing.FakeColumn;
 import org.jetbrains.annotations.NotNull;
 import org.junit.jupiter.api.Test;
@@ -45,7 +44,7 @@ public class SelectGroupByTest {
         return new SelectGroupBySubject(query);
     }
 
-    private static class SelectGroupBySubject extends UnitSubject<SelectGroupBySubject> {
+    private static class SelectGroupBySubject extends AssertSql.UnitSubject<SelectGroupBySubject> {
         private final SelectGroupBy query;
 
         private SelectGroupBySubject(@NotNull SelectGroupBy query) {

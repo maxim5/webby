@@ -2,7 +2,6 @@ package io.webby.orm.api.query;
 
 import io.webby.orm.api.Engine;
 import io.webby.orm.testing.AssertSql;
-import io.webby.orm.testing.AssertSql.UnitSubject;
 import io.webby.orm.testing.FakeColumn;
 import org.jetbrains.annotations.NotNull;
 import org.junit.jupiter.api.Test;
@@ -179,7 +178,7 @@ public class SelectWhereTest {
         return new SelectWhereSubject(query);
     }
 
-    private static class SelectWhereSubject extends UnitSubject<SelectWhereSubject> {
+    private static class SelectWhereSubject extends AssertSql.UnitSubject<SelectWhereSubject> {
         private final SelectWhere query;
 
         private SelectWhereSubject(@NotNull SelectWhere query) {
