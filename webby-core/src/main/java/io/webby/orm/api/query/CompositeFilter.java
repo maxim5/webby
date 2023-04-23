@@ -65,7 +65,7 @@ public class CompositeFilter extends Unit implements Filter {
         Builder() {
         }
 
-        Builder(@NotNull Where where, @NotNull OrderBy orderBy, @NotNull LimitClause limit, @NotNull Offset offset) {
+        Builder(@Nullable Where where, @Nullable OrderBy orderBy, @Nullable LimitClause limit, @Nullable Offset offset) {
             this.where = where;
             this.orderBy = orderBy;
             this.limit = limit;
