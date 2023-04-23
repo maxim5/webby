@@ -21,7 +21,7 @@ import java.util.Optional;
 
 import static io.webby.orm.arch.factory.TestingArch.buildTableArch;
 
-class ResultSetConversionMakerTest {
+public class ResultSetConversionMakerTest {
     @Test
     public void primitive_columns() {
         record Primitives(int id, int i, long l, byte b, short s, char ch, float f, double d, boolean bool) {}
