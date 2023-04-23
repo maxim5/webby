@@ -312,6 +312,8 @@ public final class Args {
                 log.at(Level.WARNING).log("Variable `%s` passed in as an arg. Did you forget to call `.args()`?", arg);
             } else if (arg instanceof HasArgs) {
                 log.at(Level.WARNING).log("HasArgs instance `%s` passed in as an arg. Did you forget to call `.args()`?", arg);
+            } else if (arg instanceof Args) {
+                log.at(Level.WARNING).log("Args instance `%s` passed in as an arg. Did you extra call `Args.of()`?", arg);
             }
         }
         return true;
