@@ -12,6 +12,9 @@ import java.util.function.Consumer;
 import static io.webby.orm.api.query.Args.flattenArgsOf;
 import static io.webby.orm.api.query.Representables.joinWithLines;
 
+/**
+ * A standard <code>SELECT ... FROM ... WHERE ...</code> query. Supports additional {@link CompositeFilter} clauses.
+ */
 @Immutable
 public class SelectWhere extends Unit implements SelectQuery {
     private final SelectFrom selectFrom;

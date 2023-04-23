@@ -1,6 +1,7 @@
 package io.webby.orm.api.query;
 
 import com.google.common.collect.ImmutableList;
+import com.google.errorprone.annotations.Immutable;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.stream.Collectors;
@@ -8,6 +9,10 @@ import java.util.stream.Collectors;
 import static io.webby.orm.api.query.Args.flattenArgsOf;
 import static io.webby.orm.api.query.InvalidQueryException.assure;
 
+/**
+ * A <code>UNION</code> of several {@link SelectQuery} statements.
+ */
+@Immutable
 public class SelectUnion extends Unit implements SelectQuery {
     private final ImmutableList<SelectQuery> selects;
 

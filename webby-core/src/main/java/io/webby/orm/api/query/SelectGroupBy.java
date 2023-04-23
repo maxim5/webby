@@ -14,6 +14,10 @@ import static io.webby.orm.api.query.Args.flattenArgsOf;
 import static io.webby.orm.api.query.InvalidQueryException.assure;
 import static io.webby.orm.api.query.Representables.joinWithLines;
 
+/**
+ * A standard <code>SELECT ... GROUP BY ...</code> query. Supports additional <code>HAVING</code> and
+ * {@link CompositeFilter} clauses.
+ */
 @Immutable
 public class SelectGroupBy extends Unit implements SelectQuery {
     private final ImmutableList<Term> columnTerms;

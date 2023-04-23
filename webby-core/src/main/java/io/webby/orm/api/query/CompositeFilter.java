@@ -14,6 +14,10 @@ import static io.webby.orm.api.query.InvalidQueryException.assure;
 import static io.webby.orm.api.query.Representables.joinWithLines;
 import static java.util.Objects.requireNonNull;
 
+/**
+ * Represents one or more SQL filter clauses: <code>WHERE</code>, <code>ORDER BY</code>, <code>LIMIT</code> and
+ * <code>OFFSET</code>.
+ */
 @Immutable
 public class CompositeFilter extends Unit implements Filter {
     private final Where where;
