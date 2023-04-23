@@ -1,18 +1,22 @@
 package io.webby.orm.api.query;
 
 import io.webby.orm.api.Engine;
+import io.webby.orm.testing.AssertSql;
+import io.webby.orm.testing.AssertSql.UnitSubject;
 import io.webby.orm.testing.FakeColumn;
+import org.jetbrains.annotations.NotNull;
 import org.junit.jupiter.api.Test;
 
 import static io.webby.orm.api.query.Shortcuts.num;
 import static io.webby.orm.testing.AssertSql.assertReprThrows;
-import static io.webby.orm.testing.AssertSql.assertThat;
 
 public class SelectWhereTest {
     @Test
     public void select_column_from_table() {
         SelectWhere query = SelectWhere.from("table").select(FakeColumn.INT).build();
         assertThat(query)
+            .hasConsistentIntern()
+            .hasConsistentBuilder()
             .matches("""
                 SELECT i
                 FROM table
@@ -24,6 +28,8 @@ public class SelectWhereTest {
     public void select_few_columns_from_table() {
         SelectWhere query = SelectWhere.from("table").select(FakeColumn.INT, FakeColumn.FOO).build();
         assertThat(query)
+            .hasConsistentIntern()
+            .hasConsistentBuilder()
             .matches("""
                 SELECT i, foo
                 FROM table
@@ -35,6 +41,8 @@ public class SelectWhereTest {
     public void select_function_from_table() {
         SelectWhere query = SelectWhere.from("table").select(Func.COUNT.apply(FakeColumn.INT)).build();
         assertThat(query)
+            .hasConsistentIntern()
+            .hasConsistentBuilder()
             .matches("""
                 SELECT count(i)
                 FROM table
@@ -46,6 +54,8 @@ public class SelectWhereTest {
     public void select_const_from_table() {
         SelectWhere query = SelectWhere.from("table").select(num(77)).build();
         assertThat(query)
+            .hasConsistentIntern()
+            .hasConsistentBuilder()
             .matches("""
                 SELECT 77
                 FROM table
@@ -60,6 +70,8 @@ public class SelectWhereTest {
             .where(Where.of(FakeColumn.FOO.bool()))
             .build();
         assertThat(query)
+            .hasConsistentIntern()
+            .hasConsistentBuilder()
             .matches("""
                 SELECT i
                 FROM table
@@ -75,6 +87,8 @@ public class SelectWhereTest {
             .orderBy(OrderBy.of(FakeColumn.STR, Order.ASC))
             .build();
         assertThat(query)
+            .hasConsistentIntern()
+            .hasConsistentBuilder()
             .matches("""
                 SELECT i
                 FROM table
@@ -90,6 +104,8 @@ public class SelectWhereTest {
             .with(Offset.of(5))
             .build();
         assertThat(query)
+            .hasConsistentIntern()
+            .hasConsistentBuilder()
             .matches("""
                 SELECT i
                 FROM table
@@ -105,6 +121,8 @@ public class SelectWhereTest {
             .with(Limit.of(10))
             .build();
         assertThat(query)
+            .hasConsistentIntern()
+            .hasConsistentBuilder()
             .matches("""
                 SELECT i
                 FROM table
@@ -120,6 +138,8 @@ public class SelectWhereTest {
             .with(Pagination.ofOffset(3, 5), Engine.SQLite)
             .build();
         assertThat(query)
+            .hasConsistentIntern()
+            .hasConsistentBuilder()
             .matches("""
                 SELECT i
                 FROM table
@@ -136,6 +156,8 @@ public class SelectWhereTest {
             .with(Pagination.ofOffset(3, 5), Engine.Oracle)
             .build();
         assertThat(query)
+            .hasConsistentIntern()
+            .hasConsistentBuilder()
             .matches("""
                 SELECT i
                 FROM table
@@ -151,5 +173,28 @@ public class SelectWhereTest {
         assertReprThrows(() -> SelectWhere.from("table").with(Limit.of(5)).build());
         assertReprThrows(() -> SelectWhere.from("table").select(num(1)).with(Limit.of(5)).with(Limit.of(8)).build());
         assertReprThrows(() -> SelectWhere.from("table").select(num(1)).with(Offset.of(3)).with(Offset.of(9)).build());
+    }
+
+    private static @NotNull SelectWhereSubject assertThat(@NotNull SelectWhere query) {
+        return new SelectWhereSubject(query);
+    }
+
+    private static class SelectWhereSubject extends UnitSubject<SelectWhereSubject> {
+        private final SelectWhere query;
+
+        private SelectWhereSubject(@NotNull SelectWhere query) {
+            super(query);
+            this.query = query;
+        }
+
+        public @NotNull SelectWhereSubject hasConsistentIntern() {
+            AssertSql.assertThat((Unit) query.intern()).isEqualTo(query);
+            return this;
+        }
+
+        public @NotNull SelectWhereSubject hasConsistentBuilder() {
+            AssertSql.assertThat(query.toBuilder().build()).isEqualTo(query);
+            return this;
+        }
     }
 }

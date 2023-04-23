@@ -10,6 +10,7 @@ import java.util.Map;
 import static com.google.common.truth.Truth.assertThat;
 import static io.webby.orm.api.query.Shortcuts.*;
 import static io.webby.orm.testing.AssertSql.assertThat;
+import static io.webby.orm.testing.AssertSql.assertThatSql;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 
 public class ContextualTest {
@@ -74,7 +75,7 @@ public class ContextualTest {
             Where.of(lookupBy(FakeColumn.INT, unresolved("U", TermType.NUMBER))),
             array -> Map.of("U", array.get(0))  // takes first
         );
-        assertThat(contextual).matches("WHERE i = ?");
+        assertThatSql(contextual).matches("WHERE i = ?");
         assertThat(contextual.resolveQueryArgs(IntArrayList.from(11))).containsArgsExactly(11);
         assertThat(contextual.resolveQueryArgs(IntArrayList.from(11, 12))).containsArgsExactly(11);
     }
@@ -85,7 +86,7 @@ public class ContextualTest {
             Where.of(lookupBy(FakeColumn.INT, unresolved("U", TermType.NUMBER))),
             array -> List.of(array.get(0))  // takes first
         );
-        assertThat(contextual).matches("WHERE i = ?");
+        assertThatSql(contextual).matches("WHERE i = ?");
         assertThat(contextual.resolveQueryArgs(IntArrayList.from(11, 12))).containsArgsExactly(11);
         assertThat(contextual.resolveQueryArgs(IntArrayList.from(11, 12, 13))).containsArgsExactly(11);
     }
@@ -96,7 +97,7 @@ public class ContextualTest {
             Where.and(between(FakeColumn.INT, unresolved("U", TermType.NUMBER), var(100))),
             array -> List.of(array.get(1))  // takes second
         );
-        assertThat(contextual).matches("WHERE i BETWEEN ? AND ?");
+        assertThatSql(contextual).matches("WHERE i BETWEEN ? AND ?");
         assertThat(contextual.resolveQueryArgs(IntArrayList.from(11, 12))).containsArgsExactly(12, 100);
         assertThat(contextual.resolveQueryArgs(IntArrayList.from(11, 12, 13))).containsArgsExactly(12, 100);
     }
@@ -107,7 +108,7 @@ public class ContextualTest {
             Where.and(between(FakeColumn.INT, unresolved("U", TermType.NUMBER), unresolved("V", TermType.NUMBER))),
             array -> Map.of("U", array.get(1), "V", array.get(2))  // takes second and third
         );
-        assertThat(contextual).matches("WHERE i BETWEEN ? AND ?");
+        assertThatSql(contextual).matches("WHERE i BETWEEN ? AND ?");
         assertThat(contextual.resolveQueryArgs(IntArrayList.from(11, 12, 13))).containsArgsExactly(12, 13);
         assertThat(contextual.resolveQueryArgs(IntArrayList.from(11, 12, 13, 14))).containsArgsExactly(12, 13);
     }
@@ -118,7 +119,7 @@ public class ContextualTest {
             Where.and(between(FakeColumn.INT, unresolved("U", TermType.NUMBER), unresolved("V", TermType.NUMBER))),
             array -> Map.of("U", array.get(1), "V", array.get(1))  // takes second twice!
         );
-        assertThat(contextual).matches("WHERE i BETWEEN ? AND ?");
+        assertThatSql(contextual).matches("WHERE i BETWEEN ? AND ?");
         assertThat(contextual.resolveQueryArgs(IntArrayList.from(11, 12, 13))).containsArgsExactly(12, 12);
         assertThat(contextual.resolveQueryArgs(IntArrayList.from(11, 12, 13, 14))).containsArgsExactly(12, 12);
     }
@@ -129,7 +130,7 @@ public class ContextualTest {
             Where.and(between(FakeColumn.INT, unresolved("U", TermType.NUMBER), unresolved("V", TermType.NUMBER))),
             array -> List.of(array.get(0), array.get(0))  // takes first twice!
         );
-        assertThat(contextual).matches("WHERE i BETWEEN ? AND ?");
+        assertThatSql(contextual).matches("WHERE i BETWEEN ? AND ?");
         assertThat(contextual.resolveQueryArgs(IntArrayList.from(11, 12))).containsArgsExactly(11, 11);
         assertThat(contextual.resolveQueryArgs(IntArrayList.from(11, 12, 13))).containsArgsExactly(11, 11);
     }

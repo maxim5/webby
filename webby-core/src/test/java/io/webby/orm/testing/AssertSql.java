@@ -18,24 +18,24 @@ import static io.webby.util.base.EasyCast.castAny;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 
 public class AssertSql {
-    public static @NotNull SqlSubject assertThatSql(@NotNull String query) {
-        return new SqlSubject(query);
+    public static @NotNull SqlSubject<SqlSubject<?>> assertThatSql(@NotNull String query) {
+        return new SqlSubject<>(query);
     }
 
-    public static @NotNull ArgsSubject assertThat(@NotNull Args args) {
-        return new ArgsSubject(args);
+    public static @NotNull SqlSubject<SqlSubject<?>> assertThatSql(@NotNull Representable repr) {
+        return assertThatSql(repr.repr());
     }
 
-    public static @NotNull RepresentableSubject assertThat(@NotNull Representable repr) {
-        return new RepresentableSubject(repr);
+    public static @NotNull ArgsSubject<ArgsSubject<?>> assertThat(@NotNull Args args) {
+        return new ArgsSubject<>(args);
     }
 
-    public static @NotNull UnitSubject assertThat(@NotNull Unit unit) {
-        return new UnitSubject(unit);
+    public static @NotNull UnitSubject<UnitSubject<?>> assertThat(@NotNull Unit unit) {
+        return new UnitSubject<>(unit);
     }
 
-    public static @NotNull TermSubject assertTerm(@NotNull Term term) {
-        return new TermSubject(term);
+    public static @NotNull TermSubject<TermSubject<?>> assertTerm(@NotNull Term term) {
+        return new TermSubject<>(term);
     }
 
     public static @NotNull RowsSubject assertRows(@NotNull List<DebugSql.Row> rows) {
@@ -47,82 +47,84 @@ public class AssertSql {
     }
 
     @CanIgnoreReturnValue
-    public record SqlSubject(@NotNull String query) {
-        public @NotNull SqlSubject matches(@NotNull String expected) {
+    public static class SqlSubject<T extends SqlSubject<?>> {
+        private final @NotNull String query;
+
+        public SqlSubject(@NotNull String query) {
+            this.query = query;
+        }
+
+        public @NotNull T matches(@NotNull String expected) {
             Truth.assertThat(query.trim()).isEqualTo(expected.trim());
-            return this;
+            return castAny(this);
         }
     }
 
     @CanIgnoreReturnValue
-    public record ArgsSubject(@NotNull Args args) {
-        public @NotNull ArgsSubject containsArgsExactly(@NotNull Object @Nullable ... expected) {
+    public static class ArgsSubject<T extends ArgsSubject<?>> {
+        private final @NotNull Args args;
+
+        public ArgsSubject(@NotNull Args args) {
+            this.args = args;
+        }
+
+        public @NotNull T hasArgs(@NotNull Args expected) {
+            Truth.assertThat(args).isEqualTo(expected);
+            return castAny(this);
+        }
+
+        public @NotNull T containsArgsExactly(@NotNull Object @Nullable ... expected) {
             Truth.assertThat(args.asList()).containsExactly(expected);
-            return this;
+            return castAny(this);
         }
 
-        public @NotNull ArgsSubject containsNoArgs() {
+        public @NotNull T containsNoArgs() {
             Truth.assertThat(args.asList()).isEmpty();
-            return this;
+            return castAny(this);
         }
 
-        public @NotNull ArgsSubject allArgsResolved() {
+        public @NotNull T allArgsResolved() {
             Truth.assertThat(args.isAllResolved()).isTrue();
-            return this;
+            return castAny(this);
         }
 
-        public @NotNull ArgsSubject containsUnresolved() {
+        public @NotNull T containsUnresolved() {
             Truth.assertThat(args.isAllResolved()).isFalse();
-            return this;
+            return castAny(this);
         }
     }
 
     @CanIgnoreReturnValue
-    public record RepresentableSubject(@NotNull Representable repr) {
-        public @NotNull RepresentableSubject matches(@NotNull String expected) {
-            assertThatSql(repr.repr()).matches(expected);
-            return this;
-        }
-    }
+    public static class UnitSubject<T extends UnitSubject<?>> extends ArgsSubject<UnitSubject<T>> {
+        private final @NotNull Unit unit;
 
-    @CanIgnoreReturnValue
-    public record UnitSubject(@NotNull Unit unit) {
-        public @NotNull UnitSubject matches(@NotNull String expected) {
+        public UnitSubject(@NotNull Unit unit) {
+            super(unit.args());
+            this.unit = unit;
+        }
+
+        public @NotNull T isEqualTo(@NotNull Unit expected) {
+            return hasArgs(expected.args()).matches(expected.repr());
+        }
+
+        public @NotNull T matches(@NotNull String expected) {
             assertThatSql(unit.repr()).matches(expected);
-            return this;
-        }
-
-        public @NotNull UnitSubject containsArgsExactly(@NotNull Object @Nullable ... expected) {
-            assertThat(unit.args()).containsArgsExactly(expected);
-            return this;
-        }
-
-        public @NotNull UnitSubject containsNoArgs() {
-            assertThat(unit.args()).containsNoArgs();
-            return this;
-        }
-
-        public @NotNull UnitSubject allArgsResolved() {
-            Truth.assertThat(unit.args().isAllResolved()).isTrue();
-            return this;
-        }
-
-        public @NotNull UnitSubject containsUnresolved() {
-            Truth.assertThat(unit.args().isAllResolved()).isFalse();
-            return this;
+            return castAny(this);
         }
     }
 
     @CanIgnoreReturnValue
-    public record TermSubject(@NotNull Term term) {
-        public @NotNull TermSubject matches(@NotNull String expected) {
-            assertThat(term).matches(expected);
-            return this;
+    public static class TermSubject<T extends TermSubject<?>> extends SqlSubject<TermSubject<?>> {
+        private final Term term;
+
+        public TermSubject(@NotNull Term term) {
+            super(term.repr());
+            this.term = term;
         }
 
-        public @NotNull TermSubject hasType(@NotNull TermType type) {
+        public @NotNull T hasType(@NotNull TermType type) {
             Truth.assertThat(term.type()).isEqualTo(type);
-            return this;
+            return castAny(this);
         }
     }
 
