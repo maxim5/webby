@@ -2,6 +2,7 @@ package io.webby.orm.arch.model;
 
 import com.google.common.collect.ImmutableList;
 import com.google.errorprone.annotations.Immutable;
+import com.google.mu.util.Optionals;
 import io.webby.orm.api.ReadFollow;
 import io.webby.orm.arch.*;
 import io.webby.util.collect.Pair;
@@ -129,6 +130,14 @@ public final class TableArch implements JavaNameHolder, HasColumns, HasPrefixedC
 
     public boolean isBridgeTable() {
         return bridgeInfo != null;
+    }
+
+    public @NotNull Optional<ForeignTableField> leftBridgeField() {
+        return Optionals.optionally(isBridgeTable(), this::leftBridgeFieldOrDie);
+    }
+
+    public @NotNull Optional<ForeignTableField> rightBridgeField() {
+        return Optionals.optionally(isBridgeTable(), this::rightBridgeFieldOrDie);
     }
 
     public @NotNull ForeignTableField leftBridgeFieldOrDie() {

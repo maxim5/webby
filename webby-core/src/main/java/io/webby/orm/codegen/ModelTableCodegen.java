@@ -4,7 +4,6 @@ import com.google.common.collect.ImmutableSet;
 import com.google.common.collect.Iterables;
 import com.google.common.collect.Streams;
 import com.google.common.primitives.Primitives;
-import com.google.mu.util.Optionals;
 import io.webby.orm.api.*;
 import io.webby.orm.api.entity.*;
 import io.webby.orm.api.query.*;
@@ -235,10 +234,8 @@ public class ModelTableCodegen extends BaseCodegen {
     }
 
     private void constructors() {
-        Optional<String> leftTable = Optionals.optionally(table.isBridgeTable(),
-            () -> table.leftBridgeFieldOrDie().getForeignTable().javaName());
-        Optional<String> rightTable = Optionals.optionally(table.isBridgeTable(),
-            () -> table.rightBridgeFieldOrDie().getForeignTable().javaName());
+        Optional<String> leftTable = table.leftBridgeField().map(ForeignTableField::getForeignTable).map(TableArch::javaName);
+        Optional<String> rightTable = table.rightBridgeField().map(ForeignTableField::getForeignTable).map(TableArch::javaName);
         Map<String, String> context = EasyMaps.asMap(
             "$left_table_decl", leftTable.map("protected final %s leftsTable;"::formatted).orElse(EMPTY_LINE),
             "$right_table_decl", rightTable.map("protected final %s rightsTable;"::formatted).orElse(EMPTY_LINE),
