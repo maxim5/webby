@@ -6,6 +6,6 @@ import io.webby.orm.api.annotate.ManyToMany;
 import org.jetbrains.annotations.NotNull;
 
 @ManyToMany
-public record M2mIntModel(@NotNull ForeignInt<DefaultUser> foo,
-                          @NotNull ForeignInt<DefaultUser> bar) {
+public record BridgeIntModel(@NotNull ForeignInt<DefaultUser> foo,
+                             @NotNull ForeignInt<DefaultUser> bar) {
 }

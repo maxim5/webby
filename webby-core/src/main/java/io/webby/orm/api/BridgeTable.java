@@ -7,7 +7,7 @@ import org.jetbrains.annotations.NotNull;
 import java.util.List;
 import java.util.function.Consumer;
 
-public interface ManyToManyTable<IL, EL, IR, ER> {
+public interface BridgeTable<IL, EL, IR, ER> {
     boolean exists(@NotNull IL leftIndex, @NotNull IR rightIndex);
 
     default boolean leftExists(@NotNull IL leftIndex) {

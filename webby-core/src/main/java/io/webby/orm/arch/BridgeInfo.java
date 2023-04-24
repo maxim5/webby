@@ -6,10 +6,10 @@ import io.webby.util.reflect.EasyAnnotations;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
-public record M2mInfo(@Nullable String leftField, @Nullable String rightField) {
-    public static @Nullable M2mInfo fromModelClass(@NotNull Class<?> modelClass) {
+public record BridgeInfo(@Nullable String leftField, @Nullable String rightField) {
+    public static @Nullable BridgeInfo fromModelClass(@NotNull Class<?> modelClass) {
         return EasyAnnotations.getOptionalAnnotation(modelClass, ManyToMany.class)
-                .map(ann -> new M2mInfo(Strings.emptyToNull(ann.left()), Strings.emptyToNull(ann.right())))
+                .map(ann -> new BridgeInfo(Strings.emptyToNull(ann.left()), Strings.emptyToNull(ann.right())))
                 .orElse(null);
     }
 }

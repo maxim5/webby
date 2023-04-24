@@ -6,6 +6,6 @@ import io.webby.orm.api.annotate.ManyToMany;
 import org.jetbrains.annotations.NotNull;
 
 @ManyToMany
-public record M2mLongModel(@NotNull ForeignLong<Session> foo,
-                           @NotNull ForeignLong<Session> bar) {
+public record BridgeLongModel(@NotNull ForeignLong<Session> foo,
+                              @NotNull ForeignLong<Session> bar) {
 }

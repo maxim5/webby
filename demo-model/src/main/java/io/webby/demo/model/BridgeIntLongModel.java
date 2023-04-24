@@ -8,8 +8,8 @@ import io.webby.orm.api.annotate.ManyToMany;
 import org.jetbrains.annotations.NotNull;
 
 @ManyToMany(left = "first", right = "second")
-public record M2mIntLongModel(long id,
-                              @NotNull ForeignInt<DefaultUser> first,
-                              @NotNull ForeignLong<Session> second,
-                              boolean flag) {
+public record BridgeIntLongModel(long id,
+                                 @NotNull ForeignInt<DefaultUser> first,
+                                 @NotNull ForeignLong<Session> second,
+                                 boolean flag) {
 }

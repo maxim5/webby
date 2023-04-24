@@ -107,7 +107,7 @@ public class ModelTableCodegen extends BaseCodegen {
 
         fromRow();
 
-        m2m();
+        bridge();
 
         internalMeta();
         columnsEnum();
@@ -140,8 +140,8 @@ public class ModelTableCodegen extends BaseCodegen {
         List<JavaNameHolder> foreignTableClasses = table.foreignFields(ReadFollow.FOLLOW_ALL).stream()
             .map(ForeignTableField::getForeignTable)
             .collect(Collectors.toList());
-        List<Class<?>> foreignModelClasses = table.isM2M() ?
-            Stream.of(table.m2mLeftFieldOrDie(), table.m2mRightFieldOrDie())
+        List<Class<?>> foreignModelClasses = table.isBridgeTable() ?
+            Stream.of(table.leftBridgeFieldOrDie(), table.rightBridgeFieldOrDie())
                 .map(ForeignTableField::getForeignTable)
                 .map(TableArch::modelClass)
                 .collect(Collectors.toList()) :
@@ -201,11 +201,11 @@ public class ModelTableCodegen extends BaseCodegen {
             "$BaseGenerics", baseTableClass == TableObj.class ? "$pk_type, $ModelClass" : "$ModelClass"
         );
 
-        if (table.isM2M()) {
+        if (table.isBridgeTable()) {
             appendCode(0, """
             public class $TableClass implements $BaseClass<$BaseGenerics>, \
-            ManyToManyTable<$left_index_wrap, $left_entity, $right_index_wrap, $right_entity> {
-            """, EasyMaps.merge(EasyMaps.merge(context, m2mContext()), mainContext, pkContext));
+            BridgeTable<$left_index_wrap, $left_entity, $right_index_wrap, $right_entity> {
+            """, EasyMaps.merge(EasyMaps.merge(context, bridgeContext()), mainContext, pkContext));
         } else {
             appendCode(0, "public class $TableClass implements $BaseClass<$BaseGenerics> {",
                        EasyMaps.merge(context, mainContext, pkContext));
@@ -213,8 +213,8 @@ public class ModelTableCodegen extends BaseCodegen {
     }
 
     private @NotNull List<Class<?>> baseTableClasses() {
-        if (table.isM2M()) {
-            return List.of(pickBaseTableClass(), ManyToManyTable.class);
+        if (table.isBridgeTable()) {
+            return List.of(pickBaseTableClass(), BridgeTable.class);
         }
         return List.of(pickBaseTableClass());
     }
@@ -235,8 +235,10 @@ public class ModelTableCodegen extends BaseCodegen {
     }
 
     private void constructors() {
-        Optional<String> leftTable = Optionals.optionally(table.isM2M(), () -> table.m2mLeftFieldOrDie().getForeignTable().javaName());
-        Optional<String> rightTable = Optionals.optionally(table.isM2M(), () -> table.m2mRightFieldOrDie().getForeignTable().javaName());
+        Optional<String> leftTable = Optionals.optionally(table.isBridgeTable(),
+            () -> table.leftBridgeFieldOrDie().getForeignTable().javaName());
+        Optional<String> rightTable = Optionals.optionally(table.isBridgeTable(),
+            () -> table.rightBridgeFieldOrDie().getForeignTable().javaName());
         Map<String, String> context = EasyMaps.asMap(
             "$left_table_decl", leftTable.map("protected final %s leftsTable;"::formatted).orElse(EMPTY_LINE),
             "$right_table_decl", rightTable.map("protected final %s rightsTable;"::formatted).orElse(EMPTY_LINE),
@@ -1005,12 +1007,12 @@ public class ModelTableCodegen extends BaseCodegen {
         """, EasyMaps.merge(mainContext, context));
     }
 
-    private void m2m() {
-        if (!table.isM2M()) {
+    private void bridge() {
+        if (!table.isBridgeTable()) {
             return;
         }
 
-        Map<String, String> context = m2mContext();
+        Map<String, String> context = bridgeContext();
 
         appendCode("""
         public @Nonnull $LeftTable leftsTable() {
@@ -1052,13 +1054,13 @@ public class ModelTableCodegen extends BaseCodegen {
         """, EasyMaps.merge(mainContext, context));
     }
 
-    private @NotNull Map<String, String> m2mContext() {
-        if (!table.isM2M()) {
+    private @NotNull Map<String, String> bridgeContext() {
+        if (!table.isBridgeTable()) {
             return Map.of();
         }
 
-        ForeignTableField leftField = table.m2mLeftFieldOrDie();
-        ForeignTableField rightField = table.m2mRightFieldOrDie();
+        ForeignTableField leftField = table.leftBridgeFieldOrDie();
+        ForeignTableField rightField = table.rightBridgeFieldOrDie();
 
         TableArch leftTable = leftField.getForeignTable();
         TableArch rightTable = rightField.getForeignTable();

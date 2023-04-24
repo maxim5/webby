@@ -1,7 +1,7 @@
 package io.webby.orm.arch.factory;
 
 import com.google.common.collect.ImmutableList;
-import io.webby.orm.arch.M2mInfo;
+import io.webby.orm.arch.BridgeInfo;
 import io.webby.orm.arch.model.TableArch;
 import io.webby.orm.arch.model.TableField;
 import io.webby.orm.arch.util.JavaClassAnalyzer;
@@ -35,7 +35,7 @@ public class ArchFactory {
     private @NotNull TableArch buildShallowTable(@NotNull ModelInput input) {
         return new TableArch(
             input.sqlName(), input.javaTableName(), input.modelClass(), input.javaModelName(),
-            M2mInfo.fromModelClass(input.modelClass())
+            BridgeInfo.fromModelClass(input.modelClass())
         );
     }
 

@@ -5,7 +5,7 @@ import io.webby.auth.user.UserTable;
 import io.webby.orm.api.Connector;
 import io.webby.orm.api.ForeignInt;
 import io.webby.orm.api.query.CreateTableQuery;
-import io.webby.testing.ManyToManyTableTest;
+import io.webby.testing.BridgeTableTest;
 import io.webby.testing.SqlDbTableTest;
 import io.webby.testing.TestingModels;
 import io.webby.testing.TestingSql;
@@ -17,15 +17,15 @@ import java.util.stream.IntStream;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
-public class M2mIntModelTableTest
-        extends SqlDbTableTest<M2mIntModel, M2mIntModelTable>
-        implements ManyToManyTableTest<Integer, DefaultUser, Integer, DefaultUser, M2mIntModel, M2mIntModelTable> {
+public class BridgeIntModelTableTest
+        extends SqlDbTableTest<BridgeIntModel, BridgeIntModelTable>
+        implements BridgeTableTest<Integer, DefaultUser, Integer, DefaultUser, BridgeIntModel, BridgeIntModelTable> {
     private UserTable users;
 
     @Override
     protected void setUp(@NotNull Connector connector) throws Exception {
         users = new UserTable(connector);
-        table = new M2mIntModelTable(connector);
+        table = new BridgeIntModelTable(connector);
         users.admin().createTable(CreateTableQuery.of(users).ifNotExists());
         table.admin().createTable(CreateTableQuery.of(table).ifNotExists());
     }
@@ -43,7 +43,7 @@ public class M2mIntModelTableTest
     @Override
     public void prepareRelations(@NotNull List<Pair<Integer, Integer>> relations) {
         for (Pair<Integer, Integer> relation : relations) {
-            M2mIntModel model = new M2mIntModel(ForeignInt.ofId(relation.first()), ForeignInt.ofId(relation.second()));
+            BridgeIntModel model = new BridgeIntModel(ForeignInt.ofId(relation.first()), ForeignInt.ofId(relation.second()));
             assertEquals(1, table.insert(model));
         }
     }

@@ -774,9 +774,9 @@ public class CreateTableQueryTest {
     }
 
     @Test
-    public void create_table_m2m_int_model() {
-        assertThat(createTableIfNotExists(Engine.SQLite, M2mIntModelTable.META)).isEqualTo("""
-            CREATE TABLE IF NOT EXISTS m2m_int_model (
+    public void create_table_bridge_int_model() {
+        assertThat(createTableIfNotExists(Engine.SQLite, BridgeIntModelTable.META)).isEqualTo("""
+            CREATE TABLE IF NOT EXISTS bridge_int_model (
                 foo_id INTEGER NOT NULL,
                 bar_id INTEGER NOT NULL,
                 FOREIGN KEY(foo_id) REFERENCES user(user_id),
@@ -784,8 +784,8 @@ public class CreateTableQueryTest {
             )
             """);
 
-        assertThat(createTableIfNotExists(Engine.H2, M2mIntModelTable.META)).isEqualTo("""
-            CREATE TABLE IF NOT EXISTS m2m_int_model (
+        assertThat(createTableIfNotExists(Engine.H2, BridgeIntModelTable.META)).isEqualTo("""
+            CREATE TABLE IF NOT EXISTS bridge_int_model (
                 foo_id INTEGER NOT NULL,
                 bar_id INTEGER NOT NULL,
                 FOREIGN KEY(foo_id) REFERENCES user(user_id),
@@ -793,8 +793,8 @@ public class CreateTableQueryTest {
             )
             """);
 
-        assertThat(createTableIfNotExists(Engine.MySQL, M2mIntModelTable.META)).isEqualTo("""
-            CREATE TABLE IF NOT EXISTS m2m_int_model (
+        assertThat(createTableIfNotExists(Engine.MySQL, BridgeIntModelTable.META)).isEqualTo("""
+            CREATE TABLE IF NOT EXISTS bridge_int_model (
                 foo_id INTEGER NOT NULL,
                 bar_id INTEGER NOT NULL,
                 FOREIGN KEY(foo_id) REFERENCES user(user_id),

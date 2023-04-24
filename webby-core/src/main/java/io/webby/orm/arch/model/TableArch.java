@@ -31,18 +31,18 @@ public final class TableArch implements JavaNameHolder, HasColumns, HasPrefixedC
     private final String javaName;
     private final Class<?> modelClass;
     private final String modelName;
-    private final M2mInfo m2mInfo;
+    private final BridgeInfo bridgeInfo;
 
     public TableArch(@NotNull String sqlName,
                      @NotNull String javaName,
                      @NotNull Class<?> modelClass,
                      @NotNull String modelName,
-                     @Nullable M2mInfo m2mInfo) {
+                     @Nullable BridgeInfo bridgeInfo) {
         this.sqlName = sqlName;
         this.javaName = javaName;
         this.modelClass = modelClass;
         this.modelName = modelName;
-        this.m2mInfo = m2mInfo;
+        this.bridgeInfo = bridgeInfo;
     }
 
     public @NotNull String sqlName() {
@@ -127,13 +127,13 @@ public final class TableArch implements JavaNameHolder, HasColumns, HasPrefixedC
         return fields().stream().flatMap(field -> field.columns().stream().map(column -> Pair.of(field, column))).toList();
     }
 
-    public boolean isM2M() {
-        return m2mInfo != null;
+    public boolean isBridgeTable() {
+        return bridgeInfo != null;
     }
 
-    public @NotNull ForeignTableField m2mLeftFieldOrDie() {
-        assert m2mInfo != null : "Internal error. Many-to-many not available for table: " + this;
-        String leftName = m2mInfo.leftField();
+    public @NotNull ForeignTableField leftBridgeFieldOrDie() {
+        assert bridgeInfo != null : "Internal error. Many-to-many not available for table: " + this;
+        String leftName = bridgeInfo.leftField();
         Stream<ForeignTableField> stream = foreignFields(FOLLOW_ONE_LEVEL).stream();
         if (leftName != null) {
             return stream.filter(field -> field.javaName().equals(leftName)).findFirst().orElseThrow(() ->
@@ -146,9 +146,9 @@ public final class TableArch implements JavaNameHolder, HasColumns, HasPrefixedC
         }
     }
 
-    public @NotNull ForeignTableField m2mRightFieldOrDie() {
-        assert m2mInfo != null : "Internal error. Many-to-many not available for table: " + this;
-        String rightName = m2mInfo.rightField();
+    public @NotNull ForeignTableField rightBridgeFieldOrDie() {
+        assert bridgeInfo != null : "Internal error. Many-to-many not available for table: " + this;
+        String rightName = bridgeInfo.rightField();
         Stream<ForeignTableField> stream = foreignFields(FOLLOW_ONE_LEVEL).stream();
         if (rightName != null) {
             return stream.filter(field -> field.javaName().equals(rightName)).findFirst().orElseThrow(() ->
@@ -174,9 +174,9 @@ public final class TableArch implements JavaNameHolder, HasColumns, HasPrefixedC
     }
 
     public void validate() {
-        if (isM2M()) {
-            m2mLeftFieldOrDie();
-            m2mRightFieldOrDie();
+        if (isBridgeTable()) {
+            leftBridgeFieldOrDie();
+            rightBridgeFieldOrDie();
         }
     }
 
@@ -185,18 +185,18 @@ public final class TableArch implements JavaNameHolder, HasColumns, HasPrefixedC
         return obj instanceof TableArch that &&
                Objects.equals(sqlName, that.sqlName) && Objects.equals(javaName, that.javaName) &&
                Objects.equals(modelClass, that.modelClass) && Objects.equals(modelName, that.modelName) &&
-               Objects.equals(m2mInfo, that.m2mInfo) &&
+               Objects.equals(bridgeInfo, that.bridgeInfo) &&
                Objects.equals(fieldsRef, that.fieldsRef);
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(sqlName, javaName, modelClass, modelName, m2mInfo, fieldsRef);
+        return Objects.hash(sqlName, javaName, modelClass, modelName, bridgeInfo, fieldsRef);
     }
 
     @Override
     public String toString() {
-        return "TableArch[sqlName=%s, javaName=%s, modelClass=%s, modelName=%s, m2mInfo=%s]"
-                .formatted(sqlName, javaName, modelClass, modelName, m2mInfo);
+        return "TableArch[sqlName=%s, javaName=%s, modelClass=%s, modelName=%s, bridgeInfo=%s]"
+                .formatted(sqlName, javaName, modelClass, modelName, bridgeInfo);
     }
 }

@@ -6,7 +6,7 @@ import io.webby.auth.user.UserTable;
 import io.webby.orm.api.Connector;
 import io.webby.orm.api.ForeignLong;
 import io.webby.orm.api.query.CreateTableQuery;
-import io.webby.testing.ManyToManyTableTest;
+import io.webby.testing.BridgeTableTest;
 import io.webby.testing.SqlDbTableTest;
 import io.webby.testing.TestingModels;
 import io.webby.testing.TestingSql;
@@ -18,16 +18,16 @@ import java.util.stream.LongStream;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
-public class M2mLongModelTableTest
-        extends SqlDbTableTest<M2mLongModel, M2mLongModelTable>
-        implements ManyToManyTableTest<Long, Session, Long, Session, M2mLongModel, M2mLongModelTable> {
+public class BridgeLongModelTableTest
+        extends SqlDbTableTest<BridgeLongModel, BridgeLongModelTable>
+        implements BridgeTableTest<Long, Session, Long, Session, BridgeLongModel, BridgeLongModelTable> {
     private SessionTable sessions;
 
     @Override
     protected void setUp(@NotNull Connector connector) throws Exception {
         UserTable users = new UserTable(connector);
         sessions = new SessionTable(connector);
-        table = new M2mLongModelTable(connector);
+        table = new BridgeLongModelTable(connector);
         users.admin().createTable(CreateTableQuery.of(users).ifNotExists());
         sessions.admin().createTable(CreateTableQuery.of(sessions).ifNotExists());
         table.admin().createTable(CreateTableQuery.of(table).ifNotExists());
@@ -46,7 +46,7 @@ public class M2mLongModelTableTest
     @Override
     public void prepareRelations(@NotNull List<Pair<Long, Long>> relations) {
         for (Pair<Long, Long> relation : relations) {
-            M2mLongModel model = new M2mLongModel(ForeignLong.ofId(relation.first()), ForeignLong.ofId(relation.second()));
+            BridgeLongModel model = new BridgeLongModel(ForeignLong.ofId(relation.first()), ForeignLong.ofId(relation.second()));
             assertEquals(1, table.insert(model));
         }
     }

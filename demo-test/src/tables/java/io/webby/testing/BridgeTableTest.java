@@ -1,7 +1,7 @@
 package io.webby.testing;
 
 import io.webby.orm.api.BaseTable;
-import io.webby.orm.api.ManyToManyTable;
+import io.webby.orm.api.BridgeTable;
 import io.webby.util.collect.Pair;
 import org.jetbrains.annotations.NotNull;
 import org.junit.jupiter.api.Test;
@@ -12,8 +12,8 @@ import java.util.List;
 import static com.google.common.truth.Truth.assertThat;
 import static org.junit.jupiter.api.Assertions.*;
 
-public interface ManyToManyTableTest
-        <IL, EL, IR, ER, E, T extends BaseTable<E> & ManyToManyTable<IL, EL, IR, ER>>
+public interface BridgeTableTest
+        <IL, EL, IR, ER, E, T extends BaseTable<E> & BridgeTable<IL, EL, IR, ER>>
         extends BaseTableTest<E, T> {
 
     @NotNull Pair<IL[], EL[]> prepareLefts(int num);

@@ -39,9 +39,9 @@ public class DemoTablesCodegenMain {
         ModelInput.of(ForeignKeyModel.class),
         ModelInput.of(ForeignKeyModel.Nullable.class),
 
-        ModelInput.of(M2mIntModel.class),
-        ModelInput.of(M2mLongModel.class),
-        ModelInput.of(M2mIntLongModel.class),
+        ModelInput.of(BridgeIntModel.class),
+        ModelInput.of(BridgeLongModel.class),
+        ModelInput.of(BridgeIntLongModel.class),
 
         ModelInput.of(IntsModel.class),
         ModelInput.of(LongsModel.class),

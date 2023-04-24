@@ -9,7 +9,7 @@ import io.webby.orm.api.Connector;
 import io.webby.orm.api.ForeignInt;
 import io.webby.orm.api.ForeignLong;
 import io.webby.orm.api.query.CreateTableQuery;
-import io.webby.testing.ManyToManyTableTest;
+import io.webby.testing.BridgeTableTest;
 import io.webby.testing.SqlDbTableTest;
 import io.webby.testing.TestingModels;
 import io.webby.testing.TestingSql;
@@ -22,9 +22,9 @@ import java.util.stream.LongStream;
 
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
-public class M2mIntLongModelTableTest
-        extends SqlDbTableTest<M2mIntLongModel, M2mIntLongModelTable>
-        implements ManyToManyTableTest<Integer, DefaultUser, Long, Session, M2mIntLongModel, M2mIntLongModelTable> {
+public class BridgeIntLongModelTableTest
+        extends SqlDbTableTest<BridgeIntLongModel, BridgeIntLongModelTable>
+        implements BridgeTableTest<Integer, DefaultUser, Long, Session, BridgeIntLongModel, BridgeIntLongModelTable> {
     private UserTable users;
     private SessionTable sessions;
 
@@ -32,7 +32,7 @@ public class M2mIntLongModelTableTest
     protected void setUp(@NotNull Connector connector) throws Exception {
         users = new UserTable(connector);
         sessions = new SessionTable(connector);
-        table = new M2mIntLongModelTable(connector);
+        table = new BridgeIntLongModelTable(connector);
         users.admin().createTable(CreateTableQuery.of(users).ifNotExists());
         sessions.admin().createTable(CreateTableQuery.of(sessions).ifNotExists());
         table.admin().createTable(CreateTableQuery.of(table).ifNotExists());
@@ -51,10 +51,10 @@ public class M2mIntLongModelTableTest
     @Override
     public void prepareRelations(@NotNull List<Pair<Integer, Long>> relations) {
         for (Pair<Integer, Long> relation : relations) {
-            M2mIntLongModel model = new M2mIntLongModel(LongAutoIdModel.AUTO_ID,
-                                                        ForeignInt.ofId(relation.first()),
-                                                        ForeignLong.ofId(relation.second()),
-                                                        relation.first() > relation.second());
+            BridgeIntLongModel model = new BridgeIntLongModel(LongAutoIdModel.AUTO_ID,
+                                                              ForeignInt.ofId(relation.first()),
+                                                              ForeignLong.ofId(relation.second()),
+                                                              relation.first() > relation.second());
             assertTrue(table.insertAutoIncPk(model) > 0);
         }
     }
