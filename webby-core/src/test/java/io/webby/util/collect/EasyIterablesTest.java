@@ -9,7 +9,7 @@ import java.util.stream.Stream;
 import static com.google.common.truth.Truth.assertThat;
 import static io.webby.testing.TestingBasics.iterable;
 import static io.webby.testing.TestingBasics.sortedSetOf;
-import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.*;
 
 public class EasyIterablesTest {
     @Test
@@ -44,6 +44,18 @@ public class EasyIterablesTest {
         assertEquals(EasyIterables.estimateSize(List.of(), -1), 0);
         assertEquals(EasyIterables.estimateSize(List.of(1), -1), 1);
         assertEquals(EasyIterables.estimateSize(List.of(1, 2), -1), 2);
+    }
+
+    @Test
+    public void allEqual() {
+        assertTrue(EasyIterables.allEqual(Stream.of()));
+        assertTrue(EasyIterables.allEqual(Stream.of(1)));
+        assertTrue(EasyIterables.allEqual(Stream.of(1, 1)));
+        assertTrue(EasyIterables.allEqual(Stream.of(1, 1, 1)));
+        assertFalse(EasyIterables.allEqual(Stream.of(1, 2)));
+        assertFalse(EasyIterables.allEqual(Stream.of(1, 2, 1)));
+        assertFalse(EasyIterables.allEqual(Stream.of(1, 2, 2)));
+        assertFalse(EasyIterables.allEqual(Stream.of(1, 1, 2)));
     }
 
     @Test
