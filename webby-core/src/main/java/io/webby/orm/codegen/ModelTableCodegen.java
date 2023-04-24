@@ -1026,27 +1026,27 @@ public class ModelTableCodegen extends BaseCodegen {
         }
         
         @Override
-        public int countRights(@Nonnull $left_index_wrap leftIndex) {
-            String sql = "$right_pk_sql IN (SELECT $right_fk_sql FROM $table_sql WHERE $left_fk_sql = ?)";
-            return rightsTable.count(Where.hardcoded(sql, Args.of(leftIndex)));
-        }
-        
-        @Override
-        public @Nonnull ResultSetIterator<$right_entity> iterateRights(@Nonnull $left_index_wrap leftIndex) {
-            String sql = "$right_pk_sql IN (SELECT $right_fk_sql FROM $table_sql WHERE $left_fk_sql = ?)";
-            return rightsTable.iterator(Where.hardcoded(sql, Args.of(leftIndex)));
-        }
-        
-        @Override
         public int countLefts(@Nonnull $right_index_wrap rightIndex) {
             String sql = "$left_pk_sql IN (SELECT $left_fk_sql FROM $table_sql WHERE $right_fk_sql = ?)";
             return leftsTable.count(Where.hardcoded(sql, Args.of(rightIndex)));
         }
         
         @Override
+        public int countRights(@Nonnull $left_index_wrap leftIndex) {
+            String sql = "$right_pk_sql IN (SELECT $right_fk_sql FROM $table_sql WHERE $left_fk_sql = ?)";
+            return rightsTable.count(Where.hardcoded(sql, Args.of(leftIndex)));
+        }
+        
+        @Override
         public @Nonnull ResultSetIterator<$left_entity> iterateLefts(@Nonnull $right_index_wrap rightIndex) {
             String sql = "$left_pk_sql IN (SELECT $left_fk_sql FROM $table_sql WHERE $right_fk_sql = ?)";
             return leftsTable.iterator(Where.hardcoded(sql, Args.of(rightIndex)));
+        }
+        
+        @Override
+        public @Nonnull ResultSetIterator<$right_entity> iterateRights(@Nonnull $left_index_wrap leftIndex) {
+            String sql = "$right_pk_sql IN (SELECT $right_fk_sql FROM $table_sql WHERE $left_fk_sql = ?)";
+            return rightsTable.iterator(Where.hardcoded(sql, Args.of(leftIndex)));
         }\n
         """, EasyMaps.merge(mainContext, context));
     }
