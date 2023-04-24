@@ -121,7 +121,7 @@ public class ModelAdapterCodegen extends BaseCodegen {
 
     // FIX[minor]: use javaVariableName
     private static @NotNull String columnToParam(@NotNull Column column) {
-        Class<?> nativeType = column.type().jdbcType().nativeType();
+        Class<?> nativeType = column.jdbcType().nativeType();
         return "%s %s".formatted(nativeType.getSimpleName(), column.sqlName());
     }
 

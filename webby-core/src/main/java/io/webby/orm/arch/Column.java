@@ -11,6 +11,10 @@ public record Column(@NotNull String sqlName, @NotNull ColumnType type) {
         return new PrefixedColumn(this, prefix);
     }
 
+    public @NotNull JdbcType jdbcType() {
+        return type.jdbcType();
+    }
+
     @Override
     public String toString() {
         return "Column(%s/%s)".formatted(sqlName, type);

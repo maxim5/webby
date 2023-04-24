@@ -3,7 +3,6 @@ package io.webby.orm.arch.factory;
 import com.google.common.truth.Truth;
 import com.google.errorprone.annotations.CanIgnoreReturnValue;
 import io.webby.orm.arch.Column;
-import io.webby.orm.arch.ColumnType;
 import io.webby.orm.arch.JdbcType;
 import io.webby.orm.arch.model.*;
 import io.webby.orm.codegen.ModelInput;
@@ -139,7 +138,7 @@ public class TestingArch {
         }
 
         public @NotNull TableFieldSubject hasColumnTypes(@NotNull JdbcType @NotNull ... types) {
-            List<JdbcType> jdbcTypes = tableField.columns().stream().map(Column::type).map(ColumnType::jdbcType).toList();
+            List<JdbcType> jdbcTypes = tableField.columns().stream().map(Column::jdbcType).toList();
             Truth.assertThat(jdbcTypes).containsExactly((Object[]) types).inOrder();
             return hasSize(types.length);
         }
@@ -147,7 +146,7 @@ public class TestingArch {
         @SafeVarargs
         public final @NotNull TableFieldSubject hasColumns(@NotNull Pair<String, JdbcType> @NotNull ... columns) {
             List<Pair<String, JdbcType>> typedColumns = tableField.columns().stream()
-                .map(column -> Pair.of(column.sqlName(), column.type().jdbcType()))
+                .map(column -> Pair.of(column.sqlName(), column.jdbcType()))
                 .toList();
             Truth.assertThat(typedColumns).containsExactly((Object[]) columns).inOrder();
             return hasSize(columns.length);

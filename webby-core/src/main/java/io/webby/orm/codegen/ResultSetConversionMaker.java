@@ -152,7 +152,7 @@ class ResultSetConversionMaker {
 
     // Example: result.getLong(++start)
     private @NotNull String resultSetGetterExpr(@NotNull Column column) {
-        String resultSetGetter = column.type().jdbcType().getterMethod();
+        String resultSetGetter = column.jdbcType().getterMethod();
         return "%s.%s(++%s)".formatted(resultSetParam, resultSetGetter, indexParam);
     }
 }

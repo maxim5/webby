@@ -10,6 +10,7 @@ import io.webby.orm.api.query.*;
 import io.webby.orm.arch.Column;
 import io.webby.orm.arch.*;
 import io.webby.orm.arch.model.ForeignTableField;
+import io.webby.orm.arch.model.OneColumnTableField;
 import io.webby.orm.arch.model.TableArch;
 import io.webby.orm.arch.model.TableField;
 import io.webby.orm.arch.util.Naming;
@@ -107,6 +108,7 @@ public class ModelTableCodegen extends BaseCodegen {
         fromRow();
 
         bridge();
+        bridgeNative();
 
         internalMeta();
         columnsEnum();
@@ -1051,6 +1053,53 @@ public class ModelTableCodegen extends BaseCodegen {
         """, EasyMaps.merge(mainContext, context));
     }
 
+    private void bridgeNative() {
+        if (!table.isBridgeTable()) {
+            return;
+        }
+
+        boolean isLeftNative = isNativeIntOrLong(table.leftBridgeFieldOrDie().primaryKeyFieldInForeignTable());
+        boolean isRightNative = isNativeIntOrLong(table.rightBridgeFieldOrDie().primaryKeyFieldInForeignTable());
+        if (!isLeftNative && !isRightNative) {
+            return;
+        }
+
+        Map<String, String> context = bridgeContext();
+
+        if (isLeftNative) {
+            appendCode("""
+            public int countRights($left_index_native leftIndex) {
+                String sql = "$right_pk_sql IN (SELECT $right_fk_sql FROM $table_sql WHERE $left_fk_sql = ?)";
+                return rightsTable.count(Where.hardcoded(sql, Args.of(leftIndex)));
+            }
+            
+            public @Nonnull ResultSetIterator<$right_entity> iterateRights($left_index_native leftIndex) {
+                String sql = "$right_pk_sql IN (SELECT $right_fk_sql FROM $table_sql WHERE $left_fk_sql = ?)";
+                return rightsTable.iterator(Where.hardcoded(sql, Args.of(leftIndex)));
+            }\n
+            """, EasyMaps.merge(mainContext, context));
+        }
+
+        if (isRightNative) {
+            appendCode("""
+            public int countLefts($right_index_native rightIndex) {
+                String sql = "$left_pk_sql IN (SELECT $left_fk_sql FROM $table_sql WHERE $right_fk_sql = ?)";
+                return leftsTable.count(Where.hardcoded(sql, Args.of(rightIndex)));
+            }
+            
+            public @Nonnull ResultSetIterator<$left_entity> iterateLefts($right_index_native rightIndex) {
+                String sql = "$left_pk_sql IN (SELECT $left_fk_sql FROM $table_sql WHERE $right_fk_sql = ?)";
+                return leftsTable.iterator(Where.hardcoded(sql, Args.of(rightIndex)));
+            }\n
+            """, EasyMaps.merge(mainContext, context));
+        }
+    }
+
+    private static boolean isNativeIntOrLong(@NotNull OneColumnTableField field) {
+        JdbcType jdbcType = field.column().jdbcType();
+        return jdbcType == JdbcType.Int || jdbcType == JdbcType.Long;
+    }
+
     private @NotNull Map<String, String> bridgeContext() {
         if (!table.isBridgeTable()) {
             return Map.of();
@@ -1173,7 +1222,7 @@ public class ModelTableCodegen extends BaseCodegen {
     }
 
     private void dataFactoryMethods() {
-        List<JdbcType> allTypes = table.columns().stream().map(Column::type).map(ColumnType::jdbcType).toList();
+        List<JdbcType> allTypes = table.columns().stream().map(Column::jdbcType).toList();
         boolean isAllInts = allTypes.stream().allMatch(x -> x == JdbcType.Int);
         boolean isAllLongs = allTypes.stream().allMatch(x -> x == JdbcType.Long);
 

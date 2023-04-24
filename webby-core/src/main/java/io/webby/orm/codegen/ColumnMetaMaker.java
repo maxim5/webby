@@ -11,7 +11,7 @@ import org.jetbrains.annotations.Nullable;
 class ColumnMetaMaker {
     public static @NotNull String makeColumnMeta(@NotNull TableField field, @NotNull Column column) {
         String sqlName = column.sqlName();
-        Class<?> nativeType = column.type().jdbcType().nativeType();
+        Class<?> nativeType = column.jdbcType().nativeType();
         String type = nativeType.isPrimitive() || nativeType == String.class ?
             nativeType.getSimpleName() :
             nativeType == byte[].class ?
