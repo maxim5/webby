@@ -61,7 +61,7 @@ public class SelectWhere extends Unit implements SelectQuery {
             this.filter = new CompositeFilter.Builder();
         }
 
-        public Builder(@NotNull SelectFrom selectFrom, @NotNull CompositeFilter clause) {
+        Builder(@NotNull SelectFrom selectFrom, @NotNull CompositeFilter clause) {
             this.table = selectFrom.table();
             this.terms.addAll(selectFrom.terms());
             this.filter = clause.toBuilder();

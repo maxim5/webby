@@ -1,12 +1,14 @@
 package io.webby.orm.api.query;
 
 import com.google.common.collect.ImmutableList;
+import com.google.errorprone.annotations.Immutable;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.List;
 
 import static io.webby.orm.api.query.Representables.COMMA_JOINER;
 
+@Immutable
 public class GroupBy extends Unit {
     private final ImmutableList<Named> terms;
 

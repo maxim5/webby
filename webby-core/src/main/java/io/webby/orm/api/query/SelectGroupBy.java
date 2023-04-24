@@ -20,13 +20,23 @@ import static io.webby.orm.api.query.Representables.joinWithLines;
  */
 @Immutable
 public class SelectGroupBy extends Unit implements SelectQuery {
-    private final ImmutableList<Term> columnTerms;
+    private final SelectFrom selectFrom;
+    private final FuncExpr aggregate;
+    private final Where where;
+    private final GroupBy groupBy;
+    private final Having having;
+    private final OrderBy orderBy;
 
-    public SelectGroupBy(@NotNull SelectFrom selectFrom, @Nullable Where where,
+    public SelectGroupBy(@NotNull SelectFrom selectFrom, @NotNull FuncExpr aggregate, @Nullable Where where,
                          @NotNull GroupBy groupBy, @Nullable Having having, @Nullable OrderBy orderBy) {
         super(joinWithLines(selectFrom, where, groupBy, having, orderBy),
               flattenArgsOf(selectFrom, where, groupBy, having, orderBy));
-        columnTerms = selectFrom.terms();
+        this.selectFrom = selectFrom;
+        this.aggregate = aggregate;
+        this.where = where;
+        this.groupBy = groupBy;
+        this.having = having;
+        this.orderBy = orderBy;
     }
 
     public static @NotNull Builder from(@NotNull String table) {
@@ -47,20 +57,34 @@ public class SelectGroupBy extends Unit implements SelectQuery {
 
     @Override
     public int columnsNumber() {
-        return columnTerms.size();
+        return selectFrom.terms().size();
+    }
+
+    public @NotNull Builder toBuilder() {
+        return new Builder(selectFrom, aggregate, where, groupBy, having, orderBy);
     }
 
     public static class Builder {
         private final String table;
-        private FuncExpr funcExpr = null;
+        private FuncExpr funcExpr;
         private final ImmutableList.Builder<Named> terms = ImmutableList.builder();
         private Having having;
-        private final CompositeFilter.Builder filter = new CompositeFilter.Builder();
+        private final CompositeFilter.Builder filter;
     
         public Builder(@NotNull String table) {
             this.table = table;
+            this.filter = new CompositeFilter.Builder();
         }
-    
+
+        Builder(@NotNull SelectFrom selectFrom, @NotNull FuncExpr aggregate, @Nullable Where where,
+                @NotNull GroupBy groupBy, @Nullable Having having, @Nullable OrderBy orderBy) {
+            this.table = selectFrom.table();
+            this.funcExpr = aggregate;
+            this.terms.addAll(groupBy.terms());
+            this.having = having;
+            this.filter = new CompositeFilter(where, orderBy, null, null).toBuilder();
+        }
+
         public @NotNull Builder select(@NotNull Named term, @NotNull FuncExpr aggregate) {
             return groupBy(term).aggregate(aggregate);
         }
@@ -121,10 +145,11 @@ public class SelectGroupBy extends Unit implements SelectQuery {
         }
     
         public @NotNull SelectGroupBy build() {
+            assure(funcExpr != null, "Aggregate function not provided for SelectGroupBy: table=%s", table);
             ImmutableList<Named> groupByTerms = terms.build();
             ImmutableList<Term> allTerms = ImmutableList.<Term>builder().addAll(groupByTerms).add(funcExpr).build();
             CompositeFilter composite = filter.build();
-            return new SelectGroupBy(new SelectFrom(table, allTerms), composite.where(),
+            return new SelectGroupBy(new SelectFrom(table, allTerms), funcExpr, composite.where(),
                                      new GroupBy(groupByTerms), having, composite.orderBy());
         }
     }

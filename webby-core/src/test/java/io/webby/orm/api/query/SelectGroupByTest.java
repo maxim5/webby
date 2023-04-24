@@ -5,16 +5,16 @@ import io.webby.orm.testing.FakeColumn;
 import org.jetbrains.annotations.NotNull;
 import org.junit.jupiter.api.Test;
 
-import static io.webby.orm.api.query.Func.COUNT;
-import static io.webby.orm.api.query.Func.MAX;
+import static io.webby.orm.api.query.Func.*;
 import static io.webby.orm.api.query.Shortcuts.STAR;
-import static io.webby.orm.testing.PersonTableData.PERSON_META;
+import static io.webby.orm.testing.AssertSql.assertReprThrows;
 
 public class SelectGroupByTest {
     @Test
-    public void select_one_column_group_by_one_from_table() {
+    public void select_one_column_group_by_one() {
         SelectGroupBy query = SelectGroupBy.from("table").select(FakeColumn.INT, COUNT.apply(STAR)).build();
         assertThat(query)
+            .hasConsistentBuilder()
             .hasConsistentIntern()
             .matches("""
                 SELECT i, count(*)
@@ -25,19 +25,46 @@ public class SelectGroupByTest {
     }
 
     @Test
-    public void select_one_column_group_by_two_from_table() {
-        SelectGroupBy query = SelectGroupBy.from(PERSON_META)
+    public void select_group_by_having() {
+        SelectGroupBy query = SelectGroupBy.from("table")
+            .select(FakeColumn.INT, COUNT.apply(STAR))
+            .having(Having.of(FakeColumn.FOO.isNotNull()))
+            .build();
+        assertThat(query)
+            .hasConsistentBuilder()
+            .hasConsistentIntern()
+            .matches("""
+                SELECT i, count(*)
+                FROM table
+                GROUP BY i
+                HAVING foo IS NOT NULL
+                """)
+            .containsNoArgs();
+    }
+
+    @Test
+    public void select_one_column_group_by_two() {
+        SelectGroupBy query = SelectGroupBy.from("table")
             .groupBy(FakeColumn.FOO, FakeColumn.STR)
             .aggregate(MAX.apply(FakeColumn.INT))
             .build();
         assertThat(query)
+            .hasConsistentBuilder()
             .hasConsistentIntern()
             .matches("""
                 SELECT foo, s, max(i)
-                FROM person
+                FROM table
                 GROUP BY foo, s
                 """)
             .containsNoArgs();
+    }
+
+    @Test
+    public void select_invalid() {
+        assertReprThrows(() -> SelectGroupBy.from("table").build());
+        assertReprThrows(() -> SelectGroupBy.from("table").aggregate(SQUARE.apply(FakeColumn.INT)).build());
+        assertReprThrows(() ->
+            SelectGroupBy.from("table").groupBy(FakeColumn.FOO).aggregate(SQUARE.apply(FakeColumn.INT)).build());
     }
 
     private static @NotNull SelectGroupBySubject assertThat(@NotNull SelectGroupBy query) {
@@ -54,6 +81,11 @@ public class SelectGroupByTest {
 
         public @NotNull SelectGroupBySubject hasConsistentIntern() {
             AssertSql.assertThat((Unit) query.intern()).isEqualTo(query);
+            return this;
+        }
+
+        public @NotNull SelectGroupBySubject hasConsistentBuilder() {
+            AssertSql.assertThat(query.toBuilder().build()).isEqualTo(query);
             return this;
         }
     }
