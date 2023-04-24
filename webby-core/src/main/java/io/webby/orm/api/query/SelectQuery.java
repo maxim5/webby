@@ -8,11 +8,6 @@ import org.jetbrains.annotations.NotNull;
  */
 public interface SelectQuery extends Representable, HasArgs {
     /**
-     * Returns the number of columns of the query result.
-     */
-    int columnsNumber();
-
-    /**
      * Returns a copy of this query which strips the internal fields off. Useful for memory management,
      * e.g. if the query is stored statically.
      */

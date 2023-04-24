@@ -19,7 +19,7 @@ import static io.webby.orm.api.query.Representables.joinWithLines;
  * {@link CompositeFilter} clauses.
  */
 @Immutable
-public class SelectGroupBy extends Unit implements SelectQuery {
+public class SelectGroupBy extends Unit implements TypedSelectQuery {
     private final SelectFrom selectFrom;
     private final FuncExpr aggregate;
     private final Where where;
@@ -58,6 +58,11 @@ public class SelectGroupBy extends Unit implements SelectQuery {
     @Override
     public int columnsNumber() {
         return selectFrom.terms().size();
+    }
+
+    @Override
+    public @NotNull List<TermType> columnTypes() {
+        return selectFrom.termsTypes();
     }
 
     public @NotNull Builder toBuilder() {

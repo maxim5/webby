@@ -33,4 +33,8 @@ public class SelectFrom extends Unit {
     public @NotNull ImmutableList<Term> terms() {
         return terms;
     }
+
+    public @NotNull List<TermType> termsTypes() {
+        return terms.stream().map(Term::type).toList();
+    }
 }

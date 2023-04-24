@@ -7,6 +7,7 @@ import io.webby.orm.api.Engine;
 import io.webby.orm.api.TableMeta;
 import org.jetbrains.annotations.NotNull;
 
+import java.util.List;
 import java.util.function.Consumer;
 
 import static io.webby.orm.api.query.Args.flattenArgsOf;
@@ -16,7 +17,7 @@ import static io.webby.orm.api.query.Representables.joinWithLines;
  * A standard <code>SELECT ... FROM ... WHERE ...</code> query. Supports additional {@link CompositeFilter} clauses.
  */
 @Immutable
-public class SelectWhere extends Unit implements SelectQuery {
+public class SelectWhere extends Unit implements TypedSelectQuery {
     private final SelectFrom selectFrom;
     private final CompositeFilter clause;
 
@@ -45,6 +46,11 @@ public class SelectWhere extends Unit implements SelectQuery {
     @Override
     public int columnsNumber() {
         return selectFrom.terms().size();
+    }
+
+    @Override
+    public @NotNull List<TermType> columnTypes() {
+        return selectFrom.termsTypes();
     }
 
     public @NotNull Builder toBuilder() {

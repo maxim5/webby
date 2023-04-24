@@ -16,9 +16,4 @@ public class HardcodedSelectQuery extends Unit implements SelectQuery {
     public static @NotNull HardcodedSelectQuery of(@NotNull String query) {
         return of(query, Args.of());
     }
-
-    @Override
-    public int columnsNumber() {
-        return -1;
-    }
 }
