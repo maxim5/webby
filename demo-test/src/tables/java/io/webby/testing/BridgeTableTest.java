@@ -101,7 +101,7 @@ public interface BridgeTableTest
 
     @SafeVarargs
     private void assertLefts(@NotNull IR rightIndex, @NotNull EL @NotNull... entities) {
-        assertEquals(entities.length == 0, table().rightExists(rightIndex));
+        assertEquals(entities.length > 0, table().existsRight(rightIndex));
         assertEquals(entities.length, table().countLefts(rightIndex));
         List<EL> each = new ArrayList<>();
         table().forEachLeft(rightIndex, each::add);
@@ -111,7 +111,7 @@ public interface BridgeTableTest
 
     @SafeVarargs
     private void assertRights(@NotNull IL leftIndex, @NotNull ER @NotNull ... entities) {
-        assertEquals(entities.length == 0, table().leftExists(leftIndex));
+        assertEquals(entities.length > 0, table().existsLeft(leftIndex));
         assertEquals(entities.length, table().countRights(leftIndex));
         List<ER> each = new ArrayList<>();
         table().forEachRight(leftIndex, each::add);
