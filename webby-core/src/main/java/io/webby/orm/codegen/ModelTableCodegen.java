@@ -205,7 +205,7 @@ public class ModelTableCodegen extends BaseCodegen {
         if (table.isBridgeTable()) {
             appendCode(0, """
             public class $TableClass implements $BaseClass<$BaseGenerics>, \
-            BridgeTable<$left_index_wrap, $left_entity, $right_index_wrap, $right_entity> {
+            BridgeTable<$left_id_wrap, $left_entity, $right_id_wrap, $right_entity> {
             """, EasyMaps.merge(EasyMaps.merge(context, bridgeContext()), mainContext, pkContext));
         } else {
             appendCode(0, "public class $TableClass implements $BaseClass<$BaseGenerics> {",
@@ -1023,24 +1023,24 @@ public class ModelTableCodegen extends BaseCodegen {
         }
         
         @Override
-        public boolean exists(@Nonnull $left_index_wrap leftId, @Nonnull $right_index_wrap rightId) {
+        public boolean exists(@Nonnull $left_id_wrap leftId, @Nonnull $right_id_wrap rightId) {
             return exists(Where.hardcoded("$left_fk_sql = ? AND $right_fk_sql = ?", Args.of(leftId, rightId)));
         }
         
         @Override
-        public int countLefts(@Nonnull $right_index_wrap rightId) {
+        public int countLefts(@Nonnull $right_id_wrap rightId) {
             String sql = "$left_pk_sql IN (SELECT $left_fk_sql FROM $table_sql WHERE $right_fk_sql = ?)";
             return leftsTable.count(Where.hardcoded(sql, Args.of(rightId)));
         }
         
         @Override
-        public int countRights(@Nonnull $left_index_wrap leftId) {
+        public int countRights(@Nonnull $left_id_wrap leftId) {
             String sql = "$right_pk_sql IN (SELECT $right_fk_sql FROM $table_sql WHERE $left_fk_sql = ?)";
             return rightsTable.count(Where.hardcoded(sql, Args.of(leftId)));
         }
         
         @Override
-        public @Nonnull ResultSetIterator<$left_index_wrap> iterateLeftIds(@Nonnull $right_index_wrap rightId) {
+        public @Nonnull ResultSetIterator<$left_id_wrap> iterateLeftIds(@Nonnull $right_id_wrap rightId) {
             String query = "SELECT $left_fk_sql FROM $table_sql WHERE $right_fk_sql = ?";
             try {
                 return ResultSetIterator.of(runner().prepareQuery(query, rightId).executeQuery(),
@@ -1051,13 +1051,13 @@ public class ModelTableCodegen extends BaseCodegen {
         }
         
         @Override
-        public @Nonnull ResultSetIterator<$left_entity> iterateLefts(@Nonnull $right_index_wrap rightId) {
+        public @Nonnull ResultSetIterator<$left_entity> iterateLefts(@Nonnull $right_id_wrap rightId) {
             String sql = "$left_pk_sql IN (SELECT $left_fk_sql FROM $table_sql WHERE $right_fk_sql = ?)";
             return leftsTable.iterator(Where.hardcoded(sql, Args.of(rightId)));
         }
         
         @Override
-        public @Nonnull ResultSetIterator<$right_index_wrap> iterateRightIds(@Nonnull $left_index_wrap leftId) {
+        public @Nonnull ResultSetIterator<$right_id_wrap> iterateRightIds(@Nonnull $left_id_wrap leftId) {
             String query = "SELECT $right_fk_sql FROM $table_sql WHERE $left_fk_sql = ?";
             try {
                 return ResultSetIterator.of(runner().prepareQuery(query, leftId).executeQuery(),
@@ -1068,7 +1068,7 @@ public class ModelTableCodegen extends BaseCodegen {
         }
         
         @Override
-        public @Nonnull ResultSetIterator<$right_entity> iterateRights(@Nonnull $left_index_wrap leftId) {
+        public @Nonnull ResultSetIterator<$right_entity> iterateRights(@Nonnull $left_id_wrap leftId) {
             String sql = "$right_pk_sql IN (SELECT $right_fk_sql FROM $table_sql WHERE $left_fk_sql = ?)";
             return rightsTable.iterator(Where.hardcoded(sql, Args.of(leftId)));
         }\n
@@ -1090,38 +1090,88 @@ public class ModelTableCodegen extends BaseCodegen {
 
         if (isLeftNative && isRightNative) {
             appendCode("""
-            public boolean exists($left_index_native leftId, $right_index_native rightId) {
+            public boolean exists($left_id_native leftId, $right_id_native rightId) {
                 return exists(Where.hardcoded("$left_fk_sql = ? AND $right_fk_sql = ?", Args.of(leftId, rightId)));
             }\n
             """, EasyMaps.merge(mainContext, context));
         }
 
         if (isLeftNative) {
+            Map<String, String> extraContext = EasyMaps.asMap(
+                "$TypeMarker$", table.leftBridgeFieldOrDie().primaryKeyFieldInForeignTable().column().jdbcType().name()
+            );
+
             appendCode("""
-            public int countRights($left_index_native leftId) {
+            public int countRights($left_id_native leftId) {
                 String sql = "$right_pk_sql IN (SELECT $right_fk_sql FROM $table_sql WHERE $left_fk_sql = ?)";
                 return rightsTable.count(Where.hardcoded(sql, Args.of(leftId)));
             }
             
-            public @Nonnull ResultSetIterator<$right_entity> iterateRights($left_index_native leftId) {
+            public @Nonnull ResultSetIterator<$right_entity> iterateRights($left_id_native leftId) {
                 String sql = "$right_pk_sql IN (SELECT $right_fk_sql FROM $table_sql WHERE $left_fk_sql = ?)";
                 return rightsTable.iterator(Where.hardcoded(sql, Args.of(leftId)));
+            }
+            
+            public void forEachLeftId$TypeMarker$($right_id_native rightId, @Nonnull $TypeMarker$Consumer consumer) {
+                String query = "SELECT $left_fk_sql FROM $table_sql WHERE $right_fk_sql = ?";
+                try (PreparedStatement statement = runner().prepareQuery(query, rightId);
+                     ResultSet result = statement.executeQuery()) {
+                    while (result.next()) {
+                        consumer.accept(result.$left_result_getter(1));
+                    }
+                } catch (SQLException e) {
+                    throw new QueryException("Failed to iterate over $TableClass", query, rightId, e);
+                }
+            }
+            
+            public @Nonnull $TypeMarker$ArrayList fetchAllLeftIds$TypeMarker$($right_id_native rightId) {
+                String query = "SELECT $left_fk_sql FROM $table_sql WHERE $right_fk_sql = ?";
+                try {
+                    return runner().fetch$TypeMarker$Column(() -> runner().prepareQuery(query, rightId));
+                } catch (SQLException e) {
+                    throw new QueryException("Failed to fetch left ids in $TableClass", query, rightId, e);
+                }
             }\n
-            """, EasyMaps.merge(mainContext, context));
+            """, EasyMaps.merge(mainContext, context, extraContext));
         }
 
         if (isRightNative) {
+            Map<String, String> extraContext = EasyMaps.asMap(
+                "$TypeMarker$", table.rightBridgeFieldOrDie().primaryKeyFieldInForeignTable().column().jdbcType().name()
+            );
+
             appendCode("""
-            public int countLefts($right_index_native rightId) {
+            public int countLefts($right_id_native rightId) {
                 String sql = "$left_pk_sql IN (SELECT $left_fk_sql FROM $table_sql WHERE $right_fk_sql = ?)";
                 return leftsTable.count(Where.hardcoded(sql, Args.of(rightId)));
             }
             
-            public @Nonnull ResultSetIterator<$left_entity> iterateLefts($right_index_native rightId) {
+            public @Nonnull ResultSetIterator<$left_entity> iterateLefts($right_id_native rightId) {
                 String sql = "$left_pk_sql IN (SELECT $left_fk_sql FROM $table_sql WHERE $right_fk_sql = ?)";
                 return leftsTable.iterator(Where.hardcoded(sql, Args.of(rightId)));
+            }
+                        
+            public void forEachRightId$TypeMarker$($left_id_native leftId, @Nonnull $TypeMarker$Consumer consumer) {
+                String query = "SELECT $right_fk_sql FROM $table_sql WHERE $left_fk_sql = ?";
+                try (PreparedStatement statement = runner().prepareQuery(query, leftId);
+                     ResultSet result = statement.executeQuery()) {
+                    while (result.next()) {
+                        consumer.accept(result.$right_result_getter(1));
+                    }
+                } catch (SQLException e) {
+                    throw new QueryException("Failed to iterate over $TableClass", query, leftId, e);
+                }
+            }
+            
+            public @Nonnull $TypeMarker$ArrayList fetchAllRightIds$TypeMarker$($left_id_native leftId) {
+                String query = "SELECT $right_fk_sql FROM $table_sql WHERE $left_fk_sql = ?";
+                try {
+                    return runner().fetch$TypeMarker$Column(() -> runner().prepareQuery(query, leftId));
+                } catch (SQLException e) {
+                    throw new QueryException("Failed to fetch right ids in $TableClass", query, leftId, e);
+                }
             }\n
-            """, EasyMaps.merge(mainContext, context));
+            """, EasyMaps.merge(mainContext, context, extraContext));
         }
     }
 
@@ -1147,8 +1197,8 @@ public class ModelTableCodegen extends BaseCodegen {
         return EasyMaps.asMap(
             "$LeftTable", leftTable.javaName(),
             "$left_table_sql", leftTable.sqlName(),
-            "$left_index_native", Naming.shortCanonicalJavaName(leftTablePrimaryField.javaType()),
-            "$left_index_wrap", Naming.shortCanonicalJavaName(Primitives.wrap(leftTablePrimaryField.javaType())),
+            "$left_id_native", Naming.shortCanonicalJavaName(leftTablePrimaryField.javaType()),
+            "$left_id_wrap", Naming.shortCanonicalJavaName(Primitives.wrap(leftTablePrimaryField.javaType())),
             "$left_pk_sql", leftTablePrimaryField.column().sqlName(),
             "$left_fk_sql", leftField.foreignKeyColumn().sqlName(),
             "$left_result_getter", leftTablePrimaryField.column().jdbcType().getterMethod(),
@@ -1156,8 +1206,8 @@ public class ModelTableCodegen extends BaseCodegen {
 
             "$RightTable", rightTable.javaName(),
             "$right_table_sql", rightTable.sqlName(),
-            "$right_index_native", Naming.shortCanonicalJavaName(rightTablePrimaryField.javaType()),
-            "$right_index_wrap", Naming.shortCanonicalJavaName(Primitives.wrap(rightTablePrimaryField.javaType())),
+            "$right_id_native", Naming.shortCanonicalJavaName(rightTablePrimaryField.javaType()),
+            "$right_id_wrap", Naming.shortCanonicalJavaName(Primitives.wrap(rightTablePrimaryField.javaType())),
             "$right_pk_sql", rightTablePrimaryField.column().sqlName(),
             "$right_fk_sql", rightField.foreignKeyColumn().sqlName(),
             "$right_result_getter", rightTablePrimaryField.column().jdbcType().getterMethod(),
