@@ -1023,32 +1023,32 @@ public class ModelTableCodegen extends BaseCodegen {
         }
         
         @Override
-        public boolean exists(@Nonnull $left_index_wrap leftIndex, @Nonnull $right_index_wrap rightIndex) {
-            return exists(Where.hardcoded("$left_fk_sql = ? AND $right_fk_sql = ?", Args.of(leftIndex, rightIndex)));
+        public boolean exists(@Nonnull $left_index_wrap leftId, @Nonnull $right_index_wrap rightId) {
+            return exists(Where.hardcoded("$left_fk_sql = ? AND $right_fk_sql = ?", Args.of(leftId, rightId)));
         }
         
         @Override
-        public int countLefts(@Nonnull $right_index_wrap rightIndex) {
+        public int countLefts(@Nonnull $right_index_wrap rightId) {
             String sql = "$left_pk_sql IN (SELECT $left_fk_sql FROM $table_sql WHERE $right_fk_sql = ?)";
-            return leftsTable.count(Where.hardcoded(sql, Args.of(rightIndex)));
+            return leftsTable.count(Where.hardcoded(sql, Args.of(rightId)));
         }
         
         @Override
-        public int countRights(@Nonnull $left_index_wrap leftIndex) {
+        public int countRights(@Nonnull $left_index_wrap leftId) {
             String sql = "$right_pk_sql IN (SELECT $right_fk_sql FROM $table_sql WHERE $left_fk_sql = ?)";
-            return rightsTable.count(Where.hardcoded(sql, Args.of(leftIndex)));
+            return rightsTable.count(Where.hardcoded(sql, Args.of(leftId)));
         }
         
         @Override
-        public @Nonnull ResultSetIterator<$left_entity> iterateLefts(@Nonnull $right_index_wrap rightIndex) {
+        public @Nonnull ResultSetIterator<$left_entity> iterateLefts(@Nonnull $right_index_wrap rightId) {
             String sql = "$left_pk_sql IN (SELECT $left_fk_sql FROM $table_sql WHERE $right_fk_sql = ?)";
-            return leftsTable.iterator(Where.hardcoded(sql, Args.of(rightIndex)));
+            return leftsTable.iterator(Where.hardcoded(sql, Args.of(rightId)));
         }
         
         @Override
-        public @Nonnull ResultSetIterator<$right_entity> iterateRights(@Nonnull $left_index_wrap leftIndex) {
+        public @Nonnull ResultSetIterator<$right_entity> iterateRights(@Nonnull $left_index_wrap leftId) {
             String sql = "$right_pk_sql IN (SELECT $right_fk_sql FROM $table_sql WHERE $left_fk_sql = ?)";
-            return rightsTable.iterator(Where.hardcoded(sql, Args.of(leftIndex)));
+            return rightsTable.iterator(Where.hardcoded(sql, Args.of(leftId)));
         }\n
         """, EasyMaps.merge(mainContext, context));
     }
@@ -1068,36 +1068,36 @@ public class ModelTableCodegen extends BaseCodegen {
 
         if (isLeftNative && isRightNative) {
             appendCode("""
-            public boolean exists($left_index_native leftIndex, $right_index_native rightIndex) {
-                return exists(Where.hardcoded("$left_fk_sql = ? AND $right_fk_sql = ?", Args.of(leftIndex, rightIndex)));
+            public boolean exists($left_index_native leftId, $right_index_native rightId) {
+                return exists(Where.hardcoded("$left_fk_sql = ? AND $right_fk_sql = ?", Args.of(leftId, rightId)));
             }\n
             """, EasyMaps.merge(mainContext, context));
         }
 
         if (isLeftNative) {
             appendCode("""
-            public int countRights($left_index_native leftIndex) {
+            public int countRights($left_index_native leftId) {
                 String sql = "$right_pk_sql IN (SELECT $right_fk_sql FROM $table_sql WHERE $left_fk_sql = ?)";
-                return rightsTable.count(Where.hardcoded(sql, Args.of(leftIndex)));
+                return rightsTable.count(Where.hardcoded(sql, Args.of(leftId)));
             }
             
-            public @Nonnull ResultSetIterator<$right_entity> iterateRights($left_index_native leftIndex) {
+            public @Nonnull ResultSetIterator<$right_entity> iterateRights($left_index_native leftId) {
                 String sql = "$right_pk_sql IN (SELECT $right_fk_sql FROM $table_sql WHERE $left_fk_sql = ?)";
-                return rightsTable.iterator(Where.hardcoded(sql, Args.of(leftIndex)));
+                return rightsTable.iterator(Where.hardcoded(sql, Args.of(leftId)));
             }\n
             """, EasyMaps.merge(mainContext, context));
         }
 
         if (isRightNative) {
             appendCode("""
-            public int countLefts($right_index_native rightIndex) {
+            public int countLefts($right_index_native rightId) {
                 String sql = "$left_pk_sql IN (SELECT $left_fk_sql FROM $table_sql WHERE $right_fk_sql = ?)";
-                return leftsTable.count(Where.hardcoded(sql, Args.of(rightIndex)));
+                return leftsTable.count(Where.hardcoded(sql, Args.of(rightId)));
             }
             
-            public @Nonnull ResultSetIterator<$left_entity> iterateLefts($right_index_native rightIndex) {
+            public @Nonnull ResultSetIterator<$left_entity> iterateLefts($right_index_native rightId) {
                 String sql = "$left_pk_sql IN (SELECT $left_fk_sql FROM $table_sql WHERE $right_fk_sql = ?)";
-                return leftsTable.iterator(Where.hardcoded(sql, Args.of(rightIndex)));
+                return leftsTable.iterator(Where.hardcoded(sql, Args.of(rightId)));
             }\n
             """, EasyMaps.merge(mainContext, context));
         }

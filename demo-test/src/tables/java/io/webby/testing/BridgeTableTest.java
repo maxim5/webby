@@ -100,22 +100,22 @@ public interface BridgeTableTest
     }
 
     @SafeVarargs
-    private void assertLefts(@NotNull IR rightIndex, @NotNull EL @NotNull... entities) {
-        assertEquals(entities.length > 0, table().existsRight(rightIndex));
-        assertEquals(entities.length, table().countLefts(rightIndex));
+    private void assertLefts(@NotNull IR rightId, @NotNull EL @NotNull... entities) {
+        assertEquals(entities.length > 0, table().existsRight(rightId));
+        assertEquals(entities.length, table().countLefts(rightId));
         List<EL> each = new ArrayList<>();
-        table().forEachLeft(rightIndex, each::add);
+        table().forEachLeft(rightId, each::add);
         assertThat(each).containsExactlyElementsIn(entities);
-        assertThat(table().fetchAllLefts(rightIndex)).containsExactlyElementsIn(entities);
+        assertThat(table().fetchAllLefts(rightId)).containsExactlyElementsIn(entities);
     }
 
     @SafeVarargs
-    private void assertRights(@NotNull IL leftIndex, @NotNull ER @NotNull ... entities) {
-        assertEquals(entities.length > 0, table().existsLeft(leftIndex));
-        assertEquals(entities.length, table().countRights(leftIndex));
+    private void assertRights(@NotNull IL leftId, @NotNull ER @NotNull ... entities) {
+        assertEquals(entities.length > 0, table().existsLeft(leftId));
+        assertEquals(entities.length, table().countRights(leftId));
         List<ER> each = new ArrayList<>();
-        table().forEachRight(leftIndex, each::add);
+        table().forEachRight(leftId, each::add);
         assertThat(each).containsExactlyElementsIn(entities);
-        assertThat(table().fetchAllRights(leftIndex)).containsExactlyElementsIn(entities);
+        assertThat(table().fetchAllRights(leftId)).containsExactlyElementsIn(entities);
     }
 }
