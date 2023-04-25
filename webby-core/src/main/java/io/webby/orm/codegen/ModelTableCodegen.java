@@ -1066,6 +1066,14 @@ public class ModelTableCodegen extends BaseCodegen {
 
         Map<String, String> context = bridgeContext();
 
+        if (isLeftNative && isRightNative) {
+            appendCode("""
+            public boolean exists($left_index_native leftIndex, $right_index_native rightIndex) {
+                return exists(Where.hardcoded("$left_fk_sql = ? AND $right_fk_sql = ?", Args.of(leftIndex, rightIndex)));
+            }\n
+            """, EasyMaps.merge(mainContext, context));
+        }
+
         if (isLeftNative) {
             appendCode("""
             public int countRights($left_index_native leftIndex) {
