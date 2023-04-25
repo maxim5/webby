@@ -2,15 +2,17 @@ package io.webby.testing;
 
 import io.webby.orm.api.BaseTable;
 import io.webby.orm.api.BridgeTable;
+import io.webby.testing.TestingTables.BridgeLeftIdSubject;
+import io.webby.testing.TestingTables.BridgeRightIdSubject;
 import io.webby.util.collect.Pair;
 import org.jetbrains.annotations.NotNull;
 import org.junit.jupiter.api.Test;
 
-import java.util.ArrayList;
 import java.util.List;
 
-import static com.google.common.truth.Truth.assertThat;
-import static org.junit.jupiter.api.Assertions.*;
+import static io.webby.testing.TestingTables.withTable;
+import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 public interface BridgeTableTest
         <IL, EL, IR, ER, E, T extends BaseTable<E> & BridgeTable<IL, EL, IR, ER>>
@@ -27,10 +29,10 @@ public interface BridgeTableTest
         IL[] leftKey = prepareLefts(2).first();
         IR[] rightKey = prepareRights(2).first();
 
-        assertLefts(rightKey[0]);
-        assertLefts(rightKey[1]);
-        assertRights(leftKey[0]);
-        assertRights(leftKey[1]);
+        withLeftId(leftKey[0]).assertNothing();
+        withLeftId(leftKey[1]).assertNothing();
+        withRightId(rightKey[0]).assertNothing();
+        withRightId(rightKey[1]).assertNothing();
     }
 
     @Test
@@ -44,10 +46,10 @@ public interface BridgeTableTest
             Pair.of(leftKey[1], rightKey[1])
         ));
 
-        assertLefts(rightKey[0], leftVal[0]);
-        assertLefts(rightKey[1], leftVal[1]);
-        assertRights(leftKey[0], rightVal[0]);
-        assertRights(leftKey[1], rightVal[1]);
+        withLeftId(leftKey[0]).assertOneRight(rightKey[0], rightVal[0]);
+        withLeftId(leftKey[1]).assertOneRight(rightKey[1], rightVal[1]);
+        withRightId(rightKey[0]).assertOneLeft(leftKey[0], leftVal[0]);
+        withRightId(rightKey[1]).assertOneLeft(leftKey[1], leftVal[1]);
     }
 
     @Test
@@ -62,10 +64,10 @@ public interface BridgeTableTest
             Pair.of(leftKey[1], rightKey[1])
         ));
 
-        assertLefts(rightKey[0], leftVal[0]);
-        assertLefts(rightKey[1], leftVal[0], leftVal[1]);
-        assertRights(leftKey[0], rightVal[0], rightVal[1]);
-        assertRights(leftKey[1], rightVal[1]);
+        withLeftId(leftKey[0]).assertRightIds(rightKey[0], rightKey[1]).assertRightEntities(rightVal[0], rightVal[1]);
+        withLeftId(leftKey[1]).assertOneRight(rightKey[1], rightVal[1]);
+        withRightId(rightKey[0]).assertOneLeft(leftKey[0], leftVal[0]);
+        withRightId(rightKey[1]).assertLeftIds(leftKey[0], leftKey[1]).assertLeftEntities(leftVal[0], leftVal[1]);
     }
 
     @Test
@@ -78,10 +80,10 @@ public interface BridgeTableTest
             Pair.of(leftKey[0], rightKey[0])
         ));
 
-        assertLefts(rightKey[0], leftVal[0]);
-        assertLefts(rightKey[1]);
-        assertRights(leftKey[0], rightVal[0]);
-        assertRights(leftKey[1]);
+        withLeftId(leftKey[0]).assertOneRight(rightKey[0], rightVal[0]);
+        withLeftId(leftKey[1]).assertNothing();
+        withRightId(rightKey[0]).assertOneLeft(leftKey[0], leftVal[0]);
+        withRightId(rightKey[1]).assertNothing();
     }
 
     @Test
@@ -99,23 +101,11 @@ public interface BridgeTableTest
         assertFalse(table().exists(leftKey[1], rightKey[0]));
     }
 
-    @SafeVarargs
-    private void assertLefts(@NotNull IR rightId, @NotNull EL @NotNull... entities) {
-        assertEquals(entities.length > 0, table().existsRight(rightId));
-        assertEquals(entities.length, table().countLefts(rightId));
-        List<EL> each = new ArrayList<>();
-        table().forEachLeft(rightId, each::add);
-        assertThat(each).containsExactlyElementsIn(entities);
-        assertThat(table().fetchAllLefts(rightId)).containsExactlyElementsIn(entities);
+    private @NotNull BridgeLeftIdSubject<IL, IR, ER, T> withLeftId(IL leftId) {
+        return withTable(table()).forLeftId(leftId);
     }
 
-    @SafeVarargs
-    private void assertRights(@NotNull IL leftId, @NotNull ER @NotNull ... entities) {
-        assertEquals(entities.length > 0, table().existsLeft(leftId));
-        assertEquals(entities.length, table().countRights(leftId));
-        List<ER> each = new ArrayList<>();
-        table().forEachRight(leftId, each::add);
-        assertThat(each).containsExactlyElementsIn(entities);
-        assertThat(table().fetchAllRights(leftId)).containsExactlyElementsIn(entities);
+    private @NotNull BridgeRightIdSubject<IL, EL, IR, T> withRightId(IR rightId) {
+        return withTable(table()).forRightId(rightId);
     }
 }

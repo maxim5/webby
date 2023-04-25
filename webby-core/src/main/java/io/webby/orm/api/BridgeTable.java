@@ -51,10 +51,22 @@ public interface BridgeTable<IL, EL, IR, ER> {
     int countRights(@NotNull IL leftId);
 
     /**
+     * Returns an iterator over the left ids associated with the <code>rightId</code>.
+     * <b>Important</b>: the caller is responsible for closing the iterator:
+     * <pre>
+     *     try (ResultSetIterator&lt;Entity&gt; iterator = table.iterateLeftIds(id)) {
+     *         iterator.forEachRemaining(action);
+     *     }
+     * </pre>
+     */
+    @MustBeClosed
+    @NotNull ResultSetIterator<IL> iterateLeftIds(@NotNull IR rightId);
+
+    /**
      * Returns an iterator over the left entities associated with the <code>rightId</code>.
      * <b>Important</b>: the caller is responsible for closing the iterator:
      * <pre>
-     *     try (ResultSetIterator&lt;Entity&gt; iterator = table.iterateLefts(index)) {
+     *     try (ResultSetIterator&lt;Integer&gt; iterator = table.iterateLefts(id)) {
      *         iterator.forEachRemaining(action);
      *     }
      * </pre>
@@ -63,10 +75,22 @@ public interface BridgeTable<IL, EL, IR, ER> {
     @NotNull ResultSetIterator<EL> iterateLefts(@NotNull IR rightId);
 
     /**
+     * Returns an iterator over the right ids associated with the <code>leftId</code>.
+     * <b>Important</b>: the caller is responsible for closing the iterator:
+     * <pre>
+     *     try (ResultSetIterator&lt;Integer&gt; iterator = table.iterateRightIds(id)) {
+     *         iterator.forEachRemaining(action);
+     *     }
+     * </pre>
+     */
+    @MustBeClosed
+    @NotNull ResultSetIterator<IR> iterateRightIds(@NotNull IL leftId);
+
+    /**
      * Returns an iterator over the right entities associated with the <code>leftId</code>.
      * <b>Important</b>: the caller is responsible for closing the iterator:
      * <pre>
-     *     try (ResultSetIterator&lt;Entity&gt; iterator = table.iterateRights(index)) {
+     *     try (ResultSetIterator&lt;Entity&gt; iterator = table.iterateRights(id)) {
      *         iterator.forEachRemaining(action);
      *     }
      * </pre>
@@ -75,10 +99,28 @@ public interface BridgeTable<IL, EL, IR, ER> {
     @NotNull ResultSetIterator<ER> iterateRights(@NotNull IL leftId);
 
     /**
+     * Iterates over all left ids associated with the <code>rightId</code> and calls an {@code action} on each.
+     */
+    default void forEachLeftId(@NotNull IR rightId, @NotNull Consumer<? super IL> action) {
+        try (ResultSetIterator<IL> iterator = iterateLeftIds(rightId)) {
+            iterator.forEachRemaining(action);
+        }
+    }
+
+    /**
      * Iterates over all left entities associated with the <code>rightId</code> and calls an {@code action} on each.
      */
     default void forEachLeft(@NotNull IR rightId, @NotNull Consumer<? super EL> action) {
         try (ResultSetIterator<EL> iterator = iterateLefts(rightId)) {
+            iterator.forEachRemaining(action);
+        }
+    }
+
+    /**
+     * Iterates over all right ids associated with the <code>leftId</code> and calls an {@code action} on each.
+     */
+    default void forEachRightId(@NotNull IL leftId, @NotNull Consumer<? super IR> action) {
+        try (ResultSetIterator<IR> iterator = iterateRightIds(leftId)) {
             iterator.forEachRemaining(action);
         }
     }
@@ -93,10 +135,28 @@ public interface BridgeTable<IL, EL, IR, ER> {
     }
 
     /**
+     * Fetches all left ids associated with the <code>rightId</code>.
+     */
+    default @NotNull List<IL> fetchAllLeftIds(@NotNull IR rightId) {
+        try (ResultSetIterator<IL> iterator = iterateLeftIds(rightId)) {
+            return Lists.newArrayList(iterator);
+        }
+    }
+
+    /**
      * Fetches all left entities associated with the <code>rightId</code>.
      */
     default @NotNull List<EL> fetchAllLefts(@NotNull IR rightId) {
         try (ResultSetIterator<EL> iterator = iterateLefts(rightId)) {
+            return Lists.newArrayList(iterator);
+        }
+    }
+
+    /**
+     * Fetches all right ids associated with the <code>leftId</code>.
+     */
+    default @NotNull List<IR> fetchAllRightIds(@NotNull IL leftId) {
+        try (ResultSetIterator<IR> iterator = iterateRightIds(leftId)) {
             return Lists.newArrayList(iterator);
         }
     }

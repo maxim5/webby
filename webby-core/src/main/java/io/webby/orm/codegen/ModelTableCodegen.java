@@ -1040,9 +1040,31 @@ public class ModelTableCodegen extends BaseCodegen {
         }
         
         @Override
+        public @Nonnull ResultSetIterator<$left_index_wrap> iterateLeftIds(@Nonnull $right_index_wrap rightId) {
+            String query = "SELECT $left_fk_sql FROM $table_sql WHERE $right_fk_sql = ?";
+            try {
+                return ResultSetIterator.of(runner().prepareQuery(query, rightId).executeQuery(),
+                                            result -> result.$left_result_getter(1));
+            } catch (SQLException e) {
+                throw new QueryException("Failed to iterate over $TableClass", query, rightId, e);
+            }
+        }
+        
+        @Override
         public @Nonnull ResultSetIterator<$left_entity> iterateLefts(@Nonnull $right_index_wrap rightId) {
             String sql = "$left_pk_sql IN (SELECT $left_fk_sql FROM $table_sql WHERE $right_fk_sql = ?)";
             return leftsTable.iterator(Where.hardcoded(sql, Args.of(rightId)));
+        }
+        
+        @Override
+        public @Nonnull ResultSetIterator<$right_index_wrap> iterateRightIds(@Nonnull $left_index_wrap leftId) {
+            String query = "SELECT $right_fk_sql FROM $table_sql WHERE $left_fk_sql = ?";
+            try {
+                return ResultSetIterator.of(runner().prepareQuery(query, leftId).executeQuery(),
+                                            result -> result.$right_result_getter(1));
+            } catch (SQLException e) {
+                throw new QueryException("Failed to iterate over $TableClass", query, leftId, e);
+            }
         }
         
         @Override
@@ -1119,24 +1141,26 @@ public class ModelTableCodegen extends BaseCodegen {
         TableArch leftTable = leftField.getForeignTable();
         TableArch rightTable = rightField.getForeignTable();
 
-        TableField leftTablePrimaryField = requireNonNull(leftTable.primaryKeyField());
-        TableField rightTablePrimaryField = requireNonNull(rightTable.primaryKeyField());
+        OneColumnTableField leftTablePrimaryField = leftField.primaryKeyFieldInForeignTable();
+        OneColumnTableField rightTablePrimaryField = rightField.primaryKeyFieldInForeignTable();
 
         return EasyMaps.asMap(
             "$LeftTable", leftTable.javaName(),
             "$left_table_sql", leftTable.sqlName(),
             "$left_index_native", Naming.shortCanonicalJavaName(leftTablePrimaryField.javaType()),
             "$left_index_wrap", Naming.shortCanonicalJavaName(Primitives.wrap(leftTablePrimaryField.javaType())),
-            "$left_pk_sql", leftTablePrimaryField.columns().get(0).sqlName(),
-            "$left_fk_sql", leftField.columns().get(0).sqlName(),
+            "$left_pk_sql", leftTablePrimaryField.column().sqlName(),
+            "$left_fk_sql", leftField.foreignKeyColumn().sqlName(),
+            "$left_result_getter", leftTablePrimaryField.column().jdbcType().getterMethod(),
             "$left_entity", Naming.shortCanonicalJavaName(leftTable.modelClass()),
 
             "$RightTable", rightTable.javaName(),
             "$right_table_sql", rightTable.sqlName(),
             "$right_index_native", Naming.shortCanonicalJavaName(rightTablePrimaryField.javaType()),
             "$right_index_wrap", Naming.shortCanonicalJavaName(Primitives.wrap(rightTablePrimaryField.javaType())),
-            "$right_pk_sql", rightTablePrimaryField.columns().get(0).sqlName(),
-            "$right_fk_sql", rightField.columns().get(0).sqlName(),
+            "$right_pk_sql", rightTablePrimaryField.column().sqlName(),
+            "$right_fk_sql", rightField.foreignKeyColumn().sqlName(),
+            "$right_result_getter", rightTablePrimaryField.column().jdbcType().getterMethod(),
             "$right_entity", Naming.shortCanonicalJavaName(rightTable.modelClass())
         );
     }
