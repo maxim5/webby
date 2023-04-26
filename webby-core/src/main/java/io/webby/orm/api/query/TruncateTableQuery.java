@@ -6,15 +6,8 @@ import io.webby.orm.api.TableMeta;
 import org.jetbrains.annotations.NotNull;
 
 public class TruncateTableQuery extends Unit implements DataDefinitionQuery {
-    private final String tableName;
-
-    private TruncateTableQuery(@NotNull String query, @NotNull String tableName) {
+    private TruncateTableQuery(@NotNull String query) {
         super(query);
-        this.tableName = tableName;
-    }
-
-    public @NotNull String tableName() {
-        return tableName;
     }
 
     public static @NotNull Builder of(@NotNull String tableName) {
@@ -41,7 +34,7 @@ public class TruncateTableQuery extends Unit implements DataDefinitionQuery {
                 case SQLite -> "DELETE FROM %s".formatted(tableName);
                 default -> "TRUNCATE TABLE %s".formatted(tableName);
             };
-            return new TruncateTableQuery(query, tableName);
+            return new TruncateTableQuery(query);
         }
     }
 }

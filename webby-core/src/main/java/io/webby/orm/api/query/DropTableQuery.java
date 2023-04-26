@@ -6,15 +6,8 @@ import io.webby.orm.api.TableMeta;
 import org.jetbrains.annotations.NotNull;
 
 public class DropTableQuery extends Unit implements DataDefinitionQuery {
-    private final String tableName;
-
-    private DropTableQuery(@NotNull String query, @NotNull String tableName) {
+    private DropTableQuery(@NotNull String query) {
         super(query);
-        this.tableName = tableName;
-    }
-
-    public @NotNull String tableName() {
-        return tableName;
     }
 
     public static @NotNull Builder of(@NotNull String tableName) {
@@ -59,7 +52,7 @@ public class DropTableQuery extends Unit implements DataDefinitionQuery {
                 builder.append(" CASCADE");
             }
             String query = builder.toString();
-            return new DropTableQuery(query, tableName);
+            return new DropTableQuery(query);
         }
     }
 }

@@ -7,7 +7,9 @@ import com.google.inject.Inject;
 import io.webby.app.Settings;
 import io.webby.common.GuiceCompleteEvent;
 import io.webby.orm.api.Connector;
+import io.webby.orm.api.QueryRunner;
 import io.webby.orm.api.TableMeta;
+import io.webby.orm.api.query.AlterTableAddForeignKeyQuery;
 import io.webby.orm.api.query.CreateTableQuery;
 import org.jetbrains.annotations.NotNull;
 
@@ -63,9 +65,14 @@ public class DDL {
         }
 
         try {
-            connector().runner().runAdminInTransaction(admin -> {
+            runner().runAdminInTransaction(admin -> {
+                // Table creation with foreign references may require the referenced table to be created first.
+                // Also, there could potentially be cycled. Hence, FK creation is done separately.
                 for (TableMeta table : getAllTables()) {
                     admin.createTable(CreateTableQuery.of(table).ifNotExists().withEnforceForeignKey(false));
+                }
+                for (TableMeta table : getAllTables()) {
+                    admin.alterTable(AlterTableAddForeignKeyQuery.of(table));
                 }
             });
         } catch (SQLException e) {
@@ -79,5 +86,9 @@ public class DDL {
 
     protected @NotNull Connector connector() {
         return manager.connector();
+    }
+
+    protected @NotNull QueryRunner runner() {
+        return connector().runner();
     }
 }

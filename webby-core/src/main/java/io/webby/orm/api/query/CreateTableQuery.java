@@ -16,15 +16,8 @@ import java.util.List;
 import java.util.Map;
 
 public class CreateTableQuery extends Unit implements DataDefinitionQuery {
-    private final String tableName;
-
-    private CreateTableQuery(@NotNull String query, @NotNull String tableName) {
+    private CreateTableQuery(@NotNull String query) {
         super(query);
-        this.tableName = tableName;
-    }
-
-    public @NotNull String tableName() {
-        return tableName;
     }
 
     public static @NotNull Builder of(@NotNull TableMeta meta) {
@@ -96,7 +89,7 @@ public class CreateTableQuery extends Unit implements DataDefinitionQuery {
                     %s
                 )
                 """.formatted(ifNotExists ? "IF NOT EXISTS " : "", meta.sqlTableName(), String.join(",\n    ", lines));
-            return new CreateTableQuery(query, meta.sqlTableName());
+            return new CreateTableQuery(query);
         }
     }
 

@@ -1,11 +1,11 @@
 package io.webby.orm.api;
 
 import com.google.common.flogger.FluentLogger;
-import io.webby.orm.api.query.CreateTableQuery;
-import io.webby.orm.api.query.DropTableQuery;
-import io.webby.orm.api.query.HardcodedSelectQuery;
-import io.webby.orm.api.query.TruncateTableQuery;
+import com.google.common.flogger.LazyArgs;
+import com.google.errorprone.annotations.CanIgnoreReturnValue;
+import io.webby.orm.api.query.*;
 import io.webby.util.base.Unchecked;
+import io.webby.util.func.ThrowConsumer;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
@@ -48,34 +48,66 @@ public class DbAdmin {
         };
     }
 
-    public void createTable(@NotNull CreateTableQuery query) throws SQLException {
-        log.at(Level.INFO).log("Creating SQL table: `%s`...", query.tableName());
-        int rows = runner().runUpdate(query);
-        log.at(Level.FINER).log("Query OK, %d rows affected", rows);
+    public void ignoringForeignKeyChecks(@NotNull ThrowConsumer<DbAdmin, SQLException> action) throws SQLException {
+        try {
+            setOptionIfSupported("foreign_key_checks", "0");
+            action.accept(this);
+        } finally {
+            setOptionIfSupported("foreign_key_checks", "1");
+        }
     }
 
-    public void createTable(@NotNull CreateTableQuery.Builder builder) throws SQLException {
+    @CanIgnoreReturnValue
+    public boolean setOptionIfSupported(@NotNull String name, @NotNull String value) {
+        if (engine() == Engine.MySQL || engine() == Engine.H2) {
+            doRunUpdate(hardcoded("SET %s = %s".formatted(name, value)));
+            return true;
+        }
+        return false;
+    }
+
+    public void createTable(@NotNull CreateTableQuery query) {
+        doRunUpdate(query);
+    }
+
+    public void createTable(@NotNull CreateTableQuery.Builder builder) {
         createTable(builder.build(engine()));
     }
 
-    public void dropTable(@NotNull DropTableQuery query) throws SQLException {
-        log.at(Level.INFO).log("Deleting SQL table: `%s`...", query.tableName());
-        int rows = runner().runUpdate(query);
-        log.at(Level.FINER).log("Query OK, %d rows affected", rows);
+    public void alterTable(@NotNull AlterTableQuery query) {
+        doRunUpdate(query);
     }
 
-    public void dropTable(@NotNull DropTableQuery.Builder builder) throws SQLException {
+    public void alterTable(@NotNull AlterTableAddForeignKeyQuery.Builder builder) {
+        for (AlterTableAddForeignKeyQuery query : builder.build(engine())) {
+            doRunUpdate(query);
+        }
+    }
+
+    public void dropTable(@NotNull DropTableQuery query) {
+        doRunUpdate(query);
+    }
+
+    public void dropTable(@NotNull DropTableQuery.Builder builder) {
         dropTable(builder.build(engine()));
     }
 
-    public void truncateTable(@NotNull TruncateTableQuery query) throws SQLException {
-        log.at(Level.INFO).log("Truncating SQL table: `%s`...", query.tableName());
-        int rows = runner().runUpdate(query);
-        log.at(Level.FINER).log("Query OK, %d rows affected", rows);
+    public void truncateTable(@NotNull TruncateTableQuery query) {
+        doRunUpdate(query);
     }
 
-    public void truncateTable(@NotNull TruncateTableQuery.Builder builder) throws SQLException {
+    public void truncateTable(@NotNull TruncateTableQuery.Builder builder) {
         truncateTable(builder.build(engine()));
+    }
+
+    private void doRunUpdate(@NotNull DataDefinitionQuery query) {
+        try {
+            log.at(Level.INFO).log("Running: %s ...", LazyArgs.lazy(() -> describeQuery(query.repr())));
+            int rows = runner().runUpdate(query);
+            log.at(Level.FINER).log("Query OK, %d rows affected", rows);
+        } catch (SQLException e) {
+            throw new QueryException("Failed to run admin query", query.repr(), query.args(), e);
+        }
     }
 
     private @NotNull Engine engine() {
@@ -84,5 +116,22 @@ public class DbAdmin {
 
     private @NotNull QueryRunner runner() {
         return connector.runner();
+    }
+
+    private static @NotNull String describeQuery(@NotNull String query) {
+        return query.lines().limit(1).findFirst().orElse(query).replaceAll("[()]", "").trim();
+    }
+
+    private static @NotNull DataDefinitionQuery hardcoded(@NotNull String query) {
+        return new DataDefinitionQuery() {
+            @Override
+            public @NotNull String repr() {
+                return query;
+            }
+            @Override
+            public @NotNull Args args() {
+                return Args.of();
+            }
+        };
     }
 }
