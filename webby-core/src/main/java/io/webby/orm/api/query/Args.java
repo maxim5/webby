@@ -48,6 +48,7 @@ import static io.webby.util.collect.ImmutableArrayList.toImmutableArrayList;
 @Immutable
 public final class Args {
     private static final FluentLogger log = FluentLogger.forEnclosingClass();
+    private static final Args EMPTY_ARGS = new Args(InternalType.GENERIC_LIST, ImmutableArrayList.of());
 
     private final InternalType type;     // used to optimize the storage (internal and external lists)
     private final Iterable<?> internal;  // original set of args, may contain unresolved
@@ -67,7 +68,7 @@ public final class Args {
     }
 
     public static @NotNull Args of() {
-        return new Args(InternalType.GENERIC_LIST, ImmutableArrayList.of());
+        return EMPTY_ARGS;
     }
 
     public static @NotNull Args of(@Nullable Object @NotNull ... args) {
