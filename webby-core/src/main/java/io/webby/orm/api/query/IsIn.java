@@ -1,5 +1,6 @@
 package io.webby.orm.api.query;
 
+import com.google.errorprone.annotations.Immutable;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.List;
@@ -8,6 +9,7 @@ import static io.webby.orm.api.query.Args.flattenArgsOf;
 import static io.webby.orm.api.query.InvalidQueryException.assure;
 import static io.webby.orm.api.query.Representables.COMMA_JOINER;
 
+@Immutable
 public class IsIn extends Unit implements BoolTerm {
     public IsIn(@NotNull Term lhs, @NotNull List<? extends Term> rhs) {
         super("%s IN (%s)".formatted(lhs.repr(), rhs.stream().map(Representable::repr).collect(COMMA_JOINER)),

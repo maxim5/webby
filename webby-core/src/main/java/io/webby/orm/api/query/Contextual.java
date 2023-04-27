@@ -1,5 +1,6 @@
 package io.webby.orm.api.query;
 
+import com.google.errorprone.annotations.Immutable;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.List;
@@ -25,6 +26,7 @@ import java.util.function.Function;
  * @param <Q> the type of query having unresolved args (usually a {@link Filter} instance, e.g. {@link Where})
  * @param <C> the type of context used for resolution (usually a chunk, e.g. {@link List<EntityData>})
  */
+@Immutable
 public abstract class Contextual<Q extends HasArgs, C> implements Representable {
     private final Q query;
 

@@ -1,10 +1,12 @@
 package io.webby.orm.api.query;
 
+import com.google.errorprone.annotations.Immutable;
 import org.jetbrains.annotations.NotNull;
 
 import static io.webby.orm.api.query.Args.flattenArgsOf;
 import static io.webby.orm.api.query.InvalidQueryException.assure;
 
+@Immutable
 public class Like extends Unit implements BoolTerm {
     public Like(@NotNull Term lhs, @NotNull Term rhs) {
         super("%s LIKE %s".formatted(lhs.repr(), rhs.repr()), flattenArgsOf(lhs, rhs));

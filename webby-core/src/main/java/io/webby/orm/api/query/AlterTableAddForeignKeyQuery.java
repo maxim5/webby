@@ -1,5 +1,6 @@
 package io.webby.orm.api.query;
 
+import com.google.errorprone.annotations.Immutable;
 import io.webby.orm.api.BaseTable;
 import io.webby.orm.api.Engine;
 import io.webby.orm.api.TableMeta;
@@ -11,6 +12,7 @@ import java.util.List;
 
 import static java.util.Objects.requireNonNull;
 
+@Immutable
 public class AlterTableAddForeignKeyQuery extends Unit implements AlterTableQuery {
     private AlterTableAddForeignKeyQuery(@NotNull String query) {
         super(query);

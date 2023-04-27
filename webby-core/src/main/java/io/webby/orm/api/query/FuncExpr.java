@@ -1,5 +1,6 @@
 package io.webby.orm.api.query;
 
+import com.google.errorprone.annotations.Immutable;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.List;
@@ -12,6 +13,7 @@ import static io.webby.orm.api.query.Args.flattenArgsOf;
  * If the function is aggregate, then the expression is also aggregate ({@link #isAggregate()}),
  * then can be used in {@link SelectGroupBy} queries.
  */
+@Immutable
 public class FuncExpr extends Unit implements Term {
     private final Func func;
 

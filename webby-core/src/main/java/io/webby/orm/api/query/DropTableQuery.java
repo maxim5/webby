@@ -1,10 +1,12 @@
 package io.webby.orm.api.query;
 
+import com.google.errorprone.annotations.Immutable;
 import io.webby.orm.api.BaseTable;
 import io.webby.orm.api.Engine;
 import io.webby.orm.api.TableMeta;
 import org.jetbrains.annotations.NotNull;
 
+@Immutable
 public class DropTableQuery extends Unit implements DataDefinitionQuery {
     private DropTableQuery(@NotNull String query) {
         super(query);

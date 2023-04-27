@@ -1,11 +1,13 @@
 package io.webby.orm.api.query;
 
+import com.google.errorprone.annotations.Immutable;
 import org.jetbrains.annotations.NotNull;
 
 /**
  * A query unit with an alias.
  * SQL repr: <code>[term] AS [name]</code>.
  */
+@Immutable
 public class NamedAs extends Unit implements Named {
     private final Term term;
     private final String name;

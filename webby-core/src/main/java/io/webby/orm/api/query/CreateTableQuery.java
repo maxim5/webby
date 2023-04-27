@@ -1,5 +1,6 @@
 package io.webby.orm.api.query;
 
+import com.google.errorprone.annotations.Immutable;
 import io.webby.orm.api.BaseTable;
 import io.webby.orm.api.Engine;
 import io.webby.orm.api.TableMeta;
@@ -15,6 +16,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
+@Immutable
 public class CreateTableQuery extends Unit implements DataDefinitionQuery {
     private CreateTableQuery(@NotNull String query) {
         super(query);

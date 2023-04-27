@@ -1,7 +1,9 @@
 package io.webby.orm.api.query;
 
+import com.google.errorprone.annotations.Immutable;
 import org.jetbrains.annotations.NotNull;
 
+@Immutable
 public class Not extends Unit implements BoolTerm {
     public Not(@NotNull BoolTerm term) {
         super(composeRepr(term), term.args());

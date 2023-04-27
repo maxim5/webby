@@ -1,7 +1,9 @@
 package io.webby.orm.api.query;
 
+import com.google.errorprone.annotations.Immutable;
 import org.jetbrains.annotations.NotNull;
 
+@Immutable
 public class NumberLiteral extends Unit implements Term {
     public NumberLiteral(@NotNull Number num) {
         super(num.toString());

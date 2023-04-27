@@ -1,7 +1,9 @@
 package io.webby.orm.api.query;
 
+import com.google.errorprone.annotations.Immutable;
 import org.jetbrains.annotations.NotNull;
 
+@Immutable
 public record HardcodedNumericTerm(@NotNull String repr) implements Term {
     @Override
     public @NotNull TermType type() {
