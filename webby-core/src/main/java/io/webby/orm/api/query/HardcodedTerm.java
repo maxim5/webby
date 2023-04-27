@@ -4,14 +4,21 @@ import com.google.errorprone.annotations.Immutable;
 import org.jetbrains.annotations.NotNull;
 
 @Immutable
-public record HardcodedTerm(@NotNull String repr, @NotNull TermType type) implements Term {
-    @Override
-    public @NotNull Args args() {
-        return Args.of();
+public class HardcodedTerm extends Unit implements Term {
+    private final @NotNull TermType type;
+
+    public HardcodedTerm(@NotNull String repr, @NotNull Args args, @NotNull TermType type) {
+        super(repr, args);
+        this.type = type;
+    }
+
+    public HardcodedTerm(@NotNull String repr, @NotNull TermType type) {
+        super(repr);
+        this.type = type;
     }
 
     @Override
-    public String toString() {
-        return repr;
+    public @NotNull TermType type() {
+        return type;
     }
 }
