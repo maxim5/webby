@@ -1,5 +1,6 @@
 package io.webby.orm.api.query;
 
+import io.webby.orm.api.TableMeta;
 import org.jetbrains.annotations.NotNull;
 
 /**
@@ -21,5 +22,19 @@ public interface Column extends Named {
      */
     default @NotNull DistinctColumn distinct() {
         return new DistinctColumn(this);
+    }
+
+    /**
+     * Wraps this column to make it attributed to a given table.
+     */
+    default @NotNull FullColumn fullFrom(@NotNull String table) {
+        return new FullColumn(this, table);
+    }
+
+    /**
+     * Wraps this column to make it attributed to a given table.
+     */
+    default @NotNull FullColumn fullFrom(@NotNull TableMeta table) {
+        return fullFrom(table.sqlTableName());
     }
 }

@@ -152,7 +152,7 @@ public class ModelTableCodegen extends BaseCodegen {
             baseTableClasses().stream().map(FQN::of),
             Stream.of(
                 Connector.class, QueryRunner.class, QueryException.class, Engine.class, ReadFollow.class, DbAdmin.class,
-                Filter.class, Where.class, Args.class, io.webby.orm.api.query.Column.class, TermType.class,
+                Filter.class, Where.class, Args.class, io.webby.orm.api.query.Column.class, FullColumn.class, TermType.class,
                 ResultSetIterator.class, TableMeta.class,
                 EntityData.class, EntityIntData.class, EntityLongData.class, EntityColumnMap.class,
                 BatchEntityData.class, BatchEntityIntData.class, BatchEntityLongData.class,
@@ -1244,10 +1244,14 @@ public class ModelTableCodegen extends BaseCodegen {
                 $all_columns_list
             );
             
+            public final FullColumn FULL = this.fullFrom(META);
+            
             private final TermType type;
+
             OwnColumn(TermType type) {
                 this.type = type;
             }
+
             @Override
             public @Nonnull TermType type() {
                 return type;

@@ -89,6 +89,26 @@ public class SelectQueryTest {
     }
 
     @Test
+    public void selectWhere_select_full_columns() {
+        SelectQuery query = SelectWhere.from(PERSON_META)
+            .select(PersonColumn.id.FULL, PersonColumn.sex.FULL, PersonColumn.name.FULL)
+            .orderBy(PersonColumn.id)
+            .build();
+        assertThat(query).matches("""
+            SELECT person.id, person.sex, person.name
+            FROM person
+            ORDER BY id ASC
+            """);
+        assertThat(query).containsNoArgs();
+        assertRows(SQL.runQuery(query)).containsExactly(
+            array(1, FEMALE, "Kate"),
+            array(2, MALE, "Bill"),
+            array(3, MALE, "Ivan"),
+            array(4, FEMALE, "Yuan")
+        );
+    }
+
+    @Test
     public void selectWhere_order_by_sex_country() {
         SelectQuery query = SelectWhere.from(PERSON_META)
                 .select(PersonColumn.sex, PersonColumn.country)

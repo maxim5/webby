@@ -2,6 +2,7 @@ package io.webby.orm.testing;
 
 import io.webby.orm.api.TableMeta;
 import io.webby.orm.api.query.Column;
+import io.webby.orm.api.query.FullColumn;
 import io.webby.orm.api.query.TermType;
 import org.jetbrains.annotations.NotNull;
 
@@ -18,6 +19,8 @@ public class PersonTableData {
         iq(TermType.NUMBER),
         height(TermType.NUMBER),
         photo(TermType.STRING);
+
+        public final FullColumn FULL = this.fullFrom(PERSON_META);
 
         private final TermType type;
 
