@@ -102,6 +102,10 @@ public class SelectWhere extends Unit implements TypedSelectQuery {
             filter.with(orderBy);
             return this;
         }
+
+        public @NotNull Builder orderBy(@NotNull Term term) {
+            return orderBy(OrderBy.of(term, Order.ASC));
+        }
     
         public @NotNull Builder with(@NotNull LimitClause limit) {
             filter.with(limit);
