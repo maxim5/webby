@@ -6,7 +6,7 @@ import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
 
 /**
- * Marks the class as a many-to-many association, for which a bridge table is to be generated.
+ * Marks the model class as a many-to-many association, for which a bridge table is to be generated.
  */
 @Retention(RetentionPolicy.RUNTIME)
 @Target({ElementType.TYPE})
