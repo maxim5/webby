@@ -13,6 +13,11 @@ import java.sql.Connection;
 import java.sql.SQLException;
 import java.util.logging.Level;
 
+/**
+ * An admin API to the database, e.g. DDL queries for DB schema manipulation.
+ *
+ * @see DataDefinitionQuery
+ */
 public class DbAdmin {
     private static final FluentLogger log = FluentLogger.forEnclosingClass();
 

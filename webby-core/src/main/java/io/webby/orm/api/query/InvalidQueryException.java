@@ -3,6 +3,9 @@ package io.webby.orm.api.query;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
+/**
+ * Represents an error related to query preparation or execution.
+ */
 public class InvalidQueryException extends RuntimeException {
     public InvalidQueryException(@NotNull String message) {
         super(message);
