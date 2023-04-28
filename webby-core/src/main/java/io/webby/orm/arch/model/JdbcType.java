@@ -1,4 +1,4 @@
-package io.webby.orm.arch;
+package io.webby.orm.arch.model;
 
 import com.google.common.collect.ImmutableMap;
 import com.google.common.primitives.Primitives;

@@ -8,7 +8,7 @@ import io.webby.orm.api.ForeignObj;
 import io.webby.orm.api.annotate.Model;
 import io.webby.orm.api.annotate.Sql;
 import io.webby.orm.arch.InvalidSqlModelException;
-import io.webby.orm.arch.JdbcType;
+import io.webby.orm.arch.model.JdbcType;
 import io.webby.orm.testing.FakeModelAdaptersScanner;
 import io.webby.util.base.EasyPrimitives.OptionalBool;
 import io.webby.util.collect.Pair;

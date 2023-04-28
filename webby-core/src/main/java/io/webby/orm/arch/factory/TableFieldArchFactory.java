@@ -1,8 +1,6 @@
 package io.webby.orm.arch.factory;
 
 import com.google.common.collect.ImmutableList;
-import io.webby.orm.arch.Column;
-import io.webby.orm.arch.ColumnType;
 import io.webby.orm.arch.factory.FieldResolver.ResolveResult;
 import io.webby.orm.arch.model.*;
 import io.webby.orm.arch.util.AnnotationsAnalyzer;

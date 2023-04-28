@@ -2,8 +2,6 @@ package io.webby.orm.arch.factory;
 
 import com.google.common.truth.Truth;
 import com.google.errorprone.annotations.CanIgnoreReturnValue;
-import io.webby.orm.arch.Column;
-import io.webby.orm.arch.JdbcType;
 import io.webby.orm.arch.model.*;
 import io.webby.orm.codegen.ModelInput;
 import io.webby.orm.testing.FakeModelAdaptersScanner;

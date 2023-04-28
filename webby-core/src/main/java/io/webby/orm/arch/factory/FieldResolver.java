@@ -1,6 +1,6 @@
 package io.webby.orm.arch.factory;
 
-import io.webby.orm.arch.JdbcType;
+import io.webby.orm.arch.model.JdbcType;
 import io.webby.orm.arch.model.MapperApi;
 import io.webby.orm.arch.model.TableArch;
 import io.webby.orm.arch.util.AnnotationsAnalyzer;

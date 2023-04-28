@@ -1,4 +1,4 @@
-package io.webby.orm.arch;
+package io.webby.orm.arch.model;
 
 import io.webby.orm.api.ReadFollow;
 import org.jetbrains.annotations.NotNull;

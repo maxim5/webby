@@ -1,4 +1,4 @@
-package io.webby.orm.arch;
+package io.webby.orm.arch.model;
 
 import com.google.common.base.Strings;
 import io.webby.orm.api.annotate.ManyToMany;

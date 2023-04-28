@@ -4,7 +4,7 @@ import io.webby.orm.api.Foreign;
 import io.webby.orm.api.ForeignInt;
 import io.webby.orm.api.ForeignLong;
 import io.webby.orm.api.ForeignObj;
-import io.webby.orm.arch.JdbcType;
+import io.webby.orm.arch.model.JdbcType;
 import io.webby.orm.arch.model.TableArch;
 import io.webby.orm.arch.util.AnnotationsAnalyzer;
 import io.webby.orm.arch.util.JavaClassAnalyzer;

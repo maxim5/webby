@@ -45,7 +45,7 @@ public @interface Sql {
      * The mapper class must implement a {@link io.webby.util.func.Reversible} interface with
      * one argument matching the field class and the other argument matching a JDBC supported type.
      *
-     * @see io.webby.orm.arch.JdbcType
+     * @see io.webby.orm.arch.model.JdbcType
      */
     Class<?> via() default Void.class;
 

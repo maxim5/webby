@@ -1,7 +1,5 @@
 package io.webby.orm.arch.model;
 
-import io.webby.orm.arch.Column;
-import io.webby.orm.arch.JdbcType;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.Objects;

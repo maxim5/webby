@@ -2,10 +2,6 @@ package io.webby.orm.arch.model;
 
 import com.google.errorprone.annotations.Immutable;
 import io.webby.orm.api.ReadFollow;
-import io.webby.orm.arch.Column;
-import io.webby.orm.arch.HasColumns;
-import io.webby.orm.arch.HasPrefixedColumns;
-import io.webby.orm.arch.PrefixedColumn;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 

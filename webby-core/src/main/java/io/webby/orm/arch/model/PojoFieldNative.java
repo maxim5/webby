@@ -1,9 +1,6 @@
 package io.webby.orm.arch.model;
 
 import com.google.errorprone.annotations.Immutable;
-import io.webby.orm.arch.Column;
-import io.webby.orm.arch.ColumnType;
-import io.webby.orm.arch.JdbcType;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.Objects;

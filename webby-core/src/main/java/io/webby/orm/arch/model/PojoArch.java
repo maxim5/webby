@@ -1,8 +1,6 @@
 package io.webby.orm.arch.model;
 
 import com.google.common.collect.ImmutableList;
-import io.webby.orm.arch.Column;
-import io.webby.orm.arch.HasColumns;
 import io.webby.orm.arch.util.Naming;
 import io.webby.util.lazy.AtomicCacheCompute;
 import io.webby.util.lazy.CacheCompute;

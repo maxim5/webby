@@ -1,7 +1,7 @@
 package io.webby.orm.arch.factory;
 
 import com.google.common.collect.ImmutableList;
-import io.webby.orm.arch.BridgeInfo;
+import io.webby.orm.arch.model.BridgeInfo;
 import io.webby.orm.arch.model.TableArch;
 import io.webby.orm.arch.model.TableField;
 import io.webby.orm.arch.util.JavaClassAnalyzer;
