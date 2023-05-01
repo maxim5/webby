@@ -1,10 +1,10 @@
 package io.webby.orm.codegen;
 
-import io.webby.orm.api.query.BoolOpType;
 import io.webby.orm.api.ReadFollow;
-import io.webby.orm.arch.PrefixedColumn;
-import io.webby.orm.arch.TableArch;
-import io.webby.orm.arch.TableField;
+import io.webby.orm.api.query.BoolOpType;
+import io.webby.orm.arch.model.PrefixedColumn;
+import io.webby.orm.arch.model.TableArch;
+import io.webby.orm.arch.model.TableField;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.List;

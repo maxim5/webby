@@ -1,9 +1,11 @@
 package io.webby.orm.api.query;
 
+import com.google.errorprone.annotations.Immutable;
 import io.webby.orm.api.PageToken;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
+@Immutable
 public record Pagination(@Nullable ColumnTerm lastItem, @Nullable Order order, int offset, int limit) {
     public static final int NO_OFFSET = -1;
 

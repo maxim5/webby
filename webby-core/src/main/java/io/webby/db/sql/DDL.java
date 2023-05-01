@@ -7,9 +7,10 @@ import com.google.inject.Inject;
 import io.webby.app.Settings;
 import io.webby.common.GuiceCompleteEvent;
 import io.webby.orm.api.Connector;
-import io.webby.orm.api.Engine;
+import io.webby.orm.api.QueryRunner;
 import io.webby.orm.api.TableMeta;
-import io.webby.orm.codegen.SqlSchemaMaker;
+import io.webby.orm.api.query.AlterTableAddForeignKeyQuery;
+import io.webby.orm.api.query.CreateTableQuery;
 import org.jetbrains.annotations.NotNull;
 
 import java.sql.SQLException;
@@ -63,13 +64,15 @@ public class DDL {
             log.at(Level.WARNING).log("Automatic SQL table creation called in production");
         }
 
-        Engine engine = connector().engine();
         try {
-            connector().runner().runInTransaction(runner -> {
-                for (TableMeta meta : getAllTables()) {
-                    log.at(Level.INFO).log("Creating SQL table if not exists: `%s`...", meta.sqlTableName());
-                    String query = SqlSchemaMaker.makeCreateTableQuery(engine, meta);
-                    runner.runUpdate(query);
+            runner().runAdminInTransaction(admin -> {
+                // Table creation with foreign references may require the referenced table to be created first.
+                // Also, there could potentially be cycled. Hence, FK creation is done separately.
+                for (TableMeta table : getAllTables()) {
+                    admin.createTable(CreateTableQuery.of(table).ifNotExists().withEnforceForeignKey(false));
+                }
+                for (TableMeta table : getAllTables()) {
+                    admin.alterTable(AlterTableAddForeignKeyQuery.of(table));
                 }
             });
         } catch (SQLException e) {
@@ -83,5 +86,9 @@ public class DDL {
 
     protected @NotNull Connector connector() {
         return manager.connector();
+    }
+
+    protected @NotNull QueryRunner runner() {
+        return connector().runner();
     }
 }

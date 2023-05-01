@@ -8,6 +8,7 @@ import java.util.List;
 import java.util.Optional;
 import java.util.concurrent.atomic.AtomicReference;
 import java.util.stream.Collector;
+import java.util.stream.Stream;
 import java.util.stream.StreamSupport;
 
 import static io.webby.util.base.EasyCast.castAny;
@@ -31,6 +32,10 @@ public class EasyIterables {
 
     public static <E> int estimateSizeInt(@NotNull Iterable<E> items, int def) {
         return (int) estimateSize(items, def);
+    }
+
+    public static <E> boolean allEqual(@NotNull Stream<E> stream) {
+        return stream.distinct().limit(2).count() <= 1;
     }
 
     private static final Object MORE_THAN_ONE_ITEM = new Object();

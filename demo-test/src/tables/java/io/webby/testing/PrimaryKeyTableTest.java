@@ -1,9 +1,8 @@
 package io.webby.testing;
 
-import io.webby.orm.api.Engine;
-import io.webby.orm.api.Page;
-import io.webby.orm.api.TableMeta;
-import io.webby.orm.api.TableObj;
+import com.google.common.collect.Iterators;
+import com.google.common.collect.MoreCollectors;
+import io.webby.orm.api.*;
 import io.webby.orm.api.query.*;
 import io.webby.util.collect.ListBuilder;
 import org.jetbrains.annotations.NotNull;
@@ -11,6 +10,7 @@ import org.junit.jupiter.api.Test;
 
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collection;
 import java.util.List;
 
 import static com.google.common.truth.Truth.assertThat;
@@ -25,10 +25,83 @@ public interface PrimaryKeyTableTest<K, E, T extends TableObj<K, E>> extends Bas
     @Test
     default void empty() {
         assumeKeys(1);
-        assertTableCount(0);
         assertTableNotContains(keys()[0]);
-        assertThat(table().fetchAll()).isEmpty();
+        assertTableAll();
     }
+
+    /** {@link TableObj#exists} **/
+
+    @Test
+    default void exists() {
+        assumeKeys(1);
+        assertFalse(table().exists(Where.of(Shortcuts.TRUE)));
+        E entity = createEntity(keys()[0]);
+        assertEquals(1, table().insert(entity));
+        assertTrue(table().exists(Where.of(Shortcuts.TRUE)));
+    }
+
+    /** {@link TableObj#keyOf(Object)} **/
+
+    @Test
+    default void keyOf() {
+        assumeKeys(1);
+        E entity = createEntity(keys()[0]);
+        assertEquals(table().keyOf(entity), keys()[0]);
+    }
+
+    /** {@link TableObj#fetchAllMatching(Filter)} **/
+
+    @Test
+    default void fetch_all_matching_entities() {
+        assumeKeys(2);
+        Where byPk = Where.of(Shortcuts.lookupBy(findPkColumnOrDie(), keyToVar(keys()[0])));
+        Where all = Where.of(Shortcuts.TRUE);
+        Where none = Where.of(Shortcuts.FALSE);
+
+        assertThat(table().fetchAllMatching(byPk)).isEmpty();
+        assertThat(table().fetchAllMatching(all)).isEmpty();
+        assertThat(table().fetchAllMatching(none)).isEmpty();
+
+        E entity1 = createEntity(keys()[0]);
+        assertEquals(1, table().insert(entity1));
+        assertThat(table().fetchAllMatching(byPk)).containsExactly(entity1);
+        assertThat(table().fetchAllMatching(all)).containsExactly(entity1);
+        assertThat(table().fetchAllMatching(none)).isEmpty();
+
+        E entity2 = createEntity(keys()[1]);
+        assertEquals(1, table().insert(entity2));
+        assertThat(table().fetchAllMatching(byPk)).containsExactly(entity1);
+        assertThat(table().fetchAllMatching(all)).containsExactly(entity1, entity2);
+        assertThat(table().fetchAllMatching(none)).isEmpty();
+    }
+
+    /** {@link TableObj#getFirstMatchingOrNull(Filter)} **/
+
+    @Test
+    default void get_first_matching_entity() {
+        assumeKeys(2);
+        Where byPk = Where.of(Shortcuts.lookupBy(findPkColumnOrDie(), keyToVar(keys()[0])));
+        Where all = Where.of(Shortcuts.TRUE);
+        Where none = Where.of(Shortcuts.FALSE);
+
+        assertThat(table().getFirstMatchingOrNull(byPk)).isNull();
+        assertThat(table().getFirstMatchingOrNull(all)).isNull();
+        assertThat(table().getFirstMatchingOrNull(none)).isNull();
+
+        E entity1 = createEntity(keys()[0]);
+        assertEquals(1, table().insert(entity1));
+        assertThat(table().getFirstMatchingOrNull(byPk)).isEqualTo(entity1);
+        assertThat(table().getFirstMatchingOrNull(all)).isEqualTo(entity1);
+        assertThat(table().getFirstMatchingOrNull(none)).isNull();
+
+        E entity2 = createEntity(keys()[1]);
+        assertEquals(1, table().insert(entity2));
+        assertThat(table().getFirstMatchingOrNull(byPk)).isEqualTo(entity1);
+        assertThat(table().getFirstMatchingOrNull(all)).isAnyOf(entity1, entity2);
+        assertThat(table().getFirstMatchingOrNull(none)).isNull();
+    }
+
+    /** {@link TableObj#getBatchByPk(Collection)} **/
 
     @Test
     default void getBatchByPk() {
@@ -45,6 +118,8 @@ public interface PrimaryKeyTableTest<K, E, T extends TableObj<K, E>> extends Bas
         assertEquals(1, table().insert(entity2));
         assertMapContents(table().getBatchByPk(List.of(key1, key2)), key1, entity1, key2, entity2);
     }
+
+    /** {@link TableObj#insert(Object)} **/
 
     @Test
     default void insert_entity() {
@@ -73,6 +148,16 @@ public interface PrimaryKeyTableTest<K, E, T extends TableObj<K, E>> extends Bas
     }
 
     @Test
+    default void insert_entity_already_exists_throws() {
+        assumeKeys(1);
+        E entity = createEntity(keys()[0]);
+        assertEquals(1, table().insert(entity));
+        assertThrows(QueryException.class, () -> table().insert(entity));
+    }
+
+    /** {@link TableObj#insertIgnore(Object)} **/
+
+    @Test
     default void insert_ignore() {
         // Ways to make it work in H2:
         // 1) URL: ";MODE=MYSQL"
@@ -91,6 +176,47 @@ public interface PrimaryKeyTableTest<K, E, T extends TableObj<K, E>> extends Bas
         assertTableNotContains(keys()[1]);
         assertTableAll(entity);
     }
+
+    /** {@link TableObj#insertBatch(Collection)} **/
+
+    @Test
+    default void insert_batch_of_one() {
+        assumeKeys(2);
+        E entity = createEntity(keys()[0]);
+        assertThat(table().insertBatch(List.of(entity))).asList().containsExactly(1);
+
+        assertTableCount(1);
+        assertTableContains(keys()[0], entity);
+        assertTableNotContains(keys()[1]);
+        assertTableAll(entity);
+    }
+
+    @Test
+    default void insert_batch_of_two_different() {
+        assumeKeys(2);
+        E entity1 = createEntity(keys()[0]);
+        E entity2 = createEntity(keys()[1]);
+        assertThat(table().insertBatch(List.of(entity1, entity2))).asList().containsExactly(1, 1);
+
+        assertTableCount(2);
+        assertTableContains(keys()[0], entity1);
+        assertTableContains(keys()[1], entity2);
+        assertTableAll(entity1, entity2);
+    }
+
+    @Test
+    default void insert_batch_of_two_duplicates() {
+        assumeKeys(2);
+        E entity = createEntity(keys()[0]);
+        assertThrows(QueryException.class, () -> table().insertBatch(List.of(entity, entity)));
+
+        assertTableCount(1);
+        assertTableContains(keys()[0], entity);
+        assertTableNotContains(keys()[1]);
+        assertTableAll(entity);
+    }
+
+    /** {@link TableObj#updateByPk(Object)} **/
 
     @Test
     default void update_by_pk() {
@@ -116,6 +242,8 @@ public interface PrimaryKeyTableTest<K, E, T extends TableObj<K, E>> extends Bas
         assertThat(table().fetchAll()).isEmpty();
     }
 
+    /** {@link TableObj#updateByPkOrInsert(Object)} **/
+
     @Test
     default void update_by_pk_or_insert_new_entity() {
         assumeKeys(2);
@@ -140,6 +268,8 @@ public interface PrimaryKeyTableTest<K, E, T extends TableObj<K, E>> extends Bas
         assertTableNotContains(keys()[1]);
         assertTableAll(entity);
     }
+
+    /** {@link TableObj#updateWhere(Object, Where)} **/
 
     @Test
     default void update_where_true() {
@@ -171,6 +301,41 @@ public interface PrimaryKeyTableTest<K, E, T extends TableObj<K, E>> extends Bas
         assertTableAll(entity);
     }
 
+    /** {@link TableObj#updateWhereOrInsert(Object, Where)} **/
+
+    @Test
+    default void update_where_or_insert_true() {
+        assumeKeys(2);
+        E entity = createEntity(keys()[0], 0);
+        table().insert(entity);
+
+        E newEntity = createEntity(keys()[0], 1);
+        assertEquals(1, table().updateWhereOrInsert(newEntity, Where.of(Shortcuts.TRUE)));
+
+        assertTableCount(1);
+        assertTableContains(keys()[0], newEntity);
+        assertTableNotContains(keys()[1]);
+        assertTableAll(newEntity);
+    }
+
+    @Test
+    default void update_where_or_insert_false() {
+        assumeKeys(2);
+        E entity = createEntity(keys()[0], 0);
+        table().insert(entity);
+
+        E newEntity = createEntity(keys()[1], 1);
+        assertEquals(1, table().updateWhereOrInsert(newEntity, Where.of(Shortcuts.FALSE)));
+
+        assertTableCount(2);
+        assertTableContains(keys()[0], entity);
+        assertTableContains(keys()[1], newEntity);
+        assertTableAll(entity, newEntity);
+    }
+
+
+    /** {@link TableObj#deleteByPk(Object)} **/
+
     @Test
     default void delete_by_pk() {
         assumeKeys(1);
@@ -192,7 +357,9 @@ public interface PrimaryKeyTableTest<K, E, T extends TableObj<K, E>> extends Bas
         assertThat(table().fetchAll()).isEmpty();
     }
 
-        @Test
+    /** {@link TableObj#deleteWhere(Where)} **/
+
+    @Test
     default void delete_where_true() {
         assumeKeys(1);
         table().insert(createEntity(keys()[0], 0));
@@ -215,6 +382,8 @@ public interface PrimaryKeyTableTest<K, E, T extends TableObj<K, E>> extends Bas
         assertTableNotContains(keys()[1]);
         assertTableAll(entity);
     }
+
+    /** {@link TableObj#fetchPage(CompositeFilter)} **/
 
     @Test
     default void fetch_page() {
@@ -285,16 +454,51 @@ public interface PrimaryKeyTableTest<K, E, T extends TableObj<K, E>> extends Bas
 
     @SafeVarargs
     private void assertTableAll(@NotNull E... entities) {
-        List<E> each = new ArrayList<>();
-        table().forEach(each::add);
-        assertThat(each).containsExactlyElementsIn(entities);
+        assertTableCount(entities.length);
+        assertThat(forEachToJavaList()).containsExactlyElementsIn(entities);
+        assertThat(forEachToJavaList(Where.of(Shortcuts.TRUE))).containsExactlyElementsIn(entities);
+        assertThat(iteratorToJavaList()).containsExactlyElementsIn(entities);
+        assertThat(iteratorToJavaList(Where.of(Shortcuts.TRUE))).containsExactlyElementsIn(entities);
         assertThat(table().fetchAll()).containsExactlyElementsIn(entities);
+        assertThat(table().fetchAllMatching(Where.of(Shortcuts.TRUE))).containsExactlyElementsIn(entities);
     }
 
-    default @NotNull String findPkColumnOrDie() {
+    default @NotNull Column findPkColumnOrDie() {
         return table().meta().sqlColumns().stream()
-                .filter(TableMeta.ColumnMeta::isPrimaryKey)
-                .map(TableMeta.ColumnMeta::name)
-                .findFirst().orElseThrow();
+            .filter(TableMeta.ColumnMeta::isPrimaryKey)
+            .map(TableMeta.ColumnMeta::column)
+            .collect(MoreCollectors.onlyElement());
+    }
+
+    default @NotNull Variable keyToVar(@NotNull K key) {
+        return new Variable(key, TermType.WILDCARD);
+    }
+
+    private @NotNull List<E> forEachToJavaList() {
+        List<E> result = new ArrayList<>();
+        table().forEach(result::add);
+        return result;
+    }
+
+    private @NotNull List<E> forEachToJavaList(@NotNull Filter filter) {
+        List<E> result = new ArrayList<>();
+        table().forEach(filter, result::add);
+        return result;
+    }
+
+    private @NotNull List<E> iteratorToJavaList() {
+        List<E> result = new ArrayList<>();
+        try (ResultSetIterator<E> iterator = table().iterator()) {
+            Iterators.addAll(result, iterator);
+        }
+        return result;
+    }
+
+    private @NotNull List<E> iteratorToJavaList(@NotNull Filter filter) {
+        List<E> result = new ArrayList<>();
+        try (ResultSetIterator<E> iterator = table().iterator(filter)) {
+            Iterators.addAll(result, iterator);
+        }
+        return result;
     }
 }

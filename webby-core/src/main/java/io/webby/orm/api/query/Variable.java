@@ -1,8 +1,14 @@
 package io.webby.orm.api.query;
 
+import com.google.errorprone.annotations.Immutable;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
+/**
+ * A class for the variable occurrence in the SQL query. Is a {@link Term}.
+ * SQL repr: <code>?</code>.
+ */
+@Immutable
 public class Variable extends Unit implements Term {
     private final TermType type;
 

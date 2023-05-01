@@ -15,6 +15,10 @@ public record FakeColumn(@NotNull String name, @NotNull TermType type) implement
         return new FakeColumn(name, TermType.WILDCARD);
     }
 
+    public @NotNull ColumnTerm makeVar(int value) {
+        return new ColumnTerm(this, Shortcuts.var(value));
+    }
+
     public @NotNull ColumnTerm makeVar(@NotNull String value) {
         return new ColumnTerm(this, Shortcuts.var(value));
     }

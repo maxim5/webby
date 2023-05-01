@@ -54,7 +54,7 @@ public class PalDbImpl<K, V> extends ByteArrayDb<K, V> implements KeyValueDb<K, 
         try {
             return asValue(reader().get(fromKey(key)));
         } catch (IOException e) {
-            throw new RuntimeException(e);
+            return Unchecked.rethrow(e);
         }
     }
 

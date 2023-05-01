@@ -4,5 +4,5 @@ public enum ClientFrameType {
     TEXT,
     BINARY,
     BOTH,
-    ANY
+    ANY,
 }

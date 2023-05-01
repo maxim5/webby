@@ -7,8 +7,25 @@ import java.util.Optional;
 
 import static java.util.Objects.requireNonNull;
 
+/**
+ * Represents a token for requesting the next page. Can be one of:
+ * <ul>
+ *     <li>the integer offset from the start</li>
+ *     <li>the last item of the previous page in a string form</li>
+ * </ul>
+ *
+ * @see Page
+ */
 public record PageToken(@Nullable String lastItem, int offset) {
-    public static final int NO_OFFSET = -1;
+    private static final int NO_OFFSET = -1;
+
+    public static @NotNull PageToken ofLastItem(@NotNull String lastItem) {
+        return new PageToken(lastItem, NO_OFFSET);
+    }
+
+    public static @NotNull PageToken ofOffset(int offset) {
+        return new PageToken(null, offset);
+    }
 
     public boolean hasLastItem() {
         return lastItem != null;
@@ -26,13 +43,13 @@ public record PageToken(@Nullable String lastItem, int offset) {
     }
 
     public static @Nullable PageToken parseHumanTokenOrNull(@NotNull String token) {
-        return token.startsWith(":") ? parseOffset(token) : new PageToken(token, NO_OFFSET);
+        return token.startsWith(":") ? parseOffset(token) : PageToken.ofLastItem(token);
     }
 
     public static @Nullable PageToken parseHumanTokenOrNull(@NotNull String token,
                                                             @NotNull Preference preference) {
         return switch (preference) {
-            case PREFER_LAST_ITEM -> new PageToken(token, NO_OFFSET);
+            case PREFER_LAST_ITEM -> PageToken.ofLastItem(token);
             case PREFER_OFFSET -> token.startsWith(":") ? requireNonNull(parseOffset(token)) : null;
         };
     }
@@ -48,7 +65,7 @@ public record PageToken(@Nullable String lastItem, int offset) {
     private static @Nullable PageToken parseOffset(@NotNull String token) {
         try {
             int offset = Integer.parseInt(token.substring(1));
-            return new PageToken(null, offset);
+            return PageToken.ofOffset(offset);
         } catch (NumberFormatException e) {
             return null;
         }
@@ -56,6 +73,6 @@ public record PageToken(@Nullable String lastItem, int offset) {
 
     enum Preference {
         PREFER_LAST_ITEM,
-        PREFER_OFFSET
+        PREFER_OFFSET,
     }
 }

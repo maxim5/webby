@@ -4,7 +4,8 @@ import com.google.common.collect.Streams;
 import io.webby.orm.adapter.JdbcAdapt;
 import io.webby.orm.adapter.JdbcArrayAdapter;
 import io.webby.orm.adapter.JdbcSingleValueAdapter;
-import io.webby.orm.arch.*;
+import io.webby.orm.arch.model.*;
+import io.webby.orm.arch.util.Naming;
 import io.webby.util.collect.EasyMaps;
 import org.jetbrains.annotations.NotNull;
 
@@ -66,7 +67,7 @@ public class ModelAdapterCodegen extends BaseCodegen {
     }
 
     private @NotNull Class<?> getBaseClass() {
-        return adapter.pojoArch().columnsNumber() == 1 ? JdbcSingleValueAdapter.class : JdbcArrayAdapter.class;
+        return adapter.pojoArch().isSingleColumn() ? JdbcSingleValueAdapter.class : JdbcArrayAdapter.class;
     }
 
     private @NotNull List<Class<?>> getNestedAdapters() {
@@ -119,7 +120,7 @@ public class ModelAdapterCodegen extends BaseCodegen {
 
     // FIX[minor]: use javaVariableName
     private static @NotNull String columnToParam(@NotNull Column column) {
-        Class<?> nativeType = column.type().jdbcType().nativeType();
+        Class<?> nativeType = column.jdbcType().nativeType();
         return "%s %s".formatted(nativeType.getSimpleName(), column.sqlName());
     }
 
@@ -140,22 +141,17 @@ public class ModelAdapterCodegen extends BaseCodegen {
                                                     @NotNull Map<PojoField, Column> nativeFieldsColumns,
                                                     @NotNull StringBuilder builder) {
         String canonicalName = Naming.shortCanonicalJavaName(pojo.pojoType());
-
-        if (pojo.isEnum()) {
-            String name = nativeFieldsColumns.get(pojo.fields().get(0)).sqlName();
-            return builder.append(canonicalName).append(".values()[").append(name).append("]").toString();
-        }
-
         builder.append("new ").append(canonicalName).append("(");
         for (PojoField field : pojo.fields()) {
             if (field instanceof PojoFieldNative) {
-                String name = nativeFieldsColumns.get(field).sqlName();
-                builder.append(name);
+                builder.append(field.fullSqlName());
+            } else if (field instanceof PojoFieldMapper) {
+                builder.append(field.mapperApiOrDie().expr().jdbcToField(field.fullSqlName()));
             } else if (field instanceof PojoFieldNested fieldNested) {
                 fieldConstructor(fieldNested.pojo(), nativeFieldsColumns, builder);
             } else if (field instanceof PojoFieldAdapter fieldAdapter) {
                 String params = fieldAdapter.columns().stream().map(Column::sqlName).collect(COMMA_JOINER);
-                builder.append("%s.createInstance(%s)".formatted(fieldAdapter.adapterInfo().staticRef(), params));
+                builder.append(fieldAdapter.adapterApiOrDie().expr().createInstance(params));
             } else {
                 throw new IllegalStateException("Internal error. Unrecognized field: " + field);
             }
@@ -167,7 +163,7 @@ public class ModelAdapterCodegen extends BaseCodegen {
 
     private void toValueObject() {
         PojoArch pojo = adapter.pojoArch();
-        if (pojo.columnsNumber() != 1) {
+        if (pojo.isMultiColumn()) {
             return;
         }
 
@@ -188,18 +184,17 @@ public class ModelAdapterCodegen extends BaseCodegen {
         assert fields.size() == 1 : "Expected a single pojo field, but found: %s".formatted(fields);
 
         PojoField field = fields.get(0);
-        String getter = "instance.%s()".formatted(field.javaGetter());
-        if (field.isNativelySupported()) {
-            return getter;
-        } else {
-            AdapterApi info = field.adapterInfo();
-            return "%s.toValueObject(%s);".formatted(info.staticRef(), getter);
-        }
+        String accessor = "instance.%s".formatted(field.javaAccessor());
+        return switch (field.typeSupport()) {
+            case NATIVE -> accessor;
+            case MAPPER_API -> field.mapperApiOrDie().expr().fieldToJdbc(accessor);
+            case ADAPTER_API -> field.adapterApiOrDie().expr().toValueObject(accessor);
+        };
     }
 
     private void fillArrayValues() {
         PojoArch pojo = adapter.pojoArch();
-        if (pojo.columnsNumber() == 1) {
+        if (pojo.isSingleColumn()) {
             return;
         }
 
@@ -220,15 +215,22 @@ public class ModelAdapterCodegen extends BaseCodegen {
         int index = 0;
         for (PojoField field : pojo.fields()) {
             String arrayIndex = index == 0 ? "start" : "start+%d".formatted(index);
-            String getter = "instance.%s()".formatted(field.javaGetter());
+            String getter = "instance.%s".formatted(field.javaAccessor());
 
-            if (field.isNativelySupported()) {
-                result.add("array[%s] = %s;".formatted(arrayIndex, getter));
-                index++;
-            } else {
-                AdapterApi info = field.adapterInfo();
-                result.add("%s.fillArrayValues(%s, array, %s);".formatted(info.staticRef(), getter, arrayIndex));
-                index += info.adapterColumnsNumber();
+            switch (field.typeSupport()) {
+                case NATIVE -> {
+                    result.add("array[%s] = %s;".formatted(arrayIndex, getter));
+                    index++;
+                }
+                case MAPPER_API -> {
+                    result.add("array[%s] = %s;".formatted(arrayIndex, field.mapperApiOrDie().expr().fieldToJdbc(getter)));
+                    index++;
+                }
+                case ADAPTER_API -> {
+                    AdapterApi info = field.adapterApiOrDie();
+                    result.add(info.statement().fillArrayValues(getter, "array", arrayIndex));
+                    index += info.adapterColumnsNumber();
+                }
             }
         }
         return result;

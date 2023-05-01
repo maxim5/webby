@@ -1,15 +1,15 @@
 package io.webby.orm.codegen;
 
+import com.google.common.collect.ImmutableSet;
 import com.google.common.collect.Iterables;
 import com.google.common.collect.Streams;
 import com.google.common.primitives.Primitives;
-import com.google.mu.util.Optionals;
 import io.webby.orm.api.*;
-import io.webby.orm.api.entity.BatchEntityData;
-import io.webby.orm.api.entity.EntityData;
+import io.webby.orm.api.entity.*;
 import io.webby.orm.api.query.*;
-import io.webby.orm.arch.*;
-import io.webby.orm.arch.Column;
+import io.webby.orm.arch.model.Column;
+import io.webby.orm.arch.model.*;
+import io.webby.orm.arch.util.Naming;
 import io.webby.util.collect.EasyMaps;
 import org.jetbrains.annotations.NotNull;
 
@@ -50,8 +50,8 @@ public class ModelTableCodegen extends BaseCodegen {
         this.pkContext = primaryKeyField == null ? Map.of() : EasyMaps.asMap(
             "$pk_type", Naming.shortCanonicalJavaName(primaryKeyField.javaType()),
             "$PkClass", primaryKeyField.javaType().isPrimitive() ?
-                    Primitives.wrap(primaryKeyField.javaType()).getSimpleName() :
-                    Naming.shortCanonicalJavaName(primaryKeyField.javaType()),
+                Primitives.wrap(primaryKeyField.javaType()).getSimpleName() :
+                Naming.shortCanonicalJavaName(primaryKeyField.javaType()),
             "$pk_annotation", primaryKeyField.javaType().isPrimitive() ? "" : "@Nonnull ",
             "$pk_name", primaryKeyField.javaName()
         );
@@ -64,6 +64,7 @@ public class ModelTableCodegen extends BaseCodegen {
         constructors();
         withFollowOnRead();
 
+        admin();
         getters();
         count();
         exists();
@@ -102,51 +103,65 @@ public class ModelTableCodegen extends BaseCodegen {
 
         fromRow();
 
-        m2m();
+        bridge();
+        bridgeNative();
 
         internalMeta();
         columnsEnum();
         tableMeta();
+        dataFactoryMethods();
 
         appendLine("}");
     }
 
     private void imports() {
-        List<Class<?>> customClasses = table.fields().stream()
-                .filter(TableField::isCustomSupportType)
-                .filter(Predicate.not(TableField::isForeignKey))
-                .map(TableField::javaType)
-                .collect(Collectors.toList());
+        List<Class<?>> mappedTypes = table.fields().stream()
+            .filter(TableField::isMapperSupportedType)
+            .map(TableField::javaType)
+            .collect(Collectors.toList());
+        List<Class<?>> mapperTypes = table.fields().stream()
+            .filter(TableField::isMapperSupportedType)
+            .flatMap(field -> field.mapperApiOrDie().importedClass().stream())
+            .toList();
+        List<Class<?>> adapterClasses = table.fields().stream()
+            .filter(TableField::isAdapterSupportType)
+            .map(TableField::javaType)
+            .collect(Collectors.toList());
 
         List<Class<?>> foreignKeyClasses = table.hasForeignKeyField() ?
-                List.of(Foreign.class, ForeignInt.class, ForeignLong.class, ForeignObj.class) :
-                List.of();
+            List.of(Foreign.class, ForeignInt.class, ForeignLong.class, ForeignObj.class) :
+            List.of();
         /*List<Class<?>> foreignKeyClasses = table.foreignFields(ReadFollow.FOLLOW_ALL).stream()
                 .map(TableField::javaType)
                 .collect(Collectors.toList());*/
         List<JavaNameHolder> foreignTableClasses = table.foreignFields(ReadFollow.FOLLOW_ALL).stream()
+            .map(ForeignTableField::getForeignTable)
+            .collect(Collectors.toList());
+        List<Class<?>> foreignModelClasses = table.isBridgeTable() ?
+            Stream.of(table.leftBridgeFieldOrDie(), table.rightBridgeFieldOrDie())
                 .map(ForeignTableField::getForeignTable)
-                .collect(Collectors.toList());
-        List<Class<?>> foreignModelClasses = table.isM2M() ?
-                Stream.of(table.m2mLeftFieldOrDie(), table.m2mRightFieldOrDie())
-                        .map(ForeignTableField::getForeignTable)
-                        .map(TableArch::modelClass)
-                        .collect(Collectors.toList()) :
-                List.of();
+                .map(TableArch::modelClass)
+                .collect(Collectors.toList()) :
+            List.of();
 
         List<String> classesToImport = Streams.concat(
             baseTableClasses().stream().map(FQN::of),
             Stream.of(
-                Connector.class, QueryRunner.class, QueryException.class, Engine.class, ReadFollow.class,
-                Filter.class, Where.class, Args.class, io.webby.orm.api.query.Column.class, TermType.class,
-                ResultSetIterator.class, TableMeta.class, EntityData.class, BatchEntityData.class, Contextual.class
+                Connector.class, QueryRunner.class, QueryException.class, Engine.class, ReadFollow.class, DbAdmin.class,
+                Filter.class, Where.class, Args.class, io.webby.orm.api.query.Column.class, FullColumn.class, TermType.class,
+                ResultSetIterator.class, TableMeta.class,
+                EntityData.class, EntityIntData.class, EntityLongData.class, EntityColumnMap.class,
+                BatchEntityData.class, BatchEntityIntData.class, BatchEntityLongData.class,
+                Contextual.class
             ).map(FQN::of),
-            customClasses.stream().map(FQN::of),
-            customClasses.stream().map(adaptersScanner::locateAdapterFqn),
+            mappedTypes.stream().map(FQN::of),
+            mapperTypes.stream().map(FQN::of),
+            adapterClasses.stream().map(FQN::of),
+            adapterClasses.stream().map(adaptersScanner::locateAdapterFqn),
             foreignKeyClasses.stream().map(FQN::of),
             foreignTableClasses.stream().map(FQN::of),
             foreignModelClasses.stream().map(FQN::of)
-        ).filter(fqn -> !isSkippablePackage(fqn.packageName())).map(FQN::importName).sorted().distinct().toList();
+        ).filter(fqn -> !isSkippable(fqn)).map(FQN::importName).sorted().distinct().toList();
 
         Map<String, String> context = Map.of(
             "$package", table.packageName(),
@@ -168,8 +183,12 @@ public class ModelTableCodegen extends BaseCodegen {
         """, context);
     }
 
-    private boolean isSkippablePackage(@NotNull String packageName) {
-        return packageName.equals(table.packageName()) || packageName.equals("java.util") || packageName.equals("java.lang");
+    private static final ImmutableSet<String> IMPORTED_BY_STAR = ImmutableSet.of("java.lang", "java.sql", "java.util");
+
+    private boolean isSkippable(@NotNull FQN fqn) {
+        // BitSet is in both `java.util` and `hppc`.
+        return !fqn.className().equals("BitSet") &&
+            (fqn.packageName().equals(table.packageName()) || IMPORTED_BY_STAR.contains(fqn.packageName()));
     }
 
     private void classDef() {
@@ -179,11 +198,11 @@ public class ModelTableCodegen extends BaseCodegen {
             "$BaseGenerics", baseTableClass == TableObj.class ? "$pk_type, $ModelClass" : "$ModelClass"
         );
 
-        if (table.isM2M()) {
+        if (table.isBridgeTable()) {
             appendCode(0, """
             public class $TableClass implements $BaseClass<$BaseGenerics>, \
-            ManyToManyTable<$left_index_wrap, $left_entity, $right_index_wrap, $right_entity> {
-            """, EasyMaps.merge(EasyMaps.merge(context, m2mContext()), mainContext, pkContext));
+            BridgeTable<$left_id_wrap, $left_entity, $right_id_wrap, $right_entity> {
+            """, EasyMaps.merge(EasyMaps.merge(context, bridgeContext()), mainContext, pkContext));
         } else {
             appendCode(0, "public class $TableClass implements $BaseClass<$BaseGenerics> {",
                        EasyMaps.merge(context, mainContext, pkContext));
@@ -191,8 +210,8 @@ public class ModelTableCodegen extends BaseCodegen {
     }
 
     private @NotNull List<Class<?>> baseTableClasses() {
-        if (table.isM2M()) {
-            return List.of(pickBaseTableClass(), ManyToManyTable.class);
+        if (table.isBridgeTable()) {
+            return List.of(pickBaseTableClass(), BridgeTable.class);
         }
         return List.of(pickBaseTableClass());
     }
@@ -213,8 +232,8 @@ public class ModelTableCodegen extends BaseCodegen {
     }
 
     private void constructors() {
-        Optional<String> leftTable = Optionals.optionally(table.isM2M(), () -> table.m2mLeftFieldOrDie().getForeignTable().javaName());
-        Optional<String> rightTable = Optionals.optionally(table.isM2M(), () -> table.m2mRightFieldOrDie().getForeignTable().javaName());
+        Optional<String> leftTable = table.leftBridgeField().map(ForeignTableField::getForeignTable).map(TableArch::javaName);
+        Optional<String> rightTable = table.rightBridgeField().map(ForeignTableField::getForeignTable).map(TableArch::javaName);
         Map<String, String> context = EasyMaps.asMap(
             "$left_table_decl", leftTable.map("protected final %s leftsTable;"::formatted).orElse(EMPTY_LINE),
             "$right_table_decl", rightTable.map("protected final %s rightsTable;"::formatted).orElse(EMPTY_LINE),
@@ -256,6 +275,15 @@ public class ModelTableCodegen extends BaseCodegen {
             }\n
             """;
         appendCode(code, mainContext);
+    }
+
+    private void admin() {
+        appendCode("""
+        @Override
+        public @Nonnull DbAdmin admin() {
+            return new DbAdmin(connector);
+        }\n
+        """);
     }
 
     private void getters() {
@@ -326,10 +354,10 @@ public class ModelTableCodegen extends BaseCodegen {
 
     private void selectConstants() {
         String constants = Arrays.stream(ReadFollow.values())
-                .map(follow -> new SelectMaker(table).make(follow))
-                .map(snippet -> new Snippet().withLines(snippet))
-                .map(query -> wrapAsStringLiteral(query, INDENT1))
-                .collect(Collectors.joining(",\n" + INDENT1, INDENT1, ""));
+            .map(follow -> new SelectMaker(table).make(follow))
+            .map(snippet -> new Snippet().withLines(snippet))
+            .map(query -> wrapAsStringLiteral(query, INDENT1))
+            .collect(Collectors.joining(",\n" + INDENT1, INDENT1, ""));
 
         appendCode("""
         private static final String[] SELECT_ENTITY_ALL = {
@@ -346,7 +374,7 @@ public class ModelTableCodegen extends BaseCodegen {
         Snippet where = new Snippet().withLines(WhereMaker.makeForPrimaryColumns(table));
         Map<String, String> context = EasyMaps.asMap(
             "$sql_where_literal", wrapAsStringLiteral(where, INDENT2),
-            "$pk_object", toKeyObject(requireNonNull(table.primaryKeyField()), "$pk_name")
+            "$pk_object", toPrimaryKeyObject(requireNonNull(table.primaryKeyField()), "$pk_name")
         );
 
         appendCode("""
@@ -371,7 +399,7 @@ public class ModelTableCodegen extends BaseCodegen {
         Snippet where = new Snippet().withLines(WhereMaker.makeForPrimaryColumns(table));
         Map<String, String> context = EasyMaps.asMap(
             "$sql_where_literal", wrapAsStringLiteral(where, INDENT2),
-            "$pk_object", toKeyObject(requireNonNull(table.primaryKeyField()), "$pk_name")
+            "$pk_object", toPrimaryKeyObject(requireNonNull(table.primaryKeyField()), "$pk_name")
         );
 
         appendCode("""
@@ -388,16 +416,20 @@ public class ModelTableCodegen extends BaseCodegen {
         """, EasyMaps.merge(context, mainContext, pkContext));
     }
 
-    private static @NotNull String toKeyObject(@NotNull TableField field, @NotNull String paramName) {
-        if (field.isNativelySupportedType()) {
-            return paramName;
-        }
-        AdapterApi adapterApi = requireNonNull(field.adapterApi());
-        if (field.columnsNumber() == 1) {
-            return "%s.toValueObject(%s)".formatted(adapterApi.staticRef(), paramName);
-        } else {
-            return "%s.toNewValuesArray(%s)".formatted(adapterApi.staticRef(), paramName);
-        }
+    private static @NotNull String toPrimaryKeyObject(@NotNull TableField field, @NotNull String paramName) {
+        assert field.isPrimaryKey() : "Primary key field expected: " + field;
+        return switch (field.typeSupport()) {
+            case NATIVE -> paramName;
+            case FOREIGN_KEY -> throw new AssertionError("Primary key and foreign key field: " + field);
+            case MAPPER_API -> field.mapperApiOrDie().expr().fieldToJdbc(paramName);
+            case ADAPTER_API -> {
+                if (field.isSingleColumn()) {
+                    yield field.adapterApiOrDie().expr().toValueObject(paramName);
+                } else {
+                    yield field.adapterApiOrDie().expr().toNewValuesArray(paramName);
+                }
+            }
+        };
     }
 
     private void getBatchByPk() {
@@ -407,9 +439,9 @@ public class ModelTableCodegen extends BaseCodegen {
         }
 
         List<String> primaryColumns = primaryField.columns(ReadFollow.NO_FOLLOW)
-                .stream()
-                .map(PrefixedColumn::sqlPrefixedName)
-                .toList();
+            .stream()
+            .map(PrefixedColumn::sqlPrefixedName)
+            .toList();
         if (primaryColumns.size() != 1) {
             return;  // will use a slow default implementation
         }
@@ -420,7 +452,7 @@ public class ModelTableCodegen extends BaseCodegen {
                  ResultSet result = statement.executeQuery()) {
                 while (result.next()) {
                     $ModelClass entity = fromRow(result, follow, 0);
-                    map.put(entity.$pk_getter(), entity);
+                    map.put(entity.$pk_getter, entity);
                 }
             } catch (SQLException e) {
                 throw new QueryException("Failed to find by PK batch in $TableClass", query, keys, e);
@@ -430,7 +462,7 @@ public class ModelTableCodegen extends BaseCodegen {
         Map<String, String> context = EasyMaps.asMap(
             "$query_execution", queryExecution,
             "$pk_column", primaryColumns.get(0),
-            "$pk_getter", primaryField.javaGetter()
+            "$pk_getter", primaryField.javaAccessor()
         );
 
         appendCode("""
@@ -475,10 +507,10 @@ public class ModelTableCodegen extends BaseCodegen {
 
     private void fetchPks() {
         String primaryKeyColumn = Optional.ofNullable(table.primaryKeyField())
-                .map(HasColumns::columns)
-                .map(cols -> cols.get(0))
-                .map(Column::sqlName)
-                .orElse(null);
+            .map(HasColumns::columns)
+            .map(cols -> cols.get(0))
+            .map(Column::sqlName)
+            .orElse(null);
 
         Map<String, String> context = EasyMaps.asMap(
             "$pk_column", primaryKeyColumn
@@ -519,13 +551,13 @@ public class ModelTableCodegen extends BaseCodegen {
 
         Map<String, String> context = EasyMaps.asMap(
             "$KeyOfMethod", table.isPrimaryKeyInt() ? "intKeyOf" : table.isPrimaryKeyLong() ? "longKeyOf" : "keyOf",
-            "$pk_getter", requireNonNull(table.primaryKeyField()).javaGetter()
+            "$pk_getter", requireNonNull(table.primaryKeyField()).javaAccessor()
         );
 
         appendCode("""
         @Override
         public $pk_annotation$pk_type $KeyOfMethod(@Nonnull $ModelClass $model_param) {
-            return $model_param.$pk_getter();
+            return $model_param.$pk_getter;
         }\n
         """, EasyMaps.merge(context, mainContext, pkContext));
     }
@@ -575,7 +607,7 @@ public class ModelTableCodegen extends BaseCodegen {
             "$model_id_assert", AssertModelIdMaker.makeAssert("$model_param", table).join(),
             "$sql_query_literal", wrapAsStringLiteral(query, INDENT2)
         );
-        
+
         appendCode("""
         @Override
         public int insert(@Nonnull $ModelClass $model_param) {
@@ -683,7 +715,7 @@ public class ModelTableCodegen extends BaseCodegen {
 
     private void updateWhere() {
         Snippet query = new Snippet()
-                .withLines(UpdateMaker.make(table, table.columns(Predicate.not(TableField::isPrimaryKey))));
+            .withLines(UpdateMaker.make(table, table.columns(Predicate.not(TableField::isPrimaryKey))));
         Map<String, String> context = EasyMaps.asMap(
             "$sql_query_literal", wrapAsStringLiteral(query, INDENT2)
         );
@@ -738,8 +770,8 @@ public class ModelTableCodegen extends BaseCodegen {
         }
 
         Snippet query = new Snippet()
-                .withLines(UpdateMaker.make(table, table.columns(Predicate.not(TableField::isPrimaryKey))))
-                .withLines(WhereMaker.makeForPrimaryColumns(table));
+            .withLines(UpdateMaker.make(table, table.columns(Predicate.not(TableField::isPrimaryKey))))
+            .withLines(WhereMaker.makeForPrimaryColumns(table));
         Map<String, String> context = EasyMaps.asMap(
             "$sql_query_literal", wrapAsStringLiteral(query, INDENT2)
         );
@@ -815,7 +847,7 @@ public class ModelTableCodegen extends BaseCodegen {
     
             String query = makeUpdateQueryForColumns(columns, where);
             try (PreparedStatement statement = runner().prepareQuery(query)) {
-                data.provideValues(statement);
+                data.provideValues(statement, where);
                 return statement.executeUpdate();
             } catch (SQLException e) {
                 throw new QueryException("Failed to update entities data in $TableClass by a filter", query, data, e);
@@ -853,7 +885,7 @@ public class ModelTableCodegen extends BaseCodegen {
 
     private void updateWhereBatch() {
         Snippet query = new Snippet()
-                .withLines(UpdateMaker.make(table, table.columns(Predicate.not(TableField::isPrimaryKey))));
+            .withLines(UpdateMaker.make(table, table.columns(Predicate.not(TableField::isPrimaryKey))));
         Map<String, String> context = EasyMaps.asMap(
             "$sql_query_literal", wrapAsStringLiteral(query, INDENT2)
         );
@@ -916,11 +948,11 @@ public class ModelTableCodegen extends BaseCodegen {
         }
 
         Snippet query = new Snippet()
-                .withLines(DeleteMaker.make(table))
-                .withLines(WhereMaker.makeForPrimaryColumns(table));
+            .withLines(DeleteMaker.make(table))
+            .withLines(WhereMaker.makeForPrimaryColumns(table));
         Map<String, String> context = EasyMaps.asMap(
             "$sql_query_literal", wrapAsStringLiteral(query, INDENT2),
-            "$pk_object", toKeyObject(requireNonNull(table.primaryKeyField()), "$pk_name")
+            "$pk_object", toPrimaryKeyObject(requireNonNull(table.primaryKeyField()), "$pk_name")
         );
 
         appendCode("""
@@ -970,12 +1002,12 @@ public class ModelTableCodegen extends BaseCodegen {
         """, EasyMaps.merge(mainContext, context));
     }
 
-    private void m2m() {
-        if (!table.isM2M()) {
+    private void bridge() {
+        if (!table.isBridgeTable()) {
             return;
         }
 
-        Map<String, String> context = m2mContext();
+        Map<String, String> context = bridgeContext();
 
         appendCode("""
         public @Nonnull $LeftTable leftsTable() {
@@ -987,65 +1019,194 @@ public class ModelTableCodegen extends BaseCodegen {
         }
         
         @Override
-        public boolean exists(@Nonnull $left_index_wrap leftIndex, @Nonnull $right_index_wrap rightIndex) {
-            return exists(Where.hardcoded("$left_fk_sql = ? AND $right_fk_sql = ?", Args.of(leftIndex, rightIndex)));
+        public boolean exists(@Nonnull $left_id_wrap leftId, @Nonnull $right_id_wrap rightId) {
+            return exists(Where.hardcoded("$left_fk_sql = ? AND $right_fk_sql = ?", Args.of(leftId, rightId)));
         }
         
         @Override
-        public int countRights(@Nonnull $left_index_wrap leftIndex) {
-            String sql = "$right_pk_sql IN (SELECT $right_fk_sql FROM $table_sql WHERE $left_fk_sql = ?)";
-            return rightsTable.count(Where.hardcoded(sql, Args.of(leftIndex)));
-        }
-        
-        @Override
-        public @Nonnull ResultSetIterator<$right_entity> iterateRights(@Nonnull $left_index_wrap leftIndex) {
-            String sql = "$right_pk_sql IN (SELECT $right_fk_sql FROM $table_sql WHERE $left_fk_sql = ?)";
-            return rightsTable.iterator(Where.hardcoded(sql, Args.of(leftIndex)));
-        }
-        
-        @Override
-        public int countLefts(@Nonnull $right_index_wrap rightIndex) {
+        public int countLefts(@Nonnull $right_id_wrap rightId) {
             String sql = "$left_pk_sql IN (SELECT $left_fk_sql FROM $table_sql WHERE $right_fk_sql = ?)";
-            return leftsTable.count(Where.hardcoded(sql, Args.of(rightIndex)));
+            return leftsTable.count(Where.hardcoded(sql, Args.of(rightId)));
         }
         
         @Override
-        public @Nonnull ResultSetIterator<$left_entity> iterateLefts(@Nonnull $right_index_wrap rightIndex) {
+        public int countRights(@Nonnull $left_id_wrap leftId) {
+            String sql = "$right_pk_sql IN (SELECT $right_fk_sql FROM $table_sql WHERE $left_fk_sql = ?)";
+            return rightsTable.count(Where.hardcoded(sql, Args.of(leftId)));
+        }
+        
+        @Override
+        public @Nonnull ResultSetIterator<$left_id_wrap> iterateLeftIds(@Nonnull $right_id_wrap rightId) {
+            String query = "SELECT $left_fk_sql FROM $table_sql WHERE $right_fk_sql = ?";
+            try {
+                return ResultSetIterator.of(runner().prepareQuery(query, rightId).executeQuery(),
+                                            result -> result.$left_result_getter(1));
+            } catch (SQLException e) {
+                throw new QueryException("Failed to iterate over $TableClass", query, rightId, e);
+            }
+        }
+        
+        @Override
+        public @Nonnull ResultSetIterator<$left_entity> iterateLefts(@Nonnull $right_id_wrap rightId) {
             String sql = "$left_pk_sql IN (SELECT $left_fk_sql FROM $table_sql WHERE $right_fk_sql = ?)";
-            return leftsTable.iterator(Where.hardcoded(sql, Args.of(rightIndex)));
+            return leftsTable.iterator(Where.hardcoded(sql, Args.of(rightId)));
+        }
+        
+        @Override
+        public @Nonnull ResultSetIterator<$right_id_wrap> iterateRightIds(@Nonnull $left_id_wrap leftId) {
+            String query = "SELECT $right_fk_sql FROM $table_sql WHERE $left_fk_sql = ?";
+            try {
+                return ResultSetIterator.of(runner().prepareQuery(query, leftId).executeQuery(),
+                                            result -> result.$right_result_getter(1));
+            } catch (SQLException e) {
+                throw new QueryException("Failed to iterate over $TableClass", query, leftId, e);
+            }
+        }
+        
+        @Override
+        public @Nonnull ResultSetIterator<$right_entity> iterateRights(@Nonnull $left_id_wrap leftId) {
+            String sql = "$right_pk_sql IN (SELECT $right_fk_sql FROM $table_sql WHERE $left_fk_sql = ?)";
+            return rightsTable.iterator(Where.hardcoded(sql, Args.of(leftId)));
         }\n
         """, EasyMaps.merge(mainContext, context));
     }
 
-    private @NotNull Map<String, String> m2mContext() {
-        if (!table.isM2M()) {
+    private void bridgeNative() {
+        if (!table.isBridgeTable()) {
+            return;
+        }
+
+        boolean isLeftNative = isNativeIntOrLong(table.leftBridgeFieldOrDie().primaryKeyFieldInForeignTable());
+        boolean isRightNative = isNativeIntOrLong(table.rightBridgeFieldOrDie().primaryKeyFieldInForeignTable());
+        if (!isLeftNative && !isRightNative) {
+            return;
+        }
+
+        Map<String, String> context = bridgeContext();
+
+        if (isLeftNative && isRightNative) {
+            appendCode("""
+            public boolean exists($left_id_native leftId, $right_id_native rightId) {
+                return exists(Where.hardcoded("$left_fk_sql = ? AND $right_fk_sql = ?", Args.of(leftId, rightId)));
+            }\n
+            """, EasyMaps.merge(mainContext, context));
+        }
+
+        if (isLeftNative) {
+            Map<String, String> extraContext = EasyMaps.asMap(
+                "$TypeMarker$", table.leftBridgeFieldOrDie().primaryKeyFieldInForeignTable().column().jdbcType().name()
+            );
+
+            appendCode("""
+            public int countRights($left_id_native leftId) {
+                String sql = "$right_pk_sql IN (SELECT $right_fk_sql FROM $table_sql WHERE $left_fk_sql = ?)";
+                return rightsTable.count(Where.hardcoded(sql, Args.of(leftId)));
+            }
+            
+            public @Nonnull ResultSetIterator<$right_entity> iterateRights($left_id_native leftId) {
+                String sql = "$right_pk_sql IN (SELECT $right_fk_sql FROM $table_sql WHERE $left_fk_sql = ?)";
+                return rightsTable.iterator(Where.hardcoded(sql, Args.of(leftId)));
+            }
+            
+            public void forEachLeftId$TypeMarker$($right_id_native rightId, @Nonnull $TypeMarker$Consumer consumer) {
+                String query = "SELECT $left_fk_sql FROM $table_sql WHERE $right_fk_sql = ?";
+                try (PreparedStatement statement = runner().prepareQuery(query, rightId);
+                     ResultSet result = statement.executeQuery()) {
+                    while (result.next()) {
+                        consumer.accept(result.$left_result_getter(1));
+                    }
+                } catch (SQLException e) {
+                    throw new QueryException("Failed to iterate over $TableClass", query, rightId, e);
+                }
+            }
+            
+            public @Nonnull $TypeMarker$ArrayList fetchAllLeftIds$TypeMarker$($right_id_native rightId) {
+                String query = "SELECT $left_fk_sql FROM $table_sql WHERE $right_fk_sql = ?";
+                try {
+                    return runner().fetch$TypeMarker$Column(() -> runner().prepareQuery(query, rightId));
+                } catch (SQLException e) {
+                    throw new QueryException("Failed to fetch left ids in $TableClass", query, rightId, e);
+                }
+            }\n
+            """, EasyMaps.merge(mainContext, context, extraContext));
+        }
+
+        if (isRightNative) {
+            Map<String, String> extraContext = EasyMaps.asMap(
+                "$TypeMarker$", table.rightBridgeFieldOrDie().primaryKeyFieldInForeignTable().column().jdbcType().name()
+            );
+
+            appendCode("""
+            public int countLefts($right_id_native rightId) {
+                String sql = "$left_pk_sql IN (SELECT $left_fk_sql FROM $table_sql WHERE $right_fk_sql = ?)";
+                return leftsTable.count(Where.hardcoded(sql, Args.of(rightId)));
+            }
+            
+            public @Nonnull ResultSetIterator<$left_entity> iterateLefts($right_id_native rightId) {
+                String sql = "$left_pk_sql IN (SELECT $left_fk_sql FROM $table_sql WHERE $right_fk_sql = ?)";
+                return leftsTable.iterator(Where.hardcoded(sql, Args.of(rightId)));
+            }
+                        
+            public void forEachRightId$TypeMarker$($left_id_native leftId, @Nonnull $TypeMarker$Consumer consumer) {
+                String query = "SELECT $right_fk_sql FROM $table_sql WHERE $left_fk_sql = ?";
+                try (PreparedStatement statement = runner().prepareQuery(query, leftId);
+                     ResultSet result = statement.executeQuery()) {
+                    while (result.next()) {
+                        consumer.accept(result.$right_result_getter(1));
+                    }
+                } catch (SQLException e) {
+                    throw new QueryException("Failed to iterate over $TableClass", query, leftId, e);
+                }
+            }
+            
+            public @Nonnull $TypeMarker$ArrayList fetchAllRightIds$TypeMarker$($left_id_native leftId) {
+                String query = "SELECT $right_fk_sql FROM $table_sql WHERE $left_fk_sql = ?";
+                try {
+                    return runner().fetch$TypeMarker$Column(() -> runner().prepareQuery(query, leftId));
+                } catch (SQLException e) {
+                    throw new QueryException("Failed to fetch right ids in $TableClass", query, leftId, e);
+                }
+            }\n
+            """, EasyMaps.merge(mainContext, context, extraContext));
+        }
+    }
+
+    private static boolean isNativeIntOrLong(@NotNull OneColumnTableField field) {
+        JdbcType jdbcType = field.column().jdbcType();
+        return jdbcType == JdbcType.Int || jdbcType == JdbcType.Long;
+    }
+
+    private @NotNull Map<String, String> bridgeContext() {
+        if (!table.isBridgeTable()) {
             return Map.of();
         }
 
-        ForeignTableField leftField = table.m2mLeftFieldOrDie();
-        ForeignTableField rightField = table.m2mRightFieldOrDie();
+        ForeignTableField leftField = table.leftBridgeFieldOrDie();
+        ForeignTableField rightField = table.rightBridgeFieldOrDie();
 
         TableArch leftTable = leftField.getForeignTable();
         TableArch rightTable = rightField.getForeignTable();
 
-        TableField leftTablePrimaryField = requireNonNull(leftTable.primaryKeyField());
-        TableField rightTablePrimaryField = requireNonNull(rightTable.primaryKeyField());
+        OneColumnTableField leftTablePrimaryField = leftField.primaryKeyFieldInForeignTable();
+        OneColumnTableField rightTablePrimaryField = rightField.primaryKeyFieldInForeignTable();
 
         return EasyMaps.asMap(
             "$LeftTable", leftTable.javaName(),
             "$left_table_sql", leftTable.sqlName(),
-            "$left_index_native", Naming.shortCanonicalJavaName(leftTablePrimaryField.javaType()),
-            "$left_index_wrap", Naming.shortCanonicalJavaName(Primitives.wrap(leftTablePrimaryField.javaType())),
-            "$left_pk_sql", leftTablePrimaryField.columns().get(0).sqlName(),
-            "$left_fk_sql", leftField.columns().get(0).sqlName(),
+            "$left_id_native", Naming.shortCanonicalJavaName(leftTablePrimaryField.javaType()),
+            "$left_id_wrap", Naming.shortCanonicalJavaName(Primitives.wrap(leftTablePrimaryField.javaType())),
+            "$left_pk_sql", leftTablePrimaryField.column().sqlName(),
+            "$left_fk_sql", leftField.foreignKeyColumn().sqlName(),
+            "$left_result_getter", leftTablePrimaryField.column().jdbcType().getterMethod(),
             "$left_entity", Naming.shortCanonicalJavaName(leftTable.modelClass()),
 
             "$RightTable", rightTable.javaName(),
             "$right_table_sql", rightTable.sqlName(),
-            "$right_index_native", Naming.shortCanonicalJavaName(rightTablePrimaryField.javaType()),
-            "$right_index_wrap", Naming.shortCanonicalJavaName(Primitives.wrap(rightTablePrimaryField.javaType())),
-            "$right_pk_sql", rightTablePrimaryField.columns().get(0).sqlName(),
-            "$right_fk_sql", rightField.columns().get(0).sqlName(),
+            "$right_id_native", Naming.shortCanonicalJavaName(rightTablePrimaryField.javaType()),
+            "$right_id_wrap", Naming.shortCanonicalJavaName(Primitives.wrap(rightTablePrimaryField.javaType())),
+            "$right_pk_sql", rightTablePrimaryField.column().sqlName(),
+            "$right_fk_sql", rightField.foreignKeyColumn().sqlName(),
+            "$right_result_getter", rightTablePrimaryField.column().jdbcType().getterMethod(),
             "$right_entity", Naming.shortCanonicalJavaName(rightTable.modelClass())
         );
     }
@@ -1065,17 +1226,28 @@ public class ModelTableCodegen extends BaseCodegen {
 
     private void columnsEnum() {
         Map<String, String> context = Map.of(
-            "$own_enum_values", ColumnEnumMaker.make(table.columns(ReadFollow.NO_FOLLOW)).join(Collectors.joining(",\n" + INDENT1))
+            "$own_enum_values", ColumnEnumMaker.make(table.columns(ReadFollow.NO_FOLLOW))
+                .join(Collectors.joining(",\n" + INDENT1)),
+            "$all_columns_list", table.columns().stream().map(column -> "OwnColumn.%s".formatted(column.sqlName()))
+                .collect(Collectors.joining(",\n" + INDENT2))
         );
 
         appendCode("""
         public enum OwnColumn implements Column {
             $own_enum_values;
             
+            public static final List<Column> ALL_COLUMNS = List.of(
+                $all_columns_list
+            );
+            
+            public final FullColumn FULL = this.fullFrom(META);
+            
             private final TermType type;
+
             OwnColumn(TermType type) {
                 this.type = type;
             }
+
             @Override
             public @Nonnull TermType type() {
                 return type;
@@ -1086,19 +1258,17 @@ public class ModelTableCodegen extends BaseCodegen {
 
     private void tableMeta() {
         Map<String, String> context = Map.of(
-            "$column_meta", table.columnsWithFields().stream().map(pair -> {
-                TableField field = pair.first();
-                boolean primaryKey = field.isPrimaryKey() && field.columnsNumber() == 1;  // SQL doesn't allow multi-PK
-                boolean foreignKey = field.isForeignKey();
-                Column column = pair.second();
-                String sqlName = column.sqlName();
-                Class<?> nativeType = column.type().jdbcType().nativeType();
-                String type = nativeType.isPrimitive() || nativeType == String.class ?
-                                nativeType.getSimpleName() :
-                                nativeType == byte[].class ?
-                                        "byte[]" :
-                                        nativeType.getName();
-                return "new ColumnMeta(OwnColumn.%s, %s.class, %s, %s)".formatted(sqlName, type, primaryKey, foreignKey);
+            "$column_meta_list", table.columnsWithFields().stream()
+                .map(pair -> ColumnMetaMaker.makeColumnMeta(pair.first(), pair.second()))
+                .collect(Collectors.joining(",\n" + INDENT3)),
+            "$primary_keys", table.columnsWithFields().stream().filter(pair -> pair.first().isPrimaryKey()).map(pair -> {
+                String column = pair.second().sqlName();
+                return "OwnColumn.%s".formatted(column);
+            }).collect(Collectors.joining(", ")),
+            "$unique_keys", table.fields().stream().filter(TableField::isUnique).map(field -> {
+                String columns = field.columns().stream().map(Column::sqlName).map("OwnColumn.%s"::formatted)
+                    .collect(Collectors.joining(", "));
+                return "Constraint.of(%s)".formatted(columns);
             }).collect(Collectors.joining(",\n" + INDENT3))
         );
 
@@ -1111,7 +1281,17 @@ public class ModelTableCodegen extends BaseCodegen {
             @Override
             public @Nonnull List<ColumnMeta> sqlColumns() {
                 return List.of(
-                    $column_meta
+                    $column_meta_list
+                );
+            }
+            @Override
+            public @Nonnull Constraint primaryKeys() {
+                return Constraint.of($primary_keys);
+            }
+            @Override
+            public @Nonnull Iterable<Constraint> unique() {
+                return List.of(
+                    $unique_keys
                 );
             }
         };
@@ -1119,6 +1299,63 @@ public class ModelTableCodegen extends BaseCodegen {
         @Override
         public @Nonnull TableMeta meta() {
             return META;
+        }\n
+        """, EasyMaps.merge(mainContext, context));
+    }
+
+    private void dataFactoryMethods() {
+        List<JdbcType> allTypes = table.columns().stream().map(Column::jdbcType).toList();
+        boolean isAllInts = allTypes.stream().allMatch(x -> x == JdbcType.Int);
+        boolean isAllLongs = allTypes.stream().allMatch(x -> x == JdbcType.Long);
+
+        Map<String, String> context = Map.of(
+            "$columns_num", String.valueOf(table.columnsNumber()),
+            "$data_method_name", "new%sData".formatted(table.modelName()),
+            "$data_method_batch_name", "new%sBatch".formatted(table.modelName())
+        );
+
+        if (isAllInts) {
+            appendCode("""
+            public static @Nonnull EntityIntData $data_method_name(@Nonnull IntContainer data) {
+                assert data.size() == $columns_num :
+                    "Provided $TableClass data does not match required columns: data=%s, columns=%s"
+                    .formatted(data, OwnColumn.ALL_COLUMNS);
+                return new EntityIntData(OwnColumn.ALL_COLUMNS, data);
+            }
+    
+            public static @Nonnull BatchEntityIntData $data_method_batch_name(@Nonnull IntContainer data) {
+                assert data.size() % $columns_num == 0 :
+                    "Provided $TableClass batch data does not match required columns: data=%s, columns=%s"
+                    .formatted(data, OwnColumn.ALL_COLUMNS);
+                return new BatchEntityIntData(OwnColumn.ALL_COLUMNS, data);
+            }\n
+            """, EasyMaps.merge(mainContext, context));
+        }
+
+        if (isAllLongs) {
+            appendCode("""
+            public static @Nonnull EntityLongData $data_method_name(@Nonnull LongContainer data) {
+                assert data.size() == $columns_num :
+                    "Provided $TableClass data does not match required columns: data=%s, columns=%s"
+                    .formatted(data, OwnColumn.ALL_COLUMNS);
+                return new EntityLongData(OwnColumn.ALL_COLUMNS, data);
+            }
+            
+            public static @Nonnull BatchEntityLongData $data_method_batch_name(@Nonnull LongContainer data) {
+                assert data.size() % $columns_num == 0 :
+                    "Provided $TableClass batch data does not match required columns: data=%s, columns=%s"
+                    .formatted(data, OwnColumn.ALL_COLUMNS);
+                return new BatchEntityLongData(OwnColumn.ALL_COLUMNS, data);
+            }\n
+            """, EasyMaps.merge(mainContext, context));
+        }
+
+        appendCode("""
+        public static @Nonnull EntityColumnMap<OwnColumn> $data_method_name(@Nonnull Map<OwnColumn, Object> map) {
+            assert map.size() == $columns_num :
+                "Provided $TableClass data map does not match required columns: map=%s, columns=%s"
+                .formatted(map, OwnColumn.ALL_COLUMNS);
+            return new EntityColumnMap<>(map);
         }
         """, EasyMaps.merge(mainContext, context));
     }

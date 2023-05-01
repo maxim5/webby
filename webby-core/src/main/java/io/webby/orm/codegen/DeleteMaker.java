@@ -1,6 +1,6 @@
 package io.webby.orm.codegen;
 
-import io.webby.orm.arch.TableArch;
+import io.webby.orm.arch.model.TableArch;
 import org.jetbrains.annotations.NotNull;
 
 class DeleteMaker {

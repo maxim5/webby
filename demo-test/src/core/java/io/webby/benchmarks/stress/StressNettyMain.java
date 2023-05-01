@@ -59,7 +59,7 @@ public class StressNettyMain {
             bootstrap.runLocally(PORT);
         }));
         server.start();
-        TestingUtil.waitFor(300);
+        TestingBasics.waitFor(300);
 
         return server::interrupt;
     }

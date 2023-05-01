@@ -9,6 +9,7 @@ import io.netty.handler.codec.http.HttpResponse;
 import io.netty.handler.codec.http.HttpResponseStatus;
 import io.routekit.util.CharArray;
 import io.webby.app.Settings;
+import io.webby.util.base.Unchecked;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
@@ -121,7 +122,7 @@ public class ResponseMapper {
         try {
             return CharStreams.toString(readable);
         } catch (IOException e) {
-            throw new RuntimeException(e);
+            return Unchecked.rethrow(e);
         } finally {
             if (readable instanceof Closeable closeable) {
                 closeRethrow(closeable);

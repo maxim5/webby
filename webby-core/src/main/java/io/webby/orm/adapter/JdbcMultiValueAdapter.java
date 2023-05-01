@@ -2,7 +2,15 @@ package io.webby.orm.adapter;
 
 import org.jetbrains.annotations.NotNull;
 
-public interface JdbcMultiValueAdapter <E> extends JdbcArrayAdapter<E> {
+/**
+ * An adapter which requires multiple JDBC values to represent the entity.
+ *
+ * @param <E> the entity type
+ */
+public interface JdbcMultiValueAdapter<E> extends JdbcArrayAdapter<E> {
+    /**
+     * Returns the number of values necessary to represent the entity.
+     */
     int valuesNumber();
 
     @Override

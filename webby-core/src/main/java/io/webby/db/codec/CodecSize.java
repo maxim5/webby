@@ -6,7 +6,7 @@ public record CodecSize(@NotNull Estimate estimate, int numBytes) {
     public enum Estimate {
         FIXED,
         MIN,
-        AVERAGE
+        AVERAGE,
     }
 
     public static @NotNull CodecSize fixed(long numBytes) {

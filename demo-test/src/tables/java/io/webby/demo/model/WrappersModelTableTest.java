@@ -1,12 +1,12 @@
 package io.webby.demo.model;
 
 import io.webby.orm.api.Connector;
-import io.webby.orm.codegen.SqlSchemaMaker;
+import io.webby.orm.api.query.CreateTableQuery;
 import io.webby.testing.PrimaryKeyTableTest;
 import io.webby.testing.SqlDbTableTest;
 import org.jetbrains.annotations.NotNull;
 
-import static io.webby.testing.TestingUtil.array;
+import static io.webby.testing.TestingBasics.array;
 
 public class WrappersModelTableTest
         extends SqlDbTableTest<WrappersModel, WrappersModelTable>
@@ -14,7 +14,7 @@ public class WrappersModelTableTest
     @Override
     protected void setUp(@NotNull Connector connector) throws Exception {
         table = new WrappersModelTable(connector);
-        connector().runner().runUpdate(SqlSchemaMaker.makeCreateTableQuery(table));
+        table.admin().createTable(CreateTableQuery.of(table).ifNotExists());
     }
 
     @Override

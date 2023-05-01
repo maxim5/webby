@@ -1,5 +1,7 @@
 package io.webby.util.func;
 
+import org.jetbrains.annotations.NotNull;
+
 import static java.util.Objects.requireNonNull;
 
 /**
@@ -8,7 +10,7 @@ import static java.util.Objects.requireNonNull;
  * Unlike most other functional interfaces, {@code TriConsumer} is expected
  * to operate via side-effects.
  * <p>
- * <p>This is a <a href="package-summary.html">functional interface</a>
+ * This is a <a href="package-summary.html">functional interface</a>
  * whose functional method is {@link #accept(Object, Object, Object)}.
  *
  * @param <T> the type of the first argument to the operation
@@ -19,28 +21,28 @@ import static java.util.Objects.requireNonNull;
  */
 @FunctionalInterface
 public interface TriConsumer<T, U, V> {
-
     /**
      * Performs this operation on the given arguments.
      *
      * @param t the first input argument
      * @param u the second input argument
+     * @param v the third input argument
      */
     void accept(T t, U u, V v);
 
     /**
-     * Returns a composed {@code BiConsumer} that performs, in sequence, this
+     * Returns a composed {@code TriConsumer} that performs, in sequence, this
      * operation followed by the {@code after} operation. If performing either
      * operation throws an exception, it is relayed to the caller of the
      * composed operation.  If performing this operation throws an exception,
      * the {@code after} operation will not be performed.
      *
      * @param after the operation to perform after this operation
-     * @return a composed {@code BiConsumer} that performs in sequence this
+     * @return a composed {@code TriConsumer} that performs in sequence this
      * operation followed by the {@code after} operation
      * @throws NullPointerException if {@code after} is null
      */
-    default TriConsumer<T, U, V> andThen(TriConsumer<? super T, ? super U, ? super V> after) {
+    default @NotNull TriConsumer<T, U, V> andThen(@NotNull TriConsumer<? super T, ? super U, ? super V> after) {
         requireNonNull(after);
 
         return (l, r, s) -> {

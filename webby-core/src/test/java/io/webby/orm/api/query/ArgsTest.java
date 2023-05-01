@@ -3,6 +3,9 @@ package io.webby.orm.api.query;
 import com.carrotsearch.hppc.IntArrayList;
 import com.carrotsearch.hppc.LongArrayList;
 import com.google.errorprone.annotations.CanIgnoreReturnValue;
+import com.mockrunner.mock.jdbc.MockPreparedStatement;
+import io.webby.testing.TestingBasics;
+import io.webby.util.collect.ImmutableArrayList;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import org.junit.jupiter.api.Test;
@@ -13,7 +16,11 @@ import java.util.Map;
 import java.util.stream.Collectors;
 
 import static com.google.common.truth.Truth.assertThat;
+import static io.webby.orm.testing.MockingJdbc.assertThat;
+import static io.webby.orm.testing.MockingJdbc.mockPreparedStatement;
 import static io.webby.testing.AssertBasics.assertPrivateFieldClass;
+import static io.webby.testing.AssertBasics.getPrivateFieldValue;
+import static io.webby.util.base.Unchecked.Suppliers.runRethrow;
 import static org.junit.jupiter.api.Assertions.*;
 
 public class ArgsTest {
@@ -236,6 +243,80 @@ public class ArgsTest {
             .assertUnresolved(UNRESOLVED_A, UNRESOLVED_B);
     }
 
+    @Test
+    public void resolveArgsByName_zero_unresolved() {
+        Args args = Args.of(1, "2");
+        assertThat(args.resolveArgsByName(Map.of())).isSameInstanceAs(args);
+    }
+
+    @Test
+    public void resolveArgsByName_one_unresolved() {
+        Args args = Args.of(1, UNRESOLVED_A, "2");
+        Map<String, ?> resolved = Map.of(UNRESOLVED_A.name(), "foo");
+
+        assertThat(args.asList()).containsExactly(1, 0, "2").inOrder();
+        assertThat(args.resolveArgsByName(resolved).asList()).containsExactly(1, "foo", "2").inOrder();
+    }
+
+    @Test
+    public void resolveArgsByName_two_unresolved() {
+        Args args = Args.of(1, UNRESOLVED_A, "2", UNRESOLVED_B);
+        Map<String, ?> resolved = Map.of(UNRESOLVED_A.name(), "foo", UNRESOLVED_B.name(), 10L);
+
+        assertThat(args.asList()).containsExactly(1, 0, "2", null).inOrder();
+        assertThat(args.resolveArgsByName(resolved).asList()).containsExactly(1, "foo", "2", 10L).inOrder();
+    }
+
+    @Test
+    public void resolveArgsByName_missing_values() {
+        Args args = Args.of(1, UNRESOLVED_A, "2");
+
+        assertThrows(AssertionError.class, () -> args.resolveArgsByName(Map.of()));
+        assertThrows(AssertionError.class, () -> args.resolveArgsByName(Map.of(UNRESOLVED_B.name(), "foo")));
+        assertThrows(AssertionError.class, () -> args.resolveArgsByName(Map.of(UNRESOLVED_A.name(), 1, UNRESOLVED_B.name(), 2)));
+    }
+
+    @Test
+    public void resolveArgsByOrderedList_zero_unresolved() {
+        Args args = Args.of(1, "2");
+        assertThat(args.resolveArgsByOrderedList(List.of())).isSameInstanceAs(args);
+    }
+
+    @Test
+    public void resolveArgsByOrderedList_one_unresolved() {
+        Args args = Args.of(1, UNRESOLVED_A, "2");
+        List<String> resolved = List.of("foo");
+
+        assertThat(args.asList()).containsExactly(1, 0, "2").inOrder();
+        assertThat(args.resolveArgsByOrderedList(resolved).asList()).containsExactly(1, "foo", "2").inOrder();
+    }
+
+    @Test
+    public void resolveArgsByOrderedList_two_unresolved() {
+        Args args = Args.of(1, UNRESOLVED_A, "2", UNRESOLVED_B);
+        List<?> resolved = List.of("foo", 10L);
+
+        assertThat(args.asList()).containsExactly(1, 0, "2", null).inOrder();
+        assertThat(args.resolveArgsByOrderedList(resolved).asList()).containsExactly(1, "foo", "2", 10L).inOrder();
+    }
+
+    @Test
+    public void resolveArgsByOrderedList_all_unresolved() {
+        Args args = Args.of(UNRESOLVED_A, UNRESOLVED_B);
+        List<?> resolved = List.of("foo", 10L);
+
+        assertThat(args.asList()).containsExactly(0, null).inOrder();
+        assertThat(args.resolveArgsByOrderedList(resolved).asList()).containsExactly("foo", 10L).inOrder();
+    }
+
+    @Test
+    public void resolveArgsByOrderedList_missing_values() {
+        Args args = Args.of(1, UNRESOLVED_A, "2");
+
+        assertThrows(AssertionError.class, () -> args.resolveArgsByOrderedList(List.of()));
+        assertThrows(AssertionError.class, () -> args.resolveArgsByOrderedList(List.of("foo", "bar")));
+    }
+
     private static @NotNull ArgsAssert with(@NotNull Args args) {
         return new ArgsAssert(args);
     }
@@ -264,7 +345,14 @@ public class ArgsTest {
         }
 
         public @NotNull ArgsAssert assertInternalConsistency() {
-            // FIX[norm]: check InternalType consistency
+            String type = getPrivateFieldValue(args, "type").toString();
+            Class<?> expectedClass = switch (type) {
+                case "INTS" -> IntArrayList.class;
+                case "LONGS" -> LongArrayList.class;
+                case "GENERIC_LIST" -> ImmutableArrayList.class;
+                default -> throw new AssertionError("Unexpected args.type: " + type);
+            };
+            assertInternalType(expectedClass);
             return this;
         }
 
@@ -295,6 +383,30 @@ public class ArgsTest {
             assertEquals(expected.length, args.size());
             assertEquals(expected.length == 0, args.isEmpty());
             assertThat(args.asList()).containsExactlyElementsIn(expected).inOrder();
+
+            assertPreparedParams(expected);
+            assertPreparedParamsWithOffset(expected);
+
+            return this;
+        }
+
+        public @NotNull ArgsAssert assertPreparedParams(@Nullable Object @NotNull ... expected) {
+            MockPreparedStatement statement = mockPreparedStatement();
+            int added = runRethrow(() -> args.setPreparedParams(statement));
+            assertEquals(added, expected.length);
+            assertThat(statement).withParams().equalExactly(expected);
+            return this;
+        }
+
+        public @NotNull ArgsAssert assertPreparedParamsWithOffset(@Nullable Object @NotNull ... expected) {
+            MockPreparedStatement statement = mockPreparedStatement();
+            int added = runRethrow(() -> {
+                statement.setObject(1, null);
+                return args.setPreparedParams(statement, 1);
+            });
+            expected = TestingBasics.prependVarArg(null, expected);
+            assertEquals(added, expected.length);
+            assertThat(statement).withParams().equalExactly(expected);
             return this;
         }
 

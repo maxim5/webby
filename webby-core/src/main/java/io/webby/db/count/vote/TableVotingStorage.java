@@ -79,7 +79,7 @@ public class TableVotingStorage implements VotingStorage {
         loadQueryResults(builder -> {}, consumer);
     }
 
-    private void loadQueryResults(@NotNull Consumer<SelectWhereBuilder> updater,
+    private void loadQueryResults(@NotNull Consumer<SelectWhere.Builder> updater,
                                   @NotNull IntObjectProcedure<@NotNull IntHashSet> consumer) {
         SelectWhere query = SelectWhere.from(table).select(keyColumn, actorColumn, valueColumn).applying(updater).build();
 

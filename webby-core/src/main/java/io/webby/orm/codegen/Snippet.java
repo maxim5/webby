@@ -1,5 +1,6 @@
 package io.webby.orm.codegen;
 
+import com.google.errorprone.annotations.CheckReturnValue;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.ArrayList;
@@ -55,14 +56,17 @@ class Snippet {
         return lines;
     }
 
+    @CheckReturnValue
     public @NotNull String join() {
         return String.join("\n", lines);
     }
 
+    @CheckReturnValue
     public @NotNull String join(@NotNull String indent) {
         return join(Collectors.joining("\n" + indent, "", ""));
     }
 
+    @CheckReturnValue
     public @NotNull String join(@NotNull Collector<CharSequence, ?, String> collector) {
         return lines.stream().collect(collector);
     }

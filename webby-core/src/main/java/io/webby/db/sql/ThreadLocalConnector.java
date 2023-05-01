@@ -9,14 +9,16 @@ import org.jetbrains.annotations.NotNull;
 import java.sql.Connection;
 import java.sql.SQLException;
 
-public class ThreadLocalConnector implements Connector {
+public final class ThreadLocalConnector implements Connector {
     private static final ThreadLocal<ConnectionData> local = new ThreadLocal<>();
 
     private final ConnectionPool pool;
+    private final Engine engine;
     private final long timeoutToExpireMillis;
 
     public ThreadLocalConnector(@NotNull ConnectionPool pool, long timeoutToExpireMillis) {
         this.pool = pool;
+        this.engine = pool.engine();
         this.timeoutToExpireMillis = timeoutToExpireMillis;
     }
 
@@ -42,7 +44,7 @@ public class ThreadLocalConnector implements Connector {
 
     @Override
     public @NotNull Engine engine() {
-        return pool.engine();
+        return engine;
     }
 
     public void refreshIfNecessary() {

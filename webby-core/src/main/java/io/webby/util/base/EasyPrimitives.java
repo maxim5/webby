@@ -56,7 +56,7 @@ public class EasyPrimitives {
         public MutableLong() {
         }
 
-        public MutableLong(int value) {
+        public MutableLong(long value) {
             this.value = value;
         }
 

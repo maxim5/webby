@@ -68,6 +68,6 @@ public class EasyMembers {
 
     public enum Scope {
         DECLARED,
-        ALL
+        ALL,
     }
 }

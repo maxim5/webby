@@ -2,7 +2,7 @@ package io.webby.util.collect;
 
 import org.junit.jupiter.api.Test;
 
-import static io.webby.testing.TestingUtil.array;
+import static io.webby.testing.TestingBasics.array;
 import static io.webby.util.collect.TabularFormatter.ASCII_FORMATTER;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 

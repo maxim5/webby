@@ -1,20 +1,20 @@
 package io.webby.orm.api.query;
 
+import com.google.errorprone.annotations.Immutable;
 import org.jetbrains.annotations.NotNull;
 
-public record HardcodedStringTerm(@NotNull String repr) implements Term {
+@Immutable
+public class HardcodedStringTerm extends Unit implements Term {
+    public HardcodedStringTerm(@NotNull String repr, @NotNull Args args) {
+        super(repr, args);
+    }
+
+    public HardcodedStringTerm(@NotNull String repr) {
+        super(repr);
+    }
+
     @Override
     public @NotNull TermType type() {
         return TermType.STRING;
-    }
-
-    @Override
-    public @NotNull Args args() {
-        return Args.of();
-    }
-
-    @Override
-    public String toString() {
-        return repr;
     }
 }

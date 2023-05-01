@@ -5,7 +5,7 @@ import io.webby.app.AppSettings;
 import io.webby.demo.DevPaths;
 import io.webby.demo.Main;
 import io.webby.testing.OkRequests;
-import io.webby.testing.TestingUtil;
+import io.webby.testing.TestingBasics;
 import io.webby.util.func.ThrowConsumer;
 import okhttp3.*;
 import okio.ByteString;
@@ -153,7 +153,7 @@ public class StandaloneNettyIntegrationTest {
         WebSocket ws = client.newWebSocket(request, listener);
         try {
             session.accept(ws);
-            TestingUtil.waitFor(200);
+            TestingBasics.waitFor(200);
         } finally {
             ws.close(1000, null);
         }

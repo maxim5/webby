@@ -1,11 +1,12 @@
 package io.webby.db.model;
 
+import io.webby.orm.api.annotate.Sql;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.Arrays;
 
-public record BlobKv(byte @NotNull [] id, byte @Nullable [] value) {
+public record BlobKv(byte @NotNull [] id, @Sql.Null byte @Nullable [] value) {
     public static final String DB_NAME = "blob_kv";
 
     @Override

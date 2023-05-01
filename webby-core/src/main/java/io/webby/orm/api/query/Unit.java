@@ -4,7 +4,11 @@ import org.jetbrains.annotations.NotNull;
 
 import java.util.Objects;
 
-public abstract class Unit implements HasArgs {
+/**
+ * A base class of all query units derived from {@link Representable} and {@link HasArgs}.
+ * Stores the {@code repr} and {@code args} (possibly unresolved or empty).
+ */
+public abstract class Unit implements Representable, HasArgs {
     private final String repr;
     private final Args args;
 

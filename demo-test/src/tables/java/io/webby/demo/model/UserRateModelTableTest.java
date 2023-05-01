@@ -1,7 +1,7 @@
 package io.webby.demo.model;
 
 import io.webby.orm.api.Connector;
-import io.webby.orm.codegen.SqlSchemaMaker;
+import io.webby.orm.api.query.CreateTableQuery;
 import io.webby.testing.BaseTableTest;
 import io.webby.testing.SqlDbTableTest;
 import org.jetbrains.annotations.NotNull;
@@ -12,6 +12,6 @@ public class UserRateModelTableTest
     @Override
     protected void setUp(@NotNull Connector connector) throws Exception {
         table = new UserRateModelTable(connector);
-        connector().runner().runUpdate(SqlSchemaMaker.makeCreateTableQuery(table));
+        table.admin().createTable(CreateTableQuery.of(table).ifNotExists());
     }
 }

@@ -5,6 +5,7 @@ import io.netty.buffer.ByteBuf;
 import io.netty.buffer.ByteBufInputStream;
 import io.netty.buffer.Unpooled;
 import io.webby.common.SystemProperties;
+import io.webby.util.func.Reversible;
 import org.jetbrains.annotations.NotNull;
 
 import java.io.*;
@@ -14,7 +15,7 @@ import static io.webby.util.base.EasyPrimitives.firstNonNegative;
 import static io.webby.util.base.Unchecked.rethrow;
 
 // Aka Serializer
-public interface Codec<T> {
+public interface Codec<T> extends Reversible<byte[], T> {
     @NotNull CodecSize size();
 
     default int sizeOf(@NotNull T instance) {
@@ -83,5 +84,15 @@ public interface Codec<T> {
         } catch (IOException impossible) {
             return rethrow(impossible);
         }
+    }
+
+    @Override
+    default @NotNull T forward(byte @NotNull [] bytes) {
+        return readFromBytes(bytes);
+    }
+
+    @Override
+    default byte @NotNull [] backward(@NotNull T t) {
+        return writeToBytes(t);
     }
 }

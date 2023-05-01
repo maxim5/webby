@@ -3,7 +3,8 @@ package io.webby.orm.codegen;
 import io.webby.orm.api.Foreign;
 import io.webby.orm.api.ForeignObj;
 import io.webby.orm.api.ReadFollow;
-import io.webby.orm.arch.*;
+import io.webby.orm.arch.model.*;
+import io.webby.orm.arch.util.Naming;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.Arrays;
@@ -11,9 +12,8 @@ import java.util.Set;
 import java.util.stream.Stream;
 
 import static io.webby.orm.api.ReadFollow.*;
-import static io.webby.orm.codegen.Joining.COMMA_JOINER;
 import static io.webby.orm.codegen.JavaSupport.INDENT1;
-import static java.util.Objects.requireNonNull;
+import static io.webby.orm.codegen.Joining.COMMA_JOINER;
 
 class ResultSetConversionMaker {
     private static final Set<Class<?>> FULL_NAME_CLASSES = Set.of(java.util.Date.class, java.sql.Date.class);
@@ -35,57 +35,120 @@ class ResultSetConversionMaker {
     private @NotNull String assignFieldLine(@NotNull TableField field) {
         Class<?> fieldType = field.javaType();
         String fieldClassName = FULL_NAME_CLASSES.contains(fieldType) ?
-                fieldType.getName() :
-                Naming.shortCanonicalJavaName(fieldType);
+            fieldType.getName() :
+            Naming.shortCanonicalJavaName(fieldType);
         return "%s %s = %s;".formatted(fieldClassName, field.javaName(), fieldCreateExpr(field));
     }
 
     private @NotNull String fieldCreateExpr(@NotNull TableField field) {
-        if (field.isForeignKey()) {
-            assert field instanceof ForeignTableField : "Expected a foreign key field, but found %s".formatted(field);
-            return foreignFieldSwitchExpr((ForeignTableField) field);
-        } else if (field.isNativelySupportedType()) {
-            assert field instanceof OneColumnTableField : "Native field is not one column: %s".formatted(field);
-            return resultSetGetterExpr(((OneColumnTableField) field).column());
-        } else {
-            String staticRef = requireNonNull(field.adapterApi()).staticRef();
-            String params = field.columns().stream().map(this::resultSetGetterExpr).collect(COMMA_JOINER);
-            return "%s.createInstance(%s)".formatted(staticRef, params);
-        }
+        return switch (field.typeSupport()) {
+            case NATIVE -> {
+                assert field instanceof OneColumnTableField : "Native field is not one column: %s".formatted(field);
+                yield resultSetGetterExpr(((OneColumnTableField) field).column());
+            }
+            case FOREIGN_KEY -> {
+                assert field instanceof ForeignTableField : "Expected a foreign key field, but found %s".formatted(field);
+                yield foreignFieldSwitchExpr((ForeignTableField) field);
+            }
+            case MAPPER_API -> {
+                assert field instanceof OneColumnTableField : "Mapped field is not one column: %s".formatted(field);
+                String resultSetGetterExpr = resultSetGetterExpr(((OneColumnTableField) field).column());
+                yield field.mapperApiOrDie().expr().jdbcToField(resultSetGetterExpr);
+            }
+            case ADAPTER_API -> {
+                String params = field.columns().stream().map(this::resultSetGetterExpr).collect(COMMA_JOINER);
+                yield field.adapterApiOrDie().expr().createInstance(params);
+            }
+        };
     }
 
     private @NotNull String foreignFieldSwitchExpr(@NotNull ForeignTableField field) {
-        Stream<String> cases = Arrays.stream(ReadFollow.values())
-            .map(follow -> {
-                String fkParam = resultSetGetterExpr(field.foreignKeyColumn());
-                String params;
-                String factoryMethod;
-                if (follow == NO_FOLLOW) {
-                    params = fkParam;
-                    factoryMethod = "ofId";
-                } else {
-                    int columnsNumber = field.columnsNumber(follow) - 1;  // exclude FK columns
-                    params = "%s, %s.fromRow(%s, %s.%s, (%s += %d) - %d)".formatted(
-                        fkParam,
-                        field.getForeignTable().javaName(),
-                        resultSetParam,
-                        ReadFollow.class.getSimpleName(),
-                        follow == FOLLOW_ONE_LEVEL ? NO_FOLLOW : FOLLOW_ALL,
-                        indexParam, columnsNumber, columnsNumber
-                    );
-                    factoryMethod = "ofEntity";
-                }
-                Class<?> factoryClass = field.javaType() == Foreign.class ? ForeignObj.class : field.javaType();
-                return "case %s -> %s.%s(%s);".formatted(follow, factoryClass.getSimpleName(), factoryMethod, params);
-            });
+        Stream<String> indented = Arrays.stream(ReadFollow.values())
+            .map(follow -> field.isNotNull() ? caseForNotNull(field, follow) : caseForNullable(field, follow))
+            .flatMap(String::lines)
+            .map(line -> INDENT1 + line);
         return new Snippet()
-                .withFormattedLine("switch (%s) {", followParam)
-                .withLines(cases.map(line -> INDENT1 + line))
-                .withLine("}").join(INDENT1);
+            .withFormattedLine("switch (%s) {", followParam)
+            .withLines(indented)
+            .withLine("}").join(INDENT1);
     }
 
+    private @NotNull String caseForNotNull(@NotNull ForeignTableField field, @NotNull ReadFollow follow) {
+        String fkParam = resultSetGetterExpr(field.foreignKeyColumn());
+        String params;
+        String factoryMethod;
+        if (follow == NO_FOLLOW) {
+            params = fkParam;
+            factoryMethod = "ofId";
+        } else {
+            int columnsNum = field.columnsNumber(follow) - 1;  // exclude FK columns
+            String fromRow = fromRowExpr(field, follow == FOLLOW_ONE_LEVEL ? NO_FOLLOW : FOLLOW_ALL, columnsNum);
+            params = "%s, %s".formatted(fkParam, fromRow);
+            factoryMethod = "ofEntity";
+        }
+        Class<?> factoryClass = field.javaType() == Foreign.class ? ForeignObj.class : field.javaType();
+        return "case %s -> %s.%s(%s);".formatted(follow, factoryClass.getSimpleName(), factoryMethod, params);
+    }
+
+    private @NotNull String caseForNullable(@NotNull ForeignTableField field, @NotNull ReadFollow follow) {
+        Class<?> underlyingType = field.primaryKeyFieldInForeignTable().javaType();
+        boolean isPrimitive = underlyingType.isPrimitive();
+        if (follow == NO_FOLLOW && isPrimitive) {
+            return caseForNotNull(field, follow);
+        }
+
+        int columnsNum = field.columnsNumber(follow) - 1;  // exclude FK columns
+        String tmpVar = "_%s".formatted(field.javaName());
+        String nullValue = isPrimitive ? "0" : "null";
+        Class<?> factoryClass = field.javaType() == Foreign.class ? ForeignObj.class : field.javaType();
+
+        String increment;
+        String params;
+        String factoryMethod;
+        if (follow == NO_FOLLOW) {
+            increment = "/* no need to increment `%s` */".formatted(indexParam);
+            factoryMethod = "ofId";
+            params = tmpVar;
+        } else {
+            increment = "%s += %s".formatted(indexParam, columnsNum);
+            factoryMethod = "ofEntity";
+            String fromRow = fromRowExpr(field, follow == FOLLOW_ONE_LEVEL ? NO_FOLLOW : FOLLOW_ALL, columnsNum);
+            params = "%s, %s".formatted(tmpVar, fromRow);
+        }
+
+        return """
+            case %s -> {
+                %s %s = %s;
+                if (%s == %s) {
+                    %s;
+                    yield %s.empty();
+                } else {
+                    yield %s.%s(%s);
+                }
+            }
+            """.formatted(
+            follow,
+            Naming.shortCanonicalJavaName(underlyingType), tmpVar, resultSetGetterExpr(field.foreignKeyColumn()),
+            tmpVar, nullValue,
+            increment,
+            factoryClass.getSimpleName(),
+            factoryClass.getSimpleName(), factoryMethod, params
+        );
+    }
+
+    // Example: ForeignTable.fromRow(result, ReadFollow.NO_FOLLOW, (start += 2) - 2)
+    private @NotNull String fromRowExpr(@NotNull ForeignTableField field, @NotNull ReadFollow follow, int columnsNum) {
+        return "%s.fromRow(%s, %s.%s, (%s += %d) - %d)".formatted(
+            field.getForeignTable().javaName(),
+            resultSetParam,
+            ReadFollow.class.getSimpleName(), follow,
+            indexParam, columnsNum, columnsNum
+        );
+    }
+
+    // Example: result.getLong(++start)
     private @NotNull String resultSetGetterExpr(@NotNull Column column) {
-        String getter = column.type().jdbcType().getterMethod();
-        return "result.%s(++%s)".formatted(getter, indexParam);
+        String resultSetGetter = column.jdbcType().getterMethod();
+        return "%s.%s(++%s)".formatted(resultSetParam, resultSetGetter, indexParam);
     }
 }

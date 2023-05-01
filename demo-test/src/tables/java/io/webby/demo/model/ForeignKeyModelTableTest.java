@@ -1,7 +1,10 @@
 package io.webby.demo.model;
 
-import io.webby.orm.api.*;
-import io.webby.orm.codegen.SqlSchemaMaker;
+import io.webby.orm.api.Connector;
+import io.webby.orm.api.ForeignInt;
+import io.webby.orm.api.ForeignLong;
+import io.webby.orm.api.ForeignObj;
+import io.webby.orm.api.query.CreateTableQuery;
 import io.webby.testing.ForeignKeyTableTest;
 import io.webby.testing.SqlDbTableTest;
 import io.webby.testing.TableLongTest;
@@ -14,15 +17,29 @@ public class ForeignKeyModelTableTest
     @Override
     protected void setUp(@NotNull Connector connector) throws Exception {
         table = new ForeignKeyModelTable(connector);
-        connector().runner().runUpdate(SqlSchemaMaker.makeCreateTableQuery(table.engine(), FKIntTable.class));
-        connector().runner().runUpdate(SqlSchemaMaker.makeCreateTableQuery(table.engine(), FKLongTable.class));
-        connector().runner().runUpdate(SqlSchemaMaker.makeCreateTableQuery(table.engine(), FKStringTable.class));
-        connector().runner().runUpdate(SqlSchemaMaker.makeCreateTableQuery(table.engine(), ForeignKeyModelTable.class));
+        table.admin().createTable(CreateTableQuery.of(FKIntTable.META).ifNotExists());
+        table.admin().createTable(CreateTableQuery.of(FKLongTable.META).ifNotExists());
+        table.admin().createTable(CreateTableQuery.of(FKStringTable.META).ifNotExists());
+        table.admin().createTable(CreateTableQuery.of(ForeignKeyModelTable.META).ifNotExists());
+    }
+
+    @Override
+    protected void fillUp(@NotNull Connector connector) {
+        // These contents support entity versions 0 and 1 (below).
+        new FKIntTable(connector).insert(new ForeignKeyModel.InnerInt(1, 111));
+        new FKIntTable(connector).insert(new ForeignKeyModel.InnerInt(2, 222));
+        new FKLongTable(connector).insert(new ForeignKeyModel.InnerLong(7, 777_777));
+        new FKStringTable(connector).insert(new ForeignKeyModel.InnerString("555", "value-555"));
+    }
+
+    @Override
+    public int maxSupportedVersion() {
+        return 1;
     }
 
     @Override
     public @NotNull ForeignKeyModel createEntity(@NotNull Long key, int version) {
-        return new ForeignKeyModel(key, ForeignInt.ofId(version + 1), ForeignLong.ofId(777), ForeignObj.ofId("foo"));
+        return new ForeignKeyModel(key, ForeignInt.ofId(version + 1), ForeignLong.ofId(7), ForeignObj.ofId("555"));
     }
 
     @Override
@@ -32,20 +49,14 @@ public class ForeignKeyModelTableTest
 
     @Override
     public @NotNull ForeignKeyModel enrichOneLevel(@NotNull ForeignKeyModel model) {
-        ForeignKeyModel.InnerInt fkInt = new ForeignKeyModel.InnerInt(model.innerInt().getIntId(), 123);
-        new FKIntTable(connector()).insert(fkInt);
-
-        ForeignKeyModel.InnerLong fkLong = new ForeignKeyModel.InnerLong(model.innerLong().getLongId(), 456);
-        new FKLongTable(connector()).insert(fkLong);
-
-        ForeignKeyModel.InnerString fkString = new ForeignKeyModel.InnerString(model.innerString().getFk(), "foobar");
-        new FKStringTable(connector()).insert(fkString);
-
+        int intId = model.innerInt().getIntId();
+        long longId = model.innerLong().getLongId();
+        String strId = model.innerString().getFk();
         return new ForeignKeyModel(
             model.id(),
-            ForeignInt.ofEntity(fkInt.id(), fkInt),
-            ForeignLong.ofEntity(fkLong.id(), fkLong),
-            ForeignObj.ofEntity(fkString.id(), fkString)
+            new ForeignInt<>(intId, new ForeignKeyModel.InnerInt(intId, intId * 111)),
+            new ForeignLong<>(longId, new ForeignKeyModel.InnerLong(longId, longId * 111_111)),
+            new ForeignObj<>(strId, new ForeignKeyModel.InnerString(strId, "value-" + strId))
         );
     }
 

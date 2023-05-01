@@ -4,6 +4,7 @@ import io.netty.buffer.ByteBuf;
 import io.netty.buffer.ByteBufInputStream;
 import io.netty.buffer.Unpooled;
 import io.webby.common.SystemProperties;
+import io.webby.util.func.Reversible;
 import org.jetbrains.annotations.NotNull;
 
 import java.io.*;
@@ -51,5 +52,19 @@ public interface BinaryMarshaller {
         } catch (IOException impossible) {
             return rethrow(impossible);
         }
+    }
+    
+    default <T> @NotNull Reversible<byte[], T> toBinaryReversible(@NotNull Class<T> klass) {
+        return new Reversible<>() {
+            @Override
+            public @NotNull T forward(byte @NotNull [] bytes) {
+                return readBytes(bytes, klass);
+            }
+
+            @Override
+            public byte @NotNull [] backward(@NotNull T t) {
+                return writeBytes(t);
+            }
+        };
     }
 }

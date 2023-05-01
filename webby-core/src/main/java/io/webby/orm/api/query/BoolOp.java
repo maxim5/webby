@@ -1,12 +1,14 @@
 package io.webby.orm.api.query;
 
 import com.google.common.collect.ImmutableList;
+import com.google.errorprone.annotations.Immutable;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.List;
 
 import static io.webby.orm.api.query.Args.flattenArgsOf;
 
+@Immutable
 public class BoolOp extends Unit implements BoolTerm {
     private final ImmutableList<BoolTerm> terms;
     private final BoolOpType type;
@@ -25,7 +27,7 @@ public class BoolOp extends Unit implements BoolTerm {
         }).collect(type.joiner());
     }
 
-    private static boolean isComposite(@NotNull BoolTerm term) {
+    static boolean isComposite(@NotNull BoolTerm term) {
         if (term instanceof BoolOp boolOp) {
             return boolOp.terms.size() > 1;
         }

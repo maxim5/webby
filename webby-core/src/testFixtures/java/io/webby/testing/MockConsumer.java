@@ -1,6 +1,5 @@
 package io.webby.testing;
 
-import com.google.common.truth.Truth;
 import com.google.errorprone.annotations.CheckReturnValue;
 import io.webby.util.func.ThrowConsumer;
 import org.jetbrains.annotations.NotNull;
@@ -12,6 +11,7 @@ import java.util.List;
 import java.util.Stack;
 import java.util.function.Consumer;
 
+import static com.google.common.truth.Truth.assertThat;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
@@ -79,7 +79,7 @@ public class MockConsumer<T, E extends Throwable> implements Consumer<T>, ThrowC
 
     public void assertAllDone() {
         if (expected != null) {
-            Truth.assertThat(items).containsExactlyElementsIn(expected);
+            assertThat(items).containsExactlyElementsIn(expected);
         }
     }
 

@@ -1,10 +1,13 @@
 package io.webby.auth.session;
 
+import io.webby.auth.user.DefaultUser;
+import io.webby.auth.user.UserAccess;
+import io.webby.auth.user.UserTable;
 import io.webby.orm.api.Connector;
 import io.webby.orm.api.ForeignInt;
-import io.webby.orm.codegen.SqlSchemaMaker;
-import io.webby.testing.TableLongTest;
+import io.webby.orm.api.query.CreateTableQuery;
 import io.webby.testing.SqlDbTableTest;
+import io.webby.testing.TableLongTest;
 import org.jetbrains.annotations.NotNull;
 
 import java.time.Instant;
@@ -16,7 +19,14 @@ public class SessionTableTest
     @Override
     protected void setUp(@NotNull Connector connector) throws Exception {
         table = new SessionTable(connector);
-        connector().runner().runUpdate(SqlSchemaMaker.makeCreateTableQuery(table));
+        table.admin().createTable(CreateTableQuery.of(table).ifNotExists());
+        table.admin().createTable(CreateTableQuery.of(UserTable.META).ifNotExists());
+    }
+
+    @Override
+    protected void fillUp(@NotNull Connector connector) {
+        // These contents support any entity version (below).
+        new UserTable(connector).insert(new DefaultUser(1, Instant.now(), UserAccess.Simple));
     }
 
     @Override

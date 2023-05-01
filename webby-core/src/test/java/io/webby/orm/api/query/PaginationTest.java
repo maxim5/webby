@@ -38,6 +38,18 @@ public class PaginationTest {
         assertTrue(pagination.hasLastItem());
         assertEquals(FakeColumn.FOO.makeVar("x"), pagination.lastItem());
         assertEquals(20, pagination.limit());
+        assertEquals(Order.ASC, pagination.order());
+    }
+
+    @Test
+    public void init_valid_column_desc_term() {
+        Pagination pagination = ofColumnDesc(FakeColumn.FOO.makeVar("x"), 30);
+        assertFalse(pagination.hasOffset());
+        assertEquals(NO_OFFSET, pagination.offset());
+        assertTrue(pagination.hasLastItem());
+        assertEquals(FakeColumn.FOO.makeVar("x"), pagination.lastItem());
+        assertEquals(30, pagination.limit());
+        assertEquals(Order.DESC, pagination.order());
     }
 
     @Test

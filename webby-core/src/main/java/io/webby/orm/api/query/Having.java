@@ -1,9 +1,11 @@
 package io.webby.orm.api.query;
 
+import com.google.errorprone.annotations.Immutable;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.List;
 
+@Immutable
 public class Having extends Unit {
     private final BoolTerm term;
 

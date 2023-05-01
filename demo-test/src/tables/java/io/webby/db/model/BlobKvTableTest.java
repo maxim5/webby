@@ -2,13 +2,14 @@ package io.webby.db.model;
 
 import com.google.common.primitives.Ints;
 import io.webby.orm.api.Connector;
-import io.webby.orm.codegen.SqlSchemaMaker;
+import io.webby.orm.api.query.CreateTableQuery;
 import io.webby.testing.PrimaryKeyTableTest;
 import io.webby.testing.SqlDbTableTest;
 import org.jetbrains.annotations.NotNull;
 import org.junit.jupiter.api.Test;
 
-import static io.webby.testing.TestingUtil.array;
+import static io.webby.testing.TestingBasics.array;
+import static io.webby.testing.TestingBytes.assertBytes;
 import static org.junit.jupiter.api.Assumptions.assumeTrue;
 
 public class BlobKvTableTest
@@ -17,7 +18,7 @@ public class BlobKvTableTest
     @Override
     protected void setUp(@NotNull Connector connector) throws Exception {
         table = new BlobKvTable(connector);
-        connector().runner().runUpdate(SqlSchemaMaker.makeCreateTableQuery(table));
+        table.admin().createTable(CreateTableQuery.of(table).ifNotExists());
     }
 
     @Override
@@ -28,6 +29,15 @@ public class BlobKvTableTest
     @Override
     public @NotNull BlobKv createEntity(byte @NotNull [] key, int version) {
         return new BlobKv(key, version == 0 ? null : Ints.toByteArray(version));
+    }
+
+    @Override
+    @Test
+    public void keyOf() {
+        assumeKeys(1);
+        byte[] key = keys()[0];
+        BlobKv entity = createEntity(key);
+        assertBytes(table().keyOf(entity), key);
     }
 
     @Override

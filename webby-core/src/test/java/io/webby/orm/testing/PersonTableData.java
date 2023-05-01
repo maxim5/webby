@@ -2,6 +2,7 @@ package io.webby.orm.testing;
 
 import io.webby.orm.api.TableMeta;
 import io.webby.orm.api.query.Column;
+import io.webby.orm.api.query.FullColumn;
 import io.webby.orm.api.query.TermType;
 import org.jetbrains.annotations.NotNull;
 
@@ -18,6 +19,8 @@ public class PersonTableData {
         iq(TermType.NUMBER),
         height(TermType.NUMBER),
         photo(TermType.STRING);
+
+        public final FullColumn FULL = this.fullFrom(PERSON_META);
 
         private final TermType type;
 
@@ -40,15 +43,25 @@ public class PersonTableData {
         @Override
         public @NotNull List<ColumnMeta> sqlColumns() {
             return List.of(
-                new ColumnMeta(PersonColumn.id, int.class, true, false),
-                new ColumnMeta(PersonColumn.name, String.class, false, false),
-                new ColumnMeta(PersonColumn.country, String.class, false, false),
-                new ColumnMeta(PersonColumn.sex, boolean.class, false, false),
-                new ColumnMeta(PersonColumn.birthday, Timestamp.class, false, false),
-                new ColumnMeta(PersonColumn.iq, int.class, false, false),
-                new ColumnMeta(PersonColumn.height, double.class, false, false),
-                new ColumnMeta(PersonColumn.photo, byte[].class, false, false)
+                ColumnMeta.of(PersonColumn.id, int.class).withPrimaryKey(ConstraintStatus.SINGLE_COLUMN),
+                ColumnMeta.of(PersonColumn.name, String.class),
+                ColumnMeta.of(PersonColumn.country, String.class),
+                ColumnMeta.of(PersonColumn.sex, boolean.class),
+                ColumnMeta.of(PersonColumn.birthday, Timestamp.class),
+                ColumnMeta.of(PersonColumn.iq, int.class).withUnique(ConstraintStatus.SINGLE_COLUMN),
+                ColumnMeta.of(PersonColumn.height, double.class),
+                ColumnMeta.of(PersonColumn.photo, byte[].class)
             );
+        }
+
+        @Override
+        public @NotNull Constraint primaryKeys() {
+            return Constraint.of(PersonColumn.id);
+        }
+
+        @Override
+        public @NotNull Iterable<Constraint> unique() {
+            return List.of(Constraint.of(PersonColumn.photo));
         }
     };
 

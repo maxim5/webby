@@ -1,14 +1,13 @@
 package io.webby.orm.codegen;
 
+import com.google.common.primitives.Primitives;
+import io.webby.orm.arch.model.TableField;
 import io.webby.util.func.ObjIntBiFunction;
-import io.webby.orm.arch.TableField;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Stream;
-
-import static java.util.Objects.requireNonNull;
 
 class ValuesArrayMaker {
     private final String param;
@@ -48,24 +47,34 @@ class ValuesArrayMaker {
         }
 
         public @NotNull Stream<String> initLines() {
-            if (field.isNativelySupportedType()) {
-                return Stream.of("%s.%s(),".formatted(param, field.javaGetter()));
-            }
-            if (field.isForeignKey()) {
-                return Stream.of("%s.%s().getFk(),".formatted(param, field.javaGetter()));
-            }
-            return Stream.generate(() -> "null,").limit(field.columnsNumber());
+            return switch (field.typeSupport()) {
+                case NATIVE -> Stream.of(accessFieldExpr() + ",");
+                case FOREIGN_KEY -> Stream.of(accessFieldExpr() + ".getFk(),");
+                case MAPPER_API -> Stream.of(field.mapperApiOrDie().expr().fieldToJdbc(accessFieldExpr()) + ",");
+                case ADAPTER_API -> Stream.generate(() -> "null,").limit(field.columnsNumber());
+            };
         }
 
         public @NotNull String fillValuesLine() {
-            if (field.isNativelySupportedType()) {
-                return "";
-            }
-            if (field.isForeignKey()) {
-                return "";
-            }
-            return "%s.fillArrayValues(%s.%s(), array, %d);"
-                    .formatted(requireNonNull(field.adapterApi()).staticRef(), param, field.javaGetter(), columnIndex);
+            return switch (field.typeSupport()) {
+                case NATIVE, FOREIGN_KEY, MAPPER_API -> "";
+                case ADAPTER_API -> {
+                    // Special case: `char` type. Has a custom support, but shouldn't be handled for null.
+                    if (field.isNotNull() || Primitives.allPrimitiveTypes().contains(field.javaType())) {
+                        yield field.adapterApiOrDie().statement().fillArrayValues(accessFieldExpr(), "array", columnIndex);
+                    } else {
+                        yield "Optional.ofNullable(%s).ifPresent(%s -> %s);".formatted(
+                            accessFieldExpr(),
+                            field.javaName(),
+                            field.adapterApiOrDie().expr().fillArrayValues(field.javaName(), "array", columnIndex)
+                        );
+                    }
+                }
+            };
+        }
+
+        private @NotNull String accessFieldExpr() {
+            return "%s.%s".formatted(param, field.javaAccessor());
         }
     }
 }

@@ -1,5 +1,6 @@
 package io.webby.db.codec;
 
+import com.carrotsearch.hppc.IntArrayList;
 import com.carrotsearch.hppc.IntHashSet;
 import com.google.common.collect.ImmutableMap;
 import com.google.inject.Inject;
@@ -9,6 +10,7 @@ import io.webby.auth.session.Session;
 import io.webby.auth.session.SessionCodec;
 import io.webby.auth.user.DefaultUser;
 import io.webby.auth.user.DefaultUserCodec;
+import io.webby.db.codec.standard.IntArrayListCodec;
 import io.webby.db.codec.standard.IntHashSetCodec;
 import io.webby.perf.stats.impl.StatsManager;
 import io.webby.util.collect.EasyMaps;
@@ -32,6 +34,7 @@ public class CodecProvider {
         Integer.class, INT_CODEC,
         Long.class, LONG_CODEC,
         String.class, STRING_CODEC,
+        IntArrayList.class, IntArrayListCodec.INSTANCE,
         IntHashSet.class, IntHashSetCodec.INSTANCE
     );
 

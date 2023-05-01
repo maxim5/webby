@@ -134,6 +134,6 @@ public final class AcceptorsAwareFrameConverter implements FrameConverter<Object
     enum ConcreteFrameType {
         TEXT,
         BINARY,
-        BOTH
+        BOTH,
     }
 }

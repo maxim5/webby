@@ -2,13 +2,13 @@ package io.webby.demo.model;
 
 import com.google.common.primitives.Ints;
 import io.webby.orm.api.Connector;
-import io.webby.orm.codegen.SqlSchemaMaker;
+import io.webby.orm.api.query.CreateTableQuery;
 import io.webby.testing.MaliciousTableTest;
 import io.webby.testing.PrimaryKeyTableTest;
 import io.webby.testing.SqlDbTableTest;
 import org.jetbrains.annotations.NotNull;
 
-import static io.webby.testing.TestingUtil.array;
+import static io.webby.testing.TestingBasics.array;
 
 public class StringModelTableTest extends SqlDbTableTest<StringModel, StringModelTable>
         implements PrimaryKeyTableTest<String, StringModel, StringModelTable>,
@@ -16,7 +16,7 @@ public class StringModelTableTest extends SqlDbTableTest<StringModel, StringMode
     @Override
     protected void setUp(@NotNull Connector connector) throws Exception {
         table = new StringModelTable(connector);
-        connector().runner().runUpdate(SqlSchemaMaker.makeCreateTableQuery(table));
+        table.admin().createTable(CreateTableQuery.of(table).ifNotExists());
     }
 
     @Override

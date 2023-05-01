@@ -1,6 +1,5 @@
 package io.webby.orm.api.entity;
 
-import io.webby.orm.api.QueryRunner;
 import io.webby.orm.api.query.Column;
 import io.webby.orm.api.query.Contextual;
 import org.jetbrains.annotations.NotNull;
@@ -11,9 +10,18 @@ import java.sql.SQLException;
 import java.util.Collection;
 import java.util.List;
 
+/**
+ * A {@link BatchEntityData} implementation which stores the arbitrary row set using a {@link List<EntityData>}.
+ * <p>
+ * The statement is updated via {@link EntityData#provideValues(PreparedStatement)}.
+ *
+ * @param <D> the underlying type used by implementations to store each {@code EntityData} (i.e., each chunk)
+ */
 public record BatchEntityDataList<D>(@NotNull List<EntityData<D>> batch) implements BatchEntityData<D> {
     public BatchEntityDataList {
         assert !batch.isEmpty() : "Entity batch is empty: " + batch;
+        assert batch.stream().allMatch(data -> data.columns().equals(batch.get(0).columns())) :
+            "All batch data items must have the same columns: " + batch;
     }
 
     @Override
@@ -28,7 +36,7 @@ public record BatchEntityDataList<D>(@NotNull List<EntityData<D>> batch) impleme
         for (EntityData<D> entityData : batch) {
             entityData.provideValues(statement);
             if (contextual != null) {
-                contextual.resolveQueryArgs(entityData.data()).setPreparedParams(statement, dataSize);
+                contextual.resolveQueryArgs(entityData.data()).setPreparedParams(statement, /*index=*/ dataSize);
             }
             statement.addBatch();
         }

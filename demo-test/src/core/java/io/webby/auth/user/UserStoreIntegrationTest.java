@@ -58,6 +58,6 @@ public class UserStoreIntegrationTest {
 
     private enum Scenario {
         SQL,
-        KEY_VALUE
+        KEY_VALUE,
     }
 }

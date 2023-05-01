@@ -4,12 +4,19 @@ import io.webby.app.AppConfigException;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
+/**
+ * Represents an error related to SQL model processing and table generation.
+ */
 public class InvalidSqlModelException extends AppConfigException {
     public InvalidSqlModelException() {
     }
 
     public InvalidSqlModelException(@NotNull String message) {
         super(message);
+    }
+
+    public InvalidSqlModelException(@NotNull String message, @Nullable Throwable cause) {
+        super(message, cause);
     }
 
     public InvalidSqlModelException(@NotNull String message, @Nullable Object @NotNull ... args) {

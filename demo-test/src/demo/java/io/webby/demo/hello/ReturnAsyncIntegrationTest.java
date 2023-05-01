@@ -1,7 +1,7 @@
 package io.webby.demo.hello;
 
 import io.webby.testing.BaseHttpIntegrationTest;
-import io.webby.testing.TestingUtil;
+import io.webby.testing.TestingBasics;
 import org.junit.jupiter.api.Test;
 
 import static io.webby.testing.AssertResponse.assert200;
@@ -48,7 +48,7 @@ public class ReturnAsyncIntegrationTest extends BaseHttpIntegrationTest {
 
     @Override
     protected void flushChannel() {
-        TestingUtil.waitFor(20);
+        TestingBasics.waitFor(20);
         super.flushChannel();
     }
 }

@@ -6,13 +6,25 @@ import org.jetbrains.annotations.Nullable;
 import java.util.Objects;
 import java.util.concurrent.atomic.AtomicReference;
 
+import static io.webby.util.base.EasyCast.castAny;
+
+/**
+ * A {@link Foreign} implementation for integer FK. Note: zero ids are treated as <code>NULL</code>s.
+ */
 public final class ForeignInt<E> implements Foreign<Integer, E> {
+    private static final ForeignInt<?> EMPTY = new ForeignInt<>(0, null);
+
     private final int id;
     private final AtomicReference<E> entity;
 
     public ForeignInt(int id, @Nullable E entity) {
+        assert id != 0 || entity == null : "Invalid foreign: id=%s entity=%s".formatted(id, entity);
         this.id = id;
         this.entity = new AtomicReference<>(entity);
+    }
+
+    public static <T> @NotNull ForeignInt<T> empty() {
+        return castAny(EMPTY);
     }
 
     public static <T> @NotNull ForeignInt<T> ofId(int id) {
@@ -28,13 +40,29 @@ public final class ForeignInt<E> implements Foreign<Integer, E> {
     }
 
     @Override
-    public @NotNull Integer getFk() {
-        return getIntId();
+    public @Nullable Integer getFk() {
+        return id == 0 ? null : id;
+    }
+
+    @Override
+    public @NotNull Integer getFkOrDie() {
+        assert id != 0 : "The foreign is empty: " + this;
+        return id;
     }
 
     @Override
     public @Nullable E getEntity() {
         return entity.get();
+    }
+
+    @Override
+    public boolean isEmpty() {
+        return id == 0;
+    }
+
+    @Override
+    public boolean isPresent() {
+        return id != 0;
     }
 
     @Override

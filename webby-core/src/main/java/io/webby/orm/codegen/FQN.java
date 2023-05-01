@@ -1,7 +1,7 @@
 package io.webby.orm.codegen;
 
-import io.webby.orm.arch.JavaNameHolder;
-import io.webby.orm.arch.Naming;
+import io.webby.orm.arch.model.JavaNameHolder;
+import io.webby.orm.arch.util.Naming;
 import org.jetbrains.annotations.NotNull;
 
 public record FQN(@NotNull String packageName, @NotNull String className) {

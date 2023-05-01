@@ -79,20 +79,20 @@ public class Shortcuts {
     }
 
     public static @NotNull IsIn isIn(@NotNull Term lhs, @NotNull Term @NotNull ... terms) {
-        return new IsIn(lhs, List.of(terms));
+        return IsIn.isIn(lhs, terms);
     }
 
     public static @NotNull IsIn isIn(@NotNull Term lhs, @NotNull List<? extends Term> terms) {
-        return new IsIn(lhs, terms);
+        return IsIn.isIn(lhs, terms);
     }
 
     // FIX[minor]: isIn for ints, longs
 
     public static @NotNull Like like(@NotNull Term lhs, @NotNull Term rhs) {
-        return new Like(lhs, rhs);
+        return Like.like(lhs, rhs);
     }
 
     public static @NotNull Between between(@NotNull Term term, @NotNull Term left, @NotNull Term right) {
-        return new Between(term, left, right);
+        return Between.between(term, left, right);
     }
 }

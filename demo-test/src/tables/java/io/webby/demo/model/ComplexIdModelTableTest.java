@@ -1,13 +1,15 @@
 package io.webby.demo.model;
 
 import io.webby.orm.api.Connector;
-import io.webby.orm.codegen.SqlSchemaMaker;
+import io.webby.orm.api.query.Column;
+import io.webby.orm.api.query.CreateTableQuery;
+import io.webby.orm.api.query.Shortcuts;
+import io.webby.orm.api.query.Variable;
 import io.webby.testing.PrimaryKeyTableTest;
 import io.webby.testing.SqlDbTableTest;
 import org.jetbrains.annotations.NotNull;
 
-import static io.webby.testing.TestingUtil.array;
-import static org.junit.jupiter.api.Assumptions.assumeTrue;
+import static io.webby.testing.TestingBasics.array;
 
 public class ComplexIdModelTableTest
         extends SqlDbTableTest<ComplexIdModel, ComplexIdModelTable>
@@ -15,7 +17,7 @@ public class ComplexIdModelTableTest
     @Override
     protected void setUp(@NotNull Connector connector) throws Exception {
         table = new ComplexIdModelTable(connector);
-        connector().runner().runUpdate(SqlSchemaMaker.makeCreateTableQuery(table));
+        table.admin().createTable(CreateTableQuery.of(table).ifNotExists());
     }
 
     @Override
@@ -24,12 +26,17 @@ public class ComplexIdModelTableTest
     }
 
     @Override
-    public @NotNull ComplexIdModel createEntity(ComplexIdModel.@NotNull Key key, int version) {
+    public @NotNull ComplexIdModel createEntity(@NotNull ComplexIdModel.Key key, int version) {
         return new ComplexIdModel(key, version);
     }
 
     @Override
-    public void insert_ignore() {
-        assumeTrue(false, "Complex ids are not unique, hence allow duplicate inserts");
+    public @NotNull Column findPkColumnOrDie() {
+        return ComplexIdModelTable.OwnColumn.id_x;  // use only id.x
+    }
+
+    @Override
+    public @NotNull Variable keyToVar(@NotNull ComplexIdModel.Key key) {
+        return Shortcuts.var(key.x());  // use only id.x
     }
 }
