@@ -28,7 +28,7 @@ subprojects {
     }
 
     dependencies {
-        implementation group: 'org.jetbrains', name: 'annotations', version: '22.0.0'
+        implementation group: 'org.jetbrains', name: 'annotations', version: '24.0.1'
 
         compileOnly group: 'com.google.flogger', name: 'flogger', version: '0.7.4'
         runtimeOnly group: 'com.google.flogger', name: 'flogger-log4j2-backend', version: '0.7.4'
