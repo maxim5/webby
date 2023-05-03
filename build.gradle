@@ -117,7 +117,7 @@ subprojects {
         // SQLs
         common group: 'com.h2database', name: 'h2', version: '1.4.200'
         common group: 'com.zaxxer', name: 'HikariCP', version: '5.0.1'
-        common group: 'mysql', name: 'mysql-connector-java', version: '8.0.27'
+        common group: 'mysql', name: 'mysql-connector-java', version: '8.0.32'
         common group: 'org.xerial', name: 'sqlite-jdbc', version: '3.40.1.0'
 
         // MimeType utils

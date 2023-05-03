@@ -41,7 +41,7 @@ dependencies {
     // SQLs for Unit tests
     testFixturesApi group: 'com.h2database', name: 'h2', version: '1.4.200'
     testFixturesApi group: 'com.zaxxer', name: 'HikariCP', version: '5.0.1'
-    testFixturesApi group: 'mysql', name: 'mysql-connector-java', version: '8.0.27'
+    testFixturesApi group: 'mysql', name: 'mysql-connector-java', version: '8.0.32'
     testFixturesApi group: 'org.testcontainers', name: 'mysql', version: '1.16.3'
     testFixturesApi group: 'org.testcontainers', name: 'testcontainers', version: '1.16.3'
     testFixturesApi group: 'org.xerial', name: 'sqlite-jdbc', version: '3.40.1.0'
