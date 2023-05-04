@@ -46,7 +46,7 @@ dependencies {
     testFixturesApi group: 'org.testcontainers', name: 'testcontainers', version: '1.17.6'
     testFixturesApi group: 'org.xerial', name: 'sqlite-jdbc', version: '3.40.1.0'
     // NoSQLs for Integration tests
-    testFixturesApi group: 'io.etcd', name: 'jetcd-test', version: '0.6.1'
+    testFixturesApi group: 'io.etcd', name: 'jetcd-test', version: '0.7.5'
     testFixturesApi group: 'it.ozimov', name: 'embedded-redis', version: '0.7.3'
 
     testImplementation 'com.google.jimfs:jimfs:1.2'
