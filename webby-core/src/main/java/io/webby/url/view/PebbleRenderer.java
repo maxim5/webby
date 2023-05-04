@@ -2,11 +2,11 @@ package io.webby.url.view;
 
 import com.google.common.flogger.FluentLogger;
 import com.google.inject.Inject;
-import com.mitchellbosecke.pebble.PebbleEngine;
-import com.mitchellbosecke.pebble.loader.DelegatingLoader;
-import com.mitchellbosecke.pebble.loader.FileLoader;
-import com.mitchellbosecke.pebble.loader.Loader;
-import com.mitchellbosecke.pebble.template.PebbleTemplate;
+import io.pebbletemplates.pebble.PebbleEngine;
+import io.pebbletemplates.pebble.loader.DelegatingLoader;
+import io.pebbletemplates.pebble.loader.FileLoader;
+import io.pebbletemplates.pebble.loader.Loader;
+import io.pebbletemplates.pebble.template.PebbleTemplate;
 import io.webby.app.Settings;
 import io.webby.common.InjectorHelper;
 import io.webby.url.HandlerConfigError;
@@ -71,8 +71,8 @@ public class PebbleRenderer implements Renderer<PebbleTemplate> {
     public @NotNull ThrowConsumer<OutputStream, Exception>
             renderToByteStream(@NotNull PebbleTemplate template, @NotNull Object model) {
         return outputStream -> template.evaluate(
-                new OutputStreamWriter(outputStream),
-                castMapOrFail(model, this::incompatibleError)
+            new OutputStreamWriter(outputStream),
+            castMapOrFail(model, this::incompatibleError)
         );
     }
 
@@ -81,15 +81,15 @@ public class PebbleRenderer implements Renderer<PebbleTemplate> {
         List<Path> viewPaths = settings.getViewPaths("pebble.view.paths");
         String suffix = settings.getProperty("pebble.filename.suffix");
         boolean cache = settings.isHotReload() ?
-                settings.getBoolProperty("pebble.dev.cache.enabled", false) :
-                settings.getBoolProperty("pebble.prod.cache.enabled", true);
+            settings.getBoolProperty("pebble.dev.cache.enabled", false) :
+            settings.getBoolProperty("pebble.prod.cache.enabled", true);
 
         List<FileLoader> loaders = viewPaths.stream()
-                .map(path -> {
-                    FileLoader fileLoader = new FileLoader();
-                    fileLoader.setPrefix(path.toString());
-                    return fileLoader;
-                }).toList();
+            .map(path -> {
+                FileLoader fileLoader = new FileLoader();
+                fileLoader.setPrefix(path.toString());
+                return fileLoader;
+            }).toList();
 
         Loader<?> loader = loaders.size() == 1 ? loaders.get(0) : new DelegatingLoader(castAny(loaders));
         loader.setCharset(charset.displayName());
