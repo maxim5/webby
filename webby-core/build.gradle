@@ -36,8 +36,8 @@ dependencies {
     testFixturesApi group: 'com.google.code.gson', name: 'gson', version: '2.10.1'
     testFixturesApi group: 'com.google.flogger', name: 'flogger-log4j2-backend', version: '0.7.4'
     testFixturesApi group: 'com.j256.simplemagic', name: 'simplemagic', version: '1.16'
-    testFixturesApi group: 'com.squareup.okhttp3', name: 'okhttp', version: '4.10.0-RC1'
-    testFixturesApi group: 'com.squareup.okio', name: 'okio', version: '3.0.0'
+    testFixturesApi group: 'com.squareup.okhttp3', name: 'okhttp', version: '4.10.0'
+    testFixturesApi group: 'com.squareup.okio', name: 'okio', version: '3.3.0'
     // SQLs for Unit tests
     testFixturesApi group: 'com.h2database', name: 'h2', version: '1.4.200'
     testFixturesApi group: 'com.zaxxer', name: 'HikariCP', version: '5.0.1'
