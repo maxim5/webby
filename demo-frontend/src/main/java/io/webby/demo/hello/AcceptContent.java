@@ -39,6 +39,7 @@ public class AcceptContent {
                 .map(Object::toString)
                 .map(s -> s.replace("\r\n", "\n"))
                 .map(s -> s.replaceAll("RealFile:\\s[a-zA-Z0-9/\\\\_:-]+", "RealFile: <temp-path>"))
+                .map(s -> s.replaceAll("DeleteAfter: (true|false)", "DeleteAfter: <delete-after>"))
                 .toList();
             return String.join("\n\n", bodyParts);
         } finally {
