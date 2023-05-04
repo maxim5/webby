@@ -70,7 +70,7 @@ subprojects {
         common group: 'com.google.flogger', name: 'flogger', version: '0.7.4'
         common group: 'com.google.flogger', name: 'flogger-log4j2-backend', version: '0.7.4'
 
-        common group: 'com.google.protobuf', name: 'protobuf-java', version: '3.19.4'
+        common group: 'com.google.protobuf', name: 'protobuf-java', version: '3.22.2'
         common group: 'com.leansoft', name: 'bigqueue', version: '0.7.3'
         common group: 'org.jctools', name: 'jctools-core', version: '3.3.0'
 
