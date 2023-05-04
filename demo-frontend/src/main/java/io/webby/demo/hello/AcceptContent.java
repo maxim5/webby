@@ -13,14 +13,15 @@ import java.util.List;
 
 @Serve
 public class AcceptContent {
-    @Param(var="id") public static final IntConverter paramId = IntConverter.POSITIVE;
+    @Param(var = "id")
+    public static final IntConverter paramId = IntConverter.POSITIVE;
 
-    @POST(url="/int/{id}")
+    @POST(url = "/int/{id}")
     public Object noContent(int id) {
         return new HashMap<>();
     }
 
-    @POST(url="/strint/{str}/{y}")
+    @POST(url = "/strint/{str}/{y}")
     public String contentObject(CharSequence str, int y, Object content) {
         return "Vars: str=%s y=%d content=<%s>".formatted(str, y, content.toString());
     }
@@ -35,10 +36,10 @@ public class AcceptContent {
         HttpPostRequestDecoder decoder = new HttpPostRequestDecoder(request);
         try {
             List<String> bodyParts = decoder.getBodyHttpDatas().stream()
-                    .map(Object::toString)
-                    .map(s -> s.replace("\r\n", "\n"))
-                    .map(s -> s.replaceAll("RealFile:\\s[a-zA-Z0-9/\\\\-_:]+", "RealFile: <temp-path>"))
-                    .toList();
+                .map(Object::toString)
+                .map(s -> s.replace("\r\n", "\n"))
+                .map(s -> s.replaceAll("RealFile:\\s[a-zA-Z0-9/\\\\_:-]+", "RealFile: <temp-path>"))
+                .toList();
             return String.join("\n\n", bodyParts);
         } finally {
             decoder.destroy();
