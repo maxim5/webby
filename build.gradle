@@ -121,7 +121,7 @@ subprojects {
         common group: 'org.xerial', name: 'sqlite-jdbc', version: '3.40.1.0'
 
         // MimeType utils
-        common group: 'com.j256.simplemagic', name: 'simplemagic', version: '1.16'
+        common group: 'com.j256.simplemagic', name: 'simplemagic', version: '1.17'
         common group: 'eu.medsea.mimeutil', name: 'mime-util', version: '2.1.3'
     }
 }
