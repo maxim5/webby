@@ -4,6 +4,7 @@ package io.webby.netty.response;
 import com.google.common.collect.ImmutableMap;
 import com.j256.simplemagic.ContentInfo;
 import com.j256.simplemagic.ContentInfoUtil;
+import eu.medsea.mimeutil.MimeType;
 import eu.medsea.mimeutil.MimeUtil2;
 import io.webby.util.func.ThrowFunction;
 import io.webby.util.reflect.EasyClasspath;
@@ -44,9 +45,21 @@ public class ThirdPartyMimeTypeDetectors {
         return info != null ? info.getMimeType() : null;
     }
 
-    private static @NotNull String runMimeUtil2(@NotNull File file) {
+    private static @Nullable String runMimeUtil2(@NotNull File file) {
         MimeUtil2 mimeUtil = new MimeUtil2();
+
         mimeUtil.registerMimeDetector("eu.medsea.mimeutil.detector.MagicMimeMimeDetector");
-        return MimeUtil2.getMostSpecificMimeType(mimeUtil.getMimeTypes(file)).toString();
+        MimeType mimeType = MimeUtil2.getMostSpecificMimeType(mimeUtil.getMimeTypes(file));
+        if (mimeType != MimeUtil2.UNKNOWN_MIME_TYPE) {
+            return mimeType.toString();
+        }
+
+        mimeUtil.registerMimeDetector("eu.medsea.mimeutil.detector.ExtensionMimeDetector");
+        mimeType = MimeUtil2.getMostSpecificMimeType(mimeUtil.getMimeTypes(file.getName()));
+        if (mimeType != MimeUtil2.UNKNOWN_MIME_TYPE) {
+            return mimeType.toString();
+        }
+
+        return null;
     }
 }

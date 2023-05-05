@@ -119,7 +119,7 @@ public class StandaloneNettyIntegrationTest {
                 content-length: 8388608
                 Completed: true
                 IsInMemory: false
-                RealFile: <temp-path> DeleteAfter: true""");
+                RealFile: <temp-path> DeleteAfter: <delete-after>""");
         });
     }
 
