@@ -11,6 +11,8 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Locale;
 
+// Run with:
+// -ea --illegal-access=permit -javaagent:demo-test/src/core/resources/jars/measurer-0.1.1.jar
 public class MemAnalyzer_IntLists {
     private static void printObj(Object object) {
         System.out.println(object.getClass());
@@ -28,6 +30,7 @@ public class MemAnalyzer_IntLists {
         printObj(new ArrayList<>(List.of(1, 2, 3)));
         printObj(IntArrayList.from(1, 2, 3));
         printObj(IntArrayList.from(1, 2, 3).buffer);
+        printObj(IntHashSet.from(1, 2, 3));
         printObj(BoundedProportionalArraySizingStrategy.DEFAULT_INSTANCE);
 
         // int[] array = new int[10000];
