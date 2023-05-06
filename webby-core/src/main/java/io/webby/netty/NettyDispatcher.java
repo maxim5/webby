@@ -147,8 +147,8 @@ public class NettyDispatcher extends ChannelInboundHandlerAdapter {
             return Map.of();
         }
         return Arrays.stream(protocol.split(","))
-                .filter(value -> value.indexOf('|') >= 0)
-                .map(value -> Pair.of(value.trim().split("\\|", 2)))
-                .collect(Collectors.toMap(Pair::getKey, Pair::getValue));
+            .filter(value -> value.indexOf('|') >= 0)
+            .map(value -> Pair.of(value.trim().split("\\|", 2)))
+            .collect(Collectors.toMap(Pair::getKey, Pair::getValue));
     }
 }

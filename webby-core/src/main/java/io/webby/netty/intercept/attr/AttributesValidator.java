@@ -19,15 +19,15 @@ public class AttributesValidator {
 
     public static @NotNull Result validateAttributeOwners(@NotNull Collection<InterceptItem> items) {
         int[] positions = items.stream()
-                .filter(InterceptItem::isOwner)
-                .mapToInt(InterceptItem::position)
-                .toArray();
+            .filter(InterceptItem::isOwner)
+            .mapToInt(InterceptItem::position)
+            .toArray();
         int maxPosition = validatePositions(
-                positions,
-                pos -> items.stream()
-                        .filter(item -> item.position() == pos)
-                        .map(InterceptItem::instance)
-                        .toList()
+            positions,
+            pos -> items.stream()
+                .filter(item -> item.position() == pos)
+                .map(InterceptItem::instance)
+                .toList()
         );
         return new Result(maxPosition);
     }
@@ -36,7 +36,7 @@ public class AttributesValidator {
     static int validatePositions(int @NotNull [] positions, @NotNull IntFunction<List<?>> lookup) {
         Arrays.sort(positions);
         return Arrays.stream(positions).reduce((x, y) -> {
-             failIf(x < 0, "Attribute position can't be negative: %s", lookup.apply(x));
+            failIf(x < 0, "Attribute position can't be negative: %s", lookup.apply(x));
             // No need to check y, since x <= y
             failIf(y > MAX_POSITION, "Attribute position can't exceed %d: %s", MAX_POSITION, lookup.apply(y));
             // No need to check x, since x <= y

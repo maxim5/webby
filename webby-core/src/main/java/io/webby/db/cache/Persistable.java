@@ -4,7 +4,6 @@ import org.jetbrains.annotations.NotNull;
 
 import java.io.Closeable;
 import java.io.Flushable;
-import java.io.IOException;
 import java.io.UncheckedIOException;
 
 public interface Persistable extends Closeable, Flushable {

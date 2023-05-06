@@ -44,9 +44,9 @@ public class Interceptors {
         attrBufferSize = maxPosition + 1;
         stack = items.stream().filter(item -> item.instance().isEnabled()).toList();
         unsafeOwners = stack.stream()
-                .filter(InterceptItem::isOwner)
-                .filter(InterceptItem::canBeDisabled)
-                .collect(Collectors.toMap(InterceptItem::position, InterceptItem::instance));
+            .filter(InterceptItem::isOwner)
+            .filter(InterceptItem::canBeDisabled)
+            .collect(Collectors.toMap(InterceptItem::position, InterceptItem::instance));
         safeWrapperEnabled = settings.isSafeMode() && !unsafeOwners.isEmpty();
 
         log.at(Level.FINE).log("Interceptors stack: %s", stack);

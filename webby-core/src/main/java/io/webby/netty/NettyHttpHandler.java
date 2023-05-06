@@ -140,8 +140,8 @@ public class NettyHttpHandler extends ChannelInboundHandlerAdapter {
     public void exceptionCaught(@NotNull ChannelHandlerContext context, @NotNull Throwable cause) {
         cleanupAfterFailure();
         context.channel()
-                .writeAndFlush(factory.newResponse500("Unexpected failure", cause))
-                .addListener(ChannelFutureListener.CLOSE);
+            .writeAndFlush(factory.newResponse500("Unexpected failure", cause))
+            .addListener(ChannelFutureListener.CLOSE);
         log.at(Level.SEVERE).withCause(cause).log("Unexpected failure: %s", cause.getMessage());
     }
 
@@ -290,8 +290,8 @@ public class NettyHttpHandler extends ChannelInboundHandlerAdapter {
     @SuppressWarnings("UnstableApiUsage")
     private @NotNull HttpResponse addCallback(@NotNull Future<?> future, @NotNull EndpointOptions options) {
         ListenableFuture<?> listenable = (future instanceof ListenableFuture<?> listenableFuture) ?
-                listenableFuture :
-                JdkFutureAdapters.listenInPoolThread(future, executor());
+            listenableFuture :
+            JdkFutureAdapters.listenInPoolThread(future, executor());
 
         ListenableFuture<HttpResponse> transform = Futures.transform(
             listenable,
@@ -361,10 +361,10 @@ public class NettyHttpHandler extends ChannelInboundHandlerAdapter {
     @VisibleForTesting
     @NotNull Iterable<Pair<CharSequence, CharSequence>> getDefaultHeaders(@NotNull EndpointOptions options) {
         CharSequence contentType = options.http().hasContentType() ?
-                options.http().contentType() :
-                (options.out() == Marshal.JSON) ?
-                        HttpConst.APPLICATION_JSON :
-                        HttpConst.TEXT_HTML;
+            options.http().contentType() :
+            (options.out() == Marshal.JSON) ?
+                HttpConst.APPLICATION_JSON :
+                HttpConst.TEXT_HTML;
         return headers.defaultHeaders(contentType);
     }
 
