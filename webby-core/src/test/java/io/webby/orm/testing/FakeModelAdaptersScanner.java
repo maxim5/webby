@@ -7,7 +7,7 @@ import org.jetbrains.annotations.NotNull;
 import java.util.Map;
 
 public class FakeModelAdaptersScanner extends ModelAdaptersScanner {
-    public static final FakeModelAdaptersScanner DEFAULT_SCANNER = new FakeModelAdaptersScanner(
+    public static final FakeModelAdaptersScanner FAKE_SCANNER = new FakeModelAdaptersScanner(
         Map.of(
             Character.class, CharacterJdbcAdapter.class,
             char.class, CharacterJdbcAdapter.class

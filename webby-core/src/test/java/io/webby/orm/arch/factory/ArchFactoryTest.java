@@ -526,7 +526,7 @@ public class ArchFactoryTest {
     @CanIgnoreReturnValue
     private static @NotNull InvalidSqlModelException assertInvalidModel(@NotNull Class<?> @NotNull ... models) {
         return assertThrows(InvalidSqlModelException.class, () ->
-            new ArchFactory(FakeModelAdaptersScanner.DEFAULT_SCANNER).build(TestingArch.newRunInputs(models))
+            new ArchFactory(FakeModelAdaptersScanner.FAKE_SCANNER).build(TestingArch.newRunInputs(models))
         );
     }
 }

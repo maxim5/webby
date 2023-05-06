@@ -20,13 +20,13 @@ import static com.google.common.collect.MoreCollectors.onlyElement;
 public class TestingArch {
     public static @NotNull TableArch buildTableArch(@NotNull Class<?> model) {
         RunInputs inputs = newRunInputs(model);
-        RunResult runResult = new ArchFactory(FakeModelAdaptersScanner.DEFAULT_SCANNER).build(inputs);
+        RunResult runResult = new ArchFactory(FakeModelAdaptersScanner.FAKE_SCANNER).build(inputs);
         return runResult.getTableOrDie(model);
     }
 
     public static @NotNull TableArch buildTableArch(@NotNull Class<?> model, @NotNull List<Class<?>> rest) {
         RunInputs inputs = newRunInputs(ListBuilder.concatOne(rest, model));
-        RunResult runResult = new ArchFactory(FakeModelAdaptersScanner.DEFAULT_SCANNER).build(inputs);
+        RunResult runResult = new ArchFactory(FakeModelAdaptersScanner.FAKE_SCANNER).build(inputs);
         return runResult.getTableOrDie(model);
     }
 
