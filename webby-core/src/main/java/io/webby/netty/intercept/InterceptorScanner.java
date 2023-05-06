@@ -43,11 +43,15 @@ public class InterceptorScanner {
         return stream
             .map(klass -> {
                 Interceptor instance = castAny(injector.getInstance(klass));
-                boolean isOwner = klass.isAnnotationPresent(AttributeOwner.class);
-                int position = isOwner ? klass.getAnnotation(AttributeOwner.class).position() : Integer.MAX_VALUE;
-                boolean overridesEnable = Arrays.stream(klass.getDeclaredMethods())
-                    .anyMatch(method -> method.getName().equals("isEnabled"));
-                return new InterceptItem(instance, isOwner, position, overridesEnable);
+                return toItem(instance, klass);
             }).sorted(Comparator.comparingInt(InterceptItem::position)).toList();
+    }
+
+    protected static @NotNull InterceptItem toItem(@NotNull Interceptor instance, @NotNull Class<?> klass) {
+        boolean isOwner = klass.isAnnotationPresent(AttributeOwner.class);
+        int position = isOwner ? klass.getAnnotation(AttributeOwner.class).position() : Integer.MAX_VALUE;
+        boolean overridesEnable = Arrays.stream(klass.getDeclaredMethods())
+            .anyMatch(method -> method.getName().equals("isEnabled"));
+        return new InterceptItem(instance, isOwner, position, overridesEnable);
     }
 }
