@@ -11,8 +11,7 @@ import java.util.Map;
 
 import static io.webby.testing.AssertJson.assertJsonEquivalent;
 import static io.webby.testing.FakeRequests.*;
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.junit.jupiter.api.Assertions.*;
 
 public class DefaultHttpRequestExTest {
     @BeforeEach
@@ -22,7 +21,7 @@ public class DefaultHttpRequestExTest {
 
     @Test
     public void query_params_simple() {
-        HttpRequestEx request = wrapAsEx(get("/?foo=bar"), Map.of(), 0);
+        HttpRequestEx request = getEx("/?foo=bar");
         assertEquals("/", request.path());
         assertEquals("foo=bar", request.query());
         assertEquals(Map.of("foo", List.of("bar")), request.params().getMap());
@@ -30,7 +29,7 @@ public class DefaultHttpRequestExTest {
 
     @Test
     public void contentAs_empty() {
-        HttpRequestEx request = wrapAsEx(post("/"), Map.of(), 0);
+        HttpRequestEx request = postEx("/");
         assertEquals("", request.contentAsString());
         assertThrows(IllegalArgumentException.class, () -> request.contentAsJson(Map.class));
         assertThrows(IllegalArgumentException.class, () -> request.contentAsJson(List.class));
@@ -39,7 +38,7 @@ public class DefaultHttpRequestExTest {
 
     @Test
     public void contentAs_simple() {
-        HttpRequestEx request = wrapAsEx(post("/", "{\"value\": 123}"), Map.of(), 0);
+        HttpRequestEx request = postEx("/", "{\"value\": 123}");
         assertEquals("{\"value\": 123}", request.contentAsString());
         Map<?, ?> map = request.contentAsJson(Map.class);
         assertJsonEquivalent(map, Map.of("value", 123));
@@ -49,14 +48,44 @@ public class DefaultHttpRequestExTest {
 
     @Test
     public void cookies_null() {
-        HttpRequestEx request = wrapAsEx(get("/?foo=bar"), Map.of(), 0);
+        HttpRequestEx request = getEx("/?foo=bar");
         assertEquals(List.of(), request.cookies());
     }
 
     @Test
     public void cookies_simple() {
-        HttpRequestEx request = wrapAsEx(get("/?foo=bar"), Map.of(), 0)
-                .withHeaders(Map.of("Cookie", "foo=bar; __name__=123; "));
+        HttpRequestEx request = getEx("/?foo=bar")
+            .withHeaders(Map.of("Cookie", "foo=bar; __name__=123; "));
         assertEquals(List.of(new DefaultCookie("foo", "bar"), new DefaultCookie("__name__", "123")), request.cookies());
+    }
+
+    @Test
+    public void attrs_not_set() {
+        MutableHttpRequestEx request = wrapAsEx(get("/"), 4);
+        assertNull(request.attr(0));
+        assertThrows(AssertionError.class, () -> request.attrOrDie(0));
+    }
+
+    @Test
+    public void attrs_simple_set_not_null() {
+        MutableHttpRequestEx request = wrapAsEx(get("/"), 4);
+        request.setAttr(0, "foo");
+        assertEquals(request.attr(0), "foo");
+        assertEquals(request.attrOrDie(0), "foo");
+    }
+
+    @Test
+    public void attrs_simple_set_nullable() {
+        MutableHttpRequestEx request = wrapAsEx(get("/"), 4);
+        request.setNullableAttr(0, null);
+        assertNull(request.attr(0));
+        assertThrows(AssertionError.class, () -> request.attrOrDie(0));
+    }
+
+    @Test
+    public void attrs_set_twice() {
+        MutableHttpRequestEx request = wrapAsEx(get("/"), 4);
+        request.setAttr(0, "foo");
+        assertThrows(AssertionError.class, () -> request.setAttr(0, "foo"));
     }
 }

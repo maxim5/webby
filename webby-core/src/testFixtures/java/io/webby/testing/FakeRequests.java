@@ -4,7 +4,6 @@ import io.netty.buffer.ByteBuf;
 import io.netty.channel.embedded.EmbeddedChannel;
 import io.netty.handler.codec.http.*;
 import io.webby.netty.request.DefaultHttpRequestEx;
-import io.webby.netty.request.HttpRequestEx;
 import io.webby.url.convert.Constraint;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
@@ -39,16 +38,24 @@ public class FakeRequests {
         return new DefaultFullHttpRequest(HttpVersion.HTTP_1_1, method, uri, byteBuf, headers, new DefaultHttpHeaders());
     }
 
-    public static @NotNull HttpRequestEx getEx(@NotNull String uri) {
+    public static @NotNull DefaultHttpRequestEx getEx(@NotNull String uri) {
         return wrapAsEx(get(uri));
     }
 
-    public static @NotNull HttpRequestEx postEx(@NotNull String uri) {
+    public static @NotNull DefaultHttpRequestEx postEx(@NotNull String uri) {
         return wrapAsEx(post(uri));
     }
 
-    public static @NotNull HttpRequestEx wrapAsEx(@NotNull FullHttpRequest request) {
+    public static @NotNull DefaultHttpRequestEx postEx(@NotNull String uri, @NotNull Object content) {
+        return wrapAsEx(post(uri, content));
+    }
+
+    public static @NotNull DefaultHttpRequestEx wrapAsEx(@NotNull FullHttpRequest request) {
         return wrapAsEx(request, Map.of(), 0);
+    }
+
+    public static @NotNull DefaultHttpRequestEx wrapAsEx(@NotNull FullHttpRequest request, int attributes) {
+        return wrapAsEx(request, Map.of(), attributes);
     }
 
     public static @NotNull DefaultHttpRequestEx wrapAsEx(@NotNull FullHttpRequest request,
