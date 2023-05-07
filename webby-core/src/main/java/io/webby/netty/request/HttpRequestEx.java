@@ -31,8 +31,22 @@ public interface HttpRequestEx extends FullHttpRequest {
 
     <T> @NotNull T contentAsJson(@NotNull Class<T> klass) throws IllegalArgumentException;
 
+    /**
+     * Returns the attribute at a given {@code position} or null if not set.
+     * The attributes are usually set by the interceptors (session, user, debug or performance information, etc).
+     *
+     * @see #attrOrDie(int)
+     */
     @Nullable Object attr(int position);
 
+    /**
+     * Returns the attribute at a given {@code position} or throws if not set or the type doesn't match.
+     * The attributes are usually set by the interceptors (session, user, debug or performance information, etc).
+     * <p>
+     * This method generally should be used only by the attribute owner, i.e. by the same interceptor which sets it.
+     *
+     * @see #attr(int)
+     */
     <T> @NotNull T attrOrDie(int position);
 
     @NotNull List<Cookie> cookies();
