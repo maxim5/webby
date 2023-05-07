@@ -30,7 +30,7 @@ public class Interceptors {
 
     private final List<InterceptItem> stack;
     private final int attrBufferSize;
-    private final boolean safeWrapperEnabled;
+    private final boolean safeRequestWrapperEnabled;
     private final Map<Integer, Interceptor> unsafeOwners;
 
     @Inject private HttpResponseFactory factory;
@@ -47,7 +47,7 @@ public class Interceptors {
             .filter(InterceptItem::isOwner)
             .filter(InterceptItem::canBeDisabled)
             .collect(Collectors.toMap(InterceptItem::position, InterceptItem::instance));
-        safeWrapperEnabled = settings.isSafeMode() && !unsafeOwners.isEmpty();
+        safeRequestWrapperEnabled = settings.isSafeMode() && !unsafeOwners.isEmpty();
 
         log.at(Level.FINE).log("Interceptors stack: %s", stack);
     }
@@ -57,22 +57,28 @@ public class Interceptors {
                                                        @NotNull EndpointContext context) {
         Object[] attributes = new Object[attrBufferSize];  // empty, to be filled by interceptors
         DefaultHttpRequestEx requestEx = new DefaultHttpRequestEx(request, channel, json, context.constraints(), attributes);
-        if (safeWrapperEnabled) {
+        if (safeRequestWrapperEnabled) {
             return new DefaultHttpRequestEx(requestEx) {
                 @Override
                 public <T> @NotNull T attrOrDie(int position) {
-                    Interceptor owner = unsafeOwners.get(position);
-                    if (owner != null) {
-                        StackTraceElement caller = CallerFinder.findCallerOf(this.getClass(), 0);
-                        if (caller != null && !caller.getClassName().equals(owner.getClass().getName())) {
-                            log.at(Level.WARNING).log("%s requested conditionally available attribute owned by %s", caller, owner);
-                        }
-                    }
+                    warnAboutUnsafeCall(position);
                     return super.attrOrDie(position);
                 }
             };
         }
         return requestEx;
+    }
+
+    private void warnAboutUnsafeCall(int position) {
+        Interceptor owner = unsafeOwners.get(position);
+        if (owner != null) {
+            StackTraceElement caller = CallerFinder.findCallerOf(this.getClass(), 0);
+            if (caller != null && !caller.getClassName().equals(owner.getClass().getName())) {
+                String message = "%s requested conditionally available attribute owned by %s. " +
+                                 "This call may fail in the future. Use #attr() method instead";
+                log.at(Level.WARNING).log(message, caller, owner);
+            }
+        }
     }
 
     public @Nullable HttpResponse enter(@NotNull DefaultHttpRequestEx request, @NotNull Endpoint endpoint) {
