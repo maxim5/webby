@@ -23,9 +23,9 @@ public class StatsCollector {
     private static final IntIdGenerator generator = IntIdGenerator.positiveRandom(null);
 
     private final int id;
-    private final Stopwatch stopwatch = Stopwatch.createStarted();
+    private final Stopwatch totalStopwatch = Stopwatch.createStarted();
     private final AtomicLong lock = new AtomicLong(0);
-    private final IntIntMap main = new IntIntHashMap();
+    private final IntIntMap mainCounts = new IntIntHashMap();
     private final IntObjectMap<List<StatsRecord>> records = new IntObjectHashMap<>();
 
     public StatsCollector(int id) {
@@ -36,44 +36,12 @@ public class StatsCollector {
         return new StatsCollector(generator.nextId());
     }
 
-    public boolean lock() {
-        return lock.compareAndSet(0, System.currentTimeMillis());
-    }
-
-    @CanIgnoreReturnValue
-    public long unlock() {
-        return lock.getAndSet(0);
-    }
-
-    public void unlock(int key, int count, @Nullable Object hint) {
-        long millis = unlock();
-        long elapsedMillis = System.currentTimeMillis() - millis;
-        report(key, count, elapsedMillis, hint);
-    }
-
-    public void report(int key, int count, long elapsedMillis, @Nullable Object hint) {
-        main.addTo(key, count);
-        StatsRecord record = new StatsRecord(elapsedMillis, hint);
-        EasyHppc.computeIfAbsent(records, key, ArrayList::new).add(record);
-    }
-
-    public @NotNull StatsCollector stop() {
-        if (stopwatch.isRunning()) {
-            stopwatch.stop();
-        }
-        return this;
-    }
-
     public int id() {
         return id;
     }
 
-    public long totalElapsed(@NotNull TimeUnit timeUnit) {
-        return stopwatch.elapsed(timeUnit);
-    }
-
-    public @NotNull IntIntMap main() {
-        return main;
+    public @NotNull IntIntMap mainCounts() {
+        return mainCounts;
     }
 
     public @NotNull IntObjectMap<List<StatsRecord>> records() {
@@ -81,11 +49,51 @@ public class StatsCollector {
     }
 
     public void forEach(@NotNull StatsConsumer consumer) {
-        for (IntIntCursor cursor : main) {
+        for (IntIntCursor cursor : mainCounts) {
             Stat stat = Stat.VALUES.get(cursor.key);
             List<StatsRecord> statsRecords = records.getOrDefault(cursor.key, Collections.emptyList());
             consumer.consume(stat, cursor.value, statsRecords);
         }
+    }
+
+    public boolean lock() {
+        assert isActive() : "Attempt to lock a stopped collector: " + this;
+        return lock.compareAndSet(0, System.currentTimeMillis());
+    }
+
+    @CanIgnoreReturnValue
+    public long unlock() {
+        assert isActive() : "Attempt to unlock a stopped collector: " + this;
+        return lock.getAndSet(0);
+    }
+
+    public void unlockAndReport(int key, int count, @Nullable Object hint) {
+        long millis = unlock();
+        long elapsedMillis = System.currentTimeMillis() - millis;
+        report(key, count, elapsedMillis, hint);
+    }
+
+    public void report(int key, int count, long elapsedMillis, @Nullable Object hint) {
+        assert isActive() : "Attempt to add report to a stopped collector: " + this;
+        mainCounts.addTo(key, count);
+        StatsRecord record = new StatsRecord(elapsedMillis, hint);
+        EasyHppc.computeIfAbsent(records, key, ArrayList::new).add(record);
+    }
+
+    public boolean isActive() {
+        return totalStopwatch.isRunning();
+    }
+
+    public @NotNull StatsCollector stop() {
+        assert lock.get() == 0 : "Attempt to stop a locked collector: " + this;
+        if (totalStopwatch.isRunning()) {
+            totalStopwatch.stop();
+        }
+        return this;
+    }
+
+    public long totalElapsed(@NotNull TimeUnit timeUnit) {
+        return totalStopwatch.elapsed(timeUnit);
     }
 
     @Override

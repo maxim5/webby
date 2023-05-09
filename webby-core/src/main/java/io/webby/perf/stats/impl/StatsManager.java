@@ -19,7 +19,7 @@ public class StatsManager {
             public @NotNull OpContext report(@NotNull Stat stat) {
                 StatsCollector stats = LocalStatsHolder.getLocalStats();
                 if (stats.lock()) {
-                    return () -> stats.unlock(stat.key(), 1, null);
+                    return () -> stats.unlockAndReport(stat.key(), 1, null);
                 }
                 return EMPTY_CONTEXT;
             }
@@ -28,7 +28,7 @@ public class StatsManager {
             public @NotNull OpContext reportKey(@NotNull Stat stat, @NotNull Object key) {
                 StatsCollector stats = LocalStatsHolder.getLocalStats();
                 if (stats.lock()) {
-                    return () -> stats.unlock(stat.key(), 1, key);
+                    return () -> stats.unlockAndReport(stat.key(), 1, key);
                 }
                 return EMPTY_CONTEXT;
             }
@@ -37,7 +37,7 @@ public class StatsManager {
             public @NotNull OpContext reportKeys(@NotNull Stat stat, @NotNull List<?> keys) {
                 StatsCollector stats = LocalStatsHolder.getLocalStats();
                 if (stats.lock()) {
-                    return () -> stats.unlock(stat.key(), keys.size(), keys);
+                    return () -> stats.unlockAndReport(stat.key(), keys.size(), keys);
                 }
                 return EMPTY_CONTEXT;
             }

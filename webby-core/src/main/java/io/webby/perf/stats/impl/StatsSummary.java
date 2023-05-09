@@ -26,7 +26,7 @@ public class StatsSummary {
     private final Level logLevel;
 
     public StatsSummary(@NotNull Settings settings, @NotNull StatsCollector stats) {
-        this.stats = stats.stop();
+        this.stats = stats;
         this.isRecordsSummaryEnabled = new LazyBoolean(() ->
             settings.getBoolProperty("perf.track.summary.records.enabled", false)
         );
@@ -40,15 +40,15 @@ public class StatsSummary {
 
         // See https://stackoverflow.com/questions/220231/accessing-the-web-pages-http-headers-in-javascript
         String timing = isRecordsSummaryEnabled.get() ?
-                "%s;desc=\"%s\", %s;desc=\"%s\"".formatted("main", mainAsJson(), "records", recordsAsJson()) :
-                "%s;desc=\"%s\"".formatted("main", mainAsJson());
+            "%s;desc=\"%s\", %s;desc=\"%s\"".formatted("main", mainAsJson(), "records", recordsAsJson()) :
+            "%s;desc=\"%s\"".formatted("main", mainAsJson());
         response.headers().add(HttpConst.SERVER_TIMING, timing);
     }
 
     private @NotNull String mainAsTable() {
         String ROW_FMT = "%-" + Stat.MAX_NAME_LENGTH + "s | %4d ms | %4s %s";
 
-        StringBuilder builder = new StringBuilder((stats.main().size() + 1) * 36);
+        StringBuilder builder = new StringBuilder((stats.mainCounts().size() + 1) * 36);
         builder.append(ROW_FMT.formatted("Total", stats.totalElapsed(TimeUnit.MILLISECONDS), "", ""));
         Formatter formatter = new Formatter(builder);
         stats.forEach((key, value, records) -> {
@@ -60,23 +60,23 @@ public class StatsSummary {
     }
 
     private @NotNull String mainAsJson() {
-        List<Pair<String, Long>> pairs = Streams.stream(stats.main())
-                .map(cursor -> Pair.of(Stat.NAMES.get(cursor.key), (long) cursor.value))
-                .collect(Collectors.toCollection(ArrayList::new));
+        List<Pair<String, Long>> pairs = Streams.stream(stats.mainCounts())
+            .map(cursor -> Pair.of(Stat.NAMES.get(cursor.key), (long) cursor.value))
+            .collect(Collectors.toCollection(ArrayList::new));
         pairs.add(Pair.of("time", stats.totalElapsed(TimeUnit.MILLISECONDS)));
         return pairs.stream()
-                .map(pair -> "%s:%d".formatted(pair.first(), pair.second()))
-                .collect(Collectors.joining(",", "{", "}"));
+            .map(pair -> "%s:%d".formatted(pair.first(), pair.second()))
+            .collect(Collectors.joining(",", "{", "}"));
     }
 
     private @NotNull String recordsAsJson() {
         return Streams.stream(stats.records())
-                .map(cursor -> {
-                    String name = Stat.NAMES.get(cursor.key);
-                    String value = cursor.value.stream()
-                            .map(StatsRecord::toCompactString)
-                            .collect(Collectors.joining(",", "[", "]"));
-                    return "'%s':%s".formatted(name, value);
-                }).collect(Collectors.joining(",", "{", "}"));
+            .map(cursor -> {
+                String name = Stat.NAMES.get(cursor.key);
+                String value = cursor.value.stream()
+                    .map(StatsRecord::toCompactString)
+                    .collect(Collectors.joining(",", "[", "]"));
+                return "'%s':%s".formatted(name, value);
+            }).collect(Collectors.joining(",", "{", "}"));
     }
 }

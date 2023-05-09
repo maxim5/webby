@@ -51,7 +51,7 @@ public class StatsInterceptor implements Interceptor {
         }
         localStatsRef.remove();
 
-        new StatsSummary(settings, stats).summarizeFor(request, response);
+        new StatsSummary(settings, stats.stop()).summarizeFor(request, response);
         return response;
     }
 
