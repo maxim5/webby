@@ -23,7 +23,7 @@ import java.util.List;
 
 import static com.google.common.truth.Truth.assertThat;
 import static io.webby.demo.model.UserRateModelTable.OwnColumn.*;
-import static io.webby.testing.AssertPrimitives.assertIntsNoOrder;
+import static io.webby.testing.AssertPrimitives.assertThat;
 import static io.webby.testing.TestingPrimitives.ints;
 import static io.webby.testing.TestingPrimitives.newIntObjectMap;
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -64,8 +64,8 @@ public class TableVotingStorageIntegrationTest {
                                                        ints(A, Bob, -1));
         assertEquals(state, newIntObjectMap(A, IntHashSet.from(Ann, -Bob)));
 
-        assertIntsNoOrder(storage.load(A), Ann, -Bob);
-        assertIntsNoOrder(storage.load(B));
+        assertThat(storage.load(A)).containsExactlyNoOrder(Ann, -Bob);
+        assertThat(storage.load(B)).containsExactlyNoOrder();
         assertEquals(storage.loadBatch(IntArrayList.from(A, B)), state);
         assertEquals(storage.loadAll(), newIntObjectMap(A, IntHashSet.from(Ann, -Bob)));
     }
@@ -76,8 +76,8 @@ public class TableVotingStorageIntegrationTest {
                                                        ints(B, Bob, -1));
         assertEquals(state, newIntObjectMap(A, IntHashSet.from(Ann), B, IntHashSet.from(-Bob)));
 
-        assertIntsNoOrder(storage.load(A), Ann);
-        assertIntsNoOrder(storage.load(B), -Bob);
+        assertThat(storage.load(A)).containsExactlyNoOrder(Ann);
+        assertThat(storage.load(B)).containsExactlyNoOrder(-Bob);
         assertEquals(storage.loadBatch(IntArrayList.from(A, B)), state);
         assertEquals(storage.loadAll(), state);
     }

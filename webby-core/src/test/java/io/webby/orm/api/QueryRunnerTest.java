@@ -28,8 +28,7 @@ import static io.webby.orm.testing.MockingJdbc.assertThat;
 import static io.webby.orm.testing.MockingJdbc.mockConnection;
 import static io.webby.orm.testing.MockingJdbc.mockPreparedStatement;
 import static io.webby.orm.testing.MockingJdbc.mockResultSet;
-import static io.webby.testing.AssertPrimitives.assertIntsOrdered;
-import static io.webby.testing.AssertPrimitives.assertLongsOrdered;
+import static io.webby.testing.AssertPrimitives.assertThat;
 import static io.webby.testing.TestingBasics.array;
 import static org.junit.jupiter.api.Assertions.*;
 
@@ -352,7 +351,7 @@ public class QueryRunnerTest {
 
         IntArrayList fetched = runner.fetchIntColumn(HardcodedSelectQuery.of("select ints"));
 
-        assertIntsOrdered(fetched, 111, 222, 0);
+        assertThat(fetched).containsExactlyInOrder(111, 222, 0);
         assertThat(mockedConnection).executedQueries().containsExactly("select ints");
     }
 
@@ -363,7 +362,7 @@ public class QueryRunnerTest {
 
         IntArrayList fetched = runner.fetchIntColumn(HardcodedSelectQuery.of("select ints"));
 
-        assertIntsOrdered(fetched, 111, 222, 0);
+        assertThat(fetched).containsExactlyInOrder(111, 222, 0);
         assertThat(mockedConnection).executedQueries().containsExactly("select ints");
     }
 
@@ -376,7 +375,7 @@ public class QueryRunnerTest {
 
         LongArrayList fetched = runner.fetchLongColumn(HardcodedSelectQuery.of("select longs"));
 
-        assertLongsOrdered(fetched, 111, 222, 0);
+        assertThat(fetched).containsExactlyInOrder(111, 222, 0);
         assertThat(mockedConnection).executedQueries().containsExactly("select longs");
     }
 
@@ -387,7 +386,7 @@ public class QueryRunnerTest {
 
         LongArrayList fetched = runner.fetchLongColumn(HardcodedSelectQuery.of("select longs"));
 
-        assertLongsOrdered(fetched, 111, 222, 0);
+        assertThat(fetched).containsExactlyInOrder(111, 222, 0);
         assertThat(mockedConnection).executedQueries().containsExactly("select longs");
     }
 
