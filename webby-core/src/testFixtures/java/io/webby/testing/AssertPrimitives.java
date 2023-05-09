@@ -71,6 +71,14 @@ public class AssertPrimitives {
             asJavaMap().isEqualTo(expected);
         }
 
+        public void containsExactly(int key, int value) {
+            assertEquals(newIntMap(key, value), map);
+        }
+
+        public void containsExactly(int key1, int value1, int key2, int value2) {
+            assertEquals(newIntMap(key1, value1, key2, value2), map);
+        }
+
         public void containsExactly(int... expectedKeysValues) {
             assertEquals(newIntMap(expectedKeysValues), map);
         }
@@ -99,6 +107,14 @@ public class AssertPrimitives {
 
         public void isEqualTo(@NotNull Map<Integer, T> expected) {
             asJavaMap().isEqualTo(expected);
+        }
+
+        public void containsExactly(int key, @Nullable T expectedValue) {
+            isEqualTo(newIntObjectMap(key, expectedValue));
+        }
+
+        public void containsExactly(int key1, @Nullable T expectedValue1, int key2, @Nullable T expectedValue2) {
+            isEqualTo(newIntObjectMap(key1, expectedValue1, key2, expectedValue2));
         }
 
         public void containsExactly(@Nullable Object @NotNull ... expectedKeysValues) {
