@@ -24,8 +24,8 @@ public class NettyModule extends AbstractModule {
         // MessageSender.class must use @ImplementedBy to handle generics (not ideal, but works).
         // bind(MessageSender.class).to(ChannelMessageSender.class);
 
-        bind(Interceptors.class).asEagerSingleton();
         bind(InterceptorScanner.class).asEagerSingleton();
+        bind(Interceptors.class).asEagerSingleton();
 
         bind(MarshallerFactory.class).asEagerSingleton();
         bind(Json.class).toProvider(MarshallerFactory.class).asEagerSingleton();
