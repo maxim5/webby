@@ -39,8 +39,8 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 
 @Tag("sql")
 public class VotingCounterIntegrationTest {
-    @RegisterExtension private static final SqlDbSetupExtension SQL = SqlDbSetupExtension.fromProperties().disableSavepoints();
-    @RegisterExtension private static final SqlCleanupExtension CLEANUP = SqlCleanupExtension.of(SQL, UserRateModelTable.META);
+    @RegisterExtension static final SqlDbSetupExtension SQL = SqlDbSetupExtension.fromProperties().disableSavepoints();
+    @RegisterExtension static final SqlCleanupExtension CLEANUP = SqlCleanupExtension.of(SQL, UserRateModelTable.META);
 
     private static final int A = 1000;
     private static final int B = 2000;

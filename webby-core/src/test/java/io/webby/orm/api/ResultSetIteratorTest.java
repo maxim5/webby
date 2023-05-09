@@ -22,7 +22,7 @@ import static org.junit.jupiter.api.Assertions.*;
 
 @Tag("sql")
 public class ResultSetIteratorTest {
-    @RegisterExtension private static final SqlDbSetupExtension SQL = SqlDbSetupExtension.fromProperties();
+    @RegisterExtension static final SqlDbSetupExtension SQL = SqlDbSetupExtension.fromProperties();
 
     @SuppressWarnings("ConstantConditions")
     @Test

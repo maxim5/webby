@@ -30,9 +30,9 @@ import static io.webby.testing.TestingPrimitives.newIntObjectMap;
 
 @Tag("sql")
 public class TableVotingStorageIntegrationTest {
-    @RegisterExtension private static final SqlDbSetupExtension SQL = SqlDbSetupExtension.fromProperties().disableSavepoints();
-    @RegisterExtension private static final SqlCleanupExtension CLEANUP = SqlCleanupExtension.of(SQL, UserRateModelTable.META);
-    @RegisterExtension private static final FluentLoggingCapture LOGGING = new FluentLoggingCapture(Consistency.class);
+    @RegisterExtension static final SqlDbSetupExtension SQL = SqlDbSetupExtension.fromProperties().disableSavepoints();
+    @RegisterExtension static final SqlCleanupExtension CLEANUP = SqlCleanupExtension.of(SQL, UserRateModelTable.META);
+    @RegisterExtension static final FluentLoggingCapture LOGGING = new FluentLoggingCapture(Consistency.class);
 
     private static final int A = 1000;
     private static final int B = 2000;

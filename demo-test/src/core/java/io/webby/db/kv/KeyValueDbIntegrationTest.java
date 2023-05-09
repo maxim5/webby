@@ -38,10 +38,10 @@ import static org.junit.jupiter.api.Assertions.*;
 
 @Tags({@Tag("sql"), @Tag("slow")})
 public class KeyValueDbIntegrationTest {
-    @RegisterExtension private static final CloseAllExtension CLOSE_ALL = new CloseAllExtension();
-    @RegisterExtension private static final TempDirectoryExtension TEMP_DIRECTORY = new TempDirectoryExtension();
-    @RegisterExtension private static final EmbeddedRedisExtension REDIS = new EmbeddedRedisExtension();
-    @RegisterExtension private static final SqlDbSetupExtension SQL = SqlDbSetupExtension.fromProperties();
+    @RegisterExtension static final CloseAllExtension CLOSE_ALL = new CloseAllExtension();
+    @RegisterExtension static final TempDirectoryExtension TEMP_DIRECTORY = new TempDirectoryExtension();
+    @RegisterExtension static final EmbeddedRedisExtension REDIS = new EmbeddedRedisExtension();
+    @RegisterExtension static final SqlDbSetupExtension SQL = SqlDbSetupExtension.fromProperties();
 
     @ParameterizedTest
     @EnumSource(DbType.class)

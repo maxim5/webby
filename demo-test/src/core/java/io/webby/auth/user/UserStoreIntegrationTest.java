@@ -16,7 +16,7 @@ import static org.junit.jupiter.api.Assertions.*;
 
 @Tag("sql")
 public class UserStoreIntegrationTest {
-    @RegisterExtension private static final SqlDbSetupExtension SQL = SqlDbSetupExtension.fromProperties();
+    @RegisterExtension static final SqlDbSetupExtension SQL = SqlDbSetupExtension.fromProperties();
 
     @ParameterizedTest
     @EnumSource(Scenario.class)

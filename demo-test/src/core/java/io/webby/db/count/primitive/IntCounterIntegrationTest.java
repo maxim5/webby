@@ -24,8 +24,8 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 // FIX[minor]: more test cases (existing state, check group by count, flush)
 @Tag("sql")
 public class IntCounterIntegrationTest {
-    @RegisterExtension private static final SqlDbSetupExtension SQL = SqlDbSetupExtension.fromProperties().disableSavepoints();
-    @RegisterExtension private static final SqlCleanupExtension CLEANUP = SqlCleanupExtension.of(SQL, UserRateModelTable.META);
+    @RegisterExtension static final SqlDbSetupExtension SQL = SqlDbSetupExtension.fromProperties().disableSavepoints();
+    @RegisterExtension static final SqlCleanupExtension CLEANUP = SqlCleanupExtension.of(SQL, UserRateModelTable.META);
 
     private IntCountStorage storage;
     private IntCounter counter;

@@ -11,7 +11,7 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 
 public class AttributesValidatorTest {
-    @RegisterExtension private static final FluentLoggingCapture LOGGING = new FluentLoggingCapture(AttributesValidator.class);
+    @RegisterExtension static final FluentLoggingCapture LOGGING = new FluentLoggingCapture(AttributesValidator.class);
 
     @Test
     public void validatePositions_valid() {

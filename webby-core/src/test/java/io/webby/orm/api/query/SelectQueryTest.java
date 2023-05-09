@@ -25,8 +25,8 @@ import static org.junit.jupiter.api.Assumptions.assumeFalse;
 
 @Tag("sql")
 public class SelectQueryTest {
-    @RegisterExtension private static final SqlDbSetupExtension SQL = SqlDbSetupExtension.fromProperties().disableSavepoints();
-    @RegisterExtension private static final SqlCleanupExtension CLEANUP = SqlCleanupExtension.of(SQL, PERSON_META);
+    @RegisterExtension static final SqlDbSetupExtension SQL = SqlDbSetupExtension.fromProperties().disableSavepoints();
+    @RegisterExtension static final SqlCleanupExtension CLEANUP = SqlCleanupExtension.of(SQL, PERSON_META);
 
     @BeforeEach
     void setUp() {
