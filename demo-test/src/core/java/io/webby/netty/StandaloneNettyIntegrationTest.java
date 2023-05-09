@@ -45,7 +45,7 @@ public class StandaloneNettyIntegrationTest {
 
     @Test
     public void post_json() {
-        call(Ok.post("/strint/foo-bar/777", json("{a: 1, b: 2, c:3}")), response -> {
+        call(Ok.post("/string/foo-bar/777", json("{a: 1, b: 2, c:3}")), response -> {
             assertClientCode(response, 200);
             assertClientBody(response, "Vars: str=foo-bar y=777 content=<{a=1.0, b=2.0, c=3.0}>");
             assertClientHeader(response, "Content-Type", "text/html; charset=UTF-8");

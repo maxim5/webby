@@ -21,7 +21,7 @@ public class AcceptContent {
         return new HashMap<>();
     }
 
-    @POST(url = "/strint/{str}/{y}")
+    @POST(url = "/string/{str}/{y}")
     public String contentObject(CharSequence str, int y, Object content) {
         return "Vars: str=%s y=%d content=<%s>".formatted(str, y, content.toString());
     }

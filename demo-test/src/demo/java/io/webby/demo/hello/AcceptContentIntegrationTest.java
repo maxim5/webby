@@ -20,7 +20,7 @@ public class AcceptContentIntegrationTest extends BaseHttpIntegrationTest {
 
     @Test
     public void post_content_object() {
-        assert200(post("/strint/foo/10", new int[] {1, 2, 3}), "Vars: str=foo y=10 content=<[1.0, 2.0, 3.0]>");
+        assert200(post("/string/foo/10", new int[] {1, 2, 3}), "Vars: str=foo y=10 content=<[1.0, 2.0, 3.0]>");
     }
 
     @Test
