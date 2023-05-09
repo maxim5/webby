@@ -17,7 +17,7 @@ import static io.webby.testing.AssertPrimitives.assertMap;
 import static io.webby.testing.AssertPrimitives.assertThat;
 import static io.webby.testing.TestingBasics.array;
 import static io.webby.testing.TestingPrimitives.*;
-import static org.junit.jupiter.api.Assertions.*;
+import static org.junit.jupiter.api.Assertions.fail;
 
 public class EasyHppcTest {
     @Test
@@ -218,42 +218,42 @@ public class EasyHppcTest {
     @Test
     public void computeIfAbsent_int_int_exists() {
         IntIntMap map = newIntMap(1, 111, 2, 222);
-        assertEquals(EasyHppc.computeIfAbsent(map, 1, () -> fail("Must not be called")), 111);
+        assertThat(EasyHppc.computeIfAbsent(map, 1, () -> fail("Must not be called"))).isEqualTo(111);
         assertMap(map).containsExactly(1, 111, 2, 222);
     }
 
     @Test
     public void computeIfAbsent_int_int_exists_zero() {
         IntIntMap map = newIntMap(1, 0);
-        assertEquals(EasyHppc.computeIfAbsent(map, 1, () -> fail("Must not be called")), 0);
+        assertThat(EasyHppc.computeIfAbsent(map, 1, () -> fail("Must not be called"))).isEqualTo(0);
         assertMap(map).containsExactly(1, 0);
     }
 
     @Test
     public void computeIfAbsent_int_int_not_exists() {
         IntIntMap map = newIntMap(1, 111, 2, 222);
-        assertEquals(EasyHppc.computeIfAbsent(map, 3, () -> 333), 333);
+        assertThat(EasyHppc.computeIfAbsent(map, 3, () -> 333)).isEqualTo(333);
         assertMap(map).containsExactly(1, 111, 2, 222, 3, 333);
     }
 
     @Test
     public void computeIfAbsent_int_obj_exists() {
         IntObjectMap<String> map = newIntObjectMap(1, "111", 2, "222");
-        assertEquals(EasyHppc.computeIfAbsent(map, 1, () -> fail("Must not be called")), "111");
+        assertThat(EasyHppc.computeIfAbsent(map, 1, () -> fail("Must not be called"))).isEqualTo("111");
         assertMap(map).containsExactly(1, "111", 2, "222");
     }
 
     @Test
     public void computeIfAbsent_int_obj_exists_null() {
         IntObjectMap<String> map = newIntObjectMap(1, null);
-        assertNull(EasyHppc.computeIfAbsent(map, 1, () -> fail("Must not be called")));
+        assertThat(EasyHppc.computeIfAbsent(map, 1, () -> fail("Must not be called"))).isNull();
         assertMap(map).containsExactly(1, null);
     }
 
     @Test
     public void computeIfAbsent_int_obj_not_exists() {
         IntObjectMap<String> map = newIntObjectMap(1, "111", 2, "222");
-        assertEquals(EasyHppc.computeIfAbsent(map, 3, () -> "333"), "333");
+        assertThat(EasyHppc.computeIfAbsent(map, 3, () -> "333")).isEqualTo("333");
         assertMap(map).containsExactly(1, "111", 2, "222", 3, "333");
     }
 
