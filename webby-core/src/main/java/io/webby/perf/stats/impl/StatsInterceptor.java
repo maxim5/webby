@@ -27,10 +27,10 @@ public class StatsInterceptor implements Interceptor {
 
     @Override
     public void enter(@NotNull MutableHttpRequestEx request) {
-        RequestStatsCollector stats = RequestStatsCollector.create(request);
+        StatsCollector stats = StatsCollector.createWithRandomId();
         request.setAttr(Attributes.Stats, stats);
 
-        RequestStatsCollector existing = localStats.get();
+        StatsCollector existing = localStats.get();
         if (existing != null) {
             log.at(Level.WARNING).log("This thread contains a dirty local-stats: %s", existing);
         }
@@ -40,8 +40,8 @@ public class StatsInterceptor implements Interceptor {
 
     @Override
     public @NotNull HttpResponse exit(@NotNull MutableHttpRequestEx request, @NotNull HttpResponse response) {
-        RequestStatsCollector stats = request.attrOrDie(Attributes.Stats);
-        RequestStatsCollector local = localStats.get();
+        StatsCollector stats = request.attrOrDie(Attributes.Stats);
+        StatsCollector local = localStats.get();
         if (local == null) {
             log.at(Level.WARNING).log("This thread lost a local-stats for url=%s", request.uri());
         } else if (stats.id() != local.id()) {
@@ -51,12 +51,12 @@ public class StatsInterceptor implements Interceptor {
         }
         localStats.remove();
 
-        new StatsSummary(settings, stats).summarize(response);
+        new StatsSummary(settings, stats).summarizeFor(request, response);
         return response;
     }
 
     public void cleanup() {
-        RequestStatsCollector local = localStats.get();
+        StatsCollector local = localStats.get();
         if (local != null) {
             log.at(Level.WARNING).log("Cleaning up a local-stats: %s", local);
             localStats.remove();

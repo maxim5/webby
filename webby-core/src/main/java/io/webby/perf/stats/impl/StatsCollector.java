@@ -7,10 +7,6 @@ import com.carrotsearch.hppc.IntObjectMap;
 import com.carrotsearch.hppc.cursors.IntIntCursor;
 import com.google.common.base.Stopwatch;
 import com.google.errorprone.annotations.CanIgnoreReturnValue;
-import io.netty.handler.codec.http.DefaultHttpRequest;
-import io.netty.handler.codec.http.HttpMethod;
-import io.netty.handler.codec.http.HttpRequest;
-import io.netty.handler.codec.http.HttpVersion;
 import io.webby.db.model.IntIdGenerator;
 import io.webby.perf.stats.Stat;
 import io.webby.util.hppc.EasyHppc;
@@ -23,28 +19,25 @@ import java.util.List;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicLong;
 
-public class RequestStatsCollector {
+public class StatsCollector {
     private static final IntIdGenerator generator = IntIdGenerator.positiveRandom(null);
 
     private final int id;
-    private final HttpRequest request;
     private final Stopwatch stopwatch = Stopwatch.createStarted();
     private final AtomicLong lock = new AtomicLong(0);
     private final IntIntMap main = new IntIntHashMap();
     private final IntObjectMap<List<StatsRecord>> records = new IntObjectHashMap<>();
 
-    public RequestStatsCollector(int id, @NotNull HttpRequest request) {
+    public StatsCollector(int id) {
         this.id = id;
-        this.request = request;
     }
 
-    public static @NotNull RequestStatsCollector create(@NotNull HttpRequest request) {
-        return new RequestStatsCollector(generator.nextId(), request);
+    public static @NotNull StatsCollector createWithRandomId() {
+        return new StatsCollector(generator.nextId());
     }
 
-    private static final DefaultHttpRequest REQUEST = new DefaultHttpRequest(HttpVersion.HTTP_1_1, HttpMethod.GET, "");
-    public static final RequestStatsCollector EMPTY =
-        new RequestStatsCollector(0, REQUEST) {
+    static final StatsCollector EMPTY =
+        new StatsCollector(0) {
             @Override
             public boolean lock() {
                 return false;
@@ -72,7 +65,7 @@ public class RequestStatsCollector {
         EasyHppc.computeIfAbsent(records, key, ArrayList::new).add(record);
     }
 
-    public @NotNull RequestStatsCollector stop() {
+    public @NotNull StatsCollector stop() {
         if (stopwatch.isRunning()) {
             stopwatch.stop();
         }
@@ -81,14 +74,6 @@ public class RequestStatsCollector {
 
     public int id() {
         return id;
-    }
-
-    public @NotNull HttpRequest request() {
-        return request;
-    }
-
-    public @NotNull String uri() {
-        return request.uri();
     }
 
     public long totalElapsed(@NotNull TimeUnit timeUnit) {
@@ -113,7 +98,7 @@ public class RequestStatsCollector {
 
     @Override
     public String toString() {
-        return "[id=%08x, uri=%s]".formatted(id, request.uri());
+        return "[id=%08x]".formatted(id);
     }
 
     public interface StatsConsumer {

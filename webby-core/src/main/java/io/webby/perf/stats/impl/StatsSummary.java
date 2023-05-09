@@ -2,12 +2,13 @@ package io.webby.perf.stats.impl;
 
 import com.google.common.collect.Streams;
 import com.google.common.flogger.FluentLogger;
+import io.netty.handler.codec.http.HttpRequest;
 import io.netty.handler.codec.http.HttpResponse;
 import io.webby.app.Settings;
 import io.webby.netty.HttpConst;
 import io.webby.perf.stats.Stat;
-import io.webby.util.lazy.LazyBoolean;
 import io.webby.util.collect.Pair;
+import io.webby.util.lazy.LazyBoolean;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.ArrayList;
@@ -20,11 +21,11 @@ import java.util.stream.Collectors;
 public class StatsSummary {
     private static final FluentLogger log = FluentLogger.forEnclosingClass();
 
-    private final RequestStatsCollector stats;
+    private final StatsCollector stats;
     private final LazyBoolean isRecordsSummaryEnabled;
     private final Level logLevel;
 
-    public StatsSummary(@NotNull Settings settings, @NotNull RequestStatsCollector stats) {
+    public StatsSummary(@NotNull Settings settings, @NotNull StatsCollector stats) {
         this.stats = stats.stop();
         this.isRecordsSummaryEnabled = new LazyBoolean(() ->
             settings.getBoolProperty("perf.track.summary.records.enabled", false)
@@ -32,9 +33,9 @@ public class StatsSummary {
         this.logLevel = settings.isDevMode() ? Level.INFO : Level.FINE;
     }
 
-    public void summarize(@NotNull HttpResponse response) {
+    public void summarizeFor(@NotNull HttpRequest request, @NotNull HttpResponse response) {
         if (log.at(logLevel).isEnabled()) {
-            log.at(logLevel).log("Performance stats summary for %s:\n%s\n", stats.uri(), mainAsTable());
+            log.at(logLevel).log("Performance stats summary for %s:\n%s\n", request.uri(), mainAsTable());
         }
 
         // See https://stackoverflow.com/questions/220231/accessing-the-web-pages-http-headers-in-javascript
