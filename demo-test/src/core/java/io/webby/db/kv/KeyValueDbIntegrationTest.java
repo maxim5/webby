@@ -15,10 +15,7 @@ import io.webby.db.kv.mapdb.MapDbFactory;
 import io.webby.db.kv.mapdb.MapDbImpl;
 import io.webby.db.kv.paldb.PalDbFactory;
 import io.webby.db.kv.paldb.PalDbImpl;
-import io.webby.testing.Mocking;
-import io.webby.testing.Testing;
-import io.webby.testing.TestingModels;
-import io.webby.testing.TestingProps;
+import io.webby.testing.*;
 import io.webby.testing.ext.CloseAllExtension;
 import io.webby.testing.ext.EmbeddedRedisExtension;
 import io.webby.testing.ext.SqlDbSetupExtension;
@@ -36,8 +33,6 @@ import java.util.*;
 import java.util.stream.Stream;
 
 import static com.google.common.truth.Truth.assertThat;
-import static io.webby.testing.FakeRequests.getEx;
-import static io.webby.testing.FakeRequests.postEx;
 import static io.webby.testing.TestingBasics.array;
 import static org.junit.jupiter.api.Assertions.*;
 
@@ -223,7 +218,7 @@ public class KeyValueDbIntegrationTest {
         SessionManager sessionManager = injector.getInstance(SessionManager.class);
         KeyValueFactory dbFactory = injector.getInstance(KeyValueFactory.class);
 
-        Session newSession = sessionManager.createNewSession(getEx("/"));
+        Session newSession = sessionManager.createNewSession(HttpRequestBuilder.get("/").ex());
         String cookie = sessionManager.encodeSessionForCookie(newSession);
         Session existingSession = sessionManager.getSessionOrNull(cookie);
         assertEquals(newSession, existingSession);
@@ -239,7 +234,7 @@ public class KeyValueDbIntegrationTest {
         KeyValueFactory dbFactory = setupFactory(dbType);
 
         try (KeyValueDb<Long, Session> db = dbFactory.getDb(DbOptions.of(Session.DB_NAME, Long.class, Session.class))) {
-            runMultiTest(db, 123L, Session.fromRequest(123, getEx("/foo")));
+            runMultiTest(db, 123L, Session.fromRequest(123, HttpRequestBuilder.get("/foo").ex()));
         }
     }
 
@@ -252,8 +247,8 @@ public class KeyValueDbIntegrationTest {
             runMultiTest(db,
                          Integer.MIN_VALUE,
                          Integer.MAX_VALUE,
-                         Session.fromRequest(Integer.MIN_VALUE, getEx("/foo")),
-                         Session.fromRequest(Integer.MAX_VALUE, postEx("/bar")));
+                         Session.fromRequest(Integer.MIN_VALUE, HttpRequestBuilder.get("/foo").ex()),
+                         Session.fromRequest(Integer.MAX_VALUE, HttpRequestBuilder.post("/bar").ex()));
         }
     }
 

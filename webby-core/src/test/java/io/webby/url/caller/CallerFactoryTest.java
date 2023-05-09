@@ -10,6 +10,7 @@ import io.netty.util.AsciiString;
 import io.routekit.util.CharArray;
 import io.routekit.util.MutableCharArray;
 import io.webby.netty.request.HttpRequestEx;
+import io.webby.testing.HttpRequestBuilder;
 import io.webby.testing.Testing;
 import io.webby.url.HandlerConfigError;
 import io.webby.url.convert.Constraint;
@@ -33,8 +34,6 @@ import java.util.function.IntFunction;
 import java.util.function.IntSupplier;
 import java.util.function.LongFunction;
 
-import static io.webby.testing.FakeRequests.getEx;
-import static io.webby.testing.FakeRequests.postEx;
 import static io.webby.util.collect.EasyMaps.asMap;
 import static org.junit.jupiter.api.Assertions.*;
 
@@ -400,11 +399,13 @@ public class CallerFactoryTest {
     }
 
     public static @NotNull HttpRequestEx get() {
-        return getEx(URL);    // Do not care about QueryParams for now
+        // Do not care about QueryParams for now
+        return HttpRequestBuilder.get(URL).ex();
     }
 
     public static @NotNull HttpRequestEx post() {
-        return postEx(URL);   // Do not care about QueryParams for now
+        // Do not care about QueryParams for now
+        return HttpRequestBuilder.post(URL).ex();
     }
 
     private interface StringFunction {

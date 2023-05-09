@@ -4,7 +4,7 @@ import io.netty.handler.codec.http.HttpResponse;
 import io.webby.demo.hello.HelloWorld;
 import io.webby.netty.HttpConst;
 import io.webby.testing.BaseHttpIntegrationTest;
-import io.webby.testing.FakeRequests;
+import io.webby.testing.HttpRequestBuilder;
 import io.webby.testing.Testing;
 import org.jetbrains.annotations.NotNull;
 import org.junit.jupiter.api.Test;
@@ -36,12 +36,12 @@ public class StaticServingIntegrationTest extends BaseHttpIntegrationTest {
 
     @Test
     public void serve_exists() throws Exception {
-        assertFavicon(serving.serve("favicon.ico", FakeRequests.get("/favicon.ico")));
+        assertFavicon(serving.serve("favicon.ico", HttpRequestBuilder.get("/favicon.ico").full()));
     }
 
     @Test
     public void serve_not_exists() throws Exception {
-        assert404(serving.serve("not-exists.xml", FakeRequests.get("/not-exists.xml")));
+        assert404(serving.serve("not-exists.xml", HttpRequestBuilder.get("/not-exists.xml").full()));
     }
 
     @ParameterizedTest

@@ -79,7 +79,7 @@ public abstract class BaseHttpIntegrationTest extends BaseChannelTest {
     }
 
     protected @NotNull HttpResponse call(@NotNull HttpMethod method, @NotNull String uri, @Nullable Object content) {
-        return call(FakeRequests.request(method, uri, content));
+        return call(HttpRequestBuilder.request(method, uri).withContent(content).full());
     }
 
     protected @NotNull HttpResponse call(@NotNull FullHttpRequest request) {

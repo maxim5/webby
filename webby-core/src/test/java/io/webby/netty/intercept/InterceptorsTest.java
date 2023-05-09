@@ -24,8 +24,8 @@ import org.junit.jupiter.api.Test;
 import java.util.Map;
 
 import static io.webby.testing.AssertResponse.assert404;
-import static io.webby.testing.FakeRequests.get;
-import static io.webby.testing.FakeRequests.post;
+import static io.webby.testing.HttpRequestBuilder.get;
+import static io.webby.testing.HttpRequestBuilder.post;
 import static org.junit.jupiter.api.Assertions.*;
 
 public class InterceptorsTest {
@@ -38,7 +38,7 @@ public class InterceptorsTest {
     public void lifecycle_simple() {
         MockingInterceptor mockingInterceptor = new MockingInterceptor();
         Interceptors interceptors = getInterceptorsInstance(FakeInterceptorScanner.of(mockingInterceptor));
-        DefaultHttpRequestEx request = interceptors.createRequest(get("/foo"), channel, context);
+        DefaultHttpRequestEx request = interceptors.createRequest(get("/foo").full(), channel, context);
 
         HttpResponse response = interceptors.enter(request, endpoint);
         assertNull(response);
@@ -58,7 +58,7 @@ public class InterceptorsTest {
             factory.spawn(1),
             factory.spawn(2)
         ));
-        DefaultHttpRequestEx request = interceptors.createRequest(get("/foo"), channel, context);
+        DefaultHttpRequestEx request = interceptors.createRequest(get("/foo").full(), channel, context);
 
         HttpResponse response = interceptors.enter(request, endpoint);
         assertNull(response);
@@ -85,7 +85,7 @@ public class InterceptorsTest {
             }),
             factory.spawn(222)
         ));
-        DefaultHttpRequestEx request = interceptors.createRequest(get("/foo"), channel, context);
+        DefaultHttpRequestEx request = interceptors.createRequest(get("/foo").full(), channel, context);
 
         HttpResponse response = interceptors.enter(request, endpoint);
         assertNotNull(response);
@@ -102,8 +102,8 @@ public class InterceptorsTest {
 
         Object content1 = Map.of("foo-bar", "bar");
         Object content2 = Map.of("fooBar", "bar");
-        DefaultHttpRequestEx request1 = interceptors.createRequest(post("/foo", content1), channel, context);
-        DefaultHttpRequestEx request2 = interceptors.createRequest(post("/foo", content2), channel, context);
+        DefaultHttpRequestEx request1 = interceptors.createRequest(post("/foo").withContent(content1).full(), channel, context);
+        DefaultHttpRequestEx request2 = interceptors.createRequest(post("/foo").withContent(content2).full(), channel, context);
 
         assertNull(request1.contentAsJson(Foo.class).fooBar);
         assertEquals("bar", request2.contentAsJson(Foo.class).fooBar);
@@ -116,8 +116,8 @@ public class InterceptorsTest {
 
         Object content1 = Map.of("foo-bar", "bar");
         Object content2 = Map.of("fooBar", "bar");
-        DefaultHttpRequestEx request1 = interceptors.createRequest(post("/foo", content1), channel, context);
-        DefaultHttpRequestEx request2 = interceptors.createRequest(post("/foo", content2), channel, context);
+        DefaultHttpRequestEx request1 = interceptors.createRequest(post("/foo").withContent(content1).full(), channel, context);
+        DefaultHttpRequestEx request2 = interceptors.createRequest(post("/foo").withContent(content2).full(), channel, context);
 
         assertEquals("bar", request1.contentAsJson(Foo.class).fooBar);
         assertNull(request2.contentAsJson(Foo.class).fooBar);
