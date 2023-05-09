@@ -41,6 +41,7 @@ public class InterceptorScanner {
 
     private @NotNull List<InterceptItem> toItems(@NotNull Stream<? extends Class<?>> stream) {
         return stream
+            .filter(klass -> !klass.isAnonymousClass())  // exclude the tests
             .map(klass -> {
                 Interceptor instance = castAny(injector.getInstance(klass));
                 return toItem(instance, klass);
