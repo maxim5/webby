@@ -23,10 +23,10 @@ import java.util.List;
 
 import static com.google.common.truth.Truth.assertThat;
 import static io.webby.demo.model.UserRateModelTable.OwnColumn.*;
+import static io.webby.testing.AssertPrimitives.assertMap;
 import static io.webby.testing.AssertPrimitives.assertThat;
 import static io.webby.testing.TestingPrimitives.ints;
 import static io.webby.testing.TestingPrimitives.newIntObjectMap;
-import static org.junit.jupiter.api.Assertions.assertEquals;
 
 @Tag("sql")
 public class TableVotingStorageIntegrationTest {
@@ -62,24 +62,24 @@ public class TableVotingStorageIntegrationTest {
     public void load_one_key() {
         IntObjectMap<IntHashSet> state = setupTestData(ints(A, Ann, 1),
                                                        ints(A, Bob, -1));
-        assertEquals(state, newIntObjectMap(A, IntHashSet.from(Ann, -Bob)));
+        assertMap(state).containsExactly(A, IntHashSet.from(Ann, -Bob));
 
         assertThat(storage.load(A)).containsExactlyNoOrder(Ann, -Bob);
         assertThat(storage.load(B)).containsExactlyNoOrder();
-        assertEquals(storage.loadBatch(IntArrayList.from(A, B)), state);
-        assertEquals(storage.loadAll(), newIntObjectMap(A, IntHashSet.from(Ann, -Bob)));
+        assertMap(storage.loadBatch(IntArrayList.from(A, B))).isEqualTo(state);
+        assertMap(storage.loadAll()).isEqualTo(newIntObjectMap(A, IntHashSet.from(Ann, -Bob)));
     }
 
     @Test
     public void load_two_keys() {
         IntObjectMap<IntHashSet> state = setupTestData(ints(A, Ann, 1),
                                                        ints(B, Bob, -1));
-        assertEquals(state, newIntObjectMap(A, IntHashSet.from(Ann), B, IntHashSet.from(-Bob)));
+        assertMap(state).containsExactly(A, IntHashSet.from(Ann), B, IntHashSet.from(-Bob));
 
         assertThat(storage.load(A)).containsExactlyNoOrder(Ann);
         assertThat(storage.load(B)).containsExactlyNoOrder(-Bob);
-        assertEquals(storage.loadBatch(IntArrayList.from(A, B)), state);
-        assertEquals(storage.loadAll(), state);
+        assertMap(storage.loadBatch(IntArrayList.from(A, B))).isEqualTo(state);
+        assertMap(storage.loadAll()).isEqualTo(state);
     }
 
     @Test

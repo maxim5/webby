@@ -14,11 +14,6 @@ import static io.webby.util.hppc.EasyHppc.toJavaMap;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
 public class AssertPrimitives {
-
-    public static <T> void assertMap(@NotNull IntObjectMap<T> map, @Nullable Object @NotNull ... expectedKeysValues) {
-        assertEquals(newIntObjectMap(expectedKeysValues), map);
-    }
-
     public static @NotNull IntContainerSubject assertThat(@NotNull IntContainer container) {
         return new IntContainerSubject(container);
     }
@@ -29,6 +24,10 @@ public class AssertPrimitives {
 
     public static @NotNull IntIntMapSubject assertMap(@NotNull IntIntMap map) {
         return new IntIntMapSubject(map);
+    }
+
+    public static <T> @NotNull IntObjectMapSubject<T> assertMap(@NotNull IntObjectMap<T> map) {
+        return new IntObjectMapSubject<>(map);
     }
 
     public record IntContainerSubject(@NotNull IntContainer container) {
@@ -60,6 +59,10 @@ public class AssertPrimitives {
     }
 
     public record IntIntMapSubject(@NotNull IntIntMap map) {
+        public void isEmpty() {
+            Truth.assertThat(map).isEmpty();
+        }
+
         public void isEqualTo(@NotNull IntIntMap expected) {
             Truth.assertThat(map).isEqualTo(expected);
         }
@@ -78,6 +81,28 @@ public class AssertPrimitives {
 
         public @NotNull IntIntMapSubject trimmed() {
             return new IntIntMapSubject(trim(map));
+        }
+
+        public @NotNull MapSubject asJavaMap() {
+            return Truth.assertThat(toJavaMap(map));
+        }
+    }
+
+    public record IntObjectMapSubject<T>(@NotNull IntObjectMap<T> map) {
+        public void isEmpty() {
+            Truth.assertThat(map).isEmpty();
+        }
+
+        public void isEqualTo(@NotNull IntObjectMap<T> expected) {
+            Truth.assertThat(map).isEqualTo(expected);
+        }
+
+        public void isEqualTo(@NotNull Map<Integer, T> expected) {
+            asJavaMap().isEqualTo(expected);
+        }
+
+        public void containsExactly(@Nullable Object @NotNull ... expectedKeysValues) {
+            isEqualTo(newIntObjectMap(expectedKeysValues));
         }
 
         public @NotNull MapSubject asJavaMap() {

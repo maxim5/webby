@@ -240,21 +240,21 @@ public class EasyHppcTest {
     public void computeIfAbsent_int_obj_exists() {
         IntObjectMap<String> map = newIntObjectMap(1, "111", 2, "222");
         assertEquals(EasyHppc.computeIfAbsent(map, 1, () -> fail("Must not be called")), "111");
-        assertMap(map, 1, "111", 2, "222");
+        assertMap(map).containsExactly(1, "111", 2, "222");
     }
 
     @Test
     public void computeIfAbsent_int_obj_exists_null() {
         IntObjectMap<String> map = newIntObjectMap(1, null);
         assertNull(EasyHppc.computeIfAbsent(map, 1, () -> fail("Must not be called")));
-        assertMap(map, 1, null);
+        assertMap(map).containsExactly(1, null);
     }
 
     @Test
     public void computeIfAbsent_int_obj_not_exists() {
         IntObjectMap<String> map = newIntObjectMap(1, "111", 2, "222");
         assertEquals(EasyHppc.computeIfAbsent(map, 3, () -> "333"), "333");
-        assertMap(map, 1, "111", 2, "222", 3, "333");
+        assertMap(map).containsExactly(1, "111", 2, "222", 3, "333");
     }
 
     private static @NotNull IterableSubject assertIntStreamThat(@NotNull Stream<IntCursor> stream) {
