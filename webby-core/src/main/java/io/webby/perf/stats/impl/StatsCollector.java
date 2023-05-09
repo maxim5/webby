@@ -36,14 +36,6 @@ public class StatsCollector {
         return new StatsCollector(generator.nextId());
     }
 
-    static final StatsCollector EMPTY =
-        new StatsCollector(0) {
-            @Override
-            public boolean lock() {
-                return false;
-            }
-        };
-
     public boolean lock() {
         return lock.compareAndSet(0, System.currentTimeMillis());
     }
