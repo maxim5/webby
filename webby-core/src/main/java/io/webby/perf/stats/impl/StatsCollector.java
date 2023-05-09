@@ -84,6 +84,7 @@ public class StatsCollector {
         return totalStopwatch.isRunning();
     }
 
+    @CanIgnoreReturnValue
     public @NotNull StatsCollector stop() {
         assert lock.get() == 0 : "Attempt to stop a locked collector: " + this;
         if (totalStopwatch.isRunning()) {
