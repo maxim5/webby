@@ -13,6 +13,7 @@ import io.netty.handler.codec.http.HttpRequest;
 import io.netty.handler.codec.http.HttpVersion;
 import io.webby.db.model.IntIdGenerator;
 import io.webby.perf.stats.Stat;
+import io.webby.util.hppc.EasyHppc;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
@@ -21,7 +22,6 @@ import java.util.Collections;
 import java.util.List;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicLong;
-import java.util.function.Supplier;
 
 public class RequestStatsCollector {
     private static final IntIdGenerator generator = IntIdGenerator.positiveRandom(null);
@@ -69,7 +69,7 @@ public class RequestStatsCollector {
     public void report(int key, int count, long elapsedMillis, @Nullable Object hint) {
         main.addTo(key, count);
         StatsRecord record = new StatsRecord(elapsedMillis, hint);
-        computeIfAbsent(records, key, ArrayList::new).add(record);
+        EasyHppc.computeIfAbsent(records, key, ArrayList::new).add(record);
     }
 
     public @NotNull RequestStatsCollector stop() {
@@ -114,15 +114,6 @@ public class RequestStatsCollector {
     @Override
     public String toString() {
         return "[id=%08x, uri=%s]".formatted(id, request.uri());
-    }
-
-    private static <T> T computeIfAbsent(@NotNull IntObjectMap<T> map, int key, @NotNull Supplier<T> def) {
-        T result = map.get(key);
-        if (result == null) {
-            result = def.get();
-            map.put(key, result);
-        }
-        return result;
     }
 
     public interface StatsConsumer {

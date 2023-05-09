@@ -15,7 +15,8 @@ import java.util.stream.Stream;
 import static com.google.common.truth.Truth.assertThat;
 import static io.webby.testing.AssertPrimitives.*;
 import static io.webby.testing.TestingBasics.array;
-import static io.webby.testing.TestingPrimitives.ints;
+import static io.webby.testing.TestingPrimitives.*;
+import static org.junit.jupiter.api.Assertions.*;
 
 public class EasyHppcTest {
     @Test
@@ -211,6 +212,48 @@ public class EasyHppcTest {
         assertIntsNoOrder(EasyHppc.removeAllCopy(IntHashSet.from(2), x -> x % 2 == 0));
         assertIntsNoOrder(EasyHppc.removeAllCopy(IntHashSet.from(1, 3), x -> x % 2 == 0), 1, 3);
         assertIntsNoOrder(EasyHppc.removeAllCopy(IntHashSet.from(1, 2, 3), x -> x % 2 == 0), 1, 3);
+    }
+
+    @Test
+    public void computeIfAbsent_int_int_exists() {
+        IntIntMap map = newIntMap(1, 111, 2, 222);
+        assertEquals(EasyHppc.computeIfAbsent(map, 1, () -> fail("Must not be called")), 111);
+        assertInts(map, 1, 111, 2, 222);
+    }
+
+    @Test
+    public void computeIfAbsent_int_int_exists_zero() {
+        IntIntMap map = newIntMap(1, 0);
+        assertEquals(EasyHppc.computeIfAbsent(map, 1, () -> fail("Must not be called")), 0);
+        assertInts(map, 1, 0);
+    }
+
+    @Test
+    public void computeIfAbsent_int_int_not_exists() {
+        IntIntMap map = newIntMap(1, 111, 2, 222);
+        assertEquals(EasyHppc.computeIfAbsent(map, 3, () -> 333), 333);
+        assertInts(map, 1, 111, 2, 222, 3, 333);
+    }
+
+    @Test
+    public void computeIfAbsent_int_obj_exists() {
+        IntObjectMap<String> map = newIntObjectMap(1, "111", 2, "222");
+        assertEquals(EasyHppc.computeIfAbsent(map, 1, () -> fail("Must not be called")), "111");
+        assertMap(map, 1, "111", 2, "222");
+    }
+
+    @Test
+    public void computeIfAbsent_int_obj_exists_null() {
+        IntObjectMap<String> map = newIntObjectMap(1, null);
+        assertNull(EasyHppc.computeIfAbsent(map, 1, () -> fail("Must not be called")));
+        assertMap(map, 1, null);
+    }
+
+    @Test
+    public void computeIfAbsent_int_obj_not_exists() {
+        IntObjectMap<String> map = newIntObjectMap(1, "111", 2, "222");
+        assertEquals(EasyHppc.computeIfAbsent(map, 3, () -> "333"), "333");
+        assertMap(map, 1, "111", 2, "222", 3, "333");
     }
 
     private static @NotNull IterableSubject assertIntStreamThat(@NotNull Stream<IntCursor> stream) {
