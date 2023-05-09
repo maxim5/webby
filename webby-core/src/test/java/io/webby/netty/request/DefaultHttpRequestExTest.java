@@ -61,14 +61,14 @@ public class DefaultHttpRequestExTest {
 
     @Test
     public void attrs_not_set() {
-        MutableHttpRequestEx request = HttpRequestBuilder.get("/").allocate(4).ex();
+        MutableHttpRequestEx request = HttpRequestBuilder.get("/").ex();
         assertNull(request.attr(0));
         assertThrows(AssertionError.class, () -> request.attrOrDie(0));
     }
 
     @Test
     public void attrs_simple_set_not_null() {
-        MutableHttpRequestEx request = HttpRequestBuilder.get("/").allocate(4).ex();
+        MutableHttpRequestEx request = HttpRequestBuilder.get("/").ex();
         request.setAttr(0, "foo");
         assertEquals(request.attr(0), "foo");
         assertEquals(request.attrOrDie(0), "foo");
@@ -76,7 +76,7 @@ public class DefaultHttpRequestExTest {
 
     @Test
     public void attrs_simple_set_nullable() {
-        MutableHttpRequestEx request = HttpRequestBuilder.get("/").allocate(4).ex();
+        MutableHttpRequestEx request = HttpRequestBuilder.get("/").ex();
         request.setNullableAttr(0, null);
         assertNull(request.attr(0));
         assertThrows(AssertionError.class, () -> request.attrOrDie(0));
@@ -84,7 +84,7 @@ public class DefaultHttpRequestExTest {
 
     @Test
     public void attrs_set_twice() {
-        MutableHttpRequestEx request = HttpRequestBuilder.get("/").allocate(4).ex();
+        MutableHttpRequestEx request = HttpRequestBuilder.get("/").ex();
         request.setAttr(0, "foo");
         assertThrows(AssertionError.class, () -> request.setAttr(0, "foo"));
     }

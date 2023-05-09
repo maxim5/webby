@@ -18,7 +18,7 @@ public class HttpRequestBuilder {
     private HttpHeaders headers = new DefaultHttpHeaders();
 
     private final Map<String, Constraint<?>> constraints = Map.of();
-    private int attributesSize = 0;
+    private int attributesSize = 4;
 
     public HttpRequestBuilder(@NotNull HttpMethod method, @NotNull String uri) {
         this.method = method;
