@@ -22,15 +22,16 @@ import org.junit.jupiter.api.extension.RegisterExtension;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.EnumSource;
 
-import java.io.IOException;
-import java.util.*;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.Random;
 import java.util.function.BiConsumer;
 
 import static io.webby.db.count.vote.Vote.none;
 import static io.webby.db.count.vote.Vote.votes;
 import static io.webby.demo.model.UserRateModelTable.OwnColumn.*;
-import static io.webby.testing.AssertPrimitives.assertInts;
-import static io.webby.testing.AssertPrimitives.assertIntsTrimmed;
+import static io.webby.testing.AssertPrimitives.assertMap;
 import static io.webby.testing.TestingPrimitives.newIntMap;
 import static io.webby.testing.TestingPrimitives.newIntObjectMap;
 import static java.util.Objects.requireNonNull;
@@ -66,7 +67,7 @@ public class VotingCounterIntegrationTest {
 
     @ParameterizedTest
     @EnumSource(Scenario.class)
-    public void empty_state_flush(Scenario scenario) throws IOException {
+    public void empty_state_flush(Scenario scenario) {
         setup(scenario, StorageState.EMPTY);
 
         counter.flush();
@@ -227,7 +228,7 @@ public class VotingCounterIntegrationTest {
 
     @ParameterizedTest
     @EnumSource(Scenario.class)
-    public void many_users_multi_inc_flush(Scenario scenario) throws IOException {
+    public void many_users_multi_inc_flush(Scenario scenario) {
         setup(scenario, StorageState.EMPTY);
 
         assertEquals(1, counter.increment(A, Ann));
@@ -243,7 +244,7 @@ public class VotingCounterIntegrationTest {
 
     @ParameterizedTest
     @EnumSource(Scenario.class)
-    public void many_users_multi_dec_flush(Scenario scenario) throws IOException {
+    public void many_users_multi_dec_flush(Scenario scenario) {
         setup(scenario, StorageState.EMPTY);
 
         assertEquals(-1, counter.decrement(A, Ann));
@@ -259,7 +260,7 @@ public class VotingCounterIntegrationTest {
 
     @ParameterizedTest
     @EnumSource(Scenario.class)
-    public void one_user_double_flush(Scenario scenario) throws IOException {
+    public void one_user_double_flush(Scenario scenario) {
         setup(scenario, StorageState.EMPTY);
 
         assertEquals(1, counter.increment(A, Ann));
@@ -275,7 +276,7 @@ public class VotingCounterIntegrationTest {
 
     @ParameterizedTest
     @EnumSource(Scenario.class)
-    public void one_user_inc_between_flushes(Scenario scenario) throws IOException {
+    public void one_user_inc_between_flushes(Scenario scenario) {
         setup(scenario, StorageState.EMPTY);
 
         assertEquals(1, counter.increment(A, Ann));
@@ -291,7 +292,7 @@ public class VotingCounterIntegrationTest {
 
     @ParameterizedTest
     @EnumSource(Scenario.class)
-    public void one_user_undo_inc_between_flushes(Scenario scenario) throws IOException {
+    public void one_user_undo_inc_between_flushes(Scenario scenario) {
         setup(scenario, StorageState.EMPTY);
 
         assertEquals(1, counter.increment(A, Ann));
@@ -306,7 +307,7 @@ public class VotingCounterIntegrationTest {
 
     @ParameterizedTest
     @EnumSource(Scenario.class)
-    public void one_user_undo_dec_between_flushes(Scenario scenario) throws IOException {
+    public void one_user_undo_dec_between_flushes(Scenario scenario) {
         setup(scenario, StorageState.EMPTY);
 
         assertEquals(-1, counter.decrement(A, Ann));
@@ -321,7 +322,7 @@ public class VotingCounterIntegrationTest {
 
     @ParameterizedTest
     @EnumSource(Scenario.class)
-    public void one_user_flip_between_flushes(Scenario scenario) throws IOException {
+    public void one_user_flip_between_flushes(Scenario scenario) {
         setup(scenario, StorageState.EMPTY);
 
         assertEquals(1, counter.increment(A, Ann));
@@ -337,7 +338,7 @@ public class VotingCounterIntegrationTest {
 
     @ParameterizedTest
     @EnumSource(Scenario.class)
-    public void one_user_no_change_between_flushes(Scenario scenario) throws IOException {
+    public void one_user_no_change_between_flushes(Scenario scenario) {
         setup(scenario, StorageState.EMPTY);
 
         assertEquals(1, counter.increment(A, Ann));
@@ -355,7 +356,7 @@ public class VotingCounterIntegrationTest {
 
     @ParameterizedTest
     @EnumSource(Scenario.class)
-    public void multi_changes_between_flushes(Scenario scenario) throws IOException {
+    public void multi_changes_between_flushes(Scenario scenario) {
         setup(scenario, StorageState.EMPTY);
 
         assertEquals(1, counter.increment(A, Ann));
@@ -388,7 +389,7 @@ public class VotingCounterIntegrationTest {
 
     @ParameterizedTest
     @EnumSource(Scenario.class)
-    public void existing_state_no_changes_flush(Scenario scenario) throws IOException {
+    public void existing_state_no_changes_flush(Scenario scenario) {
         setup(scenario, StorageState.of(A, IntHashSet.from(-Ann)));
 
         counter.flush();
@@ -400,7 +401,7 @@ public class VotingCounterIntegrationTest {
 
     @ParameterizedTest
     @EnumSource(Scenario.class)
-    public void existing_state_undo_inc(Scenario scenario) throws IOException {
+    public void existing_state_undo_inc(Scenario scenario) {
         setup(scenario, StorageState.of(A, IntHashSet.from(Ann)));
 
         assertEquals(0, counter.decrement(A, Ann));
@@ -413,7 +414,7 @@ public class VotingCounterIntegrationTest {
 
     @ParameterizedTest
     @EnumSource(Scenario.class)
-    public void existing_state_flip(Scenario scenario) throws IOException {
+    public void existing_state_flip(Scenario scenario) {
         setup(scenario, StorageState.of(A, IntHashSet.from(-Ann)));
 
         assertEquals(0, counter.increment(A, Ann));
@@ -427,7 +428,7 @@ public class VotingCounterIntegrationTest {
 
     @ParameterizedTest
     @EnumSource(Scenario.class)
-    public void existing_state_new_key_changed(Scenario scenario) throws IOException {
+    public void existing_state_new_key_changed(Scenario scenario) {
         setup(scenario, StorageState.of(A, IntHashSet.from(-Ann)));
 
         assertEquals(1, counter.increment(B, Ann));
@@ -441,7 +442,7 @@ public class VotingCounterIntegrationTest {
 
     @ParameterizedTest
     @EnumSource(Scenario.class)
-    public void existing_state_new_user_same_key(Scenario scenario) throws IOException {
+    public void existing_state_new_user_same_key(Scenario scenario) {
         setup(scenario, StorageState.of(A, IntHashSet.from(-Ann)));
 
         assertEquals(-2, counter.decrement(A, Bob));
@@ -455,7 +456,7 @@ public class VotingCounterIntegrationTest {
 
     @ParameterizedTest
     @EnumSource(Scenario.class)
-    public void existing_state_multi_changes_simple(Scenario scenario) throws IOException {
+    public void existing_state_multi_changes_simple(Scenario scenario) {
         setup(scenario, StorageState.of(A, IntHashSet.from(+Ann),
                                         B, IntHashSet.from(-Bob)));
 
@@ -475,7 +476,7 @@ public class VotingCounterIntegrationTest {
 
     @ParameterizedTest
     @EnumSource(Scenario.class)
-    public void existing_state_multi_changes_various(Scenario scenario) throws IOException {
+    public void existing_state_multi_changes_various(Scenario scenario) {
         setup(scenario, StorageState.of(A, IntHashSet.from(-Ann, +Bob),
                                         B, IntHashSet.from(+Ann, +Bob, +Liz)));
 
@@ -500,7 +501,7 @@ public class VotingCounterIntegrationTest {
 
     @ParameterizedTest
     @EnumSource(Scenario.class)
-    public void external_change_db_row_deleted(Scenario scenario) throws IOException {
+    public void external_change_db_row_deleted(Scenario scenario) {
         setup(scenario, StorageState.of(A, IntHashSet.from(+Ann)));
 
         assertEquals(0, counter.decrement(A, Ann));
@@ -516,7 +517,7 @@ public class VotingCounterIntegrationTest {
 
     @ParameterizedTest
     @EnumSource(Scenario.class)
-    public void external_change_db_row_inserted(Scenario scenario) throws IOException {
+    public void external_change_db_row_inserted(Scenario scenario) {
         setup(scenario, StorageState.EMPTY);
 
         assertEquals(-1, counter.decrement(A, Ann));
@@ -531,7 +532,7 @@ public class VotingCounterIntegrationTest {
 
     @ParameterizedTest
     @EnumSource(Scenario.class)
-    public void external_change_unrelated_db_row_deleted(Scenario scenario) throws IOException {
+    public void external_change_unrelated_db_row_deleted(Scenario scenario) {
         setup(scenario, StorageState.of(A, IntHashSet.from(+Ann)));
 
         assertEquals(-1, counter.decrement(B, Ann));
@@ -546,7 +547,7 @@ public class VotingCounterIntegrationTest {
 
     @ParameterizedTest
     @EnumSource(Scenario.class)
-    public void external_change_unrelated_db_row_inserted(Scenario scenario) throws IOException {
+    public void external_change_unrelated_db_row_inserted(Scenario scenario) {
         setup(scenario, StorageState.of(A, IntHashSet.from(+Ann)));
 
         assertEquals(2, counter.increment(A, Bob));
@@ -564,7 +565,7 @@ public class VotingCounterIntegrationTest {
     @Tag("slow")
     @ParameterizedTest
     @EnumSource(Scenario.class)
-    public void stress_test(Scenario scenario) throws IOException {
+    public void stress_test(Scenario scenario) {
         int users = 10;
         int keys = 30;
         int num = 10000;
@@ -596,7 +597,7 @@ public class VotingCounterIntegrationTest {
             for (Integer voter : expectedVotes.columnKeySet()) {
                 Map<Integer, Integer> expectedColumn = expectedVotes.column(voter);
                 IntIntMap actualVotes = counter.getVotes(EasyHppc.fromJavaIterableInt(expectedColumn.keySet()), voter);
-                assertInts(actualVotes, expectedColumn);
+                assertMap(actualVotes).asJavaMap().isEqualTo(expectedColumn);
             }
 
             // assert counts
@@ -623,7 +624,7 @@ public class VotingCounterIntegrationTest {
     private void assertCountEstimates(int... expected) {
         IntIntHashMap expectedMap = newIntMap(expected);
 
-        assertIntsTrimmed(counter.estimateCounts(expectedMap.keys()), expected);
+        assertMap(counter.estimateCounts(expectedMap.keys())).trimmed().containsExactlyTrimmed(expected);
         for (IntIntCursor cursor : expectedMap) {
             assertEquals(cursor.value, counter.estimateCount(cursor.key));
         }
@@ -636,13 +637,13 @@ public class VotingCounterIntegrationTest {
             int user = cursor.key;
             for (Vote vote : cursor.value) {
                 assertEquals(vote.val(), counter.getVote(vote.key(), user), "user=%d expected=%s".formatted(user, vote));
-                assertInts(counter.getVotes(IntArrayList.from(vote.key()), user), vote.key(), vote.val());
+                assertMap(counter.getVotes(IntArrayList.from(vote.key()), user)).containsExactly(vote.key(), vote.val());
             }
 
             IntArrayList keys = EasyHppc.fromJavaIterableInt(cursor.value.stream().map(Vote::key).toList());
             Map<Integer, Integer> expectedActorValues =
                 BiStream.biStream(cursor.value.stream()).mapKeys(Vote::key).mapValues(Vote::val).toMap();
-            assertInts(counter.getVotes(keys, user), expectedActorValues);
+            assertMap(counter.getVotes(keys, user)).asJavaMap().isEqualTo(expectedActorValues);
         }
     }
 

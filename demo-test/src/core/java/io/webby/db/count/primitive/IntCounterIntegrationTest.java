@@ -17,7 +17,7 @@ import org.junit.jupiter.params.provider.EnumSource;
 
 import static io.webby.demo.model.UserRateModelTable.OwnColumn.content_id;
 import static io.webby.demo.model.UserRateModelTable.OwnColumn.user_id;
-import static io.webby.testing.AssertPrimitives.assertIntsTrimmed;
+import static io.webby.testing.AssertPrimitives.assertMap;
 import static io.webby.testing.TestingPrimitives.newIntMap;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
@@ -76,7 +76,7 @@ public class IntCounterIntegrationTest {
     private void assertCountEstimates(int... expected) {
         IntIntHashMap expectedMap = newIntMap(expected);
 
-        assertIntsTrimmed(counter.estimateCounts(expectedMap.keys()), expected);
+        assertMap(counter.estimateCounts(expectedMap.keys())).trimmed().containsExactlyTrimmed(expected);
         for (IntIntCursor cursor : expectedMap) {
             assertEquals(cursor.value, counter.estimateCount(cursor.key));
         }

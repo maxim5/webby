@@ -71,23 +71,23 @@ public class EasyHppcTest {
     public void int_map_slice() {
         IntIntHashMap map = IntIntHashMap.from(ints(1, 2), ints(7, 8));
 
-        assertInts(EasyHppc.slice(map, ints(1)), 1, 7);
-        assertInts(EasyHppc.slice(map, IntArrayList.from(1)), 1, 7);
+        assertMap(EasyHppc.slice(map, ints(1))).containsExactly(1, 7);
+        assertMap(EasyHppc.slice(map, IntArrayList.from(1))).containsExactly(1, 7);
 
-        assertInts(EasyHppc.slice(map, ints(2)), 2, 8);
-        assertInts(EasyHppc.slice(map, IntArrayList.from(2)), 2, 8);
+        assertMap(EasyHppc.slice(map, ints(2))).containsExactly(2, 8);
+        assertMap(EasyHppc.slice(map, IntArrayList.from(2))).containsExactly(2, 8);
 
-        assertInts(EasyHppc.slice(map, ints(1, 2)), 1, 7, 2, 8);
-        assertInts(EasyHppc.slice(map, IntArrayList.from(1, 2)), 1, 7, 2, 8);
+        assertMap(EasyHppc.slice(map, ints(1, 2))).containsExactly(1, 7, 2, 8);
+        assertMap(EasyHppc.slice(map, IntArrayList.from(1, 2))).containsExactly(1, 7, 2, 8);
 
-        assertInts(EasyHppc.slice(map, ints(1, 3)), 1, 7, 3, 0);
-        assertInts(EasyHppc.slice(map, IntArrayList.from(1, 3)), 1, 7, 3, 0);
+        assertMap(EasyHppc.slice(map, ints(1, 3))).containsExactly(1, 7, 3, 0);
+        assertMap(EasyHppc.slice(map, IntArrayList.from(1, 3))).containsExactly(1, 7, 3, 0);
 
-        assertInts(EasyHppc.slice(map, ints(3)), 3, 0);
-        assertInts(EasyHppc.slice(map, IntArrayList.from(3)), 3, 0);
+        assertMap(EasyHppc.slice(map, ints(3))).containsExactly(3, 0);
+        assertMap(EasyHppc.slice(map, IntArrayList.from(3))).containsExactly(3, 0);
 
-        assertInts(EasyHppc.slice(map, ints()));
-        assertInts(EasyHppc.slice(map, IntArrayList.from()));
+        assertMap(EasyHppc.slice(map, ints())).containsExactly();
+        assertMap(EasyHppc.slice(map, IntArrayList.from())).containsExactly();
     }
 
     @Test
@@ -218,21 +218,21 @@ public class EasyHppcTest {
     public void computeIfAbsent_int_int_exists() {
         IntIntMap map = newIntMap(1, 111, 2, 222);
         assertEquals(EasyHppc.computeIfAbsent(map, 1, () -> fail("Must not be called")), 111);
-        assertInts(map, 1, 111, 2, 222);
+        assertMap(map).containsExactly(1, 111, 2, 222);
     }
 
     @Test
     public void computeIfAbsent_int_int_exists_zero() {
         IntIntMap map = newIntMap(1, 0);
         assertEquals(EasyHppc.computeIfAbsent(map, 1, () -> fail("Must not be called")), 0);
-        assertInts(map, 1, 0);
+        assertMap(map).containsExactly(1, 0);
     }
 
     @Test
     public void computeIfAbsent_int_int_not_exists() {
         IntIntMap map = newIntMap(1, 111, 2, 222);
         assertEquals(EasyHppc.computeIfAbsent(map, 3, () -> 333), 333);
-        assertInts(map, 1, 111, 2, 222, 3, 333);
+        assertMap(map).containsExactly(1, 111, 2, 222, 3, 333);
     }
 
     @Test
