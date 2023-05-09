@@ -64,21 +64,21 @@ public class Interceptors {
                     warnAboutUnsafeCall(position);
                     return super.attrOrDie(position);
                 }
+
+                private void warnAboutUnsafeCall(int position) {
+                    Interceptor owner = unsafeOwners.get(position);
+                    if (owner != null) {
+                        StackTraceElement caller = CallerFinder.findCallerOf(this.getClass(), 0);
+                        if (caller == null || !caller.getClassName().equals(owner.getClass().getName())) {
+                            String message = "%s requested conditionally available attribute [%d] owned by %s. " +
+                                             "This call may fail in the future. Use #attr() method instead";
+                            log.at(Level.WARNING).log(message, caller, position, owner);
+                        }
+                    }
+                }
             };
         }
         return requestEx;
-    }
-
-    private void warnAboutUnsafeCall(int position) {
-        Interceptor owner = unsafeOwners.get(position);
-        if (owner != null) {
-            StackTraceElement caller = CallerFinder.findCallerOf(this.getClass(), 0);
-            if (caller != null && !caller.getClassName().equals(owner.getClass().getName())) {
-                String message = "%s requested conditionally available attribute owned by %s. " +
-                                 "This call may fail in the future. Use #attr() method instead";
-                log.at(Level.WARNING).log(message, caller, owner);
-            }
-        }
     }
 
     public @Nullable HttpResponse enter(@NotNull DefaultHttpRequestEx request, @NotNull Endpoint endpoint) {
