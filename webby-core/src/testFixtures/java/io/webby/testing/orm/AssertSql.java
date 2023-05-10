@@ -1,4 +1,4 @@
-package io.webby.orm.testing;
+package io.webby.testing.orm;
 
 import com.google.common.truth.Ordered;
 import com.google.common.truth.Truth;

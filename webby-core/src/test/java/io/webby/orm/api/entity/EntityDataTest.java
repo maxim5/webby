@@ -5,7 +5,7 @@ import com.carrotsearch.hppc.LongArrayList;
 import com.mockrunner.mock.jdbc.MockPreparedStatement;
 import io.webby.orm.api.query.Where;
 import io.webby.orm.testing.FakeEnumColumn;
-import io.webby.orm.testing.MockingJdbc;
+import io.webby.testing.orm.MockingJdbc;
 import org.jetbrains.annotations.NotNull;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.EnumSource;
@@ -16,7 +16,7 @@ import java.util.List;
 import java.util.Map;
 
 import static io.webby.orm.api.query.Shortcuts.*;
-import static io.webby.orm.testing.MockingJdbc.assertThat;
+import static io.webby.testing.orm.MockingJdbc.assertThat;
 import static io.webby.util.collect.EasyMaps.asMap;
 
 public class EntityDataTest {

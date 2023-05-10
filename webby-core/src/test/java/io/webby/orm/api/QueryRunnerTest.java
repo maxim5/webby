@@ -24,12 +24,12 @@ import java.util.List;
 
 import static com.google.common.truth.Truth.assertThat;
 import static io.webby.orm.api.query.Shortcuts.var;
-import static io.webby.orm.testing.MockingJdbc.assertThat;
-import static io.webby.orm.testing.MockingJdbc.mockConnection;
-import static io.webby.orm.testing.MockingJdbc.mockPreparedStatement;
-import static io.webby.orm.testing.MockingJdbc.mockResultSet;
 import static io.webby.testing.AssertPrimitives.assertThat;
 import static io.webby.testing.TestingBasics.array;
+import static io.webby.testing.orm.MockingJdbc.assertThat;
+import static io.webby.testing.orm.MockingJdbc.mockConnection;
+import static io.webby.testing.orm.MockingJdbc.mockPreparedStatement;
+import static io.webby.testing.orm.MockingJdbc.mockResultSet;
 import static org.junit.jupiter.api.Assertions.*;
 
 // FIX[minor]: more tests: force .commit() or .rollback() to fail

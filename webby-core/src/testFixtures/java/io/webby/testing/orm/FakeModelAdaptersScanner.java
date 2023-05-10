@@ -1,4 +1,4 @@
-package io.webby.orm.testing;
+package io.webby.testing.orm;
 
 import io.webby.orm.adapter.chars.CharacterJdbcAdapter;
 import io.webby.orm.codegen.ModelAdaptersScanner;

@@ -9,8 +9,8 @@ import java.util.Map;
 
 import static com.google.common.truth.Truth.assertThat;
 import static io.webby.orm.api.query.Shortcuts.*;
-import static io.webby.orm.testing.AssertSql.assertThat;
-import static io.webby.orm.testing.AssertSql.assertThatSql;
+import static io.webby.testing.orm.AssertSql.assertThat;
+import static io.webby.testing.orm.AssertSql.assertThatSql;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 
 public class ContextualTest {

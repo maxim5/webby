@@ -6,7 +6,7 @@ import org.junit.jupiter.api.Test;
 import static io.webby.orm.api.query.CompareType.GE;
 import static io.webby.orm.api.query.CompareType.LE;
 import static io.webby.orm.api.query.Shortcuts.*;
-import static io.webby.orm.testing.AssertSql.assertThat;
+import static io.webby.testing.orm.AssertSql.assertThat;
 
 public class WhereTest {
     @Test

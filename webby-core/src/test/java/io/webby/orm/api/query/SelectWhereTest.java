@@ -1,13 +1,13 @@
 package io.webby.orm.api.query;
 
 import io.webby.orm.api.Engine;
-import io.webby.orm.testing.AssertSql;
 import io.webby.orm.testing.FakeColumn;
+import io.webby.testing.orm.AssertSql;
 import org.jetbrains.annotations.NotNull;
 import org.junit.jupiter.api.Test;
 
 import static io.webby.orm.api.query.Shortcuts.num;
-import static io.webby.orm.testing.AssertSql.assertReprThrows;
+import static io.webby.testing.orm.AssertSql.assertReprThrows;
 
 public class SelectWhereTest {
     @Test

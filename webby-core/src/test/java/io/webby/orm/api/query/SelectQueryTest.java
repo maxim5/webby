@@ -16,10 +16,10 @@ import java.util.List;
 import static io.webby.orm.api.query.CompareType.*;
 import static io.webby.orm.api.query.Func.*;
 import static io.webby.orm.api.query.Shortcuts.*;
-import static io.webby.orm.testing.AssertSql.UnitSubject;
-import static io.webby.orm.testing.AssertSql.assertRows;
 import static io.webby.orm.testing.PersonTableData.*;
 import static io.webby.testing.TestingBasics.array;
+import static io.webby.testing.orm.AssertSql.UnitSubject;
+import static io.webby.testing.orm.AssertSql.assertRows;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assumptions.assumeFalse;
 

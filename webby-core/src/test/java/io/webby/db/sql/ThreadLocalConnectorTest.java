@@ -1,8 +1,8 @@
 package io.webby.db.sql;
 
 import com.google.common.flogger.FluentLogger;
-import io.webby.db.sql.testing.FakeConnectionPool;
-import io.webby.db.sql.testing.SimpleConnection;
+import io.webby.testing.db.sql.FakeConnectionPool;
+import io.webby.testing.db.sql.SimpleConnection;
 import org.jetbrains.annotations.NotNull;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;

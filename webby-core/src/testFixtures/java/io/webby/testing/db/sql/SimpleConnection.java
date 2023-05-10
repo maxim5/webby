@@ -1,4 +1,4 @@
-package io.webby.db.sql.testing;
+package io.webby.testing.db.sql;
 
 import com.google.common.flogger.FluentLogger;
 import org.jetbrains.annotations.NotNull;

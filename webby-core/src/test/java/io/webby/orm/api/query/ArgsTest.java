@@ -16,10 +16,10 @@ import java.util.Map;
 import java.util.stream.Collectors;
 
 import static com.google.common.truth.Truth.assertThat;
-import static io.webby.orm.testing.MockingJdbc.assertThat;
-import static io.webby.orm.testing.MockingJdbc.mockPreparedStatement;
 import static io.webby.testing.AssertBasics.assertPrivateFieldClass;
 import static io.webby.testing.AssertBasics.getPrivateFieldValue;
+import static io.webby.testing.orm.MockingJdbc.assertThat;
+import static io.webby.testing.orm.MockingJdbc.mockPreparedStatement;
 import static io.webby.util.base.Unchecked.Suppliers.runRethrow;
 import static org.junit.jupiter.api.Assertions.*;
 

@@ -2,8 +2,8 @@ package io.webby.orm.api;
 
 import com.google.common.collect.Lists;
 import io.webby.orm.api.debug.DebugSql;
-import io.webby.orm.testing.AssertSql;
 import io.webby.testing.ext.SqlDbSetupExtension;
+import io.webby.testing.orm.AssertSql;
 import io.webby.util.collect.Pair;
 import org.jetbrains.annotations.NotNull;
 import org.junit.jupiter.api.Tag;

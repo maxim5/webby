@@ -6,8 +6,8 @@ import org.junit.jupiter.api.Test;
 
 import static io.webby.orm.api.query.Shortcuts.*;
 import static io.webby.orm.api.query.TermType.*;
-import static io.webby.orm.testing.AssertSql.assertReprThrows;
-import static io.webby.orm.testing.AssertSql.assertTerm;
+import static io.webby.testing.orm.AssertSql.assertReprThrows;
+import static io.webby.testing.orm.AssertSql.assertTerm;
 
 public class FuncTest {
     @Test

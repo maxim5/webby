@@ -1,4 +1,4 @@
-package io.webby.db.sql.testing;
+package io.webby.testing.db.sql;
 
 import io.webby.db.sql.ConnectionPool;
 import org.jetbrains.annotations.NotNull;
