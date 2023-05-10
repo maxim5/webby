@@ -13,6 +13,7 @@ import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
+import static com.google.common.truth.Truth.assertThat;
 import static org.junit.jupiter.api.Assertions.*;
 
 public class AssertStats {
@@ -39,5 +40,10 @@ public class AssertStats {
             Stream.of("time")
         ).collect(Collectors.toSet());
         assertEquals(expected, keys);
+    }
+
+    public static void assertStatsHeaderMatches(@NotNull HttpResponse response, @NotNull String pattern) {
+        String serverTiming = response.headers().get(HttpConst.SERVER_TIMING);
+        assertThat(serverTiming).matches(pattern);
     }
 }
