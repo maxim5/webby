@@ -1,10 +1,7 @@
 package io.webby.demo.hello;
 
 import io.netty.handler.codec.DecoderResult;
-import io.netty.handler.codec.http.DefaultHttpHeaders;
 import io.netty.handler.codec.http.FullHttpRequest;
-import io.netty.handler.codec.http.HttpHeaders;
-import io.netty.handler.codec.http.HttpMethod;
 import io.webby.testing.BaseHttpIntegrationTest;
 import io.webby.testing.HttpRequestBuilder;
 import org.junit.jupiter.api.Test;
@@ -39,8 +36,7 @@ public class HelloWorldIntegrationTest extends BaseHttpIntegrationTest {
 
     @Test
     public void failed_to_parse_request() {
-        HttpHeaders headers = new DefaultHttpHeaders().add("content-length", "(content-length, 3)");
-        FullHttpRequest request = HttpRequestBuilder.request(HttpMethod.GET, "/").withHeaders(headers).full();
+        FullHttpRequest request = HttpRequestBuilder.get("/").withHeader("content-length", "(content-length, 3)").full();
         request.setDecoderResult(DecoderResult.failure(new IllegalArgumentException("Multiple Content-Length values found")));
         assert400(call(request));
     }

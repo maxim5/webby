@@ -2,6 +2,7 @@ package io.webby.demo.hello;
 
 import com.google.common.io.ByteStreams;
 import io.netty.handler.codec.http.HttpResponse;
+import io.webby.netty.HttpConst;
 import io.webby.testing.BaseHttpIntegrationTest;
 import org.jetbrains.annotations.NotNull;
 import org.junit.jupiter.api.Test;
@@ -39,11 +40,11 @@ public class CustomHeadersIntegrationTest extends BaseHttpIntegrationTest {
     public void get_zip_stream() throws Exception {
         HttpResponse response = get("/headers/zip");
         assert200(response);
-        assertHeaders(response, "content-disposition", "attachment; filename=\"webby-sample.zip\"");
+        assertHeaders(response, HttpConst.CONTENT_DISPOSITION, "attachment; filename=\"webby-sample.zip\"");
         Map<String, String> expected = Map.of(
-                "0.txt", "File content for 0",
-                "1.txt", "File content for 1",
-                "2.txt", "File content for 2"
+            "0.txt", "File content for 0",
+            "1.txt", "File content for 1",
+            "2.txt", "File content for 2"
         );
         assertEquals(expected, unzipBytes(content(response).array()));
     }

@@ -15,7 +15,7 @@ public class HttpRequestBuilder {
     private final String uri;
     private HttpVersion version = HttpVersion.HTTP_1_1;
     private Object content = null;
-    private HttpHeaders headers = new DefaultHttpHeaders();
+    private final HttpHeaders headers = new DefaultHttpHeaders();
 
     private final Map<String, Constraint<?>> constraints = Map.of();
     private int attributesSize = 4;
@@ -48,7 +48,12 @@ public class HttpRequestBuilder {
     }
 
     public @NotNull HttpRequestBuilder withHeaders(@NotNull HttpHeaders headers) {
-        this.headers = headers;
+        this.headers.add(headers);
+        return this;
+    }
+
+    public @NotNull HttpRequestBuilder withHeader(@NotNull CharSequence name, @NotNull Object value) {
+        this.headers.add(name, value);
         return this;
     }
 

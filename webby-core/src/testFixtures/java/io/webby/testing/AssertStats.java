@@ -20,7 +20,7 @@ public class AssertStats {
         assertNull(response.headers().get(HttpConst.SERVER_TIMING));
     }
 
-    public static void assertStatsHeader(@NotNull HttpResponse response, @NotNull Stat ... expectedStats) {
+    public static void assertStatsHeader(@NotNull HttpResponse response, @NotNull Stat... expectedStats) {
         assertStatsHeader(response, Arrays.stream(expectedStats).toList());
     }
 
@@ -32,11 +32,11 @@ public class AssertStats {
         assertTrue(matcher.matches());
 
         Set<String> keys = Arrays.stream(matcher.group(1).split(","))
-                .map(part -> part.split(":")[0])
-                .collect(Collectors.toSet());
+            .map(part -> part.split(":")[0])
+            .collect(Collectors.toSet());
         Set<String> expected = Stream.concat(
-                Streams.stream(expectedStats).map(stat -> stat.name().toLowerCase()),
-                Stream.of("time")
+            Streams.stream(expectedStats).map(stat -> stat.name().toLowerCase()),
+            Stream.of("time")
         ).collect(Collectors.toSet());
         assertEquals(expected, keys);
     }

@@ -54,8 +54,7 @@ public class DefaultHttpRequestExTest {
 
     @Test
     public void cookies_simple() {
-        HttpRequestEx request = HttpRequestBuilder.get("/?foo=bar").ex()
-            .withHeaders(Map.of("Cookie", "foo=bar; __name__=123; "));
+        HttpRequestEx request = HttpRequestBuilder.get("/?foo=bar").withHeader("Cookie", "foo=bar; __name__=123;").ex();
         assertEquals(List.of(new DefaultCookie("foo", "bar"), new DefaultCookie("__name__", "123")), request.cookies());
     }
 
