@@ -10,6 +10,7 @@ import io.webby.perf.stats.Stat;
 import io.webby.util.collect.Pair;
 import io.webby.util.lazy.LazyBoolean;
 import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.VisibleForTesting;
 
 import java.util.ArrayList;
 import java.util.Formatter;
@@ -45,11 +46,12 @@ public class StatsSummary {
         response.headers().add(HttpConst.SERVER_TIMING, timing);
     }
 
-    private @NotNull String mainAsTable() {
+    @VisibleForTesting
+    @NotNull String mainAsTable() {
         String ROW_FMT = "%-" + Stat.MAX_NAME_LENGTH + "s | %4d ms | %4s %s";
 
         StringBuilder builder = new StringBuilder((stats.mainCounts().size() + 1) * 36);
-        builder.append(ROW_FMT.formatted("Total", stats.totalElapsed(TimeUnit.MILLISECONDS), "", ""));
+        builder.append(ROW_FMT.formatted("Total", stats.totalElapsed(TimeUnit.MILLISECONDS), "", "").trim());
         Formatter formatter = new Formatter(builder);
         stats.forEach((key, value, records) -> {
             builder.append('\n');
@@ -59,24 +61,37 @@ public class StatsSummary {
         return builder.toString();
     }
 
-    private @NotNull String mainAsJson() {
+    @VisibleForTesting
+    @NotNull String mainAsJson() {
         List<Pair<String, Long>> pairs = Streams.stream(stats.mainCounts())
             .map(cursor -> Pair.of(Stat.NAMES.get(cursor.key), (long) cursor.value))
             .collect(Collectors.toCollection(ArrayList::new));
         pairs.add(Pair.of("time", stats.totalElapsed(TimeUnit.MILLISECONDS)));
         return pairs.stream()
+            .map(pair -> pair.mapFirst(StatsSummary::simpleEscapeJson))
             .map(pair -> "%s:%d".formatted(pair.first(), pair.second()))
             .collect(Collectors.joining(",", "{", "}"));
     }
 
-    private @NotNull String recordsAsJson() {
+    @VisibleForTesting
+    @NotNull String recordsAsJson() {
         return Streams.stream(stats.records())
             .map(cursor -> {
                 String name = Stat.NAMES.get(cursor.key);
                 String value = cursor.value.stream()
-                    .map(StatsRecord::toCompactString)
+                    .map(StatsSummary::toCompactJsonString)
                     .collect(Collectors.joining(",", "[", "]"));
                 return "'%s':%s".formatted(name, value);
             }).collect(Collectors.joining(",", "{", "}"));
+    }
+
+    private static @NotNull String toCompactJsonString(@NotNull StatsRecord record) {
+        return record.hint() != null ?
+            "[%d,'%s']".formatted(record.elapsedMillis(), simpleEscapeJson(record.hint().toString())) :
+            "[%d]".formatted(record.elapsedMillis());
+    }
+
+    private static @NotNull String simpleEscapeJson(@NotNull String s) {
+        return s.replace("\\", "\\\\").replace("'", "\\'").replace("\"", "\\\"");
     }
 }
