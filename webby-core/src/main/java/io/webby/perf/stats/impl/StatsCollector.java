@@ -50,7 +50,7 @@ public class StatsCollector {
 
     public void forEach(@NotNull StatsConsumer consumer) {
         for (IntIntCursor cursor : mainCounts) {
-            Stat stat = Stat.VALUES.get(cursor.key);
+            Stat stat = Stat.index().findStatOrDummy(cursor.key);
             List<StatsRecord> statsRecords = records.getOrDefault(cursor.key, Collections.emptyList());
             consumer.consume(stat, cursor.value, statsRecords);
         }

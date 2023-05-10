@@ -48,7 +48,7 @@ public class StatsSummary {
 
     @VisibleForTesting
     @NotNull String mainAsTable() {
-        String ROW_FMT = "%-" + Stat.MAX_NAME_LENGTH + "s | %4d ms | %4s %s";
+        String ROW_FMT = "%-" + Stat.index().maxNameLength() + "s | %4d ms | %4s %s";
 
         StringBuilder builder = new StringBuilder((stats.mainCounts().size() + 1) * 36);
         builder.append(ROW_FMT.formatted("Total", stats.totalElapsed(TimeUnit.MILLISECONDS), "", "").trim());
@@ -56,7 +56,7 @@ public class StatsSummary {
         stats.forEach((key, value, records) -> {
             builder.append('\n');
             long totalMillis = records.stream().mapToLong(StatsRecord::elapsedMillis).sum();
-            formatter.format(ROW_FMT, key.lowerName(), totalMillis, value, key.unit().lowerName());
+            formatter.format(ROW_FMT, key.name(), totalMillis, value, key.unit().lowerName());
         });
         return builder.toString();
     }
@@ -64,7 +64,7 @@ public class StatsSummary {
     @VisibleForTesting
     @NotNull String mainAsJson() {
         List<Pair<String, Long>> pairs = Streams.stream(stats.mainCounts())
-            .map(cursor -> Pair.of(Stat.NAMES.get(cursor.key), (long) cursor.value))
+            .map(cursor -> Pair.of(Stat.index().findNameOrDummy(cursor.key), (long) cursor.value))
             .collect(Collectors.toCollection(ArrayList::new));
         pairs.add(Pair.of("time", stats.totalElapsed(TimeUnit.MILLISECONDS)));
         return pairs.stream()
@@ -77,7 +77,7 @@ public class StatsSummary {
     @NotNull String recordsAsJson() {
         return Streams.stream(stats.records())
             .map(cursor -> {
-                String name = Stat.NAMES.get(cursor.key);
+                String name = Stat.index().findNameOrDummy(cursor.key);
                 String value = cursor.value.stream()
                     .map(StatsSummary::toCompactJsonString)
                     .collect(Collectors.joining(",", "[", "]"));

@@ -91,6 +91,19 @@ public class StatsSummaryTest {
         assertThat(parsed.render()[0]).asList().containsExactly("111", hint);
     }
 
+    @Test
+    public void summary_unknown_key_reported() {
+        stats.report(987_654, 123, 111, null);
+        long millis = stats.stop().totalElapsed(TimeUnit.MILLISECONDS);
+
+        assertThat(summary.mainAsJson()).isEqualTo("{987654:123,time:%d}".formatted(millis));
+        assertThat(summary.mainAsTable().trim()).isEqualTo("""
+            Total       | % 4d ms |
+            987654      |  111 ms |  123
+            """.formatted(millis).trim());
+        assertThat(summary.recordsAsJson()).isEqualTo("{'987654':[[111]]}");
+    }
+
     private static <T> T parseJson(@NotNull String str, @NotNull Class<T> klass) {
         return new Gson().fromJson(str, klass);
     }
