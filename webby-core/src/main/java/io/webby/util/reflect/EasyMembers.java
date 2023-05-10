@@ -43,11 +43,11 @@ public class EasyMembers {
 
     public static @Nullable Method findMethod(@Nullable Class<?> klass, @NotNull Scope scope, @NotNull Predicate<Method> predicate) {
         return klass != null ?
-                Arrays.stream(scope == Scope.DECLARED ? klass.getDeclaredMethods() : klass.getMethods())
-                        .filter(predicate)
-                        .findAny()
-                        .orElse(null) :
-                null;
+            Arrays.stream(scope == Scope.DECLARED ? klass.getDeclaredMethods() : klass.getMethods())
+                .filter(predicate)
+                .findAny()
+                .orElse(null) :
+            null;
     }
 
     public static boolean hasMethod(@NotNull Class<?> klass, @NotNull Scope scope, @NotNull Predicate<Method> predicate) {
