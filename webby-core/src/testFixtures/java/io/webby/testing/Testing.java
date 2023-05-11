@@ -11,6 +11,7 @@ import io.webby.auth.user.DefaultUser;
 import io.webby.common.ClasspathScanner;
 import io.webby.db.model.BlobKv;
 import io.webby.netty.marshal.Json;
+import io.webby.netty.marshal.Marshaller;
 import io.webby.util.collect.Pair;
 import org.apache.logging.log4j.Level;
 import org.apache.logging.log4j.LogManager;
@@ -18,6 +19,7 @@ import org.apache.logging.log4j.core.config.Configurator;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
+import java.io.*;
 import java.nio.charset.Charset;
 import java.util.List;
 import java.util.Locale;
@@ -44,8 +46,8 @@ public class Testing {
         settings.handlerFilter().setPredicateUnsafe((pkg, cls) -> false);
         settings.interceptorFilter().setPredicateUnsafe((pkg, cls) -> false);
         settings.storageSettings()
-                .disableKeyValue()
-                .disableSql();
+            .disableKeyValue()
+            .disableSql();
         return settings;
     }
 
@@ -128,13 +130,45 @@ public class Testing {
         public static @NotNull Json json() {
             // An alternative that always works:
             // new GsonMarshaller(new Gson(), TestingBytes.CHARSET)
-            return getInstance(Json.class);
+            return injector != null ? getInstance(Json.class) : new LazyInternalJson();
         }
 
         public static void terminate() {
             if (injector != null) {
                 injector.getInstance(AppLifetime.class).getLifetime().terminate();
             }
+        }
+    }
+
+    private static class LazyInternalJson implements Json {
+        @Override
+        public @NotNull Charset charset() {
+            return Internals.charset();
+        }
+
+        @Override
+        public @NotNull Marshaller withCustomCharset(@NotNull Charset charset) {
+            return Internals.json().withCustomCharset(charset);
+        }
+
+        @Override
+        public void writeBytes(@NotNull OutputStream output, @NotNull Object instance) throws IOException {
+            Internals.json().writeBytes(output, instance);
+        }
+
+        @Override
+        public <T> @NotNull T readBytes(@NotNull InputStream input, @NotNull Class<T> klass) throws IOException {
+            return Internals.json().readBytes(input, klass);
+        }
+
+        @Override
+        public void writeChars(@NotNull Writer writer, @NotNull Object instance) throws IOException {
+            Internals.json().writeChars(writer, instance);
+        }
+
+        @Override
+        public <T> @NotNull T readChars(@NotNull Reader reader, @NotNull Class<T> klass) throws IOException {
+            return Internals.json().readChars(reader, klass);
         }
     }
 }

@@ -33,11 +33,11 @@ public class FakeInterceptorScanner extends InterceptorScanner {
         this.interceptors = interceptors;
     }
 
-    public static @NotNull FakeInterceptorScanner of(@NotNull InterceptItem... items) {
+    public static @NotNull FakeInterceptorScanner of(@NotNull InterceptItem @NotNull... items) {
         return new FakeInterceptorScanner(List.of(items));
     }
 
-    public static @NotNull FakeInterceptorScanner of(@NotNull Interceptor... interceptors) {
+    public static @NotNull FakeInterceptorScanner of(@NotNull Interceptor @NotNull... interceptors) {
         List<InterceptItem> items = Stream.of(interceptors)
             .map(interceptor -> toItem(interceptor, interceptor.getClass()))
             .sorted(Comparator.comparingInt(InterceptItem::position))
