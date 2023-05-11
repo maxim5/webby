@@ -52,10 +52,12 @@ public interface Interceptor {
 
     /**
      * Cleans up the state in case the request was intercepted or an error occurred, in other words
-     * if {@link #exit(MutableHttpRequestEx, HttpResponse)} is not called.
+     * if {@link #exit(MutableHttpRequestEx, HttpResponse)} was not called.
      * <p>
      * Note that this method may be called when a request didn't {@link #enter(MutableHttpRequestEx)} this interceptor.
+     * This method is not expected to throw.
      */
     default void cleanup() {
+        // Do nothing
     }
 }
