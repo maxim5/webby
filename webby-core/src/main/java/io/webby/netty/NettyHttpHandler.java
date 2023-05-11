@@ -28,6 +28,7 @@ import io.webby.netty.intercept.Interceptors;
 import io.webby.netty.marshal.Marshaller;
 import io.webby.netty.marshal.MarshallerFactory;
 import io.webby.netty.request.DefaultHttpRequestEx;
+import io.webby.netty.request.HttpRequestFactory;
 import io.webby.netty.response.*;
 import io.webby.url.annotate.Marshal;
 import io.webby.url.caller.Caller;
@@ -60,7 +61,8 @@ public class NettyHttpHandler extends ChannelInboundHandlerAdapter {
 
     @Inject private Settings settings;
     @Inject private Interceptors interceptors;
-    @Inject private HttpResponseFactory factory;
+    @Inject private HttpRequestFactory requests;
+    @Inject private HttpResponseFactory responses;
     @Inject private ResponseHeaders headers;
     @Inject private ResponseMapper mapper;
     @Inject private Router<RouteEndpoint> router;
@@ -114,7 +116,7 @@ public class NettyHttpHandler extends ChannelInboundHandlerAdapter {
             response = handle(request);
         } catch (Throwable throwable) {
             cleanupAfterFailure();
-            response = factory.newResponse500("Unexpected failure", throwable);
+            response = responses.newResponse500("Unexpected failure", throwable);
             log.at(Level.SEVERE).withCause(throwable).log("Unexpected failure: %s", throwable.getMessage());
         }
 
@@ -140,7 +142,7 @@ public class NettyHttpHandler extends ChannelInboundHandlerAdapter {
     public void exceptionCaught(@NotNull ChannelHandlerContext context, @NotNull Throwable cause) {
         cleanupAfterFailure();
         context.channel()
-            .writeAndFlush(factory.newResponse500("Unexpected failure", cause))
+            .writeAndFlush(responses.newResponse500("Unexpected failure", cause))
             .addListener(ChannelFutureListener.CLOSE);
         log.at(Level.SEVERE).withCause(cause).log("Unexpected failure: %s", cause.getMessage());
     }
@@ -150,26 +152,26 @@ public class NettyHttpHandler extends ChannelInboundHandlerAdapter {
         DecoderResult decoderResult = request.decoderResult();
         if (decoderResult.isFailure()) {
             log.at(Level.INFO).log("Failed to decode request: %s", decoderResult);
-            return factory.newResponse400(decoderResult.cause());
+            return responses.newResponse400(decoderResult.cause());
         }
 
         CharArray path = extractPath(request.uri());
         Match<RouteEndpoint> match = router.routeOrNull(path);
         if (match == null) {
             log.at(Level.FINE).log("No associated endpoint for url: %s", path);
-            return factory.newResponse404();
+            return responses.newResponse404();
         }
 
         Endpoint endpoint = match.handler().getAcceptedEndpointOrNull(request);
         if (endpoint == null) {
             log.at(Level.INFO).log("Endpoint does not accept the request %s for url: %s", request.method(), path);
-            return factory.newResponse404();
+            return responses.newResponse404();
         }
 
         if (endpoint.context().bypassInterceptors()) {
             return call(request, match, endpoint);
         } else {
-            DefaultHttpRequestEx requestEx = interceptors.createRequest(request, channel, endpoint.context());
+            DefaultHttpRequestEx requestEx = requests.createRequest(request, channel, endpoint.context());
             HttpResponse intercepted = interceptors.enter(requestEx, endpoint);
             if (intercepted != null) {
                 interceptors.cleanup();  // consider try-finally?
@@ -211,17 +213,17 @@ public class NettyHttpHandler extends ChannelInboundHandlerAdapter {
     private @NotNull HttpResponse callException(@NotNull Throwable error, @NotNull Caller caller) {
         if (error instanceof ConversionError) {
             log.at(Level.INFO).withCause(error).log("Request validation failed: %s", error.getMessage());
-            return factory.newResponse400(error);
+            return responses.newResponse400(error);
         }
         if (error instanceof ServeException e) {
-            return factory.handleServeException(e, "Request handler %s".formatted(caller.method()));
+            return responses.handleServeException(e, "Request handler %s".formatted(caller.method()));
         }
         if (error instanceof InvocationTargetException) {
             return callException(error.getCause(), caller);
         }
 
         log.at(Level.SEVERE).withCause(error).log("Failed to call method: %s", caller.method());
-        return factory.newResponse500("Failed to call method: %s".formatted(caller.method()), error);
+        return responses.newResponse500("Failed to call method: %s".formatted(caller.method()), error);
     }
 
     @VisibleForTesting
@@ -263,7 +265,7 @@ public class NettyHttpHandler extends ChannelInboundHandlerAdapter {
         }
 
         Marshaller marshaller = marshallers.getMarshaller(options.out());
-        return factory.newResponse(marshaller.writeByteBuf(callResult), HttpResponseStatus.OK);
+        return responses.newResponse(marshaller.writeByteBuf(callResult), HttpResponseStatus.OK);
     }
 
     @VisibleForTesting
@@ -273,11 +275,11 @@ public class NettyHttpHandler extends ChannelInboundHandlerAdapter {
         return switch (renderer.support()) {
             case BYTE_ARRAY -> {
                 byte[] bytes = renderer.renderToBytes(template, callResult);
-                yield factory.newResponse(bytes, HttpResponseStatus.OK);
+                yield responses.newResponse(bytes, HttpResponseStatus.OK);
             }
             case STRING -> {
                 String content = renderer.renderToString(template, callResult);
-                yield factory.newResponse(content, HttpResponseStatus.OK);
+                yield responses.newResponse(content, HttpResponseStatus.OK);
             }
             case BYTE_STREAM -> {
                 ThrowConsumer<OutputStream, Exception> throwConsumer = renderer.renderToByteStream(template, callResult);
@@ -306,7 +308,7 @@ public class NettyHttpHandler extends ChannelInboundHandlerAdapter {
             }
             @Override
             public void onFailure(@NotNull Throwable failure) {
-                channel.writeAndFlush(factory.newResponse500("Handler future failed: %s".formatted(future), failure));
+                channel.writeAndFlush(responses.newResponse500("Handler future failed: %s".formatted(future), failure));
             }
         }, executor());
 

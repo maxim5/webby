@@ -1,6 +1,7 @@
 package io.webby.netty.intercept.attr;
 
 import com.google.common.flogger.FluentLogger;
+import com.google.errorprone.annotations.CanIgnoreReturnValue;
 import io.webby.netty.intercept.InterceptItem;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.VisibleForTesting;
@@ -17,19 +18,16 @@ public class AttributesValidator {
     private static final FluentLogger log = FluentLogger.forEnclosingClass();
     private static final int MAX_POSITION = 255;
 
-    public static @NotNull Result validateAttributeOwners(@NotNull Collection<InterceptItem> items) {
+    @CanIgnoreReturnValue
+    public static int validateAttributeOwners(@NotNull Collection<InterceptItem> items) {
         int[] positions = items.stream()
             .filter(InterceptItem::isOwner)
             .mapToInt(InterceptItem::position)
             .toArray();
-        int maxPosition = validatePositions(
+        return validatePositions(
             positions,
-            pos -> items.stream()
-                .filter(item -> item.position() == pos)
-                .map(InterceptItem::instance)
-                .toList()
+            pos -> items.stream().filter(item -> item.position() == pos).map(InterceptItem::instance).toList()
         );
-        return new Result(maxPosition);
     }
 
     @VisibleForTesting
@@ -47,6 +45,4 @@ public class AttributesValidator {
             return y;
         }).orElse(-1);
     }
-
-    public record Result(int maxPosition) {}
 }

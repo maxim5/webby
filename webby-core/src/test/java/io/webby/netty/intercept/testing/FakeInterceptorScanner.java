@@ -1,11 +1,13 @@
 package io.webby.netty.intercept.testing;
 
+import com.google.inject.Module;
 import io.webby.auth.AuthInterceptor;
 import io.webby.auth.session.SessionInterceptor;
 import io.webby.netty.intercept.InterceptItem;
 import io.webby.netty.intercept.Interceptor;
 import io.webby.netty.intercept.InterceptorScanner;
 import io.webby.perf.stats.impl.StatsInterceptor;
+import io.webby.testing.TestingModules;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.ArrayList;
@@ -31,7 +33,7 @@ public class FakeInterceptorScanner extends InterceptorScanner {
         this.interceptors = interceptors;
     }
 
-    public static @NotNull FakeInterceptorScanner of(@NotNull InterceptItem ... items) {
+    public static @NotNull FakeInterceptorScanner of(@NotNull InterceptItem... items) {
         return new FakeInterceptorScanner(List.of(items));
     }
 
@@ -46,5 +48,9 @@ public class FakeInterceptorScanner extends InterceptorScanner {
     @Override
     public @NotNull List<InterceptItem> getInterceptorsFromClasspath() {
         return interceptors;
+    }
+
+    public @NotNull Module asGuiceModule() {
+        return TestingModules.instance(InterceptorScanner.class, this);
     }
 }

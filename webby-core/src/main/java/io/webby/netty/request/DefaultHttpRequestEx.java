@@ -44,10 +44,6 @@ public class DefaultHttpRequestEx extends DefaultFullHttpRequest implements Muta
         this.attributes = attributes;
     }
 
-    protected DefaultHttpRequestEx(@NotNull DefaultHttpRequestEx request) {
-        this(request, request.channel, request.json, request.constraints, request.attributes);
-    }
-
     @Override
     public @NotNull SocketAddress remoteAddress() {
         return channel.remoteAddress();

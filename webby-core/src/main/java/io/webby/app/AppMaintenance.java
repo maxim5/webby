@@ -2,7 +2,7 @@ package io.webby.app;
 
 import com.google.common.flogger.FluentLogger;
 import com.google.inject.Inject;
-import io.webby.netty.intercept.Interceptors;
+import io.webby.netty.intercept.InterceptorsStack;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.Optional;
@@ -14,10 +14,10 @@ public class AppMaintenance {
     private final Optional<AtomicBoolean> maintenanceMode;
 
     @Inject
-    public AppMaintenance(@NotNull Settings settings, @NotNull Interceptors interceptors) {
+    public AppMaintenance(@NotNull Settings settings, @NotNull InterceptorsStack interceptors) {
         maintenanceMode = interceptors
-                .findEnabledInterceptor(interceptor -> interceptor instanceof AppMaintenanceInterceptor)
-                .map(interceptor -> ((AppMaintenanceInterceptor) interceptor).maintenance());
+            .findEnabledInterceptor(interceptor -> interceptor instanceof AppMaintenanceInterceptor)
+            .map(interceptor -> ((AppMaintenanceInterceptor) interceptor).maintenance());
 
         if (settings.isProdMode() && maintenanceMode.isEmpty()) {
             log.at(Level.WARNING).log("AppMaintenanceInterceptor is disabled: maintenance mode won't be available");
