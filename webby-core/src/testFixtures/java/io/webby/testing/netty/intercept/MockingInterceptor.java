@@ -22,6 +22,10 @@ public class MockingInterceptor implements Interceptor {
     protected final ForcedFailure exitFailure = new ForcedFailure();
     protected final ForcedFailure cleanupFailure = new ForcedFailure();
 
+    protected MockingInterceptor() {
+        this(0);
+    }
+
     public MockingInterceptor(int id) {
         this(id, new ArrayList<>());
     }
