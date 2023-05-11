@@ -14,8 +14,10 @@ import io.webby.netty.response.HttpResponseFactory;
 import io.webby.url.impl.Endpoint;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
+import org.jetbrains.annotations.VisibleForTesting;
 
 import java.util.List;
+import java.util.function.Supplier;
 import java.util.logging.Level;
 
 public class Interceptors implements InterceptorsStack {
@@ -39,7 +41,25 @@ public class Interceptors implements InterceptorsStack {
         return stack;
     }
 
-    public @Nullable HttpResponse enter(@NotNull DefaultHttpRequestEx request, @NotNull Endpoint endpoint) {
+    public @NotNull HttpResponse process(@NotNull DefaultHttpRequestEx requestEx,
+                                         @NotNull Endpoint endpoint,
+                                         @NotNull Supplier<HttpResponse> handleAction) {
+        try {
+            HttpResponse intercepted = enter(requestEx, endpoint);
+            if (intercepted != null) {
+                cleanup();
+                return intercepted;
+            }
+            HttpResponse response = handleAction.get();
+            return exit(requestEx, response);
+        } catch (Throwable throwable) {
+            cleanup();
+            return responses.newResponse500("Unexpected failure", throwable);
+        }
+    }
+
+    @VisibleForTesting
+    @Nullable HttpResponse enter(@NotNull DefaultHttpRequestEx request, @NotNull Endpoint endpoint) {
         for (InterceptItem item : stack) {
             Interceptor instance = item.instance();
             try {
@@ -55,16 +75,22 @@ public class Interceptors implements InterceptorsStack {
         return null;
     }
 
-    public @NotNull HttpResponse exit(@NotNull DefaultHttpRequestEx request, @NotNull HttpResponse response) {
+    @VisibleForTesting
+    @NotNull HttpResponse exit(@NotNull DefaultHttpRequestEx request, @NotNull HttpResponse response) {
         for (InterceptItem item : Lists.reverse(stack)) {
             response = item.instance().exit(request, response);
         }
         return response;
     }
 
-    public void cleanup() {
+    @VisibleForTesting
+    void cleanup() {
         for (InterceptItem item : Lists.reverse(stack)) {
-            item.instance().cleanup();
+            try {
+                item.instance().cleanup();
+            } catch (Throwable e) {
+                log.at(Level.SEVERE).withCause(e).log("Interceptor clean-up failed for item=%s", item);
+            }
         }
     }
 }

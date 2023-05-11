@@ -7,6 +7,7 @@ import io.netty.handler.codec.http.HttpResponse;
 import io.webby.netty.errors.ServeException;
 import io.webby.netty.intercept.Interceptor;
 import io.webby.netty.request.MutableHttpRequestEx;
+import io.webby.testing.ForcedFailure;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.ArrayList;
@@ -17,9 +18,9 @@ public class MockingInterceptor implements Interceptor {
     protected final int id;
     protected final AtomicReference<List<String>> events;
 
-    public MockingInterceptor() {
-        this(0, new ArrayList<>());
-    }
+    protected final ForcedFailure enterFailure = new ForcedFailure();
+    protected final ForcedFailure exitFailure = new ForcedFailure();
+    protected final ForcedFailure cleanupFailure = new ForcedFailure();
 
     public MockingInterceptor(int id) {
         this(id, new ArrayList<>());
@@ -34,20 +35,38 @@ public class MockingInterceptor implements Interceptor {
         return new MockingInterceptor(id, events);
     }
 
+    public @NotNull MockingInterceptor forceEnterFail(@NotNull Throwable throwable) {
+        enterFailure.force(throwable);
+        return this;
+    }
+
+    public @NotNull MockingInterceptor forceExitFail(@NotNull Throwable throwable) {
+        exitFailure.force(throwable);
+        return this;
+    }
+
+    public @NotNull MockingInterceptor forceCleanupFail(@NotNull Throwable throwable) {
+        cleanupFailure.force(throwable);
+        return this;
+    }
+
     @Override
     public void enter(@NotNull MutableHttpRequestEx request) throws ServeException {
-        registerEvent("%d:enter".formatted(id));
+        registerEvent("%d:enter%s".formatted(id, enterFailure.isSet() ? ":FAIL" : ""));
+        enterFailure.throwIfSet();
     }
 
     @Override
     public @NotNull HttpResponse exit(@NotNull MutableHttpRequestEx request, @NotNull HttpResponse response) {
-        registerEvent("%d:exit".formatted(id));
-        return Interceptor.super.exit(request, response);
+        registerEvent("%d:exit%s".formatted(id, exitFailure.isSet() ? ":FAIL" : ""));
+        exitFailure.throwIfSet();
+        return response;
     }
 
     @Override
     public void cleanup() {
-        registerEvent("%d:cleanup".formatted(id));
+        registerEvent("%d:cleanup%s".formatted(id, cleanupFailure.isSet() ? ":FAIL" : ""));
+        cleanupFailure.throwIfSet();
     }
 
     private void registerEvent(@NotNull String event) {

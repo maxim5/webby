@@ -172,18 +172,12 @@ public class NettyHttpHandler extends ChannelInboundHandlerAdapter {
             return call(request, match, endpoint);
         } else {
             DefaultHttpRequestEx requestEx = requests.createRequest(request, channel, endpoint.context());
-            HttpResponse intercepted = interceptors.enter(requestEx, endpoint);
-            if (intercepted != null) {
-                interceptors.cleanup();  // consider try-finally?
-                return intercepted;
-            }
-            HttpResponse response = call(requestEx, match, endpoint);
-            return interceptors.exit(requestEx, response);
+            return interceptors.process(requestEx, endpoint, () -> call(requestEx, match, endpoint));
         }
     }
 
     private void cleanupAfterFailure() {
-        interceptors.cleanup();
+        // Nothing to clean right now...
     }
 
     private static void cleanupWorkingThread() {
