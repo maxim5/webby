@@ -1,4 +1,4 @@
-package io.webby.netty.intercept.testing;
+package io.webby.testing.netty.intercept;
 
 import com.google.inject.Module;
 import io.webby.auth.AuthInterceptor;

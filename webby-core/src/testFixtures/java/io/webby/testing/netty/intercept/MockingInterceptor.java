@@ -1,4 +1,4 @@
-package io.webby.netty.intercept.testing;
+package io.webby.testing.netty.intercept;
 
 import com.google.common.collect.ImmutableList;
 import com.google.common.truth.IterableSubject;

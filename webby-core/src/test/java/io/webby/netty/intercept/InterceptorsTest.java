@@ -2,13 +2,13 @@ package io.webby.netty.intercept;
 
 import io.netty.handler.codec.http.HttpResponse;
 import io.webby.netty.errors.NotFoundException;
-import io.webby.netty.intercept.testing.FakeInterceptorScanner;
-import io.webby.netty.intercept.testing.MockingInterceptor;
 import io.webby.netty.request.DefaultHttpRequestEx;
 import io.webby.netty.response.EmptyHttpResponse;
 import io.webby.testing.FakeEndpoints;
 import io.webby.testing.HttpRequestBuilder;
 import io.webby.testing.Testing;
+import io.webby.testing.netty.intercept.FakeInterceptorScanner;
+import io.webby.testing.netty.intercept.MockingInterceptor;
 import io.webby.url.impl.Endpoint;
 import org.jetbrains.annotations.NotNull;
 import org.junit.jupiter.api.Test;
@@ -139,7 +139,7 @@ public class InterceptorsTest {
                                                "222:cleanup", "0:cleanup:FAIL", "111:cleanup");
     }
 
-    private static @NotNull Interceptors getInterceptors(@NotNull Interceptor @NotNull... interceptors) {
+    private static @NotNull Interceptors getInterceptors(@NotNull Interceptor @NotNull ... interceptors) {
         FakeInterceptorScanner fakeScanner = FakeInterceptorScanner.of(interceptors);
         return Testing.testStartup(fakeScanner.asGuiceModule()).getInstance(Interceptors.class);
     }
