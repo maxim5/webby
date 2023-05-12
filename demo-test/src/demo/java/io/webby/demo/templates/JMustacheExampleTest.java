@@ -29,21 +29,18 @@ public class JMustacheExampleTest extends BaseHttpIntegrationTest {
             .hasContentIgnoringNewlines("""
                 Elvis: 75
                 Madonna: 52
-                """);
-        assertThat(response).hasRenderedStatsHeaderForCurrentConfig();
+                """)
+            .hasRenderedStatsHeaderForCurrentConfig();
     }
 
     @Test
     public void get_persons_same_as_manual() {
         HttpResponse rendered = get("/templates/jmustache/hello");
-        assertThat(rendered).is200();
-        assertThat(rendered).hasRenderedStatsHeaderForCurrentConfig();
+        assertThat(rendered).is200().hasRenderedStatsHeaderForCurrentConfig();
 
         HttpResponse manual = get("/templates/manual/jmustache/hello");
-        assertThat(manual).is200();
-        assertThat(manual).hasSimpleStatsHeaderForCurrentConfig();
+        assertThat(manual).is200().hasSimpleStatsHeaderForCurrentConfig();
 
-        assertThat(rendered).hasSameContent(manual);
-        assertThat(rendered).matchesHeadersForCurrentConfig(manual);
+        assertThat(rendered).matchesContent(manual).matchesHeadersForCurrentConfig(manual);
     }
 }

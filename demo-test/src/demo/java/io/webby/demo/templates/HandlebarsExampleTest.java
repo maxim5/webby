@@ -26,8 +26,8 @@ public class HandlebarsExampleTest extends BaseHttpIntegrationTest {
         HttpResponse response = get("/templates/handlebars/hello");
         assertThat(response)
             .is200()
-            .hasContentWhichContains("<h1> Home </h1>", "My name is Maxim. I am a Software Engineer at Google.");
-        assertThat(response).hasRenderedStatsHeaderForCurrentConfig();
+            .hasContentWhichContains("<h1> Home </h1>", "My name is Maxim. I am a Software Engineer at Google.")
+            .hasRenderedStatsHeaderForCurrentConfig();
     }
 
     @Test
@@ -35,21 +35,18 @@ public class HandlebarsExampleTest extends BaseHttpIntegrationTest {
         HttpResponse response = get("/templates/handlebars/hello/context");
         assertThat(response)
             .is200()
-            .hasContentWhichContains("<h1> Home </h1>", "My name is Maxim. I am a Software Engineer at Google.");
-        assertThat(response).hasRenderedStatsHeaderForCurrentConfig();
+            .hasContentWhichContains("<h1> Home </h1>", "My name is Maxim. I am a Software Engineer at Google.")
+            .hasRenderedStatsHeaderForCurrentConfig();
     }
 
     @Test
     public void get_hello_same_as_manual() {
         HttpResponse rendered = get("/templates/handlebars/hello");
-        assertThat(rendered).is200();
-        assertThat(rendered).hasRenderedStatsHeaderForCurrentConfig();
+        assertThat(rendered).is200().hasRenderedStatsHeaderForCurrentConfig();
 
         HttpResponse manual = get("/templates/manual/handlebars/hello");
-        assertThat(manual).is200();
-        assertThat(manual).hasSimpleStatsHeaderForCurrentConfig();
+        assertThat(manual).is200().hasSimpleStatsHeaderForCurrentConfig();
 
-        assertThat(rendered).hasSameContent(manual);
-        assertThat(rendered).matchesHeadersForCurrentConfig(manual);
+        assertThat(rendered).matchesContent(manual).matchesHeadersForCurrentConfig(manual);
     }
 }

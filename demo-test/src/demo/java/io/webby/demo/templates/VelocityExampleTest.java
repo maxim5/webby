@@ -27,21 +27,18 @@ public class VelocityExampleTest extends BaseHttpIntegrationTest {
         assertThat(response)
             .is200()
             .hasContentWhichContains("<table class=\"gridtable\">", "<td>1)</td>", "<td>foo</td>",
-                                     "<td>1.23</td>", "<td>2)</td>", "<td>bar</td>", "<td>100.0</td>");
-        assertThat(response).hasRenderedStatsHeaderForCurrentConfig();
+                                     "<td>1.23</td>", "<td>2)</td>", "<td>bar</td>", "<td>100.0</td>")
+            .hasRenderedStatsHeaderForCurrentConfig();
     }
 
     @Test
     public void get_hello_same_as_manual() {
         HttpResponse rendered = get("/templates/velocity/hello");
-        assertThat(rendered).is200();
-        assertThat(rendered).hasRenderedStatsHeaderForCurrentConfig();
+        assertThat(rendered).is200().hasRenderedStatsHeaderForCurrentConfig();
 
         HttpResponse manual = get("/templates/manual/velocity/hello");
-        assertThat(manual).is200();
-        assertThat(manual).hasSimpleStatsHeaderForCurrentConfig();
+        assertThat(manual).is200().hasSimpleStatsHeaderForCurrentConfig();
 
-        assertThat(rendered).hasSameContent(manual);
-        assertThat(rendered).matchesHeadersForCurrentConfig(manual);
+        assertThat(rendered).matchesContent(manual).matchesHeadersForCurrentConfig(manual);
     }
 }

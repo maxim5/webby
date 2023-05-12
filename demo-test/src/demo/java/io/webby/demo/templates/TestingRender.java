@@ -10,7 +10,7 @@ import io.netty.handler.codec.http.HttpResponse;
 import io.webby.app.AppSettings;
 import io.webby.netty.HttpConst;
 import io.webby.perf.stats.Stat;
-import io.webby.testing.AssertResponse;
+import io.webby.testing.AssertResponse.HttpResponseSubject;
 import io.webby.testing.Testing;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
@@ -40,7 +40,7 @@ public class TestingRender {
     }
 
     @CanIgnoreReturnValue
-    public static class RenderedHttpResponseSubject extends AssertResponse.HttpResponseSubject {
+    public static class RenderedHttpResponseSubject extends HttpResponseSubject<RenderedHttpResponseSubject> {
         public RenderedHttpResponseSubject(@NotNull FailureMetadata metadata, @Nullable HttpResponse response) {
             super(metadata, response);
         }

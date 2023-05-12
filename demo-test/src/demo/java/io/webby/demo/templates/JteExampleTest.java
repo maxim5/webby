@@ -35,21 +35,18 @@ public class JteExampleTest extends BaseHttpIntegrationTest {
         assertThat(response)
             .is200()
             .hasContentWhichContains("<meta name=\"description\" content=\"Fancy Description\">",
-                                     "<title>Fancy Title</title>");
-        assertThat(response).hasRenderedStatsHeaderForCurrentConfig();
+                                     "<title>Fancy Title</title>")
+            .hasRenderedStatsHeaderForCurrentConfig();
     }
 
     @Test
     public void get_hello_same_as_manual() {
         HttpResponse rendered = get("/templates/jte/hello");
-        assertThat(rendered).is200();
-        assertThat(rendered).hasRenderedStatsHeaderForCurrentConfig();
+        assertThat(rendered).is200().hasRenderedStatsHeaderForCurrentConfig();
 
         HttpResponse manual = get("/templates/manual/jte/hello");
-        assertThat(manual).is200();
-        assertThat(manual).hasSimpleStatsHeaderForCurrentConfig();
+        assertThat(manual).is200().hasSimpleStatsHeaderForCurrentConfig();
 
-        assertThat(rendered).hasSameContent(manual);
-        assertThat(rendered).matchesHeadersForCurrentConfig(manual);
+        assertThat(rendered).matchesContent(manual).matchesHeadersForCurrentConfig(manual);
     }
 }

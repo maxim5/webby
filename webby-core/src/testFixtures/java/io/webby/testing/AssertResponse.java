@@ -21,6 +21,7 @@ import java.util.List;
 import java.util.stream.Stream;
 
 import static io.webby.testing.TestingBytes.*;
+import static io.webby.util.base.EasyCast.castAny;
 import static io.webby.util.base.Unchecked.Consumers;
 import static io.webby.util.base.Unchecked.Suppliers;
 import static org.junit.jupiter.api.Assertions.fail;
@@ -31,12 +32,12 @@ public class AssertResponse {
     public static final List<CharSequence> ICON_MIME_TYPES = List.of("image/x-icon", "image/x-ico", "image/vnd.microsoft.icon");
 
     @CheckReturnValue
-    public static @NotNull HttpResponseSubject assertThat(@Nullable HttpResponse response) {
+    public static @NotNull HttpResponseSubject<HttpResponseSubject<?>> assertThat(@Nullable HttpResponse response) {
         return Truth.assertAbout(HttpResponseSubjectBuilder::new).that(response);
     }
 
     @CanIgnoreReturnValue
-    public static class HttpResponseSubject extends Subject {
+    public static class HttpResponseSubject<S extends HttpResponseSubject<?>> extends Subject {
         private final HttpResponse response;
 
         public HttpResponseSubject(@NotNull FailureMetadata metadata, @Nullable HttpResponse response) {
@@ -44,93 +45,95 @@ public class AssertResponse {
             this.response = response;
         }
 
-        public @NotNull HttpResponseSubject hasStatus(@NotNull HttpResponseStatus status) {
+        public @NotNull S hasStatus(@NotNull HttpResponseStatus status) {
             Truth.assertThat(response().status()).isEqualTo(status);
-            return this;
+            return castAny(this);
         }
 
-        public @NotNull HttpResponseSubject is200() {
+        public @NotNull S is200() {
             return hasStatus(HttpResponseStatus.OK);
         }
 
-        public @NotNull HttpResponseSubject is400() {
+        public @NotNull S is400() {
             return hasStatus(HttpResponseStatus.BAD_REQUEST);
         }
 
-        public @NotNull HttpResponseSubject is401() {
+        public @NotNull S is401() {
             return hasStatus(HttpResponseStatus.UNAUTHORIZED);
         }
 
-        public @NotNull HttpResponseSubject is403() {
+        public @NotNull S is403() {
             return hasStatus(HttpResponseStatus.FORBIDDEN);
         }
 
-        public @NotNull HttpResponseSubject is404() {
+        public @NotNull S is404() {
             return hasStatus(HttpResponseStatus.NOT_FOUND);
         }
 
-        public @NotNull HttpResponseSubject is500() {
+        public @NotNull S is500() {
             return hasStatus(HttpResponseStatus.INTERNAL_SERVER_ERROR);
         }
 
-        public @NotNull HttpResponseSubject is503() {
+        public @NotNull S is503() {
             return hasStatus(HttpResponseStatus.SERVICE_UNAVAILABLE);
         }
 
-        public @NotNull HttpResponseSubject isTempRedirect(@NotNull String url) {
-            return hasStatus(HttpResponseStatus.TEMPORARY_REDIRECT).hasHeader(HttpConst.LOCATION, url);
+        public @NotNull S isTempRedirect(@NotNull String url) {
+            hasStatus(HttpResponseStatus.TEMPORARY_REDIRECT).hasHeader(HttpConst.LOCATION, url);
+            return castAny(this);
         }
 
-        public @NotNull HttpResponseSubject isPermRedirect(@NotNull String url) {
-            return hasStatus(HttpResponseStatus.PERMANENT_REDIRECT).hasHeader(HttpConst.LOCATION, url);
+        public @NotNull S isPermRedirect(@NotNull String url) {
+            hasStatus(HttpResponseStatus.PERMANENT_REDIRECT).hasHeader(HttpConst.LOCATION, url);
+            return castAny(this);
         }
 
-        public @NotNull HttpResponseSubject hasContent(@NotNull String content) {
+        public @NotNull S hasContent(@NotNull String content) {
             assertByteBuf(content(), content);
-            return this;
+            return castAny(this);
         }
 
-        public @NotNull HttpResponseSubject hasContent(@NotNull ByteBuf content) {
+        public @NotNull S hasContent(@NotNull ByteBuf content) {
             assertByteBufs(content(), content);
-            return this;
+            return castAny(this);
         }
 
-        public @NotNull HttpResponseSubject hasContentWhichContains(@NotNull String @NotNull ... substrings) {
+        public @NotNull S hasContentWhichContains(@NotNull String @NotNull ... substrings) {
             String content = content().toString(CHARSET);
             for (String string : substrings) {
                 Truth.assertThat(content).contains(string);
             }
-            return this;
+            return castAny(this);
         }
 
-        public @NotNull HttpResponseSubject hasContentIgnoringNewlines(@NotNull String expected) {
+        public @NotNull S hasContentIgnoringNewlines(@NotNull String expected) {
             Truth.assertThat(asLines(content())).containsExactlyElementsIn(expected.lines().toList());
-            return this;
+            return castAny(this);
         }
 
-        public @NotNull HttpResponseSubject hasSameContent(@NotNull HttpResponse response) {
+        public @NotNull S matchesContent(@NotNull HttpResponse response) {
             return hasContent(AssertResponse.content(response));
         }
 
-        public @NotNull HttpResponseSubject hasEmptyContent() {
+        public @NotNull S hasEmptyContent() {
             return hasContent("");
         }
 
-        public @NotNull HttpResponseSubject hasHeadersExactly(@NotNull HttpHeaders headers) {
+        public @NotNull S hasHeadersExactly(@NotNull HttpHeaders headers) {
             Truth.assertThat(response().headers()).isEqualTo(headers);
-            return this;
+            return castAny(this);
         }
 
-        public @NotNull HttpResponseSubject hasHeader(@NotNull CharSequence key, @NotNull CharSequence value) {
+        public @NotNull S hasHeader(@NotNull CharSequence key, @NotNull CharSequence value) {
             Truth.assertThat(response().headers().get(key)).isEqualTo(value.toString());
-            return this;
+            return castAny(this);
         }
 
-        public @NotNull HttpResponseSubject hasContentType(@NotNull CharSequence contentType) {
+        public @NotNull S hasContentType(@NotNull CharSequence contentType) {
             return hasHeader(HttpConst.CONTENT_TYPE, contentType);
         }
 
-        public @NotNull HttpResponseSubject hasContentLength(int length) {
+        public @NotNull S hasContentLength(int length) {
             return hasHeader(HttpConst.CONTENT_LENGTH, String.valueOf(length));
         }
 
@@ -149,8 +152,8 @@ public class AssertResponse {
             super(metadata);
         }
 
-        public @NotNull HttpResponseSubject that(@Nullable HttpResponse response) {
-            return new HttpResponseSubject(metadata(), response);
+        public @NotNull HttpResponseSubject<HttpResponseSubject<?>> that(@Nullable HttpResponse response) {
+            return new HttpResponseSubject<>(metadata(), response);
         }
     }
 
