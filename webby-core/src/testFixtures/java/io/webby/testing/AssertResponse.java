@@ -1,5 +1,6 @@
 package io.webby.testing;
 
+import com.google.common.collect.Streams;
 import com.google.common.truth.CustomSubjectBuilder;
 import com.google.common.truth.FailureMetadata;
 import com.google.common.truth.Subject;
@@ -13,11 +14,17 @@ import io.netty.buffer.Unpooled;
 import io.netty.handler.codec.http.*;
 import io.webby.netty.HttpConst;
 import io.webby.netty.response.StreamingHttpResponse;
+import io.webby.perf.stats.Stat;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
 import java.io.ByteArrayOutputStream;
+import java.util.Arrays;
 import java.util.List;
+import java.util.Set;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
+import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 import static io.webby.testing.TestingBytes.*;
@@ -137,6 +144,40 @@ public class AssertResponse {
             return hasHeader(HttpConst.CONTENT_LENGTH, String.valueOf(length));
         }
 
+        public @NotNull S hasNoStatsHeaders() {
+            Truth.assertThat(response().headers().get(HttpConst.SERVER_TIMING)).isNull();
+            return castAny(this);
+        }
+
+        public @NotNull S hasStatsHeader(@NotNull Stat... expectedStats) {
+            return hasStatsHeader(Arrays.stream(expectedStats).toList());
+        }
+
+        public @NotNull S hasStatsHeader(@NotNull Iterable<Stat> expectedStats) {
+            String serverTiming = response().headers().get(HttpConst.SERVER_TIMING);
+            Truth.assertThat(serverTiming).isNotNull();
+
+            Matcher matcher = Pattern.compile("main;desc=\"\\{(.*)}\"").matcher(serverTiming);
+            Truth.assertThat(matcher.matches()).isTrue();
+
+            Set<String> keys = Arrays.stream(matcher.group(1).split(","))
+                .map(part -> part.split(":")[0])
+                .collect(Collectors.toSet());
+            Set<String> expected = Stream.concat(
+                Streams.stream(expectedStats).map(stat -> stat.name().toLowerCase()),
+                Stream.of("time")
+            ).collect(Collectors.toSet());
+            Truth.assertThat(keys).containsExactlyElementsIn(expected);
+
+            return castAny(this);
+        }
+
+        public @NotNull S hasStatsHeaderWhichMatches(@NotNull String pattern) {
+            String serverTiming = response().headers().get(HttpConst.SERVER_TIMING);
+            Truth.assertThat(serverTiming).matches(pattern);
+            return castAny(this);
+        }
+
         protected @NotNull HttpResponse response() {
             Truth.assertThat(response).isNotNull();
             return response;
@@ -148,7 +189,7 @@ public class AssertResponse {
     }
 
     private static class HttpResponseSubjectBuilder extends CustomSubjectBuilder {
-        protected HttpResponseSubjectBuilder(FailureMetadata metadata) {
+        protected HttpResponseSubjectBuilder(@NotNull FailureMetadata metadata) {
             super(metadata);
         }
 

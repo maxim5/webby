@@ -17,9 +17,6 @@ import org.jetbrains.annotations.Nullable;
 
 import java.util.function.Consumer;
 
-import static io.webby.testing.AssertStats.assertNoStatsHeaders;
-import static io.webby.testing.AssertStats.assertStatsHeader;
-
 public class TestingRender {
     enum Config {
         BytesStatsEnabled,
@@ -51,11 +48,10 @@ public class TestingRender {
 
         public @NotNull RenderedHttpResponseSubject assertSimpleStatsHeader(@NotNull Config config) {
             if (config == Config.BytesStatsEnabled) {
-                assertStatsHeader(response(), Stat.DB_SET);
+                return hasStatsHeader(Stat.DB_SET);
             } else {
-                assertNoStatsHeaders(response());
+                return hasNoStatsHeaders();
             }
-            return this;
         }
 
         public @NotNull RenderedHttpResponseSubject hasRenderedStatsHeaderForCurrentConfig() {
@@ -64,11 +60,10 @@ public class TestingRender {
 
         public @NotNull RenderedHttpResponseSubject hasRenderedStatsHeader(@NotNull Config config) {
             if (config == Config.BytesStatsEnabled) {
-                assertStatsHeader(response(), Stat.DB_SET, Stat.RENDER);
+                return hasStatsHeader(Stat.DB_SET, Stat.RENDER);
             } else {
-                assertNoStatsHeaders(response());
+                return hasNoStatsHeaders();
             }
-            return this;
         }
 
         private static @NotNull Config currentConfig() {
@@ -93,7 +88,7 @@ public class TestingRender {
     }
 
     private static class RenderedHttpResponseSubjectBuilder extends CustomSubjectBuilder {
-        protected RenderedHttpResponseSubjectBuilder(FailureMetadata metadata) {
+        protected RenderedHttpResponseSubjectBuilder(@NotNull FailureMetadata metadata) {
             super(metadata);
         }
 

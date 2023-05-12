@@ -10,7 +10,6 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.RegisterExtension;
 
 import static io.webby.testing.AssertResponse.assertThat;
-import static io.webby.testing.AssertStats.assertStatsHeaderMatches;
 
 public class RequestAttrIntegrationTest extends BaseHttpIntegrationTest {
     @RegisterExtension static final HppcIterationSeedExtension ITERATION_SEED = new HppcIterationSeedExtension();
@@ -27,7 +26,6 @@ public class RequestAttrIntegrationTest extends BaseHttpIntegrationTest {
     @Test
     public void stats() {
         HttpResponse response = get("/attr/stats");
-        assertThat(response).is200();
-        assertStatsHeaderMatches(response, "main;desc=\"\\{db_set:1,db_get:777,time:\\d+\\}\"");
+        assertThat(response).is200().hasStatsHeaderWhichMatches("main;desc=\"\\{db_set:1,db_get:777,time:\\d+\\}\"");
     }
 }
