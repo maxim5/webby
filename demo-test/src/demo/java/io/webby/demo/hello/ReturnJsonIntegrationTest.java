@@ -11,9 +11,9 @@ import org.junit.runners.Parameterized;
 
 import java.util.List;
 
-import static io.webby.testing.AssertJson.*;
+import static io.webby.testing.AssertJson.getJsonLibrary;
+import static io.webby.testing.AssertJson.withJsonLibrary;
 import static io.webby.testing.AssertResponse.assertThat;
-import static io.webby.testing.AssertResponse.content;
 import static org.junit.Assume.assumeTrue;
 
 @RunWith(Parameterized.class)
@@ -65,8 +65,8 @@ public class ReturnJsonIntegrationTest extends BaseHttpIntegrationTest {
         HttpResponse response = get("/r/json/sample_bean/bar/baz");
         assertThat(response)
             .is200()
-            .hasContentType(HttpConst.APPLICATION_JSON);
-        assertJsonValue(content(response), new SampleBean(0, "bar/baz", List.of(1, 2, 3)));
+            .hasContentType(HttpConst.APPLICATION_JSON)
+            .hasJsonContent(new SampleBean(0, "bar/baz", List.of(1, 2, 3)));
     }
 
     @Test

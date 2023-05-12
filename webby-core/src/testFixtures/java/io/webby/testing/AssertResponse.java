@@ -27,6 +27,7 @@ import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
+import static io.webby.testing.AssertJson.assertJsonValue;
 import static io.webby.testing.TestingBytes.*;
 import static io.webby.util.base.EasyCast.castAny;
 import static io.webby.util.base.Unchecked.Consumers;
@@ -118,8 +119,13 @@ public class AssertResponse {
             return castAny(this);
         }
 
+        public @NotNull S hasJsonContent(@NotNull Object object) {
+            assertJsonValue(content(), object);
+            return castAny(this);
+        }
+
         public @NotNull S matchesContent(@NotNull HttpResponse response) {
-            return hasContent(AssertResponse.content(response));
+            return hasContent(AssertResponse.contentOf(response));
         }
 
         public @NotNull S hasEmptyContent() {
@@ -184,7 +190,7 @@ public class AssertResponse {
         }
 
         protected @NotNull ByteBuf content() {
-            return AssertResponse.content(response());
+            return AssertResponse.contentOf(response());
         }
     }
 
@@ -198,7 +204,7 @@ public class AssertResponse {
         }
     }
 
-    public static @NotNull ByteBuf content(@NotNull HttpResponse response) {
+    public static @NotNull ByteBuf contentOf(@NotNull HttpResponse response) {
         if (response instanceof ByteBufHolder full) {
             return full.content();
         }
@@ -208,14 +214,14 @@ public class AssertResponse {
         return fail("Unrecognized response: " + response);
     }
 
-    public static @NotNull ByteBuf streamContent(@NotNull HttpResponse response) {
+    public static @NotNull ByteBuf streamContentOf(@NotNull HttpResponse response) {
         if (response instanceof StreamingHttpResponse streaming) {
-            return Suppliers.rethrow(() -> Unpooled.wrappedBuffer(readAll(streaming))).get();
+            return Suppliers.rethrow(() -> Unpooled.wrappedBuffer(readAllFrom(streaming))).get();
         }
-        return content(response);
+        return contentOf(response);
     }
 
-    public static byte @NotNull [] readAll(@NotNull StreamingHttpResponse streaming) throws Exception {
+    public static byte @NotNull [] readAllFrom(@NotNull StreamingHttpResponse streaming) throws Exception {
         ByteArrayOutputStream outputStream = new ByteArrayOutputStream();
         HttpChunkedInput chunkedInput = streaming.chunkedContent();
         try {
@@ -229,7 +235,7 @@ public class AssertResponse {
         return outputStream.toByteArray();
     }
 
-    public static byte @NotNull [] readAll(@NotNull Stream<HttpContent> stream) {
+    public static byte @NotNull [] readAllFrom(@NotNull Stream<HttpContent> stream) {
         ByteArrayOutputStream outputStream = new ByteArrayOutputStream();
         stream.forEach(Consumers.rethrow(content ->
                 content.content().readBytes(outputStream, content.content().readableBytes())
