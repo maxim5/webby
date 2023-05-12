@@ -5,6 +5,7 @@ import com.google.common.truth.FailureMetadata;
 import com.google.common.truth.Subject;
 import com.google.common.truth.Truth;
 import com.google.errorprone.annotations.CanIgnoreReturnValue;
+import com.google.errorprone.annotations.CheckReturnValue;
 import io.netty.buffer.ByteBuf;
 import io.netty.buffer.ByteBufAllocator;
 import io.netty.buffer.ByteBufHolder;
@@ -29,6 +30,7 @@ public class AssertResponse {
     // See https://stackoverflow.com/questions/13827325/correct-mime-type-for-favicon-ico
     public static final List<CharSequence> ICON_MIME_TYPES = List.of("image/x-icon", "image/x-ico", "image/vnd.microsoft.icon");
 
+    @CheckReturnValue
     public static @NotNull HttpResponseSubject assertThat(@Nullable HttpResponse response) {
         return Truth.assertAbout(HttpResponseSubjectBuilder::new).that(response);
     }
@@ -132,12 +134,12 @@ public class AssertResponse {
             return hasHeader(HttpConst.CONTENT_LENGTH, String.valueOf(length));
         }
 
-        private @NotNull HttpResponse response() {
+        protected @NotNull HttpResponse response() {
             Truth.assertThat(response).isNotNull();
             return response;
         }
 
-        private @NotNull ByteBuf content() {
+        protected @NotNull ByteBuf content() {
             return AssertResponse.content(response());
         }
     }

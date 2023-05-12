@@ -8,8 +8,7 @@ import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.junit.runners.Parameterized;
 
-import static io.webby.demo.templates.TestingRender.*;
-import static io.webby.testing.AssertResponse.assertThat;
+import static io.webby.demo.templates.TestingRender.assertThat;
 
 @RunWith(Parameterized.class)
 public class HandlebarsExampleTest extends BaseHttpIntegrationTest {
@@ -28,7 +27,7 @@ public class HandlebarsExampleTest extends BaseHttpIntegrationTest {
         assertThat(response)
             .is200()
             .hasContentWhichContains("<h1> Home </h1>", "My name is Maxim. I am a Software Engineer at Google.");
-        assertRenderedStatsHeaderForCurrentConfig(response);
+        assertThat(response).hasRenderedStatsHeaderForCurrentConfig();
     }
 
     @Test
@@ -37,20 +36,20 @@ public class HandlebarsExampleTest extends BaseHttpIntegrationTest {
         assertThat(response)
             .is200()
             .hasContentWhichContains("<h1> Home </h1>", "My name is Maxim. I am a Software Engineer at Google.");
-        assertRenderedStatsHeaderForCurrentConfig(response);
+        assertThat(response).hasRenderedStatsHeaderForCurrentConfig();
     }
 
     @Test
     public void get_hello_same_as_manual() {
         HttpResponse rendered = get("/templates/handlebars/hello");
         assertThat(rendered).is200();
-        assertRenderedStatsHeaderForCurrentConfig(rendered);
+        assertThat(rendered).hasRenderedStatsHeaderForCurrentConfig();
 
         HttpResponse manual = get("/templates/manual/handlebars/hello");
         assertThat(manual).is200();
-        assertSimpleStatsHeaderForCurrentConfig(manual);
+        assertThat(manual).hasSimpleStatsHeaderForCurrentConfig();
 
         assertThat(rendered).hasSameContent(manual);
-        assertHeadersForCurrentConfig(rendered, manual);
+        assertThat(rendered).matchesHeadersForCurrentConfig(manual);
     }
 }

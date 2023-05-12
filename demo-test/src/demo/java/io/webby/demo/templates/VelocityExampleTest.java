@@ -8,8 +8,7 @@ import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.junit.runners.Parameterized;
 
-import static io.webby.demo.templates.TestingRender.*;
-import static io.webby.testing.AssertResponse.assertThat;
+import static io.webby.demo.templates.TestingRender.assertThat;
 
 @RunWith(Parameterized.class)
 public class VelocityExampleTest extends BaseHttpIntegrationTest {
@@ -29,20 +28,20 @@ public class VelocityExampleTest extends BaseHttpIntegrationTest {
             .is200()
             .hasContentWhichContains("<table class=\"gridtable\">", "<td>1)</td>", "<td>foo</td>",
                                      "<td>1.23</td>", "<td>2)</td>", "<td>bar</td>", "<td>100.0</td>");
-        assertRenderedStatsHeaderForCurrentConfig(response);
+        assertThat(response).hasRenderedStatsHeaderForCurrentConfig();
     }
 
     @Test
     public void get_hello_same_as_manual() {
         HttpResponse rendered = get("/templates/velocity/hello");
         assertThat(rendered).is200();
-        assertRenderedStatsHeaderForCurrentConfig(rendered);
+        assertThat(rendered).hasRenderedStatsHeaderForCurrentConfig();
 
         HttpResponse manual = get("/templates/manual/velocity/hello");
         assertThat(manual).is200();
-        assertSimpleStatsHeaderForCurrentConfig(manual);
+        assertThat(manual).hasSimpleStatsHeaderForCurrentConfig();
 
         assertThat(rendered).hasSameContent(manual);
-        assertHeadersForCurrentConfig(rendered, manual);
+        assertThat(rendered).matchesHeadersForCurrentConfig(manual);
     }
 }

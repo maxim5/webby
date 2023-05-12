@@ -8,8 +8,7 @@ import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.junit.runners.Parameterized;
 
-import static io.webby.demo.templates.TestingRender.*;
-import static io.webby.testing.AssertResponse.assertThat;
+import static io.webby.demo.templates.TestingRender.assertThat;
 
 @RunWith(Parameterized.class)
 public class MustacheJavaExampleTest extends BaseHttpIntegrationTest {
@@ -41,20 +40,20 @@ public class MustacheJavaExampleTest extends BaseHttpIntegrationTest {
                 Price: 500.0
                   Feature: Old
                 """);
-        assertRenderedStatsHeaderForCurrentConfig(response);
+        assertThat(response).hasRenderedStatsHeaderForCurrentConfig();
     }
 
     @Test
     public void get_items_same_as_manual() {
         HttpResponse rendered = get("/templates/mustache-java/hello");
         assertThat(rendered).is200();
-        assertRenderedStatsHeaderForCurrentConfig(rendered);
+        assertThat(rendered).hasRenderedStatsHeaderForCurrentConfig();
 
         HttpResponse manual = get("/templates/manual/mustache-java/hello");
         assertThat(manual).is200();
-        assertSimpleStatsHeaderForCurrentConfig(manual);
+        assertThat(manual).hasSimpleStatsHeaderForCurrentConfig();
 
         assertThat(rendered).hasSameContent(manual);
-        assertHeadersForCurrentConfig(rendered, manual);
+        assertThat(rendered).matchesHeadersForCurrentConfig(manual);
     }
 }

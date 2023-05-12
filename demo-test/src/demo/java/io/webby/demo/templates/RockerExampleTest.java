@@ -8,8 +8,7 @@ import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.junit.runners.Parameterized;
 
-import static io.webby.demo.templates.TestingRender.*;
-import static io.webby.testing.AssertResponse.assertThat;
+import static io.webby.demo.templates.TestingRender.assertThat;
 
 @RunWith(Parameterized.class)
 public class RockerExampleTest extends BaseHttpIntegrationTest {
@@ -26,14 +25,14 @@ public class RockerExampleTest extends BaseHttpIntegrationTest {
     public void get_bound_template() {
         HttpResponse response = get("/templates/rocker/hello");
         assertThat(response).is200().hasContent("Hello World!\n");
-        assertRenderedStatsHeaderForCurrentConfig(response);
+        assertThat(response).hasRenderedStatsHeaderForCurrentConfig();
     }
 
     @Test
     public void get_model() {
         HttpResponse response = get("/templates/rocker/hello/model");
         assertThat(response).is200().hasContent("Hello Model!\n");
-        assertRenderedStatsHeaderForCurrentConfig(response);
+        assertThat(response).hasRenderedStatsHeaderForCurrentConfig();
     }
 
     @Test
@@ -48,13 +47,13 @@ public class RockerExampleTest extends BaseHttpIntegrationTest {
     public void get_hello_same_as_manual() {
         HttpResponse rendered = get("/templates/rocker/hello");
         assertThat(rendered).is200();
-        assertRenderedStatsHeaderForCurrentConfig(rendered);
+        assertThat(rendered).hasRenderedStatsHeaderForCurrentConfig();
 
         HttpResponse manual = get("/templates/manual/rocker/hello");
         assertThat(manual).is200();
-        assertSimpleStatsHeaderForCurrentConfig(manual);
+        assertThat(manual).hasSimpleStatsHeaderForCurrentConfig();
 
         assertThat(rendered).hasSameContent(manual);
-        assertHeadersForCurrentConfig(rendered, manual);
+        assertThat(rendered).matchesHeadersForCurrentConfig(manual);
     }
 }

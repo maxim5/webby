@@ -8,8 +8,7 @@ import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.junit.runners.Parameterized;
 
-import static io.webby.demo.templates.TestingRender.*;
-import static io.webby.testing.AssertResponse.assertThat;
+import static io.webby.demo.templates.TestingRender.assertThat;
 
 @RunWith(Parameterized.class)
 public class FreeMarkerExampleTest extends BaseHttpIntegrationTest {
@@ -29,7 +28,7 @@ public class FreeMarkerExampleTest extends BaseHttpIntegrationTest {
             .is200()
             .hasContentWhichContains("Welcome Big Joe, our beloved leader!",
                                      "<a href=\"products/green-mouse.html\">Green Mouse</a>!");
-        assertRenderedStatsHeaderForCurrentConfig(response);
+        assertThat(response).hasRenderedStatsHeaderForCurrentConfig();
     }
 
     @Test
@@ -38,48 +37,48 @@ public class FreeMarkerExampleTest extends BaseHttpIntegrationTest {
         assertThat(response)
             .is200()
             .hasContentWhichContains("Welcome NamE!", "<a href=\"products/green-mouse.html\">Green Mouse</a>!");
-        assertRenderedStatsHeaderForCurrentConfig(response);
+        assertThat(response).hasRenderedStatsHeaderForCurrentConfig();
     }
 
     @Test
     public void get_hello_same_as_manual() {
         HttpResponse rendered = get("/templates/freemarker/hello");
         assertThat(rendered).is200();
-        assertRenderedStatsHeaderForCurrentConfig(rendered);
+        assertThat(rendered).hasRenderedStatsHeaderForCurrentConfig();
 
         HttpResponse manual = get("/templates/manual/freemarker/hello");
         assertThat(manual).is200();
-        assertSimpleStatsHeaderForCurrentConfig(manual);
+        assertThat(manual).hasSimpleStatsHeaderForCurrentConfig();
 
         assertThat(rendered).hasSameContent(manual);
-        assertHeadersForCurrentConfig(rendered, manual);
+        assertThat(rendered).matchesHeadersForCurrentConfig(manual);
     }
 
     @Test
     public void get_hello_name_same_as_manual() {
         HttpResponse rendered = get("/templates/freemarker/hello/NamE");
         assertThat(rendered).is200();
-        assertRenderedStatsHeaderForCurrentConfig(rendered);
+        assertThat(rendered).hasRenderedStatsHeaderForCurrentConfig();
 
         HttpResponse manual = get("/templates/manual/freemarker/hello/NamE");
         assertThat(manual).is200();
-        assertSimpleStatsHeaderForCurrentConfig(manual);
+        assertThat(manual).hasSimpleStatsHeaderForCurrentConfig();
 
         assertThat(rendered).hasSameContent(manual);
-        assertHeadersForCurrentConfig(rendered, manual);
+        assertThat(rendered).matchesHeadersForCurrentConfig(manual);
     }
 
     @Test
     public void get_hello_name_same_as_manual_bytes() {
         HttpResponse rendered = get("/templates/freemarker/hello/NamE");
         assertThat(rendered).is200();
-        assertRenderedStatsHeaderForCurrentConfig(rendered);
+        assertThat(rendered).hasRenderedStatsHeaderForCurrentConfig();
 
         HttpResponse manual = get("/templates/manual/freemarker/hello-bytes/NamE");
         assertThat(manual).is200();
-        assertSimpleStatsHeaderForCurrentConfig(manual);
+        assertThat(manual).hasSimpleStatsHeaderForCurrentConfig();
 
         assertThat(rendered).hasSameContent(manual);
-        assertHeadersForCurrentConfig(rendered, manual);
+        assertThat(rendered).matchesHeadersForCurrentConfig(manual);
     }
 }
