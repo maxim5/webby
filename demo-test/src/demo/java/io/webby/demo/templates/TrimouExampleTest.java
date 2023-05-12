@@ -10,8 +10,6 @@ import org.junit.runners.Parameterized;
 
 import static io.webby.demo.templates.TestingRender.*;
 import static io.webby.testing.AssertResponse.assertThat;
-import static io.webby.testing.AssertResponse.content;
-import static io.webby.testing.TestingBytes.assertEqualsIgnoringNewlines;
 
 @RunWith(Parameterized.class)
 public class TrimouExampleTest extends BaseHttpIntegrationTest {
@@ -27,17 +25,18 @@ public class TrimouExampleTest extends BaseHttpIntegrationTest {
     @Test
     public void get_hello() {
         HttpResponse response = get("/templates/trimou/hello");
-        assertThat(response).is200();
-        assertEqualsIgnoringNewlines(content(response), """
-            Total number of items: 4
-            The first item is:\s
-                    1. Foo (5)
-                    2. Bar (15)
-                    3. INACTIVE!\s
-                    4. Baz (5000)
-        
-        
-        """);
+        assertThat(response)
+            .is200()
+            .hasContentIgnoringNewlines("""
+                Total number of items: 4
+                The first item is:\s
+                        1. Foo (5)
+                        2. Bar (15)
+                        3. INACTIVE!\s
+                        4. Baz (5000)
+            
+            
+            """);
         assertRenderedStatsHeaderForCurrentConfig(response);
     }
 

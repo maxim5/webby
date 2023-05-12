@@ -10,8 +10,6 @@ import org.junit.runners.Parameterized;
 
 import static io.webby.demo.templates.TestingRender.*;
 import static io.webby.testing.AssertResponse.assertThat;
-import static io.webby.testing.AssertResponse.content;
-import static io.webby.testing.TestingBytes.assertEqualsIgnoringNewlines;
 
 @RunWith(Parameterized.class)
 public class JMustacheExampleTest extends BaseHttpIntegrationTest {
@@ -27,11 +25,12 @@ public class JMustacheExampleTest extends BaseHttpIntegrationTest {
     @Test
     public void get_persons() {
         HttpResponse response = get("/templates/jmustache/hello");
-        assertThat(response).is200();
-        assertEqualsIgnoringNewlines(content(response), """
-        Elvis: 75
-        Madonna: 52
-        """);
+        assertThat(response)
+            .is200()
+            .hasContentIgnoringNewlines("""
+                Elvis: 75
+                Madonna: 52
+                """);
         assertRenderedStatsHeaderForCurrentConfig(response);
     }
 

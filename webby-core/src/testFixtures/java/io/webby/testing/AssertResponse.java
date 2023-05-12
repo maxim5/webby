@@ -42,11 +42,6 @@ public class AssertResponse {
             this.response = response;
         }
 
-        private @NotNull HttpResponse response() {
-            Truth.assertThat(response).isNotNull();
-            return response;
-        }
-
         public @NotNull HttpResponseSubject hasStatus(@NotNull HttpResponseStatus status) {
             Truth.assertThat(response().status()).isEqualTo(status);
             return this;
@@ -89,25 +84,30 @@ public class AssertResponse {
         }
 
         public @NotNull HttpResponseSubject hasContent(@NotNull String content) {
-            assertByteBuf(content(response()), content);
+            assertByteBuf(content(), content);
             return this;
         }
 
         public @NotNull HttpResponseSubject hasContent(@NotNull ByteBuf content) {
-            assertByteBufs(content(response()), content);
+            assertByteBufs(content(), content);
             return this;
         }
 
         public @NotNull HttpResponseSubject hasContentWhichContains(@NotNull String @NotNull ... substrings) {
-            String content = content(response()).toString(CHARSET);
+            String content = content().toString(CHARSET);
             for (String string : substrings) {
                 Truth.assertThat(content).contains(string);
             }
             return this;
         }
 
+        public @NotNull HttpResponseSubject hasContentIgnoringNewlines(@NotNull String expected) {
+            Truth.assertThat(asLines(content())).containsExactlyElementsIn(expected.lines().toList());
+            return this;
+        }
+
         public @NotNull HttpResponseSubject hasSameContent(@NotNull HttpResponse response) {
-            return hasContent(content(response));
+            return hasContent(AssertResponse.content(response));
         }
 
         public @NotNull HttpResponseSubject hasEmptyContent() {
@@ -130,6 +130,15 @@ public class AssertResponse {
 
         public @NotNull HttpResponseSubject hasContentLength(int length) {
             return hasHeader(HttpConst.CONTENT_LENGTH, String.valueOf(length));
+        }
+
+        private @NotNull HttpResponse response() {
+            Truth.assertThat(response).isNotNull();
+            return response;
+        }
+
+        private @NotNull ByteBuf content() {
+            return AssertResponse.content(response());
         }
     }
 

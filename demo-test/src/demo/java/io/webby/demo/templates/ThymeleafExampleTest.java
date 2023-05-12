@@ -10,8 +10,6 @@ import org.junit.runners.Parameterized;
 
 import static io.webby.demo.templates.TestingRender.*;
 import static io.webby.testing.AssertResponse.assertThat;
-import static io.webby.testing.AssertResponse.content;
-import static io.webby.testing.TestingBytes.assertEqualsIgnoringNewlines;
 
 @RunWith(Parameterized.class)
 public class ThymeleafExampleTest extends BaseHttpIntegrationTest {
@@ -27,23 +25,24 @@ public class ThymeleafExampleTest extends BaseHttpIntegrationTest {
     @Test
     public void get_hello() {
         HttpResponse response = get("/templates/thymeleaf/hello");
-        assertThat(response).is200();
-        assertEqualsIgnoringNewlines(content(response), """
-        <html>
-            <body>
-                <table>
-                    <tr>
-                        <td >101</td>
-                        <td >Maxim</td>
-                        <td>
-                            <span >Male</span>
-                           \s
-                        </td>
-                    </tr>
-                </table>
-            </body>
-        </html>
-        """);
+        assertThat(response)
+            .is200()
+            .hasContentIgnoringNewlines("""
+                <html>
+                    <body>
+                        <table>
+                            <tr>
+                                <td >101</td>
+                                <td >Maxim</td>
+                                <td>
+                                    <span >Male</span>
+                                   \s
+                                </td>
+                            </tr>
+                        </table>
+                    </body>
+                </html>
+                """);
         assertRenderedStatsHeaderForCurrentConfig(response);
     }
 
