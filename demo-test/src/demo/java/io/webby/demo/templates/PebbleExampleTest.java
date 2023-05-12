@@ -13,7 +13,7 @@ import org.junit.runners.Parameterized;
 import java.util.function.Consumer;
 
 import static io.webby.demo.templates.TestingRender.*;
-import static io.webby.testing.AssertResponse.*;
+import static io.webby.testing.AssertResponse.assertThat;
 
 @RunWith(Parameterized.class)
 public class PebbleExampleTest extends BaseHttpIntegrationTest {
@@ -32,40 +32,39 @@ public class PebbleExampleTest extends BaseHttpIntegrationTest {
     @Test
     public void get_hello() {
         HttpResponse response = get("/templates/pebble/hello");
-        assert200(response);
-        assertContentContains(response,
-                "<title> Home </title>",
-                "<p> Welcome to my home page. My name is Maxim.</p>",
-                "Copyright 2018"
-        );
+        assertThat(response)
+            .is200()
+            .hasContentWhichContains("<title> Home </title>",
+                                     "<p> Welcome to my home page. My name is Maxim.</p>",
+                                     "Copyright 2018");
         assertRenderedStatsHeaderForCurrentConfig(response);
     }
 
     @Test
     public void get_hello_same_as_manual() {
         HttpResponse rendered = get("/templates/pebble/hello");
-        assert200(rendered);
+        assertThat(rendered).is200();
         assertRenderedStatsHeaderForCurrentConfig(rendered);
 
         HttpResponse manual = get("/templates/manual/pebble/hello");
-        assert200(manual);
+        assertThat(manual).is200();
         assertSimpleStatsHeaderForCurrentConfig(manual);
 
-        assertContent(rendered, manual);
+        assertThat(rendered).hasSameContent(manual);
         assertHeadersForCurrentConfig(rendered, manual);
     }
 
     @Test
     public void get_hello_same_as_manual_bytes() {
         HttpResponse rendered = get("/templates/pebble/hello");
-        assert200(rendered);
+        assertThat(rendered).is200();
         assertRenderedStatsHeaderForCurrentConfig(rendered);
 
         HttpResponse manual = get("/templates/manual/pebble/hello/bytes");
-        assert200(manual);
+        assertThat(manual).is200();
         assertSimpleStatsHeaderForCurrentConfig(manual);
 
-        assertContent(rendered, manual);
+        assertThat(rendered).hasSameContent(manual);
         assertHeadersForCurrentConfig(rendered, manual);
     }
 }

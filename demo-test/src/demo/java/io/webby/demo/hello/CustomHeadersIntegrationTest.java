@@ -14,7 +14,8 @@ import java.util.Map;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipInputStream;
 
-import static io.webby.testing.AssertResponse.*;
+import static io.webby.testing.AssertResponse.assertThat;
+import static io.webby.testing.AssertResponse.content;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
 public class CustomHeadersIntegrationTest extends BaseHttpIntegrationTest {
@@ -23,24 +24,29 @@ public class CustomHeadersIntegrationTest extends BaseHttpIntegrationTest {
     @Test
     public void get_plain_text() {
         HttpResponse response = get("/headers/plain/10");
-        assert200(response, "Hello int <b>10</b>!");
-        assertContentLength(response, 20);
-        assertContentType(response, "text/plain");
+        assertThat(response)
+            .is200()
+            .hasContent("Hello int <b>10</b>!")
+            .hasContentLength(20)
+            .hasContentType("text/plain");
     }
 
     @Test
     public void get_xml() {
         HttpResponse response = get("/headers/xml");
-        assert200(response, "<foo><bar/></foo>");
-        assertContentLength(response, 17);
-        assertContentType(response, "application/xml");
+        assertThat(response)
+            .is200()
+            .hasContent("<foo><bar/></foo>")
+            .hasContentLength(17)
+            .hasContentType("application/xml");
     }
 
     @Test
     public void get_zip_stream() throws Exception {
         HttpResponse response = get("/headers/zip");
-        assert200(response);
-        assertHeaders(response, HttpConst.CONTENT_DISPOSITION, "attachment; filename=\"webby-sample.zip\"");
+        assertThat(response)
+            .is200()
+            .hasHeader(HttpConst.CONTENT_DISPOSITION, "attachment; filename=\"webby-sample.zip\"");
         Map<String, String> expected = Map.of(
             "0.txt", "File content for 0",
             "1.txt", "File content for 1",

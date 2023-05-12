@@ -9,7 +9,8 @@ import org.junit.runner.RunWith;
 import org.junit.runners.Parameterized;
 
 import static io.webby.demo.templates.TestingRender.*;
-import static io.webby.testing.AssertResponse.*;
+import static io.webby.testing.AssertResponse.assertThat;
+import static io.webby.testing.AssertResponse.content;
 import static io.webby.testing.TestingBytes.assertEqualsIgnoringNewlines;
 
 @RunWith(Parameterized.class)
@@ -26,7 +27,7 @@ public class JMustacheExampleTest extends BaseHttpIntegrationTest {
     @Test
     public void get_persons() {
         HttpResponse response = get("/templates/jmustache/hello");
-        assert200(response);
+        assertThat(response).is200();
         assertEqualsIgnoringNewlines(content(response), """
         Elvis: 75
         Madonna: 52
@@ -37,14 +38,14 @@ public class JMustacheExampleTest extends BaseHttpIntegrationTest {
     @Test
     public void get_persons_same_as_manual() {
         HttpResponse rendered = get("/templates/jmustache/hello");
-        assert200(rendered);
+        assertThat(rendered).is200();
         assertRenderedStatsHeaderForCurrentConfig(rendered);
 
         HttpResponse manual = get("/templates/manual/jmustache/hello");
-        assert200(manual);
+        assertThat(manual).is200();
         assertSimpleStatsHeaderForCurrentConfig(manual);
 
-        assertContent(rendered, manual);
+        assertThat(rendered).hasSameContent(manual);
         assertHeadersForCurrentConfig(rendered, manual);
     }
 }

@@ -5,24 +5,29 @@ import io.netty.handler.codec.http.HttpResponse;
 import io.webby.netty.HttpConst;
 import io.webby.testing.BaseHttpIntegrationTest;
 import io.webby.testing.HttpRequestBuilder;
+import io.webby.testing.ext.HppcIterationSeedExtension;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.RegisterExtension;
 
-import static io.webby.testing.AssertResponse.assert200;
+import static io.webby.testing.AssertResponse.assertThat;
 import static io.webby.testing.AssertStats.assertStatsHeaderMatches;
 
 public class RequestAttrIntegrationTest extends BaseHttpIntegrationTest {
+    @RegisterExtension static final HppcIterationSeedExtension ITERATION_SEED = new HppcIterationSeedExtension();
+
     protected final RequestAttr handler = testSetup(RequestAttr.class).initHandler();
 
     @Test
     public void attributes() {
         FullHttpRequest request = HttpRequestBuilder.get("/attr/get").withHeader(HttpConst.USER_AGENT, "foobar").full();
-        assert200(call(request), "stats:StatsCollector, session:foobar, user:null");
+        HttpResponse response = call(request);
+        assertThat(response).is200().hasContent("stats:StatsCollector, session:foobar, user:null");
     }
 
     @Test
     public void stats() {
         HttpResponse response = get("/attr/stats");
-        assert200(response);
+        assertThat(response).is200();
         assertStatsHeaderMatches(response, "main;desc=\"\\{db_set:1,db_get:777,time:\\d+\\}\"");
     }
 }

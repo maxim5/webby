@@ -9,7 +9,7 @@ import org.junit.runner.RunWith;
 import org.junit.runners.Parameterized;
 
 import static io.webby.demo.templates.TestingRender.*;
-import static io.webby.testing.AssertResponse.*;
+import static io.webby.testing.AssertResponse.assertThat;
 
 @RunWith(Parameterized.class)
 public class HandlebarsExampleTest extends BaseHttpIntegrationTest {
@@ -25,30 +25,32 @@ public class HandlebarsExampleTest extends BaseHttpIntegrationTest {
     @Test
     public void get_hello() {
         HttpResponse response = get("/templates/handlebars/hello");
-        assert200(response);
-        assertContentContains(response, "<h1> Home </h1>", "My name is Maxim. I am a Software Engineer at Google.");
+        assertThat(response)
+            .is200()
+            .hasContentWhichContains("<h1> Home </h1>", "My name is Maxim. I am a Software Engineer at Google.");
         assertRenderedStatsHeaderForCurrentConfig(response);
     }
 
     @Test
     public void get_hello_context() {
         HttpResponse response = get("/templates/handlebars/hello/context");
-        assert200(response);
-        assertContentContains(response, "<h1> Home </h1>", "My name is Maxim. I am a Software Engineer at Google.");
+        assertThat(response)
+            .is200()
+            .hasContentWhichContains("<h1> Home </h1>", "My name is Maxim. I am a Software Engineer at Google.");
         assertRenderedStatsHeaderForCurrentConfig(response);
     }
 
     @Test
     public void get_hello_same_as_manual() {
         HttpResponse rendered = get("/templates/handlebars/hello");
-        assert200(rendered);
+        assertThat(rendered).is200();
         assertRenderedStatsHeaderForCurrentConfig(rendered);
 
         HttpResponse manual = get("/templates/manual/handlebars/hello");
-        assert200(manual);
+        assertThat(manual).is200();
         assertSimpleStatsHeaderForCurrentConfig(manual);
 
-        assertContent(rendered, manual);
+        assertThat(rendered).hasSameContent(manual);
         assertHeadersForCurrentConfig(rendered, manual);
     }
 }

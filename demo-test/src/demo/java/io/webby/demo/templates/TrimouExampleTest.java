@@ -9,7 +9,8 @@ import org.junit.runner.RunWith;
 import org.junit.runners.Parameterized;
 
 import static io.webby.demo.templates.TestingRender.*;
-import static io.webby.testing.AssertResponse.*;
+import static io.webby.testing.AssertResponse.assertThat;
+import static io.webby.testing.AssertResponse.content;
 import static io.webby.testing.TestingBytes.assertEqualsIgnoringNewlines;
 
 @RunWith(Parameterized.class)
@@ -26,7 +27,7 @@ public class TrimouExampleTest extends BaseHttpIntegrationTest {
     @Test
     public void get_hello() {
         HttpResponse response = get("/templates/trimou/hello");
-        assert200(response);
+        assertThat(response).is200();
         assertEqualsIgnoringNewlines(content(response), """
             Total number of items: 4
             The first item is:\s
@@ -43,14 +44,14 @@ public class TrimouExampleTest extends BaseHttpIntegrationTest {
     @Test
     public void get_hello_same_as_manual() {
         HttpResponse rendered = get("/templates/trimou/hello");
-        assert200(rendered);
+        assertThat(rendered).is200();
         assertRenderedStatsHeaderForCurrentConfig(rendered);
 
         HttpResponse manual = get("/templates/manual/trimou/hello");
-        assert200(manual);
+        assertThat(manual).is200();
         assertSimpleStatsHeaderForCurrentConfig(manual);
 
-        assertContent(rendered, manual);
+        assertThat(rendered).hasSameContent(manual);
         assertHeadersForCurrentConfig(rendered, manual);
     }
 }

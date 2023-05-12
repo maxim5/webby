@@ -9,7 +9,7 @@ import org.junit.runner.RunWith;
 import org.junit.runners.Parameterized;
 
 import static io.webby.demo.templates.TestingRender.*;
-import static io.webby.testing.AssertResponse.*;
+import static io.webby.testing.AssertResponse.assertThat;
 
 @RunWith(Parameterized.class)
 public class VelocityExampleTest extends BaseHttpIntegrationTest {
@@ -25,26 +25,24 @@ public class VelocityExampleTest extends BaseHttpIntegrationTest {
     @Test
     public void get_hello() {
         HttpResponse response = get("/templates/velocity/hello");
-        assert200(response);
-        assertContentContains(response,
-            "<table class=\"gridtable\">",
-            "<td>1)</td>", "<td>foo</td>", "<td>1.23</td>",
-            "<td>2)</td>", "<td>bar</td>", "<td>100.0</td>"
-        );
+        assertThat(response)
+            .is200()
+            .hasContentWhichContains("<table class=\"gridtable\">", "<td>1)</td>", "<td>foo</td>",
+                                     "<td>1.23</td>", "<td>2)</td>", "<td>bar</td>", "<td>100.0</td>");
         assertRenderedStatsHeaderForCurrentConfig(response);
     }
 
     @Test
     public void get_hello_same_as_manual() {
         HttpResponse rendered = get("/templates/velocity/hello");
-        assert200(rendered);
+        assertThat(rendered).is200();
         assertRenderedStatsHeaderForCurrentConfig(rendered);
 
         HttpResponse manual = get("/templates/manual/velocity/hello");
-        assert200(manual);
+        assertThat(manual).is200();
         assertSimpleStatsHeaderForCurrentConfig(manual);
 
-        assertContent(rendered, manual);
+        assertThat(rendered).hasSameContent(manual);
         assertHeadersForCurrentConfig(rendered, manual);
     }
 }

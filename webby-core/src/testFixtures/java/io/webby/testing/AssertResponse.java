@@ -1,5 +1,10 @@
 package io.webby.testing;
 
+import com.google.common.truth.CustomSubjectBuilder;
+import com.google.common.truth.FailureMetadata;
+import com.google.common.truth.Subject;
+import com.google.common.truth.Truth;
+import com.google.errorprone.annotations.CanIgnoreReturnValue;
 import io.netty.buffer.ByteBuf;
 import io.netty.buffer.ByteBufAllocator;
 import io.netty.buffer.ByteBufHolder;
@@ -14,11 +19,9 @@ import java.io.ByteArrayOutputStream;
 import java.util.List;
 import java.util.stream.Stream;
 
-import static com.google.common.truth.Truth.assertThat;
 import static io.webby.testing.TestingBytes.*;
 import static io.webby.util.base.Unchecked.Consumers;
 import static io.webby.util.base.Unchecked.Suppliers;
-import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.fail;
 
 public class AssertResponse {
@@ -26,133 +29,118 @@ public class AssertResponse {
     // See https://stackoverflow.com/questions/13827325/correct-mime-type-for-favicon-ico
     public static final List<CharSequence> ICON_MIME_TYPES = List.of("image/x-icon", "image/x-ico", "image/vnd.microsoft.icon");
 
-    public static void assert200(@NotNull HttpResponse response) {
-        assert200(response, null);
+    public static @NotNull HttpResponseSubject assertThat(@Nullable HttpResponse response) {
+        return Truth.assertAbout(HttpResponseSubjectBuilder::new).that(response);
     }
 
-    public static void assert200(@NotNull HttpResponse response, @Nullable String content) {
-        assertResponse(response, HttpResponseStatus.OK, content);
-    }
+    @CanIgnoreReturnValue
+    public static class HttpResponseSubject extends Subject {
+        private final HttpResponse response;
 
-    public static void assertTempRedirect(@NotNull HttpResponse response, @NotNull String url) {
-        assertResponse(response, HttpResponseStatus.TEMPORARY_REDIRECT, null);
-        assertHeaders(response, HttpConst.LOCATION, url);
-    }
+        public HttpResponseSubject(@NotNull FailureMetadata metadata, @Nullable HttpResponse response) {
+            super(metadata, response);
+            this.response = response;
+        }
 
-    public static void assertPermRedirect(@NotNull HttpResponse response, @NotNull String url) {
-        assertResponse(response, HttpResponseStatus.PERMANENT_REDIRECT, null);
-        assertHeaders(response, HttpConst.LOCATION, url);
-    }
+        private @NotNull HttpResponse response() {
+            Truth.assertThat(response).isNotNull();
+            return response;
+        }
 
-    public static void assert400(@NotNull HttpResponse response) {
-        assert400(response, null);
-    }
+        public @NotNull HttpResponseSubject hasStatus(@NotNull HttpResponseStatus status) {
+            Truth.assertThat(response().status()).isEqualTo(status);
+            return this;
+        }
 
-    public static void assert400(@NotNull HttpResponse response, @Nullable String content) {
-        assertResponse(response, HttpResponseStatus.BAD_REQUEST, content);
-    }
+        public @NotNull HttpResponseSubject is200() {
+            return hasStatus(HttpResponseStatus.OK);
+        }
 
-    public static void assert401(@NotNull HttpResponse response) {
-        assertResponse(response, HttpResponseStatus.UNAUTHORIZED, null);
-    }
+        public @NotNull HttpResponseSubject is400() {
+            return hasStatus(HttpResponseStatus.BAD_REQUEST);
+        }
 
-    public static void assert403(@NotNull HttpResponse response) {
-        assertResponse(response, HttpResponseStatus.FORBIDDEN, null);
-    }
+        public @NotNull HttpResponseSubject is401() {
+            return hasStatus(HttpResponseStatus.UNAUTHORIZED);
+        }
 
-    public static void assert404(@NotNull HttpResponse response) {
-        assert404(response, null);
-    }
+        public @NotNull HttpResponseSubject is403() {
+            return hasStatus(HttpResponseStatus.FORBIDDEN);
+        }
 
-    public static void assert404(@NotNull HttpResponse response, @Nullable String content) {
-        assertResponse(response, HttpResponseStatus.NOT_FOUND, content);
-    }
+        public @NotNull HttpResponseSubject is404() {
+            return hasStatus(HttpResponseStatus.NOT_FOUND);
+        }
 
-    public static void assert500(@NotNull HttpResponse response) {
-        assertResponse(response, HttpResponseStatus.INTERNAL_SERVER_ERROR, null);
-    }
+        public @NotNull HttpResponseSubject is500() {
+            return hasStatus(HttpResponseStatus.INTERNAL_SERVER_ERROR);
+        }
 
-    public static void assert503(@NotNull HttpResponse response) {
-        assertResponse(response, HttpResponseStatus.SERVICE_UNAVAILABLE, null);
-    }
+        public @NotNull HttpResponseSubject is503() {
+            return hasStatus(HttpResponseStatus.SERVICE_UNAVAILABLE);
+        }
 
-    public static void assertResponse(@NotNull HttpResponse response,
-                                      @NotNull HttpResponseStatus status,
-                                      @Nullable String content) {
-        assertResponse(response, HttpVersion.HTTP_1_1, status, content, null);
-    }
+        public @NotNull HttpResponseSubject isTempRedirect(@NotNull String url) {
+            return hasStatus(HttpResponseStatus.TEMPORARY_REDIRECT).hasHeader(HttpConst.LOCATION, url);
+        }
 
-    public static void assertResponse(@Nullable HttpResponse response,
-                                      @NotNull HttpVersion version,
-                                      @NotNull HttpResponseStatus status,
-                                      @Nullable String expectedContent,
-                                      @Nullable HttpHeaders expectedHeaders) {
-        assertThat(response).isNotNull();
-        HttpHeaders headers = (expectedHeaders != null) ? expectedHeaders : response.headers();
+        public @NotNull HttpResponseSubject isPermRedirect(@NotNull String url) {
+            return hasStatus(HttpResponseStatus.PERMANENT_REDIRECT).hasHeader(HttpConst.LOCATION, url);
+        }
 
-        if (response instanceof DefaultFullHttpResponse full) {
-            ByteBuf byteBuf = expectedContent != null ? asByteBuf(expectedContent) : full.content();
-            HttpHeaders trailing = full.trailingHeaders();
-            assertThat(response).isEqualTo(new DefaultFullHttpResponse(version, status, byteBuf, headers, trailing));
-        } else if (response instanceof DefaultHttpResponse) {
-            assertThat(response).isEqualTo(new DefaultHttpResponse(version, status, headers));
-        } else {
-            fail("Unrecognized response: " + response);
+        public @NotNull HttpResponseSubject hasContent(@NotNull String content) {
+            assertByteBuf(content(response()), content);
+            return this;
+        }
+
+        public @NotNull HttpResponseSubject hasContent(@NotNull ByteBuf content) {
+            assertByteBufs(content(response()), content);
+            return this;
+        }
+
+        public @NotNull HttpResponseSubject hasContentWhichContains(@NotNull String @NotNull ... substrings) {
+            String content = content(response()).toString(CHARSET);
+            for (String string : substrings) {
+                Truth.assertThat(content).contains(string);
+            }
+            return this;
+        }
+
+        public @NotNull HttpResponseSubject hasSameContent(@NotNull HttpResponse response) {
+            return hasContent(content(response));
+        }
+
+        public @NotNull HttpResponseSubject hasEmptyContent() {
+            return hasContent("");
+        }
+
+        public @NotNull HttpResponseSubject hasHeadersExactly(@NotNull HttpHeaders headers) {
+            Truth.assertThat(response().headers()).isEqualTo(headers);
+            return this;
+        }
+
+        public @NotNull HttpResponseSubject hasHeader(@NotNull CharSequence key, @NotNull CharSequence value) {
+            Truth.assertThat(response().headers().get(key)).isEqualTo(value.toString());
+            return this;
+        }
+
+        public @NotNull HttpResponseSubject hasContentType(@NotNull CharSequence contentType) {
+            return hasHeader(HttpConst.CONTENT_TYPE, contentType);
+        }
+
+        public @NotNull HttpResponseSubject hasContentLength(int length) {
+            return hasHeader(HttpConst.CONTENT_LENGTH, String.valueOf(length));
         }
     }
 
-    public static void assertHeaders(@NotNull HttpResponse response, @NotNull HttpResponse expected) {
-        assertHeaders(response.headers(), expected.headers());
-    }
-
-    public static void assertHeaders(@NotNull HttpHeaders headers, @NotNull HttpHeaders expected) {
-        assertEquals(expected, headers);
-    }
-
-    public static void assertHeaders(@NotNull HttpResponse response,
-                                     @NotNull CharSequence key,
-                                     @NotNull CharSequence value) {
-        assertEquals(value.toString(), response.headers().get(key));
-    }
-
-    public static void assertHeaders(@NotNull HttpResponse response,
-                                     @NotNull CharSequence key1, @NotNull CharSequence value1,
-                                     @NotNull CharSequence key2, @NotNull CharSequence value2) {
-        assertEquals(value1.toString(), response.headers().get(key1));
-        assertEquals(value2.toString(), response.headers().get(key2));
-    }
-
-    public static void assertContentLength(@NotNull HttpResponse response, int expected) {
-        assertContentLength(response, String.valueOf(expected));
-    }
-
-    public static void assertContentLength(@NotNull HttpResponse response, @NotNull CharSequence expected) {
-        assertHeaders(response, HttpConst.CONTENT_LENGTH, expected);
-    }
-
-    public static void assertContentType(@NotNull HttpResponse response, @NotNull CharSequence expected) {
-        assertHeaders(response, HttpConst.CONTENT_TYPE, expected);
-    }
-
-    public static void assertContent(@NotNull HttpResponse response, @NotNull HttpResponse expected) {
-        assertByteBufs(content(expected), content(response));
-    }
-
-    public static void assertContentContains(@NotNull HttpResponse response, @NotNull String @NotNull ... substrings) {
-        String content = content(response).toString(CHARSET);
-        for (String string : substrings) {
-            assertThat(content).contains(string);
+    private static class HttpResponseSubjectBuilder extends CustomSubjectBuilder {
+        protected HttpResponseSubjectBuilder(FailureMetadata metadata) {
+            super(metadata);
         }
-    }
 
-    public static @NotNull HttpHeaders headersWithoutVolatile(@NotNull HttpResponse response) {
-        return headersWithoutVolatile(response.headers());
-    }
-
-    public static @NotNull HttpHeaders headersWithoutVolatile(@NotNull HttpHeaders headers) {
-        return headers.copy()
-                .remove(HttpConst.SET_COOKIE)
-                .remove(HttpConst.SERVER_TIMING);
+        public @NotNull HttpResponseSubject that(@Nullable HttpResponse response) {
+            return new HttpResponseSubject(metadata(), response);
+        }
     }
 
     public static @NotNull ByteBuf content(@NotNull HttpResponse response) {

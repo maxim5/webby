@@ -3,67 +3,67 @@ package io.webby.demo.hello;
 import io.webby.testing.BaseHttpIntegrationTest;
 import org.junit.jupiter.api.Test;
 
-import static io.webby.testing.AssertResponse.assert200;
+import static io.webby.testing.AssertResponse.assertThat;
 
 public class AcceptQueryIntegrationTest extends BaseHttpIntegrationTest {
     protected final AcceptQuery handler = testSetup(AcceptQuery.class).initHandler();
 
     @Test
     public void get_simple() {
-        assert200(get("/request/query/simple"), "[/request/query/simple] []");
-        assert200(get("/request/query/simple?"), "[/request/query/simple] []");
-        assert200(get("/request/query/simple?key=value"), "[/request/query/simple] [key=value]");
-        assert200(get("/request/query/simple?key="), "[/request/query/simple] [key=]");
-        assert200(get("/request/query/simple?=value"), "[/request/query/simple] [=value]");
+        assertThat(get("/request/query/simple")).is200().hasContent("[/request/query/simple] []");
+        assertThat(get("/request/query/simple?")).is200().hasContent("[/request/query/simple] []");
+        assertThat(get("/request/query/simple?key=value")).is200().hasContent("[/request/query/simple] [key=value]");
+        assertThat(get("/request/query/simple?key=")).is200().hasContent("[/request/query/simple] [key=]");
+        assertThat(get("/request/query/simple?=value")).is200().hasContent("[/request/query/simple] [=value]");
 
-        assert200(get("/request/query/simple#"), "[/request/query/simple] []");
-        assert200(get("/request/query/simple?#"), "[/request/query/simple] [#]");
-        assert200(get("/request/query/simple?#ignore"), "[/request/query/simple] [#ignore]");
-        assert200(get("/request/query/simple?key=value#ignore"), "[/request/query/simple] [key=value#ignore]");
+        assertThat(get("/request/query/simple#")).is200().hasContent("[/request/query/simple] []");
+        assertThat(get("/request/query/simple?#")).is200().hasContent("[/request/query/simple] [#]");
+        assertThat(get("/request/query/simple?#ignore")).is200().hasContent("[/request/query/simple] [#ignore]");
+        assertThat(get("/request/query/simple?key=value#ignore")).is200().hasContent("[/request/query/simple] [key=value#ignore]");
     }
 
     @Test
     public void get_param_simple_empty() {
-        assert200(get("/request/query/param/key"), "[null] <[]>");
-        assert200(get("/request/query/param/key?"), "[null] <[]>");
-        assert200(get("/request/query/param/key?x=y"), "[null] <[]>");
-        assert200(get("/request/query/param/key?x=y&y=x"), "[null] <[]>");
-        assert200(get("/request/query/param/key?x=key"), "[null] <[]>");
-        assert200(get("/request/query/param/key?x=key&y=key"), "[null] <[]>");
+        assertThat(get("/request/query/param/key")).is200().hasContent("[null] <[]>");
+        assertThat(get("/request/query/param/key?")).is200().hasContent("[null] <[]>");
+        assertThat(get("/request/query/param/key?x=y")).is200().hasContent("[null] <[]>");
+        assertThat(get("/request/query/param/key?x=y&y=x")).is200().hasContent("[null] <[]>");
+        assertThat(get("/request/query/param/key?x=key")).is200().hasContent("[null] <[]>");
+        assertThat(get("/request/query/param/key?x=key&y=key")).is200().hasContent("[null] <[]>");
     }
 
     @Test
     public void get_param_simple_one() {
-        assert200(get("/request/query/param/key?key="), "[] <[]>");
-        assert200(get("/request/query/param/key?key=_"), "[_] <[_]>");
-        assert200(get("/request/query/param/key?key=&x=y"), "[] <[]>");
+        assertThat(get("/request/query/param/key?key=")).is200().hasContent("[] <[]>");
+        assertThat(get("/request/query/param/key?key=_")).is200().hasContent("[_] <[_]>");
+        assertThat(get("/request/query/param/key?key=&x=y")).is200().hasContent("[] <[]>");
 
-        assert200(get("/request/query/param/key?key=x"), "[x] <[x]>");
-        assert200(get("/request/query/param/key?key=x&x=key"), "[x] <[x]>");
-        assert200(get("/request/query/param/key?x=key&key=x"), "[x] <[x]>");
-        assert200(get("/request/query/param/key?x=key&key=x&"), "[x] <[x]>");
+        assertThat(get("/request/query/param/key?key=x")).is200().hasContent("[x] <[x]>");
+        assertThat(get("/request/query/param/key?key=x&x=key")).is200().hasContent("[x] <[x]>");
+        assertThat(get("/request/query/param/key?x=key&key=x")).is200().hasContent("[x] <[x]>");
+        assertThat(get("/request/query/param/key?x=key&key=x&")).is200().hasContent("[x] <[x]>");
     }
 
     @Test
     public void get_param_simple_one_case_sensitive() {
-        assert200(get("/request/query/param/key?Key=x"), "[null] <[]>");
-        assert200(get("/request/query/param/key?KEY=x"), "[null] <[]>");
+        assertThat(get("/request/query/param/key?Key=x")).is200().hasContent("[null] <[]>");
+        assertThat(get("/request/query/param/key?KEY=x")).is200().hasContent("[null] <[]>");
     }
 
     @Test
     public void get_param_simple_one_with_hash() {
-        assert200(get("/request/query/param/key?key=#"), "[] <[]>");
-        assert200(get("/request/query/param/key?key=_#ignore"), "[_] <[_]>");
-        assert200(get("/request/query/param/key?key=&x=y#key=value"), "[] <[]>");
+        assertThat(get("/request/query/param/key?key=#")).is200().hasContent("[] <[]>");
+        assertThat(get("/request/query/param/key?key=_#ignore")).is200().hasContent("[_] <[_]>");
+        assertThat(get("/request/query/param/key?key=&x=y#key=value")).is200().hasContent("[] <[]>");
     }
 
     @Test
     public void get_param_simple_multiple() {
-        assert200(get("/request/query/param/key?key=&key="), "[] <[, ]>");
-        assert200(get("/request/query/param/key?key=_&key=_"), "[_] <[_, _]>");
-        assert200(get("/request/query/param/key?key=a&key=b"), "[a] <[a, b]>");
-        assert200(get("/request/query/param/key?key=b&key=a"), "[b] <[b, a]>");
-        assert200(get("/request/query/param/key?key=a&key="), "[a] <[a, ]>");
-        assert200(get("/request/query/param/key?key=&key=a"), "[] <[, a]>");
+        assertThat(get("/request/query/param/key?key=&key=")).is200().hasContent("[] <[, ]>");
+        assertThat(get("/request/query/param/key?key=_&key=_")).is200().hasContent("[_] <[_, _]>");
+        assertThat(get("/request/query/param/key?key=a&key=b")).is200().hasContent("[a] <[a, b]>");
+        assertThat(get("/request/query/param/key?key=b&key=a")).is200().hasContent("[b] <[b, a]>");
+        assertThat(get("/request/query/param/key?key=a&key=")).is200().hasContent("[a] <[a, ]>");
+        assertThat(get("/request/query/param/key?key=&key=a")).is200().hasContent("[] <[, a]>");
     }
 }

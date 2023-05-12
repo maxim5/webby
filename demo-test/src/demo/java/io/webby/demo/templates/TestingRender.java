@@ -10,8 +10,7 @@ import org.jetbrains.annotations.NotNull;
 
 import java.util.function.Consumer;
 
-import static io.webby.testing.AssertResponse.assertHeaders;
-import static io.webby.testing.AssertResponse.headersWithoutVolatile;
+import static com.google.common.truth.Truth.assertThat;
 import static io.webby.testing.AssertStats.assertNoStatsHeaders;
 import static io.webby.testing.AssertStats.assertStatsHeader;
 
@@ -63,6 +62,16 @@ public class TestingRender {
         if (currentConfig() == Config.StreamingEnabled) {
             manualHeaders.remove(HttpConst.CONTENT_LENGTH);
         }
-        assertHeaders(renderedHeaders, manualHeaders);
+        assertThat(renderedHeaders).isEqualTo(manualHeaders);
+    }
+
+    public static @NotNull HttpHeaders headersWithoutVolatile(@NotNull HttpResponse response) {
+        return headersWithoutVolatile(response.headers());
+    }
+
+    public static @NotNull HttpHeaders headersWithoutVolatile(@NotNull HttpHeaders headers) {
+        return headers.copy()
+            .remove(HttpConst.SET_COOKIE)
+            .remove(HttpConst.SERVER_TIMING);
     }
 }

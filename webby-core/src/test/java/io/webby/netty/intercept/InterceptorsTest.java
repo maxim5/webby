@@ -13,10 +13,7 @@ import io.webby.url.impl.Endpoint;
 import org.jetbrains.annotations.NotNull;
 import org.junit.jupiter.api.Test;
 
-import static com.google.common.truth.Truth.assertThat;
-import static io.webby.testing.AssertResponse.assert404;
-import static io.webby.testing.AssertResponse.assert500;
-import static org.junit.jupiter.api.Assertions.assertNull;
+import static io.webby.testing.AssertResponse.assertThat;
 
 public class InterceptorsTest {
     private final DefaultHttpRequestEx request = HttpRequestBuilder.get("/foo").ex();
@@ -28,7 +25,7 @@ public class InterceptorsTest {
     public void enter_called_in_order() {
         Interceptors interceptors = getInterceptors(factory.spawn(111), factory.spawn(222));
         HttpResponse response = interceptors.enter(request, endpoint);
-        assertNull(response);
+        assertThat(response).isNull();
         factory.assertEvents().containsExactly("111:enter", "222:enter");
     }
 
@@ -60,7 +57,7 @@ public class InterceptorsTest {
         Interceptors interceptors = getInterceptors(factory.spawn(111), factory.share(failing), factory.spawn(222));
 
         HttpResponse response = interceptors.process(request, endpoint, () -> defaultResponse);
-        assert404(response);
+        assertThat(response).is404();
         factory.assertEvents().containsExactly("111:enter", "0:enter:FAIL",
                                                "222:cleanup", "0:cleanup", "111:cleanup");
     }
@@ -71,7 +68,7 @@ public class InterceptorsTest {
         Interceptors interceptors = getInterceptors(factory.spawn(111), factory.share(failing), factory.spawn(222));
 
         HttpResponse response = interceptors.process(request, endpoint, () -> defaultResponse);
-        assert500(response);
+        assertThat(response).is500();
         factory.assertEvents().containsExactly("111:enter", "0:enter:FAIL",
                                                "222:cleanup", "0:cleanup", "111:cleanup");
     }
@@ -82,7 +79,7 @@ public class InterceptorsTest {
         Interceptors interceptors = getInterceptors(factory.spawn(111), factory.share(failing), factory.spawn(222));
 
         HttpResponse response = interceptors.process(request, endpoint, () -> defaultResponse);
-        assert500(response);
+        assertThat(response).is500();
         factory.assertEvents().containsExactly("111:enter", "0:enter", "222:enter",
                                                "222:exit", "0:exit:FAIL",
                                                "222:cleanup", "0:cleanup", "111:cleanup");
@@ -107,7 +104,7 @@ public class InterceptorsTest {
         Interceptors interceptors = getInterceptors(factory.spawn(111), factory.share(failing), factory.spawn(222));
 
         HttpResponse response = interceptors.process(request, endpoint, () -> defaultResponse);
-        assert404(response);
+        assertThat(response).is404();
         factory.assertEvents().containsExactly("111:enter", "0:enter:FAIL",
                                                "222:cleanup", "0:cleanup:FAIL", "111:cleanup");
     }
@@ -120,7 +117,7 @@ public class InterceptorsTest {
         Interceptors interceptors = getInterceptors(factory.spawn(111), factory.share(failing), factory.spawn(222));
 
         HttpResponse response = interceptors.process(request, endpoint, () -> defaultResponse);
-        assert500(response);
+        assertThat(response).is500();
         factory.assertEvents().containsExactly("111:enter", "0:enter:FAIL",
                                                "222:cleanup", "0:cleanup:FAIL", "111:cleanup");
     }
@@ -133,7 +130,7 @@ public class InterceptorsTest {
         Interceptors interceptors = getInterceptors(factory.spawn(111), factory.share(failing), factory.spawn(222));
 
         HttpResponse response = interceptors.process(request, endpoint, () -> defaultResponse);
-        assert500(response);
+        assertThat(response).is500();
         factory.assertEvents().containsExactly("111:enter", "0:enter", "222:enter",
                                                "222:exit", "0:exit:FAIL",
                                                "222:cleanup", "0:cleanup:FAIL", "111:cleanup");

@@ -3,28 +3,29 @@ package io.webby.demo.hello;
 import io.webby.testing.BaseHttpIntegrationTest;
 import org.junit.jupiter.api.Test;
 
-import static io.webby.testing.AssertResponse.*;
+import static io.webby.testing.AssertResponse.assertThat;
 
 public class AcceptContentIntegrationTest extends BaseHttpIntegrationTest {
     protected final AcceptContent handler = testSetup(AcceptContent.class).initHandler();
 
     @Test
     public void post_no_content() {
-        assert404(post("/"));
+        assertThat(post("/")).is404();
 
-        assert200(post("/int/10"), "{}");
-        assert400(post("/int/0"));
-        assert400(post("/int/-1"));
-        assert400(post("/int/foo"));
+        assertThat(post("/int/10")).is200().hasContent("{}");
+        assertThat(post("/int/0")).is400();
+        assertThat(post("/int/-1")).is400();
+        assertThat(post("/int/foo")).is400();
     }
 
     @Test
     public void post_content_object() {
-        assert200(post("/string/foo/10", new int[] {1, 2, 3}), "Vars: str=foo y=10 content=<[1.0, 2.0, 3.0]>");
+        assertThat(post("/string/foo/10", new int[] {1, 2, 3})).is200()
+            .hasContent("Vars: str=foo y=10 content=<[1.0, 2.0, 3.0]>");
     }
 
     @Test
     public void post_bytebuf() {
-        assert200(post("/content/bytebuf", "foobar".getBytes()), "len=6");
+        assertThat(post("/content/bytebuf", "foobar".getBytes())).is200().hasContent("len=6");
     }
 }
