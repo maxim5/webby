@@ -5,7 +5,7 @@ import io.netty.handler.codec.http.HttpObjectDecoder;
 import io.webby.app.Settings;
 import org.jetbrains.annotations.NotNull;
 
-public class NettyConst {
+class NettyConst {
     public final int masterThreads;
     public final int workerThreads;
     public final int maxInitLineLength;

@@ -38,7 +38,7 @@ import java.util.Optional;
 import java.util.logging.Level;
 import java.util.stream.Collectors;
 
-public class NettyDispatcher extends ChannelInboundHandlerAdapter {
+class NettyDispatcher extends ChannelInboundHandlerAdapter {
     private static final FluentLogger log = FluentLogger.forEnclosingClass();
 
     private static final String PROTOCOL = "io.webby";
@@ -55,6 +55,7 @@ public class NettyDispatcher extends ChannelInboundHandlerAdapter {
 
     @Override
     public void handlerAdded(@NotNull ChannelHandlerContext context) {
+        assert pipeline == null : "%s is not sharable: can't be added to multiple contexts".formatted(this);
         pipeline = context.pipeline();
     }
 
@@ -80,7 +81,7 @@ public class NettyDispatcher extends ChannelInboundHandlerAdapter {
                 pipeline.addLast(httpHandler.get());
             }
 
-            pipeline.remove(NettyDispatcher.class);
+            pipeline.remove(NettyDispatcher.class);  // remove self
 
             log.at(Level.FINER).log("New channel pipeline: %s", pipeline.names());
         } else if (message instanceof WebSocketFrame frame) {
