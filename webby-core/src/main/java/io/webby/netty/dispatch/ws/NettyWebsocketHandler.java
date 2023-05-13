@@ -2,6 +2,7 @@ package io.webby.netty.dispatch.ws;
 
 import com.google.common.flogger.FluentLogger;
 import com.google.inject.Inject;
+import com.google.inject.assistedinject.Assisted;
 import io.netty.channel.ChannelHandlerContext;
 import io.netty.channel.ChannelInboundHandlerAdapter;
 import io.netty.handler.codec.http.websocketx.WebSocketFrame;
@@ -27,7 +28,8 @@ public class NettyWebsocketHandler extends ChannelInboundHandlerAdapter {
 
     @Inject private FrameMapper mapper;
 
-    public NettyWebsocketHandler(@NotNull AgentEndpoint endpoint, @NotNull ClientInfo clientInfo) {
+    @Inject
+    public NettyWebsocketHandler(@Assisted @NotNull AgentEndpoint endpoint, @Assisted @NotNull ClientInfo clientInfo) {
         this.endpoint = endpoint;
         this.clientInfo = clientInfo;
         this.lifecycle = endpoint.lifecycle();
@@ -122,5 +124,9 @@ public class NettyWebsocketHandler extends ChannelInboundHandlerAdapter {
 
     private static void cleanupWorkingThread() {
         ThreadLocalConnector.cleanupIfNecessary();
+    }
+
+    public interface Factory {
+        @NotNull NettyWebsocketHandler create(@NotNull AgentEndpoint endpoint, @NotNull ClientInfo clientInfo);
     }
 }

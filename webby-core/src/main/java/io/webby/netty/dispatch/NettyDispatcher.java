@@ -16,7 +16,6 @@ import io.webby.auth.session.Session;
 import io.webby.auth.session.SessionManager;
 import io.webby.auth.user.UserModel;
 import io.webby.auth.user.UserStore;
-import io.webby.common.InjectorHelper;
 import io.webby.netty.dispatch.http.NettyHttpHandler;
 import io.webby.netty.dispatch.ws.NettyWebsocketHandler;
 import io.webby.netty.errors.ServeException;
@@ -43,10 +42,10 @@ class NettyDispatcher extends ChannelInboundHandlerAdapter {
 
     private static final String PROTOCOL = "io.webby";
 
-    @Inject private InjectorHelper helper;
     @Inject private NettyConst nc;
     @Inject private WebsocketRouter websocketRouter;
-    @Inject private Provider<NettyHttpHandler> httpHandler;
+    @Inject private Provider<NettyHttpHandler> httpHandlers;
+    @Inject private NettyWebsocketHandler.Factory websocketHandlers;
     @Inject private HttpResponseFactory responses;
     @Inject private SessionManager sessionManager;
     @Inject private UserStore users;
@@ -73,12 +72,12 @@ class NettyDispatcher extends ChannelInboundHandlerAdapter {
                 pipeline.addLast(new HttpObjectAggregator(nc.maxContentLength));
                 pipeline.addLast(new WebSocketServerCompressionHandler());
                 pipeline.addLast(new WebSocketServerProtocolHandler(uri, PROTOCOL, true));
-                pipeline.addLast(helper.injectMembers(new NettyWebsocketHandler(endpoint, clientInfo)));
+                pipeline.addLast(websocketHandlers.create(endpoint, clientInfo));
             } else {
                 log.at(Level.FINER).log("Migrating channel to default HTTP: %s", uri);
                 pipeline.addLast(new HttpObjectAggregator(nc.maxContentLength));
                 pipeline.addLast(new ChunkedWriteHandler());
-                pipeline.addLast(httpHandler.get());
+                pipeline.addLast(httpHandlers.get());
             }
 
             pipeline.remove(NettyDispatcher.class);  // remove self
