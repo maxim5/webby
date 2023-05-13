@@ -9,7 +9,7 @@ import io.netty.handler.codec.http.HttpObject;
 import io.netty.handler.codec.http.HttpResponse;
 import io.netty.handler.stream.ChunkedWriteHandler;
 import io.webby.app.AppSettings;
-import io.webby.netty.NettyHttpHandler;
+import io.webby.netty.dispatch.http.NettyHttpHandler;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 

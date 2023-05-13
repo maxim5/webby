@@ -1,11 +1,11 @@
-package io.webby.netty;
+package io.webby.netty.dispatch;
 
 import com.google.inject.Inject;
 import io.netty.handler.codec.http.HttpObjectDecoder;
 import io.webby.app.Settings;
 import org.jetbrains.annotations.NotNull;
 
-class NettyConst {
+public class NettyConst {
     public final int masterThreads;
     public final int workerThreads;
     public final int maxInitLineLength;

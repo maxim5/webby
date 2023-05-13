@@ -11,7 +11,7 @@ import io.netty.handler.codec.http.websocketx.TextWebSocketFrame;
 import io.netty.handler.codec.http.websocketx.WebSocketFrame;
 import io.netty.handler.codec.http.websocketx.WebSocketServerProtocolHandler.HandshakeComplete;
 import io.webby.app.AppSettings;
-import io.webby.netty.NettyWebsocketHandler;
+import io.webby.netty.dispatch.ws.NettyWebsocketHandler;
 import io.webby.url.annotate.FrameType;
 import io.webby.url.annotate.Marshal;
 import io.webby.util.base.Unchecked;

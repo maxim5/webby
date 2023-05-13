@@ -1,4 +1,4 @@
-package io.webby.netty;
+package io.webby.netty.dispatch;
 
 import org.junit.jupiter.api.Test;
 

@@ -1,4 +1,4 @@
-package io.webby.netty;
+package io.webby.netty.dispatch.http;
 
 import com.google.inject.Injector;
 import io.webby.app.AppSettings;
@@ -7,12 +7,12 @@ import org.junit.jupiter.api.Test;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
-public class NettyHttpHandlerTest {
+public class NettyHttpStepNavigatorTest {
     private final Injector injector = Testing.testStartup();
-    private final NettyHttpHandler handler = injector.getInstance(NettyHttpHandler.class);
+    private final NettyHttpStepNavigator handler = injector.getInstance(NettyHttpStepNavigator.class);
 
     @Test
-    public void extractPath() {
+    public void extractPath_simple() {
         assertEquals("", handler.extractPath("").toString());
         assertEquals("foo", handler.extractPath("foo").toString());
         assertEquals("foo-bar", handler.extractPath("foo-bar").toString());

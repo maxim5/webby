@@ -1,4 +1,4 @@
-package io.webby.netty;
+package io.webby.netty.dispatch;
 
 import com.google.common.flogger.FluentLogger;
 import com.google.inject.Inject;
@@ -14,9 +14,11 @@ import io.netty.handler.codec.http.websocketx.extensions.compression.WebSocketSe
 import io.netty.handler.stream.ChunkedWriteHandler;
 import io.webby.auth.session.Session;
 import io.webby.auth.session.SessionManager;
-import io.webby.auth.user.UserStore;
 import io.webby.auth.user.UserModel;
+import io.webby.auth.user.UserStore;
 import io.webby.common.InjectorHelper;
+import io.webby.netty.dispatch.http.NettyHttpHandler;
+import io.webby.netty.dispatch.ws.NettyWebsocketHandler;
 import io.webby.netty.errors.ServeException;
 import io.webby.netty.request.QueryParams;
 import io.webby.netty.response.HttpResponseFactory;
@@ -45,7 +47,7 @@ public class NettyDispatcher extends ChannelInboundHandlerAdapter {
     @Inject private NettyConst nc;
     @Inject private WebsocketRouter websocketRouter;
     @Inject private Provider<NettyHttpHandler> httpHandler;
-    @Inject private HttpResponseFactory factory;
+    @Inject private HttpResponseFactory responses;
     @Inject private SessionManager sessionManager;
     @Inject private UserStore users;
 
@@ -98,13 +100,13 @@ public class NettyDispatcher extends ChannelInboundHandlerAdapter {
             String replyError = clientDeniedException.getReplyError();
             log.at(Level.WARNING).withCause(cause).log("Client denied: %s", replyError);
             if (replyError != null) {
-                response = factory.newErrorResponse(HttpResponseStatus.BAD_REQUEST, replyError, cause);
+                response = responses.newErrorResponse(HttpResponseStatus.BAD_REQUEST, replyError, cause);
             }
         } else if (cause instanceof ServeException serveException) {
-            response = factory.handleServeException(serveException, "Dispatcher");
+            response = responses.handleServeException(serveException, "Dispatcher");
         } else {
             log.at(Level.SEVERE).withCause(cause).log("Unexpected failure: %s", cause.getMessage());
-            response = factory.newResponse500("Unexpected failure", cause);
+            response = responses.newResponse500("Unexpected failure", cause);
         }
 
         if (response != null) {
