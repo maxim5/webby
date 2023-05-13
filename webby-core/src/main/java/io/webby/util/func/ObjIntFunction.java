@@ -12,9 +12,10 @@ import java.util.function.BiFunction;
  * @see java.util.function.Function
  * @see java.util.function.BiFunction
  * @see java.util.function.IntFunction
+ * @see java.util.function.ObjIntConsumer
  */
 @FunctionalInterface
-public interface ObjIntBiFunction<T, R> extends BiFunction<T, Integer, R> {
+public interface ObjIntFunction<T, R> extends BiFunction<T, Integer, R> {
     /**
      * Applies this function to the given arguments.
      *
