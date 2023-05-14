@@ -23,7 +23,6 @@ import static com.google.common.truth.Truth.assertThat;
 import static io.webby.testing.OkAsserts.*;
 import static io.webby.testing.OkRequests.files;
 import static io.webby.testing.OkRequests.json;
-import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.fail;
 
 @Tag("slow")
@@ -130,8 +129,18 @@ public class StandaloneNettyIntegrationTest {
             ws.send("foo");
             ws.send(new ByteString("bar".getBytes()));
         });
-        assertNull(listener.error());
+        assertThat(listener.error()).isNull();
         assertThat(listener.messages()).containsExactly("Ack foo");
+    }
+
+    @Test
+    public void websocket_with_context() {
+        DefaultWebSocketListener listener = new DefaultWebSocketListener();
+        websocketSession(Ok.websocket("/ws/ll/accept/context"), listener, ws -> {
+            ws.send("foo");
+        });
+        assertThat(listener.error()).isNull();
+        assertThat(listener.messages()).containsExactly("Ack foo null");
     }
 
     private static void call(@NotNull Request request, @NotNull ThrowConsumer<Response, IOException> onSuccess) {
