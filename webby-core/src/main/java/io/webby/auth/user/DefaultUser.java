@@ -4,6 +4,7 @@ import io.webby.orm.api.annotate.Model;
 import org.jetbrains.annotations.NotNull;
 
 import java.time.Instant;
+import java.time.temporal.ChronoUnit;
 import java.util.Objects;
 
 @Model(exposeAs = UserModel.class, javaName = "User")
@@ -13,8 +14,8 @@ public class DefaultUser implements UserModel {
     private final UserAccess access;
 
     public DefaultUser(int userId, @NotNull Instant createdAt, @NotNull UserAccess access) {
-        this.createdAt = createdAt;
         assert userId == AUTO_ID || userId > 0: "Invalid userId=%d".formatted(userId);
+        this.createdAt = createdAt.truncatedTo(ChronoUnit.MILLIS);
         this.userId = userId;
         this.access = access;
     }

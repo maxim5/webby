@@ -10,6 +10,7 @@ import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
 import java.time.Instant;
+import java.time.temporal.ChronoUnit;
 import java.util.Objects;
 
 public record Session(long sessionId,
@@ -23,7 +24,7 @@ public record Session(long sessionId,
         HttpHeaders headers = request.headers();
         String userAgent = headers.get(HttpConst.USER_AGENT, "");
         String ipAddress = request.remoteIPAddress();
-        return new Session(sessionId, ForeignInt.empty(), Instant.now(), userAgent, ipAddress);
+        return new Session(sessionId, ForeignInt.empty(), Instant.now().truncatedTo(ChronoUnit.MILLIS), userAgent, ipAddress);
     }
 
     public int userId() {

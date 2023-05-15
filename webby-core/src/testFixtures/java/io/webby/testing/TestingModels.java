@@ -8,7 +8,6 @@ import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
 import java.time.Instant;
-import java.time.temporal.ChronoUnit;
 
 import static com.google.common.truth.Truth.assertThat;
 
@@ -30,7 +29,7 @@ public class TestingModels {
     }
 
     public static @NotNull DefaultUser newUserFixMillis(int userId, @NotNull Instant createdAt) {
-        return newUser(userId, createdAt.truncatedTo(ChronoUnit.MILLIS), UserAccess.Simple);
+        return newUser(userId, createdAt, UserAccess.Simple);
     }
 
     public static @NotNull DefaultUser newUser(int userId, @NotNull Instant createdAt, @NotNull UserAccess access) {
@@ -54,7 +53,7 @@ public class TestingModels {
     }
 
     public static @NotNull Session newSessionFixMillis(long sessionId, @NotNull Instant instant) {
-        return newSession(sessionId, instant.truncatedTo(ChronoUnit.MILLIS), "127.0.0.1");
+        return newSession(sessionId, instant, "127.0.0.1");
     }
 
     public static @NotNull Session newSession(long sessionId, @NotNull Instant instant, @Nullable String ipAddress) {
@@ -62,19 +61,6 @@ public class TestingModels {
     }
 
     public static void assertSameSession(@Nullable Session actual, @Nullable Session expected) {
-        if (expected == null) {
-            assertThat(actual).isNull();
-        } else {
-            assertThat(actual).isNotNull();
-            assertThat(fixCreationTime(actual)).isEqualTo(fixCreationTime(expected));
-        }
-    }
-
-    public static @NotNull Session fixCreationTime(@NotNull Session session) {
-        return new Session(session.sessionId(),
-                           session.user(),
-                           session.createdAt().truncatedTo(ChronoUnit.MILLIS),
-                           session.userAgent(),
-                           session.ipAddress());
+        assertThat(actual).isEqualTo(expected);
     }
 }
