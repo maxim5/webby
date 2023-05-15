@@ -10,6 +10,8 @@ import org.jetbrains.annotations.Nullable;
 import java.time.Instant;
 import java.time.temporal.ChronoUnit;
 
+import static com.google.common.truth.Truth.assertThat;
+
 public class TestingModels {
     public static @NotNull DefaultUser newUserNow(int userId) {
         return newUserNow(userId, UserAccess.Simple);
@@ -57,5 +59,17 @@ public class TestingModels {
 
     public static @NotNull Session newSession(long sessionId, @NotNull Instant instant, @Nullable String ipAddress) {
         return new Session(sessionId, ForeignInt.empty(), instant, "User-Agent", ipAddress);
+    }
+
+    public static void assertSameSession(@NotNull Session actual, @NotNull Session expected) {
+        assertThat(fixCreationTime(actual)).isEqualTo(fixCreationTime(expected));
+    }
+
+    public static @NotNull Session fixCreationTime(@NotNull Session session) {
+        return new Session(session.sessionId(),
+                           session.user(),
+                           session.createdAt().truncatedTo(ChronoUnit.MILLIS),
+                           session.userAgent(),
+                           session.ipAddress());
     }
 }

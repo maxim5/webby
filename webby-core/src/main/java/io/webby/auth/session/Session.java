@@ -10,6 +10,7 @@ import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
 import java.time.Instant;
+import java.util.Objects;
 
 public record Session(long sessionId,
                       @NotNull @Sql.Null ForeignInt<UserModel> user,
@@ -35,5 +36,23 @@ public record Session(long sessionId,
 
     public @NotNull Session withUser(@NotNull UserModel user) {
         return new Session(sessionId, ForeignInt.ofEntity(user.userId(), user), createdAt, userAgent, ipAddress);
+    }
+
+    public @NotNull Session withSessionId(long sessionId) {
+        return new Session(sessionId, user, createdAt, userAgent, ipAddress);
+    }
+
+    @Override
+    public boolean equals(Object obj) {
+        return obj instanceof Session that &&
+            sessionId == that.sessionId &&
+            createdAt.equals(that.createdAt) &&
+            userAgent.equals(that.userAgent) &&
+            Objects.equals(ipAddress, that.ipAddress);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(sessionId, user.getFk(), createdAt, userAgent, ipAddress);
     }
 }

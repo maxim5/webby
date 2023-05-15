@@ -39,9 +39,11 @@ public class DefaultUser implements UserModel {
     }
 
     @Override
-    public boolean equals(Object o) {
-        return o instanceof UserModel that && userId == that.userId() &&
-               createdAt.equals(that.createdAt()) && access.equals(that.access());
+    public boolean equals(Object obj) {
+        return obj instanceof UserModel that &&
+            userId == that.userId() &&
+            createdAt.equals(that.createdAt()) &&
+            access.equals(that.access());
     }
 
     @Override
