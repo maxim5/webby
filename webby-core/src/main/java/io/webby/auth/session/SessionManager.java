@@ -6,13 +6,7 @@ import com.google.inject.Inject;
 import io.netty.handler.codec.http.cookie.Cookie;
 import io.webby.app.Settings;
 import io.webby.auth.user.UserModel;
-import io.webby.db.kv.DbOptions;
-import io.webby.db.kv.KeyValueAutoRetryInserter;
-import io.webby.db.kv.KeyValueDb;
-import io.webby.db.kv.KeyValueFactory;
-import io.webby.db.model.LongIdGenerator;
 import io.webby.netty.request.HttpRequestEx;
-import io.webby.util.collect.Pair;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import org.jetbrains.annotations.VisibleForTesting;
@@ -21,7 +15,6 @@ import javax.crypto.Cipher;
 import javax.crypto.spec.SecretKeySpec;
 import java.security.GeneralSecurityException;
 import java.security.Key;
-import java.security.SecureRandom;
 import java.util.Arrays;
 import java.util.Base64;
 import java.util.logging.Level;
@@ -33,13 +26,10 @@ public class SessionManager {
 
     private final Cipher cipher;
     private final Cipher decipher;
-    private final KeyValueDb<Long, Session> db;
-    private final KeyValueAutoRetryInserter<Long, Session> inserter;
+    private final SessionStore store;
 
     @Inject
-    public SessionManager(@NotNull Settings settings, @NotNull KeyValueFactory factory) throws Exception {
-        int maxAttempts = settings.getIntProperty("session.id.generator.max.attempts", 5);
-
+    public SessionManager(@NotNull Settings settings, @NotNull SessionStore store) throws Exception {
         cipher = Cipher.getInstance("AES");
         decipher = Cipher.getInstance("AES");
 
@@ -47,9 +37,7 @@ public class SessionManager {
         cipher.init(Cipher.ENCRYPT_MODE, key);
         decipher.init(Cipher.DECRYPT_MODE, key);
 
-        LongIdGenerator generator = LongIdGenerator.securePositiveRandom(SecureRandom.getInstance("SHA1PRNG"));
-        db = factory.getDb(DbOptions.of(Session.DB_NAME, Long.class, Session.class));
-        inserter = new KeyValueAutoRetryInserter<>(db, generator, maxAttempts);
+        this.store = store;
     }
 
     public @NotNull Session getOrCreateSession(@NotNull HttpRequestEx request, @Nullable Cookie cookie) {
@@ -70,7 +58,7 @@ public class SessionManager {
         }
         try {
             long sessionId = decodeSessionId(cookieValue);
-            return db.get(sessionId);
+            return store.getSessionByIdOrNull(sessionId);
         } catch (Throwable throwable) {
             log.at(Level.WARNING).withCause(throwable).log("Failed to decode a cookie: %s", cookieValue);
             return null;
@@ -78,14 +66,13 @@ public class SessionManager {
     }
 
     public @NotNull Session createNewSession(@NotNull HttpRequestEx request) {
-        Pair<Long, Session> inserted = inserter.insertOrDie(sessionId -> Session.fromRequest(sessionId, request));
-        return inserted.second();
+        return store.createSessionAutoId(request);
     }
 
     public @NotNull Session addUserOrDie(@NotNull Session session, @NotNull UserModel user) {
         assert !session.hasUser() : "Session already has a user: session=%s user=%s".formatted(session, user);
         Session newSession = session.withUser(user);
-        db.set(newSession.sessionId(), newSession);
+        store.updateSessionById(newSession);
         return newSession;
     }
 
