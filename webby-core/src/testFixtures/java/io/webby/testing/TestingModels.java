@@ -61,8 +61,13 @@ public class TestingModels {
         return new Session(sessionId, ForeignInt.empty(), instant, "User-Agent", ipAddress);
     }
 
-    public static void assertSameSession(@NotNull Session actual, @NotNull Session expected) {
-        assertThat(fixCreationTime(actual)).isEqualTo(fixCreationTime(expected));
+    public static void assertSameSession(@Nullable Session actual, @Nullable Session expected) {
+        if (expected == null) {
+            assertThat(actual).isNull();
+        } else {
+            assertThat(actual).isNotNull();
+            assertThat(fixCreationTime(actual)).isEqualTo(fixCreationTime(expected));
+        }
     }
 
     public static @NotNull Session fixCreationTime(@NotNull Session session) {

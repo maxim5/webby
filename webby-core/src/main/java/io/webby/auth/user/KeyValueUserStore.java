@@ -21,7 +21,7 @@ public class KeyValueUserStore implements UserStore {
     public KeyValueUserStore(@NotNull Settings settings,
                              @NotNull Class<? extends UserModel> userClass,
                              @NotNull KeyValueFactory dbFactory) {
-        boolean randomIds = settings.getBoolProperty("user.id.generator.random.enabled");
+        boolean randomIds = settings.getBoolProperty("user.id.generator.random.enabled", true);
         int maxAttempts = settings.getIntProperty("user.id.generator.max.attempts", 5);
         db = castAny(dbFactory.getDb(DbOptions.of(UserModel.DB_NAME, Integer.class, userClass)));
         IntIdGenerator generator = randomIds ? IntIdGenerator.random(null) : IntIdGenerator.autoIncrement(() -> db.size() + 1);
