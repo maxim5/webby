@@ -7,10 +7,12 @@ import io.netty.handler.codec.http.cookie.Cookie;
 import io.webby.app.Settings;
 import io.webby.auth.user.UserModel;
 import io.webby.db.kv.DbOptions;
+import io.webby.db.kv.KeyValueAutoRetryInserter;
 import io.webby.db.kv.KeyValueDb;
 import io.webby.db.kv.KeyValueFactory;
 import io.webby.db.model.LongIdGenerator;
 import io.webby.netty.request.HttpRequestEx;
+import io.webby.util.collect.Pair;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import org.jetbrains.annotations.VisibleForTesting;
@@ -31,11 +33,13 @@ public class SessionManager {
 
     private final Cipher cipher;
     private final Cipher decipher;
-    private final LongIdGenerator generator;
     private final KeyValueDb<Long, Session> db;
+    private final KeyValueAutoRetryInserter<Long, Session> inserter;
 
     @Inject
     public SessionManager(@NotNull Settings settings, @NotNull KeyValueFactory factory) throws Exception {
+        int maxAttempts = settings.getIntProperty("session.id.generator.max.attempts", 5);
+
         cipher = Cipher.getInstance("AES");
         decipher = Cipher.getInstance("AES");
 
@@ -43,8 +47,9 @@ public class SessionManager {
         cipher.init(Cipher.ENCRYPT_MODE, key);
         decipher.init(Cipher.DECRYPT_MODE, key);
 
-        generator = LongIdGenerator.securePositiveRandom(SecureRandom.getInstance("SHA1PRNG"));
+        LongIdGenerator generator = LongIdGenerator.securePositiveRandom(SecureRandom.getInstance("SHA1PRNG"));
         db = factory.getDb(DbOptions.of(Session.DB_NAME, Long.class, Session.class));
+        inserter = new KeyValueAutoRetryInserter<>(db, generator, maxAttempts);
     }
 
     public @NotNull Session getOrCreateSession(@NotNull HttpRequestEx request, @Nullable Cookie cookie) {
@@ -73,10 +78,8 @@ public class SessionManager {
     }
 
     public @NotNull Session createNewSession(@NotNull HttpRequestEx request) {
-        long sessionId = generator.nextId();
-        Session session = Session.fromRequest(sessionId, request);
-        db.set(sessionId, session);
-        return session;
+        Pair<Long, Session> inserted = inserter.insertOrDie(sessionId -> Session.fromRequest(sessionId, request));
+        return inserted.second();
     }
 
     public @NotNull Session addUserOrDie(@NotNull Session session, @NotNull UserModel user) {
