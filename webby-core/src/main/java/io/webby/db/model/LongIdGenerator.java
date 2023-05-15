@@ -6,9 +6,15 @@ import org.jetbrains.annotations.Nullable;
 import java.security.SecureRandom;
 import java.util.Random;
 import java.util.function.LongSupplier;
+import java.util.function.Supplier;
 
-public interface LongIdGenerator {
+public interface LongIdGenerator extends Supplier<Long> {
     long nextId();
+
+    @Override
+    default @NotNull Long get() {
+        return nextId();
+    }
 
     static LongIdGenerator autoIncrement(@NotNull LongSupplier sizeSupplier) {
         return () -> sizeSupplier.getAsLong() + 1;
