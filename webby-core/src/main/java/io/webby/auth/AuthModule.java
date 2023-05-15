@@ -3,10 +3,7 @@ package io.webby.auth;
 import com.google.inject.AbstractModule;
 import com.google.inject.Provides;
 import io.webby.app.AppSettings;
-import io.webby.auth.session.KeyValueSessionStore;
-import io.webby.auth.session.SessionInterceptor;
-import io.webby.auth.session.SessionManager;
-import io.webby.auth.session.SessionStore;
+import io.webby.auth.session.*;
 import io.webby.auth.user.*;
 import org.jetbrains.annotations.NotNull;
 
@@ -19,13 +16,14 @@ public class AuthModule extends AbstractModule {
 
     @Override
     protected void configure() {
+        boolean isSqlEnabled = settings.storageSettings().isSqlEnabled();
+
         bind(AuthInterceptor.class).asEagerSingleton();
         bind(SessionInterceptor.class).asEagerSingleton();
 
-        bind(SessionStore.class).to(KeyValueSessionStore.class).asEagerSingleton();
+        bind(SessionStore.class).to(isSqlEnabled ? SqlSessionStore.class : KeyValueSessionStore.class).asEagerSingleton();
         bind(SessionManager.class).asEagerSingleton();
 
-        boolean isSqlEnabled = settings.storageSettings().isSqlEnabled();
         bind(UserStore.class).to(isSqlEnabled ? SqlUserStore.class : KeyValueUserStore.class).asEagerSingleton();
     }
 

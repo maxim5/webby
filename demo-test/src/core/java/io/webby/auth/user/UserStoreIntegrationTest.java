@@ -48,7 +48,7 @@ public class UserStoreIntegrationTest {
 
     private static @NotNull UserStore startup(@NotNull Scenario scenario) {
         AppSettings settings = Testing.defaultAppSettings();
-        settings.modelFilter().setCommonPackageOf(DefaultUser.class);
+        settings.modelFilter().setCommonPackageOf(Testing.CORE_MODELS);
         switch (scenario) {
             case SQL -> settings.storageSettings().enableSql(SQL.settings()).enableKeyValue(TestingStorage.KEY_VALUE_DEFAULT);
             case KEY_VALUE -> settings.storageSettings().enableKeyValue(TestingStorage.KEY_VALUE_DEFAULT);

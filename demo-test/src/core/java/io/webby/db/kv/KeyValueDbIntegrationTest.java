@@ -15,7 +15,10 @@ import io.webby.db.kv.mapdb.MapDbFactory;
 import io.webby.db.kv.mapdb.MapDbImpl;
 import io.webby.db.kv.paldb.PalDbFactory;
 import io.webby.db.kv.paldb.PalDbImpl;
-import io.webby.testing.*;
+import io.webby.testing.HttpRequestBuilder;
+import io.webby.testing.Testing;
+import io.webby.testing.TestingModels;
+import io.webby.testing.TestingProps;
 import io.webby.testing.ext.CloseAllExtension;
 import io.webby.testing.ext.EmbeddedRedisExtension;
 import io.webby.testing.ext.SqlDbSetupExtension;
@@ -233,7 +236,8 @@ public class KeyValueDbIntegrationTest {
     public void multi_session_sql_compatible(DbType dbType) {
         KeyValueFactory dbFactory = setupFactory(dbType);
 
-        try (KeyValueDb<Long, Session> db = dbFactory.getDb(DbOptions.of(Session.DB_NAME, Long.class, Session.class))) {
+        DbOptions<Long, Session> options = DbOptions.of(Session.DB_NAME, Long.class, Session.class);
+        try (KeyValueDb<Long, Session> db = dbFactory.getDb(options)) {
             runMultiTest(db, 123L, Session.fromRequest(123, HttpRequestBuilder.get("/foo").ex()));
         }
     }
@@ -243,7 +247,8 @@ public class KeyValueDbIntegrationTest {
     public void multi_session_forced_key_value(DbType dbType) {
         KeyValueFactory dbFactory = setupFactory(dbType);
 
-        try (KeyValueDb<Integer, Session> db = dbFactory.getDb(DbOptions.of("my-sessions", Integer.class, Session.class))) {
+        DbOptions<Integer, Session> options = DbOptions.of("my-sessions", Integer.class, Session.class);
+        try (KeyValueDb<Integer, Session> db = dbFactory.getDb(options)) {
             runMultiTest(db,
                          Integer.MIN_VALUE,
                          Integer.MAX_VALUE,
@@ -257,8 +262,9 @@ public class KeyValueDbIntegrationTest {
     public void multi_default_user_sql_compatible(DbType dbType) {
         KeyValueFactory dbFactory = setupFactory(dbType);
 
-        try (KeyValueDb<Long, DefaultUser> db = dbFactory.getDb(DbOptions.of(UserModel.DB_NAME, Long.class, DefaultUser.class))) {
-            runMultiTest(db, 777L, TestingModels.newUserNow(777, UserAccess.Simple));
+        DbOptions<Integer, DefaultUser> options = DbOptions.of(UserModel.DB_NAME, Integer.class, DefaultUser.class);
+        try (KeyValueDb<Integer, DefaultUser> db = dbFactory.getDb(options)) {
+            runMultiTest(db, 777, TestingModels.newUserNow(777, UserAccess.Simple));
         }
     }
 
@@ -267,9 +273,9 @@ public class KeyValueDbIntegrationTest {
     public void multi_default_user_forced_key_value(DbType dbType) {
         KeyValueFactory dbFactory = setupFactory(dbType);
 
-        DbOptions<Long, DefaultUser> options = DbOptions.of("my-users", Long.class, DefaultUser.class);
-        try (KeyValueDb<Long, DefaultUser> db = dbFactory.getDb(options)) {
-            runMultiTest(db, Long.MIN_VALUE, Long.MAX_VALUE,
+        DbOptions<Integer, DefaultUser> options = DbOptions.of("my-users", Integer.class, DefaultUser.class);
+        try (KeyValueDb<Integer, DefaultUser> db = dbFactory.getDb(options)) {
+            runMultiTest(db, Integer.MIN_VALUE, Integer.MAX_VALUE,
                          TestingModels.newUserNow(777, UserAccess.Simple), TestingModels.newUserNow(0, UserAccess.SuperAdmin));
         }
     }
@@ -406,8 +412,7 @@ public class KeyValueDbIntegrationTest {
         AppSettings settings = Testing.defaultAppSettings();
         settings.modelFilter().setPackagesOf(Testing.CORE_MODELS);
         settings.storageSettings()
-            .enableKeyValue(KeyValueSettings.of(dbType, TEMP_DIRECTORY.getCurrentTempDir()))
-            .enableSql(SQL.settings());
+            .enableKeyValue(KeyValueSettings.of(dbType, TEMP_DIRECTORY.getCurrentTempDir()));
         settings.setProfileMode(false);  // not testing TrackingDbAdapter by default
 
         settings.setProperty("db.chronicle.default.size", 64);
@@ -421,10 +426,10 @@ public class KeyValueDbIntegrationTest {
         settings.setProperty("db.redis.port", REDIS.getPort());
 
         if (dbType == DbType.SQL_DB) {
-            AutoCloseable mockedClock = Mocking.withMockedClock();
-            CLOSE_ALL.addCloseable(mockedClock);
+            settings.storageSettings().enableSql(SQL.settings());
+            return Testing.testStartup(settings, SQL::savepoint, SQL.combinedTestingModule());
         }
 
-        return Testing.testStartup(settings, SQL::savepoint, SQL.combinedTestingModule());
+        return Testing.testStartup(settings);
     }
 }
