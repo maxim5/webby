@@ -1,10 +1,10 @@
 package io.webby.netty.marshal;
 
-import io.webby.testing.TestingModels;
 import io.webby.demo.hello.JsonCustom;
 import io.webby.demo.hello.SampleBean;
 import io.webby.netty.marshal.MarshallerFactory.SupportedJsonLibrary;
 import io.webby.testing.Testing;
+import io.webby.testing.TestingModels;
 import org.jetbrains.annotations.NotNull;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -124,7 +124,7 @@ public class JsonIntegrationTest {
     // @Test
     public void roundtrip_default_user() {
         assumeTrue(getJsonLibrary() == SupportedJsonLibrary.DSL_JSON);
-        assertJsonStringRoundTrip(TestingModels.newUserNow(123));
+        assertJsonStringRoundTrip(TestingModels.newUser(123));
     }
 
     // @ParameterizedTest

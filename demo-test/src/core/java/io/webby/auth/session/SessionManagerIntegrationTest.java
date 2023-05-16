@@ -20,7 +20,7 @@ import static org.junit.jupiter.api.Assertions.*;
 public class SessionManagerIntegrationTest {
     @RegisterExtension static final SqlDbSetupExtension SQL = SqlDbSetupExtension.fromProperties();
 
-    private static final UserModel DUMMY_USER = TestingModels.newUserNow(123);
+    private static final UserModel DUMMY_USER = TestingModels.newUser(123);
     private static final HttpRequestEx GET = HttpRequestBuilder.get("/").ex();
 
     @ParameterizedTest

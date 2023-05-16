@@ -26,7 +26,7 @@ public class SessionTableTest
     @Override
     protected void fillUp(@NotNull Connector connector) {
         // These contents support any entity version (below).
-        new UserTable(connector).insert(new DefaultUser(1, Instant.now(), UserAccess.Simple));
+        new UserTable(connector).insert(DefaultUser.newUser(1, Instant.now(), UserAccess.Simple));
     }
 
     @Override

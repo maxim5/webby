@@ -264,7 +264,7 @@ public class KeyValueDbIntegrationTest {
 
         DbOptions<Integer, DefaultUser> options = DbOptions.of(UserModel.DB_NAME, Integer.class, DefaultUser.class);
         try (KeyValueDb<Integer, DefaultUser> db = dbFactory.getDb(options)) {
-            runMultiTest(db, 777, TestingModels.newUserNow(777, UserAccess.Simple));
+            runMultiTest(db, 777, TestingModels.newUser(777, UserAccess.Simple));
         }
     }
 
@@ -276,7 +276,7 @@ public class KeyValueDbIntegrationTest {
         DbOptions<Integer, DefaultUser> options = DbOptions.of("my-users", Integer.class, DefaultUser.class);
         try (KeyValueDb<Integer, DefaultUser> db = dbFactory.getDb(options)) {
             runMultiTest(db, Integer.MIN_VALUE, Integer.MAX_VALUE,
-                         TestingModels.newUserNow(777, UserAccess.Simple), TestingModels.newUserNow(0, UserAccess.SuperAdmin));
+                         TestingModels.newUser(777, UserAccess.Simple), TestingModels.newUser(0, UserAccess.SuperAdmin));
         }
     }
 

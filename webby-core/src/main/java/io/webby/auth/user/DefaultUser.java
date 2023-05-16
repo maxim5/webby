@@ -15,13 +15,17 @@ public class DefaultUser implements UserModel {
 
     public DefaultUser(int userId, @NotNull Instant createdAt, @NotNull UserAccess access) {
         assert userId == AUTO_ID || userId > 0: "Invalid userId=%d".formatted(userId);
-        this.createdAt = createdAt.truncatedTo(ChronoUnit.MILLIS);
+        this.createdAt = createdAt;
         this.userId = userId;
         this.access = access;
     }
 
+    public static @NotNull DefaultUser newUser(int userId, @NotNull Instant createdAt, @NotNull UserAccess access) {
+        return new DefaultUser(userId, createdAt.truncatedTo(ChronoUnit.MILLIS), access);
+    }
+
     public static @NotNull DefaultUser newAuto(@NotNull UserAccess access) {
-        return new DefaultUser(AUTO_ID, Instant.now(), access);
+        return newUser(AUTO_ID, Instant.now(), access);
     }
 
     @Override

@@ -51,7 +51,7 @@ public class BridgeIntModelTableTest
     private @NotNull Pair<Integer[], DefaultUser[]> insertUsers(int num) {
         Integer[] keys = IntStream.range(1, num + 1).boxed().toArray(Integer[]::new);
         DefaultUser[] entities = IntStream.range(1, num + 1)
-            .mapToObj(i -> TestingSql.getOrInsert(users, TestingModels.newUserNowFixMillis(i)))
+            .mapToObj(i -> TestingSql.getOrInsert(users, TestingModels.newUser(i)))
             .toArray(DefaultUser[]::new);
         return Pair.of(keys, entities);
     }

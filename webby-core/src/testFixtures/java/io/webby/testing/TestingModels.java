@@ -12,28 +12,12 @@ import java.time.Instant;
 import static com.google.common.truth.Truth.assertThat;
 
 public class TestingModels {
-    public static @NotNull DefaultUser newUserNow(int userId) {
-        return newUserNow(userId, UserAccess.Simple);
+    public static @NotNull DefaultUser newUser(int userId) {
+        return newUser(userId, UserAccess.Simple);
     }
 
-    public static @NotNull DefaultUser newUserNow(int userId, @NotNull UserAccess access) {
-        return newUser(userId, Instant.now(), access);
-    }
-
-    public static @NotNull DefaultUser newUser(int userId, @NotNull Instant createdAt) {
-        return newUser(userId, createdAt, UserAccess.Simple);
-    }
-
-    public static @NotNull DefaultUser newUserNowFixMillis(int userId) {
-        return newUserFixMillis(userId, Instant.now());
-    }
-
-    public static @NotNull DefaultUser newUserFixMillis(int userId, @NotNull Instant createdAt) {
-        return newUser(userId, createdAt, UserAccess.Simple);
-    }
-
-    public static @NotNull DefaultUser newUser(int userId, @NotNull Instant createdAt, @NotNull UserAccess access) {
-        return new DefaultUser(userId, createdAt, access);
+    public static @NotNull DefaultUser newUser(int userId, @NotNull UserAccess access) {
+        return DefaultUser.newUser(userId, Instant.now(), access);
     }
 
     public static @NotNull Session newSessionNow(long sessionId) {

@@ -27,7 +27,7 @@ public class CodecProviderTest {
         assertCodecRoundTrip(provider.getCodecOrDie(String.class), "foo");
         assertCodecRoundTrip(provider.getCodecOrDie(Session.class), TestingModels.newSessionNow(123));
         assertCodecRoundTrip(provider.getCodecOrDie(Session.class), TestingModels.newSessionNowWithoutIp(123));
-        assertCodecRoundTrip(provider.getCodecOrDie(DefaultUser.class), TestingModels.newUserNow(0));
+        assertCodecRoundTrip(provider.getCodecOrDie(DefaultUser.class), TestingModels.newUser(0));
     }
 
     @SuppressWarnings("UnstableApiUsage")

@@ -7,10 +7,10 @@ import io.webby.auth.session.Session;
 import io.webby.auth.user.DefaultUser;
 import io.webby.auth.user.UserAccess;
 import io.webby.auth.user.UserTable;
+import io.webby.benchmarks.stress.TableWorker.Init;
 import io.webby.db.sql.TableManager;
 import io.webby.db.sql.ThreadLocalConnector;
 import io.webby.orm.api.Connector;
-import io.webby.benchmarks.stress.TableWorker.Init;
 import io.webby.testing.Testing;
 import io.webby.testing.TestingModules;
 import io.webby.testing.TestingProps;
@@ -30,8 +30,8 @@ public class StressUserTableMain {
 
         Init<Integer, DefaultUser> init = initWorkers(connector);
         execWorkers(MEDIUM_WAIT, List.of(
-            TableWorker.inserter(init, id -> new DefaultUser(id, Instant.now(), UserAccess.Simple)),
-            TableWorker.updater(init, id -> new DefaultUser(id, Instant.now(), UserAccess.SuperAdmin)),
+            TableWorker.inserter(init, id -> DefaultUser.newUser(id, Instant.now(), UserAccess.Simple)),
+            TableWorker.updater(init, id -> DefaultUser.newUser(id, Instant.now(), UserAccess.SuperAdmin)),
             TableWorker.deleter(init),
             TableWorker.reader(init),
             TableWorker.scanner(init.withSteps(0.00001))

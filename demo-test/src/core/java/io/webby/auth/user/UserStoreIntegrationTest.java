@@ -30,7 +30,7 @@ public class UserStoreIntegrationTest {
     @EnumSource(Scenario.class)
     public void create_one_user(Scenario scenario) {
         UserStore users = startup(scenario);
-        DefaultUser user = TestingModels.newUserNowFixMillis(AUTO_ID);
+        DefaultUser user = TestingModels.newUser(AUTO_ID);
         int userId = users.createUserAutoId(user);
         assertEquals(userId, user.userId());
         assertTrue(userId > 0);
@@ -42,7 +42,7 @@ public class UserStoreIntegrationTest {
     @EnumSource(Scenario.class)
     public void invalid_user_with_id(Scenario scenario) {
         UserStore users = startup(scenario);
-        DefaultUser user = TestingModels.newUserNow(1, UserAccess.Simple);
+        DefaultUser user = TestingModels.newUser(1, UserAccess.Simple);
         assertThrows(AssertionError.class, () -> users.createUserAutoId(user));
     }
 
