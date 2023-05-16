@@ -67,11 +67,13 @@ public final class ForeignLong<E> implements Foreign<Long, E> {
 
     @Override
     public boolean setEntityIfMissing(@NotNull E entity) {
+        assert isPresent() : "ForeignLong reference is empty, can't set the entity: " + entity;
         return this.entity.compareAndSet(null, entity);
     }
 
     @Override
     public void setEntityUnconditionally(@NotNull E entity) {
+        assert isPresent() : "ForeignLong reference is empty, can't set the entity: " + entity;
         this.entity.set(entity);
     }
 

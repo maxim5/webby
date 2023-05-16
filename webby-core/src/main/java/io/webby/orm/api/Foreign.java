@@ -75,12 +75,14 @@ public interface Foreign<I, E> {
 
     /**
      * Sets the {@code entity} reference if it's not present in this instance.
+     * Fails if this {@link Foreign} instance is empty, i.e. holds a <code>NULL</code> foreign key.
      * @return true if updated
      */
     boolean setEntityIfMissing(@NotNull E entity);
 
     /**
      * Sets the {@code entity} regardless of the current present value.
+     * Fails if this {@link Foreign} instance is empty, i.e. holds a <code>NULL</code> foreign key.
      */
     void setEntityUnconditionally(@NotNull E entity);
 

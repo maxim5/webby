@@ -57,11 +57,13 @@ public final class ForeignObj<I, E> implements Foreign<I, E> {
 
     @Override
     public boolean setEntityIfMissing(@NotNull E entity) {
+        assert isPresent() : "ForeignObj reference is empty, can't set the entity: " + entity;
         return this.entity.compareAndSet(null, entity);
     }
 
     @Override
     public void setEntityUnconditionally(@NotNull E entity) {
+        assert isPresent() : "ForeignObj reference is empty, can't set the entity: " + entity;
         this.entity.set(entity);
     }
 
