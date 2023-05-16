@@ -89,4 +89,8 @@ public final class ForeignLong<E> implements Foreign<Long, E> {
     public String toString() {
         return "ForeignLong{id=%d, entity=%s}".formatted(id, entity);
     }
+
+    public static <E> boolean isMatch(@NotNull ForeignLong<E> left, @NotNull ForeignLong<E> right) {
+        return left.id == right.id && Foreign.isEntityMatch(left, right);
+    }
 }

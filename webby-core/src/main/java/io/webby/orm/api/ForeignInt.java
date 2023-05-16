@@ -89,4 +89,8 @@ public final class ForeignInt<E> implements Foreign<Integer, E> {
     public String toString() {
         return "ForeignInt{id=%d, entity=%s}".formatted(id, entity);
     }
+
+    public static <E> boolean isMatch(@NotNull ForeignInt<E> left, @NotNull ForeignInt<E> right) {
+        return left.id == right.id && Foreign.isEntityMatch(left, right);
+    }
 }
