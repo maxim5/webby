@@ -14,7 +14,7 @@ import org.junit.jupiter.api.extension.RegisterExtension;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.EnumSource;
 
-import static io.webby.testing.TestingModels.assertSameSession;
+import static com.google.common.truth.Truth.assertThat;
 import static org.junit.jupiter.api.Assertions.*;
 
 public class SessionManagerIntegrationTest {
@@ -46,7 +46,7 @@ public class SessionManagerIntegrationTest {
         Session session = manager.createNewSession(GET);
         String encoded = manager.encodeSessionForCookie(session);
         Session returned = manager.getOrCreateSession(GET, new DefaultCookie("name", encoded));
-        assertSameSession(session, returned);
+        assertThat(session).isEqualTo(returned);
     }
 
     @ParameterizedTest
@@ -65,7 +65,7 @@ public class SessionManagerIntegrationTest {
 
         String encoded = manager.encodeSessionForCookie(newSession);
         Session returned = manager.getOrCreateSession(GET, new DefaultCookie("name", encoded));
-        assertSameSession(newSession, returned);
+        assertThat(newSession).isEqualTo(returned);
         assertTrue(returned.hasUser());
     }
 

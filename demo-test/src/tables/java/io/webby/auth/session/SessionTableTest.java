@@ -11,7 +11,6 @@ import io.webby.testing.TableLongTest;
 import org.jetbrains.annotations.NotNull;
 
 import java.time.Instant;
-import java.time.temporal.ChronoUnit;
 
 public class SessionTableTest
         extends SqlDbTableTest<Session, SessionTable>
@@ -31,12 +30,12 @@ public class SessionTableTest
 
     @Override
     public @NotNull Session createEntity(@NotNull Long key, int version) {
-        Instant created = Instant.now().truncatedTo(ChronoUnit.MILLIS);
-        return new Session(key, ForeignInt.ofId(1), created, String.valueOf(version), version == 0 ? "127.0.0.1" : null);
+        String ipAddress = version == 0 ? "127.0.0.1" : null;
+        return Session.newSession(key, ForeignInt.ofId(1), Instant.now(), String.valueOf(version), ipAddress);
     }
 
     @Override
     public @NotNull Session copyEntityWithId(@NotNull Session session, long autoId) {
-        return new Session(autoId, session.user(), session.createdAt(), session.userAgent(), session.ipAddress());
+        return Session.newSession(autoId, session.user(), session.createdAt(), session.userAgent(), session.ipAddress());
     }
 }
