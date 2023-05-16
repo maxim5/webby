@@ -1,5 +1,6 @@
 package io.webby.auth.session;
 
+import com.google.errorprone.annotations.Immutable;
 import io.netty.handler.codec.http.HttpHeaders;
 import io.webby.auth.user.UserModel;
 import io.webby.netty.HttpConst;
@@ -15,8 +16,9 @@ import java.time.temporal.ChronoUnit;
 import java.util.Objects;
 
 @Model(exposeAs = SessionModel.class, javaName = "Session")
+@Immutable
 public class DefaultSession implements SessionModel {
-    protected long sessionId;
+    protected final long sessionId;
     protected final @NotNull @Sql.Null ForeignInt<UserModel> user;
     protected final @NotNull Instant createdAt;
     protected final @NotNull String userAgent;
@@ -82,17 +84,6 @@ public class DefaultSession implements SessionModel {
     @Override
     public @NotNull DefaultSession withSessionId(long sessionId) {
         return new DefaultSession(sessionId, user, createdAt, userAgent, ipAddress);
-    }
-
-    @Override
-    public void resetIdToAuto() {
-        sessionId = AUTO_ID;
-    }
-
-    @Override
-    public void setIfAutoIdOrDie(long newId) {
-        assert sessionId == AUTO_ID : "Failed to set auto-inc id to session: %s".formatted(this);
-        sessionId = newId;
     }
 
     @Override
