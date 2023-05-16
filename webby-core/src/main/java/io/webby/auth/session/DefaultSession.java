@@ -78,10 +78,11 @@ public class DefaultSession implements SessionModel {
 
     @Override
     public @NotNull DefaultSession withUser(@NotNull UserModel user) {
+        assert !user.isAutoId() : "Incomplete user provided for the session: " + user;
         if (this.userId() == user.userId() && this.user.setEntityIfMissing(user)) {
             return this;
         }
-        return new DefaultSession(sessionId, ForeignInt.ofEntity(user.userId(), user), createdAt, userAgent, ipAddress);
+        return new DefaultSession(sessionId, user.toForeignInt(), createdAt, userAgent, ipAddress);
     }
 
     @Override
