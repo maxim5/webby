@@ -239,7 +239,7 @@ public class KeyValueDbIntegrationTest {
 
         DbOptions<Long, DefaultSession> options = DbOptions.of(DefaultSession.DB_NAME, Long.class, DefaultSession.class);
         try (KeyValueDb<Long, DefaultSession> db = dbFactory.getDb(options)) {
-            runMultiTest(db, 123L, DefaultSession.fromRequest(123, HttpRequestBuilder.get("/foo").ex()));
+            runMultiTest(db, 123L, TestingModels.newSessionNow(123));
         }
     }
 
@@ -251,10 +251,8 @@ public class KeyValueDbIntegrationTest {
         DbOptions<Integer, DefaultSession> options = DbOptions.of("my-sessions", Integer.class, DefaultSession.class);
         try (KeyValueDb<Integer, DefaultSession> db = dbFactory.getDb(options)) {
             runMultiTest(db,
-                         Integer.MIN_VALUE,
-                         Integer.MAX_VALUE,
-                         DefaultSession.fromRequest(Integer.MIN_VALUE, HttpRequestBuilder.get("/foo").ex()),
-                         DefaultSession.fromRequest(Integer.MAX_VALUE, HttpRequestBuilder.post("/bar").ex()));
+                         Integer.MIN_VALUE, Integer.MAX_VALUE,
+                         TestingModels.newSessionNow(Integer.MIN_VALUE), TestingModels.newSessionNow(Integer.MAX_VALUE));
         }
     }
 
@@ -298,7 +296,7 @@ public class KeyValueDbIntegrationTest {
         assertTrue(palDb.isEmpty());
     }
 
-    private static <K, V> void runMultiTest(@NotNull KeyValueDb<K, V> db, @NotNull K key,  @NotNull V value) {
+    private static <K, V> void runMultiTest(@NotNull KeyValueDb<K, V> db, @NotNull K key, @NotNull V value) {
         assertEqualsTo(db, Map.of());
         assertNotContainsAnyOf(db, Map.of(key, value));
 

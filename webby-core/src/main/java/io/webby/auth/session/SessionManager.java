@@ -27,9 +27,12 @@ public class SessionManager {
     private final Cipher cipher;
     private final Cipher decipher;
     private final SessionStore store;
+    private final Factory factory;
 
     @Inject
-    public SessionManager(@NotNull Settings settings, @NotNull SessionStore store) throws Exception {
+    public SessionManager(@NotNull Settings settings,
+                          @NotNull SessionStore store,
+                          @NotNull SessionManager.Factory factory) throws Exception {
         cipher = Cipher.getInstance("AES");
         decipher = Cipher.getInstance("AES");
 
@@ -38,6 +41,7 @@ public class SessionManager {
         decipher.init(Cipher.DECRYPT_MODE, key);
 
         this.store = store;
+        this.factory = factory;
     }
 
     public @NotNull SessionModel getOrCreateSession(@NotNull HttpRequestEx request, @Nullable Cookie cookie) {
@@ -66,7 +70,8 @@ public class SessionManager {
     }
 
     public @NotNull SessionModel createNewSession(@NotNull HttpRequestEx request) {
-        return store.createSessionAutoId(request);
+        SessionData data = factory.newSessionData(request);
+        return store.createSessionAutoId(data);
     }
 
     public @NotNull SessionModel addUserOrDie(@NotNull SessionModel session, @NotNull UserModel user) {
@@ -108,5 +113,9 @@ public class SessionManager {
         } catch (GeneralSecurityException e) {
             return rethrow("Failed to decrypt the data: %s".formatted(Arrays.toString(encrypted)), e);
         }
+    }
+
+    public interface Factory {
+        @NotNull SessionData newSessionData(@NotNull HttpRequestEx request);
     }
 }

@@ -7,7 +7,6 @@ import io.webby.db.kv.KeyValueAutoRetryInserter;
 import io.webby.db.kv.KeyValueDb;
 import io.webby.db.kv.KeyValueFactory;
 import io.webby.db.model.LongIdGenerator;
-import io.webby.netty.request.HttpRequestEx;
 import io.webby.util.collect.Pair;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
@@ -44,8 +43,9 @@ public class KeyValueSessionStore implements SessionStore {
     }
 
     @Override
-    public @NotNull SessionModel createSessionAutoId(@NotNull HttpRequestEx request) {
-        Pair<Long, SessionModel> inserted = inserter.insertOrDie(sessionId -> DefaultSession.fromRequest(sessionId, request));
+    public @NotNull SessionModel createSessionAutoId(@NotNull SessionData data) {
+        assert !(data instanceof SessionModel model) || model.isAutoId() : "Session is not auto-id: %s".formatted(data);
+        Pair<Long, SessionModel> inserted = inserter.insertOrDie(data::toSessionModel);
         return inserted.second();
     }
 

@@ -1,9 +1,7 @@
 package io.webby.auth.session;
 
 import com.google.inject.Inject;
-import io.webby.db.model.LongAutoIdModel;
 import io.webby.db.sql.TableManager;
-import io.webby.netty.request.HttpRequestEx;
 import io.webby.orm.api.TableLong;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
@@ -29,10 +27,11 @@ public class SqlSessionStore implements SessionStore {
     }
 
     @Override
-    public @NotNull SessionModel createSessionAutoId(@NotNull HttpRequestEx request) {
-        SessionModel session = DefaultSession.fromRequest(LongAutoIdModel.AUTO_ID, request);
-        long autoId = table.insertAutoIncPk(session);
-        return session.withSessionId(autoId);
+    public @NotNull SessionModel createSessionAutoId(@NotNull SessionData data) {
+        SessionModel entity = data instanceof SessionModel model ? model : data.toSessionModel(SessionModel.AUTO_ID);
+        assert entity.isAutoId() : "Session is not auto-id: %s".formatted(data);
+        long autoId = table.insertAutoIncPk(entity);
+        return entity.toSessionModel(autoId);
     }
 
     @Override

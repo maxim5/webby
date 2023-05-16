@@ -44,11 +44,11 @@ public class DefaultSession implements SessionModel {
         return new DefaultSession(sessionId, user, createdAt.truncatedTo(ChronoUnit.MILLIS), userAgent, ipAddress);
     }
 
-    public static @NotNull DefaultSession fromRequest(long sessionId, @NotNull HttpRequestEx request) {
+    public static @NotNull DefaultSession newSessionData(@NotNull HttpRequestEx request) {
         HttpHeaders headers = request.headers();
         String userAgent = headers.get(HttpConst.USER_AGENT, "");
         String ipAddress = request.remoteIPAddress();
-        return newSession(sessionId, ForeignInt.empty(), Instant.now(), userAgent, ipAddress);
+        return newSession(AUTO_ID, ForeignInt.empty(), Instant.now(), userAgent, ipAddress);
     }
 
     @Override
@@ -85,7 +85,8 @@ public class DefaultSession implements SessionModel {
     }
 
     @Override
-    public @NotNull DefaultSession withSessionId(long sessionId) {
+    public @NotNull DefaultSession toSessionModel(long sessionId) {
+        assert isAutoId() : "DefaultSession is not a pure data object: " + this;
         return new DefaultSession(sessionId, user, createdAt, userAgent, ipAddress);
     }
 

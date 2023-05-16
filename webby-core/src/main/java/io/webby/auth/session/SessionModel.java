@@ -8,7 +8,7 @@ import org.jetbrains.annotations.Nullable;
 
 import java.time.Instant;
 
-public interface SessionModel extends LongAutoIdModel {
+public interface SessionModel extends SessionData, LongAutoIdModel {
     String DB_NAME = "session";
 
     long sessionId();
@@ -35,6 +35,4 @@ public interface SessionModel extends LongAutoIdModel {
     @Nullable String ipAddress();
 
     @NotNull SessionModel withUser(@NotNull UserModel user);
-
-    @NotNull SessionModel withSessionId(long sessionId);
 }

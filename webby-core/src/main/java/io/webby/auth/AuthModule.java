@@ -22,6 +22,7 @@ public class AuthModule extends AbstractModule {
         bind(SessionInterceptor.class).asEagerSingleton();
 
         bind(SessionStore.class).to(isSqlEnabled ? SqlSessionStore.class : KeyValueSessionStore.class).asEagerSingleton();
+        bind(SessionManager.Factory.class).toInstance(DefaultSession::newSessionData);
         bind(SessionManager.class).asEagerSingleton();
 
         bind(UserStore.class).to(isSqlEnabled ? SqlUserStore.class : KeyValueUserStore.class).asEagerSingleton();
