@@ -3,6 +3,7 @@ package io.webby.auth.session;
 import io.webby.auth.user.UserModel;
 import io.webby.db.model.LongAutoIdModel;
 import io.webby.orm.api.ForeignInt;
+import io.webby.orm.api.ForeignLong;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
@@ -35,4 +36,8 @@ public interface SessionModel extends SessionData, LongAutoIdModel {
     @Nullable String ipAddress();
 
     @NotNull SessionModel withUser(@NotNull UserModel user);
+
+    default @NotNull ForeignLong<SessionModel> toForeignLong() {
+        return ForeignLong.ofEntity(sessionId(), this);
+    }
 }
