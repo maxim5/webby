@@ -32,10 +32,9 @@ public class SqlUserStore implements UserStore {
     }
 
     @Override
-    public int createUserAutoId(@NotNull UserModel user) {
+    public @NotNull UserModel createUserAutoId(@NotNull UserModel user) {
         assert user.isAutoId() : "User is not auto-id: %s".formatted(user);
         int autoId = table.insertAutoIncPk(user);
-        user.setIfAutoIdOrDie(autoId);
-        return autoId;
+        return user.withUserId(autoId);
     }
 }

@@ -30,11 +30,9 @@ public class UserStoreIntegrationTest {
     @EnumSource(Scenario.class)
     public void create_one_user(Scenario scenario) {
         UserStore users = startup(scenario);
-        DefaultUser user = TestingModels.newUser(AUTO_ID);
-        int userId = users.createUserAutoId(user);
-        assertEquals(userId, user.userId());
-        assertTrue(userId > 0);
-        assertEquals(user, users.getUserByIdOrNull(userId));
+        UserModel user = users.createUserAutoId(TestingModels.newUser(AUTO_ID));
+        assertTrue(user.userId() > 0);
+        assertEquals(user, users.getUserByIdOrNull(user.userId()));
         assertNull(users.getUserByIdOrNull(0));
     }
 

@@ -18,4 +18,6 @@ public interface UserModel extends IntAutoIdModel {
     @NotNull Instant createdAt();
 
     @NotNull UserAccess access();
+
+    @NotNull UserModel withUserId(int userId);
 }

@@ -46,13 +46,9 @@ public class KeyValueUserStore implements UserStore {
     }
 
     @Override
-    public int createUserAutoId(@NotNull UserModel user) {
+    public @NotNull UserModel createUserAutoId(@NotNull UserModel user) {
         assert user.isAutoId() : "User is not auto-id: %s".formatted(user);
-        Pair<Integer, UserModel> inserted = inserter.insertOrDie(userId -> {
-            user.resetIdToAuto();
-            user.setIfAutoIdOrDie(userId);
-            return user;
-        });
-        return inserted.first();
+        Pair<Integer, UserModel> inserted = inserter.insertOrDie(user::withUserId);
+        return inserted.second();
     }
 }

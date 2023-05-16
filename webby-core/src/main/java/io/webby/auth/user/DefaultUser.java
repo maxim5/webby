@@ -1,5 +1,6 @@
 package io.webby.auth.user;
 
+import com.google.errorprone.annotations.Immutable;
 import io.webby.orm.api.annotate.Model;
 import org.jetbrains.annotations.NotNull;
 
@@ -8,8 +9,9 @@ import java.time.temporal.ChronoUnit;
 import java.util.Objects;
 
 @Model(exposeAs = UserModel.class, javaName = "User")
+@Immutable
 public class DefaultUser implements UserModel {
-    protected int userId;
+    protected final int userId;
     protected final @NotNull Instant createdAt;
     protected final @NotNull UserAccess access;
 
@@ -44,14 +46,8 @@ public class DefaultUser implements UserModel {
     }
 
     @Override
-    public void resetIdToAuto() {
-        userId = AUTO_ID;
-    }
-
-    @Override
-    public void setIfAutoIdOrDie(int newId) {
-        assert userId == AUTO_ID : "Failed to set auto-inc id to user: %s".formatted(this);
-        userId = newId;
+    public @NotNull UserModel withUserId(int userId) {
+        return new DefaultUser(userId, createdAt, access);
     }
 
     @Override
