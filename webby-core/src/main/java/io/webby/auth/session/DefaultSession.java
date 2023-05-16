@@ -78,6 +78,9 @@ public class DefaultSession implements SessionModel {
 
     @Override
     public @NotNull DefaultSession withUser(@NotNull UserModel user) {
+        if (this.userId() == user.userId() && this.user.setEntityIfMissing(user)) {
+            return this;
+        }
         return new DefaultSession(sessionId, ForeignInt.ofEntity(user.userId(), user), createdAt, userAgent, ipAddress);
     }
 
@@ -90,6 +93,7 @@ public class DefaultSession implements SessionModel {
     public boolean equals(Object obj) {
         return obj instanceof DefaultSession that &&
             sessionId == that.sessionId &&
+            ForeignInt.isMatch(user, that.user) &&
             createdAt.equals(that.createdAt) &&
             userAgent.equals(that.userAgent) &&
             Objects.equals(ipAddress, that.ipAddress);
