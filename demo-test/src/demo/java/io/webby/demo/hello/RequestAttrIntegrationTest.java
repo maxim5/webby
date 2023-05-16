@@ -2,7 +2,6 @@ package io.webby.demo.hello;
 
 import io.netty.handler.codec.http.FullHttpRequest;
 import io.netty.handler.codec.http.HttpResponse;
-import io.webby.netty.HttpConst;
 import io.webby.testing.BaseHttpIntegrationTest;
 import io.webby.testing.HttpRequestBuilder;
 import io.webby.testing.ext.HppcIterationSeedExtension;
@@ -18,7 +17,7 @@ public class RequestAttrIntegrationTest extends BaseHttpIntegrationTest {
 
     @Test
     public void attributes() {
-        FullHttpRequest request = HttpRequestBuilder.get("/attr/get").withHeader(HttpConst.USER_AGENT, "foobar").full();
+        FullHttpRequest request = HttpRequestBuilder.get("/attr/get").withUserAgent("foobar").full();
         HttpResponse response = call(request);
         assertThat(response).is200().hasContent("stats:StatsCollector, session:foobar, user:null");
     }

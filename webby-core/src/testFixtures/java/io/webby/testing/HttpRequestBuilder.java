@@ -3,6 +3,7 @@ package io.webby.testing;
 import io.netty.buffer.ByteBuf;
 import io.netty.channel.embedded.EmbeddedChannel;
 import io.netty.handler.codec.http.*;
+import io.webby.netty.HttpConst;
 import io.webby.netty.request.DefaultHttpRequestEx;
 import io.webby.url.convert.Constraint;
 import org.jetbrains.annotations.NotNull;
@@ -55,6 +56,10 @@ public class HttpRequestBuilder {
     public @NotNull HttpRequestBuilder withHeader(@NotNull CharSequence name, @NotNull Object value) {
         this.headers.add(name, value);
         return this;
+    }
+
+    public @NotNull HttpRequestBuilder withUserAgent(@NotNull String userAgent) {
+        return withHeader(HttpConst.USER_AGENT, userAgent);
     }
 
     public @NotNull HttpRequestBuilder allocate(int attributesSize) {
