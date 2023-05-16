@@ -25,8 +25,8 @@ public class CodecProviderTest {
         assertCodecRoundTrip(provider.getCodecOrDie(Long.class), 0L);
         assertCodecRoundTrip(provider.getCodecOrDie(String.class), "");
         assertCodecRoundTrip(provider.getCodecOrDie(String.class), "foo");
-        assertCodecRoundTrip(provider.getCodecOrDie(DefaultSession.class), TestingModels.newSessionNow(123));
-        assertCodecRoundTrip(provider.getCodecOrDie(DefaultSession.class), TestingModels.newSessionNowWithoutIp(123));
+        assertCodecRoundTrip(provider.getCodecOrDie(DefaultSession.class), TestingModels.newSession(123));
+        assertCodecRoundTrip(provider.getCodecOrDie(DefaultSession.class), TestingModels.newSessionWithoutIp(123));
         assertCodecRoundTrip(provider.getCodecOrDie(DefaultUser.class), TestingModels.newUser(0));
     }
 

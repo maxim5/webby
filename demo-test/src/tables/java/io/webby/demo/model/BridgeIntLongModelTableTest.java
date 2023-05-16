@@ -70,7 +70,7 @@ public class BridgeIntLongModelTableTest
     private @NotNull Pair<Long[], DefaultSession[]> insertSessions(int num) {
         Long[] keys = LongStream.range(1, num + 1).boxed().toArray(Long[]::new);
         DefaultSession[] entities = LongStream.range(1, num + 1)
-            .mapToObj(i -> TestingSql.getOrInsert(sessions, TestingModels.newSessionNow(i)))
+            .mapToObj(i -> TestingSql.getOrInsert(sessions, TestingModels.newSession(i)))
             .toArray(DefaultSession[]::new);
         return Pair.of(keys, entities);
     }

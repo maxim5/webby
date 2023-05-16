@@ -18,11 +18,11 @@ public class TestingModels {
         return DefaultUser.newUser(userId, Instant.now(), access);
     }
 
-    public static @NotNull DefaultSession newSessionNow(long sessionId) {
+    public static @NotNull DefaultSession newSession(long sessionId) {
         return newSession(sessionId, Instant.now());
     }
 
-    public static @NotNull DefaultSession newSessionNowWithoutIp(long sessionId) {
+    public static @NotNull DefaultSession newSessionWithoutIp(long sessionId) {
         return newSession(sessionId, Instant.now(), null);
     }
 

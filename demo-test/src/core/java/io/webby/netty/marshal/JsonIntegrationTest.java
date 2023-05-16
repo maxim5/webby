@@ -130,7 +130,7 @@ public class JsonIntegrationTest {
     // @ParameterizedTest
     // @EnumSource(value = MarshallerFactory.SupportedJsonLibrary.class)
     public void roundtrip_session() {
-        assertJsonStringRoundTrip(TestingModels.newSessionNow(123));
+        assertJsonStringRoundTrip(TestingModels.newSession(123));
     }
 
     private static void assertJsonRead(String input, Class<?> klass, Object expected) throws Exception {

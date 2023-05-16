@@ -239,7 +239,7 @@ public class KeyValueDbIntegrationTest {
 
         DbOptions<Long, DefaultSession> options = DbOptions.of(DefaultSession.DB_NAME, Long.class, DefaultSession.class);
         try (KeyValueDb<Long, DefaultSession> db = dbFactory.getDb(options)) {
-            runMultiTest(db, 123L, TestingModels.newSessionNow(123));
+            runMultiTest(db, 123L, TestingModels.newSession(123));
         }
     }
 
@@ -252,7 +252,7 @@ public class KeyValueDbIntegrationTest {
         try (KeyValueDb<Integer, DefaultSession> db = dbFactory.getDb(options)) {
             runMultiTest(db,
                          Integer.MIN_VALUE, Integer.MAX_VALUE,
-                         TestingModels.newSessionNow(Integer.MIN_VALUE), TestingModels.newSessionNow(Integer.MAX_VALUE));
+                         TestingModels.newSession(Integer.MIN_VALUE), TestingModels.newSession(Integer.MAX_VALUE));
         }
     }
 
