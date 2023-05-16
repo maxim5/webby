@@ -11,11 +11,11 @@ import org.jetbrains.annotations.Nullable;
 import static io.webby.util.base.EasyCast.castAny;
 
 public class SqlSessionStore implements SessionStore {
-    protected final TableLong<Session> table;
+    protected final TableLong<SessionModel> table;
 
     @Inject
-    public SqlSessionStore(@NotNull TableManager manager) {
-        table = castAny(manager.getMatchingTableOrDie(Session.DB_NAME, Long.class, Session.class));
+    public SqlSessionStore(@NotNull TableManager manager, @NotNull Class<? extends SessionModel> sessionClass) {
+        table = castAny(manager.getMatchingTableOrDie(SessionModel.DB_NAME, Long.class, sessionClass));
     }
 
     @Override
@@ -24,19 +24,19 @@ public class SqlSessionStore implements SessionStore {
     }
 
     @Override
-    public @Nullable Session getSessionByIdOrNull(long sessionId) {
+    public @Nullable SessionModel getSessionByIdOrNull(long sessionId) {
         return table.getByPkOrNull(sessionId);
     }
 
     @Override
-    public @NotNull Session createSessionAutoId(@NotNull HttpRequestEx request) {
-        Session session = Session.fromRequest(LongAutoIdModel.AUTO_ID, request);
+    public @NotNull SessionModel createSessionAutoId(@NotNull HttpRequestEx request) {
+        SessionModel session = DefaultSession.fromRequest(LongAutoIdModel.AUTO_ID, request);
         long autoId = table.insertAutoIncPk(session);
         return session.withSessionId(autoId);
     }
 
     @Override
-    public void updateSessionById(@NotNull Session session) {
+    public void updateSessionById(@NotNull SessionModel session) {
         table.updateByPk(session);
     }
 }

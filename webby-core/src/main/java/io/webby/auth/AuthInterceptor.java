@@ -1,9 +1,9 @@
 package io.webby.auth;
 
 import com.google.inject.Inject;
-import io.webby.auth.session.Session;
-import io.webby.auth.user.UserStore;
+import io.webby.auth.session.SessionModel;
 import io.webby.auth.user.UserModel;
+import io.webby.auth.user.UserStore;
 import io.webby.netty.errors.ServeException;
 import io.webby.netty.errors.UnauthorizedException;
 import io.webby.netty.intercept.AdvancedInterceptor;
@@ -21,7 +21,7 @@ public class AuthInterceptor implements AdvancedInterceptor {
     @Override
     public void enter(@NotNull MutableHttpRequestEx request, @NotNull Endpoint endpoint) throws ServeException {
         UserModel user = null;
-        Session session = request.session();
+        SessionModel session = request.session();
         if (session.hasUser()) {
             user = users.getUserByIdOrNull(session.user());
             request.setNullableAttr(Attributes.User, user);

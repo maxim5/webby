@@ -27,7 +27,7 @@ public class SessionManagerIntegrationTest {
     @EnumSource(Scenario.class)
     public void getOrCreateSession_null(Scenario scenario) {
         SessionManager manager = startup(scenario);
-        Session session = manager.getOrCreateSession(GET, null);
+        SessionModel session = manager.getOrCreateSession(GET, null);
         assertFalse(session.hasUser());
     }
 
@@ -35,7 +35,7 @@ public class SessionManagerIntegrationTest {
     @EnumSource(Scenario.class)
     public void getOrCreateSession_invalid_cookie(Scenario scenario) {
         SessionManager manager = startup(scenario);
-        Session session = manager.getOrCreateSession(GET, new DefaultCookie("name", "foo"));
+        SessionModel session = manager.getOrCreateSession(GET, new DefaultCookie("name", "foo"));
         assertFalse(session.hasUser());
     }
 
@@ -43,9 +43,9 @@ public class SessionManagerIntegrationTest {
     @EnumSource(Scenario.class)
     public void getOrCreateSession_valid_cookie(Scenario scenario) {
         SessionManager manager = startup(scenario);
-        Session session = manager.createNewSession(GET);
+        SessionModel session = manager.createNewSession(GET);
         String encoded = manager.encodeSessionForCookie(session);
-        Session returned = manager.getOrCreateSession(GET, new DefaultCookie("name", encoded));
+        SessionModel returned = manager.getOrCreateSession(GET, new DefaultCookie("name", encoded));
         assertThat(session).isEqualTo(returned);
     }
 
@@ -53,10 +53,10 @@ public class SessionManagerIntegrationTest {
     @EnumSource(Scenario.class)
     public void addUserOrDie_no_user(Scenario scenario) {
         SessionManager manager = startup(scenario);
-        Session session = manager.createNewSession(GET);
+        SessionModel session = manager.createNewSession(GET);
         assertFalse(session.hasUser());
 
-        Session newSession = manager.addUserOrDie(session, DUMMY_USER);
+        SessionModel newSession = manager.addUserOrDie(session, DUMMY_USER);
         assertEquals(newSession.sessionId(), session.sessionId());
         assertEquals(newSession.createdAt(), session.createdAt());
         assertEquals(newSession.userAgent(), session.userAgent());
@@ -64,7 +64,7 @@ public class SessionManagerIntegrationTest {
         assertTrue(newSession.hasUser());
 
         String encoded = manager.encodeSessionForCookie(newSession);
-        Session returned = manager.getOrCreateSession(GET, new DefaultCookie("name", encoded));
+        SessionModel returned = manager.getOrCreateSession(GET, new DefaultCookie("name", encoded));
         assertThat(newSession).isEqualTo(returned);
         assertTrue(returned.hasUser());
     }
@@ -73,8 +73,8 @@ public class SessionManagerIntegrationTest {
     @EnumSource(Scenario.class)
     public void addUserOrDie_with_user_throws(Scenario scenario) {
         SessionManager manager = startup(scenario);
-        Session session = manager.createNewSession(GET);
-        Session newSession = manager.addUserOrDie(session, DUMMY_USER);
+        SessionModel session = manager.createNewSession(GET);
+        SessionModel newSession = manager.addUserOrDie(session, DUMMY_USER);
         assertTrue(newSession.hasUser());
 
         assertThrows(AssertionError.class, () -> manager.addUserOrDie(newSession, DUMMY_USER));

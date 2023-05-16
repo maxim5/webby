@@ -4,7 +4,7 @@ import io.netty.channel.Channel;
 import io.netty.handler.codec.http.*;
 import io.netty.handler.codec.http.cookie.Cookie;
 import io.webby.auth.CookieUtil;
-import io.webby.auth.session.Session;
+import io.webby.auth.session.SessionModel;
 import io.webby.auth.user.UserModel;
 import io.webby.netty.HttpConst;
 import io.webby.netty.intercept.attr.Attributes;
@@ -142,7 +142,7 @@ public class DefaultHttpRequestEx extends DefaultFullHttpRequest implements Muta
     }
 
     @Override
-    public @NotNull Session session() {
+    public @NotNull <S extends SessionModel> S session() {
         return attrOrDie(Attributes.Session);
     }
 

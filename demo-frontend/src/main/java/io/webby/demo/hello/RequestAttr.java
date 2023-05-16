@@ -1,6 +1,6 @@
 package io.webby.demo.hello;
 
-import io.webby.auth.session.Session;
+import io.webby.auth.session.SessionModel;
 import io.webby.auth.user.UserModel;
 import io.webby.netty.intercept.attr.Attributes;
 import io.webby.netty.request.HttpRequestEx;
@@ -13,7 +13,7 @@ public class RequestAttr {
     @GET(url = "/attr/get")
     public String attributes(@NotNull HttpRequestEx request) {
         Object stats = request.attr(Attributes.Stats);
-        Session session = request.session();
+        SessionModel session = request.session();
         UserModel user = request.user();
         return "stats:%s, session:%s, user:%s".formatted(
             stats != null ? stats.getClass().getSimpleName() : null,

@@ -2,7 +2,7 @@ package io.webby.netty.request;
 
 import io.netty.handler.codec.http.FullHttpRequest;
 import io.netty.handler.codec.http.cookie.Cookie;
-import io.webby.auth.session.Session;
+import io.webby.auth.session.SessionModel;
 import io.webby.auth.user.UserModel;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
@@ -51,7 +51,7 @@ public interface HttpRequestEx extends FullHttpRequest {
 
     @NotNull List<Cookie> cookies();
 
-    @NotNull Session session();
+    @NotNull <S extends SessionModel> S session();
 
     boolean isAuthenticated();
 

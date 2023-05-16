@@ -15,18 +15,18 @@ import java.time.temporal.ChronoUnit;
 import java.util.Objects;
 
 @Model(exposeAs = SessionModel.class, javaName = "Session")
-public class Session implements SessionModel {
+public class DefaultSession implements SessionModel {
     protected long sessionId;
     protected final @NotNull @Sql.Null ForeignInt<UserModel> user;
     protected final @NotNull Instant createdAt;
     protected final @NotNull String userAgent;
     protected final @Nullable @Sql.Null String ipAddress;
 
-    protected Session(long sessionId,
-                      @NotNull ForeignInt<UserModel> user,
-                      @NotNull Instant createdAt,
-                      @NotNull String userAgent,
-                      @Nullable String ipAddress) {
+    protected DefaultSession(long sessionId,
+                             @NotNull ForeignInt<UserModel> user,
+                             @NotNull Instant createdAt,
+                             @NotNull String userAgent,
+                             @Nullable String ipAddress) {
         this.sessionId = sessionId;
         this.user = user;
         this.createdAt = createdAt;
@@ -34,15 +34,15 @@ public class Session implements SessionModel {
         this.ipAddress = ipAddress;
     }
 
-    public static @NotNull Session newSession(long sessionId,
-                                              @NotNull ForeignInt<UserModel> user,
-                                              @NotNull Instant createdAt,
-                                              @NotNull String userAgent,
-                                              @Nullable String ipAddress) {
-        return new Session(sessionId, user, createdAt.truncatedTo(ChronoUnit.MILLIS), userAgent, ipAddress);
+    public static @NotNull DefaultSession newSession(long sessionId,
+                                                     @NotNull ForeignInt<UserModel> user,
+                                                     @NotNull Instant createdAt,
+                                                     @NotNull String userAgent,
+                                                     @Nullable String ipAddress) {
+        return new DefaultSession(sessionId, user, createdAt.truncatedTo(ChronoUnit.MILLIS), userAgent, ipAddress);
     }
 
-    public static @NotNull Session fromRequest(long sessionId, @NotNull HttpRequestEx request) {
+    public static @NotNull DefaultSession fromRequest(long sessionId, @NotNull HttpRequestEx request) {
         HttpHeaders headers = request.headers();
         String userAgent = headers.get(HttpConst.USER_AGENT, "");
         String ipAddress = request.remoteIPAddress();
@@ -74,12 +74,14 @@ public class Session implements SessionModel {
         return ipAddress;
     }
 
-    public @NotNull Session withUser(@NotNull UserModel user) {
-        return new Session(sessionId, ForeignInt.ofEntity(user.userId(), user), createdAt, userAgent, ipAddress);
+    @Override
+    public @NotNull DefaultSession withUser(@NotNull UserModel user) {
+        return new DefaultSession(sessionId, ForeignInt.ofEntity(user.userId(), user), createdAt, userAgent, ipAddress);
     }
 
-    public @NotNull Session withSessionId(long sessionId) {
-        return new Session(sessionId, user, createdAt, userAgent, ipAddress);
+    @Override
+    public @NotNull DefaultSession withSessionId(long sessionId) {
+        return new DefaultSession(sessionId, user, createdAt, userAgent, ipAddress);
     }
 
     @Override
@@ -95,7 +97,7 @@ public class Session implements SessionModel {
 
     @Override
     public boolean equals(Object obj) {
-        return obj instanceof Session that &&
+        return obj instanceof DefaultSession that &&
             sessionId == that.sessionId &&
             createdAt.equals(that.createdAt) &&
             userAgent.equals(that.userAgent) &&

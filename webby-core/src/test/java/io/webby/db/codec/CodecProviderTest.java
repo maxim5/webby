@@ -2,7 +2,7 @@ package io.webby.db.codec;
 
 import com.google.common.io.ByteStreams;
 import io.netty.buffer.ByteBuf;
-import io.webby.auth.session.Session;
+import io.webby.auth.session.DefaultSession;
 import io.webby.auth.user.DefaultUser;
 import io.webby.testing.Testing;
 import io.webby.testing.TestingModels;
@@ -25,8 +25,8 @@ public class CodecProviderTest {
         assertCodecRoundTrip(provider.getCodecOrDie(Long.class), 0L);
         assertCodecRoundTrip(provider.getCodecOrDie(String.class), "");
         assertCodecRoundTrip(provider.getCodecOrDie(String.class), "foo");
-        assertCodecRoundTrip(provider.getCodecOrDie(Session.class), TestingModels.newSessionNow(123));
-        assertCodecRoundTrip(provider.getCodecOrDie(Session.class), TestingModels.newSessionNowWithoutIp(123));
+        assertCodecRoundTrip(provider.getCodecOrDie(DefaultSession.class), TestingModels.newSessionNow(123));
+        assertCodecRoundTrip(provider.getCodecOrDie(DefaultSession.class), TestingModels.newSessionNowWithoutIp(123));
         assertCodecRoundTrip(provider.getCodecOrDie(DefaultUser.class), TestingModels.newUser(0));
     }
 

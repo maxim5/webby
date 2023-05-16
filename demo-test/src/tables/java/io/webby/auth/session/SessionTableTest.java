@@ -13,8 +13,8 @@ import org.jetbrains.annotations.NotNull;
 import java.time.Instant;
 
 public class SessionTableTest
-        extends SqlDbTableTest<Session, SessionTable>
-        implements TableLongTest<Session, SessionTable> {
+        extends SqlDbTableTest<DefaultSession, SessionTable>
+        implements TableLongTest<DefaultSession, SessionTable> {
     @Override
     protected void setUp(@NotNull Connector connector) throws Exception {
         table = new SessionTable(connector);
@@ -29,13 +29,13 @@ public class SessionTableTest
     }
 
     @Override
-    public @NotNull Session createEntity(@NotNull Long key, int version) {
+    public @NotNull DefaultSession createEntity(@NotNull Long key, int version) {
         String ipAddress = version == 0 ? "127.0.0.1" : null;
-        return Session.newSession(key, ForeignInt.ofId(1), Instant.now(), String.valueOf(version), ipAddress);
+        return DefaultSession.newSession(key, ForeignInt.ofId(1), Instant.now(), String.valueOf(version), ipAddress);
     }
 
     @Override
-    public @NotNull Session copyEntityWithId(@NotNull Session session, long autoId) {
-        return Session.newSession(autoId, session.user(), session.createdAt(), session.userAgent(), session.ipAddress());
+    public @NotNull DefaultSession copyEntityWithId(@NotNull DefaultSession session, long autoId) {
+        return DefaultSession.newSession(autoId, session.user(), session.createdAt(), session.userAgent(), session.ipAddress());
     }
 }

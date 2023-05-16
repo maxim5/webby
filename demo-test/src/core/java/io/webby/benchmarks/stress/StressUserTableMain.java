@@ -3,7 +3,7 @@ package io.webby.benchmarks.stress;
 import com.google.inject.Injector;
 import io.webby.Webby;
 import io.webby.app.AppSettings;
-import io.webby.auth.session.Session;
+import io.webby.auth.session.DefaultSession;
 import io.webby.auth.user.DefaultUser;
 import io.webby.auth.user.UserAccess;
 import io.webby.auth.user.UserTable;
@@ -52,7 +52,7 @@ public class StressUserTableMain {
 
     private static @NotNull Connector initConnector() {
         AppSettings settings = Testing.defaultAppSettings();
-        settings.modelFilter().setCommonPackageOf(DefaultUser.class, Session.class);
+        settings.modelFilter().setCommonPackageOf(DefaultUser.class, DefaultSession.class);
         settings.storageSettings().enableSql(TestingProps.propsSqlSettings());
         settings.setProperty("db.sql.connection.expiration.millis", 10_000);
         Injector injector = Webby.getReady(settings, TestingModules.PERSISTENT_DB_CLEANER_MODULE);

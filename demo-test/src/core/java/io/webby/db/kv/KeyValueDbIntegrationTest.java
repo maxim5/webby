@@ -3,7 +3,7 @@ package io.webby.db.kv;
 import com.google.common.collect.Lists;
 import com.google.inject.Injector;
 import io.webby.app.AppSettings;
-import io.webby.auth.session.Session;
+import io.webby.auth.session.DefaultSession;
 import io.webby.auth.session.SessionManager;
 import io.webby.auth.user.DefaultUser;
 import io.webby.auth.user.UserAccess;
@@ -221,12 +221,13 @@ public class KeyValueDbIntegrationTest {
         SessionManager sessionManager = injector.getInstance(SessionManager.class);
         KeyValueFactory dbFactory = injector.getInstance(KeyValueFactory.class);
 
-        Session newSession = sessionManager.createNewSession(HttpRequestBuilder.get("/").ex());
+        DefaultSession newSession = (DefaultSession) sessionManager.createNewSession(HttpRequestBuilder.get("/").ex());
         String cookie = sessionManager.encodeSessionForCookie(newSession);
-        Session existingSession = sessionManager.getSessionOrNull(cookie);
+        DefaultSession existingSession = (DefaultSession) sessionManager.getSessionOrNull(cookie);
         assertEquals(newSession, existingSession);
 
-        try (KeyValueDb<Long, Session> db = dbFactory.getDb(DbOptions.of(Session.DB_NAME, Long.class, Session.class))) {
+        DbOptions<Long, DefaultSession> options = DbOptions.of(DefaultSession.DB_NAME, Long.class, DefaultSession.class);
+        try (KeyValueDb<Long, DefaultSession> db = dbFactory.getDb(options)) {
             assertEqualsTo(db, Map.of(newSession.sessionId(), newSession));
         }
     }
@@ -236,9 +237,9 @@ public class KeyValueDbIntegrationTest {
     public void multi_session_sql_compatible(DbType dbType) {
         KeyValueFactory dbFactory = setupFactory(dbType);
 
-        DbOptions<Long, Session> options = DbOptions.of(Session.DB_NAME, Long.class, Session.class);
-        try (KeyValueDb<Long, Session> db = dbFactory.getDb(options)) {
-            runMultiTest(db, 123L, Session.fromRequest(123, HttpRequestBuilder.get("/foo").ex()));
+        DbOptions<Long, DefaultSession> options = DbOptions.of(DefaultSession.DB_NAME, Long.class, DefaultSession.class);
+        try (KeyValueDb<Long, DefaultSession> db = dbFactory.getDb(options)) {
+            runMultiTest(db, 123L, DefaultSession.fromRequest(123, HttpRequestBuilder.get("/foo").ex()));
         }
     }
 
@@ -247,13 +248,13 @@ public class KeyValueDbIntegrationTest {
     public void multi_session_forced_key_value(DbType dbType) {
         KeyValueFactory dbFactory = setupFactory(dbType);
 
-        DbOptions<Integer, Session> options = DbOptions.of("my-sessions", Integer.class, Session.class);
-        try (KeyValueDb<Integer, Session> db = dbFactory.getDb(options)) {
+        DbOptions<Integer, DefaultSession> options = DbOptions.of("my-sessions", Integer.class, DefaultSession.class);
+        try (KeyValueDb<Integer, DefaultSession> db = dbFactory.getDb(options)) {
             runMultiTest(db,
                          Integer.MIN_VALUE,
                          Integer.MAX_VALUE,
-                         Session.fromRequest(Integer.MIN_VALUE, HttpRequestBuilder.get("/foo").ex()),
-                         Session.fromRequest(Integer.MAX_VALUE, HttpRequestBuilder.post("/bar").ex()));
+                         DefaultSession.fromRequest(Integer.MIN_VALUE, HttpRequestBuilder.get("/foo").ex()),
+                         DefaultSession.fromRequest(Integer.MAX_VALUE, HttpRequestBuilder.post("/bar").ex()));
         }
     }
 

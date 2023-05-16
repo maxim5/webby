@@ -14,15 +14,19 @@ import org.jetbrains.annotations.Nullable;
 
 import java.security.SecureRandom;
 
+import static io.webby.util.base.EasyCast.castAny;
+
 public class KeyValueSessionStore implements SessionStore {
-    protected final KeyValueDb<Long, Session> db;
-    protected final KeyValueAutoRetryInserter<Long, Session> inserter;
+    protected final KeyValueDb<Long, SessionModel> db;
+    protected final KeyValueAutoRetryInserter<Long, SessionModel> inserter;
 
     @Inject
-    public KeyValueSessionStore(@NotNull Settings settings, @NotNull KeyValueFactory factory) throws Exception {
+    public KeyValueSessionStore(@NotNull Settings settings,
+                                @NotNull Class<? extends SessionModel> sessionClass,
+                                @NotNull KeyValueFactory factory) throws Exception {
         boolean randomIds = settings.getBoolProperty("session.id.generator.random.enabled", true);
         int maxAttempts = settings.getIntProperty("session.id.generator.max.attempts", 5);
-        db = factory.getDb(DbOptions.of(Session.DB_NAME, Long.class, Session.class));
+        db = castAny(factory.getDb(DbOptions.of(DefaultSession.DB_NAME, Long.class, sessionClass)));
         LongIdGenerator generator = randomIds ?
             LongIdGenerator.securePositiveRandom(SecureRandom.getInstance("SHA1PRNG")) :
             LongIdGenerator.autoIncrement(() -> db.size() + 1);
@@ -35,18 +39,18 @@ public class KeyValueSessionStore implements SessionStore {
     }
 
     @Override
-    public @Nullable Session getSessionByIdOrNull(long sessionId) {
+    public @Nullable SessionModel getSessionByIdOrNull(long sessionId) {
         return db.get(sessionId);
     }
 
     @Override
-    public @NotNull Session createSessionAutoId(@NotNull HttpRequestEx request) {
-        Pair<Long, Session> inserted = inserter.insertOrDie(sessionId -> Session.fromRequest(sessionId, request));
+    public @NotNull SessionModel createSessionAutoId(@NotNull HttpRequestEx request) {
+        Pair<Long, SessionModel> inserted = inserter.insertOrDie(sessionId -> DefaultSession.fromRequest(sessionId, request));
         return inserted.second();
     }
 
     @Override
-    public void updateSessionById(@NotNull Session session) {
+    public void updateSessionById(@NotNull SessionModel session) {
         db.set(session.sessionId(), session);
     }
 }

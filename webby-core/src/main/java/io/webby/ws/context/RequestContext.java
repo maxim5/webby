@@ -3,7 +3,7 @@ package io.webby.ws.context;
 import io.netty.handler.codec.http.websocketx.BinaryWebSocketFrame;
 import io.netty.handler.codec.http.websocketx.TextWebSocketFrame;
 import io.netty.handler.codec.http.websocketx.WebSocketFrame;
-import io.webby.auth.session.Session;
+import io.webby.auth.session.SessionModel;
 import io.webby.auth.user.UserModel;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
@@ -11,11 +11,11 @@ import org.jetbrains.annotations.Nullable;
 public record RequestContext(long requestId,
                              @NotNull WebSocketFrame requestFrame,
                              @NotNull ClientInfo clientInfo) implements BaseRequestContext {
-    public @Nullable Session sessionOrNull() {
+    public @Nullable SessionModel sessionOrNull() {
         return clientInfo.sessionOrNull();
     }
 
-    public @NotNull Session sessionOrDie() {
+    public @NotNull SessionModel sessionOrDie() {
         return clientInfo.sessionOrDie();
     }
 

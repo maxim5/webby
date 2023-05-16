@@ -7,9 +7,9 @@ import org.jetbrains.annotations.Nullable;
 public interface SessionStore {
     int size();
 
-    @Nullable Session getSessionByIdOrNull(long sessionId);
+    @Nullable SessionModel getSessionByIdOrNull(long sessionId);
 
-    @NotNull Session createSessionAutoId(@NotNull HttpRequestEx request);
+    @NotNull SessionModel createSessionAutoId(@NotNull HttpRequestEx request);
 
-    void updateSessionById(@NotNull Session session);
+    void updateSessionById(@NotNull SessionModel session);
 }

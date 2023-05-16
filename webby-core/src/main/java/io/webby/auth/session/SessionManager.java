@@ -40,19 +40,19 @@ public class SessionManager {
         this.store = store;
     }
 
-    public @NotNull Session getOrCreateSession(@NotNull HttpRequestEx request, @Nullable Cookie cookie) {
-        Session session = getSessionOrNull(cookie);
+    public @NotNull SessionModel getOrCreateSession(@NotNull HttpRequestEx request, @Nullable Cookie cookie) {
+        SessionModel session = getSessionOrNull(cookie);
         if (session == null) {
             return createNewSession(request);
         }
         return session;
     }
 
-    public @Nullable Session getSessionOrNull(@Nullable Cookie cookie) {
+    public @Nullable SessionModel getSessionOrNull(@Nullable Cookie cookie) {
         return cookie == null ? null : getSessionOrNull(cookie.value());
     }
 
-    public @Nullable Session getSessionOrNull(@Nullable String cookieValue) {
+    public @Nullable SessionModel getSessionOrNull(@Nullable String cookieValue) {
         if (cookieValue == null) {
             return null;
         }
@@ -65,18 +65,18 @@ public class SessionManager {
         }
     }
 
-    public @NotNull Session createNewSession(@NotNull HttpRequestEx request) {
+    public @NotNull SessionModel createNewSession(@NotNull HttpRequestEx request) {
         return store.createSessionAutoId(request);
     }
 
-    public @NotNull Session addUserOrDie(@NotNull Session session, @NotNull UserModel user) {
+    public @NotNull SessionModel addUserOrDie(@NotNull SessionModel session, @NotNull UserModel user) {
         assert !session.hasUser() : "Session already has a user: session=%s user=%s".formatted(session, user);
-        Session newSession = session.withUser(user);
+        SessionModel newSession = session.withUser(user);
         store.updateSessionById(newSession);
         return newSession;
     }
 
-    public @NotNull String encodeSessionForCookie(@NotNull Session session) {
+    public @NotNull String encodeSessionForCookie(@NotNull SessionModel session) {
         return encodeSessionId(session.sessionId());
     }
 

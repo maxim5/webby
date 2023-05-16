@@ -1,6 +1,6 @@
 package io.webby.demo;
 
-import io.webby.auth.session.Session;
+import io.webby.auth.session.DefaultSession;
 import io.webby.auth.user.DefaultUser;
 import io.webby.db.model.BlobKv;
 import io.webby.demo.model.*;
@@ -12,7 +12,7 @@ public class DemoTablesCodegenMain {
     private static final String DESTINATION_DIRECTORY = "demo-frontend/build/generated/sources/orm";
     private static final RunInputs RUN_INPUTS = RunInputs.of(
         ModelInput.of(DefaultUser.class),
-        ModelInput.of(Session.class),
+        ModelInput.of(DefaultSession.class),
         ModelInput.of(BlobKv.class),
 
         ModelInput.of(PrimitiveModel.class),

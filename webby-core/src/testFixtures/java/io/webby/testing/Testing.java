@@ -6,7 +6,7 @@ import com.google.inject.util.Modules;
 import io.webby.Webby;
 import io.webby.app.AppLifetime;
 import io.webby.app.AppSettings;
-import io.webby.auth.session.Session;
+import io.webby.auth.session.DefaultSession;
 import io.webby.auth.user.DefaultUser;
 import io.webby.common.ClasspathScanner;
 import io.webby.db.model.BlobKv;
@@ -32,7 +32,7 @@ public class Testing {
     public static final String DEFAULT_VIEW_PATH = ".";
     public static final String DEFAULT_USER_CONTENT_PATH = ".";
 
-    public static final List<Class<?>> CORE_MODELS = List.of(Session.class, DefaultUser.class, BlobKv.class);
+    public static final List<Class<?>> CORE_MODELS = List.of(DefaultSession.class, DefaultUser.class, BlobKv.class);
 
     public static @NotNull AppSettings defaultAppSettings() {
         AppSettings settings = new AppSettings();

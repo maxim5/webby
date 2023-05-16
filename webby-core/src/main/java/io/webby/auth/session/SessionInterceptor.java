@@ -40,13 +40,13 @@ public class SessionInterceptor implements Interceptor {
                 .filter(cookie -> cookie.name().equals(COOKIE_ID))
                 .findFirst()
                 .orElse(null);
-        Session session = sessionManager.getOrCreateSession(request, sessionCookie);
+        SessionModel session = sessionManager.getOrCreateSession(request, sessionCookie);
         request.setAttr(Attributes.Session, session);
     }
 
     @Override
     public @NotNull HttpResponse exit(@NotNull MutableHttpRequestEx request, @NotNull HttpResponse response) {
-        Session session = request.session();
+        SessionModel session = request.session();
         if (shouldRefresh(session)) {
             String cookieValue = sessionManager.encodeSessionForCookie(session);
             Cookie cookie = new DefaultCookie(COOKIE_ID, cookieValue);
@@ -58,7 +58,7 @@ public class SessionInterceptor implements Interceptor {
     }
 
     @VisibleForTesting
-    static boolean shouldRefresh(@NotNull Session session) {
+    static boolean shouldRefresh(@NotNull SessionModel session) {
         long createdMillis = session.createdAt().getEpochSecond() * 1000;
         long now = System.currentTimeMillis();
         return createdMillis + JUST_CREATED_MILLIS >= now || createdMillis + TIME_TO_REFRESH_MILLIS < now;

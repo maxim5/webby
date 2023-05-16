@@ -15,13 +15,13 @@ import java.time.Instant;
 
 import static io.webby.db.codec.standard.Codecs.*;
 
-public class SessionCodec implements Codec<Session> {
-    public static final SessionCodec DEFAULT_INSTANCE = new SessionCodec(Instant64Codec.INSTANCE);
+public class DefaultSessionCodec implements Codec<DefaultSession> {
+    public static final DefaultSessionCodec DEFAULT_INSTANCE = new DefaultSessionCodec(Instant64Codec.INSTANCE);
 
     private final Codec<Instant> instantCodec;
     @Inject private Charset charset;
 
-    public SessionCodec(@NotNull Codec<Instant> instantCodec) {
+    public DefaultSessionCodec(@NotNull Codec<Instant> instantCodec) {
         this.instantCodec = instantCodec;
     }
 
@@ -31,14 +31,14 @@ public class SessionCodec implements Codec<Session> {
     }
 
     @Override
-    public int sizeOf(@NotNull Session instance) {
+    public int sizeOf(@NotNull DefaultSession instance) {
         return INT64_SIZE + INT32_SIZE + instantCodec.size().numBytes() +
                stringSize(instance.userAgent(), charset) +
                nullableStringSize(instance.ipAddress(), charset);
     }
 
     @Override
-    public int writeTo(@NotNull OutputStream output, @NotNull Session instance) throws IOException {
+    public int writeTo(@NotNull OutputStream output, @NotNull DefaultSession instance) throws IOException {
         return writeLong64(instance.sessionId(), output) +
                writeInt32(instance.userId(), output) +
                instantCodec.writeTo(output, instance.createdAt()) +
@@ -47,12 +47,12 @@ public class SessionCodec implements Codec<Session> {
     }
 
     @Override
-    public @NotNull Session readFrom(@NotNull InputStream input, int available) throws IOException {
+    public @NotNull DefaultSession readFrom(@NotNull InputStream input, int available) throws IOException {
         long sessionId = readLong64(input);
         int userId = readInt32(input);
         Instant created = instantCodec.readFrom(input, available);
         String userAgent = readString(input, charset);
         String ipAddress = readNullableString(input, charset);
-        return new Session(sessionId, ForeignInt.ofId(userId), created, userAgent, ipAddress);
+        return new DefaultSession(sessionId, ForeignInt.ofId(userId), created, userAgent, ipAddress);
     }
 }

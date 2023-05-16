@@ -33,4 +33,8 @@ public interface SessionModel extends LongAutoIdModel {
     @NotNull String userAgent();
 
     @Nullable String ipAddress();
+
+    @NotNull SessionModel withUser(@NotNull UserModel user);
+
+    @NotNull SessionModel withSessionId(long sessionId);
 }

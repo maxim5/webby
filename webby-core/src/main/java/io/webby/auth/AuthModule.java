@@ -27,9 +27,15 @@ public class AuthModule extends AbstractModule {
         bind(UserStore.class).to(isSqlEnabled ? SqlUserStore.class : KeyValueUserStore.class).asEagerSingleton();
     }
 
-    // TODO: detect user class automatically from settings/model setup?
+    // TODO: detect user/session class automatically from settings/model setup?
+
     @Provides
     public Class<? extends UserModel> userClass() {
         return DefaultUser.class;
+    }
+
+    @Provides
+    public Class<? extends SessionModel> sessionClass() {
+        return DefaultSession.class;
     }
 }
