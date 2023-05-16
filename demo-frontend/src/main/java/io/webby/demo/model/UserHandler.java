@@ -36,7 +36,7 @@ public class UserHandler {
         UserModel user = request.user();
         SessionModel session = request.session();
         if (!session.hasUser()) {
-            UserModel newUser = users.createUserAutoId(DefaultUser.newAuto(UserAccess.Simple));
+            UserModel newUser = users.createUserAutoId(DefaultUser.newUserData(UserAccess.Simple));
             return newUser.userId();
         } else {
             System.out.println(users.getUserByIdOrNull(session.user()));

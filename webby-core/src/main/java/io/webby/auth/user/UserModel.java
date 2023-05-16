@@ -5,7 +5,7 @@ import org.jetbrains.annotations.NotNull;
 
 import java.time.Instant;
 
-public interface UserModel extends IntAutoIdModel {
+public interface UserModel extends UserData, IntAutoIdModel {
     String DB_NAME = "user";
 
     int userId();
@@ -18,6 +18,4 @@ public interface UserModel extends IntAutoIdModel {
     @NotNull Instant createdAt();
 
     @NotNull UserAccess access();
-
-    @NotNull UserModel withUserId(int userId);
 }

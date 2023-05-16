@@ -26,7 +26,7 @@ public class DefaultUser implements UserModel {
         return new DefaultUser(userId, createdAt.truncatedTo(ChronoUnit.MILLIS), access);
     }
 
-    public static @NotNull DefaultUser newAuto(@NotNull UserAccess access) {
+    public static @NotNull UserData newUserData(@NotNull UserAccess access) {
         return newUser(AUTO_ID, Instant.now(), access);
     }
 
@@ -46,7 +46,8 @@ public class DefaultUser implements UserModel {
     }
 
     @Override
-    public @NotNull UserModel withUserId(int userId) {
+    public @NotNull DefaultUser toUserModel(int userId) {
+        assert isAutoId() : "DefaultUser is not a pure data object: " + this;
         return new DefaultUser(userId, createdAt, access);
     }
 

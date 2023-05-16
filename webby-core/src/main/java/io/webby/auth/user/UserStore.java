@@ -25,5 +25,5 @@ public interface UserStore {
         return getOrThrowNotFound(() -> getUserByIdOrNull(foreignId), "User not found: foreign_id=%s", foreignId);
     }
 
-    @NotNull UserModel createUserAutoId(@NotNull UserModel user);
+    @NotNull UserModel createUserAutoId(@NotNull UserData data);
 }
