@@ -9,11 +9,11 @@ import java.util.Objects;
 
 @Model(exposeAs = UserModel.class, javaName = "User")
 public class DefaultUser implements UserModel {
-    private int userId;
-    private final Instant createdAt;
-    private final UserAccess access;
+    protected int userId;
+    protected final @NotNull Instant createdAt;
+    protected final @NotNull UserAccess access;
 
-    public DefaultUser(int userId, @NotNull Instant createdAt, @NotNull UserAccess access) {
+    protected DefaultUser(int userId, @NotNull Instant createdAt, @NotNull UserAccess access) {
         assert userId == AUTO_ID || userId > 0: "Invalid userId=%d".formatted(userId);
         this.createdAt = createdAt;
         this.userId = userId;
@@ -44,6 +44,17 @@ public class DefaultUser implements UserModel {
     }
 
     @Override
+    public void resetIdToAuto() {
+        userId = AUTO_ID;
+    }
+
+    @Override
+    public void setIfAutoIdOrDie(int newId) {
+        assert userId == AUTO_ID : "Failed to set auto-inc id to user: %s".formatted(this);
+        userId = newId;
+    }
+
+    @Override
     public boolean equals(Object obj) {
         return obj instanceof UserModel that &&
             userId == that.userId() &&
@@ -59,14 +70,5 @@ public class DefaultUser implements UserModel {
     @Override
     public String toString() {
         return "DefaultUser{%d: access=%s}".formatted(userId, access);
-    }
-
-    public void resetIdToAuto() {
-        userId = AUTO_ID;
-    }
-
-    public void setIfAutoIdOrDie(int newId) {
-        assert userId == AUTO_ID : "Failed to set auto-inc id to user: %s".formatted(this);
-        userId = newId;
     }
 }

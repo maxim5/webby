@@ -10,6 +10,7 @@ public interface UserModel extends IntAutoIdModel {
 
     int userId();
 
+    @Override
     default boolean isAutoId() {
         return userId() == AUTO_ID;
     }
