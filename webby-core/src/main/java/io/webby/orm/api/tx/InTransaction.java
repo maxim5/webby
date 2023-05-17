@@ -3,6 +3,8 @@ package io.webby.orm.api.tx;
 import io.webby.util.base.Unchecked;
 import io.webby.util.func.ThrowConsumer;
 import io.webby.util.func.ThrowFunction;
+import io.webby.util.func.ThrowRunnable;
+import io.webby.util.func.ThrowSupplier;
 import org.jetbrains.annotations.NotNull;
 
 import java.sql.Connection;
@@ -30,7 +32,23 @@ public class InTransaction<P> {
         }
     }
 
+    public void run(@NotNull ThrowRunnable<SQLException> action) {
+        try {
+            runChecked(action);
+        } catch (SQLException e) {
+            Unchecked.rethrow("Transaction failed", e);
+        }
+    }
+
     public <T> T run(@NotNull ThrowFunction<P, T, SQLException> action) {
+        try {
+            return runChecked(action);
+        } catch (SQLException e) {
+            return Unchecked.rethrow("Transaction failed", e);
+        }
+    }
+
+    public <T> T run(@NotNull ThrowSupplier<T, SQLException> action) {
         try {
             return runChecked(action);
         } catch (SQLException e) {
@@ -60,6 +78,19 @@ public class InTransaction<P> {
         runChecked(runner -> {
             action.accept(runner);
             return null;
+        });
+    }
+
+    public void runChecked(@NotNull ThrowRunnable<SQLException> action) throws SQLException {
+        runChecked(runner -> {
+            action.run();
+            return null;
+        });
+    }
+
+    public <T> T runChecked(@NotNull ThrowSupplier<T, SQLException> action) throws SQLException {
+        return runChecked(runner -> {
+            return action.get();
         });
     }
 }
