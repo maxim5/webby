@@ -11,7 +11,6 @@ import org.junit.jupiter.api.extension.RegisterExtension;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.EnumSource;
 
-import static io.webby.db.model.IntAutoIdModel.AUTO_ID;
 import static org.junit.jupiter.api.Assertions.*;
 
 @Tag("sql")
@@ -30,7 +29,7 @@ public class UserStoreIntegrationTest {
     @EnumSource(Scenario.class)
     public void create_one_user(Scenario scenario) {
         UserStore users = startup(scenario);
-        UserModel user = users.createUserAutoId(TestingModels.newUser(AUTO_ID));
+        UserModel user = users.createUserAutoId(DefaultUser.newUserData(UserAccess.Simple));
         assertTrue(user.userId() > 0);
         assertEquals(user, users.getUserByIdOrNull(user.userId()));
         assertNull(users.getUserByIdOrNull(0));
