@@ -5,6 +5,7 @@ import org.jetbrains.annotations.Nullable;
 
 import java.util.Objects;
 import java.util.concurrent.atomic.AtomicReference;
+import java.util.function.ToIntFunction;
 
 import static io.webby.util.base.EasyCast.castAny;
 
@@ -75,6 +76,10 @@ public final class ForeignInt<E> implements Foreign<Integer, E> {
     public void setEntityUnconditionally(@NotNull E entity) {
         assert isPresent() : "ForeignInt reference is empty, can't set the entity: " + entity;
         this.entity.set(entity);
+    }
+
+    public boolean isConsistent(@NotNull ToIntFunction<E> func) {
+        return entity.get() == null || id == func.applyAsInt(entity.get());
     }
 
     @Override

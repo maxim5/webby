@@ -5,6 +5,7 @@ import org.jetbrains.annotations.Nullable;
 
 import java.util.Objects;
 import java.util.concurrent.atomic.AtomicReference;
+import java.util.function.ToLongFunction;
 
 import static io.webby.util.base.EasyCast.castAny;
 
@@ -75,6 +76,10 @@ public final class ForeignLong<E> implements Foreign<Long, E> {
     public void setEntityUnconditionally(@NotNull E entity) {
         assert isPresent() : "ForeignLong reference is empty, can't set the entity: " + entity;
         this.entity.set(entity);
+    }
+
+    public boolean isConsistent(@NotNull ToLongFunction<E> func) {
+        return entity.get() == null || id == func.applyAsLong(entity.get());
     }
 
     @Override

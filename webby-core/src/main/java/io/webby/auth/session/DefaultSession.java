@@ -29,6 +29,7 @@ public class DefaultSession implements SessionModel {
                              @NotNull Instant createdAt,
                              @NotNull String userAgent,
                              @Nullable String ipAddress) {
+        assert user.isConsistent(UserModel::userId) : "Foreign user reference inconsistent: " + user;
         this.sessionId = sessionId;
         this.user = user;
         this.createdAt = createdAt;
