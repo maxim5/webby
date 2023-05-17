@@ -75,7 +75,7 @@ public class SessionManager {
     }
 
     public @NotNull SessionModel addUserOrDie(@NotNull SessionModel session, @NotNull UserModel user) {
-        assert !session.hasUser() : "Session already has a user: session=%s user=%s".formatted(session, user);
+        assert !session.hasUserId() : "Session already has a user: session=%s user=%s".formatted(session, user);
         SessionModel newSession = session.withUser(user);
         store.updateSessionById(newSession);
         return newSession;

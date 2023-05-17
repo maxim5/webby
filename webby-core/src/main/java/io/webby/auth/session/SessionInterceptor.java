@@ -37,11 +37,11 @@ public class SessionInterceptor implements Interceptor {
         log.at(Level.FINER).log("Request cookies: %s", cookies);
 
         Cookie sessionCookie = cookies.stream()
-                .filter(cookie -> cookie.name().equals(COOKIE_ID))
-                .findFirst()
-                .orElse(null);
+            .filter(cookie -> cookie.name().equals(COOKIE_ID))
+            .findFirst()
+            .orElse(null);
         SessionModel session = sessionManager.getOrCreateSession(request, sessionCookie);
-        request.setAttr(Attributes.Session, session);
+        request.setSession(session);
     }
 
     @Override

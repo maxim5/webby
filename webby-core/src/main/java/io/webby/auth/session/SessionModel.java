@@ -25,8 +25,12 @@ public interface SessionModel extends SessionData, LongAutoIdModel {
         return user().getIntId();
     }
 
-    default boolean hasUser() {
+    default boolean hasUserId() {
         return user().isPresent();
+    }
+
+    default boolean isAuthenticated() {
+        return hasUserId();
     }
 
     @NotNull Instant createdAt();

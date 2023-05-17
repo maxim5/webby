@@ -15,7 +15,8 @@ import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.EnumSource;
 
 import static com.google.common.truth.Truth.assertThat;
-import static org.junit.jupiter.api.Assertions.*;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 
 public class SessionManagerIntegrationTest {
     @RegisterExtension static final SqlDbSetupExtension SQL = SqlDbSetupExtension.fromProperties();
@@ -28,7 +29,7 @@ public class SessionManagerIntegrationTest {
     public void getOrCreateSession_null(Scenario scenario) {
         SessionManager manager = startup(scenario);
         SessionModel session = manager.getOrCreateSession(GET, null);
-        assertFalse(session.hasUser());
+        assertThat(session.hasUserId()).isFalse();
     }
 
     @ParameterizedTest
@@ -36,7 +37,7 @@ public class SessionManagerIntegrationTest {
     public void getOrCreateSession_invalid_cookie(Scenario scenario) {
         SessionManager manager = startup(scenario);
         SessionModel session = manager.getOrCreateSession(GET, new DefaultCookie("name", "foo"));
-        assertFalse(session.hasUser());
+        assertThat(session.hasUserId()).isFalse();
     }
 
     @ParameterizedTest
@@ -54,19 +55,19 @@ public class SessionManagerIntegrationTest {
     public void addUserOrDie_no_user(Scenario scenario) {
         SessionManager manager = startup(scenario);
         SessionModel session = manager.createNewSession(GET);
-        assertFalse(session.hasUser());
+        assertThat(session.hasUserId()).isFalse();
 
         SessionModel newSession = manager.addUserOrDie(session, DUMMY_USER);
         assertEquals(newSession.sessionId(), session.sessionId());
         assertEquals(newSession.createdAt(), session.createdAt());
         assertEquals(newSession.userAgent(), session.userAgent());
         assertEquals(newSession.ipAddress(), session.ipAddress());
-        assertTrue(newSession.hasUser());
+        assertThat(newSession.hasUserId()).isTrue();
 
         String encoded = manager.encodeSessionForCookie(newSession);
         SessionModel returned = manager.getOrCreateSession(GET, new DefaultCookie("name", encoded));
         assertThat(newSession).isEqualTo(returned);
-        assertTrue(returned.hasUser());
+        assertThat(returned.hasUserId()).isTrue();
     }
 
     @ParameterizedTest
@@ -75,7 +76,7 @@ public class SessionManagerIntegrationTest {
         SessionManager manager = startup(scenario);
         SessionModel session = manager.createNewSession(GET);
         SessionModel newSession = manager.addUserOrDie(session, DUMMY_USER);
-        assertTrue(newSession.hasUser());
+        assertThat(newSession.hasUserId()).isTrue();
 
         assertThrows(AssertionError.class, () -> manager.addUserOrDie(newSession, DUMMY_USER));
     }

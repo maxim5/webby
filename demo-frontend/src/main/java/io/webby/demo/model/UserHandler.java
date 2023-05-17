@@ -35,7 +35,7 @@ public class UserHandler {
     public Object create(@NotNull HttpRequestEx request) {
         UserModel user = request.user();
         SessionModel session = request.session();
-        if (!session.hasUser()) {
+        if (!session.isAuthenticated()) {
             UserModel newUser = users.createUserAutoId(DefaultUser.newUserData(UserAccess.Simple));
             return newUser.userId();
         } else {

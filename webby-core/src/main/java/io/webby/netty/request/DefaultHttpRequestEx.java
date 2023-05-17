@@ -105,6 +105,12 @@ public class DefaultHttpRequestEx extends DefaultFullHttpRequest implements Muta
         }
     }
 
+    public @NotNull DefaultHttpRequestEx withHeaders(@NotNull Map<CharSequence, Object> headers) {
+        HttpHeaders requestHeaders = headers();
+        headers.forEach(requestHeaders::add);
+        return this;
+    }
+
     @Override
     public @Nullable Object attr(int position) {
         return attributes[position];
@@ -129,10 +135,8 @@ public class DefaultHttpRequestEx extends DefaultFullHttpRequest implements Muta
         attributes[position] = attr;
     }
 
-    public @NotNull DefaultHttpRequestEx withHeaders(@NotNull Map<CharSequence, Object> headers) {
-        HttpHeaders requestHeaders = headers();
-        headers.forEach(requestHeaders::add);
-        return this;
+    private void forceSetAttr(int position, @Nullable Object attr) {
+        attributes[position] = attr;
     }
 
     @Override
@@ -146,9 +150,8 @@ public class DefaultHttpRequestEx extends DefaultFullHttpRequest implements Muta
         return attrOrDie(Attributes.Session);
     }
 
-    @Override
-    public boolean isAuthenticated() {
-        return session().hasUser();
+    protected @Nullable SessionModel sessionOrNull() {
+        return castAny(attr(Attributes.Session));
     }
 
     @Override
@@ -159,6 +162,35 @@ public class DefaultHttpRequestEx extends DefaultFullHttpRequest implements Muta
     @Override
     public @NotNull <U extends UserModel> U userOrDie() {
         return attrOrDie(Attributes.User);
+    }
+
+    @Override
+    public boolean isAuthenticated() {
+        SessionModel session = sessionOrNull();
+        return session != null && session.isAuthenticated();
+    }
+
+    @Override
+    public void authenticate(@NotNull UserModel user) {
+        SessionModel session = session();
+        assert !session.isAuthenticated() : "Current session is already authenticated: " + session;
+        assert user() == null : "Current session already has a user: " + user();
+        forceSetAttr(Attributes.User, user);
+        forceSetAttr(Attributes.Session, session.withUser(user));
+    }
+
+    @Override
+    public void setSession(@NotNull SessionModel session) {
+        assert user() == null : "Current session already has a user: " + user();
+        setAttr(Attributes.Session, session);
+    }
+
+    @Override
+    public void setUser(@NotNull UserModel user) {
+        SessionModel session = session();
+        assert session.isAuthenticated() && session.userId() == user.userId() :
+            "Provided user is inconsistent with session: user=%s session=%s".formatted(user, session);
+        setAttr(Attributes.User, user);
     }
 
     private @NotNull QueryParams parseQuery() {

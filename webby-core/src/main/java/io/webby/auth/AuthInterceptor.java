@@ -22,9 +22,9 @@ public class AuthInterceptor implements AdvancedInterceptor {
     public void enter(@NotNull MutableHttpRequestEx request, @NotNull Endpoint endpoint) throws ServeException {
         UserModel user = null;
         SessionModel session = request.session();
-        if (session.hasUser()) {
-            user = users.getUserByIdOrNull(session.user());
-            request.setNullableAttr(Attributes.User, user);
+        if (session.isAuthenticated()) {
+            user = users.getUserByIdOr404(session.user());  // TODO: invalidate the session instead of throwing 404
+            request.setUser(user);
         }
 
         EndpointOptions options = endpoint.options();
