@@ -143,31 +143,37 @@ public class Testing {
     private static class LazyInternalJson implements Json {
         @Override
         public @NotNull Charset charset() {
+            assertNotNull(Internals.injector, "Test Guice Injector is not initialized");
             return Internals.charset();
         }
 
         @Override
         public @NotNull Marshaller withCustomCharset(@NotNull Charset charset) {
+            assertNotNull(Internals.injector, "Test Guice Injector is not initialized");
             return Internals.json().withCustomCharset(charset);
         }
 
         @Override
         public void writeBytes(@NotNull OutputStream output, @NotNull Object instance) throws IOException {
+            assertNotNull(Internals.injector, "Test Guice Injector is not initialized");
             Internals.json().writeBytes(output, instance);
         }
 
         @Override
         public <T> @NotNull T readBytes(@NotNull InputStream input, @NotNull Class<T> klass) throws IOException {
+            assertNotNull(Internals.injector, "Test Guice Injector is not initialized");
             return Internals.json().readBytes(input, klass);
         }
 
         @Override
         public void writeChars(@NotNull Writer writer, @NotNull Object instance) throws IOException {
+            assertNotNull(Internals.injector, "Test Guice Injector is not initialized");
             Internals.json().writeChars(writer, instance);
         }
 
         @Override
         public <T> @NotNull T readChars(@NotNull Reader reader, @NotNull Class<T> klass) throws IOException {
+            assertNotNull(Internals.injector, "Test Guice Injector is not initialized");
             return Internals.json().readChars(reader, klass);
         }
     }
