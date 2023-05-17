@@ -36,6 +36,6 @@ public class SqlSessionStore implements SessionStore {
 
     @Override
     public void updateSessionById(@NotNull SessionModel session) {
-        table.updateByPk(session);
+        table.updateByPkOrInsert(session);
     }
 }
