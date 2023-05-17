@@ -1,6 +1,7 @@
 package io.webby.testing;
 
 import com.google.errorprone.annotations.CanIgnoreReturnValue;
+import io.webby.util.base.Unchecked;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
@@ -29,14 +30,7 @@ public class ForcedFailure {
     public void throwIfSet() {
         Throwable throwable = failure.get();
         if (throwable != null) {
-            ForcedFailure.throwException(throwable);
+            Unchecked.throwAny(throwable);
         }
-    }
-
-    // Idea taken from
-    // https://stackoverflow.com/questions/4519557/is-there-a-way-to-throw-an-exception-without-adding-the-throws-declaration
-    @SuppressWarnings("unchecked")
-    private static <T extends Throwable> void throwException(Throwable exception) throws T {
-        throw (T) exception;
     }
 }
