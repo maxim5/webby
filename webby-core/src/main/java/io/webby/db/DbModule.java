@@ -2,6 +2,7 @@ package io.webby.db;
 
 import com.google.inject.AbstractModule;
 import io.webby.app.AppSettings;
+import io.webby.common.InjectorHelper;
 import io.webby.db.cache.BackgroundCacheCleaner;
 import io.webby.db.codec.CodecProvider;
 import io.webby.db.content.FileSystemStorage;
@@ -17,6 +18,11 @@ import io.webby.db.kv.redis.RedisSettings;
 import io.webby.db.sql.ConnectionPool;
 import io.webby.db.sql.DDL;
 import io.webby.db.sql.TableManager;
+import io.webby.db.sql.tx.NoTxRunner;
+import io.webby.db.sql.tx.TxRunner;
+import io.webby.db.sql.tx.TxRunnerImpl;
+import io.webby.orm.api.Connector;
+import io.webby.orm.api.Engine;
 import org.jetbrains.annotations.NotNull;
 
 public class DbModule extends AbstractModule {
@@ -49,6 +55,12 @@ public class DbModule extends AbstractModule {
             bind(ConnectionPool.class).asEagerSingleton();
             bind(TableManager.class).asEagerSingleton();
             bind(DDL.class).asEagerSingleton();
+
+            bind(Connector.class).toProvider(InjectorHelper.asProvider(TableManager.class, TableManager::connector)).asEagerSingleton();
+            bind(Engine.class).toProvider(InjectorHelper.asProvider(TableManager.class, TableManager::engine)).asEagerSingleton();
+            bind(TxRunner.class).to(TxRunnerImpl.class).asEagerSingleton();
+        } else {
+            bind(TxRunner.class).to(NoTxRunner.class);
         }
 
         bind(DbReadiness.class).asEagerSingleton();

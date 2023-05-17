@@ -99,6 +99,18 @@ public class InjectorHelper {
         return ensureSingletonProvider(klass).get();
     }
 
+    public static <T, P> Provider<T> asProvider(@NotNull Class<P> klass, @NotNull Function<P, T> getter) {
+        return new Provider<>() {
+            @Inject private Injector injector;
+
+            @Override
+            public T get() {
+                P instance = injector.getInstance(klass);
+                return getter.apply(instance);
+            }
+        };
+    }
+
     private static @NotNull <T> Binding<T> constantBinding(@NotNull Key<T> key, @NotNull Binding<T> binding) {
         T instance = binding.getProvider().get();
         return new Binding<>() {
