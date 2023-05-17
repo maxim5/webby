@@ -11,10 +11,6 @@ import io.webby.orm.api.TableMeta;
 import io.webby.orm.api.query.DropTableQuery;
 import org.jetbrains.annotations.NotNull;
 
-import java.sql.SQLException;
-
-import static io.webby.util.base.Unchecked.rethrow;
-
 public class TestingPersistentDbTableCleaner {
     @Inject
     public TestingPersistentDbTableCleaner(@NotNull Settings settings, @NotNull EventBus eventBus, @NotNull Injector injector) {
@@ -28,11 +24,9 @@ public class TestingPersistentDbTableCleaner {
                 }
 
                 private void dropAllTablesIfExist() {
-                    try {
-                        runner().runAdminInTransaction(admin -> admin.ignoringForeignKeyChecks(this::dropAllTablesImpl));
-                    } catch (SQLException e) {
-                        rethrow(e);
-                    }
+                    runner().adminTx().run(admin -> {
+                        admin.ignoringForeignKeyChecks(this::dropAllTablesImpl);
+                    });
                 }
 
                 private void dropAllTablesImpl(@NotNull DbAdmin admin) {

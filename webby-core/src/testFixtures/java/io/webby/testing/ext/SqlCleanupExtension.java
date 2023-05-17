@@ -10,7 +10,6 @@ import org.junit.jupiter.api.extension.BeforeAllCallback;
 import org.junit.jupiter.api.extension.BeforeEachCallback;
 import org.junit.jupiter.api.extension.ExtensionContext;
 
-import java.sql.SQLException;
 import java.util.List;
 
 public class SqlCleanupExtension implements BeforeAllCallback, BeforeEachCallback {
@@ -27,8 +26,8 @@ public class SqlCleanupExtension implements BeforeAllCallback, BeforeEachCallbac
     }
 
     @Override
-    public void beforeAll(ExtensionContext context) throws SQLException {
-        connector.runner().runAdminInTransaction(admin -> {
+    public void beforeAll(ExtensionContext context) {
+        connector.runner().adminTx().run(admin -> {
             for (TableMeta table : tables) {
                 admin.dropTable(DropTableQuery.of(table).ifExists());
                 admin.createTable(CreateTableQuery.of(table).ifNotExists());
@@ -37,8 +36,8 @@ public class SqlCleanupExtension implements BeforeAllCallback, BeforeEachCallbac
     }
 
     @Override
-    public void beforeEach(ExtensionContext context) throws SQLException {
-        connector.runner().runAdminInTransaction(admin -> {
+    public void beforeEach(ExtensionContext context) {
+        connector.runner().adminTx().run(admin -> {
             for (TableMeta table : tables) {
                 admin.truncateTable(TruncateTableQuery.of(table));
             }
