@@ -25,11 +25,15 @@ public class SqlCleanupExtension implements BeforeAllCallback, BeforeEachCallbac
         return new SqlCleanupExtension(connector, List.of(table));
     }
 
+    public static @NotNull SqlCleanupExtension of(@NotNull Connector connector, @NotNull TableMeta @NotNull ... tables) {
+        return new SqlCleanupExtension(connector, List.of(tables));
+    }
+
     @Override
     public void beforeAll(ExtensionContext context) {
         connector.runner().adminTx().run(admin -> {
             for (TableMeta table : tables) {
-                admin.dropTable(DropTableQuery.of(table).ifExists());
+                admin.ignoringForeignKeyChecks().dropTable(DropTableQuery.of(table).ifExists().cascade());
                 admin.createTable(CreateTableQuery.of(table).ifNotExists());
             }
         });
@@ -39,7 +43,7 @@ public class SqlCleanupExtension implements BeforeAllCallback, BeforeEachCallbac
     public void beforeEach(ExtensionContext context) {
         connector.runner().adminTx().run(admin -> {
             for (TableMeta table : tables) {
-                admin.truncateTable(TruncateTableQuery.of(table));
+                admin.ignoringForeignKeyChecks().truncateTable(TruncateTableQuery.of(table));
             }
         });
     }

@@ -6,7 +6,6 @@ import com.google.inject.Injector;
 import io.webby.app.Settings;
 import io.webby.db.sql.DDL;
 import io.webby.db.sql.TableManager;
-import io.webby.orm.api.DbAdmin;
 import io.webby.orm.api.TableMeta;
 import io.webby.orm.api.query.DropTableQuery;
 import org.jetbrains.annotations.NotNull;
@@ -25,14 +24,10 @@ public class TestingPersistentDbTableCleaner {
 
                 private void dropAllTablesIfExist() {
                     runner().adminTx().run(admin -> {
-                        admin.ignoringForeignKeyChecks(this::dropAllTablesImpl);
+                        for (TableMeta table : getAllTables()) {
+                            admin.ignoringForeignKeyChecks().dropTable(DropTableQuery.of(table).ifExists().cascade());
+                        }
                     });
-                }
-
-                private void dropAllTablesImpl(@NotNull DbAdmin admin) {
-                    for (TableMeta table : getAllTables()) {
-                        admin.dropTable(DropTableQuery.of(table).ifExists().cascade());
-                    }
                 }
             };
         }

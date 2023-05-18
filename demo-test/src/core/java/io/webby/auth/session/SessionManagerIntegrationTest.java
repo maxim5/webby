@@ -2,14 +2,18 @@ package io.webby.auth.session;
 
 import io.netty.handler.codec.http.cookie.DefaultCookie;
 import io.webby.app.AppSettings;
-import io.webby.auth.user.UserModel;
+import io.webby.auth.user.DefaultUser;
+import io.webby.auth.user.UserTable;
 import io.webby.netty.request.HttpRequestEx;
 import io.webby.testing.HttpRequestBuilder;
 import io.webby.testing.Testing;
 import io.webby.testing.TestingModels;
 import io.webby.testing.TestingStorage;
+import io.webby.testing.ext.SqlCleanupExtension;
 import io.webby.testing.ext.SqlDbSetupExtension;
 import org.jetbrains.annotations.NotNull;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.extension.RegisterExtension;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.EnumSource;
@@ -18,11 +22,18 @@ import static com.google.common.truth.Truth.assertThat;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 
+@Tag("sql")
 public class SessionManagerIntegrationTest {
-    @RegisterExtension static final SqlDbSetupExtension SQL = SqlDbSetupExtension.fromProperties();
+    @RegisterExtension static final SqlDbSetupExtension SQL = SqlDbSetupExtension.fromProperties().disableSavepoints();
+    @RegisterExtension static final SqlCleanupExtension CLEANUP = SqlCleanupExtension.of(SQL, UserTable.META, SessionTable.META);
 
-    private static final UserModel DUMMY_USER = TestingModels.newUser(123);
+    private static final DefaultUser DUMMY_USER = TestingModels.newUser(123);
     private static final HttpRequestEx GET = HttpRequestBuilder.get("/").ex();
+
+    @BeforeEach
+    void setUp() {
+        new UserTable(SQL).insert(DUMMY_USER);
+    }
 
     @ParameterizedTest
     @EnumSource(Scenario.class)
@@ -88,7 +99,7 @@ public class SessionManagerIntegrationTest {
             case SQL -> settings.storageSettings().enableSql(SQL.settings()).enableKeyValue(TestingStorage.KEY_VALUE_DEFAULT);
             case KEY_VALUE -> settings.storageSettings().enableKeyValue(TestingStorage.KEY_VALUE_DEFAULT);
         }
-        return Testing.testStartup(settings, SQL::savepoint, SQL.combinedTestingModule()).getInstance(SessionManager.class);
+        return Testing.testStartup(settings).getInstance(SessionManager.class);
     }
 
     private enum Scenario {

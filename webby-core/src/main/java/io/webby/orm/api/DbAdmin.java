@@ -5,7 +5,6 @@ import com.google.common.flogger.LazyArgs;
 import com.google.errorprone.annotations.CanIgnoreReturnValue;
 import io.webby.orm.api.query.*;
 import io.webby.util.base.Unchecked;
-import io.webby.util.func.ThrowConsumer;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
@@ -53,13 +52,18 @@ public class DbAdmin {
         };
     }
 
-    public void ignoringForeignKeyChecks(@NotNull ThrowConsumer<DbAdmin, SQLException> action) throws SQLException {
-        try {
-            setOptionIfSupported("foreign_key_checks", "0");
-            action.accept(this);
-        } finally {
-            setOptionIfSupported("foreign_key_checks", "1");
-        }
+    public @NotNull DbAdmin ignoringForeignKeyChecks() {
+        return new DbAdmin(connector) {
+            @Override
+            protected void doRunUpdate(@NotNull DataDefinitionQuery query) {
+                try {
+                    DbAdmin.this.setOptionIfSupported("foreign_key_checks", "0");
+                    super.doRunUpdate(query);
+                } finally {
+                    DbAdmin.this.setOptionIfSupported("foreign_key_checks", "1");
+                }
+            }
+        };
     }
 
     @CanIgnoreReturnValue
@@ -105,7 +109,7 @@ public class DbAdmin {
         truncateTable(builder.build(engine()));
     }
 
-    private void doRunUpdate(@NotNull DataDefinitionQuery query) {
+    protected void doRunUpdate(@NotNull DataDefinitionQuery query) {
         try {
             log.at(Level.INFO).log("Running: %s ...", LazyArgs.lazy(() -> describeQuery(query.repr())));
             int rows = runner().runUpdate(query);
