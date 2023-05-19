@@ -11,7 +11,7 @@ import org.jetbrains.annotations.NotNull;
 import org.junit.jupiter.api.AfterEach;
 
 // FIX[major]: transform into an extension. A scenario needs to be a class param for that.
-public class BaseCoreIntegrationTest {
+public abstract class BaseCoreIntegrationTest {
     @AfterEach
     protected void tearDown() {
         Testing.Internals.terminate();
@@ -19,10 +19,14 @@ public class BaseCoreIntegrationTest {
 
     protected static @NotNull Injector startup(@NotNull Scenario scenario, @NotNull SqlSettings sqlSettings) {
         AppSettings settings = Testing.defaultAppSettings();
+        settings.setProperty("user.id.generator.random.enabled", scenario.isRandomIdsEnabled());
+        settings.setProperty("session.id.generator.random.enabled", scenario.isRandomIdsEnabled());
         settings.modelFilter().setCommonPackageOf(Testing.AUTH_MODELS);
         switch (scenario) {
-            case SQL -> settings.storageSettings().enableSql(sqlSettings);
-            case KEY_VALUE -> settings.storageSettings().enableKeyValue(TestingStorage.KEY_VALUE_DEFAULT);
+            case SQL ->
+                settings.storageSettings().enableSql(sqlSettings);
+            case KEY_VALUE_RANDOM_ID, KEY_VALUE_AUTO_ID ->
+                settings.storageSettings().enableKeyValue(TestingStorage.KEY_VALUE_DEFAULT);
         }
         return Testing.testStartup(settings);
     }
@@ -37,6 +41,11 @@ public class BaseCoreIntegrationTest {
 
     protected enum Scenario {
         SQL,
-        KEY_VALUE,
+        KEY_VALUE_RANDOM_ID,
+        KEY_VALUE_AUTO_ID;
+
+        public boolean isRandomIdsEnabled() {
+            return this == KEY_VALUE_RANDOM_ID;
+        }
     }
 }
