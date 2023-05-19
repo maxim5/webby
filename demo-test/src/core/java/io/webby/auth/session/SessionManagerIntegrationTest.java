@@ -1,17 +1,14 @@
 package io.webby.auth.session;
 
 import io.netty.handler.codec.http.cookie.DefaultCookie;
-import io.webby.app.AppSettings;
+import io.webby.auth.BaseCoreIntegrationTest;
 import io.webby.auth.user.DefaultUser;
 import io.webby.auth.user.UserTable;
 import io.webby.netty.request.HttpRequestEx;
 import io.webby.testing.HttpRequestBuilder;
-import io.webby.testing.Testing;
 import io.webby.testing.TestingModels;
-import io.webby.testing.TestingStorage;
 import io.webby.testing.ext.SqlCleanupExtension;
 import io.webby.testing.ext.SqlDbSetupExtension;
-import org.jetbrains.annotations.NotNull;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.extension.RegisterExtension;
@@ -23,7 +20,7 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 
 @Tag("sql")
-public class SessionManagerIntegrationTest {
+public class SessionManagerIntegrationTest extends BaseCoreIntegrationTest {
     @RegisterExtension static final SqlDbSetupExtension SQL = SqlDbSetupExtension.fromProperties().disableSavepoints();
     @RegisterExtension static final SqlCleanupExtension CLEANUP = SqlCleanupExtension.of(SQL, UserTable.META, SessionTable.META);
 
@@ -38,7 +35,7 @@ public class SessionManagerIntegrationTest {
     @ParameterizedTest
     @EnumSource(Scenario.class)
     public void getOrCreateSession_null(Scenario scenario) {
-        SessionManager manager = startup(scenario);
+        SessionManager manager = startup(scenario, SQL.settings()).getInstance(SessionManager.class);
         SessionModel session = manager.getOrCreateSession(GET, null);
         assertThat(session.hasUserId()).isFalse();
     }
@@ -46,7 +43,7 @@ public class SessionManagerIntegrationTest {
     @ParameterizedTest
     @EnumSource(Scenario.class)
     public void getOrCreateSession_invalid_cookie(Scenario scenario) {
-        SessionManager manager = startup(scenario);
+        SessionManager manager = startup(scenario, SQL.settings()).getInstance(SessionManager.class);
         SessionModel session = manager.getOrCreateSession(GET, new DefaultCookie("name", "foo"));
         assertThat(session.hasUserId()).isFalse();
     }
@@ -54,7 +51,7 @@ public class SessionManagerIntegrationTest {
     @ParameterizedTest
     @EnumSource(Scenario.class)
     public void getOrCreateSession_valid_cookie(Scenario scenario) {
-        SessionManager manager = startup(scenario);
+        SessionManager manager = startup(scenario, SQL.settings()).getInstance(SessionManager.class);
         SessionModel session = manager.createNewSession(GET);
         String encoded = manager.encodeSessionForCookie(session);
         SessionModel returned = manager.getOrCreateSession(GET, new DefaultCookie("name", encoded));
@@ -64,7 +61,7 @@ public class SessionManagerIntegrationTest {
     @ParameterizedTest
     @EnumSource(Scenario.class)
     public void addUserOrDie_no_user(Scenario scenario) {
-        SessionManager manager = startup(scenario);
+        SessionManager manager = startup(scenario, SQL.settings()).getInstance(SessionManager.class);
         SessionModel session = manager.createNewSession(GET);
         assertThat(session.hasUserId()).isFalse();
 
@@ -84,26 +81,11 @@ public class SessionManagerIntegrationTest {
     @ParameterizedTest
     @EnumSource(Scenario.class)
     public void addUserOrDie_with_user_throws(Scenario scenario) {
-        SessionManager manager = startup(scenario);
+        SessionManager manager = startup(scenario, SQL.settings()).getInstance(SessionManager.class);
         SessionModel session = manager.createNewSession(GET);
         SessionModel newSession = manager.addUserOrDie(session, DUMMY_USER);
         assertThat(newSession.hasUserId()).isTrue();
 
         assertThrows(AssertionError.class, () -> manager.addUserOrDie(newSession, DUMMY_USER));
-    }
-
-    private static @NotNull SessionManager startup(@NotNull Scenario scenario) {
-        AppSettings settings = Testing.defaultAppSettings();
-        settings.modelFilter().setCommonPackageOf(Testing.CORE_MODELS);
-        switch (scenario) {
-            case SQL -> settings.storageSettings().enableSql(SQL.settings()).enableKeyValue(TestingStorage.KEY_VALUE_DEFAULT);
-            case KEY_VALUE -> settings.storageSettings().enableKeyValue(TestingStorage.KEY_VALUE_DEFAULT);
-        }
-        return Testing.testStartup(settings).getInstance(SessionManager.class);
-    }
-
-    private enum Scenario {
-        SQL,
-        KEY_VALUE,
     }
 }

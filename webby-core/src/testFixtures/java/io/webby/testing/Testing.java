@@ -32,6 +32,7 @@ public class Testing {
     public static final String DEFAULT_VIEW_PATH = ".";
     public static final String DEFAULT_USER_CONTENT_PATH = ".";
 
+    public static final List<Class<?>> AUTH_MODELS = List.of(DefaultSession.class, DefaultUser.class);
     public static final List<Class<?>> CORE_MODELS = List.of(DefaultSession.class, DefaultUser.class, BlobKv.class);
 
     public static @NotNull AppSettings defaultAppSettings() {
