@@ -4,6 +4,7 @@ import com.google.errorprone.annotations.Immutable;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
+import java.util.function.Consumer;
 import java.util.function.Function;
 import java.util.function.ToIntFunction;
 
@@ -81,6 +82,14 @@ public class OneOf<U, V> {
 
     public int mapToInt(@NotNull ToIntFunction<U> fromFirst, @NotNull ToIntFunction<V> fromSecond) {
         return hasFirst() ? fromFirst.applyAsInt(first) : fromSecond.applyAsInt(second);
+    }
+
+    public void apply(@NotNull Consumer<U> takeFirst, @NotNull Consumer<V> takeSecond) {
+        if (hasFirst()) {
+            takeFirst.accept(first);
+        } else {
+            takeSecond.accept(second);
+        }
     }
 
     @Override
