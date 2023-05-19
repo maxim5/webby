@@ -1,10 +1,10 @@
 package io.webby.common;
 
 import com.google.common.collect.Lists;
-import com.zaxxer.hikari.HikariDataSource;
 import io.webby.app.AppSettings;
 import io.webby.db.cache.BackgroundCacheCleaner;
 import io.webby.db.kv.KeyValueSettings;
+import io.webby.db.sql.ConnectionPool;
 import io.webby.db.sql.SqlSettings;
 import io.webby.db.sql.TableManager;
 import io.webby.testing.Testing;
@@ -36,7 +36,7 @@ public class LifetimeTest {
         lifetimeMock.terminate();
 
         List<Class<?>> expected = List.of(
-            HikariDataSource.class,
+            ConnectionPool.class,
             TableManager.class,
             BackgroundCacheCleaner.class
         );

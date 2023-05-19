@@ -23,7 +23,10 @@ public class ConnectionPool implements HasEngine {
         HikariConfig config = new HikariConfig();
         config.setJdbcUrl(settings.storageSettings().sqlSettingsOrDie().url());
         dataSource = new HikariDataSource(config);
-        lifetime.onTerminate(dataSource);
+        lifetime.onTerminate(() -> {
+            ThreadLocalConnector.forceCleanUp();
+            dataSource.close();
+        });
     }
 
     @VisibleForTesting
