@@ -14,7 +14,7 @@ import io.webby.orm.api.Engine;
 import io.webby.testing.Testing;
 import io.webby.testing.TestingProps;
 import io.webby.testing.ext.EmbeddedRedisExtension;
-import io.webby.testing.ext.SqlDbSetupExtension;
+import io.webby.testing.ext.SqlDbExtension;
 import io.webby.testing.ext.TempDirectoryExtension;
 import org.jetbrains.annotations.NotNull;
 import org.junit.jupiter.api.Tag;
@@ -35,7 +35,7 @@ import static io.webby.testing.TestingBasics.array;
 public class KeyEventStoreIntegrationTest {
     @RegisterExtension static final TempDirectoryExtension TEMP_DIRECTORY = new TempDirectoryExtension();
     @RegisterExtension static final EmbeddedRedisExtension REDIS = new EmbeddedRedisExtension();
-    @RegisterExtension static final SqlDbSetupExtension SQL = SqlDbSetupExtension.fromProperties();
+    @RegisterExtension static final SqlDbExtension SQL = SqlDbExtension.fromProperties().withSavepoints();
 
     @Test
     public void simple_empty_store() {
@@ -216,7 +216,7 @@ public class KeyEventStoreIntegrationTest {
         settings.setProperty("db.event.store.average.size", 80);
 
         settings.setProperty("db.redis.port", REDIS.getPort());
-        return Testing.testStartup(settings, SQL::savepoint, SQL.combinedTestingModule());
+        return Testing.testStartup(settings, SQL::setUp, SQL.combinedTestingModule());
     }
 
     @SuppressWarnings("unchecked")

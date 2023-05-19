@@ -2,8 +2,7 @@ package io.webby.auth.user;
 
 import io.webby.auth.BaseCoreIntegrationTest;
 import io.webby.testing.TestingModels;
-import io.webby.testing.ext.SqlCleanupExtension;
-import io.webby.testing.ext.SqlDbSetupExtension;
+import io.webby.testing.ext.SqlDbExtension;
 import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.extension.RegisterExtension;
 import org.junit.jupiter.params.ParameterizedTest;
@@ -13,8 +12,7 @@ import static org.junit.jupiter.api.Assertions.*;
 
 @Tag("sql")
 public class UserStoreIntegrationTest extends BaseCoreIntegrationTest {
-    @RegisterExtension static final SqlDbSetupExtension SQL = SqlDbSetupExtension.fromProperties().disableSavepoints();
-    @RegisterExtension static final SqlCleanupExtension CLEANUP = SqlCleanupExtension.of(SQL, UserTable.META);
+    @RegisterExtension static final SqlDbExtension SQL = SqlDbExtension.fromProperties().withManualCleanup(UserTable.META);
 
     @ParameterizedTest
     @EnumSource(Scenario.class)

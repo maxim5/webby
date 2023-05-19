@@ -10,8 +10,7 @@ import io.webby.demo.model.UserRateModelTable;
 import io.webby.orm.api.query.Shortcuts;
 import io.webby.orm.api.query.Where;
 import io.webby.testing.ext.FluentLoggingCapture;
-import io.webby.testing.ext.SqlCleanupExtension;
-import io.webby.testing.ext.SqlDbSetupExtension;
+import io.webby.testing.ext.SqlDbExtension;
 import org.jetbrains.annotations.NotNull;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Tag;
@@ -30,8 +29,7 @@ import static io.webby.testing.TestingPrimitives.newIntObjectMap;
 
 @Tag("sql")
 public class TableVotingStorageIntegrationTest {
-    @RegisterExtension static final SqlDbSetupExtension SQL = SqlDbSetupExtension.fromProperties().disableSavepoints();
-    @RegisterExtension static final SqlCleanupExtension CLEANUP = SqlCleanupExtension.of(SQL, UserRateModelTable.META);
+    @RegisterExtension static final SqlDbExtension SQL = SqlDbExtension.fromProperties().withManualCleanup(UserRateModelTable.META);
     @RegisterExtension static final FluentLoggingCapture LOGGING = new FluentLoggingCapture(Consistency.class);
 
     private static final int A = 1000;

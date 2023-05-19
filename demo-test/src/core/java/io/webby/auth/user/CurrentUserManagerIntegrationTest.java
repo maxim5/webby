@@ -6,8 +6,7 @@ import io.webby.auth.session.SessionTable;
 import io.webby.netty.request.DefaultHttpRequestEx;
 import io.webby.testing.HttpRequestBuilder;
 import io.webby.testing.TestingModels;
-import io.webby.testing.ext.SqlCleanupExtension;
-import io.webby.testing.ext.SqlDbSetupExtension;
+import io.webby.testing.ext.SqlDbExtension;
 import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.extension.RegisterExtension;
 import org.junit.jupiter.params.ParameterizedTest;
@@ -18,8 +17,7 @@ import static org.junit.jupiter.api.Assertions.assertThrows;
 
 @Tag("sql")
 public class CurrentUserManagerIntegrationTest extends BaseCoreIntegrationTest {
-    @RegisterExtension static final SqlDbSetupExtension SQL = SqlDbSetupExtension.fromProperties().disableSavepoints();
-    @RegisterExtension static final SqlCleanupExtension CLEANUP = SqlCleanupExtension.of(SQL, UserTable.META, SessionTable.META);
+    @RegisterExtension static final SqlDbExtension SQL = SqlDbExtension.fromProperties().withManualCleanup(UserTable.META, SessionTable.META);
     private static final UserData USER_DATA = DefaultUser.newUserData(UserAccess.SuperAdmin);
 
     private final DefaultHttpRequestEx request = HttpRequestBuilder.get("/foo").ex();

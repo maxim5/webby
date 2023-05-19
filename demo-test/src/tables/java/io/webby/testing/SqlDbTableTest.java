@@ -3,7 +3,7 @@ package io.webby.testing;
 import io.webby.orm.api.BaseTable;
 import io.webby.orm.api.Connector;
 import io.webby.orm.api.debug.DebugSql;
-import io.webby.testing.ext.SqlDbSetupExtension;
+import io.webby.testing.ext.SqlDbExtension;
 import org.jetbrains.annotations.NotNull;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Tag;
@@ -19,7 +19,7 @@ import static org.junit.jupiter.api.Assertions.assertFalse;
 
 @Tag("sql")
 public abstract class SqlDbTableTest<E, T extends BaseTable<E>> implements BaseTableTest<E, T> {
-    @RegisterExtension private final SqlDbSetupExtension SQL = SqlDbSetupExtension.fromProperties();
+    @RegisterExtension private final SqlDbExtension SQL = SqlDbExtension.fromProperties().withSavepoints();
 
     protected T table;
 
@@ -31,7 +31,7 @@ public abstract class SqlDbTableTest<E, T extends BaseTable<E>> implements BaseT
     @BeforeEach
     void setUp() throws Exception {
         setUp(connector());
-        SQL.savepoint();
+        SQL.setUp();
         fillUp(connector());
     }
 

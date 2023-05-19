@@ -2,7 +2,7 @@ package io.webby.orm.api;
 
 import com.google.common.collect.Lists;
 import io.webby.orm.api.debug.DebugSql;
-import io.webby.testing.ext.SqlDbSetupExtension;
+import io.webby.testing.ext.SqlDbExtension;
 import io.webby.testing.orm.AssertSql;
 import io.webby.util.collect.Pair;
 import org.jetbrains.annotations.NotNull;
@@ -22,7 +22,7 @@ import static org.junit.jupiter.api.Assertions.*;
 
 @Tag("sql")
 public class ResultSetIteratorTest {
-    @RegisterExtension static final SqlDbSetupExtension SQL = SqlDbSetupExtension.fromProperties();
+    @RegisterExtension static final SqlDbExtension SQL = SqlDbExtension.fromProperties().withSavepoints();
 
     @SuppressWarnings("ConstantConditions")
     @Test

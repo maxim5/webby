@@ -21,7 +21,7 @@ import io.webby.testing.TestingModels;
 import io.webby.testing.TestingProps;
 import io.webby.testing.ext.CloseAllExtension;
 import io.webby.testing.ext.EmbeddedRedisExtension;
-import io.webby.testing.ext.SqlDbSetupExtension;
+import io.webby.testing.ext.SqlDbExtension;
 import io.webby.testing.ext.TempDirectoryExtension;
 import io.webby.util.collect.Pair;
 import org.jetbrains.annotations.NotNull;
@@ -44,7 +44,7 @@ public class KeyValueDbIntegrationTest {
     @RegisterExtension static final CloseAllExtension CLOSE_ALL = new CloseAllExtension();
     @RegisterExtension static final TempDirectoryExtension TEMP_DIRECTORY = new TempDirectoryExtension();
     @RegisterExtension static final EmbeddedRedisExtension REDIS = new EmbeddedRedisExtension();
-    @RegisterExtension static final SqlDbSetupExtension SQL = SqlDbSetupExtension.fromProperties();
+    @RegisterExtension static final SqlDbExtension SQL = SqlDbExtension.fromProperties().withSavepoints();
 
     @ParameterizedTest
     @EnumSource(DbType.class)
@@ -426,7 +426,7 @@ public class KeyValueDbIntegrationTest {
 
         if (dbType == DbType.SQL_DB) {
             settings.storageSettings().enableSql(SQL.settings());
-            return Testing.testStartup(settings, SQL::savepoint, SQL.combinedTestingModule());
+            return Testing.testStartup(settings, SQL::setUp, SQL.combinedTestingModule());
         }
 
         return Testing.testStartup(settings);
