@@ -5,8 +5,9 @@ import io.webby.auth.session.DefaultSession;
 import io.webby.auth.user.DefaultUser;
 import io.webby.auth.user.UserModel;
 import io.webby.testing.HttpRequestBuilder;
+import io.webby.testing.SessionBuilder;
 import io.webby.testing.Testing;
-import io.webby.testing.TestingModels;
+import io.webby.testing.UserBuilder;
 import io.webby.util.base.EasyPrimitives.MutableInt;
 import org.junit.jupiter.api.Test;
 
@@ -101,7 +102,7 @@ public class DefaultHttpRequestExTest {
     @Test
     public void set_session_without_user_unauthenticated() {
         DefaultHttpRequestEx request = HttpRequestBuilder.get("/").ex();
-        DefaultSession session = TestingModels.newSession(123);
+        DefaultSession session = SessionBuilder.ofId(123).build();
 
         request.setSession(session);
 
@@ -113,7 +114,7 @@ public class DefaultHttpRequestExTest {
     @Test
     public void set_session_with_user_authenticated() {
         DefaultHttpRequestEx request = HttpRequestBuilder.get("/").ex();
-        DefaultSession session = TestingModels.newSession(123).withUser(TestingModels.newUser(456));
+        DefaultSession session = SessionBuilder.ofId(123).withUser(UserBuilder.simple(456)).build();
 
         request.setSession(session);
 
@@ -125,8 +126,8 @@ public class DefaultHttpRequestExTest {
     @Test
     public void set_user_having_session_with_user_authenticated() {
         DefaultHttpRequestEx request = HttpRequestBuilder.get("/").ex();
-        DefaultUser user = TestingModels.newUser(456);
-        DefaultSession session = TestingModels.newSession(123).withUser(user);
+        DefaultUser user = UserBuilder.simple(456);
+        DefaultSession session = SessionBuilder.ofId(123).withUser(user).build();
 
         request.setSession(session);
         request.setUser(user);
@@ -139,7 +140,7 @@ public class DefaultHttpRequestExTest {
     @Test
     public void set_user_having_no_session_throws() {
         DefaultHttpRequestEx request = HttpRequestBuilder.get("/").ex();
-        DefaultUser user = TestingModels.newUser(456);
+        DefaultUser user = UserBuilder.simple(456);
 
         assertThrows(AssertionError.class, () -> request.setUser(user));
     }
@@ -147,8 +148,8 @@ public class DefaultHttpRequestExTest {
     @Test
     public void set_user_having_session_without_user_throws() {
         DefaultHttpRequestEx request = HttpRequestBuilder.get("/").ex();
-        DefaultSession session = TestingModels.newSession(123);
-        DefaultUser user = TestingModels.newUser(456);
+        DefaultSession session = SessionBuilder.ofId(123).build();
+        DefaultUser user = UserBuilder.simple(456);
 
         request.setSession(session);
         assertThrows(AssertionError.class, () -> request.setUser(user));
@@ -157,17 +158,17 @@ public class DefaultHttpRequestExTest {
     @Test
     public void set_user_having_session_with_another_user_throws() {
         DefaultHttpRequestEx request = HttpRequestBuilder.get("/").ex();
-        DefaultSession session = TestingModels.newSession(123).withUser(TestingModels.newUser(456));
+        DefaultSession session = SessionBuilder.ofId(123).withUser(UserBuilder.simple(456)).build();
 
         request.setSession(session);
-        assertThrows(AssertionError.class, () -> request.setUser(TestingModels.newUser(789)));
+        assertThrows(AssertionError.class, () -> request.setUser(UserBuilder.simple(789)));
     }
 
     @Test
     public void authenticate_having_session_without_user_ok() {
         DefaultHttpRequestEx request = HttpRequestBuilder.get("/").ex();
-        DefaultSession session = TestingModels.newSession(123);
-        DefaultUser user = TestingModels.newUser(456);
+        DefaultSession session = SessionBuilder.ofId(123).build();
+        DefaultUser user = UserBuilder.simple(456);
 
         request.setSession(session);
         request.authenticate(user);
@@ -180,7 +181,7 @@ public class DefaultHttpRequestExTest {
     @Test
     public void authenticate_having_no_session_throws() {
         DefaultHttpRequestEx request = HttpRequestBuilder.get("/").ex();
-        DefaultUser user = TestingModels.newUser(456);
+        DefaultUser user = UserBuilder.simple(456);
 
         assertThrows(AssertionError.class, () -> request.authenticate(user));
     }
@@ -188,8 +189,8 @@ public class DefaultHttpRequestExTest {
     @Test
     public void authenticate_having_session_with_user_throws() {
         DefaultHttpRequestEx request = HttpRequestBuilder.get("/").ex();
-        DefaultUser user = TestingModels.newUser(456);
-        DefaultSession session = TestingModels.newSession(123).withUser(user);
+        DefaultUser user = UserBuilder.simple(456);
+        DefaultSession session = SessionBuilder.ofId(123).withUser(user).build();
 
         request.setSession(session);
         assertThrows(AssertionError.class, () -> request.authenticate(user));
@@ -198,8 +199,8 @@ public class DefaultHttpRequestExTest {
     @Test
     public void authenticate_having_session_and_user_throws() {
         DefaultHttpRequestEx request = HttpRequestBuilder.get("/").ex();
-        DefaultUser user = TestingModels.newUser(456);
-        DefaultSession session = TestingModels.newSession(123).withUser(user);
+        DefaultUser user = UserBuilder.simple(456);
+        DefaultSession session = SessionBuilder.ofId(123).withUser(user).build();
 
         request.setSession(session);
         request.setUser(user);

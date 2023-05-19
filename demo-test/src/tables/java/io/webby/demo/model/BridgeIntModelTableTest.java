@@ -7,8 +7,8 @@ import io.webby.orm.api.ForeignInt;
 import io.webby.orm.api.query.CreateTableQuery;
 import io.webby.testing.BridgeTableTest;
 import io.webby.testing.SqlDbTableTest;
-import io.webby.testing.TestingModels;
 import io.webby.testing.TestingSql;
+import io.webby.testing.UserBuilder;
 import io.webby.util.collect.Pair;
 import org.jetbrains.annotations.NotNull;
 
@@ -51,7 +51,7 @@ public class BridgeIntModelTableTest
     private @NotNull Pair<Integer[], DefaultUser[]> insertUsers(int num) {
         Integer[] keys = IntStream.range(1, num + 1).boxed().toArray(Integer[]::new);
         DefaultUser[] entities = IntStream.range(1, num + 1)
-            .mapToObj(i -> TestingSql.getOrInsert(users, TestingModels.newUser(i)))
+            .mapToObj(i -> TestingSql.getOrInsert(users, UserBuilder.simple(i)))
             .toArray(DefaultUser[]::new);
         return Pair.of(keys, entities);
     }

@@ -5,7 +5,8 @@ import io.webby.auth.BaseCoreIntegrationTest;
 import io.webby.auth.session.SessionTable;
 import io.webby.netty.request.DefaultHttpRequestEx;
 import io.webby.testing.HttpRequestBuilder;
-import io.webby.testing.TestingModels;
+import io.webby.testing.SessionBuilder;
+import io.webby.testing.UserBuilder;
 import io.webby.testing.ext.SqlDbExtension;
 import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.extension.RegisterExtension;
@@ -34,9 +35,9 @@ public class CurrentUserManagerIntegrationTest extends BaseCoreIntegrationTest {
     public void invalid_user_data_fails(Scenario scenario) {
         Injector injector = startup(scenario, SQL.settings());
         CurrentUserManager manager = injector.getInstance(CurrentUserManager.class);
-        request.setSession(TestingModels.newSession(123));
+        request.setSession(SessionBuilder.simple(123));
 
-        assertThrows(AssertionError.class, () ->  manager.createAndBindCurrentUser(TestingModels.newUser(456), request));
+        assertThrows(AssertionError.class, () -> manager.createAndBindCurrentUser(UserBuilder.simple(456), request));
         assertThat(getUserStore().size()).isEqualTo(0);
         assertThat(getSessionStore().size()).isEqualTo(0);
     }
@@ -45,8 +46,8 @@ public class CurrentUserManagerIntegrationTest extends BaseCoreIntegrationTest {
     @EnumSource(Scenario.class)
     public void with_authenticated_session_fails(Scenario scenario) {
         CurrentUserManager manager = startup(scenario, SQL.settings()).getInstance(CurrentUserManager.class);
-        request.setSession(TestingModels.newSession(123));
-        request.authenticate(TestingModels.newUser(456));
+        request.setSession(SessionBuilder.simple(123));
+        request.authenticate(UserBuilder.simple(456));
 
         assertThrows(AssertionError.class, () ->  manager.createAndBindCurrentUser(USER_DATA, request));
         assertThat(getUserStore().size()).isEqualTo(0);
@@ -57,7 +58,7 @@ public class CurrentUserManagerIntegrationTest extends BaseCoreIntegrationTest {
     @EnumSource(Scenario.class)
     public void with_unauthenticated_session_success(Scenario scenario) {
         CurrentUserManager manager = startup(scenario, SQL.settings()).getInstance(CurrentUserManager.class);
-        request.setSession(TestingModels.newSession(123));
+        request.setSession(SessionBuilder.simple(123));
 
         UserModel user = manager.createAndBindCurrentUser(USER_DATA, request);
         int userId = user.userId();

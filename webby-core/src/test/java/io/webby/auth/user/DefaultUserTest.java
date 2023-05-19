@@ -1,7 +1,7 @@
 package io.webby.auth.user;
 
 import io.webby.testing.Mocking;
-import io.webby.testing.TestingModels;
+import io.webby.testing.UserBuilder;
 import org.junit.jupiter.api.Test;
 import org.mockito.ScopedMock;
 
@@ -33,7 +33,7 @@ public class DefaultUserTest {
 
     @Test
     public void toUserModel_fails() {
-        UserData data = TestingModels.newUser(222);
+        UserData data = UserBuilder.simple(222);
         assertThrows(AssertionError.class, () -> data.toUserModel(333));
     }
 }

@@ -1,7 +1,7 @@
 package io.webby.auth.user;
 
 import io.webby.auth.BaseCoreIntegrationTest;
-import io.webby.testing.TestingModels;
+import io.webby.testing.UserBuilder;
 import io.webby.testing.ext.SqlDbExtension;
 import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.extension.RegisterExtension;
@@ -36,7 +36,7 @@ public class UserStoreIntegrationTest extends BaseCoreIntegrationTest {
     @EnumSource(Scenario.class)
     public void invalid_user_with_id(Scenario scenario) {
         UserStore users = startup(scenario, SQL.settings()).getInstance(UserStore.class);
-        DefaultUser user = TestingModels.newUser(1, UserAccess.Simple);
+        DefaultUser user = UserBuilder.ofId(1).withAccess(UserAccess.Simple).build();
         assertThrows(AssertionError.class, () -> users.createUserAutoId(user));
     }
 }

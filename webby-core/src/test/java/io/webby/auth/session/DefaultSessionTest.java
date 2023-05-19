@@ -5,7 +5,8 @@ import io.webby.netty.request.HttpRequestEx;
 import io.webby.orm.api.ForeignInt;
 import io.webby.testing.HttpRequestBuilder;
 import io.webby.testing.Mocking;
-import io.webby.testing.TestingModels;
+import io.webby.testing.SessionBuilder;
+import io.webby.testing.UserBuilder;
 import org.junit.jupiter.api.Test;
 import org.mockito.ScopedMock;
 
@@ -20,7 +21,7 @@ public class DefaultSessionTest {
     private static final String IP = null;
     private static final HttpRequestEx REQUEST = HttpRequestBuilder.get("/foo").withUserAgent(USER_AGENT).ex();
     private static final Instant INSTANT = Mocking.nowTruncatedToMillis();
-    private static final DefaultUser USER = TestingModels.newUser(777);
+    private static final DefaultUser USER = UserBuilder.ofId(777).build();
 
     @Test
     public void newSessionData_simple() {
@@ -43,7 +44,7 @@ public class DefaultSessionTest {
 
     @Test
     public void toSessionModel_fails() {
-        SessionData data = TestingModels.newSession(222);
+        SessionData data = SessionBuilder.ofId(222).build();
         assertThrows(AssertionError.class, () -> data.toSessionModel(333));
     }
 

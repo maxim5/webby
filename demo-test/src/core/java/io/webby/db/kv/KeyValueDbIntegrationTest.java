@@ -15,10 +15,7 @@ import io.webby.db.kv.mapdb.MapDbFactory;
 import io.webby.db.kv.mapdb.MapDbImpl;
 import io.webby.db.kv.paldb.PalDbFactory;
 import io.webby.db.kv.paldb.PalDbImpl;
-import io.webby.testing.HttpRequestBuilder;
-import io.webby.testing.Testing;
-import io.webby.testing.TestingModels;
-import io.webby.testing.TestingProps;
+import io.webby.testing.*;
 import io.webby.testing.ext.CloseAllExtension;
 import io.webby.testing.ext.EmbeddedRedisExtension;
 import io.webby.testing.ext.SqlDbExtension;
@@ -239,7 +236,7 @@ public class KeyValueDbIntegrationTest {
 
         DbOptions<Long, DefaultSession> options = DbOptions.of(DefaultSession.DB_NAME, Long.class, DefaultSession.class);
         try (KeyValueDb<Long, DefaultSession> db = dbFactory.getDb(options)) {
-            runMultiTest(db, 123L, TestingModels.newSession(123));
+            runMultiTest(db, 123L, SessionBuilder.ofId(123).build());
         }
     }
 
@@ -251,8 +248,10 @@ public class KeyValueDbIntegrationTest {
         DbOptions<Integer, DefaultSession> options = DbOptions.of("my-sessions", Integer.class, DefaultSession.class);
         try (KeyValueDb<Integer, DefaultSession> db = dbFactory.getDb(options)) {
             runMultiTest(db,
-                         Integer.MIN_VALUE, Integer.MAX_VALUE,
-                         TestingModels.newSession(Integer.MIN_VALUE), TestingModels.newSession(Integer.MAX_VALUE));
+                         Integer.MIN_VALUE,
+                         Integer.MAX_VALUE,
+                         SessionBuilder.ofAnyId(Integer.MIN_VALUE).build(),
+                         SessionBuilder.ofId(Integer.MAX_VALUE).build());
         }
     }
 
@@ -263,7 +262,7 @@ public class KeyValueDbIntegrationTest {
 
         DbOptions<Integer, DefaultUser> options = DbOptions.of(UserModel.DB_NAME, Integer.class, DefaultUser.class);
         try (KeyValueDb<Integer, DefaultUser> db = dbFactory.getDb(options)) {
-            runMultiTest(db, 777, TestingModels.newUser(777, UserAccess.Simple));
+            runMultiTest(db, 777, UserBuilder.ofId(777).withAccess(UserAccess.Simple).build());
         }
     }
 
@@ -274,8 +273,11 @@ public class KeyValueDbIntegrationTest {
 
         DbOptions<Integer, DefaultUser> options = DbOptions.of("my-users", Integer.class, DefaultUser.class);
         try (KeyValueDb<Integer, DefaultUser> db = dbFactory.getDb(options)) {
-            runMultiTest(db, Integer.MIN_VALUE, Integer.MAX_VALUE,
-                         TestingModels.newUser(777, UserAccess.Simple), TestingModels.newUser(0, UserAccess.SuperAdmin));
+            runMultiTest(db,
+                         Integer.MIN_VALUE,
+                         Integer.MAX_VALUE,
+                         UserBuilder.ofId(777).withAccess(UserAccess.Simple).build(),
+                         UserBuilder.ofAnyId(0).withAccess(UserAccess.SuperAdmin).build());
         }
     }
 

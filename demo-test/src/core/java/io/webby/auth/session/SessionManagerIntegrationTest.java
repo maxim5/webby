@@ -6,7 +6,7 @@ import io.webby.auth.user.DefaultUser;
 import io.webby.auth.user.UserTable;
 import io.webby.netty.request.HttpRequestEx;
 import io.webby.testing.HttpRequestBuilder;
-import io.webby.testing.TestingModels;
+import io.webby.testing.UserBuilder;
 import io.webby.testing.ext.SqlDbExtension;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Tag;
@@ -22,7 +22,7 @@ import static org.junit.jupiter.api.Assertions.assertThrows;
 public class SessionManagerIntegrationTest extends BaseCoreIntegrationTest {
     @RegisterExtension static final SqlDbExtension SQL = SqlDbExtension.fromProperties().withManualCleanup(UserTable.META, SessionTable.META);
 
-    private static final DefaultUser DUMMY_USER = TestingModels.newUser(123);
+    private static final DefaultUser DUMMY_USER = UserBuilder.ofId(123).build();
     private static final HttpRequestEx GET = HttpRequestBuilder.get("/").ex();
 
     @BeforeEach

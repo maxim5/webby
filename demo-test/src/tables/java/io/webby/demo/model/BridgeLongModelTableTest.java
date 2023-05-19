@@ -7,8 +7,8 @@ import io.webby.orm.api.Connector;
 import io.webby.orm.api.ForeignLong;
 import io.webby.orm.api.query.CreateTableQuery;
 import io.webby.testing.BridgeTableTest;
+import io.webby.testing.SessionBuilder;
 import io.webby.testing.SqlDbTableTest;
-import io.webby.testing.TestingModels;
 import io.webby.testing.TestingSql;
 import io.webby.util.collect.Pair;
 import org.jetbrains.annotations.NotNull;
@@ -54,7 +54,7 @@ public class BridgeLongModelTableTest
     private @NotNull Pair<Long[], DefaultSession[]> insertSessions(int num) {
         Long[] keys = LongStream.range(1, num + 1).boxed().toArray(Long[]::new);
         DefaultSession[] entities = LongStream.range(1, num + 1)
-            .mapToObj(i -> TestingSql.getOrInsert(sessions, TestingModels.newSession(i)))
+            .mapToObj(i -> TestingSql.getOrInsert(sessions, SessionBuilder.simple(i)))
             .toArray(DefaultSession[]::new);
         return Pair.of(keys, entities);
     }
