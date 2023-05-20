@@ -62,6 +62,10 @@ public class HttpRequestBuilder {
         return withHeader(HttpConst.USER_AGENT, userAgent);
     }
 
+    public @NotNull HttpRequestBuilder withCookie(@NotNull String cookie) {
+        return withHeader(HttpConst.COOKIE, cookie);
+    }
+
     public @NotNull HttpRequestBuilder allocate(int attributesSize) {
         this.attributesSize = attributesSize;
         return this;
