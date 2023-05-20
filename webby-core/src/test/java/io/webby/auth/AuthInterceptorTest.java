@@ -29,6 +29,7 @@ public class AuthInterceptorTest {
         interceptor.enter(request, FakeEndpoints.fakeEndpoint());
         assertThat(request.isAuthenticated()).isFalse();
         assertThat(request.<UserModel>user()).isNull();
+        assertThat(userStore.isEmpty()).isTrue();
     }
 
     @Test
@@ -40,6 +41,8 @@ public class AuthInterceptorTest {
         interceptor.enter(request, FakeEndpoints.fakeEndpoint());
         assertThat(request.isAuthenticated()).isTrue();
         assertThat(request.<UserModel>user()).isSameInstanceAs(user);
+        assertThat(userStore.size()).isEqualTo(1);
+        assertThat(userStore.getUserByIdOrNull(user.userId())).isEqualTo(user);
     }
 
     @Test
@@ -48,5 +51,6 @@ public class AuthInterceptorTest {
         request.setSession(SessionBuilder.ofId(555).withUserId(999).build());
 
         assertThrows(NotFoundException.class, () -> interceptor.enter(request, FakeEndpoints.fakeEndpoint()));
+        assertThat(userStore.isEmpty()).isTrue();
     }
 }
