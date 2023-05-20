@@ -4,6 +4,7 @@ import io.netty.handler.codec.http.cookie.DefaultCookie;
 import io.webby.auth.session.DefaultSession;
 import io.webby.auth.user.DefaultUser;
 import io.webby.auth.user.UserModel;
+import io.webby.netty.HttpConst;
 import io.webby.testing.HttpRequestBuilder;
 import io.webby.testing.SessionBuilder;
 import io.webby.testing.Testing;
@@ -16,22 +17,22 @@ import java.util.Map;
 
 import static com.google.common.truth.Truth.assertThat;
 import static io.webby.testing.AssertJson.assertJsonEquivalent;
-import static org.junit.jupiter.api.Assertions.*;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 
 public class DefaultHttpRequestExTest {
     @Test
     public void query_params_simple() {
         HttpRequestEx request = HttpRequestBuilder.get("/?foo=bar").ex();
-        assertEquals("/", request.path());
-        assertEquals("foo=bar", request.query());
-        assertEquals(Map.of("foo", List.of("bar")), request.params().getMap());
+        assertThat(request.path()).isEqualTo("/");
+        assertThat(request.query()).isEqualTo("foo=bar");
+        assertThat(request.params().getMap()).isEqualTo(Map.of("foo", List.of("bar")));
     }
 
     @Test
     public void contentAs_empty() {
         Testing.testStartup();
         HttpRequestEx request = HttpRequestBuilder.post("/").ex();
-        assertEquals("", request.contentAsString());
+        assertThat(request.contentAsString()).isEqualTo("");
         assertThrows(IllegalArgumentException.class, () -> request.contentAsJson(Map.class));
         assertThrows(IllegalArgumentException.class, () -> request.contentAsJson(List.class));
         assertThrows(IllegalArgumentException.class, () -> request.contentAsJson(Object.class));
@@ -41,29 +42,58 @@ public class DefaultHttpRequestExTest {
     public void contentAs_simple() {
         Testing.testStartup();
         HttpRequestEx request = HttpRequestBuilder.post("/").withContent("{\"value\": 123}").ex();
-        assertEquals("{\"value\": 123}", request.contentAsString());
+        assertThat(request.contentAsString()).isEqualTo("{\"value\": 123}");
         Map<?, ?> map = request.contentAsJson(Map.class);
         assertJsonEquivalent(map, Map.of("value", 123));
         MutableInt counter = request.contentAsJson(MutableInt.class);
-        assertEquals(123, counter.value);
+        assertThat(counter.value).isEqualTo(123);
     }
 
     @Test
     public void cookies_null() {
-        HttpRequestEx request = HttpRequestBuilder.get("/?foo=bar").ex();
-        assertEquals(List.of(), request.cookies());
+        assertThat(HttpRequestBuilder.get("/foo").ex().cookies()).isEmpty();
     }
 
     @Test
-    public void cookies_simple() {
-        HttpRequestEx request = HttpRequestBuilder.get("/?foo=bar").withHeader("Cookie", "foo=bar; __name__=123;").ex();
-        assertEquals(List.of(new DefaultCookie("foo", "bar"), new DefaultCookie("__name__", "123")), request.cookies());
+    public void cookies_valid() {
+        assertThat(HttpRequestBuilder.get("/foo").withHeader(HttpConst.COOKIE, "foo=bar").ex().cookies())
+            .containsExactly(new DefaultCookie("foo", "bar"));
+        assertThat(HttpRequestBuilder.get("/foo").withHeader(HttpConst.COOKIE, "foo=bar;").ex().cookies())
+            .containsExactly(new DefaultCookie("foo", "bar"));
+        assertThat(HttpRequestBuilder.get("/foo").withHeader(HttpConst.COOKIE, "foo=bar;baz=foo").ex().cookies())
+            .containsExactly(new DefaultCookie("foo", "bar"), new DefaultCookie("baz", "foo"));
+        assertThat(HttpRequestBuilder.get("/foo").withHeader(HttpConst.COOKIE, "foo=bar; __name__=123;").ex().cookies())
+            .containsExactly(new DefaultCookie("foo", "bar"), new DefaultCookie("__name__", "123"));
+    }
+
+    @Test
+    public void cookies_empty_value() {
+        assertThat(HttpRequestBuilder.get("/foo").withHeader(HttpConst.COOKIE, "foo=").ex().cookies())
+            .containsExactly(new DefaultCookie("foo", ""));
+        assertThat(HttpRequestBuilder.get("/foo").withHeader(HttpConst.COOKIE, "foo=;").ex().cookies())
+            .containsExactly(new DefaultCookie("foo", ""));
+    }
+
+    @Test
+    public void cookies_invalid() {
+        assertThat(HttpRequestBuilder.get("/foo").withHeader(HttpConst.COOKIE, "").ex().cookies()).isEmpty();
+        assertThat(HttpRequestBuilder.get("/foo").withHeader(HttpConst.COOKIE, ";").ex().cookies()).isEmpty();
+        assertThat(HttpRequestBuilder.get("/foo").withHeader(HttpConst.COOKIE, ";;;").ex().cookies()).isEmpty();
+        assertThat(HttpRequestBuilder.get("/foo").withHeader(HttpConst.COOKIE, "=").ex().cookies()).isEmpty();
+        assertThat(HttpRequestBuilder.get("/foo").withHeader(HttpConst.COOKIE, "===").ex().cookies()).isEmpty();
+        assertThat(HttpRequestBuilder.get("/foo").withHeader(HttpConst.COOKIE, "=foo").ex().cookies()).isEmpty();
+        assertThat(HttpRequestBuilder.get("/foo").withHeader(HttpConst.COOKIE, "===foo").ex().cookies()).isEmpty();
+        assertThat(HttpRequestBuilder.get("/foo").withHeader(HttpConst.COOKIE, "=;").ex().cookies()).isEmpty();
+        assertThat(HttpRequestBuilder.get("/foo").withHeader(HttpConst.COOKIE, "===;;;").ex().cookies()).isEmpty();
+        assertThat(HttpRequestBuilder.get("/foo").withHeader(HttpConst.COOKIE, "foo").ex().cookies()).isEmpty();
+        assertThat(HttpRequestBuilder.get("/foo").withHeader(HttpConst.COOKIE, "foo;").ex().cookies()).isEmpty();
+        assertThat(HttpRequestBuilder.get("/foo").withHeader(HttpConst.COOKIE, "foo;;;").ex().cookies()).isEmpty();
     }
 
     @Test
     public void attrs_not_set() {
         MutableHttpRequestEx request = HttpRequestBuilder.get("/").ex();
-        assertNull(request.attr(0));
+        assertThat(request.attr(0)).isNull();
         assertThrows(AssertionError.class, () -> request.attrOrDie(0));
     }
 
@@ -71,15 +101,15 @@ public class DefaultHttpRequestExTest {
     public void attrs_simple_set_not_null() {
         MutableHttpRequestEx request = HttpRequestBuilder.get("/").ex();
         request.setAttr(0, "foo");
-        assertEquals(request.attr(0), "foo");
-        assertEquals(request.attrOrDie(0), "foo");
+        assertThat(request.attr(0)).isEqualTo("foo");
+        assertThat(request.<String>attrOrDie(0)).isEqualTo("foo");
     }
 
     @Test
     public void attrs_simple_set_nullable() {
         MutableHttpRequestEx request = HttpRequestBuilder.get("/").ex();
         request.setNullableAttr(0, null);
-        assertNull(request.attr(0));
+        assertThat(request.attr(0)).isNull();
         assertThrows(AssertionError.class, () -> request.attrOrDie(0));
     }
 
