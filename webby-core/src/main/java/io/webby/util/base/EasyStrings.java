@@ -21,12 +21,12 @@ public class EasyStrings {
         return big;
     }
 
-    public static @NotNull String firstNotEmpty(@NotNull String s1, @NotNull String s2) {
-        if (s1.isEmpty()) {
-            assert !s2.isEmpty();
-            return s2;
+    public static @NotNull String firstNotEmpty(@NotNull String first, @NotNull String second) {
+        if (first.isEmpty()) {
+            assert !second.isEmpty() : "Both input strings are empty";
+            return second;
         }
-        return s1;
+        return first;
     }
 
     public static @NotNull Optional<String> ofNonEmpty(@Nullable String s) {
