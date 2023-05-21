@@ -15,9 +15,9 @@ import java.util.Map;
 import java.util.Optional;
 
 import static com.google.common.truth.Truth.assertThat;
+import static io.webby.testing.AssertPrimitives.assertMap;
 import static io.webby.testing.AssertPrimitives.assertThat;
 import static io.webby.testing.TestingBasics.array;
-import static io.webby.testing.TestingPrimitives.newLongObjectMap;
 import static org.junit.jupiter.api.Assertions.*;
 
 public interface TableLongTest<E, T extends TableLong<E>> extends PrimaryKeyTableTest<Long, E, T> {
@@ -40,7 +40,7 @@ public interface TableLongTest<E, T extends TableLong<E>> extends PrimaryKeyTabl
         assertThrows(NullPointerException.class, () -> table().getByPkOrDie(key));
         assertThat(table().getOptionalByPk(key)).isEqualTo(Optional.empty());
 
-        assertEquals(1, table().insert(entity));
+        assertThat(table().insert(entity)).isEqualTo(1);
         assertThat(table().getByPkOrNull(key)).isEqualTo(entity);
         assertThat(table().getByPkOrDie(key)).isEqualTo(entity);
         assertThat(table().getOptionalByPk(key)).isEqualTo(Optional.of(entity));
@@ -55,12 +55,12 @@ public interface TableLongTest<E, T extends TableLong<E>> extends PrimaryKeyTabl
         assertThat(table().getBatchByPk(batch)).isEmpty();
 
         E entity1 = createEntity(key1);
-        assertEquals(1, table().insert(entity1));
-        assertEquals(table().getBatchByPk(batch), newLongObjectMap(key1, entity1));
+        assertThat(table().insert(entity1)).isEqualTo(1);
+        assertMap(table().getBatchByPk(batch)).containsExactly(key1, entity1);
 
         E entity2 = createEntity(key2);
-        assertEquals(1, table().insert(entity2));
-        assertEquals(table().getBatchByPk(batch), newLongObjectMap(key1, entity1, key2, entity2));
+        assertThat(table().insert(entity2)).isEqualTo(1);
+        assertMap(table().getBatchByPk(batch)).containsExactly(key1, entity1, key2, entity2);
     }
 
     @Test
@@ -131,7 +131,7 @@ public interface TableLongTest<E, T extends TableLong<E>> extends PrimaryKeyTabl
 
         E entity = createEntity(keys()[0], 1);
         Where where = Where.of(CompareType.EQ.compare(findPkColumnOrDie(), Shortcuts.var(keys()[0])));
-        assertEquals(1, table().updateWhere(entity, where));
+        assertThat(table().updateWhere(entity, where)).isEqualTo(1);
 
         assertTableCount(1);
         assertTableContains(keys()[0], entity);
@@ -144,8 +144,8 @@ public interface TableLongTest<E, T extends TableLong<E>> extends PrimaryKeyTabl
         assumeKeys(1);
         long key = keys()[0];
         E entity = createEntity(key);
-        assertEquals(table().longKeyOf(entity), key);
-        assertEquals(table().keyOf(entity), key);
+        assertThat(table().longKeyOf(entity)).isEqualTo(key);
+        assertThat(table().keyOf(entity)).isEqualTo(key);
     }
 
     @NotNull E copyEntityWithId(@NotNull E entity, long autoId);
