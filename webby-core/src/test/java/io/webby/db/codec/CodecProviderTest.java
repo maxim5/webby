@@ -14,8 +14,8 @@ import java.io.IOException;
 import java.nio.ByteBuffer;
 import java.util.Arrays;
 
+import static com.google.common.truth.Truth.assertThat;
 import static io.webby.testing.TestingBytes.assertBytes;
-import static org.junit.jupiter.api.Assertions.assertEquals;
 
 public class CodecProviderTest {
     private final CodecProvider provider = Testing.testStartup().getInstance(CodecProvider.class);
@@ -37,36 +37,36 @@ public class CodecProviderTest {
         CodecSize size = codec.size();
         int predictedSize = codec.sizeOf(value);
         if (size.isFixed()) {
-            assertEquals(size.numBytes(), predictedSize);
+            assertThat(size.numBytes()).isEqualTo(predictedSize);
         }
         if (predictedSize >= 0) {
             int written = codec.writeTo(ByteStreams.nullOutputStream(), value);
-            assertEquals(written, predictedSize);
+            assertThat(written).isEqualTo(predictedSize);
         }
 
         byte[] bytes = codec.writeToBytes(value);
         assertSize(bytes.length, predictedSize);
-        assertEquals(value, codec.readFromBytes(bytes));
+        assertThat(codec.readFromBytes(bytes)).isEqualTo(value);
 
         ByteBuffer buffer = codec.writeToByteBuffer(value);
         assertSize(buffer.remaining(), predictedSize);
-        assertEquals(value, codec.readFromByteBuffer(buffer));
+        assertThat(codec.readFromByteBuffer(buffer)).isEqualTo(value);
 
         ByteBuf byteBuf = codec.writeToByteBuf(value);
         assertSize(byteBuf.readableBytes(), predictedSize);
-        assertEquals(value, codec.readFromByteBuf(byteBuf));
+        assertThat(codec.readFromByteBuf(byteBuf)).isEqualTo(value);
 
         byte[] prefix = { 0, 1, 2 };
         byte[] prefixedBytes = codec.writeToBytes(prefix, value);
         assertBytes(prefix, Arrays.copyOfRange(prefixedBytes, 0, prefix.length));
         assertBytes(bytes, Arrays.copyOfRange(prefixedBytes, prefix.length, prefixedBytes.length));
-        assertEquals(value, codec.readFromBytes(prefix.length, prefixedBytes));
+        assertThat(value).isEqualTo(codec.readFromBytes(prefix.length, prefixedBytes));
         assertSize(prefixedBytes.length - prefix.length, predictedSize);
     }
 
     private static void assertSize(int length, int predictedSize) {
         if (predictedSize >= 0) {
-            assertEquals(length, predictedSize);
+            assertThat(length).isEqualTo(predictedSize);
         }
     }
 }

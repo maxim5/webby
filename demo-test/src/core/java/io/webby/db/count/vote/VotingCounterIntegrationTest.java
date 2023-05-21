@@ -27,6 +27,7 @@ import java.util.Map;
 import java.util.Random;
 import java.util.function.BiConsumer;
 
+import static com.google.common.truth.Truth.assertThat;
 import static io.webby.db.count.vote.Vote.none;
 import static io.webby.db.count.vote.Vote.votes;
 import static io.webby.demo.model.UserRateModelTable.OwnColumn.*;
@@ -34,7 +35,6 @@ import static io.webby.testing.AssertPrimitives.assertMap;
 import static io.webby.testing.TestingPrimitives.newIntMap;
 import static io.webby.testing.TestingPrimitives.newIntObjectMap;
 import static java.util.Objects.requireNonNull;
-import static org.junit.jupiter.api.Assertions.assertEquals;
 
 @Tag("sql")
 public class VotingCounterIntegrationTest {
@@ -57,7 +57,7 @@ public class VotingCounterIntegrationTest {
     public void empty_state_counts(Scenario scenario) {
         setup(scenario, StorageState.EMPTY);
 
-        assertEquals(0, counter.estimateCount(A));
+        assertThat(counter.estimateCount(A)).isEqualTo(0);
         assertCountEstimates(A, 0, B, 0, C, 0);
         assertActorValues(Ann, votes(none(A), none(B), none(C)));
         assertStorage(StorageState.EMPTY);
@@ -80,7 +80,7 @@ public class VotingCounterIntegrationTest {
     public void increment_simple(Scenario scenario) {
         setup(scenario, StorageState.EMPTY);
 
-        assertEquals(1, counter.increment(A, Ann));
+        assertThat(counter.increment(A, Ann)).isEqualTo(1);
 
         assertCountEstimates(A, 1, B, 0, C, 0);
         assertActorValues(Ann, votes(+A, none(B), none(C)),
@@ -93,8 +93,8 @@ public class VotingCounterIntegrationTest {
     public void increment_double(Scenario scenario) {
         setup(scenario, StorageState.EMPTY);
 
-        assertEquals(1, counter.increment(A, Ann));
-        assertEquals(1, counter.increment(A, Ann));
+        assertThat(counter.increment(A, Ann)).isEqualTo(1);
+        assertThat(counter.increment(A, Ann)).isEqualTo(1);
 
         assertCountEstimates(A, 1, B, 0, C, 0);
         assertActorValues(Ann, votes(+A, none(B), none(C)),
@@ -107,7 +107,7 @@ public class VotingCounterIntegrationTest {
     public void decrement_simple(Scenario scenario) {
         setup(scenario, StorageState.EMPTY);
 
-        assertEquals(-1, counter.decrement(A, Ann));
+        assertThat(counter.decrement(A, Ann)).isEqualTo(-1);
 
         assertCountEstimates(A, -1, B, 0, C, 0);
         assertActorValues(Ann, votes(-A, none(B), none(C)),
@@ -120,8 +120,8 @@ public class VotingCounterIntegrationTest {
     public void decrement_double(Scenario scenario) {
         setup(scenario, StorageState.EMPTY);
 
-        assertEquals(-1, counter.decrement(A, Ann));
-        assertEquals(-1, counter.decrement(A, Ann));
+        assertThat(counter.decrement(A, Ann)).isEqualTo(-1);
+        assertThat(counter.decrement(A, Ann)).isEqualTo(-1);
 
         assertCountEstimates(A, -1, B, 0, C, 0);
         assertActorValues(Ann, votes(-A, none(B), none(C)),
@@ -134,8 +134,8 @@ public class VotingCounterIntegrationTest {
     public void one_user_inc_dec_same_key(Scenario scenario) {
         setup(scenario, StorageState.EMPTY);
 
-        assertEquals(1, counter.increment(A, Ann));
-        assertEquals(0, counter.decrement(A, Ann));
+        assertThat(counter.increment(A, Ann)).isEqualTo(1);
+        assertThat(counter.decrement(A, Ann)).isEqualTo(0);
 
         assertCountEstimates(A, 0, B, 0, C, 0);
         assertActorValues(Ann, votes(none(A), none(B), none(C)));
@@ -147,13 +147,13 @@ public class VotingCounterIntegrationTest {
     public void one_user_multi_inc_dec_same_key(Scenario scenario) {
         setup(scenario, StorageState.EMPTY);
 
-        assertEquals(-1, counter.decrement(A, Ann));
-        assertEquals(-1, counter.decrement(A, Ann));
-        assertEquals(0, counter.increment(A, Ann));
-        assertEquals(1, counter.increment(A, Ann));
-        assertEquals(1, counter.increment(A, Ann));
-        assertEquals(0, counter.decrement(A, Ann));
-        assertEquals(-1, counter.decrement(A, Ann));
+        assertThat(counter.decrement(A, Ann)).isEqualTo(-1);
+        assertThat(counter.decrement(A, Ann)).isEqualTo(-1);
+        assertThat(counter.increment(A, Ann)).isEqualTo(0);
+        assertThat(counter.increment(A, Ann)).isEqualTo(1);
+        assertThat(counter.increment(A, Ann)).isEqualTo(1);
+        assertThat(counter.decrement(A, Ann)).isEqualTo(0);
+        assertThat(counter.decrement(A, Ann)).isEqualTo(-1);
 
         assertCountEstimates(A, -1);
         assertActorValues(Ann, votes(-A));
@@ -165,9 +165,9 @@ public class VotingCounterIntegrationTest {
     public void one_user_inc_different_keys(Scenario scenario) {
         setup(scenario, StorageState.EMPTY);
 
-        assertEquals(1, counter.increment(A, Ann));
-        assertEquals(1, counter.increment(B, Ann));
-        assertEquals(1, counter.increment(C, Ann));
+        assertThat(counter.increment(A, Ann)).isEqualTo(1);
+        assertThat(counter.increment(B, Ann)).isEqualTo(1);
+        assertThat(counter.increment(C, Ann)).isEqualTo(1);
 
         assertCountEstimates(A, 1, B, 1, C, 1);
         assertActorValues(Ann, votes(+A, +B, +C));
@@ -179,9 +179,9 @@ public class VotingCounterIntegrationTest {
     public void many_users_inc_same_key(Scenario scenario) {
         setup(scenario, StorageState.EMPTY);
 
-        assertEquals(1, counter.increment(A, Ann));
-        assertEquals(2, counter.increment(A, Bob));
-        assertEquals(3, counter.increment(A, Liz));
+        assertThat(counter.increment(A, Ann)).isEqualTo(1);
+        assertThat(counter.increment(A, Bob)).isEqualTo(2);
+        assertThat(counter.increment(A, Liz)).isEqualTo(3);
 
         assertCountEstimates(A, 3, B, 0, C, 0);
         assertActorValues(Ann, votes(+A), Bob, votes(+A), Liz, votes(+A));
@@ -193,12 +193,12 @@ public class VotingCounterIntegrationTest {
     public void many_users_inc_dec_same_key(Scenario scenario) {
         setup(scenario, StorageState.EMPTY);
 
-        assertEquals(1, counter.increment(A, Ann));
-        assertEquals(2, counter.increment(A, Bob));
-        assertEquals(3, counter.increment(A, Liz));
-        assertEquals(2, counter.decrement(A, Ann));
-        assertEquals(1, counter.decrement(A, Bob));
-        assertEquals(0, counter.decrement(A, Liz));
+        assertThat(counter.increment(A, Ann)).isEqualTo(1);
+        assertThat(counter.increment(A, Bob)).isEqualTo(2);
+        assertThat(counter.increment(A, Liz)).isEqualTo(3);
+        assertThat(counter.decrement(A, Ann)).isEqualTo(2);
+        assertThat(counter.decrement(A, Bob)).isEqualTo(1);
+        assertThat(counter.decrement(A, Liz)).isEqualTo(0);
 
         assertCountEstimates(A, 0, B, 0, C, 0);
         assertActorValues(Ann, votes(none(A)), Bob, votes(none(A)), Liz, votes(none(A)));
@@ -210,12 +210,12 @@ public class VotingCounterIntegrationTest {
     public void multi_users_inc_dec_different_key(Scenario scenario) {
         setup(scenario, StorageState.EMPTY);
 
-        assertEquals(1, counter.increment(A, Ann));
-        assertEquals(0, counter.decrement(A, Bob));
-        assertEquals(1, counter.increment(B, Liz));
-        assertEquals(0, counter.decrement(B, Ann));
-        assertEquals(1, counter.increment(C, Bob));
-        assertEquals(2, counter.increment(C, Liz));
+        assertThat(counter.increment(A, Ann)).isEqualTo(1);
+        assertThat(counter.decrement(A, Bob)).isEqualTo(0);
+        assertThat(counter.increment(B, Liz)).isEqualTo(1);
+        assertThat(counter.decrement(B, Ann)).isEqualTo(0);
+        assertThat(counter.increment(C, Bob)).isEqualTo(1);
+        assertThat(counter.increment(C, Liz)).isEqualTo(2);
 
         assertCountEstimates(A, 0, B, 0, C, 2);
         assertActorValues(Ann, votes(+A, -B, none(C)),
@@ -229,9 +229,9 @@ public class VotingCounterIntegrationTest {
     public void many_users_multi_inc_flush(Scenario scenario) {
         setup(scenario, StorageState.EMPTY);
 
-        assertEquals(1, counter.increment(A, Ann));
-        assertEquals(1, counter.increment(B, Bob));
-        assertEquals(2, counter.increment(A, Liz));
+        assertThat(counter.increment(A, Ann)).isEqualTo(1);
+        assertThat(counter.increment(B, Bob)).isEqualTo(1);
+        assertThat(counter.increment(A, Liz)).isEqualTo(2);
         counter.flush();
 
         assertCountEstimates(A, 2, B, 1);
@@ -245,9 +245,9 @@ public class VotingCounterIntegrationTest {
     public void many_users_multi_dec_flush(Scenario scenario) {
         setup(scenario, StorageState.EMPTY);
 
-        assertEquals(-1, counter.decrement(A, Ann));
-        assertEquals(-1, counter.decrement(B, Bob));
-        assertEquals(-2, counter.decrement(A, Liz));
+        assertThat(counter.decrement(A, Ann)).isEqualTo(-1);
+        assertThat(counter.decrement(B, Bob)).isEqualTo(-1);
+        assertThat(counter.decrement(A, Liz)).isEqualTo(-2);
         counter.flush();
 
         assertCountEstimates(A, -2, B, -1);
@@ -261,8 +261,8 @@ public class VotingCounterIntegrationTest {
     public void one_user_double_flush(Scenario scenario) {
         setup(scenario, StorageState.EMPTY);
 
-        assertEquals(1, counter.increment(A, Ann));
-        assertEquals(1, counter.increment(B, Ann));
+        assertThat(counter.increment(A, Ann)).isEqualTo(1);
+        assertThat(counter.increment(B, Ann)).isEqualTo(1);
         counter.flush();
         counter.flush();
 
@@ -277,9 +277,9 @@ public class VotingCounterIntegrationTest {
     public void one_user_inc_between_flushes(Scenario scenario) {
         setup(scenario, StorageState.EMPTY);
 
-        assertEquals(1, counter.increment(A, Ann));
+        assertThat(counter.increment(A, Ann)).isEqualTo(1);
         counter.flush();
-        assertEquals(1, counter.increment(B, Ann));
+        assertThat(counter.increment(B, Ann)).isEqualTo(1);
         counter.flush();
 
         assertCountEstimates(A, 1, B, 1);
@@ -293,9 +293,9 @@ public class VotingCounterIntegrationTest {
     public void one_user_undo_inc_between_flushes(Scenario scenario) {
         setup(scenario, StorageState.EMPTY);
 
-        assertEquals(1, counter.increment(A, Ann));
+        assertThat(counter.increment(A, Ann)).isEqualTo(1);
         counter.flush();
-        assertEquals(0, counter.decrement(A, Ann));
+        assertThat(counter.decrement(A, Ann)).isEqualTo(0);
         counter.flush();
 
         assertCountEstimates(A, 0);
@@ -308,9 +308,9 @@ public class VotingCounterIntegrationTest {
     public void one_user_undo_dec_between_flushes(Scenario scenario) {
         setup(scenario, StorageState.EMPTY);
 
-        assertEquals(-1, counter.decrement(A, Ann));
+        assertThat(counter.decrement(A, Ann)).isEqualTo(-1);
         counter.flush();
-        assertEquals(0, counter.increment(A, Ann));
+        assertThat(counter.increment(A, Ann)).isEqualTo(0);
         counter.flush();
 
         assertCountEstimates(A, 0);
@@ -323,10 +323,10 @@ public class VotingCounterIntegrationTest {
     public void one_user_flip_between_flushes(Scenario scenario) {
         setup(scenario, StorageState.EMPTY);
 
-        assertEquals(1, counter.increment(A, Ann));
+        assertThat(counter.increment(A, Ann)).isEqualTo(1);
         counter.flush();
-        assertEquals(0, counter.decrement(A, Ann));
-        assertEquals(-1, counter.decrement(A, Ann));
+        assertThat(counter.decrement(A, Ann)).isEqualTo(0);
+        assertThat(counter.decrement(A, Ann)).isEqualTo(-1);
         counter.flush();
 
         assertCountEstimates(A, -1);
@@ -339,11 +339,11 @@ public class VotingCounterIntegrationTest {
     public void one_user_no_change_between_flushes(Scenario scenario) {
         setup(scenario, StorageState.EMPTY);
 
-        assertEquals(1, counter.increment(A, Ann));
-        assertEquals(-1, counter.decrement(B, Ann));
+        assertThat(counter.increment(A, Ann)).isEqualTo(1);
+        assertThat(counter.decrement(B, Ann)).isEqualTo(-1);
         counter.flush();
-        assertEquals(1, counter.increment(A, Ann));
-        assertEquals(-1, counter.decrement(B, Ann));
+        assertThat(counter.increment(A, Ann)).isEqualTo(1);
+        assertThat(counter.decrement(B, Ann)).isEqualTo(-1);
         counter.flush();
 
         assertCountEstimates(A, 1, B, -1);
@@ -357,11 +357,11 @@ public class VotingCounterIntegrationTest {
     public void multi_changes_between_flushes(Scenario scenario) {
         setup(scenario, StorageState.EMPTY);
 
-        assertEquals(1, counter.increment(A, Ann));
-        assertEquals(-1, counter.decrement(B, Ann));
+        assertThat(counter.increment(A, Ann)).isEqualTo(1);
+        assertThat(counter.decrement(B, Ann)).isEqualTo(-1);
         counter.flush();
-        assertEquals(-1, counter.decrement(C, Ann));
-        assertEquals(0, counter.increment(B, Bob));
+        assertThat(counter.decrement(C, Ann)).isEqualTo(-1);
+        assertThat(counter.increment(B, Bob)).isEqualTo(0);
         counter.flush();
 
         assertCountEstimates(A, 1, B, 0, C, -1);
@@ -402,7 +402,7 @@ public class VotingCounterIntegrationTest {
     public void existing_state_undo_inc(Scenario scenario) {
         setup(scenario, StorageState.of(A, IntHashSet.from(Ann)));
 
-        assertEquals(0, counter.decrement(A, Ann));
+        assertThat(counter.decrement(A, Ann)).isEqualTo(0);
         counter.flush();
 
         assertCountEstimates(A, 0);
@@ -415,8 +415,8 @@ public class VotingCounterIntegrationTest {
     public void existing_state_flip(Scenario scenario) {
         setup(scenario, StorageState.of(A, IntHashSet.from(-Ann)));
 
-        assertEquals(0, counter.increment(A, Ann));
-        assertEquals(1, counter.increment(A, Ann));
+        assertThat(counter.increment(A, Ann)).isEqualTo(0);
+        assertThat(counter.increment(A, Ann)).isEqualTo(1);
         counter.flush();
 
         assertCountEstimates(A, 1);
@@ -429,7 +429,7 @@ public class VotingCounterIntegrationTest {
     public void existing_state_new_key_changed(Scenario scenario) {
         setup(scenario, StorageState.of(A, IntHashSet.from(-Ann)));
 
-        assertEquals(1, counter.increment(B, Ann));
+        assertThat(counter.increment(B, Ann)).isEqualTo(1);
         counter.flush();
 
         assertCountEstimates(A, -1, B, 1);
@@ -443,7 +443,7 @@ public class VotingCounterIntegrationTest {
     public void existing_state_new_user_same_key(Scenario scenario) {
         setup(scenario, StorageState.of(A, IntHashSet.from(-Ann)));
 
-        assertEquals(-2, counter.decrement(A, Bob));
+        assertThat(counter.decrement(A, Bob)).isEqualTo(-2);
         counter.flush();
 
         assertCountEstimates(A, -2);
@@ -458,10 +458,10 @@ public class VotingCounterIntegrationTest {
         setup(scenario, StorageState.of(A, IntHashSet.from(+Ann),
                                         B, IntHashSet.from(-Bob)));
 
-        assertEquals(2, counter.increment(A, Bob));
-        assertEquals(3, counter.increment(A, Liz));
-        assertEquals(-2, counter.decrement(B, Ann));
-        assertEquals(-3, counter.decrement(B, Liz));
+        assertThat(counter.increment(A, Bob)).isEqualTo(2);
+        assertThat(counter.increment(A, Liz)).isEqualTo(3);
+        assertThat(counter.decrement(B, Ann)).isEqualTo(-2);
+        assertThat(counter.decrement(B, Liz)).isEqualTo(-3);
         counter.flush();
 
         assertCountEstimates(A, 3, B, -3, C, 0);
@@ -478,14 +478,14 @@ public class VotingCounterIntegrationTest {
         setup(scenario, StorageState.of(A, IntHashSet.from(-Ann, +Bob),
                                         B, IntHashSet.from(+Ann, +Bob, +Liz)));
 
-        assertEquals(0, counter.decrement(A, Ann));     // double
-        assertEquals(-1, counter.decrement(A, Liz));    // new
-        assertEquals(-2, counter.decrement(A, Bob));    // undo
-        assertEquals(-3, counter.decrement(A, Bob));    // flip
-        assertEquals(2, counter.decrement(B, Ann));     // undo
-        assertEquals(2, counter.increment(B, Bob));     // double
-        assertEquals(1, counter.increment(C, Bob));     // new
-        assertEquals(0, counter.decrement(C, Liz));     // new
+        assertThat(counter.decrement(A, Ann)).isEqualTo(0);     // double
+        assertThat(counter.decrement(A, Liz)).isEqualTo(-1);    // new
+        assertThat(counter.decrement(A, Bob)).isEqualTo(-2);    // undo
+        assertThat(counter.decrement(A, Bob)).isEqualTo(-3);    // flip
+        assertThat(counter.decrement(B, Ann)).isEqualTo(2);     // undo
+        assertThat(counter.increment(B, Bob)).isEqualTo(2);     // double
+        assertThat(counter.increment(C, Bob)).isEqualTo(1);     // new
+        assertThat(counter.decrement(C, Liz)).isEqualTo(0);     // new
         counter.flush();
 
         assertCountEstimates(A, -3, B, 2, C, 0);
@@ -502,8 +502,8 @@ public class VotingCounterIntegrationTest {
     public void external_change_db_row_deleted(Scenario scenario) {
         setup(scenario, StorageState.of(A, IntHashSet.from(+Ann)));
 
-        assertEquals(0, counter.decrement(A, Ann));
-        assertEquals(-1, counter.decrement(A, Ann));    // flipped
+        assertThat(counter.decrement(A, Ann)).isEqualTo(0);
+        assertThat(counter.decrement(A, Ann)).isEqualTo(-1);  // flipped
 
         pushToStorage(StorageState.EMPTY);
         counter.flush();
@@ -518,7 +518,7 @@ public class VotingCounterIntegrationTest {
     public void external_change_db_row_inserted(Scenario scenario) {
         setup(scenario, StorageState.EMPTY);
 
-        assertEquals(-1, counter.decrement(A, Ann));
+        assertThat(counter.decrement(A, Ann)).isEqualTo(-1);
 
         pushToStorage(StorageState.of(A, IntHashSet.from(+Ann)));
         counter.flush();
@@ -533,7 +533,7 @@ public class VotingCounterIntegrationTest {
     public void external_change_unrelated_db_row_deleted(Scenario scenario) {
         setup(scenario, StorageState.of(A, IntHashSet.from(+Ann)));
 
-        assertEquals(-1, counter.decrement(B, Ann));
+        assertThat(counter.decrement(B, Ann)).isEqualTo(-1);
 
         pushToStorage(StorageState.EMPTY);
         counter.flush();
@@ -548,7 +548,7 @@ public class VotingCounterIntegrationTest {
     public void external_change_unrelated_db_row_inserted(Scenario scenario) {
         setup(scenario, StorageState.of(A, IntHashSet.from(+Ann)));
 
-        assertEquals(2, counter.increment(A, Bob));
+        assertThat(counter.increment(A, Bob)).isEqualTo(2);
 
         pushToStorage(StorageState.of(B, IntHashSet.from(-Bob)));
         counter.flush();
@@ -585,9 +585,9 @@ public class VotingCounterIntegrationTest {
                 int sum = expectedVotes.row(key).values().stream().mapToInt(x -> x).sum();
 
                 if (vote) {
-                    assertEquals(sum, counter.increment(key, user));
+                    assertThat(counter.increment(key, user)).isEqualTo(sum);
                 } else {
-                    assertEquals(sum, counter.decrement(key, user));
+                    assertThat(counter.decrement(key, user)).isEqualTo(sum);
                 }
             }
 
@@ -602,7 +602,7 @@ public class VotingCounterIntegrationTest {
             IntIntMap counts = counter.estimateCounts(EasyHppc.fromJavaIterableInt(expectedVotes.rowKeySet()));
             for (IntIntCursor cursor : counts) {
                 int sum = expectedVotes.row(cursor.key).values().stream().mapToInt(x -> x).sum();
-                assertEquals(sum, cursor.value);
+                assertThat(cursor.value).isEqualTo(sum);
             }
 
             // (maybe) flush
@@ -624,7 +624,7 @@ public class VotingCounterIntegrationTest {
 
         assertMap(counter.estimateCounts(expectedMap.keys())).trimmed().containsExactlyTrimmed(expected);
         for (IntIntCursor cursor : expectedMap) {
-            assertEquals(cursor.value, counter.estimateCount(cursor.key));
+            assertThat(counter.estimateCount(cursor.key)).isEqualTo(cursor.value);
         }
     }
 
@@ -634,7 +634,8 @@ public class VotingCounterIntegrationTest {
         for (IntObjectCursor<List<Vote>> cursor : expectedMap) {
             int user = cursor.key;
             for (Vote vote : cursor.value) {
-                assertEquals(vote.val(), counter.getVote(vote.key(), user), "user=%d expected=%s".formatted(user, vote));
+                // With custom error message: "user=%d expected=%s".formatted(user, vote)
+                assertThat(counter.getVote(vote.key(), user)).isEqualTo(vote.val());
                 assertMap(counter.getVotes(IntArrayList.from(vote.key()), user)).containsExactly(vote.key(), vote.val());
             }
 
@@ -646,7 +647,7 @@ public class VotingCounterIntegrationTest {
     }
 
     public void assertStorage(@NotNull StorageState state) {
-        assertEquals(state.map(), storage.loadAll());
+        assertThat(storage.loadAll()).isEqualTo(state.map());
     }
 
     public void pushToStorage(@NotNull StorageState state) {
