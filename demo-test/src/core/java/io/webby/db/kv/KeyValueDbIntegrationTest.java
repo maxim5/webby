@@ -213,7 +213,7 @@ public class KeyValueDbIntegrationTest {
 
     @ParameterizedTest
     @EnumSource(DbType.class)
-    public void serialize_session(DbType dbType) {
+    public void serialize_default_session(DbType dbType) {
         Injector injector = setup(dbType);
         SessionManager sessionManager = injector.getInstance(SessionManager.class);
         KeyValueFactory dbFactory = injector.getInstance(KeyValueFactory.class);
@@ -231,7 +231,7 @@ public class KeyValueDbIntegrationTest {
 
     @ParameterizedTest
     @EnumSource(DbType.class)
-    public void multi_session_sql_compatible(DbType dbType) {
+    public void multi_default_session_sql_compatible(DbType dbType) {
         KeyValueFactory dbFactory = setupFactory(dbType);
 
         DbOptions<Long, DefaultSession> options = DbOptions.of(DefaultSession.DB_NAME, Long.class, DefaultSession.class);
@@ -242,9 +242,10 @@ public class KeyValueDbIntegrationTest {
 
     @ParameterizedTest
     @EnumSource(DbType.class)
-    public void multi_session_forced_key_value(DbType dbType) {
+    public void multi_default_session_forced_key_value_blob(DbType dbType) {
         KeyValueFactory dbFactory = setupFactory(dbType);
 
+        // Key: Long -> Integer
         DbOptions<Integer, DefaultSession> options = DbOptions.of("my-sessions", Integer.class, DefaultSession.class);
         try (KeyValueDb<Integer, DefaultSession> db = dbFactory.getDb(options)) {
             runMultiTest(db,
@@ -268,14 +269,15 @@ public class KeyValueDbIntegrationTest {
 
     @ParameterizedTest
     @EnumSource(DbType.class)
-    public void multi_default_user_forced_key_value(DbType dbType) {
+    public void multi_default_user_forced_key_value_blob(DbType dbType) {
         KeyValueFactory dbFactory = setupFactory(dbType);
 
-        DbOptions<Integer, DefaultUser> options = DbOptions.of("my-users", Integer.class, DefaultUser.class);
-        try (KeyValueDb<Integer, DefaultUser> db = dbFactory.getDb(options)) {
+        // Key: Integer -> Long
+        DbOptions<Long, DefaultUser> options = DbOptions.of("my-users", Long.class, DefaultUser.class);
+        try (KeyValueDb<Long, DefaultUser> db = dbFactory.getDb(options)) {
             runMultiTest(db,
-                         Integer.MIN_VALUE,
-                         Integer.MAX_VALUE,
+                         Long.MIN_VALUE,
+                         Long.MAX_VALUE,
                          UserBuilder.ofId(777).withAccess(UserAccess.Simple).build(),
                          UserBuilder.ofAnyId(0).withAccess(UserAccess.SuperAdmin).build());
         }
