@@ -8,9 +8,7 @@ import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.junit.runners.Parameterized;
 
-import static io.webby.demo.templates.TestingRender.*;
-import static io.webby.testing.AssertResponse.*;
-import static io.webby.testing.TestingBytes.assertEqualsIgnoringNewlines;
+import static io.webby.demo.templates.TestingRender.assertThat;
 
 @RunWith(Parameterized.class)
 public class MustacheJavaExampleTest extends BaseHttpIntegrationTest {
@@ -26,35 +24,33 @@ public class MustacheJavaExampleTest extends BaseHttpIntegrationTest {
     @Test
     public void get_items() {
         HttpResponse response = get("/templates/mustache-java/hello");
-        assert200(response);
-        assertEqualsIgnoringNewlines(content(response), """
-        Name: Foo
-        Price: 10.0
-          Feature: New!
-        Name: Bar
-        Price: 99.99
-          Feature: Cool
-          Feature: Awesome
-        Name: Qux
-        Price: 1.5
-        Name: Baz
-        Price: 500.0
-          Feature: Old
-        """);
-        assertRenderedStatsHeaderForCurrentConfig(response);
+        assertThat(response)
+            .is200()
+            .hasContentIgnoringNewlines("""
+                Name: Foo
+                Price: 10.0
+                  Feature: New!
+                Name: Bar
+                Price: 99.99
+                  Feature: Cool
+                  Feature: Awesome
+                Name: Qux
+                Price: 1.5
+                Name: Baz
+                Price: 500.0
+                  Feature: Old
+                """)
+            .hasRenderedStatsHeaderForCurrentConfig();
     }
 
     @Test
     public void get_items_same_as_manual() {
         HttpResponse rendered = get("/templates/mustache-java/hello");
-        assert200(rendered);
-        assertRenderedStatsHeaderForCurrentConfig(rendered);
+        assertThat(rendered).is200().hasRenderedStatsHeaderForCurrentConfig();
 
         HttpResponse manual = get("/templates/manual/mustache-java/hello");
-        assert200(manual);
-        assertSimpleStatsHeaderForCurrentConfig(manual);
+        assertThat(manual).is200().hasSimpleStatsHeaderForCurrentConfig();
 
-        assertContent(rendered, manual);
-        assertHeadersForCurrentConfig(rendered, manual);
+        assertThat(rendered).matchesContent(manual).matchesHeadersForCurrentConfig(manual);
     }
 }

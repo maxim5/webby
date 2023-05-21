@@ -1,55 +1,143 @@
 package io.webby.netty.intercept;
 
-import com.google.gson.FieldNamingPolicy;
-import com.google.gson.Gson;
-import com.google.inject.Module;
-import io.netty.channel.embedded.EmbeddedChannel;
+import io.netty.handler.codec.http.HttpResponse;
+import io.webby.netty.errors.NotFoundException;
 import io.webby.netty.request.DefaultHttpRequestEx;
+import io.webby.netty.response.EmptyHttpResponse;
+import io.webby.testing.FakeEndpoints;
+import io.webby.testing.HttpRequestBuilder;
 import io.webby.testing.Testing;
-import io.webby.testing.TestingModules;
-import io.webby.url.impl.EndpointContext;
+import io.webby.testing.netty.intercept.FakeInterceptorScanner;
+import io.webby.testing.netty.intercept.MockingInterceptor;
+import io.webby.url.impl.Endpoint;
+import org.jetbrains.annotations.NotNull;
 import org.junit.jupiter.api.Test;
 
-import java.util.Map;
-
-import static io.webby.testing.FakeRequests.post;
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertNull;
+import static io.webby.testing.AssertResponse.assertThat;
 
 public class InterceptorsTest {
-    private final Interceptors interceptors = Testing.testStartup().getInstance(Interceptors.class);
+    private final DefaultHttpRequestEx request = HttpRequestBuilder.get("/foo").ex();
+    private final Endpoint endpoint = FakeEndpoints.fakeEndpoint();
+    private final EmptyHttpResponse defaultResponse = EmptyHttpResponse.INSTANCE;
+    private final MockingInterceptor.Factory factory = new MockingInterceptor.Factory();
 
     @Test
-    public void createRequest_get_json_content_standard_gson() {
-        Object content1 = Map.of("foo-bar", "bar");
-        Object content2 = Map.of("fooBar", "bar");
-
-        EmbeddedChannel channel = new EmbeddedChannel();
-        EndpointContext context = new EndpointContext(Map.of(), false, false);
-        DefaultHttpRequestEx request1 = interceptors.createRequest(post("/foo", content1), channel, context);
-        assertNull(request1.contentAsJson(Foo.class).fooBar);
-        DefaultHttpRequestEx request2 = interceptors.createRequest(post("/foo", content2), channel, context);
-        assertEquals("bar", request2.contentAsJson(Foo.class).fooBar);
+    public void enter_called_in_order() {
+        Interceptors interceptors = getInterceptors(factory.spawn(111), factory.spawn(222));
+        HttpResponse response = interceptors.enter(request, endpoint);
+        assertThat(response).isNull();
+        factory.assertEvents().containsExactly("111:enter", "222:enter");
     }
 
     @Test
-    public void createRequest_get_json_content_custom_gson() {
-        Module module = TestingModules.provided(Gson.class,
-                () -> new Gson().newBuilder().setFieldNamingPolicy(FieldNamingPolicy.LOWER_CASE_WITH_DASHES).create());
-        Interceptors interceptors = Testing.testStartup(module).getInstance(Interceptors.class);
-
-        Object content1 = Map.of("foo-bar", "bar");
-        Object content2 = Map.of("fooBar", "bar");
-
-        EmbeddedChannel channel = new EmbeddedChannel();
-        EndpointContext context = new EndpointContext(Map.of(), false, false);
-        DefaultHttpRequestEx request1 = interceptors.createRequest(post("/foo", content1), channel, context);
-        assertEquals("bar", request1.contentAsJson(Foo.class).fooBar);
-        DefaultHttpRequestEx request2 = interceptors.createRequest(post("/foo", content2), channel, context);
-        assertNull(request2.contentAsJson(Foo.class).fooBar);
+    public void exit_called_in_reverse_order() {
+        Interceptors interceptors = getInterceptors(factory.spawn(111), factory.spawn(222));
+        interceptors.exit(request, defaultResponse);
+        factory.assertEvents().containsExactly("222:exit", "111:exit");
     }
 
-    public static class Foo {
-        String fooBar;
+    @Test
+    public void cleanup_called_in_reverse_order() {
+        Interceptors interceptors = getInterceptors(factory.spawn(111), factory.spawn(222));
+        interceptors.cleanup();
+        factory.assertEvents().containsExactly("222:cleanup", "111:cleanup");
+    }
+
+    @Test
+    public void process_all_successful() {
+        Interceptors interceptors = getInterceptors(factory.spawn(111), factory.spawn(222));
+        HttpResponse response = interceptors.process(request, endpoint, () -> defaultResponse);
+        assertThat(response).isSameInstanceAs(defaultResponse);
+        factory.assertEvents().containsExactly("111:enter", "222:enter", "222:exit", "111:exit");
+    }
+
+    @Test
+    public void process_enter_serve_error() {
+        MockingInterceptor failing = new MockingInterceptor(0).forceEnterFail(new NotFoundException("Not Found"));
+        Interceptors interceptors = getInterceptors(factory.spawn(111), factory.share(failing), factory.spawn(222));
+
+        HttpResponse response = interceptors.process(request, endpoint, () -> defaultResponse);
+        assertThat(response).is404();
+        factory.assertEvents().containsExactly("111:enter", "0:enter:FAIL",
+                                               "222:cleanup", "0:cleanup", "111:cleanup");
+    }
+
+    @Test
+    public void process_enter_internal_error() {
+        MockingInterceptor failing = new MockingInterceptor(0).forceEnterFail(new AssertionError("Oops"));
+        Interceptors interceptors = getInterceptors(factory.spawn(111), factory.share(failing), factory.spawn(222));
+
+        HttpResponse response = interceptors.process(request, endpoint, () -> defaultResponse);
+        assertThat(response).is500();
+        factory.assertEvents().containsExactly("111:enter", "0:enter:FAIL",
+                                               "222:cleanup", "0:cleanup", "111:cleanup");
+    }
+
+    @Test
+    public void process_exit_internal_error() {
+        MockingInterceptor failing = new MockingInterceptor(0).forceExitFail(new AssertionError("Oops"));
+        Interceptors interceptors = getInterceptors(factory.spawn(111), factory.share(failing), factory.spawn(222));
+
+        HttpResponse response = interceptors.process(request, endpoint, () -> defaultResponse);
+        assertThat(response).is500();
+        factory.assertEvents().containsExactly("111:enter", "0:enter", "222:enter",
+                                               "222:exit", "0:exit:FAIL",
+                                               "222:cleanup", "0:cleanup", "111:cleanup");
+    }
+
+    @Test
+    public void process_cleanup_internal_error() {
+        MockingInterceptor failing = new MockingInterceptor(0).forceCleanupFail(new AssertionError("Oops"));
+        Interceptors interceptors = getInterceptors(factory.spawn(111), factory.share(failing), factory.spawn(222));
+
+        HttpResponse response = interceptors.process(request, endpoint, () -> defaultResponse);
+        assertThat(response).isSameInstanceAs(defaultResponse);
+        factory.assertEvents().containsExactly("111:enter", "0:enter", "222:enter",
+                                               "222:exit", "0:exit", "111:exit");
+    }
+
+    @Test
+    public void process_enter_serve_error_and_cleanup_internal_error() {
+        MockingInterceptor failing = new MockingInterceptor(0)
+            .forceEnterFail(new NotFoundException("Not Found"))
+            .forceCleanupFail(new AssertionError("Oops"));
+        Interceptors interceptors = getInterceptors(factory.spawn(111), factory.share(failing), factory.spawn(222));
+
+        HttpResponse response = interceptors.process(request, endpoint, () -> defaultResponse);
+        assertThat(response).is404();
+        factory.assertEvents().containsExactly("111:enter", "0:enter:FAIL",
+                                               "222:cleanup", "0:cleanup:FAIL", "111:cleanup");
+    }
+
+    @Test
+    public void process_enter_internal_error_and_cleanup_internal_error() {
+        MockingInterceptor failing = new MockingInterceptor(0)
+            .forceEnterFail(new AssertionError("Oops"))
+            .forceCleanupFail(new AssertionError("Oops"));
+        Interceptors interceptors = getInterceptors(factory.spawn(111), factory.share(failing), factory.spawn(222));
+
+        HttpResponse response = interceptors.process(request, endpoint, () -> defaultResponse);
+        assertThat(response).is500();
+        factory.assertEvents().containsExactly("111:enter", "0:enter:FAIL",
+                                               "222:cleanup", "0:cleanup:FAIL", "111:cleanup");
+    }
+
+    @Test
+    public void process_exit_internal_error_cleanup_internal_error() {
+        MockingInterceptor failing = new MockingInterceptor(0)
+            .forceExitFail(new AssertionError("Oops"))
+            .forceCleanupFail(new AssertionError("Oops"));
+        Interceptors interceptors = getInterceptors(factory.spawn(111), factory.share(failing), factory.spawn(222));
+
+        HttpResponse response = interceptors.process(request, endpoint, () -> defaultResponse);
+        assertThat(response).is500();
+        factory.assertEvents().containsExactly("111:enter", "0:enter", "222:enter",
+                                               "222:exit", "0:exit:FAIL",
+                                               "222:cleanup", "0:cleanup:FAIL", "111:cleanup");
+    }
+
+    private static @NotNull Interceptors getInterceptors(@NotNull Interceptor @NotNull ... interceptors) {
+        FakeInterceptorScanner fakeScanner = FakeInterceptorScanner.of(interceptors);
+        return Testing.testStartup(fakeScanner.asGuiceModule()).getInstance(Interceptors.class);
     }
 }

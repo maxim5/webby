@@ -3,6 +3,8 @@ package io.webby.orm.api;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
+import java.util.Objects;
+
 /**
  * Represents foreign entity referenced from another entity. In SQL, it's represented by a foreign key, i.e. just an id.
  * In case Table API retrieves a shallow entity, the {@link Foreign} instance contains only id of type {@link I}.
@@ -65,13 +67,37 @@ public interface Foreign<I, E> {
     }
 
     /**
+     * Returns whether the foreign entity is not present.
+     */
+    default boolean hasNullEntity() {
+        return getEntity() == null;
+    }
+
+    /**
      * Sets the {@code entity} reference if it's not present in this instance.
+     * Fails if this {@link Foreign} instance is empty, i.e. holds a <code>NULL</code> foreign key.
      * @return true if updated
      */
     boolean setEntityIfMissing(@NotNull E entity);
 
     /**
      * Sets the {@code entity} regardless of the current present value.
+     * Fails if this {@link Foreign} instance is empty, i.e. holds a <code>NULL</code> foreign key.
      */
     void setEntityUnconditionally(@NotNull E entity);
+
+    /**
+     * Returns whether two {@link Foreign} instances match, i.e. the foreign keys are equal and
+     * the foreign entities are equal if present in both instances.
+     */
+    static <I, E> boolean isMatch(@NotNull Foreign<I, E> left, @NotNull Foreign<I, E> right) {
+        return Objects.equals(left.getFk(), right.getFk()) && isEntityMatch(left, right);
+    }
+
+    /**
+     * Returns whether two {@link Foreign} entities match, i.e. the entities are equal if present in both instances.
+     */
+    static <I, E> boolean isEntityMatch(@NotNull Foreign<I, E> left, @NotNull Foreign<I, E> right) {
+        return left.hasNullEntity() || right.hasNullEntity() || Objects.equals(left.getEntity(), right.getEntity());
+    }
 }

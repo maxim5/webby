@@ -15,7 +15,7 @@ import java.util.Map;
 import java.util.Optional;
 
 import static com.google.common.truth.Truth.assertThat;
-import static io.webby.testing.AssertPrimitives.assertIntsNoOrder;
+import static io.webby.testing.AssertPrimitives.assertThat;
 import static io.webby.testing.TestingBasics.array;
 import static io.webby.testing.TestingPrimitives.newIntObjectMap;
 import static org.junit.jupiter.api.Assertions.*;
@@ -72,10 +72,10 @@ public interface TableIntTest<E, T extends TableInt<E>> extends PrimaryKeyTableT
         E entity2 = createEntity(key2);
         table().insertBatch(List.of(entity1, entity2));
 
-        assertIntsNoOrder(table().fetchPks(Where.of(Shortcuts.TRUE)), key1, key2);
-        assertIntsNoOrder(table().fetchPks(Where.of(Shortcuts.lookupBy(findPkColumnOrDie(), key1))), key1);
-        assertIntsNoOrder(table().fetchPks(Where.of(Shortcuts.lookupBy(findPkColumnOrDie(), key2))), key2);
-        assertIntsNoOrder(table().fetchPks(Where.of(Shortcuts.FALSE)));
+        assertThat(table().fetchPks(Where.of(Shortcuts.TRUE))).containsExactlyNoOrder(key1, key2);
+        assertThat(table().fetchPks(Where.of(Shortcuts.lookupBy(findPkColumnOrDie(), key1)))).containsExactlyNoOrder(key1);
+        assertThat(table().fetchPks(Where.of(Shortcuts.lookupBy(findPkColumnOrDie(), key2)))).containsExactlyNoOrder(key2);
+        assertThat(table().fetchPks(Where.of(Shortcuts.FALSE))).containsExactlyNoOrder();
     }
 
     @Test

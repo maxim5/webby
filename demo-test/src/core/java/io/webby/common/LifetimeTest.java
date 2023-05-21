@@ -1,11 +1,10 @@
 package io.webby.common;
 
 import com.google.common.collect.Lists;
-import com.zaxxer.hikari.HikariDataSource;
 import io.webby.app.AppSettings;
 import io.webby.db.cache.BackgroundCacheCleaner;
 import io.webby.db.kv.KeyValueSettings;
-import io.webby.db.kv.javamap.JavaMapDbFactory;
+import io.webby.db.sql.ConnectionPool;
 import io.webby.db.sql.SqlSettings;
 import io.webby.db.sql.TableManager;
 import io.webby.testing.Testing;
@@ -29,17 +28,16 @@ public class LifetimeTest {
         settings.setProperty("testing.logging", "io.webby.common.Lifetime.Definition=DEBUG");
         settings.modelFilter().setPackagesOf(Testing.CORE_MODELS);
         settings.storageSettings()
-                .enableKeyValue(KeyValueSettings.of(KeyValueSettings.DEFAULT_TYPE))
-                .enableSql(SqlSettings.SQLITE_IN_MEMORY);
+            .enableKeyValue(KeyValueSettings.of(KeyValueSettings.DEFAULT_TYPE))
+            .enableSql(SqlSettings.SQLITE_IN_MEMORY);
 
         Lifetime.Definition lifetimeMock = mockLifetime();
         Testing.testStartup(settings, TestingModules.instance(Lifetime.class, lifetimeMock));
         lifetimeMock.terminate();
 
         List<Class<?>> expected = List.of(
-            HikariDataSource.class,
+            ConnectionPool.class,
             TableManager.class,
-            JavaMapDbFactory.class,
             BackgroundCacheCleaner.class
         );
         assertEquals(expected, addedResources);

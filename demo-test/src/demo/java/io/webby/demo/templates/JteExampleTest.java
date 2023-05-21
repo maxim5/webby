@@ -12,8 +12,7 @@ import org.junit.runners.Parameterized;
 
 import java.util.function.Consumer;
 
-import static io.webby.demo.templates.TestingRender.*;
-import static io.webby.testing.AssertResponse.*;
+import static io.webby.demo.templates.TestingRender.assertThat;
 
 @RunWith(Parameterized.class)
 public class JteExampleTest extends BaseHttpIntegrationTest {
@@ -33,25 +32,21 @@ public class JteExampleTest extends BaseHttpIntegrationTest {
     @Test
     public void get_hello() {
         HttpResponse response = get("/templates/jte/hello");
-        assert200(response);
-        assertContentContains(response,
-                "<meta name=\"description\" content=\"Fancy Description\">",
-                "<title>Fancy Title</title>"
-        );
-        assertRenderedStatsHeaderForCurrentConfig(response);
+        assertThat(response)
+            .is200()
+            .hasContentWhichContains("<meta name=\"description\" content=\"Fancy Description\">",
+                                     "<title>Fancy Title</title>")
+            .hasRenderedStatsHeaderForCurrentConfig();
     }
 
     @Test
     public void get_hello_same_as_manual() {
         HttpResponse rendered = get("/templates/jte/hello");
-        assert200(rendered);
-        assertRenderedStatsHeaderForCurrentConfig(rendered);
+        assertThat(rendered).is200().hasRenderedStatsHeaderForCurrentConfig();
 
         HttpResponse manual = get("/templates/manual/jte/hello");
-        assert200(manual);
-        assertSimpleStatsHeaderForCurrentConfig(manual);
+        assertThat(manual).is200().hasSimpleStatsHeaderForCurrentConfig();
 
-        assertContent(rendered, manual);
-        assertHeadersForCurrentConfig(rendered, manual);
+        assertThat(rendered).matchesContent(manual).matchesHeadersForCurrentConfig(manual);
     }
 }

@@ -6,9 +6,15 @@ import org.jetbrains.annotations.Nullable;
 import java.security.SecureRandom;
 import java.util.Random;
 import java.util.function.IntSupplier;
+import java.util.function.Supplier;
 
-public interface IntIdGenerator {
+public interface IntIdGenerator extends Supplier<Integer> {
     int nextId();
+
+    @Override
+    default @NotNull Integer get() {
+        return nextId();
+    }
 
     static IntIdGenerator autoIncrement(@NotNull IntSupplier sizeSupplier) {
         return () -> sizeSupplier.getAsInt() + 1;

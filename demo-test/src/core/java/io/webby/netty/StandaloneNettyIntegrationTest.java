@@ -23,7 +23,6 @@ import static com.google.common.truth.Truth.assertThat;
 import static io.webby.testing.OkAsserts.*;
 import static io.webby.testing.OkRequests.files;
 import static io.webby.testing.OkRequests.json;
-import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.fail;
 
 @Tag("slow")
@@ -31,7 +30,7 @@ public class StandaloneNettyIntegrationTest {
     private static final FluentLogger log = FluentLogger.forEnclosingClass();
 
     private static final AppSettings SETTINGS = createSettingsForTest();
-    @RegisterExtension private static final StandaloneNettyExtension STANDALONE = new StandaloneNettyExtension(SETTINGS);
+    @RegisterExtension static final StandaloneNettyExtension STANDALONE = new StandaloneNettyExtension(SETTINGS);
     private static final OkRequests Ok = OkRequests.ofLocalhost(STANDALONE.port());
 
     @Test
@@ -45,7 +44,7 @@ public class StandaloneNettyIntegrationTest {
 
     @Test
     public void post_json() {
-        call(Ok.post("/strint/foo-bar/777", json("{a: 1, b: 2, c:3}")), response -> {
+        call(Ok.post("/string/foo-bar/777", json("{a: 1, b: 2, c:3}")), response -> {
             assertClientCode(response, 200);
             assertClientBody(response, "Vars: str=foo-bar y=777 content=<{a=1.0, b=2.0, c=3.0}>");
             assertClientHeader(response, "Content-Type", "text/html; charset=UTF-8");
@@ -130,8 +129,18 @@ public class StandaloneNettyIntegrationTest {
             ws.send("foo");
             ws.send(new ByteString("bar".getBytes()));
         });
-        assertNull(listener.error());
+        assertThat(listener.error()).isNull();
         assertThat(listener.messages()).containsExactly("Ack foo");
+    }
+
+    @Test
+    public void websocket_with_context() {
+        DefaultWebSocketListener listener = new DefaultWebSocketListener();
+        websocketSession(Ok.websocket("/ws/ll/accept/context"), listener, ws -> {
+            ws.send("foo");
+        });
+        assertThat(listener.error()).isNull();
+        assertThat(listener.messages()).containsExactly("Ack foo null");
     }
 
     private static void call(@NotNull Request request, @NotNull ThrowConsumer<Response, IOException> onSuccess) {

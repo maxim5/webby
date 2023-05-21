@@ -4,7 +4,7 @@ import io.webby.orm.api.Engine;
 import io.webby.orm.testing.FakeColumn;
 import org.junit.jupiter.api.Test;
 
-import static io.webby.orm.testing.AssertSql.assertThat;
+import static io.webby.testing.orm.AssertSql.assertThat;
 
 public class CompositeFilterTest {
     @Test

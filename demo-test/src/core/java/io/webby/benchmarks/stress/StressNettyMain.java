@@ -2,11 +2,11 @@ package io.webby.benchmarks.stress;
 
 import io.webby.Webby;
 import io.webby.app.AppSettings;
-import io.webby.auth.session.Session;
+import io.webby.auth.session.DefaultSession;
 import io.webby.auth.user.DefaultUser;
 import io.webby.demo.Main;
-import io.webby.netty.NettyBootstrap;
-import io.webby.netty.NettyHttpHandler;
+import io.webby.netty.dispatch.NettyBootstrap;
+import io.webby.netty.dispatch.http.NettyHttpHandler;
 import io.webby.netty.response.HttpResponseFactory;
 import io.webby.testing.*;
 import org.apache.logging.log4j.Level;
@@ -41,7 +41,7 @@ public class StressNettyMain {
 
     private static @NotNull Closeable bootstrapServer() {
         AppSettings settings = Main.localSettings();
-        settings.modelFilter().setCommonPackageOf(DefaultUser.class, Session.class);
+        settings.modelFilter().setCommonPackageOf(DefaultUser.class, DefaultSession.class);
         settings.handlerFilter().setPackageOnly("io.webby.demo");
         settings.storageSettings()
                 .enableKeyValue(TestingStorage.KEY_VALUE_DEFAULT)

@@ -5,6 +5,7 @@ import org.jetbrains.annotations.Nullable;
 
 import java.util.Objects;
 import java.util.concurrent.atomic.AtomicReference;
+import java.util.function.Function;
 
 import static io.webby.util.base.EasyCast.castAny;
 
@@ -57,12 +58,18 @@ public final class ForeignObj<I, E> implements Foreign<I, E> {
 
     @Override
     public boolean setEntityIfMissing(@NotNull E entity) {
+        assert isPresent() : "ForeignObj reference is empty, can't set the entity: " + entity;
         return this.entity.compareAndSet(null, entity);
     }
 
     @Override
     public void setEntityUnconditionally(@NotNull E entity) {
+        assert isPresent() : "ForeignObj reference is empty, can't set the entity: " + entity;
         this.entity.set(entity);
+    }
+
+    public boolean isConsistent(@NotNull Function<E, I> func) {
+        return entity.get() == null || Objects.equals(id, func.apply(entity.get()));
     }
 
     @Override
@@ -80,5 +87,9 @@ public final class ForeignObj<I, E> implements Foreign<I, E> {
     @Override
     public String toString() {
         return "ForeignObj{id=%s, entity=%s}".formatted(id, entity);
+    }
+
+    public static <I, E> boolean isMatch(@NotNull ForeignObj<I, E> left, @NotNull ForeignObj<I, E> right) {
+        return Foreign.isMatch(left, right);
     }
 }

@@ -3,7 +3,7 @@ package io.webby.db.kv;
 import com.google.common.collect.Lists;
 import com.google.inject.Injector;
 import io.webby.app.AppSettings;
-import io.webby.auth.session.Session;
+import io.webby.auth.session.DefaultSession;
 import io.webby.auth.session.SessionManager;
 import io.webby.auth.user.DefaultUser;
 import io.webby.auth.user.UserAccess;
@@ -15,13 +15,10 @@ import io.webby.db.kv.mapdb.MapDbFactory;
 import io.webby.db.kv.mapdb.MapDbImpl;
 import io.webby.db.kv.paldb.PalDbFactory;
 import io.webby.db.kv.paldb.PalDbImpl;
-import io.webby.testing.Mocking;
-import io.webby.testing.Testing;
-import io.webby.testing.TestingModels;
-import io.webby.testing.TestingProps;
+import io.webby.testing.*;
 import io.webby.testing.ext.CloseAllExtension;
 import io.webby.testing.ext.EmbeddedRedisExtension;
-import io.webby.testing.ext.SqlDbSetupExtension;
+import io.webby.testing.ext.SqlDbExtension;
 import io.webby.testing.ext.TempDirectoryExtension;
 import io.webby.util.collect.Pair;
 import org.jetbrains.annotations.NotNull;
@@ -36,17 +33,15 @@ import java.util.*;
 import java.util.stream.Stream;
 
 import static com.google.common.truth.Truth.assertThat;
-import static io.webby.testing.FakeRequests.getEx;
-import static io.webby.testing.FakeRequests.postEx;
 import static io.webby.testing.TestingBasics.array;
 import static org.junit.jupiter.api.Assertions.*;
 
 @Tags({@Tag("sql"), @Tag("slow")})
 public class KeyValueDbIntegrationTest {
-    @RegisterExtension private static final CloseAllExtension CLOSE_ALL = new CloseAllExtension();
-    @RegisterExtension private static final TempDirectoryExtension TEMP_DIRECTORY = new TempDirectoryExtension();
-    @RegisterExtension private static final EmbeddedRedisExtension REDIS = new EmbeddedRedisExtension();
-    @RegisterExtension private static final SqlDbSetupExtension SQL = SqlDbSetupExtension.fromProperties();
+    @RegisterExtension static final CloseAllExtension CLOSE_ALL = new CloseAllExtension();
+    @RegisterExtension static final TempDirectoryExtension TEMP_DIRECTORY = new TempDirectoryExtension();
+    @RegisterExtension static final EmbeddedRedisExtension REDIS = new EmbeddedRedisExtension();
+    @RegisterExtension static final SqlDbExtension SQL = SqlDbExtension.fromProperties().withSavepoints();
 
     @ParameterizedTest
     @EnumSource(DbType.class)
@@ -218,42 +213,46 @@ public class KeyValueDbIntegrationTest {
 
     @ParameterizedTest
     @EnumSource(DbType.class)
-    public void serialize_session(DbType dbType) {
+    public void serialize_default_session(DbType dbType) {
         Injector injector = setup(dbType);
         SessionManager sessionManager = injector.getInstance(SessionManager.class);
         KeyValueFactory dbFactory = injector.getInstance(KeyValueFactory.class);
 
-        Session newSession = sessionManager.createNewSession(getEx("/"));
+        DefaultSession newSession = (DefaultSession) sessionManager.createNewSession(HttpRequestBuilder.get("/").ex());
         String cookie = sessionManager.encodeSessionForCookie(newSession);
-        Session existingSession = sessionManager.getSessionOrNull(cookie);
+        DefaultSession existingSession = (DefaultSession) sessionManager.getSessionOrNull(cookie);
         assertEquals(newSession, existingSession);
 
-        try (KeyValueDb<Long, Session> db = dbFactory.getDb(DbOptions.of(Session.DB_NAME, Long.class, Session.class))) {
+        DbOptions<Long, DefaultSession> options = DbOptions.of(DefaultSession.DB_NAME, Long.class, DefaultSession.class);
+        try (KeyValueDb<Long, DefaultSession> db = dbFactory.getDb(options)) {
             assertEqualsTo(db, Map.of(newSession.sessionId(), newSession));
         }
     }
 
     @ParameterizedTest
     @EnumSource(DbType.class)
-    public void multi_session_sql_compatible(DbType dbType) {
+    public void multi_default_session_sql_compatible(DbType dbType) {
         KeyValueFactory dbFactory = setupFactory(dbType);
 
-        try (KeyValueDb<Long, Session> db = dbFactory.getDb(DbOptions.of(Session.DB_NAME, Long.class, Session.class))) {
-            runMultiTest(db, 123L, Session.fromRequest(123, getEx("/foo")));
+        DbOptions<Long, DefaultSession> options = DbOptions.of(DefaultSession.DB_NAME, Long.class, DefaultSession.class);
+        try (KeyValueDb<Long, DefaultSession> db = dbFactory.getDb(options)) {
+            runMultiTest(db, 123L, SessionBuilder.ofId(123).build());
         }
     }
 
     @ParameterizedTest
     @EnumSource(DbType.class)
-    public void multi_session_forced_key_value(DbType dbType) {
+    public void multi_default_session_forced_key_value_blob(DbType dbType) {
         KeyValueFactory dbFactory = setupFactory(dbType);
 
-        try (KeyValueDb<Integer, Session> db = dbFactory.getDb(DbOptions.of("my-sessions", Integer.class, Session.class))) {
+        // Key: Long -> Integer
+        DbOptions<Integer, DefaultSession> options = DbOptions.of("my-sessions", Integer.class, DefaultSession.class);
+        try (KeyValueDb<Integer, DefaultSession> db = dbFactory.getDb(options)) {
             runMultiTest(db,
                          Integer.MIN_VALUE,
                          Integer.MAX_VALUE,
-                         Session.fromRequest(Integer.MIN_VALUE, getEx("/foo")),
-                         Session.fromRequest(Integer.MAX_VALUE, postEx("/bar")));
+                         SessionBuilder.ofAnyId(Integer.MIN_VALUE).build(),
+                         SessionBuilder.ofId(Integer.MAX_VALUE).build());
         }
     }
 
@@ -262,20 +261,25 @@ public class KeyValueDbIntegrationTest {
     public void multi_default_user_sql_compatible(DbType dbType) {
         KeyValueFactory dbFactory = setupFactory(dbType);
 
-        try (KeyValueDb<Long, DefaultUser> db = dbFactory.getDb(DbOptions.of(UserModel.DB_NAME, Long.class, DefaultUser.class))) {
-            runMultiTest(db, 777L, TestingModels.newUserNow(777, UserAccess.Simple));
+        DbOptions<Integer, DefaultUser> options = DbOptions.of(UserModel.DB_NAME, Integer.class, DefaultUser.class);
+        try (KeyValueDb<Integer, DefaultUser> db = dbFactory.getDb(options)) {
+            runMultiTest(db, 777, UserBuilder.ofId(777).withAccess(UserAccess.Simple).build());
         }
     }
 
     @ParameterizedTest
     @EnumSource(DbType.class)
-    public void multi_default_user_forced_key_value(DbType dbType) {
+    public void multi_default_user_forced_key_value_blob(DbType dbType) {
         KeyValueFactory dbFactory = setupFactory(dbType);
 
+        // Key: Integer -> Long
         DbOptions<Long, DefaultUser> options = DbOptions.of("my-users", Long.class, DefaultUser.class);
         try (KeyValueDb<Long, DefaultUser> db = dbFactory.getDb(options)) {
-            runMultiTest(db, Long.MIN_VALUE, Long.MAX_VALUE,
-                         TestingModels.newUserNow(777, UserAccess.Simple), TestingModels.newUserNow(0, UserAccess.SuperAdmin));
+            runMultiTest(db,
+                         Long.MIN_VALUE,
+                         Long.MAX_VALUE,
+                         UserBuilder.ofId(777).withAccess(UserAccess.Simple).build(),
+                         UserBuilder.ofAnyId(0).withAccess(UserAccess.SuperAdmin).build());
         }
     }
 
@@ -296,7 +300,7 @@ public class KeyValueDbIntegrationTest {
         assertTrue(palDb.isEmpty());
     }
 
-    private static <K, V> void runMultiTest(@NotNull KeyValueDb<K, V> db, @NotNull K key,  @NotNull V value) {
+    private static <K, V> void runMultiTest(@NotNull KeyValueDb<K, V> db, @NotNull K key, @NotNull V value) {
         assertEqualsTo(db, Map.of());
         assertNotContainsAnyOf(db, Map.of(key, value));
 
@@ -411,8 +415,7 @@ public class KeyValueDbIntegrationTest {
         AppSettings settings = Testing.defaultAppSettings();
         settings.modelFilter().setPackagesOf(Testing.CORE_MODELS);
         settings.storageSettings()
-            .enableKeyValue(KeyValueSettings.of(dbType, TEMP_DIRECTORY.getCurrentTempDir()))
-            .enableSql(SQL.settings());
+            .enableKeyValue(KeyValueSettings.of(dbType, TEMP_DIRECTORY.getCurrentTempDir()));
         settings.setProfileMode(false);  // not testing TrackingDbAdapter by default
 
         settings.setProperty("db.chronicle.default.size", 64);
@@ -426,10 +429,10 @@ public class KeyValueDbIntegrationTest {
         settings.setProperty("db.redis.port", REDIS.getPort());
 
         if (dbType == DbType.SQL_DB) {
-            AutoCloseable mockedClock = Mocking.withMockedClock();
-            CLOSE_ALL.addCloseable(mockedClock);
+            settings.storageSettings().enableSql(SQL.settings());
+            return Testing.testStartup(settings, SQL::setUp, SQL.combinedTestingModule());
         }
 
-        return Testing.testStartup(settings, SQL::savepoint, SQL.combinedTestingModule());
+        return Testing.testStartup(settings);
     }
 }

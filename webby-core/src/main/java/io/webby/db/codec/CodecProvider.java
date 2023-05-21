@@ -6,8 +6,8 @@ import com.google.common.collect.ImmutableMap;
 import com.google.inject.Inject;
 import com.google.inject.Injector;
 import io.webby.app.Settings;
-import io.webby.auth.session.Session;
-import io.webby.auth.session.SessionCodec;
+import io.webby.auth.session.DefaultSession;
+import io.webby.auth.session.DefaultSessionCodec;
 import io.webby.auth.user.DefaultUser;
 import io.webby.auth.user.DefaultUserCodec;
 import io.webby.db.codec.standard.IntArrayListCodec;
@@ -29,7 +29,7 @@ import static io.webby.util.base.EasyCast.castAny;
 // Scan for codecs
 public class CodecProvider {
     private final ImmutableMap<Class<?>, Codec<?>> map = EasyMaps.immutableOf(
-        Session.class, SessionCodec.DEFAULT_INSTANCE,
+        DefaultSession.class, DefaultSessionCodec.DEFAULT_INSTANCE,
         DefaultUser.class, DefaultUserCodec.DEFAULT_INSTANCE,
         Integer.class, INT_CODEC,
         Long.class, LONG_CODEC,

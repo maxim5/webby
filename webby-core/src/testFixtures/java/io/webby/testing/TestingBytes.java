@@ -81,14 +81,6 @@ public class TestingBytes {
         assertEquals(asReadableOrNull(expected), asReadableOrNull(buf));
     }
 
-    public static void assertEqualsIgnoringNewlines(@Nullable ByteBuf buf, @Nullable String expected) {
-        assertEquals(asLines(expected), asLines(buf));
-    }
-
-    public static void assertEqualsIgnoringNewlines(@Nullable String str, @Nullable String expected) {
-        assertEquals(asLines(expected), asLines(str));
-    }
-
     public static @NotNull ByteBuf asReadable(@Nullable ByteBuf buf) {
         ByteBuf byteBuf = buf == null ? Unpooled.EMPTY_BUFFER : buf;
         return switch (READABILITY_MODE) {

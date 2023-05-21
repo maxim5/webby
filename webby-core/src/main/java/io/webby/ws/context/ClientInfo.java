@@ -1,6 +1,6 @@
 package io.webby.ws.context;
 
-import io.webby.auth.session.Session;
+import io.webby.auth.session.SessionModel;
 import io.webby.auth.user.UserModel;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
@@ -9,7 +9,7 @@ import java.util.Optional;
 
 public record ClientInfo(@NotNull Optional<String> version,
                          @NotNull Optional<ClientFrameType> preferredType,
-                         @NotNull Optional<Session> session,
+                         @NotNull Optional<SessionModel> session,
                          @NotNull Optional<UserModel> user) {
     public @Nullable String versionOrNull() {
         return version.orElse(null);
@@ -27,11 +27,11 @@ public record ClientInfo(@NotNull Optional<String> version,
         return preferredType.orElseThrow();
     }
 
-    public @Nullable Session sessionOrNull() {
+    public @Nullable SessionModel sessionOrNull() {
         return session.orElse(null);
     }
 
-    public @NotNull Session sessionOrDie() {
+    public @NotNull SessionModel sessionOrDie() {
         return session.orElseThrow();
     }
 

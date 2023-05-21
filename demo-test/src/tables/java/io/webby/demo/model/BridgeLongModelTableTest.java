@@ -1,14 +1,14 @@
 package io.webby.demo.model;
 
-import io.webby.auth.session.Session;
+import io.webby.auth.session.DefaultSession;
 import io.webby.auth.session.SessionTable;
 import io.webby.auth.user.UserTable;
 import io.webby.orm.api.Connector;
 import io.webby.orm.api.ForeignLong;
 import io.webby.orm.api.query.CreateTableQuery;
 import io.webby.testing.BridgeTableTest;
+import io.webby.testing.SessionBuilder;
 import io.webby.testing.SqlDbTableTest;
-import io.webby.testing.TestingModels;
 import io.webby.testing.TestingSql;
 import io.webby.util.collect.Pair;
 import org.jetbrains.annotations.NotNull;
@@ -20,7 +20,7 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 
 public class BridgeLongModelTableTest
         extends SqlDbTableTest<BridgeLongModel, BridgeLongModelTable>
-        implements BridgeTableTest<Long, Session, Long, Session, BridgeLongModel, BridgeLongModelTable> {
+        implements BridgeTableTest<Long, DefaultSession, Long, DefaultSession, BridgeLongModel, BridgeLongModelTable> {
     private SessionTable sessions;
 
     @Override
@@ -34,12 +34,12 @@ public class BridgeLongModelTableTest
     }
 
     @Override
-    public @NotNull Pair<Long[], Session[]> prepareLefts(int num) {
+    public @NotNull Pair<Long[], DefaultSession[]> prepareLefts(int num) {
         return insertSessions(num);
     }
 
     @Override
-    public @NotNull Pair<Long[], Session[]> prepareRights(int num) {
+    public @NotNull Pair<Long[], DefaultSession[]> prepareRights(int num) {
         return insertSessions(num);
     }
 
@@ -51,11 +51,11 @@ public class BridgeLongModelTableTest
         }
     }
 
-    private @NotNull Pair<Long[], Session[]> insertSessions(int num) {
+    private @NotNull Pair<Long[], DefaultSession[]> insertSessions(int num) {
         Long[] keys = LongStream.range(1, num + 1).boxed().toArray(Long[]::new);
-        Session[] entities = LongStream.range(1, num + 1)
-            .mapToObj(i -> TestingSql.getOrInsert(sessions, TestingModels.newSessionNowFixMillis(i)))
-            .toArray(Session[]::new);
+        DefaultSession[] entities = LongStream.range(1, num + 1)
+            .mapToObj(i -> TestingSql.getOrInsert(sessions, SessionBuilder.simple(i)))
+            .toArray(DefaultSession[]::new);
         return Pair.of(keys, entities);
     }
 }

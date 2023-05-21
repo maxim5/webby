@@ -10,8 +10,7 @@ import io.webby.demo.model.UserRateModelTable;
 import io.webby.orm.api.query.Shortcuts;
 import io.webby.orm.api.query.Where;
 import io.webby.testing.ext.FluentLoggingCapture;
-import io.webby.testing.ext.SqlCleanupExtension;
-import io.webby.testing.ext.SqlDbSetupExtension;
+import io.webby.testing.ext.SqlDbExtension;
 import org.jetbrains.annotations.NotNull;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Tag;
@@ -23,16 +22,15 @@ import java.util.List;
 
 import static com.google.common.truth.Truth.assertThat;
 import static io.webby.demo.model.UserRateModelTable.OwnColumn.*;
-import static io.webby.testing.AssertPrimitives.assertIntsNoOrder;
+import static io.webby.testing.AssertPrimitives.assertMap;
+import static io.webby.testing.AssertPrimitives.assertThat;
 import static io.webby.testing.TestingPrimitives.ints;
 import static io.webby.testing.TestingPrimitives.newIntObjectMap;
-import static org.junit.jupiter.api.Assertions.assertEquals;
 
 @Tag("sql")
 public class TableVotingStorageIntegrationTest {
-    @RegisterExtension private static final SqlDbSetupExtension SQL = SqlDbSetupExtension.fromProperties().disableSavepoints();
-    @RegisterExtension private static final SqlCleanupExtension CLEANUP = SqlCleanupExtension.of(SQL, UserRateModelTable.META);
-    @RegisterExtension private static final FluentLoggingCapture LOGGING = new FluentLoggingCapture(Consistency.class);
+    @RegisterExtension static final SqlDbExtension SQL = SqlDbExtension.fromProperties().withManualCleanup(UserRateModelTable.META);
+    @RegisterExtension static final FluentLoggingCapture LOGGING = new FluentLoggingCapture(Consistency.class);
 
     private static final int A = 1000;
     private static final int B = 2000;
@@ -62,24 +60,24 @@ public class TableVotingStorageIntegrationTest {
     public void load_one_key() {
         IntObjectMap<IntHashSet> state = setupTestData(ints(A, Ann, 1),
                                                        ints(A, Bob, -1));
-        assertEquals(state, newIntObjectMap(A, IntHashSet.from(Ann, -Bob)));
+        assertMap(state).containsExactly(A, IntHashSet.from(Ann, -Bob));
 
-        assertIntsNoOrder(storage.load(A), Ann, -Bob);
-        assertIntsNoOrder(storage.load(B));
-        assertEquals(storage.loadBatch(IntArrayList.from(A, B)), state);
-        assertEquals(storage.loadAll(), newIntObjectMap(A, IntHashSet.from(Ann, -Bob)));
+        assertThat(storage.load(A)).containsExactlyNoOrder(Ann, -Bob);
+        assertThat(storage.load(B)).containsExactlyNoOrder();
+        assertMap(storage.loadBatch(IntArrayList.from(A, B))).isEqualTo(state);
+        assertMap(storage.loadAll()).isEqualTo(newIntObjectMap(A, IntHashSet.from(Ann, -Bob)));
     }
 
     @Test
     public void load_two_keys() {
         IntObjectMap<IntHashSet> state = setupTestData(ints(A, Ann, 1),
                                                        ints(B, Bob, -1));
-        assertEquals(state, newIntObjectMap(A, IntHashSet.from(Ann), B, IntHashSet.from(-Bob)));
+        assertMap(state).containsExactly(A, IntHashSet.from(Ann), B, IntHashSet.from(-Bob));
 
-        assertIntsNoOrder(storage.load(A), Ann);
-        assertIntsNoOrder(storage.load(B), -Bob);
-        assertEquals(storage.loadBatch(IntArrayList.from(A, B)), state);
-        assertEquals(storage.loadAll(), state);
+        assertThat(storage.load(A)).containsExactlyNoOrder(Ann);
+        assertThat(storage.load(B)).containsExactlyNoOrder(-Bob);
+        assertMap(storage.loadBatch(IntArrayList.from(A, B))).isEqualTo(state);
+        assertMap(storage.loadAll()).isEqualTo(state);
     }
 
     @Test

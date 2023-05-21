@@ -1,7 +1,7 @@
 package io.webby.orm.api.query;
 
-import io.webby.orm.testing.AssertSql;
 import io.webby.orm.testing.FakeColumn;
+import io.webby.testing.orm.AssertSql;
 import org.jetbrains.annotations.NotNull;
 import org.junit.jupiter.api.Test;
 

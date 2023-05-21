@@ -12,35 +12,35 @@ import java.io.IOException;
 import java.util.function.Consumer;
 
 import static com.google.common.truth.Truth.assertThat;
-import static org.junit.jupiter.api.Assertions.*;
+import static org.junit.jupiter.api.Assertions.fail;
 
 public class OkAsserts {
     public static void assertClientCode(@NotNull Response response, int code) {
-        assertEquals(code, response.code());
+        assertThat(response.code()).isEqualTo(code);
     }
 
     public static void assertClientBody(@NotNull Response response, @Nullable String content) throws IOException {
         if (content == null) {
-            assertNull(response.body());
+            assertThat(response.body()).isNull();
         } else {
-            assertNotNull(response.body());
-            assertEquals(content, response.peekBody(Long.MAX_VALUE).string());
+            assertThat(response.body()).isNotNull();
+            assertThat(response.peekBody(Long.MAX_VALUE).string()).isEqualTo(content);
         }
     }
 
     public static void assertClientBody(@NotNull Response response, @Nullable Consumer<String> matcher) throws IOException {
         if (matcher == null) {
-            assertNull(response.body());
+            assertThat(response.body()).isNull();
         } else {
-            assertNotNull(response.body());
+            assertThat(response.body()).isNotNull();
             matcher.accept(response.peekBody(Long.MAX_VALUE).string());
         }
     }
 
     public static void assertClientBody(@NotNull Response response, long length) throws IOException {
         ResponseBody body = response.peekBody(Long.MAX_VALUE);
-        assertNotNull(body);
-        assertEquals(length, body.bytes().length);
+        assertThat(body).isNotNull();
+        assertThat(body.bytes().length).isEqualTo(length);
     }
 
     public static void assertClientHeader(@NotNull Response response, @NotNull String name, @NotNull String... expected) {

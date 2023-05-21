@@ -15,6 +15,8 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.function.IntSupplier;
+import java.util.function.Supplier;
 import java.util.stream.IntStream;
 import java.util.stream.Stream;
 
@@ -168,5 +170,23 @@ public class EasyHppc {
         IntHashSet copy = new IntHashSet(container);
         copy.removeAll(predicate);
         return copy;
+    }
+
+    public static int computeIfAbsent(@NotNull IntIntMap map, int key, @NotNull IntSupplier def) {
+        int result = map.get(key);
+        if (result == 0 && !map.containsKey(key)) {
+            result = def.getAsInt();
+            map.put(key, result);
+        }
+        return result;
+    }
+
+    public static <T> T computeIfAbsent(@NotNull IntObjectMap<T> map, int key, @NotNull Supplier<T> def) {
+        T result = map.get(key);
+        if (result == null && !map.containsKey(key)) {
+            result = def.get();
+            map.put(key, result);
+        }
+        return result;
     }
 }

@@ -3,28 +3,28 @@ package io.webby.demo.hello;
 import io.webby.testing.BaseHttpIntegrationTest;
 import org.junit.jupiter.api.Test;
 
-import static io.webby.testing.AssertResponse.*;
+import static io.webby.testing.AssertResponse.assertThat;
 
 public class ThrowServeErrorIntegrationTest extends BaseHttpIntegrationTest {
     protected final ThrowServeError handler = testSetup(ThrowServeError.class).initHandler();
 
     @Test
     public void redirects() {
-        assertTempRedirect(get("/r/error/307"), "/");
-        assertPermRedirect(get("/r/error/308"), "/");
+        assertThat(get("/r/error/307")).isTempRedirect("/");
+        assertThat(get("/r/error/308")).isPermRedirect("/");
     }
 
     @Test
     public void serve_errors() {
-        assert400(get("/r/error/400"));
-        assert401(get("/r/error/401"));
-        assert403(get("/r/error/403"));
-        assert404(get("/r/error/404"));
-        assert503(get("/r/error/503"));
+        assertThat(get("/r/error/400")).is400();
+        assertThat(get("/r/error/401")).is401();
+        assertThat(get("/r/error/403")).is403();
+        assertThat(get("/r/error/404")).is404();
+        assertThat(get("/r/error/503")).is503();
 
-        assert200(get("/r/error/custom/200"));
-        assert400(get("/r/error/custom/400"));
-        assert404(get("/r/error/custom/404"));
-        assert500(get("/r/error/custom/500"));
+        assertThat(get("/r/error/custom/200")).is200();
+        assertThat(get("/r/error/custom/400")).is400();
+        assertThat(get("/r/error/custom/404")).is404();
+        assertThat(get("/r/error/custom/500")).is500();
     }
 }

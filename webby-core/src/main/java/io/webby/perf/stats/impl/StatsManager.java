@@ -17,27 +17,27 @@ public class StatsManager {
         return new DbStatsListener() {
             @Override
             public @NotNull OpContext report(@NotNull Stat stat) {
-                RequestStatsCollector stats = LocalStatsHolder.getLocalStats();
+                StatsCollector stats = LocalStatsHolder.getLocalStats();
                 if (stats.lock()) {
-                    return () -> stats.unlock(stat.key(), 1, null);
+                    return () -> stats.unlockAndReport(stat.key(), 1, null);
                 }
                 return EMPTY_CONTEXT;
             }
 
             @Override
             public @NotNull OpContext reportKey(@NotNull Stat stat, @NotNull Object key) {
-                RequestStatsCollector stats = LocalStatsHolder.getLocalStats();
+                StatsCollector stats = LocalStatsHolder.getLocalStats();
                 if (stats.lock()) {
-                    return () -> stats.unlock(stat.key(), 1, key);
+                    return () -> stats.unlockAndReport(stat.key(), 1, key);
                 }
                 return EMPTY_CONTEXT;
             }
 
             @Override
             public @NotNull OpContext reportKeys(@NotNull Stat stat, @NotNull List<?> keys) {
-                RequestStatsCollector stats = LocalStatsHolder.getLocalStats();
+                StatsCollector stats = LocalStatsHolder.getLocalStats();
                 if (stats.lock()) {
-                    return () -> stats.unlock(stat.key(), keys.size(), keys);
+                    return () -> stats.unlockAndReport(stat.key(), keys.size(), keys);
                 }
                 return EMPTY_CONTEXT;
             }
@@ -46,14 +46,14 @@ public class StatsManager {
 
     public @NotNull CodecStatsListener newCodecStatsListener() {
         return (stat, numBytes, elapsedMillis, hint) -> {
-            RequestStatsCollector stats = LocalStatsHolder.getLocalStats();
+            StatsCollector stats = LocalStatsHolder.getLocalStats();
             stats.report(stat.key(), numBytes, elapsedMillis, hint);
         };
     }
 
     public @NotNull RenderingStatsListener newRenderingStatsListener() {
         return (stat, size, elapsedMillis, hint) -> {
-            RequestStatsCollector stats = LocalStatsHolder.getLocalStats();
+            StatsCollector stats = LocalStatsHolder.getLocalStats();
             stats.report(stat.key(), size, elapsedMillis, hint);
         };
     }

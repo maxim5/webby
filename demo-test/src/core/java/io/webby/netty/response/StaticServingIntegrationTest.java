@@ -4,7 +4,7 @@ import io.netty.handler.codec.http.HttpResponse;
 import io.webby.demo.hello.HelloWorld;
 import io.webby.netty.HttpConst;
 import io.webby.testing.BaseHttpIntegrationTest;
-import io.webby.testing.FakeRequests;
+import io.webby.testing.HttpRequestBuilder;
 import io.webby.testing.Testing;
 import org.jetbrains.annotations.NotNull;
 import org.junit.jupiter.api.Test;
@@ -16,8 +16,8 @@ import java.util.Set;
 
 import static com.google.common.truth.Truth.assertThat;
 import static io.webby.testing.AssertBasics.assertOneOf;
-import static io.webby.testing.AssertResponse.*;
-import static org.junit.jupiter.api.Assertions.assertEquals;
+import static io.webby.testing.AssertResponse.ICON_MIME_TYPES;
+import static io.webby.testing.AssertResponse.assertThat;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 
 public class StaticServingIntegrationTest extends BaseHttpIntegrationTest {
@@ -36,12 +36,12 @@ public class StaticServingIntegrationTest extends BaseHttpIntegrationTest {
 
     @Test
     public void serve_exists() throws Exception {
-        assertFavicon(serving.serve("favicon.ico", FakeRequests.get("/favicon.ico")));
+        assertFavicon(serving.serve("favicon.ico", HttpRequestBuilder.get("/favicon.ico").full()));
     }
 
     @Test
     public void serve_not_exists() throws Exception {
-        assert404(serving.serve("not-exists.xml", FakeRequests.get("/not-exists.xml")));
+        assertThat(serving.serve("not-exists.xml", HttpRequestBuilder.get("/not-exists.xml").full())).is404();
     }
 
     @ParameterizedTest
@@ -53,17 +53,17 @@ public class StaticServingIntegrationTest extends BaseHttpIntegrationTest {
             settings.setProperty("url.static.files.dynamic.lookup", dynamicLookup);
         }).initHandler();
 
-        assert200(get("/"), "Hello World!");
-        assert200(get("/int/10"), "Hello int <b>10</b>!");
-        assert200(get("/intstr/foo/10"), "Hello int/str <b>foo</b> and <b>10</b>!");
+        assertThat(get("/")).is200().hasContent("Hello World!");
+        assertThat(get("/int/10")).is200().hasContent("Hello int <b>10</b>!");
+        assertThat(get("/intstr/foo/10")).is200().hasContent("Hello int/str <b>foo</b> and <b>10</b>!");
 
         assertFavicon(get("/favicon.ico"));
-        assert200(get("/freemarker/hello.ftl"));
-        assert200(get("/jte/example.jte"));
+        assertThat(get("/freemarker/hello.ftl")).is200();
+        assertThat(get("/jte/example.jte")).is200();
 
-        assert404(get("/foo/favicon.ico"));
-        assert404(get("/not-exists.xml"));
-        assert404(get("/int"));
+        assertThat(get("/foo/favicon.ico")).is404();
+        assertThat(get("/not-exists.xml")).is404();
+        assertThat(get("/int")).is404();
     }
 
     @ParameterizedTest
@@ -75,24 +75,25 @@ public class StaticServingIntegrationTest extends BaseHttpIntegrationTest {
             settings.setProperty("url.static.files.dynamic.lookup", dynamicLookup);
         }).initHandler();
 
-        assert200(get("/"), "Hello World!");
-        assert200(get("/int/10"), "Hello int <b>10</b>!");
-        assert200(get("/intstr/foo/10"), "Hello int/str <b>foo</b> and <b>10</b>!");
+        assertThat(get("/")).is200().hasContent("Hello World!");
+        assertThat(get("/int/10")).is200().hasContent("Hello int <b>10</b>!");
+        assertThat(get("/intstr/foo/10")).is200().hasContent("Hello int/str <b>foo</b> and <b>10</b>!");
 
         assertFavicon(get("/foo/favicon.ico"));
-        assert200(get("/foo/freemarker/hello.ftl"));
-        assert200(get("/foo/jte/example.jte"));
+        assertThat(get("/foo/freemarker/hello.ftl")).is200();
+        assertThat(get("/foo/jte/example.jte")).is200();
 
-        assert404(get("/favicon.ico"));
-        assert404(get("/foo/not-exists.xml"));
-        assert404(get("/int"));
+        assertThat(get("/favicon.ico")).is404();
+        assertThat(get("/foo/not-exists.xml")).is404();
+        assertThat(get("/int")).is404();
     }
 
     private static void assertFavicon(@NotNull HttpResponse response) {
-        assert200(response);
-        assertEquals("15406", response.headers().get(HttpConst.CONTENT_LENGTH));
+        assertThat(response)
+            .is200()
+            .hasContentLength(15406)
+            .hasHeader(HttpConst.ETAG, "1e5d75d6");
         assertOneOf(response.headers().get(HttpConst.CONTENT_TYPE), ICON_MIME_TYPES);
-        assertEquals("1e5d75d6", response.headers().get(HttpConst.ETAG));
         assertNotNull(response.headers().getTimeMillis(HttpConst.LAST_MODIFIED));
     }
 }

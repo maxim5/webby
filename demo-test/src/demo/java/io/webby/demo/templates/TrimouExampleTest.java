@@ -8,9 +8,7 @@ import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.junit.runners.Parameterized;
 
-import static io.webby.demo.templates.TestingRender.*;
-import static io.webby.testing.AssertResponse.*;
-import static io.webby.testing.TestingBytes.assertEqualsIgnoringNewlines;
+import static io.webby.demo.templates.TestingRender.assertThat;
 
 @RunWith(Parameterized.class)
 public class TrimouExampleTest extends BaseHttpIntegrationTest {
@@ -26,31 +24,29 @@ public class TrimouExampleTest extends BaseHttpIntegrationTest {
     @Test
     public void get_hello() {
         HttpResponse response = get("/templates/trimou/hello");
-        assert200(response);
-        assertEqualsIgnoringNewlines(content(response), """
-            Total number of items: 4
-            The first item is:\s
-                    1. Foo (5)
-                    2. Bar (15)
-                    3. INACTIVE!\s
-                    4. Baz (5000)
-        
-        
-        """);
-        assertRenderedStatsHeaderForCurrentConfig(response);
+        assertThat(response)
+            .is200()
+            .hasContentIgnoringNewlines("""
+                Total number of items: 4
+                The first item is:\s
+                        1. Foo (5)
+                        2. Bar (15)
+                        3. INACTIVE!\s
+                        4. Baz (5000)
+            
+            
+            """);
+        assertThat(response).hasRenderedStatsHeaderForCurrentConfig();
     }
 
     @Test
     public void get_hello_same_as_manual() {
         HttpResponse rendered = get("/templates/trimou/hello");
-        assert200(rendered);
-        assertRenderedStatsHeaderForCurrentConfig(rendered);
+        assertThat(rendered).is200().hasRenderedStatsHeaderForCurrentConfig();
 
         HttpResponse manual = get("/templates/manual/trimou/hello");
-        assert200(manual);
-        assertSimpleStatsHeaderForCurrentConfig(manual);
+        assertThat(manual).is200().hasSimpleStatsHeaderForCurrentConfig();
 
-        assertContent(rendered, manual);
-        assertHeadersForCurrentConfig(rendered, manual);
+        assertThat(rendered).matchesContent(manual).matchesHeadersForCurrentConfig(manual);
     }
 }

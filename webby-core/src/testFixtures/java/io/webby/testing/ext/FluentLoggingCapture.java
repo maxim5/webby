@@ -5,7 +5,10 @@ import com.google.common.flogger.FluentLogger;
 import com.google.common.flogger.backend.LogData;
 import com.google.common.flogger.backend.LoggerBackend;
 import io.webby.util.base.Unchecked;
+import io.webby.util.func.ThrowRunnable;
 import io.webby.util.reflect.EasyMembers;
+import org.apache.logging.log4j.Level;
+import org.apache.logging.log4j.core.config.Configurator;
 import org.jetbrains.annotations.NotNull;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.extension.AfterEachCallback;
@@ -39,6 +42,17 @@ public class FluentLoggingCapture implements BeforeEachCallback, AfterEachCallba
     @Override
     public void afterEach(ExtensionContext context) throws Exception {
         injectBackend(logger, requireNonNull(backend));
+    }
+
+    public <E extends Throwable> void withCustomLog4jLevel(@NotNull Level oldLevel,
+                                                           @NotNull Level newLevel,
+                                                           @NotNull ThrowRunnable<E> runnable) throws E {
+        Configurator.setAllLevels(backend.getLoggerName(), newLevel);
+        try {
+            runnable.run();
+        } finally {
+            Configurator.setAllLevels(backend.getLoggerName(), oldLevel);
+        }
     }
 
     public @NotNull List<LogData> logRecords() {

@@ -1,8 +1,11 @@
 package io.webby.demo.model;
 
 import com.google.inject.Inject;
-import io.webby.auth.session.Session;
-import io.webby.auth.user.*;
+import io.webby.auth.session.SessionModel;
+import io.webby.auth.user.DefaultUser;
+import io.webby.auth.user.UserAccess;
+import io.webby.auth.user.UserModel;
+import io.webby.auth.user.UserStore;
 import io.webby.netty.errors.NotFoundException;
 import io.webby.netty.request.HttpRequestEx;
 import io.webby.url.annotate.GET;
@@ -31,10 +34,10 @@ public class UserHandler {
     @POST(url = "/user/")
     public Object create(@NotNull HttpRequestEx request) {
         UserModel user = request.user();
-        Session session = request.session();
-        if (!session.hasUser()) {
-            int userId = users.createUserAutoId(DefaultUser.newAuto(UserAccess.Simple));
-            return userId;
+        SessionModel session = request.session();
+        if (!session.isAuthenticated()) {
+            UserModel newUser = users.createUserAutoId(DefaultUser.newUserData(UserAccess.Simple));
+            return newUser.userId();
         } else {
             System.out.println(users.getUserByIdOrNull(session.user()));
             return "already exists: " + user;

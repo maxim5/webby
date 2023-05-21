@@ -1,6 +1,8 @@
 package io.webby.orm.arch.util;
 
-import io.webby.auth.session.Session;
+import io.webby.auth.session.DefaultSession;
+import io.webby.auth.session.SessionModel;
+import io.webby.auth.user.DefaultUser;
 import io.webby.auth.user.UserModel;
 import io.webby.demo.model.NestedModel;
 import org.junit.jupiter.api.Test;
@@ -11,7 +13,9 @@ public class NamingTest {
     @Test
     public void generatedSimpleJavaName_simple() {
         assertEquals("UserModel", Naming.generatedSimpleJavaName(UserModel.class));
-        assertEquals("Session", Naming.generatedSimpleJavaName(Session.class));
+        assertEquals("DefaultUser", Naming.generatedSimpleJavaName(DefaultUser.class));
+        assertEquals("SessionModel", Naming.generatedSimpleJavaName(SessionModel.class));
+        assertEquals("DefaultSession", Naming.generatedSimpleJavaName(DefaultSession.class));
 
         assertEquals("NestedModel", Naming.generatedSimpleJavaName(NestedModel.class));
         assertEquals("NestedModel_Level1", Naming.generatedSimpleJavaName(NestedModel.Level1.class));
@@ -21,7 +25,9 @@ public class NamingTest {
     @Test
     public void shortCanonicalJavaName_simple() {
         assertEquals("UserModel", Naming.shortCanonicalJavaName(UserModel.class));
-        assertEquals("Session", Naming.shortCanonicalJavaName(Session.class));
+        assertEquals("DefaultUser", Naming.shortCanonicalJavaName(DefaultUser.class));
+        assertEquals("SessionModel", Naming.shortCanonicalJavaName(SessionModel.class));
+        assertEquals("DefaultSession", Naming.shortCanonicalJavaName(DefaultSession.class));
 
         assertEquals("NestedModel", Naming.shortCanonicalJavaName(NestedModel.class));
         assertEquals("NestedModel.Level1", Naming.shortCanonicalJavaName(NestedModel.Level1.class));

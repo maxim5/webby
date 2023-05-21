@@ -7,11 +7,12 @@ import com.carrotsearch.hppc.LongContainer;
 import com.carrotsearch.hppc.cursors.IntCursor;
 import com.carrotsearch.hppc.cursors.LongCursor;
 import com.google.common.collect.Lists;
+import com.google.errorprone.annotations.CheckReturnValue;
 import com.google.errorprone.annotations.MustBeClosed;
 import io.webby.orm.api.query.Args;
 import io.webby.orm.api.query.DataDefinitionQuery;
 import io.webby.orm.api.query.SelectQuery;
-import io.webby.util.base.Unchecked;
+import io.webby.orm.api.tx.InTransaction;
 import io.webby.util.func.ThrowConsumer;
 import io.webby.util.func.ThrowSupplier;
 import org.jetbrains.annotations.NotNull;
@@ -36,25 +37,14 @@ public class QueryRunner {
         return connection;
     }
 
-    public void runInTransaction(@NotNull ThrowConsumer<QueryRunner, SQLException> action) throws SQLException {
-        boolean autoCommit = connection.getAutoCommit();
-        connection.setAutoCommit(false);
-        try {
-            action.accept(this);
-            connection.commit();
-        } catch (SQLException | RuntimeException | Error exception) {
-            connection.rollback();
-            throw exception;
-        } catch (Throwable throwable) {
-            connection.rollback();
-            Unchecked.rethrow(throwable);
-        } finally {
-            connection.setAutoCommit(autoCommit);
-        }
+    @CheckReturnValue
+    public @NotNull InTransaction<QueryRunner> tx() {
+        return new InTransaction<>(connection, this);
     }
 
-    public void runAdminInTransaction(@NotNull ThrowConsumer<DbAdmin, SQLException> action) throws SQLException {
-        runInTransaction(runner -> action.accept(DbAdmin.ofFixed(runner)));
+    @CheckReturnValue
+    public @NotNull InTransaction<DbAdmin> adminTx() {
+        return new InTransaction<>(connection, DbAdmin.ofFixed(this));
     }
 
     // Run SelectQuery

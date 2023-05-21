@@ -6,11 +6,12 @@ import com.google.inject.util.Modules;
 import io.webby.Webby;
 import io.webby.app.AppLifetime;
 import io.webby.app.AppSettings;
-import io.webby.auth.session.Session;
+import io.webby.auth.session.DefaultSession;
 import io.webby.auth.user.DefaultUser;
 import io.webby.common.ClasspathScanner;
 import io.webby.db.model.BlobKv;
 import io.webby.netty.marshal.Json;
+import io.webby.netty.marshal.Marshaller;
 import io.webby.util.collect.Pair;
 import org.apache.logging.log4j.Level;
 import org.apache.logging.log4j.LogManager;
@@ -18,6 +19,7 @@ import org.apache.logging.log4j.core.config.Configurator;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
+import java.io.*;
 import java.nio.charset.Charset;
 import java.util.List;
 import java.util.Locale;
@@ -30,7 +32,8 @@ public class Testing {
     public static final String DEFAULT_VIEW_PATH = ".";
     public static final String DEFAULT_USER_CONTENT_PATH = ".";
 
-    public static final List<Class<?>> CORE_MODELS = List.of(Session.class, DefaultUser.class, BlobKv.class);
+    public static final List<Class<?>> AUTH_MODELS = List.of(DefaultSession.class, DefaultUser.class);
+    public static final List<Class<?>> CORE_MODELS = List.of(DefaultSession.class, DefaultUser.class, BlobKv.class);
 
     public static @NotNull AppSettings defaultAppSettings() {
         AppSettings settings = new AppSettings();
@@ -44,8 +47,8 @@ public class Testing {
         settings.handlerFilter().setPredicateUnsafe((pkg, cls) -> false);
         settings.interceptorFilter().setPredicateUnsafe((pkg, cls) -> false);
         settings.storageSettings()
-                .disableKeyValue()
-                .disableSql();
+            .disableKeyValue()
+            .disableSql();
         return settings;
     }
 
@@ -128,13 +131,51 @@ public class Testing {
         public static @NotNull Json json() {
             // An alternative that always works:
             // new GsonMarshaller(new Gson(), TestingBytes.CHARSET)
-            return getInstance(Json.class);
+            return injector != null ? getInstance(Json.class) : new LazyInternalJson();
         }
 
         public static void terminate() {
             if (injector != null) {
                 injector.getInstance(AppLifetime.class).getLifetime().terminate();
             }
+        }
+    }
+
+    private static class LazyInternalJson implements Json {
+        @Override
+        public @NotNull Charset charset() {
+            assertNotNull(Internals.injector, "Test Guice Injector is not initialized");
+            return Internals.charset();
+        }
+
+        @Override
+        public @NotNull Marshaller withCustomCharset(@NotNull Charset charset) {
+            assertNotNull(Internals.injector, "Test Guice Injector is not initialized");
+            return Internals.json().withCustomCharset(charset);
+        }
+
+        @Override
+        public void writeBytes(@NotNull OutputStream output, @NotNull Object instance) throws IOException {
+            assertNotNull(Internals.injector, "Test Guice Injector is not initialized");
+            Internals.json().writeBytes(output, instance);
+        }
+
+        @Override
+        public <T> @NotNull T readBytes(@NotNull InputStream input, @NotNull Class<T> klass) throws IOException {
+            assertNotNull(Internals.injector, "Test Guice Injector is not initialized");
+            return Internals.json().readBytes(input, klass);
+        }
+
+        @Override
+        public void writeChars(@NotNull Writer writer, @NotNull Object instance) throws IOException {
+            assertNotNull(Internals.injector, "Test Guice Injector is not initialized");
+            Internals.json().writeChars(writer, instance);
+        }
+
+        @Override
+        public <T> @NotNull T readChars(@NotNull Reader reader, @NotNull Class<T> klass) throws IOException {
+            assertNotNull(Internals.injector, "Test Guice Injector is not initialized");
+            return Internals.json().readChars(reader, klass);
         }
     }
 }

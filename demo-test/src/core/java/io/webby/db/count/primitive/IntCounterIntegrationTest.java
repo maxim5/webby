@@ -6,8 +6,7 @@ import com.google.common.eventbus.EventBus;
 import io.webby.db.StorageType;
 import io.webby.db.kv.javamap.JavaMapDbFactory;
 import io.webby.demo.model.UserRateModelTable;
-import io.webby.testing.ext.SqlCleanupExtension;
-import io.webby.testing.ext.SqlDbSetupExtension;
+import io.webby.testing.ext.SqlDbExtension;
 import io.webby.util.collect.OneOf;
 import org.jetbrains.annotations.NotNull;
 import org.junit.jupiter.api.Tag;
@@ -17,15 +16,14 @@ import org.junit.jupiter.params.provider.EnumSource;
 
 import static io.webby.demo.model.UserRateModelTable.OwnColumn.content_id;
 import static io.webby.demo.model.UserRateModelTable.OwnColumn.user_id;
-import static io.webby.testing.AssertPrimitives.assertIntsTrimmed;
+import static io.webby.testing.AssertPrimitives.assertMap;
 import static io.webby.testing.TestingPrimitives.newIntMap;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
 // FIX[minor]: more test cases (existing state, check group by count, flush)
 @Tag("sql")
 public class IntCounterIntegrationTest {
-    @RegisterExtension private static final SqlDbSetupExtension SQL = SqlDbSetupExtension.fromProperties().disableSavepoints();
-    @RegisterExtension private static final SqlCleanupExtension CLEANUP = SqlCleanupExtension.of(SQL, UserRateModelTable.META);
+    @RegisterExtension static final SqlDbExtension SQL = SqlDbExtension.fromProperties().withManualCleanup(UserRateModelTable.META);
 
     private IntCountStorage storage;
     private IntCounter counter;
@@ -76,7 +74,7 @@ public class IntCounterIntegrationTest {
     private void assertCountEstimates(int... expected) {
         IntIntHashMap expectedMap = newIntMap(expected);
 
-        assertIntsTrimmed(counter.estimateCounts(expectedMap.keys()), expected);
+        assertMap(counter.estimateCounts(expectedMap.keys())).trimmed().containsExactlyTrimmed(expected);
         for (IntIntCursor cursor : expectedMap) {
             assertEquals(cursor.value, counter.estimateCount(cursor.key));
         }

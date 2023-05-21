@@ -7,7 +7,7 @@ import io.webby.db.kv.DbType;
 import io.webby.db.kv.KeyValueSettings;
 import io.webby.db.sql.SqlSettings;
 import io.webby.demo.templates.JteExample;
-import io.webby.netty.NettyBootstrap;
+import io.webby.netty.dispatch.NettyBootstrap;
 import io.webby.orm.api.Engine;
 import org.jetbrains.annotations.NotNull;
 

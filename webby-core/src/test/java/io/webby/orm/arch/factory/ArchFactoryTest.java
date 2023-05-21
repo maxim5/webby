@@ -9,7 +9,7 @@ import io.webby.orm.api.annotate.Model;
 import io.webby.orm.api.annotate.Sql;
 import io.webby.orm.arch.InvalidSqlModelException;
 import io.webby.orm.arch.model.JdbcType;
-import io.webby.orm.testing.FakeModelAdaptersScanner;
+import io.webby.testing.orm.FakeModelAdaptersScanner;
 import io.webby.util.base.EasyPrimitives.OptionalBool;
 import io.webby.util.collect.Pair;
 import org.jetbrains.annotations.NotNull;
@@ -526,7 +526,7 @@ public class ArchFactoryTest {
     @CanIgnoreReturnValue
     private static @NotNull InvalidSqlModelException assertInvalidModel(@NotNull Class<?> @NotNull ... models) {
         return assertThrows(InvalidSqlModelException.class, () ->
-            new ArchFactory(FakeModelAdaptersScanner.DEFAULT_SCANNER).build(TestingArch.newRunInputs(models))
+            new ArchFactory(FakeModelAdaptersScanner.FAKE_SCANNER).build(TestingArch.newRunInputs(models))
         );
     }
 }

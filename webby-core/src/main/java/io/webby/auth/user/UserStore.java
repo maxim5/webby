@@ -9,6 +9,10 @@ import static io.webby.netty.errors.NotFoundException.getOrThrowNotFound;
 public interface UserStore {
     int size();
 
+    default boolean isEmpty() {
+        return size() == 0;
+    }
+
     @NotNull Iterable<? extends UserModel> fetchAllUsers();
 
     @Nullable UserModel getUserByIdOrNull(int userId);
@@ -25,5 +29,5 @@ public interface UserStore {
         return getOrThrowNotFound(() -> getUserByIdOrNull(foreignId), "User not found: foreign_id=%s", foreignId);
     }
 
-    int createUserAutoId(@NotNull UserModel user);
+    @NotNull UserModel createUserAutoId(@NotNull UserData data);
 }

@@ -13,11 +13,8 @@ import io.webby.orm.api.query.AlterTableAddForeignKeyQuery;
 import io.webby.orm.api.query.CreateTableQuery;
 import org.jetbrains.annotations.NotNull;
 
-import java.sql.SQLException;
 import java.util.List;
 import java.util.logging.Level;
-
-import static io.webby.util.base.Unchecked.rethrow;
 
 public class DDL {
     private static final FluentLogger log = FluentLogger.forEnclosingClass();
@@ -64,20 +61,18 @@ public class DDL {
             log.at(Level.WARNING).log("Automatic SQL table creation called in production");
         }
 
-        try {
-            runner().runAdminInTransaction(admin -> {
-                // Table creation with foreign references may require the referenced table to be created first.
-                // Also, there could potentially be cycled. Hence, FK creation is done separately.
-                for (TableMeta table : getAllTables()) {
-                    admin.createTable(CreateTableQuery.of(table).ifNotExists().withEnforceForeignKey(false));
-                }
-                for (TableMeta table : getAllTables()) {
-                    admin.alterTable(AlterTableAddForeignKeyQuery.of(table));
-                }
-            });
-        } catch (SQLException e) {
-            rethrow(e);
-        }
+        // Table creation with foreign references may require the referenced table to be created first.
+        // Also, there could potentially be cycled. Hence, FK creation is done separately.
+        runner().adminTx().run(admin -> {
+            // Table creation with foreign references may require the referenced table to be created first.
+            // Also, there could potentially be cycled. Hence, FK creation is done separately.
+            for (TableMeta table : getAllTables()) {
+                admin.createTable(CreateTableQuery.of(table).ifNotExists().withEnforceForeignKey(false));
+            }
+            for (TableMeta table : getAllTables()) {
+                admin.alterTable(AlterTableAddForeignKeyQuery.of(table));
+            }
+        });
     }
 
     protected @NotNull List<TableMeta> getAllTables() {

@@ -19,7 +19,7 @@ import java.util.List;
 import java.util.Optional;
 
 import static io.webby.orm.arch.factory.TestingArch.buildTableArch;
-import static io.webby.orm.testing.AssertSql.assertThatSql;
+import static io.webby.testing.orm.AssertSql.assertThatSql;
 
 public class ValuesArrayMakerTest {
     @Test

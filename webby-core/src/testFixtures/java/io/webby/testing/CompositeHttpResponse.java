@@ -27,7 +27,7 @@ public class CompositeHttpResponse extends DefaultHttpResponse implements Conten
         CompositeHttpResponse httpResponse = new CompositeHttpResponse(response.protocolVersion(), response.status(), response.headers());
 
         Stream<HttpContent> stream = objects.stream().map(object -> (HttpContent) object);
-        byte[] bytes = AssertResponse.readAll(stream);
+        byte[] bytes = AssertResponse.readAllFrom(stream);
         httpResponse.content = Unpooled.wrappedBuffer(bytes);
 
         return httpResponse;

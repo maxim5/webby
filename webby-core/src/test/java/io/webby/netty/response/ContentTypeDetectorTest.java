@@ -19,8 +19,8 @@ public class ContentTypeDetectorTest {
         assertEquals("image/gif", detector.guessContentType(Path.of("foo.gif")));
 
         assertEquals("text/css", detector.guessContentType(Path.of("foo.css")));
-        assertEquals("application/javascript", detector.guessContentType(Path.of("foo.js")));
         assertEquals("application/xml", detector.guessContentType(Path.of("foo.xml")));
+        assertOneOf(detector.guessContentType(Path.of("foo.js")), "application/javascript", "text/javascript");
 
         assertOneOf(detector.guessContentType(Path.of("foo.ico")), ICON_MIME_TYPES);
     }

@@ -1,6 +1,7 @@
 package io.webby.netty.intercept.attr;
 
 import com.google.common.flogger.FluentLogger;
+import com.google.errorprone.annotations.CanIgnoreReturnValue;
 import io.webby.netty.intercept.InterceptItem;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.VisibleForTesting;
@@ -17,26 +18,23 @@ public class AttributesValidator {
     private static final FluentLogger log = FluentLogger.forEnclosingClass();
     private static final int MAX_POSITION = 255;
 
-    public static @NotNull Result validateAttributeOwners(@NotNull Collection<InterceptItem> items) {
+    @CanIgnoreReturnValue
+    public static int validateAttributeOwners(@NotNull Collection<InterceptItem> items) {
         int[] positions = items.stream()
-                .filter(InterceptItem::isOwner)
-                .mapToInt(InterceptItem::position)
-                .toArray();
-        int maxPosition = validatePositions(
-                positions,
-                pos -> items.stream()
-                        .filter(item -> item.position() == pos)
-                        .map(InterceptItem::instance)
-                        .toList()
+            .filter(InterceptItem::isOwner)
+            .mapToInt(InterceptItem::position)
+            .toArray();
+        return validatePositions(
+            positions,
+            pos -> items.stream().filter(item -> item.position() == pos).map(InterceptItem::instance).toList()
         );
-        return new Result(maxPosition);
     }
 
     @VisibleForTesting
     static int validatePositions(int @NotNull [] positions, @NotNull IntFunction<List<?>> lookup) {
         Arrays.sort(positions);
         return Arrays.stream(positions).reduce((x, y) -> {
-             failIf(x < 0, "Attribute position can't be negative: %s", lookup.apply(x));
+            failIf(x < 0, "Attribute position can't be negative: %s", lookup.apply(x));
             // No need to check y, since x <= y
             failIf(y > MAX_POSITION, "Attribute position can't exceed %d: %s", MAX_POSITION, lookup.apply(y));
             // No need to check x, since x <= y
@@ -47,6 +45,4 @@ public class AttributesValidator {
             return y;
         }).orElse(-1);
     }
-
-    public record Result(int maxPosition) {}
 }

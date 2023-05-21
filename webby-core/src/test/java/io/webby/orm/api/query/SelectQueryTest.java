@@ -3,8 +3,7 @@ package io.webby.orm.api.query;
 import com.carrotsearch.hppc.IntArrayList;
 import com.carrotsearch.hppc.LongArrayList;
 import io.webby.orm.api.Engine;
-import io.webby.testing.ext.SqlCleanupExtension;
-import io.webby.testing.ext.SqlDbSetupExtension;
+import io.webby.testing.ext.SqlDbExtension;
 import org.jetbrains.annotations.NotNull;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Tag;
@@ -16,17 +15,16 @@ import java.util.List;
 import static io.webby.orm.api.query.CompareType.*;
 import static io.webby.orm.api.query.Func.*;
 import static io.webby.orm.api.query.Shortcuts.*;
-import static io.webby.orm.testing.AssertSql.UnitSubject;
-import static io.webby.orm.testing.AssertSql.assertRows;
 import static io.webby.orm.testing.PersonTableData.*;
 import static io.webby.testing.TestingBasics.array;
+import static io.webby.testing.orm.AssertSql.UnitSubject;
+import static io.webby.testing.orm.AssertSql.assertRows;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assumptions.assumeFalse;
 
 @Tag("sql")
 public class SelectQueryTest {
-    @RegisterExtension private static final SqlDbSetupExtension SQL = SqlDbSetupExtension.fromProperties().disableSavepoints();
-    @RegisterExtension private static final SqlCleanupExtension CLEANUP = SqlCleanupExtension.of(SQL, PERSON_META);
+    @RegisterExtension static final SqlDbExtension SQL = SqlDbExtension.fromProperties().withManualCleanup(PERSON_META);
 
     @BeforeEach
     void setUp() {

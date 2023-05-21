@@ -8,9 +8,7 @@ import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.junit.runners.Parameterized;
 
-import static io.webby.demo.templates.TestingRender.*;
-import static io.webby.testing.AssertResponse.*;
-import static io.webby.testing.TestingBytes.assertEqualsIgnoringNewlines;
+import static io.webby.demo.templates.TestingRender.assertThat;
 
 @RunWith(Parameterized.class)
 public class JMustacheExampleTest extends BaseHttpIntegrationTest {
@@ -26,25 +24,23 @@ public class JMustacheExampleTest extends BaseHttpIntegrationTest {
     @Test
     public void get_persons() {
         HttpResponse response = get("/templates/jmustache/hello");
-        assert200(response);
-        assertEqualsIgnoringNewlines(content(response), """
-        Elvis: 75
-        Madonna: 52
-        """);
-        assertRenderedStatsHeaderForCurrentConfig(response);
+        assertThat(response)
+            .is200()
+            .hasContentIgnoringNewlines("""
+                Elvis: 75
+                Madonna: 52
+                """)
+            .hasRenderedStatsHeaderForCurrentConfig();
     }
 
     @Test
     public void get_persons_same_as_manual() {
         HttpResponse rendered = get("/templates/jmustache/hello");
-        assert200(rendered);
-        assertRenderedStatsHeaderForCurrentConfig(rendered);
+        assertThat(rendered).is200().hasRenderedStatsHeaderForCurrentConfig();
 
         HttpResponse manual = get("/templates/manual/jmustache/hello");
-        assert200(manual);
-        assertSimpleStatsHeaderForCurrentConfig(manual);
+        assertThat(manual).is200().hasSimpleStatsHeaderForCurrentConfig();
 
-        assertContent(rendered, manual);
-        assertHeadersForCurrentConfig(rendered, manual);
+        assertThat(rendered).matchesContent(manual).matchesHeadersForCurrentConfig(manual);
     }
 }

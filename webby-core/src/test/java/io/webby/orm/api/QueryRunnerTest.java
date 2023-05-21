@@ -24,25 +24,23 @@ import java.util.List;
 
 import static com.google.common.truth.Truth.assertThat;
 import static io.webby.orm.api.query.Shortcuts.var;
-import static io.webby.orm.testing.MockingJdbc.assertThat;
-import static io.webby.orm.testing.MockingJdbc.mockConnection;
-import static io.webby.orm.testing.MockingJdbc.mockPreparedStatement;
-import static io.webby.orm.testing.MockingJdbc.mockResultSet;
-import static io.webby.testing.AssertPrimitives.assertIntsOrdered;
-import static io.webby.testing.AssertPrimitives.assertLongsOrdered;
+import static io.webby.testing.AssertPrimitives.assertThat;
 import static io.webby.testing.TestingBasics.array;
+import static io.webby.testing.orm.MockingJdbc.assertThat;
+import static io.webby.testing.orm.MockingJdbc.mockConnection;
+import static io.webby.testing.orm.MockingJdbc.mockPreparedStatement;
+import static io.webby.testing.orm.MockingJdbc.mockResultSet;
 import static org.junit.jupiter.api.Assertions.*;
 
-// FIX[minor]: more tests: force .commit() or .rollback() to fail
 // FIX[norm]: more tests: .runAndGetInt() result type mismatch
 public class QueryRunnerTest {
     private static final Object NULL = null;
     private static final UnresolvedArg UNRESOLVED_A = new UnresolvedArg("a", 0);
 
     private MockConnection mockedConnection;
-    private QueryRunner runner;
     private PreparedStatementResultSetHandler resultSetHandler;
     private MockPreparedStatement mockStatement;
+    private QueryRunner runner;
 
     @BeforeEach
     void setUp() {
@@ -57,62 +55,6 @@ public class QueryRunnerTest {
         resultSetHandler.getPreparedStatements().forEach(statement -> {
             assertTrue(statement.isClosed(), "Statement was not closed: \"%s\"".formatted(statement.getSQL()));
         });
-    }
-
-    /** {@link QueryRunner#runInTransaction(ThrowConsumer)} **/
-
-    @Test
-    public void runInTransaction_success_with_autocommit() throws SQLException {
-        mockedConnection.setAutoCommit(true);
-
-        try (CalledOnce<QueryRunner, SQLException> calledOnce = new CalledOnce<>()) {
-            runner.runInTransaction(calledOnce.alsoCall(queryRunner ->
-                assertFalse(mockedConnection.getAutoCommit())
-            ));
-        }
-
-        assertThat(mockedConnection).hasAutocommit(true).wasCommitted(1).wasRolledBack(0);
-    }
-
-    @Test
-    public void runInTransaction_success_without_autocommit() throws SQLException {
-        mockedConnection.setAutoCommit(false);
-
-        try (CalledOnce<QueryRunner, SQLException> calledOnce = new CalledOnce<>()) {
-            runner.runInTransaction(calledOnce.alsoCall(queryRunner ->
-                assertFalse(mockedConnection.getAutoCommit())
-            ));
-        }
-
-        assertThat(mockedConnection).hasAutocommit(false).wasCommitted(1).wasRolledBack(0);
-    }
-
-    @Test
-    public void runInTransaction_throws_sql_exception() throws SQLException {
-        mockedConnection.setAutoCommit(true);
-
-        Exception exception = assertThrows(SQLException.class, () ->
-            runner.runInTransaction(queryRunner -> {
-                throw new SQLException("Fail");
-            })
-        );
-
-        assertThat(exception).hasMessageThat().isEqualTo("Fail");
-        assertThat(mockedConnection).hasAutocommit(true).wasCommitted(0).wasRolledBack(1);
-    }
-
-    @Test
-    public void runInTransaction_throws_other_exception() throws SQLException {
-        mockedConnection.setAutoCommit(true);
-
-        AssertionError exception = assertThrows(AssertionError.class, () ->
-            runner.runInTransaction(queryRunner -> {
-                throw new AssertionError("Fail");
-            })
-        );
-
-        assertThat(exception).hasMessageThat().isEqualTo("Fail");
-        assertThat(mockedConnection).hasAutocommit(true).wasCommitted(0).wasRolledBack(1);
     }
 
     /** {@link QueryRunner#runAndGet(SelectQuery)} **/
@@ -352,7 +294,7 @@ public class QueryRunnerTest {
 
         IntArrayList fetched = runner.fetchIntColumn(HardcodedSelectQuery.of("select ints"));
 
-        assertIntsOrdered(fetched, 111, 222, 0);
+        assertThat(fetched).containsExactlyInOrder(111, 222, 0);
         assertThat(mockedConnection).executedQueries().containsExactly("select ints");
     }
 
@@ -363,7 +305,7 @@ public class QueryRunnerTest {
 
         IntArrayList fetched = runner.fetchIntColumn(HardcodedSelectQuery.of("select ints"));
 
-        assertIntsOrdered(fetched, 111, 222, 0);
+        assertThat(fetched).containsExactlyInOrder(111, 222, 0);
         assertThat(mockedConnection).executedQueries().containsExactly("select ints");
     }
 
@@ -376,7 +318,7 @@ public class QueryRunnerTest {
 
         LongArrayList fetched = runner.fetchLongColumn(HardcodedSelectQuery.of("select longs"));
 
-        assertLongsOrdered(fetched, 111, 222, 0);
+        assertThat(fetched).containsExactlyInOrder(111, 222, 0);
         assertThat(mockedConnection).executedQueries().containsExactly("select longs");
     }
 
@@ -387,7 +329,7 @@ public class QueryRunnerTest {
 
         LongArrayList fetched = runner.fetchLongColumn(HardcodedSelectQuery.of("select longs"));
 
-        assertLongsOrdered(fetched, 111, 222, 0);
+        assertThat(fetched).containsExactlyInOrder(111, 222, 0);
         assertThat(mockedConnection).executedQueries().containsExactly("select longs");
     }
 

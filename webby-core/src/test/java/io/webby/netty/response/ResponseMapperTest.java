@@ -16,7 +16,7 @@ import java.util.ArrayList;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.function.Function;
 
-import static io.webby.testing.AssertResponse.streamContent;
+import static io.webby.testing.AssertResponse.streamContentOf;
 import static io.webby.testing.TestingBytes.assertByteBuf;
 import static org.junit.jupiter.api.Assertions.*;
 
@@ -129,7 +129,7 @@ public class ResponseMapperTest {
         if (expected != null) {
             assertNotNull(lookup, () -> describe(obj));
             HttpResponse response = lookup.apply(obj);
-            assertByteBuf(streamContent(response), expected);
+            assertByteBuf(streamContentOf(response), expected);
         } else {
             assertNull(lookup, () -> describe(obj));
         }

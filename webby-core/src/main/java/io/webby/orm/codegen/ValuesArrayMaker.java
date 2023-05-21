@@ -2,7 +2,7 @@ package io.webby.orm.codegen;
 
 import com.google.common.primitives.Primitives;
 import io.webby.orm.arch.model.TableField;
-import io.webby.util.func.ObjIntBiFunction;
+import io.webby.util.func.ObjIntFunction;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.ArrayList;
@@ -27,7 +27,7 @@ class ValuesArrayMaker {
     }
 
     private static <T> @NotNull List<T> zipWithColumnIndex(@NotNull Iterable<TableField> fields,
-                                                           @NotNull ObjIntBiFunction<TableField, T> converter) {
+                                                           @NotNull ObjIntFunction<TableField, T> converter) {
         ArrayList<T> result = new ArrayList<>();
         int columnIndex = 0;
         for (TableField field : fields) {

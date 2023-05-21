@@ -6,6 +6,7 @@ import org.jetbrains.annotations.Nullable;
 
 import static io.webby.testing.TestingBasics.array;
 import static io.webby.util.base.EasyCast.castAny;
+import static java.util.Objects.requireNonNull;
 
 public class TestingPrimitives {
     public static @NotNull IntIntHashMap newIntMap(int key, int value) {
@@ -16,7 +17,7 @@ public class TestingPrimitives {
         return IntIntHashMap.from(ints(key1, key2), ints(value1, value2));
     }
 
-    public static @NotNull IntIntHashMap newIntMap(int ... keyValues) {
+    public static @NotNull IntIntHashMap newIntMap(int... keyValues) {
         assert keyValues.length % 2 == 0 : "Invalid number of items: %d".formatted(keyValues.length);
         int[] keys = new int[keyValues.length / 2];
         int[] values = new int[keyValues.length / 2];
@@ -37,26 +38,26 @@ public class TestingPrimitives {
         return new IntObjectHashMap<>();
     }
 
-    public static <T> @NotNull IntObjectMap<T> newIntObjectMap(int key, @NotNull T value) {
+    public static <T> @NotNull IntObjectMap<T> newIntObjectMap(int key, @Nullable T value) {
         return IntObjectHashMap.from(ints(key), array(value));
     }
 
-    public static <T> @NotNull IntObjectMap<T> newIntObjectMap(int key1, @NotNull T value1,
-                                                               int key2, @NotNull T value2) {
+    public static <T> @NotNull IntObjectMap<T> newIntObjectMap(int key1, @Nullable T value1,
+                                                               int key2, @Nullable T value2) {
         return IntObjectHashMap.from(ints(key1, key2), array(value1, value2));
     }
 
-    public static <T> @NotNull IntObjectMap<T> newIntObjectMap(int key1, @NotNull T value1,
-                                                               int key2, @NotNull T value2,
-                                                               int key3, @NotNull T value3) {
+    public static <T> @NotNull IntObjectMap<T> newIntObjectMap(int key1, @Nullable T value1,
+                                                               int key2, @Nullable T value2,
+                                                               int key3, @Nullable T value3) {
         return IntObjectHashMap.from(ints(key1, key2, key3), array(value1, value2, value3));
     }
 
-    public static <T> @NotNull IntObjectMap<T> newIntObjectMap(@NotNull Object @NotNull ... items) {
+    public static <T> @NotNull IntObjectMap<T> newIntObjectMap(@Nullable Object @NotNull ... items) {
         assert items.length % 2 == 0 : "Invalid number of items: %d".formatted(items.length);
         IntObjectHashMap<T> map = new IntObjectHashMap<>();
         for (int i = 0; i < items.length; i += 2) {
-            Integer key = (Integer) items[i];
+            Integer key = (Integer) requireNonNull(items[i]);
             T value = castAny(items[i + 1]);
             map.put(key, value);
         }
