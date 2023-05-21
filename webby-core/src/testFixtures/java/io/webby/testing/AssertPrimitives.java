@@ -30,6 +30,10 @@ public class AssertPrimitives {
         return new IntObjectMapSubject<>(map);
     }
 
+    public static <T> @NotNull LongObjectMapSubject<T> assertMap(@NotNull LongObjectMap<T> map) {
+        return new LongObjectMapSubject<>(map);
+    }
+
     public record IntContainerSubject(@NotNull IntContainer container) {
         public void isEmpty() {
             Truth.assertThat(container).isEmpty();
@@ -119,6 +123,36 @@ public class AssertPrimitives {
 
         public void containsExactly(@Nullable Object @NotNull ... expectedKeysValues) {
             isEqualTo(newIntObjectMap(expectedKeysValues));
+        }
+
+        public @NotNull MapSubject asJavaMap() {
+            return Truth.assertThat(toJavaMap(map));
+        }
+    }
+
+    public record LongObjectMapSubject<T>(@NotNull LongObjectMap<T> map) {
+        public void isEmpty() {
+            Truth.assertThat(map).isEmpty();
+        }
+
+        public void isEqualTo(@NotNull LongObjectMap<T> expected) {
+            Truth.assertThat(map).isEqualTo(expected);
+        }
+
+        public void isEqualTo(@NotNull Map<Long, T> expected) {
+            asJavaMap().isEqualTo(expected);
+        }
+
+        public void containsExactly(long key, @Nullable T expectedValue) {
+            isEqualTo(newLongObjectMap(key, expectedValue));
+        }
+
+        public void containsExactly(long key1, @Nullable T expectedValue1, long key2, @Nullable T expectedValue2) {
+            isEqualTo(newLongObjectMap(key1, expectedValue1, key2, expectedValue2));
+        }
+
+        public void containsExactly(@Nullable Object @NotNull ... expectedKeysValues) {
+            isEqualTo(newLongObjectMap(expectedKeysValues));
         }
 
         public @NotNull MapSubject asJavaMap() {

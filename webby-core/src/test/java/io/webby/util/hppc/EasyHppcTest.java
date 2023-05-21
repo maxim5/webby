@@ -158,6 +158,21 @@ public class EasyHppcTest {
     }
 
     @Test
+    public void long_long_map_to_java_map() {
+        assertThat(EasyHppc.toJavaMap(new LongLongHashMap())).isEmpty();
+        assertThat(EasyHppc.toJavaMap(LongLongHashMap.from(longs(1), longs(7)))).containsExactly(1L, 7L);
+        assertThat(EasyHppc.toJavaMap(LongLongHashMap.from(longs(1, 2), longs(7, 8)))).containsExactly(1L, 7L, 2L, 8L);
+    }
+
+    @Test
+    public void long_obj_map_to_java_map() {
+        assertThat(EasyHppc.toJavaMap(new LongObjectHashMap<>())).isEmpty();
+        assertThat(EasyHppc.toJavaMap(LongObjectHashMap.from(longs(1), array("foo")))).containsExactly(1L, "foo");
+        assertThat(EasyHppc.toJavaMap(LongObjectHashMap.from(longs(1, 2), array("a", "b"))))
+            .containsExactly(1L, "a", 2L, "b");
+    }
+
+    @Test
     public void collect_from_int_stream() {
         assertThat(EasyHppc.collectFromIntStream(IntStream.of())).isEmpty();
         assertThat(EasyHppc.collectFromIntStream(IntStream.of(1))).containsExactlyInOrder(1);

@@ -68,19 +68,30 @@ public class TestingPrimitives {
         return new LongObjectHashMap<>();
     }
 
-    public static <T> @NotNull LongObjectMap<T> newLongObjectMap(long key, @NotNull T value) {
+    public static <T> @NotNull LongObjectMap<T> newLongObjectMap(long key, @Nullable T value) {
         return LongObjectHashMap.from(longs(key), array(value));
     }
 
-    public static <T> @NotNull LongObjectMap<T> newLongObjectMap(long key1, @NotNull T value1,
-                                                                 long key2, @NotNull T value2) {
+    public static <T> @NotNull LongObjectMap<T> newLongObjectMap(long key1, @Nullable T value1,
+                                                                 long key2, @Nullable T value2) {
         return LongObjectHashMap.from(longs(key1, key2), array(value1, value2));
     }
 
-    public static <T> @NotNull LongObjectMap<T> newLongObjectMap(long key1, @NotNull T value1,
-                                                                 long key2, @NotNull T value2,
-                                                                 long key3, @NotNull T value3) {
+    public static <T> @NotNull LongObjectMap<T> newLongObjectMap(long key1, @Nullable T value1,
+                                                                 long key2, @Nullable T value2,
+                                                                 long key3, @Nullable T value3) {
         return LongObjectHashMap.from(longs(key1, key2, key3), array(value1, value2, value3));
+    }
+
+    public static <T> @NotNull LongObjectMap<T> newLongObjectMap(@Nullable Object @NotNull ... items) {
+        assert items.length % 2 == 0 : "Invalid number of items: %d".formatted(items.length);
+        LongObjectHashMap<T> map = new LongObjectHashMap<>();
+        for (int i = 0; i < items.length; i += 2) {
+            Long key = (Long) requireNonNull(items[i]);
+            T value = castAny(items[i + 1]);
+            map.put(key, value);
+        }
+        return map;
     }
 
     public static @NotNull IntHashSet toIntSet(@Nullable Object obj) {
