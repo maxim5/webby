@@ -26,6 +26,7 @@ import java.lang.reflect.Method;
 import java.util.List;
 import java.util.concurrent.atomic.AtomicInteger;
 
+import static com.google.common.truth.Truth.assertThat;
 import static io.webby.testing.AssertFrame.assertBinaryFrame;
 import static io.webby.testing.AssertFrame.assertTextFrame;
 import static io.webby.testing.FakeFrames.binary;
@@ -33,7 +34,7 @@ import static io.webby.testing.FakeFrames.text;
 import static io.webby.testing.TestingBytes.asByteBuf;
 import static io.webby.testing.TestingBytes.asString;
 import static io.webby.ws.convert.AcceptorsAwareFrameConverter.resolveFrameType;
-import static org.junit.jupiter.api.Assertions.*;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 
 public class AcceptorsAwareFrameConverterTest {
     private static final Method DUMMY_METHOD = Testing.class.getDeclaredMethods()[0];
@@ -41,25 +42,25 @@ public class AcceptorsAwareFrameConverterTest {
 
     @Test
     public void resolveFrameType_cases() {
-        assertEquals(ConcreteFrameType.TEXT, resolveFrameType(ClientFrameType.TEXT, FrameType.TEXT_ONLY));
-        assertEquals(ConcreteFrameType.TEXT, resolveFrameType(ClientFrameType.ANY, FrameType.TEXT_ONLY));
+        assertThat(resolveFrameType(ClientFrameType.TEXT, FrameType.TEXT_ONLY)).isEqualTo(ConcreteFrameType.TEXT);
+        assertThat(resolveFrameType(ClientFrameType.ANY, FrameType.TEXT_ONLY)).isEqualTo(ConcreteFrameType.TEXT);
         assertThrows(ClientDeniedException.class, () -> resolveFrameType(ClientFrameType.BINARY, FrameType.TEXT_ONLY));
         assertThrows(ClientDeniedException.class, () -> resolveFrameType(ClientFrameType.BOTH, FrameType.TEXT_ONLY));
 
-        assertEquals(ConcreteFrameType.BINARY, resolveFrameType(ClientFrameType.BINARY, FrameType.BINARY_ONLY));
-        assertEquals(ConcreteFrameType.BINARY, resolveFrameType(ClientFrameType.ANY, FrameType.BINARY_ONLY));
+        assertThat(resolveFrameType(ClientFrameType.BINARY, FrameType.BINARY_ONLY)).isEqualTo(ConcreteFrameType.BINARY);
+        assertThat(resolveFrameType(ClientFrameType.ANY, FrameType.BINARY_ONLY)).isEqualTo(ConcreteFrameType.BINARY);
         assertThrows(ClientDeniedException.class, () -> resolveFrameType(ClientFrameType.TEXT, FrameType.BINARY_ONLY));
         assertThrows(ClientDeniedException.class, () -> resolveFrameType(ClientFrameType.BOTH, FrameType.BINARY_ONLY));
 
-        assertEquals(ConcreteFrameType.TEXT, resolveFrameType(ClientFrameType.TEXT, FrameType.FROM_CLIENT));
-        assertEquals(ConcreteFrameType.BOTH, resolveFrameType(ClientFrameType.ANY, FrameType.FROM_CLIENT));  // temp
-        assertEquals(ConcreteFrameType.BINARY, resolveFrameType(ClientFrameType.BINARY, FrameType.FROM_CLIENT));
-        assertEquals(ConcreteFrameType.BOTH, resolveFrameType(ClientFrameType.BOTH, FrameType.FROM_CLIENT));
+        assertThat(resolveFrameType(ClientFrameType.TEXT, FrameType.FROM_CLIENT)).isEqualTo(ConcreteFrameType.TEXT);
+        assertThat(resolveFrameType(ClientFrameType.ANY, FrameType.FROM_CLIENT)).isEqualTo(ConcreteFrameType.BOTH);  // temp
+        assertThat(resolveFrameType(ClientFrameType.BINARY, FrameType.FROM_CLIENT)).isEqualTo(ConcreteFrameType.BINARY);
+        assertThat(resolveFrameType(ClientFrameType.BOTH, FrameType.FROM_CLIENT)).isEqualTo(ConcreteFrameType.BOTH);
 
-        assertEquals(ConcreteFrameType.BOTH, resolveFrameType(ClientFrameType.TEXT, FrameType.ALLOW_BOTH));
-        assertEquals(ConcreteFrameType.BOTH, resolveFrameType(ClientFrameType.BINARY, FrameType.ALLOW_BOTH));
-        assertEquals(ConcreteFrameType.BOTH, resolveFrameType(ClientFrameType.ANY, FrameType.ALLOW_BOTH));
-        assertEquals(ConcreteFrameType.BOTH, resolveFrameType(ClientFrameType.BOTH, FrameType.ALLOW_BOTH));
+        assertThat(resolveFrameType(ClientFrameType.TEXT, FrameType.ALLOW_BOTH)).isEqualTo(ConcreteFrameType.BOTH);
+        assertThat(resolveFrameType(ClientFrameType.BINARY, FrameType.ALLOW_BOTH)).isEqualTo(ConcreteFrameType.BOTH);
+        assertThat(resolveFrameType(ClientFrameType.ANY, FrameType.ALLOW_BOTH)).isEqualTo(ConcreteFrameType.BOTH);
+        assertThat(resolveFrameType(ClientFrameType.BOTH, FrameType.ALLOW_BOTH)).isEqualTo(ConcreteFrameType.BOTH);
     }
 
     @Test
@@ -70,31 +71,31 @@ public class AcceptorsAwareFrameConverterTest {
         AcceptorsAwareFrameConverter converter = setupConverter(FrameType.ALLOW_BOTH, acceptFoo, acceptBar);
 
         converter.toMessage(text("foo"), (acceptor, payload, context) -> {
-            assertEquals(acceptFoo, acceptor);
-            assertEquals("foo", payload);
-            assertEquals(1, context.requestId());
-            assertTrue(context.isTextRequest());
+            assertThat(acceptor).isEqualTo(acceptFoo);
+            assertThat(payload).isEqualTo("foo");
+            assertThat(context.requestId()).isEqualTo(1);
+            assertThat(context.isTextRequest()).isTrue();
         });
 
         converter.toMessage(binary("foo"), (acceptor, payload, context) -> {
-            assertEquals(acceptFoo, acceptor);
-            assertEquals("foo", payload);
-            assertEquals(2, context.requestId());
-            assertTrue(context.isBinaryRequest());
+            assertThat(acceptor).isEqualTo(acceptFoo);
+            assertThat(payload).isEqualTo("foo");
+            assertThat(context.requestId()).isEqualTo(2);
+            assertThat(context.isBinaryRequest()).isTrue();
         });
 
         converter.toMessage(text("bar"), (acceptor, payload, context) -> {
-            assertEquals(acceptBar, acceptor);
-            assertEquals("bar", payload);
-            assertEquals(3, context.requestId());
-            assertTrue(context.isTextRequest());
+            assertThat(acceptor).isEqualTo(acceptBar);
+            assertThat(payload).isEqualTo("bar");
+            assertThat(context.requestId()).isEqualTo(3);
+            assertThat(context.isTextRequest()).isTrue();
         });
 
         converter.toMessage(binary("bar"), (acceptor, payload, context) -> {
-            assertEquals(acceptBar, acceptor);
-            assertEquals("bar", payload);
-            assertEquals(4, context.requestId());
-            assertTrue(context.isBinaryRequest());
+            assertThat(acceptor).isEqualTo(acceptBar);
+            assertThat(payload).isEqualTo("bar");
+            assertThat(context.requestId()).isEqualTo(4);
+            assertThat(context.isBinaryRequest()).isTrue();
         });
 
         assertThrows(BadFrameException.class, () -> converter.toMessage(text("baz"), EMPTY_CONSUMER));
@@ -109,17 +110,17 @@ public class AcceptorsAwareFrameConverterTest {
         AcceptorsAwareFrameConverter converter = setupConverter(FrameType.TEXT_ONLY, acceptFoo, acceptBar);
 
         converter.toMessage(text("foo"), (acceptor, payload, context) -> {
-            assertEquals(acceptFoo, acceptor);
-            assertEquals("foo", payload);
-            assertEquals(1, context.requestId());
-            assertTrue(context.isTextRequest());
+            assertThat(acceptor).isEqualTo(acceptFoo);
+            assertThat(payload).isEqualTo("foo");
+            assertThat(context.requestId()).isEqualTo(1);
+            assertThat(context.isTextRequest()).isTrue();
         });
 
         converter.toMessage(text("bar"), (acceptor, payload, context) -> {
-            assertEquals(acceptBar, acceptor);
-            assertEquals("bar", payload);
-            assertEquals(2, context.requestId());
-            assertTrue(context.isTextRequest());
+            assertThat(acceptor).isEqualTo(acceptBar);
+            assertThat(payload).isEqualTo("bar");
+            assertThat(context.requestId()).isEqualTo(2);
+            assertThat(context.isTextRequest()).isTrue();
         });
 
         assertThrows(BadFrameException.class, () -> converter.toMessage(binary("foo"), EMPTY_CONSUMER));
@@ -136,17 +137,17 @@ public class AcceptorsAwareFrameConverterTest {
         AcceptorsAwareFrameConverter converter = setupConverter(FrameType.BINARY_ONLY, acceptFoo, acceptBar);
 
         converter.toMessage(binary("foo"), (acceptor, payload, context) -> {
-            assertEquals(acceptFoo, acceptor);
-            assertEquals("foo", payload);
-            assertEquals(1, context.requestId());
-            assertTrue(context.isBinaryRequest());
+            assertThat(acceptor).isEqualTo(acceptFoo);
+            assertThat(payload).isEqualTo("foo");
+            assertThat(context.requestId()).isEqualTo(1);
+            assertThat(context.isBinaryRequest()).isTrue();
         });
 
         converter.toMessage(binary("bar"), (acceptor, payload, context) -> {
-            assertEquals(acceptBar, acceptor);
-            assertEquals("bar", payload);
-            assertEquals(2, context.requestId());
-            assertTrue(context.isBinaryRequest());
+            assertThat(acceptor).isEqualTo(acceptBar);
+            assertThat(payload).isEqualTo("bar");
+            assertThat(context.requestId()).isEqualTo(2);
+            assertThat(context.isBinaryRequest()).isTrue();
         });
 
         assertThrows(BadFrameException.class, () -> converter.toMessage(text("foo"), EMPTY_CONSUMER));
@@ -163,18 +164,18 @@ public class AcceptorsAwareFrameConverterTest {
         AcceptorsAwareFrameConverter converter = setupConverter(FrameType.ALLOW_BOTH, acceptTxt, acceptBin);
 
         converter.toMessage(text("txt"), (acceptor, payload, context) -> {
-            assertEquals(acceptTxt, acceptor);
-            assertEquals(text("txt"), payload);
-            assertEquals(1, context.requestId());
-            assertTrue(context.isTextRequest());
+            assertThat(acceptor).isEqualTo(acceptTxt);
+            assertThat(payload).isEqualTo(text("txt"));
+            assertThat(context.requestId()).isEqualTo(1);
+            assertThat(context.isTextRequest()).isTrue();
         });
         assertThrows(BadFrameException.class, () -> converter.toMessage(binary("txt"), EMPTY_CONSUMER));
 
         converter.toMessage(binary("bin"), (acceptor, payload, context) -> {
-            assertEquals(acceptBin, acceptor);
-            assertEquals(binary("bin"), payload);
-            assertEquals(3, context.requestId());
-            assertTrue(context.isBinaryRequest());
+            assertThat(acceptor).isEqualTo(acceptBin);
+            assertThat(payload).isEqualTo(binary("bin"));
+            assertThat(context.requestId()).isEqualTo(3);
+            assertThat(context.isBinaryRequest()).isTrue();
         });
         assertThrows(BadFrameException.class, () -> converter.toMessage(text("bin"), EMPTY_CONSUMER));
 
@@ -186,8 +187,8 @@ public class AcceptorsAwareFrameConverterTest {
     public void toFrame_simple() {
         AcceptorsAwareFrameConverter converter = setupConverter(FrameType.ALLOW_BOTH);
 
-        assertTrue(converter.peekFrameType(EmptyContext.EMPTY_TEXT_CONTEXT));
-        assertFalse(converter.peekFrameType(EmptyContext.EMPTY_BINARY_CONTEXT));
+        assertThat(converter.peekFrameType(EmptyContext.EMPTY_TEXT_CONTEXT)).isTrue();
+        assertThat(converter.peekFrameType(EmptyContext.EMPTY_BINARY_CONTEXT)).isFalse();
         assertTextFrame(converter.toFrame(StatusCodes.OK, "ok", EmptyContext.EMPTY_TEXT_CONTEXT), "-1:0:ok");
         assertBinaryFrame(converter.toFrame(StatusCodes.OK, "ok", EmptyContext.EMPTY_BINARY_CONTEXT), "-1:0:ok");
     }

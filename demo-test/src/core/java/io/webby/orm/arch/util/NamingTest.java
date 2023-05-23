@@ -7,86 +7,86 @@ import io.webby.auth.user.UserModel;
 import io.webby.demo.model.NestedModel;
 import org.junit.jupiter.api.Test;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
+import static com.google.common.truth.Truth.assertThat;
 
 public class NamingTest {
     @Test
     public void generatedSimpleJavaName_simple() {
-        assertEquals("UserModel", Naming.generatedSimpleJavaName(UserModel.class));
-        assertEquals("DefaultUser", Naming.generatedSimpleJavaName(DefaultUser.class));
-        assertEquals("SessionModel", Naming.generatedSimpleJavaName(SessionModel.class));
-        assertEquals("DefaultSession", Naming.generatedSimpleJavaName(DefaultSession.class));
+        assertThat(Naming.generatedSimpleJavaName(UserModel.class)).isEqualTo("UserModel");
+        assertThat(Naming.generatedSimpleJavaName(DefaultUser.class)).isEqualTo("DefaultUser");
+        assertThat(Naming.generatedSimpleJavaName(SessionModel.class)).isEqualTo("SessionModel");
+        assertThat(Naming.generatedSimpleJavaName(DefaultSession.class)).isEqualTo("DefaultSession");
 
-        assertEquals("NestedModel", Naming.generatedSimpleJavaName(NestedModel.class));
-        assertEquals("NestedModel_Level1", Naming.generatedSimpleJavaName(NestedModel.Level1.class));
-        assertEquals("NestedModel_Simple", Naming.generatedSimpleJavaName(NestedModel.Simple.class));
+        assertThat(Naming.generatedSimpleJavaName(NestedModel.class)).isEqualTo("NestedModel");
+        assertThat(Naming.generatedSimpleJavaName(NestedModel.Level1.class)).isEqualTo("NestedModel_Level1");
+        assertThat(Naming.generatedSimpleJavaName(NestedModel.Simple.class)).isEqualTo("NestedModel_Simple");
     }
 
     @Test
     public void shortCanonicalJavaName_simple() {
-        assertEquals("UserModel", Naming.shortCanonicalJavaName(UserModel.class));
-        assertEquals("DefaultUser", Naming.shortCanonicalJavaName(DefaultUser.class));
-        assertEquals("SessionModel", Naming.shortCanonicalJavaName(SessionModel.class));
-        assertEquals("DefaultSession", Naming.shortCanonicalJavaName(DefaultSession.class));
+        assertThat(Naming.shortCanonicalJavaName(UserModel.class)).isEqualTo("UserModel");
+        assertThat(Naming.shortCanonicalJavaName(DefaultUser.class)).isEqualTo("DefaultUser");
+        assertThat(Naming.shortCanonicalJavaName(SessionModel.class)).isEqualTo("SessionModel");
+        assertThat(Naming.shortCanonicalJavaName(DefaultSession.class)).isEqualTo("DefaultSession");
 
-        assertEquals("NestedModel", Naming.shortCanonicalJavaName(NestedModel.class));
-        assertEquals("NestedModel.Level1", Naming.shortCanonicalJavaName(NestedModel.Level1.class));
-        assertEquals("NestedModel.Simple", Naming.shortCanonicalJavaName(NestedModel.Simple.class));
+        assertThat(Naming.shortCanonicalJavaName(NestedModel.class)).isEqualTo("NestedModel");
+        assertThat(Naming.shortCanonicalJavaName(NestedModel.Level1.class)).isEqualTo("NestedModel.Level1");
+        assertThat(Naming.shortCanonicalJavaName(NestedModel.Simple.class)).isEqualTo("NestedModel.Simple");
     }
 
     @Test
     public void fieldSqlName_simple() {
-        assertEquals("foo", Naming.fieldSqlName("Foo"));
-        assertEquals("foo", Naming.fieldSqlName("_foo"));
-        assertEquals("foo", Naming.fieldSqlName("Foo_"));
-        assertEquals("foo", Naming.fieldSqlName("foo"));
+        assertThat(Naming.fieldSqlName("Foo")).isEqualTo("foo");
+        assertThat(Naming.fieldSqlName("_foo")).isEqualTo("foo");
+        assertThat(Naming.fieldSqlName("Foo_")).isEqualTo("foo");
+        assertThat(Naming.fieldSqlName("foo")).isEqualTo("foo");
 
-        assertEquals("foo_bar", Naming.fieldSqlName("FooBar"));
-        assertEquals("foo_bar", Naming.fieldSqlName("fooBar"));
-        assertEquals("foo_bar", Naming.fieldSqlName("Foo_Bar"));
-        assertEquals("foo_bar", Naming.fieldSqlName("Foo_Bar__"));
+        assertThat(Naming.fieldSqlName("FooBar")).isEqualTo("foo_bar");
+        assertThat(Naming.fieldSqlName("fooBar")).isEqualTo("foo_bar");
+        assertThat(Naming.fieldSqlName("Foo_Bar")).isEqualTo("foo_bar");
+        assertThat(Naming.fieldSqlName("Foo_Bar__")).isEqualTo("foo_bar");
 
-        assertEquals("foo_bar", Naming.fieldSqlName("foo_bar"));
-        assertEquals("foo_bar", Naming.fieldSqlName("foo__bar"));
+        assertThat(Naming.fieldSqlName("foo_bar")).isEqualTo("foo_bar");
+        assertThat(Naming.fieldSqlName("foo__bar")).isEqualTo("foo_bar");
     }
 
     @Test
     public void modelSqlName_simple() {
-        assertEquals("foo", Naming.modelSqlName("Foo"));
-        assertEquals("foo", Naming.modelSqlName("_foo"));
-        assertEquals("foo", Naming.modelSqlName("Foo_"));
-        assertEquals("foo", Naming.modelSqlName("foo"));
+        assertThat(Naming.modelSqlName("Foo")).isEqualTo("foo");
+        assertThat(Naming.modelSqlName("_foo")).isEqualTo("foo");
+        assertThat(Naming.modelSqlName("Foo_")).isEqualTo("foo");
+        assertThat(Naming.modelSqlName("foo")).isEqualTo("foo");
 
-        assertEquals("foo_bar", Naming.modelSqlName("FooBar"));
-        assertEquals("foo_bar", Naming.modelSqlName("fooBar"));
-        assertEquals("foo_bar", Naming.modelSqlName("Foo_Bar"));
-        assertEquals("foo_bar", Naming.modelSqlName("Foo_Bar__"));
+        assertThat(Naming.modelSqlName("FooBar")).isEqualTo("foo_bar");
+        assertThat(Naming.modelSqlName("fooBar")).isEqualTo("foo_bar");
+        assertThat(Naming.modelSqlName("Foo_Bar")).isEqualTo("foo_bar");
+        assertThat(Naming.modelSqlName("Foo_Bar__")).isEqualTo("foo_bar");
 
-        assertEquals("foo_bar", Naming.modelSqlName("foo_bar"));
-        assertEquals("foo_bar", Naming.modelSqlName("foo__bar"));
+        assertThat(Naming.modelSqlName("foo_bar")).isEqualTo("foo_bar");
+        assertThat(Naming.modelSqlName("foo__bar")).isEqualTo("foo_bar");
     }
 
     @Test
     public void concatSqlNames_simple() {
-        assertEquals("foo_bar", Naming.concatSqlNames("foo", "bar"));
-        assertEquals("foo_bar", Naming.concatSqlNames("foo_", "_bar"));
-        assertEquals("foo_bar", Naming.concatSqlNames("_foo_", "_bar_"));
-        assertEquals("foo_", Naming.concatSqlNames("foo", ""));
-        assertEquals("foo_", Naming.concatSqlNames("foo", "_"));
-        assertEquals("_bar", Naming.concatSqlNames("", "bar"));
-        assertEquals("_bar", Naming.concatSqlNames("_", "bar"));
+        assertThat(Naming.concatSqlNames("foo", "bar")).isEqualTo("foo_bar");
+        assertThat(Naming.concatSqlNames("foo_", "_bar")).isEqualTo("foo_bar");
+        assertThat(Naming.concatSqlNames("_foo_", "_bar_")).isEqualTo("foo_bar");
+        assertThat(Naming.concatSqlNames("foo", "")).isEqualTo("foo_");
+        assertThat(Naming.concatSqlNames("foo", "_")).isEqualTo("foo_");
+        assertThat(Naming.concatSqlNames("", "bar")).isEqualTo("_bar");
+        assertThat(Naming.concatSqlNames("_", "bar")).isEqualTo("_bar");
     }
 
     @Test
     public void camelToSnake_simple() {
-        assertEquals("foo", Naming.camelToSnake("Foo"));
-        assertEquals("foo_bar", Naming.camelToSnake("FooBar"));
-        assertEquals("foo_bar", Naming.camelToSnake("fooBar"));
-        assertEquals("foo__bar", Naming.camelToSnake("Foo_Bar"));
+        assertThat(Naming.camelToSnake("Foo")).isEqualTo("foo");
+        assertThat(Naming.camelToSnake("FooBar")).isEqualTo("foo_bar");
+        assertThat(Naming.camelToSnake("fooBar")).isEqualTo("foo_bar");
+        assertThat(Naming.camelToSnake("Foo_Bar")).isEqualTo("foo__bar");
 
-        assertEquals("_foo", Naming.camelToSnake("_foo"));
-        assertEquals("foo_", Naming.camelToSnake("Foo_"));
-        assertEquals("foo", Naming.camelToSnake("foo"));
-        assertEquals("f_o_o", Naming.camelToSnake("FOO"));
+        assertThat(Naming.camelToSnake("_foo")).isEqualTo("_foo");
+        assertThat(Naming.camelToSnake("Foo_")).isEqualTo("foo_");
+        assertThat(Naming.camelToSnake("foo")).isEqualTo("foo");
+        assertThat(Naming.camelToSnake("FOO")).isEqualTo("f_o_o");
     }
 }

@@ -29,12 +29,15 @@ import org.junit.jupiter.api.extension.RegisterExtension;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.EnumSource;
 
-import java.util.*;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Map;
 import java.util.stream.Stream;
 
 import static com.google.common.truth.Truth.assertThat;
+import static com.google.common.truth.Truth8.assertThat;
 import static io.webby.testing.TestingBasics.array;
-import static org.junit.jupiter.api.Assertions.*;
 
 @Tags({@Tag("sql"), @Tag("slow")})
 public class KeyValueDbIntegrationTest {
@@ -52,15 +55,15 @@ public class KeyValueDbIntegrationTest {
             assertEqualsTo(db, Map.of());
             assertNotContainsAnyOf(db, Map.of(1L, "foo"));
 
-            assertNull(db.put(1L, "foo"));
+            assertThat(db.put(1L, "foo")).isNull();
             assertEqualsTo(db, Map.of(1L, "foo"));
             assertNotContainsAnyOf(db, Map.of(2L, "bar"));
 
-            assertNull(db.put(2L, "bar"));
+            assertThat(db.put(2L, "bar")).isNull();
             assertEqualsTo(db, Map.of(1L, "foo", 2L, "bar"));
             assertNotContainsAnyOf(db, Map.of(3L, "baz"));
 
-            assertEquals("bar", db.put(2L, "baz"));
+            assertThat(db.put(2L, "baz")).isEqualTo("bar");
             assertEqualsTo(db, Map.of(1L, "foo", 2L, "baz"));
             assertNotContainsAnyOf(db, Map.of(3L, "bar"));
 
@@ -68,15 +71,15 @@ public class KeyValueDbIntegrationTest {
             assertEqualsTo(db, Map.of(1L, "foo", 2L, "baz", 3L, "foobar"));
             assertNotContainsAnyOf(db, Map.of(0L, "bar"));
 
-            assertEquals("foobar", db.putIfAbsent(3L, "foo"));
+            assertThat(db.putIfAbsent(3L, "foo")).isEqualTo("foobar");
             assertEqualsTo(db, Map.of(1L, "foo", 2L, "baz", 3L, "foobar"));
             assertNotContainsAnyOf(db, Map.of(0L, "bar"));
 
-            assertEquals("foo", db.remove(1L));
+            assertThat(db.remove(1L)).isEqualTo("foo");
             assertEqualsTo(db, Map.of(2L, "baz", 3L, "foobar"));
             assertNotContainsAnyOf(db, Map.of(1L, "foo"));
 
-            assertNull(db.remove(1L));
+            assertThat(db.remove(1L)).isNull();
             assertEqualsTo(db, Map.of(2L, "baz", 3L, "foobar"));
             assertNotContainsAnyOf(db, Map.of(1L, "foo"));
 
@@ -94,15 +97,15 @@ public class KeyValueDbIntegrationTest {
             assertEqualsTo(db, Map.of());
             assertNotContainsAnyOf(db, Map.of("foo", 1));
 
-            assertNull(db.put("foo", 1));
+            assertThat(db.put("foo", 1)).isNull();
             assertEqualsTo(db, Map.of("foo", 1));
             assertNotContainsAnyOf(db, Map.of("bar", 2));
 
-            assertNull(db.put("bar", 2));
+            assertThat(db.put("bar", 2)).isNull();
             assertEqualsTo(db, Map.of("foo", 1, "bar", 2));
             assertNotContainsAnyOf(db, Map.of("baz", 3));
 
-            assertEquals(2, db.put("bar", 3));
+            assertThat(db.put("bar", 3)).isEqualTo(2);
             assertEqualsTo(db, Map.of("foo", 1, "bar", 3));
             assertNotContainsAnyOf(db, Map.of("baz", 2));
 
@@ -110,15 +113,15 @@ public class KeyValueDbIntegrationTest {
             assertEqualsTo(db, Map.of("foo", 1, "bar", 3, "foobar", 2));
             assertNotContainsAnyOf(db, Map.of("baz", 0));
 
-            assertEquals(2, db.putIfAbsent("foobar", 4));
+            assertThat(db.putIfAbsent("foobar", 4)).isEqualTo(2);
             assertEqualsTo(db, Map.of("foo", 1, "bar", 3, "foobar", 2));
             assertNotContainsAnyOf(db, Map.of("baz", 0));
 
-            assertEquals(1, db.remove("foo"));
+            assertThat(db.remove("foo")).isEqualTo(1);
             assertEqualsTo(db, Map.of("bar", 3, "foobar", 2));
             assertNotContainsAnyOf(db, Map.of("foo", 1));
 
-            assertNull(db.remove("foo"));
+            assertThat(db.remove("foo")).isNull();
             assertEqualsTo(db, Map.of("bar", 3, "foobar", 2));
             assertNotContainsAnyOf(db, Map.of("foo", 1));
 
@@ -221,7 +224,7 @@ public class KeyValueDbIntegrationTest {
         DefaultSession newSession = (DefaultSession) sessionManager.createNewSession(HttpRequestBuilder.get("/").ex());
         String cookie = sessionManager.encodeSessionForCookie(newSession);
         DefaultSession existingSession = (DefaultSession) sessionManager.getSessionOrNull(cookie);
-        assertEquals(newSession, existingSession);
+        assertThat(existingSession).isEqualTo(newSession);
 
         DbOptions<Long, DefaultSession> options = DbOptions.of(DefaultSession.DB_NAME, Long.class, DefaultSession.class);
         try (KeyValueDb<Long, DefaultSession> db = dbFactory.getDb(options)) {
@@ -289,37 +292,37 @@ public class KeyValueDbIntegrationTest {
 
         ChronicleFactory chronicleFactory = dbFactory.getInternalFactory(DbType.CHRONICLE_MAP);
         ChronicleDb<Long, Long> chronicleDb = chronicleFactory.getInternalDb(DbOptions.of("foo", Long.class, Long.class));
-        assertTrue(chronicleDb.isEmpty());
+        assertThat(chronicleDb.isEmpty()).isTrue();
 
         MapDbFactory mapDbFactory = dbFactory.getInternalFactory(DbType.MAP_DB);
         MapDbImpl<Long, Long> mapDb = mapDbFactory.getInternalDb(DbOptions.of("foo", Long.class, Long.class));
-        assertTrue(mapDb.isEmpty());
+        assertThat(mapDb.isEmpty()).isTrue();
 
         PalDbFactory palDbFactory = dbFactory.getInternalFactory(DbType.PAL_DB);
         PalDbImpl<Long, Long> palDb = palDbFactory.getInternalDb(DbOptions.of("foo", Long.class, Long.class));
-        assertTrue(palDb.isEmpty());
+        assertThat(palDb.isEmpty()).isTrue();
     }
 
     private static <K, V> void runMultiTest(@NotNull KeyValueDb<K, V> db, @NotNull K key, @NotNull V value) {
         assertEqualsTo(db, Map.of());
         assertNotContainsAnyOf(db, Map.of(key, value));
 
-        assertNull(db.put(key, value));
+        assertThat(db.put(key, value)).isNull();
         assertEqualsTo(db, Map.of(key, value));
 
-        assertEquals(value, db.remove(key));
+        assertThat(db.remove(key)).isEqualTo(value);
         assertEqualsTo(db, Map.of());
 
-        assertNull(db.putIfPresent(key, value));
+        assertThat(db.putIfPresent(key, value)).isNull();
         assertEqualsTo(db, Map.of());
 
-        assertNull(db.putIfAbsent(key, value));
+        assertThat(db.putIfAbsent(key, value)).isNull();
         assertEqualsTo(db, Map.of(key, value));
 
-        assertEquals(value, db.putIfPresent(key, value));
+        assertThat(db.putIfPresent(key, value)).isEqualTo(value);
         assertEqualsTo(db, Map.of(key, value));
 
-        assertEquals(value, db.putIfAbsent(key, value));
+        assertThat(db.putIfAbsent(key, value)).isEqualTo(value);
         assertEqualsTo(db, Map.of(key, value));
 
         db.putAll(Map.of(key, value));
@@ -335,27 +338,27 @@ public class KeyValueDbIntegrationTest {
         assertEqualsTo(db, Map.of());
         assertNotContainsAnyOf(db, Map.of(key1, value1, key2, value2));
 
-        assertNull(db.put(key1, value1));
+        assertThat(db.put(key1, value1)).isNull();
         assertEqualsTo(db, Map.of(key1, value1));
         assertNotContainsAnyOf(db, Map.of(key2, value2));
 
-        assertNull(db.put(key2, value2));
+        assertThat(db.put(key2, value2)).isNull();
         assertEqualsTo(db, Map.of(key1, value1, key2, value2));
 
-        assertEquals(value1, db.put(key1, value2));
+        assertThat(db.put(key1, value2)).isEqualTo(value1);
         assertEqualsTo(db, Map.of(key1, value2, key2, value2));
 
         db.set(key2, value1);
         assertEqualsTo(db, Map.of(key1, value2, key2, value1));
 
-        assertEquals(value1, db.remove(key2));
+        assertThat(db.remove(key2)).isEqualTo(value1);
         assertEqualsTo(db, Map.of(key1, value2));
         assertNotContainsAnyOf(db, Map.of(key2, value1));
 
-        assertEquals(value2, db.putIfPresent(key1, value1));
+        assertThat(db.putIfPresent(key1, value1)).isEqualTo(value2);
         assertEqualsTo(db, Map.of(key1, value1));
 
-        assertEquals(value1, db.putIfAbsent(key1, value1));
+        assertThat(db.putIfAbsent(key1, value1)).isEqualTo(value1);
         assertEqualsTo(db, Map.of(key1, value1));
 
         db.putAll(Map.of(key1, value1, key2, value2));
@@ -366,42 +369,42 @@ public class KeyValueDbIntegrationTest {
     }
 
     private static <K, V> void assertEqualsTo(@NotNull KeyValueDb<K, V> db, @NotNull Map<K, V> map) {
-        assertEquals(map.size(), db.size());
-        assertEquals(map.size(), db.longSize());
-        assertEquals(map.isEmpty(), db.isEmpty());
-        assertEquals(!map.isEmpty(), db.isNotEmpty());
+        assertThat(db.size()).isEqualTo(map.size());
+        assertThat(db.longSize()).isEqualTo(map.size());
+        assertThat(db.isEmpty()).isEqualTo(map.isEmpty());
+        assertThat(db.isNotEmpty()).isEqualTo(!map.isEmpty());
 
         assertThat(Lists.newArrayList(db.keys())).containsExactlyElementsIn(map.keySet());
         assertThat(new HashSet<>(db.keySet())).containsExactlyElementsIn(map.keySet());
         assertThat(db.values()).containsExactlyElementsIn(map.values());
         assertThat(new HashSet<>(db.entrySet())).containsExactlyElementsIn(map.entrySet());
-        assertEquals(db.asMap(), map);
-        assertEquals(db.copyToMap(), map);
+        assertThat(map).isEqualTo(db.asMap());
+        assertThat(map).isEqualTo(db.copyToMap());
 
         for (Map.Entry<K, V> entry : map.entrySet()) {
             K key = entry.getKey();
             V value = entry.getValue();
-            assertTrue(db.containsKey(key));
-            assertTrue(db.containsValue(value));
-            assertEquals(value, db.get(key));
-            assertEquals(Optional.of(value), db.getOptional(key));
+            assertThat(db.containsKey(key)).isTrue();
+            assertThat(db.containsValue(value)).isTrue();
+            assertThat(db.get(key)).isEqualTo(value);
+            assertThat(db.getOptional(key)).hasValue(value);
         }
 
         Map<K, V> iterated = new HashMap<>(db.size());
         db.forEach(iterated::put);
-        assertEquals(iterated, map);
+        assertThat(iterated).isEqualTo(map);
     }
 
     private static <K, V> void assertNotContainsAnyOf(@NotNull KeyValueDb<K, V> db, @NotNull Map<K, V> map) {
         for (Map.Entry<K, V> entry : map.entrySet()) {
             K key = entry.getKey();
             V value = entry.getValue();
-            assertFalse(db.containsKey(key));
-            assertFalse(db.containsValue(value));
-            assertNull(db.get(key));
-            assertTrue(db.getOptional(key).isEmpty());
-            assertEquals(value, db.getOrDefault(key, value));
-            assertEquals(value, db.getOrCompute(key, () -> value));
+            assertThat(db.containsKey(key)).isFalse();
+            assertThat(db.containsValue(value)).isFalse();
+            assertThat(db.get(key)).isNull();
+            assertThat(db.getOptional(key).isEmpty()).isTrue();
+            assertThat(db.getOrDefault(key, value)).isEqualTo(value);
+            assertThat(db.getOrCompute(key, () -> value)).isEqualTo(value);
         }
     }
 

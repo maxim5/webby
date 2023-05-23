@@ -2,77 +2,77 @@ package io.webby.db.content;
 
 import org.junit.jupiter.api.Test;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
+import static com.google.common.truth.Truth.assertThat;
 
 public class FileExtTest {
     @Test
     public void fromName_simple() {
-        assertEquals(new FileExt(".txt"), FileExt.fromName("foo.txt", false));
-        assertEquals(new FileExt(".txt"), FileExt.fromName("foo..txt", false));
-        assertEquals(new FileExt(".txt"), FileExt.fromName("foo.bar.txt", false));
+        assertThat(FileExt.fromName("foo.txt", false)).isEqualTo(new FileExt(".txt"));
+        assertThat(FileExt.fromName("foo..txt", false)).isEqualTo(new FileExt(".txt"));
+        assertThat(FileExt.fromName("foo.bar.txt", false)).isEqualTo(new FileExt(".txt"));
 
-        assertEquals(new FileExt(".7z"), FileExt.fromName("foo.7z", false));
-        assertEquals(new FileExt(".o"), FileExt.fromName("foo.o", false));
+        assertThat(FileExt.fromName("foo.7z", false)).isEqualTo(new FileExt(".7z"));
+        assertThat(FileExt.fromName("foo.o", false)).isEqualTo(new FileExt(".o"));
 
-        assertEquals(new FileExt(".txt"), FileExt.fromName(".txt", false));
-        assertEquals(new FileExt(".o"), FileExt.fromName(".o", false));
+        assertThat(FileExt.fromName(".txt", false)).isEqualTo(new FileExt(".txt"));
+        assertThat(FileExt.fromName(".o", false)).isEqualTo(new FileExt(".o"));
     }
 
     @Test
     public void fromName_empty() {
-        assertEquals(FileExt.EMPTY, FileExt.fromName("", false));
-        assertEquals(FileExt.EMPTY, FileExt.fromName("/", false));
-        assertEquals(FileExt.EMPTY, FileExt.fromName("///", false));
+        assertThat(FileExt.fromName("", false)).isEqualTo(FileExt.EMPTY);
+        assertThat(FileExt.fromName("/", false)).isEqualTo(FileExt.EMPTY);
+        assertThat(FileExt.fromName("///", false)).isEqualTo(FileExt.EMPTY);
 
-        assertEquals(FileExt.EMPTY, FileExt.fromName("foo", false));
-        assertEquals(FileExt.EMPTY, FileExt.fromName("foo.", false));
-        assertEquals(FileExt.EMPTY, FileExt.fromName("foo..", false));
+        assertThat(FileExt.fromName("foo", false)).isEqualTo(FileExt.EMPTY);
+        assertThat(FileExt.fromName("foo.", false)).isEqualTo(FileExt.EMPTY);
+        assertThat(FileExt.fromName("foo..", false)).isEqualTo(FileExt.EMPTY);
 
-        assertEquals(FileExt.EMPTY, FileExt.fromName(".", false));
-        assertEquals(FileExt.EMPTY, FileExt.fromName("..", false));
+        assertThat(FileExt.fromName(".", false)).isEqualTo(FileExt.EMPTY);
+        assertThat(FileExt.fromName("..", false)).isEqualTo(FileExt.EMPTY);
     }
 
     @Test
     public void fromName_case() {
-        assertEquals(new FileExt(".TXT"), FileExt.fromName("foo.TXT", false));
-        assertEquals(new FileExt(".txt"), FileExt.fromName("foo.TXT", true));
+        assertThat(FileExt.fromName("foo.TXT", false)).isEqualTo(new FileExt(".TXT"));
+        assertThat(FileExt.fromName("foo.TXT", true)).isEqualTo(new FileExt(".txt"));
     }
 
     @Test
     public void fromName_path() {
-        assertEquals(new FileExt(".txt"), FileExt.fromName("foo/bar.txt", false));
+        assertThat(FileExt.fromName("foo/bar.txt", false)).isEqualTo(new FileExt(".txt"));
     }
     
     @Test
     public void fromUrl_simple_url() {
-        assertEquals(new FileExt(".jpg"), FileExt.fromUrl("www.foo.com/foo.jpg", false));
-        assertEquals(new FileExt(".jpg"), FileExt.fromUrl("www.foo.com/foo/bar/baz.jpg", false));
-        assertEquals(new FileExt(".jpg"), FileExt.fromUrl("www.foo.com/foo/bar/baz.jpg?a=b&c=d", false));
+        assertThat(FileExt.fromUrl("www.foo.com/foo.jpg", false)).isEqualTo(new FileExt(".jpg"));
+        assertThat(FileExt.fromUrl("www.foo.com/foo/bar/baz.jpg", false)).isEqualTo(new FileExt(".jpg"));
+        assertThat(FileExt.fromUrl("www.foo.com/foo/bar/baz.jpg?a=b&c=d", false)).isEqualTo(new FileExt(".jpg"));
 
-        assertEquals(new FileExt(".png"), FileExt.fromUrl("http://www.foo.com/foo/bar/baz.png", false));
-        assertEquals(new FileExt(".png"), FileExt.fromUrl("https://www.foo.com/foo/bar/baz.png", false));
+        assertThat(FileExt.fromUrl("http://www.foo.com/foo/bar/baz.png", false)).isEqualTo(new FileExt(".png"));
+        assertThat(FileExt.fromUrl("https://www.foo.com/foo/bar/baz.png", false)).isEqualTo(new FileExt(".png"));
     }
 
     @Test
     public void fromUrl_invalid_url() {
-        assertEquals(FileExt.EMPTY, FileExt.fromUrl("", false));
-        assertEquals(FileExt.EMPTY, FileExt.fromUrl(".", false));
-        assertEquals(FileExt.EMPTY, FileExt.fromUrl("/", false));
-        assertEquals(FileExt.EMPTY, FileExt.fromUrl("//", false));
-        assertEquals(FileExt.EMPTY, FileExt.fromUrl("foo", false));
+        assertThat(FileExt.fromUrl("", false)).isEqualTo(FileExt.EMPTY);
+        assertThat(FileExt.fromUrl(".", false)).isEqualTo(FileExt.EMPTY);
+        assertThat(FileExt.fromUrl("/", false)).isEqualTo(FileExt.EMPTY);
+        assertThat(FileExt.fromUrl("//", false)).isEqualTo(FileExt.EMPTY);
+        assertThat(FileExt.fromUrl("foo", false)).isEqualTo(FileExt.EMPTY);
 
-        assertEquals(new FileExt(".txt"), FileExt.fromUrl(".txt", false));
-        assertEquals(new FileExt(".txt"), FileExt.fromUrl("..txt", false));
-        assertEquals(new FileExt(".txt"), FileExt.fromUrl("foo.txt", false));
-        assertEquals(new FileExt(".txt"), FileExt.fromUrl("/foo.txt", false));
-        assertEquals(new FileExt(".txt"), FileExt.fromUrl("/foo/bar.txt", false));
-        assertEquals(new FileExt(".txt"), FileExt.fromUrl("/foo.bar.txt", false));
+        assertThat(FileExt.fromUrl(".txt", false)).isEqualTo(new FileExt(".txt"));
+        assertThat(FileExt.fromUrl("..txt", false)).isEqualTo(new FileExt(".txt"));
+        assertThat(FileExt.fromUrl("foo.txt", false)).isEqualTo(new FileExt(".txt"));
+        assertThat(FileExt.fromUrl("/foo.txt", false)).isEqualTo(new FileExt(".txt"));
+        assertThat(FileExt.fromUrl("/foo/bar.txt", false)).isEqualTo(new FileExt(".txt"));
+        assertThat(FileExt.fromUrl("/foo.bar.txt", false)).isEqualTo(new FileExt(".txt"));
     }
 
     @Test
     public void fromUrl_empty_path() {
-        assertEquals(FileExt.EMPTY, FileExt.fromUrl("http://www.foo.com/", false));
-        assertEquals(FileExt.EMPTY, FileExt.fromUrl("www.foo.com/", false));
-        assertEquals(new FileExt(".com"), FileExt.fromUrl("www.foo.com", false));
+        assertThat(FileExt.fromUrl("http://www.foo.com/", false)).isEqualTo(FileExt.EMPTY);
+        assertThat(FileExt.fromUrl("www.foo.com/", false)).isEqualTo(FileExt.EMPTY);
+        assertThat(FileExt.fromUrl("www.foo.com", false)).isEqualTo(new FileExt(".com"));
     }
 }

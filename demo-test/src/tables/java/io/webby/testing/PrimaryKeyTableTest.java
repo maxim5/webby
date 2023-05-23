@@ -14,7 +14,8 @@ import java.util.Collection;
 import java.util.List;
 
 import static com.google.common.truth.Truth.assertThat;
-import static io.webby.testing.AssertBasics.*;
+import static com.google.common.truth.Truth8.assertThat;
+import static io.webby.testing.AssertBasics.assertMapContents;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assumptions.assumeTrue;
 
@@ -442,14 +443,14 @@ public interface PrimaryKeyTableTest<K, E, T extends TableObj<K, E>> extends Bas
         assertThat(table().exists(key)).isTrue();
         assertThat(table().getByPkOrNull(key)).isEqualTo(entity);
         assertThat(table().getByPkOrDie(key)).isEqualTo(entity);
-        assertPresent(table().getOptionalByPk(key), entity);
+        assertThat(table().getOptionalByPk(key)).hasValue(entity);
     }
 
     default void assertTableNotContains(@NotNull K key) {
         assertThat(table().exists(key)).isFalse();
         assertThat(table().getByPkOrNull(key)).isNull();
+        assertThat(table().getOptionalByPk(key)).isEmpty();
         assertThrows(RuntimeException.class, () -> table().getByPkOrDie(key));
-        assertEmpty(table().getOptionalByPk(key));
     }
 
     @SafeVarargs

@@ -2,30 +2,30 @@ package io.webby.util.collect;
 
 import org.junit.jupiter.api.Test;
 
+import static com.google.common.truth.Truth.assertThat;
 import static io.webby.testing.TestingBasics.array;
 import static io.webby.util.collect.TabularFormatter.ASCII_FORMATTER;
-import static org.junit.jupiter.api.Assertions.assertEquals;
 
 public class TabularFormatterTest {
     @Test
     public void formatIntoTableString_0x0() {
         Tabular<String> tab = new ArrayTabular<>(new String[0][0]);
         String table = ASCII_FORMATTER.formatIntoTableString(tab);
-        assertEquals("<empty>", table);
+        assertThat(table).isEqualTo("<empty>");
     }
 
     @Test
     public void formatIntoTableString_0x1() {
         Tabular<String> tab = new ArrayTabular<>(new String[0][1]);
         String table = ASCII_FORMATTER.formatIntoTableString(tab);
-        assertEquals("<empty>", table);
+        assertThat(table).isEqualTo("<empty>");
     }
 
     @Test
     public void formatIntoTableString_1x0() {
         Tabular<String> tab = new ArrayTabular<>(new String[1][0]);
         String table = ASCII_FORMATTER.formatIntoTableString(tab);
-        assertEquals("<empty>", table);
+        assertThat(table).isEqualTo("<empty>");
     }
 
     @Test
@@ -34,11 +34,11 @@ public class TabularFormatterTest {
             array("1")
         );
         String table = ASCII_FORMATTER.formatIntoTableString(tab);
-        assertEquals("""
+        assertThat(table).isEqualTo("""
         -----
         | 1 |
         -----\
-        """, table);
+        """);
     }
 
     @Test
@@ -47,11 +47,11 @@ public class TabularFormatterTest {
             array("")
         );
         String table = ASCII_FORMATTER.formatIntoTableString(tab);
-        assertEquals("""
+        assertThat(table).isEqualTo("""
         ----
         |  |
         ----\
-        """, table);
+        """);
     }
 
     @Test
@@ -60,11 +60,11 @@ public class TabularFormatterTest {
             array((String) null)
         );
         String table = ASCII_FORMATTER.formatIntoTableString(tab);
-        assertEquals("""
+        assertThat(table).isEqualTo("""
         --------
         | null |
         --------\
-        """, table);
+        """);
     }
 
     @Test
@@ -74,13 +74,13 @@ public class TabularFormatterTest {
             array("1")
         );
         String table = ASCII_FORMATTER.formatIntoTableString(tab);
-        assertEquals("""
+        assertThat(table).isEqualTo("""
         -------
         | foo |
         -------
         | 1   |
         -------\
-        """, table);
+        """);
     }
 
     @Test
@@ -90,13 +90,13 @@ public class TabularFormatterTest {
             array("123456789")
         );
         String table = ASCII_FORMATTER.formatIntoTableString(tab);
-        assertEquals("""
+        assertThat(table).isEqualTo("""
         -------------
         | foo       |
         -------------
         | 123456789 |
         -------------\
-        """, table);
+        """);
     }
 
     @Test
@@ -106,13 +106,13 @@ public class TabularFormatterTest {
             array("")
         );
         String table = ASCII_FORMATTER.formatIntoTableString(tab);
-        assertEquals("""
+        assertThat(table).isEqualTo("""
         -------
         | foo |
         -------
         |     |
         -------\
-        """, table);
+        """);
     }
 
     @Test
@@ -122,13 +122,13 @@ public class TabularFormatterTest {
             array("")
         );
         String table = ASCII_FORMATTER.formatIntoTableString(tab);
-        assertEquals("""
+        assertThat(table).isEqualTo("""
         ----
         |  |
         ----
         |  |
         ----\
-        """, table);
+        """);
     }
 
     @Test
@@ -138,13 +138,13 @@ public class TabularFormatterTest {
             array("1",   "123456")
         );
         String table = ASCII_FORMATTER.formatIntoTableString(tab);
-        assertEquals("""
+        assertThat(table).isEqualTo("""
         ----------------
         | foo | bar    |
         ----------------
         | 1   | 123456 |
         ----------------\
-        """, table);
+        """);
     }
 
     @Test
@@ -154,13 +154,13 @@ public class TabularFormatterTest {
             array(null, null)
         );
         String table = ASCII_FORMATTER.formatIntoTableString(tab);
-        assertEquals("""
+        assertThat(table).isEqualTo("""
         ---------------
         |      |      |
         ---------------
         | null | null |
         ---------------\
-        """, table);
+        """);
     }
 
     @Test
@@ -171,7 +171,7 @@ public class TabularFormatterTest {
             array("1234")
         );
         String table = ASCII_FORMATTER.formatIntoTableString(tab);
-        assertEquals("""
+        assertThat(table).isEqualTo("""
         --------
         | foo  |
         --------
@@ -179,7 +179,7 @@ public class TabularFormatterTest {
         --------
         | 1234 |
         --------\
-        """, table);
+        """);
     }
 
     @Test
@@ -190,7 +190,7 @@ public class TabularFormatterTest {
             array("1234", "123",   "12")
         );
         String table = ASCII_FORMATTER.formatIntoTableString(tab);
-        assertEquals("""
+        assertThat(table).isEqualTo("""
         ----------------------
         | foo  | bar   | baz |
         ----------------------
@@ -198,7 +198,7 @@ public class TabularFormatterTest {
         ----------------------
         | 1234 | 123   | 12  |
         ----------------------\
-        """, table);
+        """);
     }
 
     @Test
@@ -207,12 +207,12 @@ public class TabularFormatterTest {
             array("1\n2")
         );
         String table = ASCII_FORMATTER.formatIntoTableString(tab);
-        assertEquals("""
+        assertThat(table).isEqualTo("""
         -----
         | 1 |
         | 2 |
         -----\
-        """, table);
+        """);
     }
 
     @Test
@@ -221,13 +221,13 @@ public class TabularFormatterTest {
             array("1\n123\n12")
         );
         String table = ASCII_FORMATTER.formatIntoTableString(tab);
-        assertEquals("""
+        assertThat(table).isEqualTo("""
         -------
         | 1   |
         | 123 |
         | 12  |
         -------\
-        """, table);
+        """);
     }
 
     @Test
@@ -241,7 +241,7 @@ public class TabularFormatterTest {
                   123456789""")
         );
         String table = ASCII_FORMATTER.formatIntoTableString(tab);
-        assertEquals("""
+        assertThat(table).isEqualTo("""
         -------------
         | 1234      |
         |           |
@@ -249,7 +249,7 @@ public class TabularFormatterTest {
         | 123       |
         | 123456789 |
         -------------\
-        """, table);
+        """);
     }
 
     @Test
@@ -258,12 +258,12 @@ public class TabularFormatterTest {
             array("\n\n")
         );
         String table = ASCII_FORMATTER.formatIntoTableString(tab);
-        assertEquals("""
+        assertThat(table).isEqualTo("""
         ----
         |  |
         |  |
         ----\
-        """, table);
+        """);
     }
 
     @Test
@@ -272,13 +272,13 @@ public class TabularFormatterTest {
             array("\nx\n\n")
         );
         String table = ASCII_FORMATTER.formatIntoTableString(tab);
-        assertEquals("""
+        assertThat(table).isEqualTo("""
         -----
         |   |
         | x |
         |   |
         -----\
-        """, table);
+        """);
     }
 
     @Test
@@ -288,7 +288,7 @@ public class TabularFormatterTest {
             array("baz",   "\n\n\n")
         );
         String table = ASCII_FORMATTER.formatIntoTableString(tab);
-        assertEquals("""
+        assertThat(table).isEqualTo("""
         ----------
         | foo |  |
         | bar |  |
@@ -297,7 +297,7 @@ public class TabularFormatterTest {
         |     |  |
         |     |  |
         ----------\
-        """, table);
+        """);
     }
 
     @Test
@@ -306,10 +306,10 @@ public class TabularFormatterTest {
             array("123")
         );
         String table = TabularFormatter.of('|', '-', 2).formatIntoTableString(tab);
-        assertEquals("""
+        assertThat(table).isEqualTo("""
         ---------
         |  123  |
         ---------\
-        """, table);
+        """);
     }
 }

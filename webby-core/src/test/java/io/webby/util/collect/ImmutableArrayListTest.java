@@ -11,8 +11,6 @@ import java.util.stream.Stream;
 
 import static com.google.common.truth.Truth.assertThat;
 import static io.webby.util.collect.ImmutableArrayList.toImmutableArrayList;
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertTrue;
 
 public class ImmutableArrayListTest {
     @Test
@@ -51,18 +49,18 @@ public class ImmutableArrayListTest {
 
     @Test
     public void toImmutableArrayList_simple() {
-        assertEquals(Stream.of().collect(toImmutableArrayList()), ImmutableArrayList.of());
-        assertEquals(Stream.of(1).collect(toImmutableArrayList()), ImmutableArrayList.of(1));
-        assertEquals(Stream.of(1, 2).collect(toImmutableArrayList()), ImmutableArrayList.of(1, 2));
-        assertEquals(Stream.of(1, 2, 3).collect(toImmutableArrayList()), ImmutableArrayList.of(1, 2, 3));
+        assertThat(Stream.of().collect(toImmutableArrayList())).isEqualTo(ImmutableArrayList.of());
+        assertThat(Stream.of(1).collect(toImmutableArrayList())).isEqualTo(ImmutableArrayList.of(1));
+        assertThat(Stream.of(1, 2).collect(toImmutableArrayList())).isEqualTo(ImmutableArrayList.of(1, 2));
+        assertThat(Stream.of(1, 2, 3).collect(toImmutableArrayList())).isEqualTo(ImmutableArrayList.of(1, 2, 3));
     }
 
     @Test
     public void toImmutableArrayList_nulls() {
-        assertEquals(Stream.of((Object) null).collect(toImmutableArrayList()), ImmutableArrayList.of(null));
-        assertEquals(Stream.of(1, null).collect(toImmutableArrayList()), ImmutableArrayList.of(1, null));
-        assertEquals(Stream.of(null, null).collect(toImmutableArrayList()), ImmutableArrayList.of(null, null));
-        assertEquals(Stream.of(null, 1, null).collect(toImmutableArrayList()), ImmutableArrayList.of(null, 1, null));
+        assertThat(Stream.of((Object) null).collect(toImmutableArrayList())).isEqualTo(ImmutableArrayList.of(null));
+        assertThat(Stream.of(1, null).collect(toImmutableArrayList())).isEqualTo(ImmutableArrayList.of(1, null));
+        assertThat(Stream.of(null, null).collect(toImmutableArrayList())).isEqualTo(ImmutableArrayList.of(null, null));
+        assertThat(Stream.of(null, 1, null).collect(toImmutableArrayList())).isEqualTo(ImmutableArrayList.of(null, 1, null));
     }
 
     @SafeVarargs
@@ -76,13 +74,12 @@ public class ImmutableArrayListTest {
         List<T> expectedList = Arrays.asList(expected);
         for (int i = 0; i < expected.length; i++) {
             T item = expected[i];
-            assertEquals(item, list.get(i));
-            assertEquals(expectedList.indexOf(item), list.indexOf(item));
-            assertEquals(expectedList.lastIndexOf(item), list.lastIndexOf(item));
-            assertTrue(list.contains(item));
+            assertThat(list.get(i)).isEqualTo(item);
+            assertThat(list.indexOf(item)).isEqualTo(expectedList.indexOf(item));
+            assertThat(list.lastIndexOf(item)).isEqualTo(expectedList.lastIndexOf(item));
+            assertThat(list.contains(item)).isTrue();
             assertThat(list.subList(i, i + 1)).containsExactly(item);
         }
         assertThat(list.subList(0, expected.length)).containsExactlyElementsIn(expected).inOrder();
     }
-
 }

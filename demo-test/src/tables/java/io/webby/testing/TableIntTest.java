@@ -12,9 +12,9 @@ import org.junit.jupiter.api.Test;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.Optional;
 
 import static com.google.common.truth.Truth.assertThat;
+import static com.google.common.truth.Truth8.assertThat;
 import static io.webby.testing.AssertPrimitives.assertMap;
 import static io.webby.testing.AssertPrimitives.assertThat;
 import static io.webby.testing.TestingBasics.array;
@@ -37,13 +37,13 @@ public interface TableIntTest<E, T extends TableInt<E>> extends PrimaryKeyTableT
         E entity = createEntity(key);
 
         assertThat(table().getByPkOrNull(key)).isNull();
+        assertThat(table().getOptionalByPk(key)).isEmpty();
         assertThrows(NullPointerException.class, () -> table().getByPkOrDie(key));
-        assertThat(table().getOptionalByPk(key)).isEqualTo(Optional.empty());
 
         assertThat(table().insert(entity)).isEqualTo(1);
         assertThat(table().getByPkOrNull(key)).isEqualTo(entity);
         assertThat(table().getByPkOrDie(key)).isEqualTo(entity);
-        assertThat(table().getOptionalByPk(key)).isEqualTo(Optional.of(entity));
+        assertThat(table().getOptionalByPk(key)).hasValue(entity);
     }
 
     @Test

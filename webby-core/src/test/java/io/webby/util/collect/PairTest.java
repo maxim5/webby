@@ -7,8 +7,8 @@ import org.junit.jupiter.api.Test;
 
 import java.util.AbstractMap;
 
+import static com.google.common.truth.Truth.assertThat;
 import static io.webby.testing.TestingBasics.array;
-import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 
 public class PairTest {
@@ -68,40 +68,40 @@ public class PairTest {
 
     @Test
     public void pair_mapToObj() {
-        assertEquals(Pair.of("1", "2").mapToObj("%s%s"::formatted), "12");
-        assertEquals(Pair.of("1", null).mapToObj("%s%s"::formatted), "1null");
-        assertEquals(Pair.of(null, "2").mapToObj("%s%s"::formatted), "null2");
-        assertEquals(Pair.of(null, null).mapToObj("%s%s"::formatted), "nullnull");
+        assertThat(Pair.of("1", "2").<String>mapToObj("%s%s"::formatted)).isEqualTo("12");
+        assertThat(Pair.of("1", null).<String>mapToObj("%s%s"::formatted)).isEqualTo("1null");
+        assertThat(Pair.of(null, "2").<String>mapToObj("%s%s"::formatted)).isEqualTo("null2");
+        assertThat(Pair.of(null, null).<String>mapToObj("%s%s"::formatted)).isEqualTo("nullnull");
     }
 
     @Test
     public void pair_mapToInt() {
-        assertEquals(Pair.of(1, 2).mapToInt(Integer::sum), 3);
-        assertEquals(Pair.of(1, null).mapToInt(Objects::hashCode), Objects.hashCode(1, null));
-        assertEquals(Pair.of(null, 2).mapToInt(Objects::hashCode), Objects.hashCode(null, 2));
-        assertEquals(Pair.of(null, null).mapToInt(Objects::hashCode), Objects.hashCode(null, null));
+        assertThat(Pair.of(1, 2).mapToInt(Integer::sum)).isEqualTo(3);
+        assertThat(Pair.of(1, null).mapToInt(Objects::hashCode)).isEqualTo(Objects.hashCode(1, null));
+        assertThat(Pair.of(null, 2).mapToInt(Objects::hashCode)).isEqualTo(Objects.hashCode(null, 2));
+        assertThat(Pair.of(null, null).mapToInt(Objects::hashCode)).isEqualTo(Objects.hashCode(null, null));
     }
 
     @Test
     public void pair_mapToLong() {
-        assertEquals(Pair.of(1, 2).mapToLong(Integer::sum), 3);
-        assertEquals(Pair.of(1, null).mapToLong(Objects::hashCode), Objects.hashCode(1, null));
-        assertEquals(Pair.of(null, 2).mapToLong(Objects::hashCode), Objects.hashCode(null, 2));
-        assertEquals(Pair.of(null, null).mapToLong(Objects::hashCode), Objects.hashCode(null, null));
+        assertThat(Pair.of(1, 2).mapToLong(Integer::sum)).isEqualTo(3);
+        assertThat(Pair.of(1, null).mapToLong(Objects::hashCode)).isEqualTo(Objects.hashCode(1, null));
+        assertThat(Pair.of(null, 2).mapToLong(Objects::hashCode)).isEqualTo(Objects.hashCode(null, 2));
+        assertThat(Pair.of(null, null).mapToLong(Objects::hashCode)).isEqualTo(Objects.hashCode(null, null));
     }
 
     @Test
     public void pair_mapToDouble() {
-        assertEquals(Pair.of(1, 2).mapToDouble(Integer::sum), 3);
-        assertEquals(Pair.of(1, null).mapToDouble(Objects::hashCode), Objects.hashCode(1, null));
-        assertEquals(Pair.of(null, 2).mapToDouble(Objects::hashCode), Objects.hashCode(null, 2));
-        assertEquals(Pair.of(null, null).mapToDouble(Objects::hashCode), Objects.hashCode(null, null));
+        assertThat(Pair.of(1, 2).mapToDouble(Integer::sum)).isEqualTo(3);
+        assertThat(Pair.of(1, null).mapToDouble(Objects::hashCode)).isEqualTo(Objects.hashCode(1, null));
+        assertThat(Pair.of(null, 2).mapToDouble(Objects::hashCode)).isEqualTo(Objects.hashCode(null, 2));
+        assertThat(Pair.of(null, null).mapToDouble(Objects::hashCode)).isEqualTo(Objects.hashCode(null, null));
     }
 
     private static <U, V> void assertPair(@NotNull Pair<U, V> pair, @Nullable Object first, @Nullable Object second) {
-        assertEquals(pair.first(), first);
-        assertEquals(pair.getKey(), first);
-        assertEquals(pair.second(), second);
-        assertEquals(pair.getValue(), second);
+        assertThat(pair.first()).isEqualTo(first);
+        assertThat(pair.getKey()).isEqualTo(first);
+        assertThat(pair.second()).isEqualTo(second);
+        assertThat(pair.getValue()).isEqualTo(second);
     }
 }

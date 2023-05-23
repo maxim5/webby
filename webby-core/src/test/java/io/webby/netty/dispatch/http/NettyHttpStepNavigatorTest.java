@@ -5,7 +5,7 @@ import io.webby.app.AppSettings;
 import io.webby.testing.Testing;
 import org.junit.jupiter.api.Test;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
+import static com.google.common.truth.Truth.assertThat;
 
 public class NettyHttpStepNavigatorTest {
     private final Injector injector = Testing.testStartup();
@@ -13,31 +13,31 @@ public class NettyHttpStepNavigatorTest {
 
     @Test
     public void extractPath_simple() {
-        assertEquals("", handler.extractPath("").toString());
-        assertEquals("foo", handler.extractPath("foo").toString());
-        assertEquals("foo-bar", handler.extractPath("foo-bar").toString());
+        assertThat(handler.extractPath("").toString()).isEqualTo("");
+        assertThat(handler.extractPath("foo").toString()).isEqualTo("foo");
+        assertThat(handler.extractPath("foo-bar").toString()).isEqualTo("foo-bar");
 
-        assertEquals("/", handler.extractPath("/").toString());
-        assertEquals("///", handler.extractPath("///").toString());
+        assertThat(handler.extractPath("/").toString()).isEqualTo("/");
+        assertThat(handler.extractPath("///").toString()).isEqualTo("///");
 
-        assertEquals("/foo", handler.extractPath("/foo").toString());
-        assertEquals("/foo/bar", handler.extractPath("/foo/bar").toString());
-        assertEquals("/foo/bar/", handler.extractPath("/foo/bar/").toString());
+        assertThat(handler.extractPath("/foo").toString()).isEqualTo("/foo");
+        assertThat(handler.extractPath("/foo/bar").toString()).isEqualTo("/foo/bar");
+        assertThat(handler.extractPath("/foo/bar/").toString()).isEqualTo("/foo/bar/");
 
-        assertEquals("", handler.extractPath("?").toString());
-        assertEquals("", handler.extractPath("#").toString());
-        assertEquals("/", handler.extractPath("/?").toString());
-        assertEquals("/", handler.extractPath("/?key=value").toString());
+        assertThat(handler.extractPath("?").toString()).isEqualTo("");
+        assertThat(handler.extractPath("#").toString()).isEqualTo("");
+        assertThat(handler.extractPath("/?").toString()).isEqualTo("/");
+        assertThat(handler.extractPath("/?key=value").toString()).isEqualTo("/");
 
-        assertEquals("/foo", handler.extractPath("/foo?").toString());
-        assertEquals("/foo", handler.extractPath("/foo?key=value").toString());
-        assertEquals("/foo", handler.extractPath("/foo?key=value&key=").toString());
-        assertEquals("/foo", handler.extractPath("/foo?&=").toString());
+        assertThat(handler.extractPath("/foo?").toString()).isEqualTo("/foo");
+        assertThat(handler.extractPath("/foo?key=value").toString()).isEqualTo("/foo");
+        assertThat(handler.extractPath("/foo?key=value&key=").toString()).isEqualTo("/foo");
+        assertThat(handler.extractPath("/foo?&=").toString()).isEqualTo("/foo");
 
-        assertEquals("/", handler.extractPath("/#").toString());
-        assertEquals("/", handler.extractPath("/#ignore").toString());
-        assertEquals("/", handler.extractPath("/?#").toString());
-        assertEquals("/", handler.extractPath("/?key=value#").toString());
+        assertThat(handler.extractPath("/#").toString()).isEqualTo("/");
+        assertThat(handler.extractPath("/#ignore").toString()).isEqualTo("/");
+        assertThat(handler.extractPath("/?#").toString()).isEqualTo("/");
+        assertThat(handler.extractPath("/?key=value#").toString()).isEqualTo("/");
     }
 
     @Test
@@ -45,16 +45,16 @@ public class NettyHttpStepNavigatorTest {
         AppSettings appSettings = injector.getInstance(AppSettings.class);
         appSettings.setProperty("netty.url.trailing.slash.ignore", true);
 
-        assertEquals("a", handler.extractPath("a").toString());
-        assertEquals("foo", handler.extractPath("foo").toString());
+        assertThat(handler.extractPath("a").toString()).isEqualTo("a");
+        assertThat(handler.extractPath("foo").toString()).isEqualTo("foo");
 
-        assertEquals("/", handler.extractPath("/").toString());
-        assertEquals("/", handler.extractPath("//").toString());
-        assertEquals("/foo", handler.extractPath("/foo").toString());
-        assertEquals("/foo", handler.extractPath("/foo/").toString());
-        assertEquals("/foo/", handler.extractPath("/foo//").toString());
+        assertThat(handler.extractPath("/").toString()).isEqualTo("/");
+        assertThat(handler.extractPath("//").toString()).isEqualTo("/");
+        assertThat(handler.extractPath("/foo").toString()).isEqualTo("/foo");
+        assertThat(handler.extractPath("/foo/").toString()).isEqualTo("/foo");
+        assertThat(handler.extractPath("/foo//").toString()).isEqualTo("/foo/");
 
-        assertEquals("/foo/bar", handler.extractPath("/foo/bar").toString());
-        assertEquals("/foo/bar", handler.extractPath("/foo/bar/").toString());
+        assertThat(handler.extractPath("/foo/bar").toString()).isEqualTo("/foo/bar");
+        assertThat(handler.extractPath("/foo/bar/").toString()).isEqualTo("/foo/bar");
     }
 }
