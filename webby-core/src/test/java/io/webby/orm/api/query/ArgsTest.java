@@ -21,7 +21,7 @@ import static io.webby.testing.AssertBasics.getPrivateFieldValue;
 import static io.webby.testing.orm.MockingJdbc.assertThat;
 import static io.webby.testing.orm.MockingJdbc.mockPreparedStatement;
 import static io.webby.util.base.Unchecked.Suppliers.runRethrow;
-import static org.junit.jupiter.api.Assertions.*;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 
 public class ArgsTest {
     private static final Object NULL = null;
@@ -357,31 +357,31 @@ public class ArgsTest {
         }
 
         public @NotNull ArgsAssert assertAllResolved() {
-            assertTrue(args.isAllResolved());
+            assertThat(args.isAllResolved()).isTrue();
             return this;
         }
 
         public @NotNull ArgsAssert assertUnresolved(@NotNull UnresolvedArg @NotNull ... unresolvedArgs) {
-            assertFalse(args.isAllResolved());
+            assertThat(args.isAllResolved()).isFalse();
 
             List<String> names = Arrays.stream(unresolvedArgs).map(UnresolvedArg::name).toList();
             List<String> upperNames = names.stream().map(String::toUpperCase).toList();
             Map<String, String> map = names.stream().collect(Collectors.toMap(name -> name, String::toUpperCase));
 
             Args resolvedByName = args.resolveArgsByName(map);
-            assertTrue(resolvedByName.isAllResolved());
+            assertThat(resolvedByName.isAllResolved()).isTrue();
             assertThat(resolvedByName.asList()).containsAtLeastElementsIn(upperNames).inOrder();
 
             Args resolvedByList = args.resolveArgsByOrderedList(names);
-            assertTrue(resolvedByList.isAllResolved());
+            assertThat(resolvedByList.isAllResolved()).isTrue();
             assertThat(resolvedByList.asList()).containsAtLeastElementsIn(names).inOrder();
 
             return this;
         }
 
         public @NotNull ArgsAssert assertItems(@Nullable Object @NotNull ... expected) {
-            assertEquals(expected.length, args.size());
-            assertEquals(expected.length == 0, args.isEmpty());
+            assertThat(args.size()).isEqualTo(expected.length);
+            assertThat(args.isEmpty()).isEqualTo(expected.length == 0);
             assertThat(args.asList()).containsExactlyElementsIn(expected).inOrder();
 
             assertPreparedParams(expected);
@@ -393,7 +393,7 @@ public class ArgsTest {
         public @NotNull ArgsAssert assertPreparedParams(@Nullable Object @NotNull ... expected) {
             MockPreparedStatement statement = mockPreparedStatement();
             int added = runRethrow(() -> args.setPreparedParams(statement));
-            assertEquals(added, expected.length);
+            assertThat(expected.length).isEqualTo(added);
             assertThat(statement).withParams().equalExactly(expected);
             return this;
         }
@@ -405,7 +405,7 @@ public class ArgsTest {
                 return args.setPreparedParams(statement, 1);
             });
             expected = TestingBasics.prependVarArg(null, expected);
-            assertEquals(added, expected.length);
+            assertThat(expected.length).isEqualTo(added);
             assertThat(statement).withParams().equalExactly(expected);
             return this;
         }

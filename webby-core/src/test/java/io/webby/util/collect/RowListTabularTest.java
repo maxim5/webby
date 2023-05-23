@@ -5,7 +5,7 @@ import org.junit.jupiter.api.Test;
 import java.util.List;
 
 import static com.google.common.truth.Truth.assertThat;
-import static org.junit.jupiter.api.Assertions.*;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 
 public class RowListTabularTest {
     @Test
@@ -17,11 +17,11 @@ public class RowListTabularTest {
             )
         );
 
-        assertEquals(tab.rows(), 2);
-        assertEquals(tab.columns(), 1);
-        assertFalse(tab.isEmpty());
-        assertEquals(tab.cell(0, 0), "first");
-        assertEquals(tab.cell(1, 0), "second");
+        assertThat(tab.rows()).isEqualTo(2);
+        assertThat(tab.columns()).isEqualTo(1);
+        assertThat(tab.isEmpty()).isFalse();
+        assertThat(tab.cell(0, 0)).isEqualTo("first");
+        assertThat(tab.cell(1, 0)).isEqualTo("second");
         assertThat(tab.rowAt(0)).containsExactly("first");
         assertThat(tab.rowAt(1)).containsExactly("second");
         assertThat(tab.columnAt(0)).containsExactly("first", "second");

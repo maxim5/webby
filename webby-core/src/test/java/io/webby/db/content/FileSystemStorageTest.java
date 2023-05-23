@@ -12,8 +12,9 @@ import java.nio.file.FileSystem;
 import java.nio.file.Files;
 import java.nio.file.Path;
 
+import static com.google.common.truth.Truth.assertThat;
 import static io.webby.testing.TestingBytes.assertBytes;
-import static org.junit.jupiter.api.Assertions.*;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 
 public class FileSystemStorageTest {
     private static final byte[] CONTENT = "foo".getBytes();
@@ -26,7 +27,7 @@ public class FileSystemStorageTest {
     public void add_new_file(Scenario scenario) throws IOException {
         setup(scenario);
         storage.addFile(new FileId("foo.txt"), CONTENT, WriteMode.FAIL_IF_EXISTS);
-        assertTrue(Files.exists(root.resolve("foo.txt")));
+        assertThat(Files.exists(root.resolve("foo.txt"))).isTrue();
         assertBytes(Files.readAllBytes(root.resolve("foo.txt")), CONTENT);
     }
 
@@ -35,7 +36,7 @@ public class FileSystemStorageTest {
     public void add_new_directory_and_file(Scenario scenario) throws IOException {
         setup(scenario);
         storage.addFile(new FileId("dir/foo.txt"), CONTENT, WriteMode.FAIL_IF_EXISTS);
-        assertTrue(Files.exists(root.resolve("dir/foo.txt")));
+        assertThat(Files.exists(root.resolve("dir/foo.txt"))).isTrue();
         assertBytes(Files.readAllBytes(root.resolve("dir/foo.txt")), CONTENT);
     }
 
@@ -62,9 +63,9 @@ public class FileSystemStorageTest {
         setup(scenario);
         FileId fileId = new FileId("foo.txt");
         storage.addFile(fileId, CONTENT, WriteMode.FAIL_IF_EXISTS);
-        assertTrue(storage.exists(fileId));
-        assertEquals(CONTENT.length, storage.getFileSizeInBytes(fileId));
-        assertTrue(System.currentTimeMillis() - storage.getLastModifiedMillis(fileId) < 100);
+        assertThat(storage.exists(fileId)).isTrue();
+        assertThat(storage.getFileSizeInBytes(fileId)).isEqualTo(CONTENT.length);
+        assertThat(System.currentTimeMillis() - storage.getLastModifiedMillis(fileId) < 100).isTrue();
     }
 
     @ParameterizedTest
@@ -82,9 +83,9 @@ public class FileSystemStorageTest {
         setup(scenario);
         FileId fileId = new FileId("foo.txt");
         storage.addFile(fileId, CONTENT, WriteMode.FAIL_IF_EXISTS);
-        assertTrue(storage.deleteFile(fileId));
-        assertFalse(storage.exists(fileId));
-        assertFalse(Files.exists(root.resolve("foo.txt")));
+        assertThat(storage.deleteFile(fileId)).isTrue();
+        assertThat(storage.exists(fileId)).isFalse();
+        assertThat(Files.exists(root.resolve("foo.txt"))).isFalse();
     }
 
     @ParameterizedTest
@@ -92,7 +93,7 @@ public class FileSystemStorageTest {
     public void delete_file_not_exists(Scenario scenario) throws IOException {
         setup(scenario);
         FileId fileId = new FileId("foo.txt");
-        assertFalse(storage.deleteFile(fileId));
+        assertThat(storage.deleteFile(fileId)).isFalse();
     }
 
     private void setup(@NotNull Scenario scenario) throws IOException {

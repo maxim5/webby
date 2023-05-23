@@ -5,8 +5,8 @@ import org.junit.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.ValueSource;
 
+import static com.google.common.truth.Truth.assertThat;
 import static io.webby.db.content.StableFingerprint.BitSize.*;
-import static org.junit.jupiter.api.Assertions.assertEquals;
 
 public class StableFingerprintTest {
     private final StableFingerprint fingerprint = new StableFingerprint(Testing.defaultAppSettings());
@@ -23,15 +23,15 @@ public class StableFingerprintTest {
 
     @Test
     public void computeFingerprint_stable() {
-        assertEquals("kHskmktnxTtrgajuJNM71w", fingerprint.computeFingerprint(SIZE_128, "".getBytes()).contentId());
-        assertEquals("YE5FKkIM1dbValXXRZWrag", fingerprint.computeFingerprint(SIZE_128, "foo".getBytes()).contentId());
-        assertEquals("F6ep4XFFCgfAOXEsELlGZA", fingerprint.computeFingerprint(SIZE_128, "12345".getBytes()).contentId());
-        assertEquals("px0XT6azvh6oxFvgKCSibA", fingerprint.computeFingerprint(SIZE_128, "12346".getBytes()).contentId());
+        assertThat(fingerprint.computeFingerprint(SIZE_128, "".getBytes()).contentId()).isEqualTo("kHskmktnxTtrgajuJNM71w");
+        assertThat(fingerprint.computeFingerprint(SIZE_128, "foo".getBytes()).contentId()).isEqualTo("YE5FKkIM1dbValXXRZWrag");
+        assertThat(fingerprint.computeFingerprint(SIZE_128, "12345".getBytes()).contentId()).isEqualTo("F6ep4XFFCgfAOXEsELlGZA");
+        assertThat(fingerprint.computeFingerprint(SIZE_128, "12346".getBytes()).contentId()).isEqualTo("px0XT6azvh6oxFvgKCSibA");
     }
 
     private static void assertContentId(ContentId contentId, int bits) {
         int expectedFingerprintSize = (bits + 5) / 6;
-        assertEquals(expectedFingerprintSize, contentId.contentId().length());
+        assertThat(contentId.contentId().length()).isEqualTo(expectedFingerprintSize);
     }
 
     private static byte[] parseByteArray(String input) {

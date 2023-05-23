@@ -18,7 +18,8 @@ import static com.google.common.truth.Truth8.assertThat;
 import static io.webby.testing.AssertPrimitives.assertMap;
 import static io.webby.testing.AssertPrimitives.assertThat;
 import static io.webby.testing.TestingBasics.array;
-import static org.junit.jupiter.api.Assertions.*;
+import static org.junit.jupiter.api.Assertions.assertNotEquals;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 
 public interface TableIntTest<E, T extends TableInt<E>> extends PrimaryKeyTableTest<Integer, E, T> {
     @Override
@@ -82,7 +83,7 @@ public interface TableIntTest<E, T extends TableInt<E>> extends PrimaryKeyTableT
     default void insert_auto_id() {
         E entity = createEntity(IntAutoIdModel.AUTO_ID, 0);
         int autoId = table().insertAutoIncPk(entity);
-        assertTrue(autoId > 0);
+        assertThat(autoId > 0).isTrue();
         entity = copyEntityWithId(entity, autoId);
 
         assertTableCount(1);
@@ -95,7 +96,7 @@ public interface TableIntTest<E, T extends TableInt<E>> extends PrimaryKeyTableT
         Integer key = 1000;
         E entity = createEntity(key, 0);
         int autoId = table().insertAutoIncPk(entity);
-        assertTrue(autoId > 0);
+        assertThat(autoId > 0).isTrue();
         assertNotEquals(autoId, key);
         entity = copyEntityWithId(entity, autoId);
 
@@ -112,7 +113,7 @@ public interface TableIntTest<E, T extends TableInt<E>> extends PrimaryKeyTableT
         for (int version = 0; version < num; version++) {
             E entity = createEntity(IntAutoIdModel.AUTO_ID, version);
             int autoId = table().insertAutoIncPk(entity);
-            assertTrue(autoId > 0);
+            assertThat(autoId > 0).isTrue();
             entities.put(autoId, copyEntityWithId(entity, autoId));
         }
 

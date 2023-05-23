@@ -16,7 +16,7 @@ import org.mockito.Mockito;
 import java.util.ArrayList;
 import java.util.List;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
+import static com.google.common.truth.Truth.assertThat;
 
 public class LifetimeTest {
     private final List<Class<?>> addedResources = new ArrayList<>();
@@ -40,8 +40,8 @@ public class LifetimeTest {
             TableManager.class,
             BackgroundCacheCleaner.class
         );
-        assertEquals(expected, addedResources);
-        assertEquals(Lists.reverse(expected), deconstructedResources);
+        assertThat(addedResources).isEqualTo(expected);
+        assertThat(deconstructedResources).isEqualTo(Lists.reverse(expected));
     }
 
     private @NotNull Lifetime.Definition mockLifetime() throws Throwable {

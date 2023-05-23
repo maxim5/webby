@@ -6,18 +6,21 @@ import io.routekit.SimpleQueryParser;
 import io.webby.testing.Testing;
 import io.webby.url.annotate.GET;
 import io.webby.url.caller.Caller;
-import io.webby.util.reflect.EasyMembers.Scope;
 import io.webby.util.collect.Pair;
+import io.webby.util.reflect.EasyMembers.Scope;
 import org.jetbrains.annotations.NotNull;
 import org.junit.jupiter.api.Test;
 
 import java.lang.reflect.Method;
-import java.util.*;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
 import java.util.function.BiPredicate;
 
+import static com.google.common.truth.Truth.assertThat;
 import static io.webby.util.reflect.EasyMembers.findMethod;
 import static java.util.Objects.requireNonNull;
-import static org.junit.jupiter.api.Assertions.*;
 
 public class HandlerBinderTest {
     @Test
@@ -31,23 +34,23 @@ public class HandlerBinderTest {
         SingleRouteEndpoint bar = assertSingleRoute(endpoints.get("/bar"), HttpMethod.GET, false);
         Object instanceBar = assertCaller(bar.endpoint().caller(), "SimpleHandler.bar");
 
-        assertSame(instanceFoo, instanceBar);
+        assertThat(instanceFoo).isSameInstanceAs(instanceBar);
     }
 
     private static @NotNull SingleRouteEndpoint
             assertSingleRoute(@NotNull RouteEndpoint endpoint, @NotNull HttpMethod method, boolean isVoid) {
-        assertTrue(endpoint instanceof SingleRouteEndpoint);
+        assertThat(endpoint instanceof SingleRouteEndpoint).isTrue();
         SingleRouteEndpoint single = (SingleRouteEndpoint) endpoint;
-        assertEquals(method, single.httpMethod());
-        assertEquals(isVoid, single.endpoint().context().isVoid());
+        assertThat(single.httpMethod()).isEqualTo(method);
+        assertThat(single.endpoint().context().isVoid()).isEqualTo(isVoid);
         return single;
     }
 
     private static @NotNull Object assertCaller(@NotNull Caller caller, @NotNull String method) throws Exception {
         Pair<String, String> pair = Pair.of(method.split("\\."));
-        assertEquals(pair.second(), ((Method) caller.method()).getName());
+        assertThat(((Method) caller.method()).getName()).isEqualTo(pair.second());
         Object instance = requireNonNull(findMethod(caller.getClass(), Scope.DECLARED, "instance")).invoke(caller);
-        assertEquals(pair.first(), instance.getClass().getSimpleName());
+        assertThat(instance.getClass().getSimpleName()).isEqualTo(pair.first());
         return instance;
     }
 
