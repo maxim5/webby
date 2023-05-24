@@ -64,6 +64,31 @@ public class TestingPrimitives {
         return map;
     }
 
+    public static @NotNull LongLongHashMap newLongMap(long key, long value) {
+        return LongLongHashMap.from(longs(key), longs(value));
+    }
+
+    public static @NotNull LongLongHashMap newLongMap(long key1, long value1, long key2, long value2) {
+        return LongLongHashMap.from(longs(key1, key2), longs(value1, value2));
+    }
+
+    public static @NotNull LongLongHashMap newLongMap(long... keyValues) {
+        assert keyValues.length % 2 == 0 : "Invalid number of items: %d".formatted(keyValues.length);
+        long[] keys = new long[keyValues.length / 2];
+        long[] values = new long[keyValues.length / 2];
+        for (int i = 0; i < keyValues.length; i += 2) {
+            keys[i / 2] = keyValues[i];
+            values[i / 2] = keyValues[i + 1];
+        }
+        return LongLongHashMap.from(keys, values);
+    }
+
+    public static @NotNull LongLongHashMap trim(@NotNull LongLongMap map) {
+        LongLongHashMap copy = new LongLongHashMap(map);
+        copy.removeAll((key, value) -> value == 0);
+        return copy;
+    }
+
     public static <T> @NotNull LongObjectMap<T> newLongObjectMap() {
         return new LongObjectHashMap<>();
     }
