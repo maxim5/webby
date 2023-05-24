@@ -1,6 +1,7 @@
 package io.webby.orm.api.query;
 
 import io.webby.orm.api.Engine;
+import io.webby.testing.AssertPrimitives;
 import io.webby.testing.ext.SqlDbExtension;
 import org.jetbrains.annotations.NotNull;
 import org.junit.jupiter.api.BeforeEach;
@@ -14,7 +15,7 @@ import static io.webby.orm.api.query.CompareType.*;
 import static io.webby.orm.api.query.Func.*;
 import static io.webby.orm.api.query.Shortcuts.*;
 import static io.webby.orm.testing.PersonTableData.*;
-import static io.webby.testing.AssertPrimitives.assertThat;
+import static io.webby.testing.AssertPrimitives.assertArray;
 import static io.webby.testing.TestingBasics.array;
 import static io.webby.testing.orm.AssertSql.UnitSubject;
 import static io.webby.testing.orm.AssertSql.assertRows;
@@ -366,7 +367,7 @@ public class SelectQueryTest {
             ORDER BY id DESC
             """);
         assertQuery(query).containsNoArgs();
-        assertThat(SQL.runner().fetchIntColumn(query)).containsExactlyInOrder(4, 3, 2, 1);
+        AssertPrimitives.assertArray(SQL.runner().fetchIntColumn(query)).containsExactlyInOrder(4, 3, 2, 1);
     }
 
     @Test
@@ -381,7 +382,7 @@ public class SelectQueryTest {
             ORDER BY iq ASC
             """);
         assertQuery(query).containsNoArgs();
-        assertThat(SQL.runner().fetchLongColumn(query)).containsExactlyInOrder(100, 110, 120, 130);
+        assertArray(SQL.runner().fetchLongColumn(query)).containsExactlyInOrder(100, 110, 120, 130);
     }
 
     private static @NotNull UnitSubject<UnitSubject<?>> assertQuery(@NotNull SelectQuery query) {

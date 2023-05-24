@@ -14,11 +14,11 @@ import static io.webby.util.hppc.EasyHppc.toJavaMap;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
 public class AssertPrimitives {
-    public static @NotNull IntContainerSubject assertThat(@NotNull IntContainer container) {
+    public static @NotNull IntContainerSubject assertArray(@NotNull IntContainer container) {
         return new IntContainerSubject(container);
     }
 
-    public static @NotNull LongContainerSubject assertThat(@NotNull LongContainer container) {
+    public static @NotNull LongContainerSubject assertArray(@NotNull LongContainer container) {
         return new LongContainerSubject(container);
     }
 
