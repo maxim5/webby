@@ -1,7 +1,5 @@
 package io.webby.orm.api.query;
 
-import com.carrotsearch.hppc.IntArrayList;
-import com.carrotsearch.hppc.LongArrayList;
 import io.webby.orm.api.Engine;
 import io.webby.testing.ext.SqlDbExtension;
 import org.jetbrains.annotations.NotNull;
@@ -16,10 +14,10 @@ import static io.webby.orm.api.query.CompareType.*;
 import static io.webby.orm.api.query.Func.*;
 import static io.webby.orm.api.query.Shortcuts.*;
 import static io.webby.orm.testing.PersonTableData.*;
+import static io.webby.testing.AssertPrimitives.assertThat;
 import static io.webby.testing.TestingBasics.array;
 import static io.webby.testing.orm.AssertSql.UnitSubject;
 import static io.webby.testing.orm.AssertSql.assertRows;
-import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assumptions.assumeFalse;
 
 @Tag("sql")
@@ -48,12 +46,12 @@ public class SelectQueryTest {
                 .select(PersonColumn.id)
                 .where(Where.of(EQ.compare(PersonColumn.name, literal("Bill"))))
                 .build();
-        assertThat(query).matches("""
+        assertQuery(query).matches("""
             SELECT id
             FROM person
             WHERE name = 'Bill'
             """);
-        assertThat(query).containsNoArgs();
+        assertQuery(query).containsNoArgs();
         assertRows(SQL.runQuery(query)).containsExactly(array(2));
     }
 
@@ -62,11 +60,11 @@ public class SelectQueryTest {
         SelectQuery query = SelectWhere.from(PERSON_META)
                 .select(SUM.apply(PersonColumn.height))
                 .build();
-        assertThat(query).matches("""
+        assertQuery(query).matches("""
             SELECT sum(height)
             FROM person
             """);
-        assertThat(query).containsNoArgs();
+        assertQuery(query).containsNoArgs();
         assertRows(SQL.runQuery(query)).containsExactly(array(662.7));
     }
 
@@ -75,11 +73,11 @@ public class SelectQueryTest {
         SelectQuery query = SelectWhere.from(PERSON_META)
                 .select(PersonColumn.sex.distinct())
                 .build();
-        assertThat(query).matches("""
+        assertQuery(query).matches("""
             SELECT DISTINCT sex
             FROM person
             """);
-        assertThat(query).containsNoArgs();
+        assertQuery(query).containsNoArgs();
         assertRows(SQL.runQuery(query)).containsExactly(
             array(FEMALE),
             array(MALE)
@@ -92,12 +90,12 @@ public class SelectQueryTest {
             .select(PersonColumn.id.FULL, PersonColumn.sex.FULL, PersonColumn.name.FULL)
             .orderBy(PersonColumn.id)
             .build();
-        assertThat(query).matches("""
+        assertQuery(query).matches("""
             SELECT person.id, person.sex, person.name
             FROM person
             ORDER BY id ASC
             """);
-        assertThat(query).containsNoArgs();
+        assertQuery(query).containsNoArgs();
         assertRows(SQL.runQuery(query)).containsExactly(
             array(1, FEMALE, "Kate"),
             array(2, MALE, "Bill"),
@@ -113,13 +111,13 @@ public class SelectQueryTest {
                 .where(Where.of(LT.compare(PersonColumn.height, num(200.0))))
                 .orderBy(OrderBy.of(PersonColumn.sex.ordered(Order.ASC), PersonColumn.country.ordered(Order.DESC)))
                 .build();
-        assertThat(query).matches("""
+        assertQuery(query).matches("""
             SELECT sex, country
             FROM person
             WHERE height < 200.0
             ORDER BY sex ASC, country DESC
             """);
-        assertThat(query).containsNoArgs();
+        assertQuery(query).containsNoArgs();
         assertRows(SQL.runQuery(query)).containsExactly(
             array(MALE, "US"),
             array(MALE, "RU"),
@@ -133,11 +131,11 @@ public class SelectQueryTest {
         SelectQuery query = SelectWhere.from(PERSON_META)
                 .select(PersonColumn.name, GT.compare(PersonColumn.iq, var(125)))
                 .build();
-        assertThat(query).matches("""
+        assertQuery(query).matches("""
             SELECT name, iq > ?
             FROM person
             """);
-        assertThat(query).containsArgsExactly(125);
+        assertQuery(query).containsArgsExactly(125);
         assertRows(SQL.runQuery(query)).containsExactly(
             array("Kate", false),
             array("Bill", false),
@@ -154,12 +152,12 @@ public class SelectQueryTest {
                 EQ.compare(LENGTH.apply(PersonColumn.name), var(4)),
                 like(PersonColumn.country, var("%U%"))
             )).build();
-        assertThat(query).matches("""
+        assertQuery(query).matches("""
             SELECT id, country
             FROM person
             WHERE length(name) = ? AND country LIKE ?
             """);
-        assertThat(query).containsArgsExactly(4, "%U%");
+        assertQuery(query).containsArgsExactly(4, "%U%");
         assertRows(SQL.runQuery(query)).containsExactly(
             array(2, "US"),
             array(3, "RU")
@@ -172,12 +170,12 @@ public class SelectQueryTest {
             .select(PersonColumn.id, PersonColumn.country)
             .where(Where.of(LT.compare(PersonColumn.birthday, var(parseDate("1985-01-01")))))
             .build();
-        assertThat(query).matches("""
+        assertQuery(query).matches("""
             SELECT id, country
             FROM person
             WHERE birthday < ?
             """);
-        assertThat(query).containsArgsExactly(parseDate("1985-01-01"));
+        assertQuery(query).containsArgsExactly(parseDate("1985-01-01"));
         assertRows(SQL.runQuery(query)).containsExactly(array(2, "US"));
     }
 
@@ -187,12 +185,12 @@ public class SelectQueryTest {
             .select(PersonColumn.id, PersonColumn.country)
             .where(Where.of(between(PersonColumn.birthday, var(parseDate("1985-01-01")), var(parseDate("2000-01-01")))))
             .build();
-        assertThat(query).matches("""
+        assertQuery(query).matches("""
             SELECT id, country
             FROM person
             WHERE birthday BETWEEN ? AND ?
             """);
-        assertThat(query).containsArgsExactly(parseDate("1985-01-01"), parseDate("2000-01-01"));
+        assertQuery(query).containsArgsExactly(parseDate("1985-01-01"), parseDate("2000-01-01"));
         assertRows(SQL.runQuery(query)).containsExactly(
             array(1, "DE"),
             array(3, "RU")
@@ -204,11 +202,11 @@ public class SelectQueryTest {
         SelectQuery query = SelectWhere.from(PERSON_META)
             .select(PersonColumn.id, IFNULL_STR.apply(PersonColumn.country, literal("??")))
             .build();
-        assertThat(query).matches("""
+        assertQuery(query).matches("""
             SELECT id, ifnull(country, '??')
             FROM person
             """);
-        assertThat(query).containsNoArgs();
+        assertQuery(query).containsNoArgs();
         assertRows(SQL.runQuery(query)).containsExactly(
             array(1, "DE"),
             array(2, "US"),
@@ -223,11 +221,11 @@ public class SelectQueryTest {
         SelectQuery query = SelectWhere.from(PERSON_META)
             .select(PersonColumn.id, CAST_AS_SIGNED.apply(PersonColumn.photo))
             .build();
-        assertThat(query).matches("""
+        assertQuery(query).matches("""
             SELECT id, CAST(photo AS SIGNED)
             FROM person
             """);
-        assertThat(query).containsNoArgs();
+        assertQuery(query).containsNoArgs();
         assertRows(SQL.runQuery(query)).containsExactly(
             array(1, 1111111),
             array(2, 2222222),
@@ -242,11 +240,11 @@ public class SelectQueryTest {
         SelectQuery query = SelectWhere.from(PERSON_META)
             .select(PersonColumn.id, CAST_AS_CHAR.apply(PersonColumn.photo))
             .build();
-        assertThat(query).matches("""
+        assertQuery(query).matches("""
             SELECT id, CAST(photo AS CHAR)
             FROM person
             """);
-        assertThat(query).containsNoArgs();
+        assertQuery(query).containsNoArgs();
         assertRows(SQL.runQuery(query)).containsExactly(
             array(1, "1111111"),
             array(2, "2222222"),
@@ -261,12 +259,12 @@ public class SelectQueryTest {
             .groupBy(PersonColumn.sex)
             .aggregate(COUNT.apply(STAR))
             .build();
-        assertThat(query).matches("""
+        assertQuery(query).matches("""
             SELECT sex, count(*)
             FROM person
             GROUP BY sex
             """);
-        assertThat(query).containsNoArgs();
+        assertQuery(query).containsNoArgs();
         assertRows(SQL.runQuery(query)).containsExactly(
             array(FEMALE, 2),
             array(MALE, 2)
@@ -280,12 +278,12 @@ public class SelectQueryTest {
             .groupBy(PersonColumn.sex)
             .aggregate(AVG.apply(PersonColumn.iq))
             .build();
-        assertThat(query).matches("""
+        assertQuery(query).matches("""
             SELECT sex, avg(iq)
             FROM person
             GROUP BY sex
             """);
-        assertThat(query).containsNoArgs();
+        assertQuery(query).containsNoArgs();
         assertRows(SQL.runQuery(query)).containsExactly(
             array(FEMALE, 120.0),
             array(MALE, 110.0)
@@ -298,12 +296,12 @@ public class SelectQueryTest {
             .groupBy(PersonColumn.sex, PersonColumn.name)
             .aggregate(MAX.apply(PersonColumn.id))
             .build();
-        assertThat(query).matches("""
+        assertQuery(query).matches("""
             SELECT sex, name, max(id)
             FROM person
             GROUP BY sex, name
             """);
-        assertThat(query).containsNoArgs();
+        assertQuery(query).containsNoArgs();
         assertRows(SQL.runQuery(query)).containsExactly(
             array(FEMALE, "Kate", 1),
             array(MALE, "Bill", 2),
@@ -320,14 +318,14 @@ public class SelectQueryTest {
             .groupBy(PersonColumn.name)
             .orderBy(OrderBy.of(PersonColumn.id, Order.ASC))
             .build();
-        assertThat(query).matches("""
+        assertQuery(query).matches("""
             SELECT name, count(id)
             FROM person
             WHERE sex
             GROUP BY name
             ORDER BY id ASC
             """);
-        assertThat(query).containsNoArgs();
+        assertQuery(query).containsNoArgs();
         assertRows(SQL.runQuery(query)).containsExactly(
             array("Kate", 1),
             array("Yuan", 1)
@@ -341,13 +339,13 @@ public class SelectQueryTest {
             .groupBy(PersonColumn.country)
             .having(Having.of(GT.compare(COUNT.apply(PersonColumn.id), ZERO)))
             .build();
-        assertThat(query).matches("""
+        assertQuery(query).matches("""
             SELECT country, count(id)
             FROM person
             GROUP BY country
             HAVING count(id) > 0
             """);
-        assertThat(query).containsNoArgs();
+        assertQuery(query).containsNoArgs();
         assertRows(SQL.runQuery(query)).containsExactly(
             array("CN", 1),
             array("DE", 1),
@@ -362,13 +360,13 @@ public class SelectQueryTest {
             .select(PersonColumn.id)
             .orderBy(OrderBy.of(PersonColumn.id, Order.DESC))
             .build();
-        assertThat(query).matches("""
+        assertQuery(query).matches("""
             SELECT id
             FROM person
             ORDER BY id DESC
             """);
-        assertThat(query).containsNoArgs();
-        assertEquals(IntArrayList.from(4, 3, 2, 1), SQL.runner().fetchIntColumn(query));
+        assertQuery(query).containsNoArgs();
+        assertThat(SQL.runner().fetchIntColumn(query)).containsExactlyInOrder(4, 3, 2, 1);
     }
 
     @Test
@@ -377,16 +375,16 @@ public class SelectQueryTest {
             .select(PersonColumn.iq)
             .orderBy(OrderBy.of(PersonColumn.iq, Order.ASC))
             .build();
-        assertThat(query).matches("""
+        assertQuery(query).matches("""
             SELECT iq
             FROM person
             ORDER BY iq ASC
             """);
-        assertThat(query).containsNoArgs();
-        assertEquals(LongArrayList.from(100, 110, 120, 130), SQL.runner().fetchLongColumn(query));
+        assertQuery(query).containsNoArgs();
+        assertThat(SQL.runner().fetchLongColumn(query)).containsExactlyInOrder(100, 110, 120, 130);
     }
 
-    private static @NotNull UnitSubject assertThat(@NotNull SelectQuery query) {
-        return new UnitSubject((Unit) query);
+    private static @NotNull UnitSubject<UnitSubject<?>> assertQuery(@NotNull SelectQuery query) {
+        return new UnitSubject<>((Unit) query);
     }
 }
