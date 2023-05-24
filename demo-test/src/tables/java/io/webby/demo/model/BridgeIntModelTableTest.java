@@ -15,7 +15,7 @@ import org.jetbrains.annotations.NotNull;
 import java.util.List;
 import java.util.stream.IntStream;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
+import static com.google.common.truth.Truth.assertThat;
 
 public class BridgeIntModelTableTest
         extends SqlDbTableTest<BridgeIntModel, BridgeIntModelTable>
@@ -44,7 +44,7 @@ public class BridgeIntModelTableTest
     public void prepareRelations(@NotNull List<Pair<Integer, Integer>> relations) {
         for (Pair<Integer, Integer> relation : relations) {
             BridgeIntModel model = new BridgeIntModel(ForeignInt.ofId(relation.first()), ForeignInt.ofId(relation.second()));
-            assertEquals(1, table.insert(model));
+            assertThat(table.insert(model)).isEqualTo(1);
         }
     }
 

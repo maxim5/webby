@@ -5,16 +5,16 @@ import org.jetbrains.annotations.NotNull;
 import java.util.Arrays;
 import java.util.List;
 
-import static org.junit.Assert.assertTrue;
+import static com.google.common.truth.Truth.assertThat;
 
 record Vote(int key, int val) {
     public Vote {
-        assertTrue(key > 0);
-        assertTrue(-1 <= val && val <= 1);
+        assertThat(key > 0).isTrue();
+        assertThat(-1 <= val && val <= 1).isTrue();
     }
 
     public static @NotNull Vote from(int signed) {
-        assertTrue(signed != 0);
+        assertThat(signed != 0).isTrue();
         return new Vote(Math.abs(signed), signed > 0 ? 1 : -1);
     }
 

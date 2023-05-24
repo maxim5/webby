@@ -10,7 +10,6 @@ import java.util.Arrays;
 import java.util.List;
 
 import static com.google.common.truth.Truth.assertThat;
-import static org.junit.jupiter.api.Assertions.*;
 import static org.junit.jupiter.api.Assumptions.assumeTrue;
 
 public interface BaseTableTest<E, T extends BaseTable<E>> extends TableTestApi<E, T> {
@@ -24,9 +23,9 @@ public interface BaseTableTest<E, T extends BaseTable<E>> extends TableTestApi<E
 
     @Test
     default void empty() {
-        assertEquals(0, table().count());
-        assertTrue(table().isEmpty());
-        assertFalse(table().isNotEmpty());
+        assertThat(table().count()).isEqualTo(0);
+        assertThat(table().isEmpty()).isTrue();
+        assertThat(table().isNotEmpty()).isFalse();
         assertThat(table().fetchAll()).isEmpty();
     }
 

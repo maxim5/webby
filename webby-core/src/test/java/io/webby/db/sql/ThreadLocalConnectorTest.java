@@ -16,7 +16,8 @@ import java.util.concurrent.TimeUnit;
 import java.util.function.Supplier;
 import java.util.logging.Level;
 
-import static org.junit.jupiter.api.Assertions.*;
+import static com.google.common.truth.Truth.assertThat;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 public class ThreadLocalConnectorTest {
     private static final FluentLogger log = FluentLogger.forEnclosingClass();
@@ -95,7 +96,7 @@ public class ThreadLocalConnectorTest {
                 beforeCalls.run();
                 for (int call = 0; call < callsPerRequest; call++) {
                     last = (SimpleConnection) connector.connection();
-                    assertFalse(last.isClosed());
+                    assertThat(last.isClosed()).isFalse();
                 }
                 afterCalls.run();
             }
@@ -119,7 +120,7 @@ public class ThreadLocalConnectorTest {
     }
 
     private static void assertSingleThreadAccessAndClosed(@NotNull List<SimpleConnection> connections, int expected) {
-        assertEquals(expected, connections.size());
+        assertThat(connections.size()).isEqualTo(expected);
         assertTrue(connections.stream().allMatch(SimpleConnection::isSingleThreadAccess),
                    () -> "Not all connections are accessed by only one thread. Connections: %s".formatted(connections));
         assertTrue(connections.stream().allMatch(SimpleConnection::isClosed),

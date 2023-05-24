@@ -11,7 +11,7 @@ import java.util.List;
 import static com.google.common.truth.Truth.assertThat;
 import static io.webby.testing.AssertBasics.assertPrivateFieldClass;
 import static io.webby.util.base.EasyCast.castAny;
-import static org.junit.jupiter.api.Assertions.*;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 
 public class ArrayTest {
     @Test
@@ -89,7 +89,7 @@ public class ArrayTest {
     @Test
     public void array_set() {
         Array<Integer> array = Array.of(1, 2, 3);
-        assertEquals(array.set(1, 7), 2);
+        assertThat(2).isEqualTo(array.set(1, 7));
         assertArray(array, 1, 7, 3);
     }
 
@@ -151,10 +151,10 @@ public class ArrayTest {
         List<T> expectedList = Arrays.asList(expected);
         for (int i = 0; i < expected.length; i++) {
             T item = expected[i];
-            assertEquals(item, array.get(i));
-            assertEquals(expectedList.indexOf(item), array.indexOf(item));
-            assertEquals(expectedList.lastIndexOf(item), array.lastIndexOf(item));
-            assertTrue(array.contains(item));
+            assertThat(array.get(i)).isEqualTo(item);
+            assertThat(array.indexOf(item)).isEqualTo(expectedList.indexOf(item));
+            assertThat(array.lastIndexOf(item)).isEqualTo(expectedList.lastIndexOf(item));
+            assertThat(array.contains(item)).isTrue();
             assertThat(array.subList(i, i + 1)).containsExactly(item);
         }
         assertThat(array.subList(0, expected.length)).containsExactlyElementsIn(expected).inOrder();
