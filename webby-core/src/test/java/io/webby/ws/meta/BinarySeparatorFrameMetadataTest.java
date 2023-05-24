@@ -3,16 +3,16 @@ package io.webby.ws.meta;
 import com.google.common.primitives.Longs;
 import org.junit.jupiter.api.Test;
 
+import static com.google.common.truth.Truth.assertThat;
 import static io.webby.testing.TestingBytes.*;
 import static io.webby.testing.ws.meta.AssertMeta.assertNotParsed;
-import static org.junit.jupiter.api.Assertions.assertEquals;
 
 public class BinarySeparatorFrameMetadataTest {
     @Test
     public void parse_simple() {
         new BinarySeparatorFrameMetadata().parse(asByteBuf("foo 00000000 bar"), (acceptorId, requestId, content) -> {
             assertByteBuf(acceptorId, "foo");
-            assertEquals(Longs.fromByteArray(asBytes("00000000")), requestId);
+            assertThat(requestId).isEqualTo(Longs.fromByteArray(asBytes("00000000")));
             assertByteBuf(content, "bar");
         });
     }
@@ -21,7 +21,7 @@ public class BinarySeparatorFrameMetadataTest {
     public void parse_short_acceptorId() {
         new BinarySeparatorFrameMetadata().parse(asByteBuf("x ~~~~~~~~ y"), (acceptorId, requestId, content) -> {
             assertByteBuf(acceptorId, "x");
-            assertEquals(Longs.fromByteArray(asBytes("~~~~~~~~")), requestId);
+            assertThat(requestId).isEqualTo(Longs.fromByteArray(asBytes("~~~~~~~~")));
             assertByteBuf(content, "y");
         });
     }
@@ -30,7 +30,7 @@ public class BinarySeparatorFrameMetadataTest {
     public void parse_empty_content() {
         new BinarySeparatorFrameMetadata().parse(asByteBuf("foo !@#$%^&* "), (acceptorId, requestId, content) -> {
             assertByteBuf(acceptorId, "foo");
-            assertEquals(Longs.fromByteArray(asBytes("!@#$%^&*")), requestId);
+            assertThat(requestId).isEqualTo(Longs.fromByteArray(asBytes("!@#$%^&*")));
             assertByteBuf(content, "");
         });
     }
@@ -39,7 +39,7 @@ public class BinarySeparatorFrameMetadataTest {
     public void parse_all_separators() {
         new BinarySeparatorFrameMetadata().parse(asByteBuf("foo             "), (acceptorId, requestId, content) -> {
             assertByteBuf(acceptorId, "foo");
-            assertEquals(Longs.fromByteArray(asBytes("        ")), requestId);
+            assertThat(requestId).isEqualTo(Longs.fromByteArray(asBytes("        ")));
             assertByteBuf(content, "   ");
         });
     }

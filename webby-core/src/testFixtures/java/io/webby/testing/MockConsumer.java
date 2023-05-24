@@ -12,7 +12,6 @@ import java.util.Stack;
 import java.util.function.Consumer;
 
 import static com.google.common.truth.Truth.assertThat;
-import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 /**
@@ -68,7 +67,7 @@ public class MockConsumer<T, E extends Throwable> implements Consumer<T>, ThrowC
     public void accept(T item) {
         if (expected != null) {
             assertTrue(expected.size() > items.size(), "Unexpected item added: " + item);
-            assertEquals(expected.get(items.size()), item);
+            assertThat(item).isEqualTo(expected.get(items.size()));
         }
         items.add(item);
     }

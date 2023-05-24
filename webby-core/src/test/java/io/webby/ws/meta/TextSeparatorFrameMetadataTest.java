@@ -3,17 +3,17 @@ package io.webby.ws.meta;
 import io.webby.netty.ws.FrameConst;
 import org.junit.jupiter.api.Test;
 
+import static com.google.common.truth.Truth.assertThat;
 import static io.webby.testing.TestingBytes.asByteBuf;
 import static io.webby.testing.TestingBytes.assertByteBuf;
 import static io.webby.testing.ws.meta.AssertMeta.assertNotParsed;
-import static org.junit.jupiter.api.Assertions.assertEquals;
 
 public class TextSeparatorFrameMetadataTest {
     @Test
     public void parse_simple() {
         new TextSeparatorFrameMetadata().parse(asByteBuf("foo 123 bar"), (acceptorId, requestId, content) -> {
             assertByteBuf(acceptorId, "foo");
-            assertEquals(123, requestId);
+            assertThat(requestId).isEqualTo(123);
             assertByteBuf(content, "bar");
         });
     }
@@ -22,7 +22,7 @@ public class TextSeparatorFrameMetadataTest {
     public void parse_negative_id() {
         new TextSeparatorFrameMetadata().parse(asByteBuf("foo -123 bar"), (acceptorId, requestId, content) -> {
             assertByteBuf(acceptorId, "foo");
-            assertEquals(-123, requestId);
+            assertThat(requestId).isEqualTo(-123);
             assertByteBuf(content, "bar");
         });
     }
@@ -31,7 +31,7 @@ public class TextSeparatorFrameMetadataTest {
     public void parse_short_acceptorId() {
         new TextSeparatorFrameMetadata().parse(asByteBuf("x 0 y"), (acceptorId, requestId, content) -> {
             assertByteBuf(acceptorId, "x");
-            assertEquals(0, requestId);
+            assertThat(requestId).isEqualTo(0);
             assertByteBuf(content, "y");
         });
     }
@@ -40,7 +40,7 @@ public class TextSeparatorFrameMetadataTest {
     public void parse_empty_content() {
         new TextSeparatorFrameMetadata().parse(asByteBuf("foo 777 "), (acceptorId, requestId, content) -> {
             assertByteBuf(acceptorId, "foo");
-            assertEquals(777, requestId);
+            assertThat(requestId).isEqualTo(777);
             assertByteBuf(content, "");
         });
     }
@@ -49,7 +49,7 @@ public class TextSeparatorFrameMetadataTest {
     public void parse_fail_to_parse_request_id() {
         new TextSeparatorFrameMetadata().parse(asByteBuf("foo xxx bar"), (acceptorId, requestId, content) -> {
             assertByteBuf(acceptorId, "foo");
-            assertEquals(FrameConst.RequestIds.NO_ID, requestId);
+            assertThat(requestId).isEqualTo(FrameConst.RequestIds.NO_ID);
             assertByteBuf(content, "bar");
         });
     }

@@ -17,7 +17,6 @@ import java.util.Queue;
 
 import static com.google.common.truth.Truth.assertThat;
 import static io.webby.testing.AssertFrame.*;
-import static org.junit.jupiter.api.Assertions.assertEquals;
 
 public class AcceptingDifferentTest extends BaseWebsocketIntegrationTest {
     private static final TextSeparatorFrameMetadata TEXT_SEPARATOR_META = new TextSeparatorFrameMetadata();
@@ -66,7 +65,7 @@ public class AcceptingDifferentTest extends BaseWebsocketIntegrationTest {
     public void on_json_text_string_not_null() {
         AcceptingDifferent agent = setupJson(FrameType.TEXT_ONLY, TEXT_SEPARATOR_META);
         Queue<WebSocketFrame> frames = sendText("str 111111111 {'s': 'aaa'}");
-        assertEquals(96352, new StringMessage("aaa").hashCode());
+        assertThat(new StringMessage("aaa").hashCode()).isEqualTo(96352);
         assertTextFrames(frames, """
             111111111 0 {"i":96352,"l":0,"b":0,"s":0,"ch":"\\u0000","f":0.0,"d":0.0,"bool":false}
         """.trim());
@@ -77,7 +76,7 @@ public class AcceptingDifferentTest extends BaseWebsocketIntegrationTest {
     public void on_json_binary_string_not_null() {
         AcceptingDifferent agent = setupJson(FrameType.BINARY_ONLY, TEXT_SEPARATOR_META);
         Queue<WebSocketFrame> frames = sendBinary("str 111111111 {'s': 'aaa'}");
-        assertEquals(96352, new StringMessage("aaa").hashCode());
+        assertThat(new StringMessage("aaa").hashCode()).isEqualTo(96352);
         assertBinaryFrames(frames, """
             111111111 0 {"i":96352,"l":0,"b":0,"s":0,"ch":"\\u0000","f":0.0,"d":0.0,"bool":false}
         """.trim());

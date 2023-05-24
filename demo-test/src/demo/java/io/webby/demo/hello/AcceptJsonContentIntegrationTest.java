@@ -10,11 +10,10 @@ import org.junit.runners.Parameterized;
 import java.util.List;
 import java.util.Map;
 
+import static com.google.common.truth.Truth.assertThat;
 import static io.webby.testing.AssertJson.assertJsonEquivalent;
 import static io.webby.testing.AssertJson.withJsonLibrary;
 import static io.webby.testing.AssertResponse.assertThat;
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertNull;
 
 @RunWith(Parameterized.class)
 public class AcceptJsonContentIntegrationTest extends BaseHttpIntegrationTest {
@@ -47,7 +46,7 @@ public class AcceptJsonContentIntegrationTest extends BaseHttpIntegrationTest {
     @Test
     public void accept_valid_json_list() {
         assertThat(post("/json/list/0", "[]")).is200().hasContent("ok");
-        assertEquals(handler.getIncoming(), List.of());
+        assertThat(handler.getIncoming()).isEqualTo(List.of());
 
         assertThat(post("/json/list/0", "[1, 2, 3]")).is200().hasContent("ok");
         assertJsonEquivalent(handler.getIncoming(), List.of(1, 2, 3));
@@ -71,24 +70,24 @@ public class AcceptJsonContentIntegrationTest extends BaseHttpIntegrationTest {
     @Test
     public void accept_valid_json_sample_bean() {
         assertThat(post("/json/sample_bean/0", "{\"x\": 1, \"s\": \"foo\", \"list\": [1, 2, 3]}")).is200().hasContent("ok");
-        assertEquals(handler.getIncoming(), new SampleBean(1, "foo", List.of(1, 2, 3)));
+        assertThat(handler.getIncoming()).isEqualTo(new SampleBean(1, "foo", List.of(1, 2, 3)));
     }
 
     @Test
     public void invalid_json() {
         assertThat(post("/json/obj/0", "{")).is400();
-        assertNull(handler.getIncoming());
+        assertThat(handler.getIncoming()).isNull();
 
         assertThat(post("/json/obj/0", "")).is400();
-        assertNull(handler.getIncoming());
+        assertThat(handler.getIncoming()).isNull();
 
         assertThat(post("/json/obj/0", "foo bar baz")).is400();
-        assertNull(handler.getIncoming());
+        assertThat(handler.getIncoming()).isNull();
     }
 
     @Test
     public void wrong_format_json() {
         assertThat(post("/json/map/0", "[1, 2]")).is400();
-        assertNull(handler.getIncoming());
+        assertThat(handler.getIncoming()).isNull();
     }
 }

@@ -13,7 +13,6 @@ import java.lang.reflect.Method;
 import java.util.List;
 
 import static com.google.common.truth.Truth.assertThat;
-import static org.junit.jupiter.api.Assertions.assertNotNull;
 
 @SuppressWarnings({"unused", "FieldCanBeLocal"})
 public class JavaClassAnalyzerTest {
@@ -162,7 +161,7 @@ public class JavaClassAnalyzerTest {
     private record JavaClassAnalyzerSubject(@NotNull Class<?> klass) {
         public @NotNull JavaClassAnalyzerSubject findsMethod(@NotNull String name, @NotNull String expected) {
             Method getterMethod = findGetterMethod(name);
-            assertNotNull(getterMethod);
+            assertThat(getterMethod).isNotNull();
             assertThat(getterMethod.getName()).isEqualTo(expected);
             return this;
         }
@@ -179,7 +178,7 @@ public class JavaClassAnalyzerTest {
 
         private @NotNull Field getFieldByName(@NotNull String name) {
             Field field = EasyMembers.findField(klass, name);
-            assertNotNull(field);
+            assertThat(field).isNotNull();
             return field;
         }
     }

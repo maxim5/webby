@@ -7,11 +7,11 @@ import io.webby.testing.Testing;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.EnumSource;
 
+import static com.google.common.truth.Truth.assertThat;
 import static io.webby.testing.AssertJson.withJsonLibrary;
 import static io.webby.testing.TestingBytes.asByteBuf;
 import static io.webby.testing.TestingBytes.assertByteBuf;
 import static io.webby.testing.ws.meta.AssertMeta.*;
-import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 
 public class JsonMetadataTest {
@@ -26,7 +26,7 @@ public class JsonMetadataTest {
         """);
         metadata.parse(input1, (acceptorId, requestId, content) -> {
             assertByteBuf(acceptorId, "foo");
-            assertEquals(123, requestId);
+            assertThat(requestId).isEqualTo(123);
             assertByteBuf(content, "{'x':'y'}");
         });
 
@@ -35,7 +35,7 @@ public class JsonMetadataTest {
         """);
         metadata.parse(input2, (acceptorId, requestId, content) -> {
             assertByteBuf(acceptorId, "bar");
-            assertEquals(123, requestId);
+            assertThat(requestId).isEqualTo(123);
             assertByteBuf(content, "{'x':'y'}");
         });
     }

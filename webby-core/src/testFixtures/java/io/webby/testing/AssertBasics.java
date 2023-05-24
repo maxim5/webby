@@ -12,8 +12,6 @@ import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 import static com.google.common.truth.Truth.assertThat;
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertNotNull;
 
 public class AssertBasics {
     @SuppressWarnings("unchecked")
@@ -29,18 +27,18 @@ public class AssertBasics {
         LinkedHashMap<Object, Object> expectedMap = EasyMaps.asMap(expected);
         Set<Object> keys = Stream.concat(map.keySet().stream(), expectedMap.keySet().stream()).collect(Collectors.toSet());
         for (Object key : keys) {
-            assertEquals(expectedMap.get(key), map.get(key));
+            assertThat(map.get(key)).isEqualTo(expectedMap.get(key));
         }
     }
 
     public static <T> void assertPrivateFieldValue(@NotNull T object, @NotNull String name, @NotNull Object expected) {
-        assertEquals(expected, getPrivateFieldValue(object, name));
+        assertThat(getPrivateFieldValue(object, name)).isEqualTo(expected);
     }
 
     public static <T> void assertPrivateFieldClass(@NotNull T object, @NotNull String name, @NotNull Class<?> expected) {
         Object value = getPrivateFieldValue(object, name);
-        assertNotNull(value);
-        assertEquals(expected, value.getClass());
+        assertThat(value).isNotNull();
+        assertThat(value.getClass()).isEqualTo(expected);
     }
 
     public static <T> Object getPrivateFieldValue(@NotNull T object, @NotNull String name) {

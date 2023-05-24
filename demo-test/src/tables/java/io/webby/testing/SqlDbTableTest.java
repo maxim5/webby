@@ -14,7 +14,6 @@ import java.util.Arrays;
 import java.util.List;
 
 import static com.google.common.truth.Truth.assertThat;
-import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 
 @Tag("sql")
@@ -41,7 +40,7 @@ public abstract class SqlDbTableTest<E, T extends BaseTable<E>> implements BaseT
 
     @Test
     public void engine() {
-        assertEquals(SQL.engine(), table.engine());
+        assertThat(table.engine()).isEqualTo(SQL.engine());
     }
 
     public @NotNull List<String> parseColumnNamesFromDb(@NotNull String name) {
