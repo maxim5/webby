@@ -12,8 +12,8 @@ import java.util.concurrent.TimeUnit;
 @Fork(value = 1, warmups = 0)
 @BenchmarkMode(Mode.Throughput)
 @OutputTimeUnit(TimeUnit.SECONDS)
-@Warmup(iterations = 1, time = 2000, timeUnit = TimeUnit.MILLISECONDS)
-@Measurement(iterations = 5, time = 2000, timeUnit = TimeUnit.MILLISECONDS)
+@Warmup(iterations = 1, time = 3000, timeUnit = TimeUnit.MILLISECONDS)
+@Measurement(iterations = 5, time = 5000, timeUnit = TimeUnit.MILLISECONDS)
 public class FastFormatBenchmark {
     private static final int LOOPS = 1000;
 
@@ -72,6 +72,26 @@ public class FastFormatBenchmark {
         int counter = 0;
         for (int i = 0; i < LOOPS; i++) {
             String s = FastFormat.format("What do you get if you multiply %s and %s and %d?", counter, counter, counter);
+            counter += s.length();
+        }
+        return counter;
+    }
+
+    @Benchmark
+    public int short_only_specs_std() {
+        int counter = 0;
+        for (int i = 0; i < LOOPS; i++) {
+            String s = String.format("%s%d%s", counter, counter, counter);
+            counter += s.length();
+        }
+        return counter;
+    }
+
+    @Benchmark
+    public int short_only_specs_new() {
+        int counter = 0;
+        for (int i = 0; i < LOOPS; i++) {
+            String s = FastFormat.format("%s%d%s", counter, counter, counter);
             counter += s.length();
         }
         return counter;

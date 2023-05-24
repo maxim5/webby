@@ -21,9 +21,8 @@ public class FastFormat {
                 continue;
             }
 
-            boolean isPercent = prev == '%';
             String replace = null;
-            if (isPercent) {
+            if (prev == '%') {
                 if (value == 's' || value == 'd') {
                     assert argCounter < args.length : "Invalid args: pattern=%s args=%s".formatted(pattern, args);
                     replace = String.valueOf(args[argCounter++]);
