@@ -21,14 +21,7 @@ public class FastFormat {
     }
 
     public static @NotNull String format(@NotNull String pattern, @Nullable Object @NotNull ... args) {
-        int total = 0;
-        for (int i = 0; i < args.length; i++) {
-            String s = String.valueOf(args[i]);
-            args[i] = s;
-            total += s.length();
-        }
-
-        StringBuilder builder = new StringBuilder(pattern.length() + total - 2 * args.length);
+        StringBuilder builder = new StringBuilder(pattern.length());
         int prevStart = 0;
         for (Object arg : args) {
             int newStart = pattern.indexOf("%s", prevStart);
@@ -36,7 +29,7 @@ public class FastFormat {
                 break;
             }
             builder.append(pattern, prevStart, newStart);
-            builder.append(arg.toString());
+            builder.append(arg);
             prevStart = newStart + 2;
         }
         builder.append(pattern, prevStart, pattern.length());
