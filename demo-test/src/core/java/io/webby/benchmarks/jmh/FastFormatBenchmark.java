@@ -1,5 +1,6 @@
 package io.webby.benchmarks.jmh;
 
+import com.google.common.base.Strings;
 import io.webby.util.base.FastFormat;
 import org.openjdk.jmh.annotations.*;
 import org.openjdk.jmh.runner.Runner;
@@ -18,7 +19,7 @@ public class FastFormatBenchmark {
     private static final int LOOPS = 1000;
 
     @Benchmark
-    public int str_std() {
+    public int str1_std() {
         int counter = 0;
         for (int i = 0; i < LOOPS; i++) {
             String s = String.format("What do you get if you multiply %s?", counter);
@@ -28,7 +29,17 @@ public class FastFormatBenchmark {
     }
 
     @Benchmark
-    public int str_new_i() {
+    public int str1_gua() {
+        int counter = 0;
+        for (int i = 0; i < LOOPS; i++) {
+            String s = Strings.lenientFormat("What do you get if you multiply %s?", counter);
+            counter += s.length();
+        }
+        return counter;
+    }
+
+    @Benchmark
+    public int str1_new_i() {
         int counter = 0;
         for (int i = 0; i < LOOPS; i++) {
             String s = FastFormat.format("What do you get if you multiply %s?", counter);
@@ -38,7 +49,7 @@ public class FastFormatBenchmark {
     }
 
     @Benchmark
-    public int str_new_o() {
+    public int str1_new_o() {
         int counter = 0;
         for (int i = 0; i < LOOPS; i++) {
             String s = FastFormat.format("What do you get if you multiply %s?", (Object) counter);
@@ -48,7 +59,7 @@ public class FastFormatBenchmark {
     }
 
     @Benchmark
-    public int str_str_std() {
+    public int str2_std() {
         int counter = 0;
         for (int i = 0; i < LOOPS; i++) {
             String s = String.format("What do you get if you multiply %s and %s?", counter, counter);
@@ -58,7 +69,17 @@ public class FastFormatBenchmark {
     }
 
     @Benchmark
-    public int str_str_new() {
+    public int str2_gua() {
+        int counter = 0;
+        for (int i = 0; i < LOOPS; i++) {
+            String s = Strings.lenientFormat("What do you get if you multiply %s and %s?", counter, counter);
+            counter += s.length();
+        }
+        return counter;
+    }
+
+    @Benchmark
+    public int str2_new() {
         int counter = 0;
         for (int i = 0; i < LOOPS; i++) {
             String s = FastFormat.format("What do you get if you multiply %s and %s?", counter, counter);
@@ -68,40 +89,60 @@ public class FastFormatBenchmark {
     }
 
     @Benchmark
-    public int str_str_int_std() {
+    public int str3_std() {
         int counter = 0;
         for (int i = 0; i < LOOPS; i++) {
-            String s = String.format("What do you get if you multiply %s and %s and %d?", counter, counter, counter);
+            String s = String.format("What do you get if you multiply %s and %s and %s?", counter, counter, counter);
             counter += s.length();
         }
         return counter;
     }
 
     @Benchmark
-    public int str_str_int_new() {
+    public int str3_gua() {
         int counter = 0;
         for (int i = 0; i < LOOPS; i++) {
-            String s = FastFormat.format("What do you get if you multiply %s and %s and %d?", counter, counter, counter);
+            String s = Strings.lenientFormat("What do you get if you multiply %s and %s and %s?", counter, counter, counter);
             counter += s.length();
         }
         return counter;
     }
 
     @Benchmark
-    public int short_only_specs_std() {
+    public int str3_new() {
         int counter = 0;
         for (int i = 0; i < LOOPS; i++) {
-            String s = String.format("%s%d%s", counter, counter, counter);
+            String s = FastFormat.format("What do you get if you multiply %s and %s and %s?", counter, counter, counter);
             counter += s.length();
         }
         return counter;
     }
 
     @Benchmark
-    public int short_only_specs_new() {
+    public int only_specs_std() {
         int counter = 0;
         for (int i = 0; i < LOOPS; i++) {
-            String s = FastFormat.format("%s%d%s", counter, counter, counter);
+            String s = String.format("%s%s%s", counter, counter, counter);
+            counter += s.length();
+        }
+        return counter;
+    }
+
+    @Benchmark
+    public int only_specs_gua() {
+        int counter = 0;
+        for (int i = 0; i < LOOPS; i++) {
+            String s = Strings.lenientFormat("%s%s%s", counter, counter, counter);
+            counter += s.length();
+        }
+        return counter;
+    }
+
+    @Benchmark
+    public int only_specs_new() {
+        int counter = 0;
+        for (int i = 0; i < LOOPS; i++) {
+            String s = FastFormat.format("%s%s%s", counter, counter, counter);
             counter += s.length();
         }
         return counter;
