@@ -23,7 +23,7 @@ public class CodecsTest {
         assertThat(writeByte8(value, buffer.outputStream())).isEqualTo(INT8_SIZE);
         assertThat(buffer.size()).isEqualTo(INT8_SIZE);
         assertThat(buffer.snapshot().hex()).isEqualTo("%02x".formatted((byte) value));
-        assertBytes(buffer.snapshot().toByteArray(), new byte[]{(byte) value});
+        assertBytes(buffer.snapshot().toByteArray()).isEqualTo(new byte[]{(byte) value});
         assertThat(readByte8(buffer.inputStream())).isEqualTo(value);
     }
 
@@ -33,7 +33,7 @@ public class CodecsTest {
         assertThat(writeInt16(value, buffer.outputStream())).isEqualTo(INT16_SIZE);
         assertThat(buffer.size()).isEqualTo(INT16_SIZE);
         assertThat(buffer.snapshot().hex()).isEqualTo("%04x".formatted((short) value));
-        assertBytes(buffer.snapshot().toByteArray(), Shorts.toByteArray((short) value));
+        assertBytes(buffer.snapshot().toByteArray()).isEqualTo(Shorts.toByteArray((short) value));
         assertThat(readInt16(buffer.inputStream())).isEqualTo(value);
     }
 
@@ -43,7 +43,7 @@ public class CodecsTest {
         assertThat(writeInt32(value, buffer.outputStream())).isEqualTo(INT32_SIZE);
         assertThat(buffer.size()).isEqualTo(INT32_SIZE);
         assertThat(buffer.snapshot().hex()).isEqualTo("%08x".formatted(value));
-        assertBytes(buffer.snapshot().toByteArray(), Ints.toByteArray(value));
+        assertBytes(buffer.snapshot().toByteArray()).isEqualTo(Ints.toByteArray(value));
         assertThat(readInt32(buffer.inputStream())).isEqualTo(value);
     }
 
@@ -53,7 +53,7 @@ public class CodecsTest {
         assertThat(writeLong64(value, buffer.outputStream())).isEqualTo(INT64_SIZE);
         assertThat(buffer.size()).isEqualTo(INT64_SIZE);
         assertThat(buffer.snapshot().hex()).isEqualTo("%016x".formatted(value));
-        assertBytes(buffer.snapshot().toByteArray(), Longs.toByteArray(value));
+        assertBytes(buffer.snapshot().toByteArray()).isEqualTo(Longs.toByteArray(value));
         assertThat(readLong64(buffer.inputStream())).isEqualTo(value);
     }
 
@@ -63,7 +63,7 @@ public class CodecsTest {
         assertThat(writeBoolean8(value, buffer.outputStream())).isEqualTo(INT8_SIZE);
         assertThat(buffer.size()).isEqualTo(INT8_SIZE);
         assertThat(buffer.snapshot().hex()).isEqualTo("%02x".formatted(value ? 1 : 0));
-        assertBytes(buffer.snapshot().toByteArray(), new byte[]{(byte) (value ? 1 : 0)});
+        assertBytes(buffer.snapshot().toByteArray()).isEqualTo(new byte[]{(byte) (value ? 1 : 0)});
         assertThat(readBoolean8(buffer.inputStream())).isEqualTo(value);
     }
 
@@ -73,17 +73,17 @@ public class CodecsTest {
         byte[] bytes = paramToBytes(encoded);
 
         assertThat(writeNullableByteArray(bytes, buffer.outputStream())).isEqualTo(nullableByteArraySize(bytes));
-        assertBytes(readNullableByteArray(buffer.inputStream()), bytes);
+        assertBytes(readNullableByteArray(buffer.inputStream())).isEqualTo(bytes);
 
         assertThat(writeShortNullableByteArray(bytes, buffer.outputStream())).isEqualTo(shortNullableByteArraySize(bytes));
-        assertBytes(readShortNullableByteArray(buffer.inputStream()), bytes);
+        assertBytes(readShortNullableByteArray(buffer.inputStream())).isEqualTo(bytes);
 
         if (bytes != null) {
             assertThat(writeByteArray(bytes, buffer.outputStream())).isEqualTo(byteArraySize(bytes));
-            assertBytes(readByteArray(buffer.inputStream()), bytes);
+            assertBytes(readByteArray(buffer.inputStream())).isEqualTo(bytes);
 
             assertThat(writeShortByteArray(bytes, buffer.outputStream())).isEqualTo(shortByteArraySize(bytes));
-            assertBytes(readShortByteArray(buffer.inputStream()), bytes);
+            assertBytes(readShortByteArray(buffer.inputStream())).isEqualTo(bytes);
         }
     }
 

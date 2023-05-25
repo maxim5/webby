@@ -58,8 +58,8 @@ public class CodecProviderTest {
 
         byte[] prefix = { 0, 1, 2 };
         byte[] prefixedBytes = codec.writeToBytes(prefix, value);
-        assertBytes(prefix, Arrays.copyOfRange(prefixedBytes, 0, prefix.length));
-        assertBytes(bytes, Arrays.copyOfRange(prefixedBytes, prefix.length, prefixedBytes.length));
+        assertBytes(prefix).isEqualTo(Arrays.copyOfRange(prefixedBytes, 0, prefix.length));
+        assertBytes(bytes).isEqualTo(Arrays.copyOfRange(prefixedBytes, prefix.length, prefixedBytes.length));
         assertThat(value).isEqualTo(codec.readFromBytes(prefix.length, prefixedBytes));
         assertSize(prefixedBytes.length - prefix.length, predictedSize);
     }

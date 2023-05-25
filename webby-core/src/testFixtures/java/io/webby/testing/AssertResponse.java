@@ -97,12 +97,12 @@ public class AssertResponse {
         }
 
         public @NotNull S hasContent(@NotNull String content) {
-            assertByteBuf(content(), content);
+            assertBytes(content()).isEqualTo(content);
             return castAny(this);
         }
 
         public @NotNull S hasContent(@NotNull ByteBuf content) {
-            assertByteBufs(content(), content);
+            assertBytes(content()).isEqualTo(content);
             return castAny(this);
         }
 
@@ -238,7 +238,7 @@ public class AssertResponse {
     public static byte @NotNull [] readAllFrom(@NotNull Stream<HttpContent> stream) {
         ByteArrayOutputStream outputStream = new ByteArrayOutputStream();
         stream.forEach(Consumers.rethrow(content ->
-                content.content().readBytes(outputStream, content.content().readableBytes())
+            content.content().readBytes(outputStream, content.content().readableBytes())
         ));
         return outputStream.toByteArray();
     }

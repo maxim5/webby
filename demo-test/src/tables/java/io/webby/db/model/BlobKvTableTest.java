@@ -37,7 +37,7 @@ public class BlobKvTableTest
         assumeKeys(1);
         byte[] key = keys()[0];
         BlobKv entity = createEntity(key);
-        assertBytes(table().keyOf(entity), key);
+        assertBytes(table().keyOf(entity)).isEqualTo(key);
     }
 
     @Override

@@ -214,19 +214,19 @@ public class EasyHppcTest {
 
     @Test
     public void int_retain_all_copy() {
-        assertArray(EasyHppc.retainAllCopy(IntHashSet.from(), x1 -> x1 % 2 == 0)).containsExactlyNoOrder();
-        assertArray(EasyHppc.retainAllCopy(IntHashSet.from(1), x1 -> x1 % 2 == 0)).containsExactlyNoOrder();
-        assertArray(EasyHppc.retainAllCopy(IntHashSet.from(2), x1 -> x1 % 2 == 0)).containsExactlyNoOrder(2);
-        assertArray(EasyHppc.retainAllCopy(IntHashSet.from(1, 3), x1 -> x1 % 2 == 0)).containsExactlyNoOrder();
+        assertArray(EasyHppc.retainAllCopy(IntHashSet.from(), x -> x % 2 == 0)).containsExactlyNoOrder();
+        assertArray(EasyHppc.retainAllCopy(IntHashSet.from(1), x -> x % 2 == 0)).containsExactlyNoOrder();
+        assertArray(EasyHppc.retainAllCopy(IntHashSet.from(2), x -> x % 2 == 0)).containsExactlyNoOrder(2);
+        assertArray(EasyHppc.retainAllCopy(IntHashSet.from(1, 3), x -> x % 2 == 0)).containsExactlyNoOrder();
         assertArray(EasyHppc.retainAllCopy(IntHashSet.from(1, 2, 3), x -> x % 2 == 0)).containsExactlyNoOrder(2);
     }
 
     @Test
     public void int_remove_all_copy() {
-        assertArray(EasyHppc.removeAllCopy(IntHashSet.from(), x1 -> x1 % 2 == 0)).containsExactlyNoOrder();
-        assertArray(EasyHppc.removeAllCopy(IntHashSet.from(1), x1 -> x1 % 2 == 0)).containsExactlyNoOrder(1);
-        assertArray(EasyHppc.removeAllCopy(IntHashSet.from(2), x1 -> x1 % 2 == 0)).containsExactlyNoOrder();
-        assertArray(EasyHppc.removeAllCopy(IntHashSet.from(1, 3), x1 -> x1 % 2 == 0)).containsExactlyNoOrder(1, 3);
+        assertArray(EasyHppc.removeAllCopy(IntHashSet.from(), x -> x % 2 == 0)).containsExactlyNoOrder();
+        assertArray(EasyHppc.removeAllCopy(IntHashSet.from(1), x -> x % 2 == 0)).containsExactlyNoOrder(1);
+        assertArray(EasyHppc.removeAllCopy(IntHashSet.from(2), x -> x % 2 == 0)).containsExactlyNoOrder();
+        assertArray(EasyHppc.removeAllCopy(IntHashSet.from(1, 3), x -> x % 2 == 0)).containsExactlyNoOrder(1, 3);
         assertArray(EasyHppc.removeAllCopy(IntHashSet.from(1, 2, 3), x -> x % 2 == 0)).containsExactlyNoOrder(1, 3);
     }
 

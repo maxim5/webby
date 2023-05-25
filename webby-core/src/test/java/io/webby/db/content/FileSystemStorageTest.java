@@ -28,7 +28,7 @@ public class FileSystemStorageTest {
         setup(scenario);
         storage.addFile(new FileId("foo.txt"), CONTENT, WriteMode.FAIL_IF_EXISTS);
         assertThat(Files.exists(root.resolve("foo.txt"))).isTrue();
-        assertBytes(Files.readAllBytes(root.resolve("foo.txt")), CONTENT);
+        assertBytes(Files.readAllBytes(root.resolve("foo.txt"))).isEqualTo(CONTENT);
     }
 
     @ParameterizedTest
@@ -37,7 +37,7 @@ public class FileSystemStorageTest {
         setup(scenario);
         storage.addFile(new FileId("dir/foo.txt"), CONTENT, WriteMode.FAIL_IF_EXISTS);
         assertThat(Files.exists(root.resolve("dir/foo.txt"))).isTrue();
-        assertBytes(Files.readAllBytes(root.resolve("dir/foo.txt")), CONTENT);
+        assertBytes(Files.readAllBytes(root.resolve("dir/foo.txt"))).isEqualTo(CONTENT);
     }
 
     @ParameterizedTest
@@ -74,7 +74,7 @@ public class FileSystemStorageTest {
         setup(scenario);
         FileId fileId = new FileId("foo.txt");
         storage.addFile(fileId, CONTENT, WriteMode.FAIL_IF_EXISTS);
-        assertBytes(storage.readFileContent(fileId).readAllBytes(), CONTENT);
+        assertBytes(storage.readFileContent(fileId).readAllBytes()).isEqualTo(CONTENT);
     }
 
     @ParameterizedTest

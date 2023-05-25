@@ -8,7 +8,8 @@ import org.junit.jupiter.api.Test;
 import java.util.function.Consumer;
 
 import static com.google.common.truth.Truth.assertThat;
-import static io.webby.testing.TestingBytes.*;
+import static io.webby.testing.TestingBytes.asByteBuf;
+import static io.webby.testing.TestingBytes.assertBytes;
 
 
 public class EasyByteBufTest {
@@ -17,57 +18,57 @@ public class EasyByteBufTest {
 
     @Test
     public void copyToByteArray_simple() {
-        assertBytes(EasyByteBuf.copyToByteArray(asByteBuf("")), "");
-        assertBytes(EasyByteBuf.copyToByteArray(asByteBuf("foo")), "foo");
-        assertBytes(EasyByteBuf.copyToByteArray(asByteBuf("\0")), "\0");
+        assertBytes(EasyByteBuf.copyToByteArray(asByteBuf(""))).isEqualTo("");
+        assertBytes(EasyByteBuf.copyToByteArray(asByteBuf("foo"))).isEqualTo("foo");
+        assertBytes(EasyByteBuf.copyToByteArray(asByteBuf("\0"))).isEqualTo("\0");
     }
 
     @Test
     public void copyToByteArray_copy() {
         ByteBuf byteBuf = asByteBuf("foo");
-        assertBytes(EasyByteBuf.copyToByteArray(byteBuf), "foo");
-        assertByteBuf(byteBuf, "foo");
+        assertBytes(EasyByteBuf.copyToByteArray(byteBuf)).isEqualTo("foo");
+        assertBytes(byteBuf).isEqualTo("foo");
     }
 
     @Test
     public void readUntil_simple() {
-        assertByteBuf(EasyByteBuf.readUntil(asByteBuf("foo-bar"), DASH, 0, 100), "foo");
-        assertByteBuf(EasyByteBuf.readUntil(asByteBuf("foo--bar"), DASH, 0, 100), "foo");
-        assertByteBuf(EasyByteBuf.readUntil(asByteBuf("foo-bar"), DASH, 0, 3), null);
-        assertByteBuf(EasyByteBuf.readUntil(asByteBuf("foo-bar"), UNDER, 0, 100), null);
+        assertBytes(EasyByteBuf.readUntil(asByteBuf("foo-bar"), DASH, 0, 100)).isEqualTo("foo");
+        assertBytes(EasyByteBuf.readUntil(asByteBuf("foo--bar"), DASH, 0, 100)).isEqualTo("foo");
+        assertBytes(EasyByteBuf.readUntil(asByteBuf("foo-bar"), DASH, 0, 3)).isNull();
+        assertBytes(EasyByteBuf.readUntil(asByteBuf("foo-bar"), UNDER, 0, 100)).isNull();
 
-        assertByteBuf(EasyByteBuf.readUntil(asByteBuf("---"), DASH, 0, 100), "");
-        assertByteBuf(EasyByteBuf.readUntil(asByteBuf("---"), DASH, 0, 1), "");
-        assertByteBuf(EasyByteBuf.readUntil(asByteBuf("---"), DASH, 0, 0), null);
+        assertBytes(EasyByteBuf.readUntil(asByteBuf("---"), DASH, 0, 100)).isEqualTo("");
+        assertBytes(EasyByteBuf.readUntil(asByteBuf("---"), DASH, 0, 1)).isEqualTo("");
+        assertBytes(EasyByteBuf.readUntil(asByteBuf("---"), DASH, 0, 0)).isNull();
 
-        assertByteBuf(EasyByteBuf.readUntil(asByteBuf("-"), DASH, 0, 100), "");
-        assertByteBuf(EasyByteBuf.readUntil(asByteBuf("-"), DASH, 0, 0), null);
+        assertBytes(EasyByteBuf.readUntil(asByteBuf("-"), DASH, 0, 100)).isEqualTo("");
+        assertBytes(EasyByteBuf.readUntil(asByteBuf("-"), DASH, 0, 0)).isNull();
 
-        assertByteBuf(EasyByteBuf.readUntil(asByteBuf(""), DASH, 0, 100), null);
-        assertByteBuf(EasyByteBuf.readUntil(asByteBuf(""), DASH, 0, 1), null);
-        assertByteBuf(EasyByteBuf.readUntil(asByteBuf(""), DASH, 0, 0), null);
+        assertBytes(EasyByteBuf.readUntil(asByteBuf(""), DASH, 0, 100)).isNull();
+        assertBytes(EasyByteBuf.readUntil(asByteBuf(""), DASH, 0, 1)).isNull();
+        assertBytes(EasyByteBuf.readUntil(asByteBuf(""), DASH, 0, 0)).isNull();
     }
 
     @Test
     public void readUntil_readIndex() {
         ByteBuf content = asByteBuf("foo-bar-baz");
-        assertByteBuf(EasyByteBuf.readUntil(content, DASH, 0, 100), "foo");
-        assertByteBuf(content, "bar-baz");
-        assertByteBuf(EasyByteBuf.readUntil(content, DASH, 0, 100), "bar");
-        assertByteBuf(content, "baz");
-        assertByteBuf(EasyByteBuf.readUntil(content, DASH, 0, 100), null);
+        assertBytes(EasyByteBuf.readUntil(content, DASH, 0, 100)).isEqualTo("foo");
+        assertBytes(content).isEqualTo("bar-baz");
+        assertBytes(EasyByteBuf.readUntil(content, DASH, 0, 100)).isEqualTo("bar");
+        assertBytes(content).isEqualTo("baz");
+        assertBytes(EasyByteBuf.readUntil(content, DASH, 0, 100)).isNull();
     }
 
     @Test
     public void readUntil_readIndex_empty() {
         ByteBuf content = asByteBuf("---");
-        assertByteBuf(EasyByteBuf.readUntil(content, DASH, 0, 100), "");
-        assertByteBuf(content, "--");
-        assertByteBuf(EasyByteBuf.readUntil(content, DASH, 0, 100), "");
-        assertByteBuf(content, "-");
-        assertByteBuf(EasyByteBuf.readUntil(content, DASH, 0, 100), "");
-        assertByteBuf(content, "");
-        assertByteBuf(EasyByteBuf.readUntil(content, DASH, 0, 100), null);
+        assertBytes(EasyByteBuf.readUntil(content, DASH, 0, 100)).isEqualTo("");
+        assertBytes(content).isEqualTo("--");
+        assertBytes(EasyByteBuf.readUntil(content, DASH, 0, 100)).isEqualTo("");
+        assertBytes(content).isEqualTo("-");
+        assertBytes(EasyByteBuf.readUntil(content, DASH, 0, 100)).isEqualTo("");
+        assertBytes(content).isEqualTo("");
+        assertBytes(EasyByteBuf.readUntil(content, DASH, 0, 100)).isNull();
     }
 
     @Test
@@ -150,16 +151,16 @@ public class EasyByteBufTest {
 
     @Test
     public void writeIntString_simple() {
-        assertByteBuf(withNewBuffer(content -> EasyByteBuf.writeIntString(0, content)), "0");
-        assertByteBuf(withNewBuffer(content -> EasyByteBuf.writeIntString(101, content)), "101");
-        assertByteBuf(withNewBuffer(content -> EasyByteBuf.writeIntString(-101, content)), "-101");
+        assertBytes(withNewBuffer(content -> EasyByteBuf.writeIntString(0, content))).isEqualTo("0");
+        assertBytes(withNewBuffer(content -> EasyByteBuf.writeIntString(101, content))).isEqualTo("101");
+        assertBytes(withNewBuffer(content -> EasyByteBuf.writeIntString(-101, content))).isEqualTo("-101");
     }
 
     @Test
     public void writeLongString_simple() {
-        assertByteBuf(withNewBuffer(content -> EasyByteBuf.writeLongString(0, content)), "0");
-        assertByteBuf(withNewBuffer(content -> EasyByteBuf.writeLongString(101, content)), "101");
-        assertByteBuf(withNewBuffer(content -> EasyByteBuf.writeLongString(-101, content)), "-101");
+        assertBytes(withNewBuffer(content -> EasyByteBuf.writeLongString(0, content))).isEqualTo("0");
+        assertBytes(withNewBuffer(content -> EasyByteBuf.writeLongString(101, content))).isEqualTo("101");
+        assertBytes(withNewBuffer(content -> EasyByteBuf.writeLongString(-101, content))).isEqualTo("-101");
     }
 
     private static @NotNull ByteBuf withNewBuffer(@NotNull Consumer<ByteBuf> consumer) {

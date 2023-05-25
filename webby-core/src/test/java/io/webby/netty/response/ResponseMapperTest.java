@@ -18,7 +18,7 @@ import java.util.function.Function;
 
 import static com.google.common.truth.Truth.assertThat;
 import static io.webby.testing.AssertResponse.streamContentOf;
-import static io.webby.testing.TestingBytes.assertByteBuf;
+import static io.webby.testing.TestingBytes.assertBytes;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertNull;
 
@@ -131,7 +131,7 @@ public class ResponseMapperTest {
         if (expected != null) {
             assertNotNull(lookup, () -> describe(obj));
             HttpResponse response = lookup.apply(obj);
-            assertByteBuf(streamContentOf(response), expected);
+            assertBytes(streamContentOf(response)).isEqualTo(expected);
         } else {
             assertNull(lookup, () -> describe(obj));
         }

@@ -11,36 +11,36 @@ public class BinarySeparatorFrameMetadataTest {
     @Test
     public void parse_simple() {
         new BinarySeparatorFrameMetadata().parse(asByteBuf("foo 00000000 bar"), (acceptorId, requestId, content) -> {
-            assertByteBuf(acceptorId, "foo");
+            assertBytes(acceptorId).isEqualTo("foo");
             assertThat(requestId).isEqualTo(Longs.fromByteArray(asBytes("00000000")));
-            assertByteBuf(content, "bar");
+            assertBytes(content).isEqualTo("bar");
         });
     }
 
     @Test
     public void parse_short_acceptorId() {
         new BinarySeparatorFrameMetadata().parse(asByteBuf("x ~~~~~~~~ y"), (acceptorId, requestId, content) -> {
-            assertByteBuf(acceptorId, "x");
+            assertBytes(acceptorId).isEqualTo("x");
             assertThat(requestId).isEqualTo(Longs.fromByteArray(asBytes("~~~~~~~~")));
-            assertByteBuf(content, "y");
+            assertBytes(content).isEqualTo("y");
         });
     }
 
     @Test
     public void parse_empty_content() {
         new BinarySeparatorFrameMetadata().parse(asByteBuf("foo !@#$%^&* "), (acceptorId, requestId, content) -> {
-            assertByteBuf(acceptorId, "foo");
+            assertBytes(acceptorId).isEqualTo("foo");
             assertThat(requestId).isEqualTo(Longs.fromByteArray(asBytes("!@#$%^&*")));
-            assertByteBuf(content, "");
+            assertBytes(content).isEqualTo("");
         });
     }
 
     @Test
     public void parse_all_separators() {
         new BinarySeparatorFrameMetadata().parse(asByteBuf("foo             "), (acceptorId, requestId, content) -> {
-            assertByteBuf(acceptorId, "foo");
+            assertBytes(acceptorId).isEqualTo("foo");
             assertThat(requestId).isEqualTo(Longs.fromByteArray(asBytes("        ")));
-            assertByteBuf(content, "   ");
+            assertBytes(content).isEqualTo("   ");
         });
     }
 

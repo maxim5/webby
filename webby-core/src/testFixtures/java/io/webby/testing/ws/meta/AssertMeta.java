@@ -6,7 +6,7 @@ import org.jetbrains.annotations.NotNull;
 
 import static com.google.common.truth.Truth.assertThat;
 import static io.webby.testing.TestingBytes.asByteBuf;
-import static io.webby.testing.TestingBytes.assertByteBuf;
+import static io.webby.testing.TestingBytes.assertBytes;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 
 public class AssertMeta {
@@ -16,7 +16,7 @@ public class AssertMeta {
         metadata.parse(asByteBuf(input), (acceptorId, requestId, content) -> {
             assertThat((Object) acceptorId).isNull();
             assertThat(requestId).isEqualTo(FrameConst.RequestIds.NO_ID);
-            assertByteBuf(content, input);
+            assertBytes(content).isEqualTo(input);
         });
     }
 

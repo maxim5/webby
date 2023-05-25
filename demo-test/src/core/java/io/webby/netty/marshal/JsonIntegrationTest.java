@@ -147,8 +147,8 @@ public class JsonIntegrationTest {
         Json json = Testing.Internals.json();
         assertThat(json.writeString(instance)).isEqualTo(expected);
         assertThat(writeToString(writer -> json.writeChars(writer, instance))).isEqualTo(expected);
-        assertBytes(json.writeBytes(instance), expected);
-        assertBytes(outputToBytes(outputStream -> json.writeBytes(outputStream, instance)), expected);
-        assertByteBuf(json.writeByteBuf(instance), expected);
+        assertBytes(json.writeBytes(instance)).isEqualTo(expected);
+        assertBytes(outputToBytes(outputStream -> json.writeBytes(outputStream, instance))).isEqualTo(expected);
+        assertBytes(json.writeByteBuf(instance)).isEqualTo(expected);
     }
 }
