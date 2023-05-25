@@ -20,6 +20,7 @@ public class FastFormatTest {
     @Test
     public void no_specs_escaped() {
         assertFormat("%%");
+        assertFormat("%%%%");
         assertFormat("%% foo bar %% %%");
     }
 
@@ -31,6 +32,10 @@ public class FastFormatTest {
         assertFormat("foo %s", 1);
         assertFormat("%s foo", 1);
         assertFormat("%s foo", NULL);
+        assertFormat("%s foo %%", 1);
+        assertFormat("%s foo %%", NULL);
+        assertFormat("%s foo %% %%", 1);
+        assertFormat("%s foo %% %%", NULL);
     }
 
     @Test
@@ -38,6 +43,23 @@ public class FastFormatTest {
         assertFormat("%d", 111);
         assertFormat("foo %d", 222);
         assertFormat("%d foo", 333);
+        assertFormat("%d foo %%", 444);
+    }
+
+    @Test
+    public void one_long_simple() {
+        assertFormat("%d", 111L);
+        assertFormat("foo %d", 222L);
+        assertFormat("%d foo", 333L);
+        assertFormat("%d foo %%", 444L);
+    }
+
+    @Test
+    public void one_boolean_simple() {
+        assertFormat("%s", true);
+        assertFormat("foo %s", false);
+        assertFormat("%s foo", true);
+        assertFormat("%s foo %%", false);
     }
 
     @Test
@@ -50,6 +72,31 @@ public class FastFormatTest {
         assertFormat("foo %s bar %s", NULL, "bar");
         assertFormat("foo %s bar %s", "foo", NULL);
         assertFormat("foo %s bar %s", NULL, NULL);
+        assertFormat("foo %s bar %s %%%%", "foo", "bar");
+    }
+
+    private static void assertFormat(@NotNull String pattern, @Nullable Object arg) {
+        String formatted = FastFormat.format(pattern, arg);
+        String expected = pattern.formatted(arg);
+        assertThat(formatted).isEqualTo(expected);
+    }
+
+    private static void assertFormat(@NotNull String pattern, int arg) {
+        String formatted = FastFormat.format(pattern, arg);
+        String expected = pattern.formatted(arg);
+        assertThat(formatted).isEqualTo(expected);
+    }
+
+    private static void assertFormat(@NotNull String pattern, long arg) {
+        String formatted = FastFormat.format(pattern, arg);
+        String expected = pattern.formatted(arg);
+        assertThat(formatted).isEqualTo(expected);
+    }
+
+    private static void assertFormat(@NotNull String pattern, boolean arg) {
+        String formatted = FastFormat.format(pattern, arg);
+        String expected = pattern.formatted(arg);
+        assertThat(formatted).isEqualTo(expected);
     }
 
     private static void assertFormat(@NotNull String pattern, @Nullable Object @NotNull ... args) {

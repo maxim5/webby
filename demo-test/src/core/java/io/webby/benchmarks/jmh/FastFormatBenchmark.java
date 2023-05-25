@@ -28,10 +28,20 @@ public class FastFormatBenchmark {
     }
 
     @Benchmark
-    public int str_new() {
+    public int str_new_i() {
         int counter = 0;
         for (int i = 0; i < LOOPS; i++) {
             String s = FastFormat.format("What do you get if you multiply %s?", counter);
+            counter += s.length();
+        }
+        return counter;
+    }
+
+    @Benchmark
+    public int str_new_o() {
+        int counter = 0;
+        for (int i = 0; i < LOOPS; i++) {
+            String s = FastFormat.format("What do you get if you multiply %s?", (Object) counter);
             counter += s.length();
         }
         return counter;
