@@ -5,23 +5,19 @@ import org.jetbrains.annotations.Nullable;
 
 public class FastFormat {
     public static @NotNull String format(@NotNull String pattern, @Nullable Object arg) {
-        String s = String.valueOf(arg);
-        return pattern.replace("%s", s).replace("%%", "%");
+        return pattern.replace("%s", String.valueOf(arg));
     }
 
     public static @NotNull String format(@NotNull String pattern, int arg) {
-        String s = Integer.toString(arg);
-        return pattern.replace("%s", s).replace("%%", "%");
+        return pattern.replace("%s", Integer.toString(arg));
     }
 
     public static @NotNull String format(@NotNull String pattern, long arg) {
-        String s = Long.toString(arg);
-        return pattern.replace("%s", s).replace("%%", "%");
+        return pattern.replace("%s", Long.toString(arg));
     }
 
     public static @NotNull String format(@NotNull String pattern, boolean arg) {
-        String s = Boolean.toString(arg);
-        return pattern.replace("%s", s).replace("%%", "%");
+        return pattern.replace("%s", Boolean.toString(arg));
     }
 
     public static @NotNull String format(@NotNull String pattern, @Nullable Object @NotNull ... args) {
@@ -44,6 +40,6 @@ public class FastFormat {
             prevStart = newStart + 2;
         }
         builder.append(pattern, prevStart, pattern.length());
-        return builder.toString().replace("%%", "%");
+        return builder.toString();
     }
 }

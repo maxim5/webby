@@ -18,13 +18,6 @@ public class FastFormatTest {
     }
 
     @Test
-    public void no_specs_escaped() {
-        assertFormat("%%");
-        assertFormat("%%%%");
-        assertFormat("%% foo bar %% %%");
-    }
-
-    @Test
     public void one_str_simple() {
         assertFormat("%s", "foo");
         assertFormat("%s", NULL);
@@ -32,10 +25,6 @@ public class FastFormatTest {
         assertFormat("foo %s", 1);
         assertFormat("%s foo", 1);
         assertFormat("%s foo", NULL);
-        assertFormat("%s foo %%", 1);
-        assertFormat("%s foo %%", NULL);
-        assertFormat("%s foo %% %%", 1);
-        assertFormat("%s foo %% %%", NULL);
     }
 
     @Test
@@ -43,7 +32,6 @@ public class FastFormatTest {
         assertFormat("%s", 111);
         assertFormat("foo %s", 222);
         assertFormat("%s foo", 333);
-        assertFormat("%s foo %%", 444);
     }
 
     @Test
@@ -51,7 +39,6 @@ public class FastFormatTest {
         assertFormat("%s", 111L);
         assertFormat("foo %s", 222L);
         assertFormat("%s foo", 333L);
-        assertFormat("%s foo %%", 444L);
     }
 
     @Test
@@ -59,7 +46,6 @@ public class FastFormatTest {
         assertFormat("%s", true);
         assertFormat("foo %s", false);
         assertFormat("%s foo", true);
-        assertFormat("%s foo %%", false);
     }
 
     @Test
@@ -72,7 +58,6 @@ public class FastFormatTest {
         assertFormat("foo %s bar %s", NULL, "bar");
         assertFormat("foo %s bar %s", "foo", NULL);
         assertFormat("foo %s bar %s", NULL, NULL);
-        assertFormat("foo %s bar %s %%%%", "foo", "bar");
     }
 
     private static void assertFormat(@NotNull String pattern, @Nullable Object arg) {
