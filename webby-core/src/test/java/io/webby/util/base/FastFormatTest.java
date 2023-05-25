@@ -40,18 +40,18 @@ public class FastFormatTest {
 
     @Test
     public void one_int_simple() {
-        assertFormat("%d", 111);
-        assertFormat("foo %d", 222);
-        assertFormat("%d foo", 333);
-        assertFormat("%d foo %%", 444);
+        assertFormat("%s", 111);
+        assertFormat("foo %s", 222);
+        assertFormat("%s foo", 333);
+        assertFormat("%s foo %%", 444);
     }
 
     @Test
     public void one_long_simple() {
-        assertFormat("%d", 111L);
-        assertFormat("foo %d", 222L);
-        assertFormat("%d foo", 333L);
-        assertFormat("%d foo %%", 444L);
+        assertFormat("%s", 111L);
+        assertFormat("foo %s", 222L);
+        assertFormat("%s foo", 333L);
+        assertFormat("%s foo %%", 444L);
     }
 
     @Test
