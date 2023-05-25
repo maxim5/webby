@@ -11,7 +11,6 @@ import java.util.Map;
 import static io.webby.testing.TestingPrimitives.*;
 import static io.webby.util.hppc.EasyHppc.toArrayList;
 import static io.webby.util.hppc.EasyHppc.toJavaMap;
-import static org.junit.jupiter.api.Assertions.assertEquals;
 
 public class AssertPrimitives {
     public static @NotNull IntContainerSubject assertArray(@NotNull IntContainer container) {
@@ -80,15 +79,15 @@ public class AssertPrimitives {
         }
 
         public void containsExactly(int key, int value) {
-            assertEquals(newIntMap(key, value), map);
+            Truth.assertThat(map).isEqualTo(newIntMap(key, value));
         }
 
         public void containsExactly(int key1, int value1, int key2, int value2) {
-            assertEquals(newIntMap(key1, value1, key2, value2), map);
+            Truth.assertThat(map).isEqualTo(newIntMap(key1, value1, key2, value2));
         }
 
         public void containsExactly(int... expectedKeysValues) {
-            assertEquals(newIntMap(expectedKeysValues), map);
+            Truth.assertThat(map).isEqualTo(newIntMap(expectedKeysValues));
         }
 
         public void containsExactlyTrimmed(int... expectedKeysValues) {
@@ -148,15 +147,15 @@ public class AssertPrimitives {
         }
 
         public void containsExactly(long key, long value) {
-            assertEquals(newLongMap(key, value), map);
+            Truth.assertThat(map).isEqualTo(newLongMap(key, value));
         }
 
         public void containsExactly(long key1, long value1, long key2, long value2) {
-            assertEquals(newLongMap(key1, value1, key2, value2), map);
+            Truth.assertThat(map).isEqualTo(newLongMap(key1, value1, key2, value2));
         }
 
         public void containsExactly(long... expectedKeysValues) {
-            assertEquals(newLongMap(expectedKeysValues), map);
+            Truth.assertThat(map).isEqualTo(newLongMap(expectedKeysValues));
         }
 
         public void containsExactlyTrimmed(long... expectedKeysValues) {
