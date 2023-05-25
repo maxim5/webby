@@ -38,6 +38,7 @@ public class AssertResponse {
     public static final String TEXT_HTML_CHARSET = "text/html; charset=%s".formatted(Testing.Internals.charset());
     // See https://stackoverflow.com/questions/13827325/correct-mime-type-for-favicon-ico
     public static final List<CharSequence> ICON_MIME_TYPES = List.of("image/x-icon", "image/x-ico", "image/vnd.microsoft.icon");
+    public static final List<CharSequence> JS_MIME_TYPES = List.of("application/javascript", "text/javascript");
 
     @CheckReturnValue
     public static @NotNull HttpResponseSubject<HttpResponseSubject<?>> assertThat(@Nullable HttpResponse response) {

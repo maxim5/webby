@@ -6,8 +6,8 @@ import org.junit.jupiter.api.Test;
 import java.nio.file.Path;
 
 import static com.google.common.truth.Truth.assertThat;
-import static io.webby.testing.AssertBasics.assertOneOf;
 import static io.webby.testing.AssertResponse.ICON_MIME_TYPES;
+import static io.webby.testing.AssertResponse.JS_MIME_TYPES;
 
 public class ContentTypeDetectorTest {
     private final ContentTypeDetector detector = Testing.testStartup().getInstance(ContentTypeDetector.class);
@@ -20,9 +20,9 @@ public class ContentTypeDetectorTest {
 
         assertThat(detector.guessContentType(Path.of("foo.css"))).isEqualTo("text/css");
         assertThat(detector.guessContentType(Path.of("foo.xml"))).isEqualTo("application/xml");
-        assertOneOf(detector.guessContentType(Path.of("foo.js")), "application/javascript", "text/javascript");
+        assertThat(detector.guessContentType(Path.of("foo.js"))).isIn(JS_MIME_TYPES);
 
-        assertOneOf(detector.guessContentType(Path.of("foo.ico")), ICON_MIME_TYPES);
+        assertThat(detector.guessContentType(Path.of("foo.ico"))).isIn(ICON_MIME_TYPES);
     }
 
     @Test

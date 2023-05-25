@@ -15,7 +15,6 @@ import java.util.HashSet;
 import java.util.Set;
 
 import static com.google.common.truth.Truth.assertThat;
-import static io.webby.testing.AssertBasics.assertOneOf;
 import static io.webby.testing.AssertResponse.ICON_MIME_TYPES;
 import static io.webby.testing.AssertResponse.assertThat;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
@@ -93,7 +92,7 @@ public class StaticServingIntegrationTest extends BaseHttpIntegrationTest {
             .is200()
             .hasContentLength(15406)
             .hasHeader(HttpConst.ETAG, "1e5d75d6");
-        assertOneOf(response.headers().get(HttpConst.CONTENT_TYPE), ICON_MIME_TYPES);
+        assertThat(response.headers().get(HttpConst.CONTENT_TYPE)).isIn(ICON_MIME_TYPES);
         assertNotNull(response.headers().getTimeMillis(HttpConst.LAST_MODIFIED));
     }
 }

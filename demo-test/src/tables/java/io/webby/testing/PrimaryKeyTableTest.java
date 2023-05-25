@@ -15,7 +15,7 @@ import java.util.List;
 
 import static com.google.common.truth.Truth.assertThat;
 import static com.google.common.truth.Truth8.assertThat;
-import static io.webby.testing.AssertBasics.assertMapContents;
+import static io.webby.testing.MoreTruth.assertThat;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assumptions.assumeTrue;
 
@@ -109,15 +109,15 @@ public interface PrimaryKeyTableTest<K, E, T extends TableObj<K, E>> extends Bas
         assumeKeys(2);
         K key1 = keys()[0];
         K key2 = keys()[1];
-        assertMapContents(table().getBatchByPk(List.of(key1, key2)));
+        assertThat(table().getBatchByPk(List.of(key1, key2))).trimmed().isEmpty();
 
         E entity1 = createEntity(key1);
         assertThat(table().insert(entity1)).isEqualTo(1);
-        assertMapContents(table().getBatchByPk(List.of(key1, key2)), key1, entity1);
+        assertThat(table().getBatchByPk(List.of(key1, key2))).trimmed().containsExactly(key1, entity1);
 
         E entity2 = createEntity(key2);
         assertThat(table().insert(entity2)).isEqualTo(1);
-        assertMapContents(table().getBatchByPk(List.of(key1, key2)), key1, entity1, key2, entity2);
+        assertThat(table().getBatchByPk(List.of(key1, key2))).containsExactly(key1, entity1, key2, entity2);
     }
 
     /** {@link TableObj#insert(Object)} **/
