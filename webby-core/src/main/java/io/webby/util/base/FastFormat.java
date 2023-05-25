@@ -25,45 +25,25 @@ public class FastFormat {
     }
 
     public static @NotNull String format(@NotNull String pattern, @Nullable Object @NotNull ... args) {
-        StringBuilder builder = new StringBuilder(pattern.length());  // better estimate?
-
-        int prev = -1;
-        int argCounter = 0;
-        boolean skipOne = false;
-
-        for (int i = 0, len = pattern.length(); i < len; i++) {
-            char value = pattern.charAt(i);
-
-            if (skipOne) {
-                skipOne = false;
-                builder.append(value);
-                prev = -1;
-                continue;
-            }
-
-            String replace = null;
-            if (prev == '%') {
-                if (value == 's') {
-                    assert argCounter < args.length : "Invalid args: pattern=%s args=%s".formatted(pattern, args);
-                    replace = String.valueOf(args[argCounter++]);
-                } else if (value == '%') {
-                    replace = "%";
-                    skipOne = true;
-                } else {
-                    throw new IllegalArgumentException("Unrecognized pattern: " + pattern);
-                }
-            }
-
-            if (replace != null) {
-                builder.ensureCapacity(len - i + replace.length());
-                builder.append(replace);
-            } else if (value != '%') {
-                builder.append(value);
-            }
-
-            prev = value;
+        int total = 0;
+        for (int i = 0; i < args.length; i++) {
+            String s = String.valueOf(args[i]);
+            args[i] = s;
+            total += s.length();
         }
 
-        return builder.toString();
+        StringBuilder builder = new StringBuilder(pattern.length() + total - 2 * args.length);
+        int prevStart = 0;
+        for (Object arg : args) {
+            int newStart = pattern.indexOf("%s", prevStart);
+            if (newStart == -1) {
+                break;
+            }
+            builder.append(pattern, prevStart, newStart);
+            builder.append(arg.toString());
+            prevStart = newStart + 2;
+        }
+        builder.append(pattern, prevStart, pattern.length());
+        return builder.toString().replace("%%", "%");
     }
 }
