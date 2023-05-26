@@ -3,6 +3,7 @@ package io.webby.db.event;
 import com.google.common.collect.ArrayListMultimap;
 import com.google.common.collect.ImmutableMultimap;
 import com.google.common.collect.Multimap;
+import com.google.errorprone.annotations.CanIgnoreReturnValue;
 import com.google.inject.Injector;
 import io.webby.app.AppLifetime;
 import io.webby.app.AppSettings;
@@ -43,11 +44,10 @@ public class KeyEventStoreIntegrationTest {
 
         EventStoreOptions<Integer, String> options = EventStoreOptions.of("foo", Integer.class, String.class);
         try (KeyEventStore<Integer, String> store = factory.getEventStore(options)) {
-            assertCleanState(store);
+            assertStore(store).isCleanState();
 
             store.flush(FlushMode.FULL_CLEAR);
-            assertEmptyCache(store);
-            assertEqualsTo(store, multi());
+            assertStore(store).isCleanState();
         }
     }
 
@@ -58,33 +58,31 @@ public class KeyEventStoreIntegrationTest {
 
         EventStoreOptions<Integer, String> options = EventStoreOptions.of("foo", Integer.class, String.class);
         try (KeyEventStore<Integer, String> store = factory.getEventStore(options)) {
-            assertCleanState(store);
+            assertStore(store).isCleanState();
 
             store.append(1, "a");
-            assertEqualsTo(store, multi(array(1, "a")));
+            assertStore(store).isEqualTo(array(1, "a"));
 
             store.append(2, "b");
-            assertEqualsTo(store, multi(array(1, "a"), array(2, "b")));
+            assertStore(store).isEqualTo(array(1, "a"), array(2, "b"));
 
             store.append(1, "c");
-            assertEqualsTo(store, multi(array(1, "a", "c"), array(2, "b")));
+            assertStore(store).isEqualTo(array(1, "a", "c"), array(2, "b"));
 
             store.append(3, "d");
-            assertEqualsTo(store, multi(array(1, "a", "c"), array(2, "b"), array(3, "d")));
+            assertStore(store).isEqualTo(array(1, "a", "c"), array(2, "b"), array(3, "d"));
 
             store.flush(FlushMode.FULL_CLEAR);
-            assertEmptyCache(store);
-            assertEqualsTo(store, multi(array(1, "a", "c"), array(2, "b"), array(3, "d")));
+            assertStore(store).isEmptyCache().isEqualTo(array(1, "a", "c"), array(2, "b"), array(3, "d"));
 
             store.append(1, "e");
-            assertEqualsTo(store, multi(array(1, "a", "c", "e"), array(2, "b"), array(3, "d")));
+            assertStore(store).isEqualTo(array(1, "a", "c", "e"), array(2, "b"), array(3, "d"));
 
             store.append(4, "f");
-            assertEqualsTo(store, multi(array(1, "a", "c", "e"), array(2, "b"), array(3, "d"), array(4, "f")));
+            assertStore(store).isEqualTo(array(1, "a", "c", "e"), array(2, "b"), array(3, "d"), array(4, "f"));
 
             store.flush(FlushMode.FULL_CLEAR);
-            assertEmptyCache(store);
-            assertEqualsTo(store, multi(array(1, "a", "c", "e"), array(2, "b"), array(3, "d"), array(4, "f")));
+            assertStore(store).isEmptyCache().isEqualTo(array(1, "a", "c", "e"), array(2, "b"), array(3, "d"), array(4, "f"));
         }
     }
 
@@ -95,24 +93,22 @@ public class KeyEventStoreIntegrationTest {
 
         EventStoreOptions<Integer, String> options = EventStoreOptions.of("foo", Integer.class, String.class);
         try (KeyEventStore<Integer, String> store = factory.getEventStore(options)) {
-            assertCleanState(store);
+            assertStore(store).isCleanState();
 
             store.append(1, "a");
-            assertEqualsTo(store, multi(array(1, "a")));
+            assertStore(store).isEqualTo(array(1, "a"));
 
             store.append(1, "b");
-            assertEqualsTo(store, multi(array(1, "a", "b")));
+            assertStore(store).isEqualTo(array(1, "a", "b"));
 
             store.flush(FlushMode.FULL_CLEAR);
-            assertEmptyCache(store);
-            assertEqualsTo(store, multi(array(1, "a", "b")));
+            assertStore(store).isEmptyCache().isEqualTo(array(1, "a", "b"));
 
             store.append(1, "c");
-            assertEqualsTo(store, multi(array(1, "a", "b", "c")));
+            assertStore(store).isEqualTo(array(1, "a", "b", "c"));
 
             store.flush(FlushMode.FULL_CLEAR);
-            assertEmptyCache(store);
-            assertEqualsTo(store, multi(array(1, "a", "b", "c")));
+            assertStore(store).isEmptyCache().isEqualTo(array(1, "a", "b", "c"));
         }
     }
 
@@ -123,33 +119,33 @@ public class KeyEventStoreIntegrationTest {
 
         EventStoreOptions<Integer, String> options = EventStoreOptions.of("ops", Integer.class, String.class);
         try (KeyEventStore<Integer, String> store = factory.getEventStore(options)) {
-            assertCleanState(store);
+            assertStore(store).isCleanState();
 
             store.append(1, "a");
-            assertEqualsTo(store, multi(array(1, "a")));
+            assertStore(store).isEqualTo(array(1, "a"));
 
             store.append(2, "b");
-            assertEqualsTo(store, multi(array(1, "a"), array(2, "b")));
+            assertStore(store).isEqualTo(array(1, "a"), array(2, "b"));
 
             store.append(1, "c");
-            assertEqualsTo(store, multi(array(1, "a", "c"), array(2, "b")));
+            assertStore(store).isEqualTo(array(1, "a", "c"), array(2, "b"));
 
             store.deleteAll(1);
-            assertEqualsTo(store, multi(array(2, "b")));
+            assertStore(store).isEqualTo(array(2, "b"));
 
             store.flush(FlushMode.FULL_CLEAR);
-            assertEmptyCache(store);
-            assertEqualsTo(store, multi(array(2, "b")));
+            assertStore(store).isEmptyCache();
+            assertStore(store).isEqualTo(array(2, "b"));
 
             store.append(1, "e");
-            assertEqualsTo(store, multi(array(1, "e"), array(2, "b")));
+            assertStore(store).isEqualTo(array(1, "e"), array(2, "b"));
 
             store.deleteAll(1);
-            assertEqualsTo(store, multi(array(2, "b")));
+            assertStore(store).isEqualTo(array(2, "b"));
 
             store.flush(FlushMode.FULL_CLEAR);
-            assertEmptyCache(store);
-            assertEqualsTo(store, multi(array(2, "b")));
+            assertStore(store).isEmptyCache();
+            assertStore(store).isEqualTo(array(2, "b"));
         }
     }
 
@@ -164,20 +160,20 @@ public class KeyEventStoreIntegrationTest {
 
         EventStoreOptions<Integer, String> options = EventStoreOptions.of("many", Integer.class, String.class);
         try (KeyEventStore<Integer, String> store = factory.getEventStore(options)) {
-            assertCleanState(store);
+            assertStore(store).isCleanState();
 
             for (int i = 1; i <= size; i++) {
                 store.append(1, "12345678");
                 if (i % flushEvery == 0) {
                     store.flush(FlushMode.FULL_CLEAR);
-                    assertEmptyCache(store);
+                    assertStore(store).isEmptyCache();
                 }
             }
 
             Multimap<Integer, String> expected = new ImmutableMultimap.Builder<Integer, String>()
                 .putAll(1, Collections.nCopies(size, "12345678"))
                 .build();
-            assertEqualsTo(store, expected);
+            assertStore(store).isEqualTo(expected);
         }
     }
 
@@ -192,13 +188,13 @@ public class KeyEventStoreIntegrationTest {
             EventStoreOptions.of("life", Integer.class, String.class)
         );
 
-        assertCleanState(store);
+        assertStore(store).isCleanState();
         store.append(1, "a");
         store.append(2, "b");
         store.append(3, "c");
 
         lifetime.terminate();
-        assertEmptyCache(store);
+        assertStore(store).isEmptyCache();
     }
 
     private static @NotNull Injector setup(int batchSize) {
@@ -224,36 +220,51 @@ public class KeyEventStoreIntegrationTest {
         return Testing.testStartup(settings, SQL::setUp, SQL.combinedTestingModule());
     }
 
-    @SuppressWarnings("unchecked")
-    private static <K, V> @NotNull Multimap<K, V> multi(@NotNull Object[] @NotNull ... entries) {
-        Multimap<K, V> result = ArrayListMultimap.create();
-        for (Object[] entry : entries) {
-            assert entry.length > 0;
-            result.putAll((K) entry[0], Arrays.stream(entry).skip(1).map(i -> (V) i).toList());
+    @CanIgnoreReturnValue
+    private static <K, V> @NotNull KeyEventStoreSubject<K, V> assertStore(@NotNull KeyEventStore<K, V> store) {
+        return new KeyEventStoreSubject<>(store);
+    }
+
+    @CanIgnoreReturnValue
+    private record KeyEventStoreSubject<K, V>(@NotNull KeyEventStore<K, V> store) {
+        public @NotNull KeyEventStoreSubject<K, V> isEqualTo(@NotNull Multimap<K, V> expected) {
+            for (K key : expected.keySet()) {
+                assertThat(store.getAll(key)).containsExactlyElementsIn(expected.get(key));
+            }
+            return this;
         }
-        return result;
-    }
 
-    private static <K, V> void assertEqualsTo(@NotNull KeyEventStore<K, V> store, @NotNull Multimap<K, V> expected) {
-        for (K key : expected.keySet()) {
-            assertThat(store.getAll(key)).containsExactlyElementsIn(expected.get(key));
+        public @NotNull KeyEventStoreSubject<K, V> isEqualTo(@NotNull Object[] @NotNull ... entries) {
+            return isEqualTo(multi(entries));
         }
-    }
 
-    private static <K, V> void assertCleanState(@NotNull KeyEventStore<K, V> store) {
-        assertEmptyCache(store);
-        assertUnderlyingDbEmpty(store);
-    }
-
-    private static <K, V> void assertEmptyCache(@NotNull KeyEventStore<K, V> store) {
-        if (store instanceof CachingKvdbEventStore<?, ?> cachingStore) {
-            assertThat(cachingStore.cache()).isEmpty();
+        public @NotNull KeyEventStoreSubject<K, V> isCleanState() {
+            return isEmptyCache().isUnderlyingDbEmpty();
         }
-    }
 
-    private static <K, V> void assertUnderlyingDbEmpty(@NotNull KeyEventStore<K, V> store) {
-        if (store instanceof CachingKvdbEventStore<?, ?> cachingStore) {
-            assertThat(cachingStore.db().keys()).isEmpty();
+        public @NotNull KeyEventStoreSubject<K, V> isEmptyCache() {
+            if (store instanceof CachingKvdbEventStore<?, ?> cachingStore) {
+                assertThat(cachingStore.cache()).isEmpty();
+            }
+            return this;
+        }
+
+        public @NotNull KeyEventStoreSubject<K, V> isUnderlyingDbEmpty() {
+            if (store instanceof CachingKvdbEventStore<?, ?> cachingStore) {
+                assertThat(cachingStore.db().isEmpty()).isTrue();
+                assertThat(cachingStore.db().keys()).isEmpty();
+            }
+            return this;
+        }
+
+        @SuppressWarnings("unchecked")
+        private static <K, V> @NotNull Multimap<K, V> multi(@NotNull Object[] @NotNull ... entries) {
+            Multimap<K, V> result = ArrayListMultimap.create();
+            for (Object[] entry : entries) {
+                assert entry.length > 0;
+                result.putAll((K) entry[0], Arrays.stream(entry).skip(1).map(i -> (V) i).toList());
+            }
+            return result;
         }
     }
 }
