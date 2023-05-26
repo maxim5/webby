@@ -41,7 +41,8 @@ public class KeyEventStoreIntegrationTest {
     public void simple_empty_store() {
         KeyEventStoreFactory factory = Testing.testStartup().getInstance(KeyEventStoreFactory.class);
 
-        try (KeyEventStore<Integer, String> store = factory.getEventStore(EventStoreOptions.of("foo", Integer.class, String.class))) {
+        EventStoreOptions<Integer, String> options = EventStoreOptions.of("foo", Integer.class, String.class);
+        try (KeyEventStore<Integer, String> store = factory.getEventStore(options)) {
             assertCleanState(store);
 
             store.flush(FlushMode.FULL_CLEAR);
@@ -55,7 +56,8 @@ public class KeyEventStoreIntegrationTest {
     public void simple_append_and_flush(int batchSize) {
         KeyEventStoreFactory factory = setup(batchSize).getInstance(KeyEventStoreFactory.class);
 
-        try (KeyEventStore<Integer, String> store = factory.getEventStore(EventStoreOptions.of("foo", Integer.class, String.class))) {
+        EventStoreOptions<Integer, String> options = EventStoreOptions.of("foo", Integer.class, String.class);
+        try (KeyEventStore<Integer, String> store = factory.getEventStore(options)) {
             assertCleanState(store);
 
             store.append(1, "a");
@@ -91,7 +93,8 @@ public class KeyEventStoreIntegrationTest {
     public void simple_append_one_key_and_flush(int batchSize) {
         KeyEventStoreFactory factory = setup(batchSize).getInstance(KeyEventStoreFactory.class);
 
-        try (KeyEventStore<Integer, String> store = factory.getEventStore(EventStoreOptions.of("foo", Integer.class, String.class))) {
+        EventStoreOptions<Integer, String> options = EventStoreOptions.of("foo", Integer.class, String.class);
+        try (KeyEventStore<Integer, String> store = factory.getEventStore(options)) {
             assertCleanState(store);
 
             store.append(1, "a");
@@ -118,7 +121,8 @@ public class KeyEventStoreIntegrationTest {
     public void simple_operations(DbType dbType) {
         KeyEventStoreFactory factory = setup(dbType).getInstance(KeyEventStoreFactory.class);
 
-        try (KeyEventStore<Integer, String> store = factory.getEventStore(EventStoreOptions.of("ops", Integer.class, String.class))) {
+        EventStoreOptions<Integer, String> options = EventStoreOptions.of("ops", Integer.class, String.class);
+        try (KeyEventStore<Integer, String> store = factory.getEventStore(options)) {
             assertCleanState(store);
 
             store.append(1, "a");
@@ -158,7 +162,8 @@ public class KeyEventStoreIntegrationTest {
         int size = Math.min(100000, maxSize);
         int flushEvery = size / 10;
 
-        try (KeyEventStore<Integer, String> store = factory.getEventStore(EventStoreOptions.of("many", Integer.class, String.class))) {
+        EventStoreOptions<Integer, String> options = EventStoreOptions.of("many", Integer.class, String.class);
+        try (KeyEventStore<Integer, String> store = factory.getEventStore(options)) {
             assertCleanState(store);
 
             for (int i = 1; i <= size; i++) {
@@ -170,8 +175,8 @@ public class KeyEventStoreIntegrationTest {
             }
 
             Multimap<Integer, String> expected = new ImmutableMultimap.Builder<Integer, String>()
-                    .putAll(1, Collections.nCopies(size, "12345678"))
-                    .build();
+                .putAll(1, Collections.nCopies(size, "12345678"))
+                .build();
             assertEqualsTo(store, expected);
         }
     }
@@ -208,8 +213,8 @@ public class KeyEventStoreIntegrationTest {
         AppSettings settings = Testing.defaultAppSettings();
         settings.modelFilter().setPackagesOf(Testing.CORE_MODELS);
         settings.storageSettings()
-                .enableKeyValue(KeyValueSettings.of(dbType, TEMP_DIRECTORY.getCurrentTempDir()))
-                .enableSql(SQL.settings());
+            .enableKeyValue(KeyValueSettings.of(dbType, TEMP_DIRECTORY.getCurrentTempDir()))
+            .enableSql(SQL.settings());
         settings.setProfileMode(false);  // not testing TrackingDbAdapter by default
 
         settings.setProperty("db.event.store.flush.batch.size", 1);
