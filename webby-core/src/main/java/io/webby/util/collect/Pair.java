@@ -56,6 +56,14 @@ public record Pair<U, V>(U first, V second) implements Map.Entry<U, V> {
         return convert.applyAsDouble(first, second);
     }
 
+    public boolean test(@NotNull BiPredicate<U, V> convert) {
+        return convert.test(first, second);
+    }
+
+    public void apply(@NotNull BiConsumer<U, V> action) {
+        action.accept(first, second);
+    }
+
     @Override
     public U getKey() {
         return first;

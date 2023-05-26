@@ -98,6 +98,15 @@ public class PairTest {
         assertThat(Pair.of(null, null).mapToDouble(Objects::hashCode)).isEqualTo(Objects.hashCode(null, null));
     }
 
+    @Test
+    public void pair_test() {
+        assertThat(Pair.of(1, 1).test((x, y) -> x - y == 0)).isTrue();
+        assertThat(Pair.of(1, 2).test((x, y) -> x - y == 0)).isFalse();
+        assertThat(Pair.of(1, null).test((x, y) -> x != null && y == null)).isTrue();
+        assertThat(Pair.of(null, 1).test((x, y) -> x == null && y != null)).isTrue();
+        assertThat(Pair.of(null, null).test((x, y) -> x == null && y == null)).isTrue();
+    }
+
     private static <U, V> void assertPair(@NotNull Pair<U, V> pair, @Nullable Object first, @Nullable Object second) {
         assertThat(pair.first()).isEqualTo(first);
         assertThat(pair.getKey()).isEqualTo(first);
