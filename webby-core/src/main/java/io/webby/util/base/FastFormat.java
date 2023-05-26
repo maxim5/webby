@@ -4,6 +4,32 @@ import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
 public class FastFormat {
+    private final String pattern;
+
+    public FastFormat(@NotNull String pattern) {
+        this.pattern = pattern;
+    }
+
+    public static @NotNull FastFormat ff(@NotNull String pattern) {
+        return new FastFormat(pattern);
+    }
+
+    public @NotNull String formatted(@Nullable Object arg) {
+        return format(pattern, arg);
+    }
+
+    public @NotNull String formatted(int arg) {
+        return format(pattern, arg);
+    }
+
+    public @NotNull String formatted(long arg) {
+        return format(pattern, arg);
+    }
+
+    public @NotNull String formatted(boolean arg) {
+        return format(pattern, arg);
+    }
+
     public static @NotNull String format(@NotNull String pattern, @Nullable Object arg) {
         return pattern.replace("%s", String.valueOf(arg));
     }
