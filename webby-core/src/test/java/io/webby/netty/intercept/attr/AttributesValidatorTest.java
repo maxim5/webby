@@ -7,7 +7,6 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.RegisterExtension;
 
 import static com.google.common.truth.Truth.assertThat;
-import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 
 public class AttributesValidatorTest {
@@ -43,7 +42,7 @@ public class AttributesValidatorTest {
     }
 
     private static void assertPositions(int expected, int... positions) {
-        assertEquals(expected, AttributesValidator.validatePositions(positions, value -> null));
+        assertThat(AttributesValidator.validatePositions(positions, value -> null)).isEqualTo(expected);
     }
 
     private static void assertPositionsThrows(int... positions) {

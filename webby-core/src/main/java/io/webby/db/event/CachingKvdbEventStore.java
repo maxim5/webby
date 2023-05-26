@@ -34,9 +34,9 @@ public class CachingKvdbEventStore<K, E> implements KeyEventStore<K, E>, HasCach
                                  int cacheSizeHardLimit,
                                  int flushBatchSize) {
         assert cacheSizeSoftLimit > 0 :
-                "Invalid cache size limits: soft=%d hard=%d".formatted(cacheSizeSoftLimit, cacheSizeHardLimit);
+            "Invalid cache size limits: soft=%d hard=%d".formatted(cacheSizeSoftLimit, cacheSizeHardLimit);
         assert cacheSizeHardLimit >= cacheSizeSoftLimit :
-                "Invalid cache size limits: soft=%d hard=%d".formatted(cacheSizeSoftLimit, cacheSizeHardLimit);
+            "Invalid cache size limits: soft=%d hard=%d".formatted(cacheSizeSoftLimit, cacheSizeHardLimit);
         this.db = db;
         this.compacter = compacter;
         this.cacheSizeSoftLimit = cacheSizeSoftLimit;
@@ -98,12 +98,12 @@ public class CachingKvdbEventStore<K, E> implements KeyEventStore<K, E>, HasCach
                 List<K> keys = allKeys.subList(i, i + batch);
                 List<@Nullable List<E>> values = db.getAll(keys);
                 assert keys.size() == values.size() :
-                        "Internal error: keys/values mismatch: keys=%s values=%s".formatted(keys, values);
+                    "Internal error: keys/values mismatch: keys=%s values=%s".formatted(keys, values);
                 List<List<E>> combined = BiStream.zip(keys, values)
-                        .mapKeys(cache::get)
-                        .mapKeys(compacter::compactInMemory)
-                        .mapToObj(CachingKvdbEventStore::concatToList)
-                        .toList();
+                    .mapKeys(cache::get)
+                    .mapKeys(compacter::compactInMemory)
+                    .mapToObj(CachingKvdbEventStore::concatToList)
+                    .toList();
                 db.putAll(keys, combined);
             }
             cache.clear();

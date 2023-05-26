@@ -18,7 +18,8 @@ import static com.google.common.truth.Truth.assertThat;
 import static io.webby.testing.orm.MockingJdbc.assertThat;
 import static io.webby.testing.orm.MockingJdbc.mockConnection;
 import static io.webby.testing.orm.MockingJdbc.mockResultSet;
-import static org.junit.jupiter.api.Assertions.*;
+import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 // FIX[minor]: more tests: force .commit() or .rollback() to fail
 public class InTransactionTest {
@@ -48,7 +49,7 @@ public class InTransactionTest {
 
         try (CalledOnce<QueryRunner, SQLException> calledOnce = new CalledOnce<>()) {
             tx.run(calledOnce.alsoCall(runner ->
-                assertFalse(mockedConnection.getAutoCommit())
+                assertThat(mockedConnection.getAutoCommit()).isFalse()
             ));
         }
 
@@ -61,7 +62,7 @@ public class InTransactionTest {
 
         try (CalledOnce<QueryRunner, SQLException> calledOnce = new CalledOnce<>()) {
             tx.run(calledOnce.alsoCall(runner ->
-                assertFalse(mockedConnection.getAutoCommit())
+                assertThat(mockedConnection.getAutoCommit()).isFalse()
             ));
         }
 

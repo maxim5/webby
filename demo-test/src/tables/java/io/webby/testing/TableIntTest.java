@@ -12,13 +12,14 @@ import org.junit.jupiter.api.Test;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.Optional;
 
 import static com.google.common.truth.Truth.assertThat;
-import static io.webby.testing.AssertPrimitives.assertThat;
+import static com.google.common.truth.Truth8.assertThat;
+import static io.webby.testing.AssertPrimitives.assertArray;
+import static io.webby.testing.AssertPrimitives.assertMap;
 import static io.webby.testing.TestingBasics.array;
-import static io.webby.testing.TestingPrimitives.newIntObjectMap;
-import static org.junit.jupiter.api.Assertions.*;
+import static org.junit.jupiter.api.Assertions.assertNotEquals;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 
 public interface TableIntTest<E, T extends TableInt<E>> extends PrimaryKeyTableTest<Integer, E, T> {
     @Override
@@ -37,13 +38,13 @@ public interface TableIntTest<E, T extends TableInt<E>> extends PrimaryKeyTableT
         E entity = createEntity(key);
 
         assertThat(table().getByPkOrNull(key)).isNull();
+        assertThat(table().getOptionalByPk(key)).isEmpty();
         assertThrows(NullPointerException.class, () -> table().getByPkOrDie(key));
-        assertThat(table().getOptionalByPk(key)).isEqualTo(Optional.empty());
 
-        assertEquals(1, table().insert(entity));
+        assertThat(table().insert(entity)).isEqualTo(1);
         assertThat(table().getByPkOrNull(key)).isEqualTo(entity);
         assertThat(table().getByPkOrDie(key)).isEqualTo(entity);
-        assertThat(table().getOptionalByPk(key)).isEqualTo(Optional.of(entity));
+        assertThat(table().getOptionalByPk(key)).hasValue(entity);
     }
 
     @Test
@@ -52,15 +53,15 @@ public interface TableIntTest<E, T extends TableInt<E>> extends PrimaryKeyTableT
         int key1 = keys()[0];
         int key2 = keys()[1];
         IntArrayList batch = IntArrayList.from(key1, key2);
-        assertThat(table().getBatchByPk(batch)).isEmpty();
+        assertMap(table().getBatchByPk(batch)).isEmpty();
 
         E entity1 = createEntity(key1);
-        assertEquals(1, table().insert(entity1));
-        assertEquals(table().getBatchByPk(batch), newIntObjectMap(key1, entity1));
+        assertThat(table().insert(entity1)).isEqualTo(1);
+        assertMap(table().getBatchByPk(batch)).containsExactly(key1, entity1);
 
         E entity2 = createEntity(key2);
-        assertEquals(1, table().insert(entity2));
-        assertEquals(table().getBatchByPk(batch), newIntObjectMap(key1, entity1, key2, entity2));
+        assertThat(table().insert(entity2)).isEqualTo(1);
+        assertMap(table().getBatchByPk(batch)).containsExactly(key1, entity1, key2, entity2);
     }
 
     @Test
@@ -72,17 +73,17 @@ public interface TableIntTest<E, T extends TableInt<E>> extends PrimaryKeyTableT
         E entity2 = createEntity(key2);
         table().insertBatch(List.of(entity1, entity2));
 
-        assertThat(table().fetchPks(Where.of(Shortcuts.TRUE))).containsExactlyNoOrder(key1, key2);
-        assertThat(table().fetchPks(Where.of(Shortcuts.lookupBy(findPkColumnOrDie(), key1)))).containsExactlyNoOrder(key1);
-        assertThat(table().fetchPks(Where.of(Shortcuts.lookupBy(findPkColumnOrDie(), key2)))).containsExactlyNoOrder(key2);
-        assertThat(table().fetchPks(Where.of(Shortcuts.FALSE))).containsExactlyNoOrder();
+        assertArray(table().fetchPks(Where.of(Shortcuts.TRUE))).containsExactlyNoOrder(key1, key2);
+        assertArray(table().fetchPks(Where.of(Shortcuts.lookupBy(findPkColumnOrDie(), key1)))).containsExactlyNoOrder(key1);
+        assertArray(table().fetchPks(Where.of(Shortcuts.lookupBy(findPkColumnOrDie(), key2)))).containsExactlyNoOrder(key2);
+        assertArray(table().fetchPks(Where.of(Shortcuts.FALSE))).containsExactlyNoOrder();
     }
 
     @Test
     default void insert_auto_id() {
         E entity = createEntity(IntAutoIdModel.AUTO_ID, 0);
         int autoId = table().insertAutoIncPk(entity);
-        assertTrue(autoId > 0);
+        assertThat(autoId > 0).isTrue();
         entity = copyEntityWithId(entity, autoId);
 
         assertTableCount(1);
@@ -95,7 +96,7 @@ public interface TableIntTest<E, T extends TableInt<E>> extends PrimaryKeyTableT
         Integer key = 1000;
         E entity = createEntity(key, 0);
         int autoId = table().insertAutoIncPk(entity);
-        assertTrue(autoId > 0);
+        assertThat(autoId > 0).isTrue();
         assertNotEquals(autoId, key);
         entity = copyEntityWithId(entity, autoId);
 
@@ -112,7 +113,7 @@ public interface TableIntTest<E, T extends TableInt<E>> extends PrimaryKeyTableT
         for (int version = 0; version < num; version++) {
             E entity = createEntity(IntAutoIdModel.AUTO_ID, version);
             int autoId = table().insertAutoIncPk(entity);
-            assertTrue(autoId > 0);
+            assertThat(autoId > 0).isTrue();
             entities.put(autoId, copyEntityWithId(entity, autoId));
         }
 
@@ -131,7 +132,7 @@ public interface TableIntTest<E, T extends TableInt<E>> extends PrimaryKeyTableT
 
         E entity = createEntity(keys()[0], 1);
         Where where = Where.of(CompareType.EQ.compare(findPkColumnOrDie(), Shortcuts.var(keys()[0])));
-        assertEquals(1, table().updateWhere(entity, where));
+        assertThat(table().updateWhere(entity, where)).isEqualTo(1);
 
         assertTableCount(1);
         assertTableContains(keys()[0], entity);
@@ -144,8 +145,8 @@ public interface TableIntTest<E, T extends TableInt<E>> extends PrimaryKeyTableT
         assumeKeys(1);
         int key = keys()[0];
         E entity = createEntity(key);
-        assertEquals(table().intKeyOf(entity), key);
-        assertEquals(table().keyOf(entity), key);
+        assertThat(table().intKeyOf(entity)).isEqualTo(key);
+        assertThat(table().keyOf(entity)).isEqualTo(key);
     }
 
     @NotNull E copyEntityWithId(@NotNull E entity, int autoId);

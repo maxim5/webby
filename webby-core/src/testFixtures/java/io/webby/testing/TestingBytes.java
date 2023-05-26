@@ -1,5 +1,6 @@
 package io.webby.testing;
 
+import com.google.common.truth.Truth;
 import io.netty.buffer.ByteBuf;
 import io.netty.buffer.ByteBufHolder;
 import io.netty.buffer.DuplicatedByteBuf;
@@ -13,7 +14,6 @@ import java.util.Arrays;
 import java.util.List;
 
 import static io.webby.util.base.EasyCast.castAny;
-import static org.junit.jupiter.api.Assertions.assertEquals;
 
 public class TestingBytes {
     public static final Charset CHARSET = Testing.Internals.charset();
@@ -65,20 +65,30 @@ public class TestingBytes {
         return asLines(asStringOrNull(buf));
     }
 
-    public static void assertBytes(byte @Nullable [] bytes, @Nullable String expected) {
-        assertByteBufs(asByteBufOrNull(bytes), asByteBufOrNull(expected));
+    public static @NotNull ByteBufSubject assertBytes(byte @Nullable [] bytes) {
+        return assertBytes(asByteBufOrNull(bytes));
     }
 
-    public static void assertBytes(byte @Nullable [] bytes, byte @Nullable [] expected) {
-        assertByteBufs(asByteBufOrNull(bytes), asByteBufOrNull(expected));
+    public static @NotNull ByteBufSubject assertBytes(@Nullable ByteBuf byteBuf) {
+        return new ByteBufSubject(byteBuf);
     }
 
-    public static void assertByteBuf(@Nullable ByteBuf buf, @Nullable String expected) {
-        assertEquals(expected, asStringOrNull(buf));
-    }
+    public record ByteBufSubject(@Nullable ByteBuf byteBuf) {
+        public void isNull() {
+            Truth.assertThat(byteBuf).isNull();
+        }
 
-    public static void assertByteBufs(@Nullable ByteBuf buf, @Nullable ByteBuf expected) {
-        assertEquals(asReadableOrNull(expected), asReadableOrNull(buf));
+        public void isEqualTo(@Nullable ByteBuf expected) {
+            Truth.assertThat(asReadableOrNull(byteBuf)).isEqualTo(asReadableOrNull(expected));
+        }
+
+        public void isEqualTo(@Nullable String expected) {
+            isEqualTo(asByteBufOrNull(expected));
+        }
+
+        public void isEqualTo(byte @Nullable [] expected) {
+            isEqualTo(asByteBufOrNull(expected));
+        }
     }
 
     public static @NotNull ByteBuf asReadable(@Nullable ByteBuf buf) {

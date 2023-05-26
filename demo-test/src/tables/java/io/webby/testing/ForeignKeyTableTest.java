@@ -7,7 +7,6 @@ import org.junit.jupiter.params.provider.ValueSource;
 
 import static com.google.common.truth.Truth.assertThat;
 import static io.webby.orm.api.ReadFollow.*;
-import static org.junit.jupiter.api.Assertions.assertEquals;
 
 public interface ForeignKeyTableTest<K, E, T extends TableObj<K, E>> extends PrimaryKeyTableTest<K, E, T> {
     @ParameterizedTest(name = "version = {0}")
@@ -21,13 +20,13 @@ public interface ForeignKeyTableTest<K, E, T extends TableObj<K, E>> extends Pri
         assertThat(table.fetchAll()).isEmpty();
 
         E shallow = createEntity(keys()[0], version);
-        assertEquals(1, table.insert(shallow));
+        assertThat(table.insert(shallow)).isEqualTo(1);
         assertTableCount(1);
         assertTableContains(keys()[0], shallow);
         assertThat(table.fetchAll()).containsExactly(shallow);
 
         enrichOneLevel(shallow);
-        assertEquals(shallow, table.getByPkOrNull(keys()[0]));
+        assertThat(table.getByPkOrNull(keys()[0])).isEqualTo(shallow);
         assertThat(table.fetchAll()).containsExactly(shallow);
     }
 
@@ -42,11 +41,11 @@ public interface ForeignKeyTableTest<K, E, T extends TableObj<K, E>> extends Pri
         assertThat(table.fetchAll()).isEmpty();
 
         E shallow = createEntity(keys()[0], version);
-        assertEquals(1, table.insert(shallow));
+        assertThat(table.insert(shallow)).isEqualTo(1);
         assertTableCount(1);
 
         E rich = enrichOneLevel(shallow);
-        assertEquals(rich, table.getByPkOrNull(keys()[0]));
+        assertThat(table.getByPkOrNull(keys()[0])).isEqualTo(rich);
         assertThat(table.fetchAll()).containsExactly(rich);
     }
 
@@ -61,11 +60,11 @@ public interface ForeignKeyTableTest<K, E, T extends TableObj<K, E>> extends Pri
         assertThat(table.fetchAll()).isEmpty();
 
         E shallow = createEntity(keys()[0], version);
-        assertEquals(1, table.insert(shallow));
+        assertThat(table.insert(shallow)).isEqualTo(1);
         assertTableCount(1);
 
         E rich = enrichAllLevels(shallow);
-        assertEquals(rich, table.getByPkOrNull(keys()[0]));
+        assertThat(table.getByPkOrNull(keys()[0])).isEqualTo(rich);
         assertThat(table.fetchAll()).containsExactly(rich);
     }
 

@@ -1,6 +1,8 @@
 package io.webby.testing;
 
 import com.google.common.io.BaseEncoding;
+import com.google.errorprone.annotations.CanIgnoreReturnValue;
+import com.google.errorprone.annotations.CheckReturnValue;
 import okhttp3.MediaType;
 import okhttp3.Request;
 import okhttp3.Response;
@@ -15,36 +17,53 @@ import static com.google.common.truth.Truth.assertThat;
 import static org.junit.jupiter.api.Assertions.fail;
 
 public class OkAsserts {
-    public static void assertClientCode(@NotNull Response response, int code) {
-        assertThat(response.code()).isEqualTo(code);
+    @CheckReturnValue
+    public static @NotNull ResponseSubject assertClient(@NotNull Response response) {
+        return new ResponseSubject(response);
     }
 
-    public static void assertClientBody(@NotNull Response response, @Nullable String content) throws IOException {
-        if (content == null) {
-            assertThat(response.body()).isNull();
-        } else {
-            assertThat(response.body()).isNotNull();
-            assertThat(response.peekBody(Long.MAX_VALUE).string()).isEqualTo(content);
+    @CanIgnoreReturnValue
+    public record ResponseSubject(@NotNull Response response) {
+        public @NotNull ResponseSubject is200() {
+            return hasCode(200);
         }
-    }
 
-    public static void assertClientBody(@NotNull Response response, @Nullable Consumer<String> matcher) throws IOException {
-        if (matcher == null) {
-            assertThat(response.body()).isNull();
-        } else {
-            assertThat(response.body()).isNotNull();
-            matcher.accept(response.peekBody(Long.MAX_VALUE).string());
+        public @NotNull ResponseSubject hasCode(int code) {
+            assertThat(response.code()).isEqualTo(code);
+            return this;
         }
-    }
 
-    public static void assertClientBody(@NotNull Response response, long length) throws IOException {
-        ResponseBody body = response.peekBody(Long.MAX_VALUE);
-        assertThat(body).isNotNull();
-        assertThat(body.bytes().length).isEqualTo(length);
-    }
+        public @NotNull ResponseSubject hasBody(@Nullable String content) throws IOException {
+            if (content == null) {
+                assertThat(response.body()).isNull();
+            } else {
+                assertThat(response.body()).isNotNull();
+                assertThat(response.peekBody(Long.MAX_VALUE).string()).isEqualTo(content);
+            }
+            return this;
+        }
 
-    public static void assertClientHeader(@NotNull Response response, @NotNull String name, @NotNull String... expected) {
-        assertThat(response.headers(name)).containsExactlyElementsIn(expected).inOrder();
+        public @NotNull ResponseSubject hasBody(@Nullable Consumer<String> matcher) throws IOException {
+            if (matcher == null) {
+                assertThat(response.body()).isNull();
+            } else {
+                assertThat(response.body()).isNotNull();
+                matcher.accept(response.peekBody(Long.MAX_VALUE).string());
+            }
+            return this;
+        }
+
+        public @NotNull ResponseSubject hasBody(long length) throws IOException {
+            ResponseBody body = response.peekBody(Long.MAX_VALUE);
+            assertThat(body).isNotNull();
+            assertThat(body.bytes().length).isEqualTo(length);
+            return this;
+        }
+
+        public @NotNull ResponseSubject hasHeader(@NotNull String name, @NotNull String... expected) {
+            assertThat(response.headers(name)).containsExactlyElementsIn(expected).inOrder();
+            return this;
+        }
     }
 
     public static @NotNull String describe(@Nullable Request request) {

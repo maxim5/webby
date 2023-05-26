@@ -15,7 +15,6 @@ import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.EnumSource;
 
 import static com.google.common.truth.Truth.assertThat;
-import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 
 @Tag("sql")
@@ -64,10 +63,10 @@ public class SessionManagerIntegrationTest extends BaseCoreIntegrationTest {
         assertThat(session.hasUserId()).isFalse();
 
         SessionModel newSession = manager.addUserOrDie(session, DUMMY_USER);
-        assertEquals(newSession.sessionId(), session.sessionId());
-        assertEquals(newSession.createdAt(), session.createdAt());
-        assertEquals(newSession.userAgent(), session.userAgent());
-        assertEquals(newSession.ipAddress(), session.ipAddress());
+        assertThat(newSession.sessionId()).isEqualTo(session.sessionId());
+        assertThat(newSession.createdAt()).isEqualTo(session.createdAt());
+        assertThat(newSession.userAgent()).isEqualTo(session.userAgent());
+        assertThat(newSession.ipAddress()).isEqualTo(session.ipAddress());
         assertThat(newSession.hasUserId()).isTrue();
 
         String encoded = manager.encodeSessionForCookie(newSession);

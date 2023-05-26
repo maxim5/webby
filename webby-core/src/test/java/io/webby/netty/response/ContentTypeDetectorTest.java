@@ -5,50 +5,50 @@ import org.junit.jupiter.api.Test;
 
 import java.nio.file.Path;
 
-import static io.webby.testing.AssertBasics.assertOneOf;
+import static com.google.common.truth.Truth.assertThat;
 import static io.webby.testing.AssertResponse.ICON_MIME_TYPES;
-import static org.junit.jupiter.api.Assertions.assertEquals;
+import static io.webby.testing.AssertResponse.JS_MIME_TYPES;
 
 public class ContentTypeDetectorTest {
     private final ContentTypeDetector detector = Testing.testStartup().getInstance(ContentTypeDetector.class);
 
     @Test
     public void guessContentType_simple() {
-        assertEquals("image/jpeg", detector.guessContentType(Path.of("foo.jpg")));
-        assertEquals("image/png", detector.guessContentType(Path.of("foo.png")));
-        assertEquals("image/gif", detector.guessContentType(Path.of("foo.gif")));
+        assertThat(detector.guessContentType(Path.of("foo.jpg"))).isEqualTo("image/jpeg");
+        assertThat(detector.guessContentType(Path.of("foo.png"))).isEqualTo("image/png");
+        assertThat(detector.guessContentType(Path.of("foo.gif"))).isEqualTo("image/gif");
 
-        assertEquals("text/css", detector.guessContentType(Path.of("foo.css")));
-        assertEquals("application/xml", detector.guessContentType(Path.of("foo.xml")));
-        assertOneOf(detector.guessContentType(Path.of("foo.js")), "application/javascript", "text/javascript");
+        assertThat(detector.guessContentType(Path.of("foo.css"))).isEqualTo("text/css");
+        assertThat(detector.guessContentType(Path.of("foo.xml"))).isEqualTo("application/xml");
+        assertThat(detector.guessContentType(Path.of("foo.js"))).isIn(JS_MIME_TYPES);
 
-        assertOneOf(detector.guessContentType(Path.of("foo.ico")), ICON_MIME_TYPES);
+        assertThat(detector.guessContentType(Path.of("foo.ico"))).isIn(ICON_MIME_TYPES);
     }
 
     @Test
     public void guessContentType_audio() {
-        assertEquals("audio/mpeg", detector.guessContentType(Path.of("foo.mp3")));
-        assertEquals("audio/mpeg", detector.guessContentType(Path.of("foo.m3a")));
+        assertThat(detector.guessContentType(Path.of("foo.mp3"))).isEqualTo("audio/mpeg");
+        assertThat(detector.guessContentType(Path.of("foo.m3a"))).isEqualTo("audio/mpeg");
     }
 
     @Test
     public void guessContentType_video() {
-        assertEquals("video/mpeg", detector.guessContentType(Path.of("foo.mpg")));
-        assertEquals("video/mpeg", detector.guessContentType(Path.of("foo.mpeg")));
-        assertEquals("video/webm", detector.guessContentType(Path.of("foo.webm")));
-        assertEquals("video/x-flv", detector.guessContentType(Path.of("foo.flv")));
+        assertThat(detector.guessContentType(Path.of("foo.mpg"))).isEqualTo("video/mpeg");
+        assertThat(detector.guessContentType(Path.of("foo.mpeg"))).isEqualTo("video/mpeg");
+        assertThat(detector.guessContentType(Path.of("foo.webm"))).isEqualTo("video/webm");
+        assertThat(detector.guessContentType(Path.of("foo.flv"))).isEqualTo("video/x-flv");
     }
 
     @Test
     public void guessContentType_exclusive_simplemagic() {
-        assertEquals("audio/midi", detector.guessContentType(Path.of("foo.rmi")));
-        assertEquals("image/vnd.adobe.photoshop", detector.guessContentType(Path.of("foo.psd")));
+        assertThat(detector.guessContentType(Path.of("foo.rmi"))).isEqualTo("audio/midi");
+        assertThat(detector.guessContentType(Path.of("foo.psd"))).isEqualTo("image/vnd.adobe.photoshop");
     }
 
     @Test
     public void guessContentType_exclusive_mimeutil() {
-        assertEquals("application/x-iphone", detector.guessContentType(Path.of("foo.iii")));
-        assertEquals("application/x-cocoa", detector.guessContentType(Path.of("foo.cco")));
-        assertEquals("application/x-httpd-imap", detector.guessContentType(Path.of("foo.imap")));
+        assertThat(detector.guessContentType(Path.of("foo.iii"))).isEqualTo("application/x-iphone");
+        assertThat(detector.guessContentType(Path.of("foo.cco"))).isEqualTo("application/x-cocoa");
+        assertThat(detector.guessContentType(Path.of("foo.imap"))).isEqualTo("application/x-httpd-imap");
     }
 }

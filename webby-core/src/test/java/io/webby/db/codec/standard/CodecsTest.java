@@ -7,12 +7,12 @@ import okio.Buffer;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.ValueSource;
 
+import static com.google.common.truth.Truth.assertThat;
 import static io.webby.db.codec.standard.Codecs.*;
 import static io.webby.testing.TestingBytes.CHARSET;
 import static io.webby.testing.TestingBytes.assertBytes;
 import static io.webby.testing.TestingParams.paramToBytes;
 import static io.webby.testing.TestingParams.paramToString;
-import static org.junit.jupiter.api.Assertions.assertEquals;
 
 public class CodecsTest {
     private final Buffer buffer = new Buffer();
@@ -20,51 +20,51 @@ public class CodecsTest {
     @ParameterizedTest
     @ValueSource(ints = {0, 12, -1, Byte.MAX_VALUE, Byte.MIN_VALUE})
     public void primitives_byte(int value) throws Exception {
-        assertEquals(INT8_SIZE, writeByte8(value, buffer.outputStream()));
-        assertEquals(INT8_SIZE, buffer.size());
-        assertEquals("%02x".formatted((byte) value), buffer.snapshot().hex());
-        assertBytes(buffer.snapshot().toByteArray(), new byte[]{(byte) value});
-        assertEquals(value, readByte8(buffer.inputStream()));
+        assertThat(writeByte8(value, buffer.outputStream())).isEqualTo(INT8_SIZE);
+        assertThat(buffer.size()).isEqualTo(INT8_SIZE);
+        assertThat(buffer.snapshot().hex()).isEqualTo("%02x".formatted((byte) value));
+        assertBytes(buffer.snapshot().toByteArray()).isEqualTo(new byte[]{(byte) value});
+        assertThat(readByte8(buffer.inputStream())).isEqualTo(value);
     }
 
     @ParameterizedTest
     @ValueSource(ints = {0, 12, -1, Short.MAX_VALUE, Short.MIN_VALUE})
     public void primitives_short(int value) throws Exception {
-        assertEquals(INT16_SIZE, writeInt16(value, buffer.outputStream()));
-        assertEquals(INT16_SIZE, buffer.size());
-        assertEquals("%04x".formatted((short) value), buffer.snapshot().hex());
-        assertBytes(buffer.snapshot().toByteArray(), Shorts.toByteArray((short) value));
-        assertEquals(value, readInt16(buffer.inputStream()));
+        assertThat(writeInt16(value, buffer.outputStream())).isEqualTo(INT16_SIZE);
+        assertThat(buffer.size()).isEqualTo(INT16_SIZE);
+        assertThat(buffer.snapshot().hex()).isEqualTo("%04x".formatted((short) value));
+        assertBytes(buffer.snapshot().toByteArray()).isEqualTo(Shorts.toByteArray((short) value));
+        assertThat(readInt16(buffer.inputStream())).isEqualTo(value);
     }
 
     @ParameterizedTest
     @ValueSource(ints = {0, 12, -1, Integer.MAX_VALUE, Integer.MIN_VALUE})
     public void primitives_int(int value) throws Exception {
-        assertEquals(INT32_SIZE, writeInt32(value, buffer.outputStream()));
-        assertEquals(INT32_SIZE, buffer.size());
-        assertEquals("%08x".formatted(value), buffer.snapshot().hex());
-        assertBytes(buffer.snapshot().toByteArray(), Ints.toByteArray(value));
-        assertEquals(value, readInt32(buffer.inputStream()));
+        assertThat(writeInt32(value, buffer.outputStream())).isEqualTo(INT32_SIZE);
+        assertThat(buffer.size()).isEqualTo(INT32_SIZE);
+        assertThat(buffer.snapshot().hex()).isEqualTo("%08x".formatted(value));
+        assertBytes(buffer.snapshot().toByteArray()).isEqualTo(Ints.toByteArray(value));
+        assertThat(readInt32(buffer.inputStream())).isEqualTo(value);
     }
 
     @ParameterizedTest
     @ValueSource(longs = {0, 12, -1, Long.MAX_VALUE, Long.MIN_VALUE})
     public void primitives_long(long value) throws Exception {
-        assertEquals(INT64_SIZE, writeLong64(value, buffer.outputStream()));
-        assertEquals(INT64_SIZE, buffer.size());
-        assertEquals("%016x".formatted(value), buffer.snapshot().hex());
-        assertBytes(buffer.snapshot().toByteArray(), Longs.toByteArray(value));
-        assertEquals(value, readLong64(buffer.inputStream()));
+        assertThat(writeLong64(value, buffer.outputStream())).isEqualTo(INT64_SIZE);
+        assertThat(buffer.size()).isEqualTo(INT64_SIZE);
+        assertThat(buffer.snapshot().hex()).isEqualTo("%016x".formatted(value));
+        assertBytes(buffer.snapshot().toByteArray()).isEqualTo(Longs.toByteArray(value));
+        assertThat(readLong64(buffer.inputStream())).isEqualTo(value);
     }
 
     @ParameterizedTest
     @ValueSource(booleans = {true, false})
     public void primitives_long(boolean value) throws Exception {
-        assertEquals(INT8_SIZE, writeBoolean8(value, buffer.outputStream()));
-        assertEquals(INT8_SIZE, buffer.size());
-        assertEquals("%02x".formatted(value ? 1 : 0), buffer.snapshot().hex());
-        assertBytes(buffer.snapshot().toByteArray(), new byte[]{(byte) (value ? 1 : 0)});
-        assertEquals(value, readBoolean8(buffer.inputStream()));
+        assertThat(writeBoolean8(value, buffer.outputStream())).isEqualTo(INT8_SIZE);
+        assertThat(buffer.size()).isEqualTo(INT8_SIZE);
+        assertThat(buffer.snapshot().hex()).isEqualTo("%02x".formatted(value ? 1 : 0));
+        assertBytes(buffer.snapshot().toByteArray()).isEqualTo(new byte[]{(byte) (value ? 1 : 0)});
+        assertThat(readBoolean8(buffer.inputStream())).isEqualTo(value);
     }
 
     @ParameterizedTest
@@ -72,18 +72,18 @@ public class CodecsTest {
     public void byte_arrays(String encoded) throws Exception {
         byte[] bytes = paramToBytes(encoded);
 
-        assertEquals(nullableByteArraySize(bytes), writeNullableByteArray(bytes, buffer.outputStream()));
-        assertBytes(readNullableByteArray(buffer.inputStream()), bytes);
+        assertThat(writeNullableByteArray(bytes, buffer.outputStream())).isEqualTo(nullableByteArraySize(bytes));
+        assertBytes(readNullableByteArray(buffer.inputStream())).isEqualTo(bytes);
 
-        assertEquals(shortNullableByteArraySize(bytes), writeShortNullableByteArray(bytes, buffer.outputStream()));
-        assertBytes(readShortNullableByteArray(buffer.inputStream()), bytes);
+        assertThat(writeShortNullableByteArray(bytes, buffer.outputStream())).isEqualTo(shortNullableByteArraySize(bytes));
+        assertBytes(readShortNullableByteArray(buffer.inputStream())).isEqualTo(bytes);
 
         if (bytes != null) {
-            assertEquals(byteArraySize(bytes), writeByteArray(bytes, buffer.outputStream()));
-            assertBytes(readByteArray(buffer.inputStream()), bytes);
+            assertThat(writeByteArray(bytes, buffer.outputStream())).isEqualTo(byteArraySize(bytes));
+            assertBytes(readByteArray(buffer.inputStream())).isEqualTo(bytes);
 
-            assertEquals(shortByteArraySize(bytes), writeShortByteArray(bytes, buffer.outputStream()));
-            assertBytes(readShortByteArray(buffer.inputStream()), bytes);
+            assertThat(writeShortByteArray(bytes, buffer.outputStream())).isEqualTo(shortByteArraySize(bytes));
+            assertBytes(readShortByteArray(buffer.inputStream())).isEqualTo(bytes);
         }
     }
 
@@ -92,18 +92,18 @@ public class CodecsTest {
     public void strings(String encoded) throws Exception {
         String input = paramToString(encoded);
 
-        assertEquals(nullableStringSize(input, CHARSET), writeNullableString(input, CHARSET, buffer.outputStream()));
-        assertEquals(input, readNullableString(buffer.inputStream(), CHARSET));
+        assertThat(writeNullableString(input, CHARSET, buffer.outputStream())).isEqualTo(nullableStringSize(input, CHARSET));
+        assertThat(readNullableString(buffer.inputStream(), CHARSET)).isEqualTo(input);
 
-        assertEquals(shortNullableStringSize(input, CHARSET), writeShortNullableString(input, CHARSET, buffer.outputStream()));
-        assertEquals(input, readShortNullableString(buffer.inputStream(), CHARSET));
+        assertThat(writeShortNullableString(input, CHARSET, buffer.outputStream())).isEqualTo(shortNullableStringSize(input, CHARSET));
+        assertThat(readShortNullableString(buffer.inputStream(), CHARSET)).isEqualTo(input);
 
         if (input != null) {
-            assertEquals(stringSize(input, CHARSET), writeString(input, CHARSET, buffer.outputStream()));
-            assertEquals(input, readString(buffer.inputStream(), CHARSET));
+            assertThat(writeString(input, CHARSET, buffer.outputStream())).isEqualTo(stringSize(input, CHARSET));
+            assertThat(readString(buffer.inputStream(), CHARSET)).isEqualTo(input);
 
-            assertEquals(shortStringSize(input, CHARSET), writeShortString(input, CHARSET, buffer.outputStream()));
-            assertEquals(input, readShortString(buffer.inputStream(), CHARSET));
+            assertThat(writeShortString(input, CHARSET, buffer.outputStream())).isEqualTo(shortStringSize(input, CHARSET));
+            assertThat(readShortString(buffer.inputStream(), CHARSET)).isEqualTo(input);
         }
     }
 }

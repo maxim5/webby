@@ -7,11 +7,11 @@ import io.webby.testing.Testing;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.EnumSource;
 
+import static com.google.common.truth.Truth.assertThat;
 import static io.webby.testing.AssertJson.withJsonLibrary;
 import static io.webby.testing.TestingBytes.asByteBuf;
-import static io.webby.testing.TestingBytes.assertByteBuf;
+import static io.webby.testing.TestingBytes.assertBytes;
 import static io.webby.testing.ws.meta.AssertMeta.*;
-import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 
 public class JsonMetadataTest {
@@ -25,18 +25,18 @@ public class JsonMetadataTest {
             {"on": "foo", "id": 123, "data": "{'x':'y'}"}
         """);
         metadata.parse(input1, (acceptorId, requestId, content) -> {
-            assertByteBuf(acceptorId, "foo");
-            assertEquals(123, requestId);
-            assertByteBuf(content, "{'x':'y'}");
+            assertBytes(acceptorId).isEqualTo("foo");
+            assertThat(requestId).isEqualTo(123);
+            assertBytes(content).isEqualTo("{'x':'y'}");
         });
 
         ByteBuf input2 = asByteBuf("""
             {"on": "bar", "id": 123.0, "data": "{'x':'y'}"}
         """);
         metadata.parse(input2, (acceptorId, requestId, content) -> {
-            assertByteBuf(acceptorId, "bar");
-            assertEquals(123, requestId);
-            assertByteBuf(content, "{'x':'y'}");
+            assertBytes(acceptorId).isEqualTo("bar");
+            assertThat(requestId).isEqualTo(123);
+            assertBytes(content).isEqualTo("{'x':'y'}");
         });
     }
 

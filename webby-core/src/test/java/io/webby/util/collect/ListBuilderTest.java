@@ -9,7 +9,6 @@ import java.util.List;
 import java.util.Objects;
 
 import static com.google.common.truth.Truth.assertThat;
-import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 
 public class ListBuilderTest {
@@ -169,7 +168,7 @@ public class ListBuilderTest {
     @SafeVarargs
     private static <T> void assertBuilder(@NotNull ListBuilder<T> builder, @Nullable T @NotNull ... expected) {
         boolean hasNulls = Arrays.stream(expected).anyMatch(Objects::isNull);
-        assertEquals(builder.containsNulls(), hasNulls);
+        assertThat(builder.containsNulls()).isEqualTo(hasNulls);
 
         if (hasNulls) {
             assertThrows(AssertionError.class, builder::toList);

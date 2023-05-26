@@ -10,9 +10,8 @@ import org.junit.jupiter.api.Test;
 
 import java.util.List;
 
+import static com.google.common.truth.Truth.assertThat;
 import static io.webby.testing.TestingTables.withTable;
-import static org.junit.jupiter.api.Assertions.assertFalse;
-import static org.junit.jupiter.api.Assertions.assertTrue;
 
 public interface BridgeTableTest
         <IL, EL, IR, ER, E, T extends BaseTable<E> & BridgeTable<IL, EL, IR, ER>>
@@ -95,10 +94,10 @@ public interface BridgeTableTest
             Pair.of(leftKey[1], rightKey[1])
         ));
 
-        assertTrue(table().exists(leftKey[0], rightKey[0]));
-        assertTrue(table().exists(leftKey[1], rightKey[1]));
-        assertFalse(table().exists(leftKey[0], rightKey[1]));
-        assertFalse(table().exists(leftKey[1], rightKey[0]));
+        assertThat(table().exists(leftKey[0], rightKey[0])).isTrue();
+        assertThat(table().exists(leftKey[1], rightKey[1])).isTrue();
+        assertThat(table().exists(leftKey[0], rightKey[1])).isFalse();
+        assertThat(table().exists(leftKey[1], rightKey[0])).isFalse();
     }
 
     private @NotNull BridgeLeftIdSubject<IL, IR, ER, T> withLeftId(IL leftId) {

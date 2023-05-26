@@ -8,7 +8,8 @@ import org.junit.jupiter.api.extension.RegisterExtension;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.EnumSource;
 
-import static org.junit.jupiter.api.Assertions.*;
+import static com.google.common.truth.Truth.assertThat;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 
 @Tag("sql")
 public class UserStoreIntegrationTest extends BaseCoreIntegrationTest {
@@ -18,8 +19,8 @@ public class UserStoreIntegrationTest extends BaseCoreIntegrationTest {
     @EnumSource(Scenario.class)
     public void no_users(Scenario scenario) {
         UserStore users = startup(scenario, SQL.settings()).getInstance(UserStore.class);
-        assertNull(users.getUserByIdOrNull(0));
-        assertNull(users.getUserByIdOrNull(1));
+        assertThat(users.getUserByIdOrNull(0)).isNull();
+        assertThat(users.getUserByIdOrNull(1)).isNull();
     }
 
     @ParameterizedTest
@@ -27,9 +28,9 @@ public class UserStoreIntegrationTest extends BaseCoreIntegrationTest {
     public void create_one_user(Scenario scenario) {
         UserStore users = startup(scenario, SQL.settings()).getInstance(UserStore.class);
         UserModel user = users.createUserAutoId(DefaultUser.newUserData(UserAccess.Simple));
-        assertTrue(user.userId() > 0);
-        assertEquals(user, users.getUserByIdOrNull(user.userId()));
-        assertNull(users.getUserByIdOrNull(0));
+        assertThat(user.userId() > 0).isTrue();
+        assertThat(users.getUserByIdOrNull(user.userId())).isEqualTo(user);
+        assertThat(users.getUserByIdOrNull(0)).isNull();
     }
 
     @ParameterizedTest

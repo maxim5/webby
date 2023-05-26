@@ -38,6 +38,7 @@ public class AssertResponse {
     public static final String TEXT_HTML_CHARSET = "text/html; charset=%s".formatted(Testing.Internals.charset());
     // See https://stackoverflow.com/questions/13827325/correct-mime-type-for-favicon-ico
     public static final List<CharSequence> ICON_MIME_TYPES = List.of("image/x-icon", "image/x-ico", "image/vnd.microsoft.icon");
+    public static final List<CharSequence> JS_MIME_TYPES = List.of("application/javascript", "text/javascript");
 
     @CheckReturnValue
     public static @NotNull HttpResponseSubject<HttpResponseSubject<?>> assertThat(@Nullable HttpResponse response) {
@@ -97,12 +98,12 @@ public class AssertResponse {
         }
 
         public @NotNull S hasContent(@NotNull String content) {
-            assertByteBuf(content(), content);
+            assertBytes(content()).isEqualTo(content);
             return castAny(this);
         }
 
         public @NotNull S hasContent(@NotNull ByteBuf content) {
-            assertByteBufs(content(), content);
+            assertBytes(content()).isEqualTo(content);
             return castAny(this);
         }
 
@@ -238,7 +239,7 @@ public class AssertResponse {
     public static byte @NotNull [] readAllFrom(@NotNull Stream<HttpContent> stream) {
         ByteArrayOutputStream outputStream = new ByteArrayOutputStream();
         stream.forEach(Consumers.rethrow(content ->
-                content.content().readBytes(outputStream, content.content().readableBytes())
+            content.content().readBytes(outputStream, content.content().readableBytes())
         ));
         return outputStream.toByteArray();
     }

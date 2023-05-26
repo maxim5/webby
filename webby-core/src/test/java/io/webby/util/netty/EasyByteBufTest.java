@@ -7,8 +7,9 @@ import org.junit.jupiter.api.Test;
 
 import java.util.function.Consumer;
 
-import static io.webby.testing.TestingBytes.*;
-import static org.junit.jupiter.api.Assertions.assertEquals;
+import static com.google.common.truth.Truth.assertThat;
+import static io.webby.testing.TestingBytes.asByteBuf;
+import static io.webby.testing.TestingBytes.assertBytes;
 
 
 public class EasyByteBufTest {
@@ -17,149 +18,149 @@ public class EasyByteBufTest {
 
     @Test
     public void copyToByteArray_simple() {
-        assertBytes(EasyByteBuf.copyToByteArray(asByteBuf("")), "");
-        assertBytes(EasyByteBuf.copyToByteArray(asByteBuf("foo")), "foo");
-        assertBytes(EasyByteBuf.copyToByteArray(asByteBuf("\0")), "\0");
+        assertBytes(EasyByteBuf.copyToByteArray(asByteBuf(""))).isEqualTo("");
+        assertBytes(EasyByteBuf.copyToByteArray(asByteBuf("foo"))).isEqualTo("foo");
+        assertBytes(EasyByteBuf.copyToByteArray(asByteBuf("\0"))).isEqualTo("\0");
     }
 
     @Test
     public void copyToByteArray_copy() {
         ByteBuf byteBuf = asByteBuf("foo");
-        assertBytes(EasyByteBuf.copyToByteArray(byteBuf), "foo");
-        assertByteBuf(byteBuf, "foo");
+        assertBytes(EasyByteBuf.copyToByteArray(byteBuf)).isEqualTo("foo");
+        assertBytes(byteBuf).isEqualTo("foo");
     }
 
     @Test
     public void readUntil_simple() {
-        assertByteBuf(EasyByteBuf.readUntil(asByteBuf("foo-bar"), DASH, 0, 100), "foo");
-        assertByteBuf(EasyByteBuf.readUntil(asByteBuf("foo--bar"), DASH, 0, 100), "foo");
-        assertByteBuf(EasyByteBuf.readUntil(asByteBuf("foo-bar"), DASH, 0, 3), null);
-        assertByteBuf(EasyByteBuf.readUntil(asByteBuf("foo-bar"), UNDER, 0, 100), null);
+        assertBytes(EasyByteBuf.readUntil(asByteBuf("foo-bar"), DASH, 0, 100)).isEqualTo("foo");
+        assertBytes(EasyByteBuf.readUntil(asByteBuf("foo--bar"), DASH, 0, 100)).isEqualTo("foo");
+        assertBytes(EasyByteBuf.readUntil(asByteBuf("foo-bar"), DASH, 0, 3)).isNull();
+        assertBytes(EasyByteBuf.readUntil(asByteBuf("foo-bar"), UNDER, 0, 100)).isNull();
 
-        assertByteBuf(EasyByteBuf.readUntil(asByteBuf("---"), DASH, 0, 100), "");
-        assertByteBuf(EasyByteBuf.readUntil(asByteBuf("---"), DASH, 0, 1), "");
-        assertByteBuf(EasyByteBuf.readUntil(asByteBuf("---"), DASH, 0, 0), null);
+        assertBytes(EasyByteBuf.readUntil(asByteBuf("---"), DASH, 0, 100)).isEqualTo("");
+        assertBytes(EasyByteBuf.readUntil(asByteBuf("---"), DASH, 0, 1)).isEqualTo("");
+        assertBytes(EasyByteBuf.readUntil(asByteBuf("---"), DASH, 0, 0)).isNull();
 
-        assertByteBuf(EasyByteBuf.readUntil(asByteBuf("-"), DASH, 0, 100), "");
-        assertByteBuf(EasyByteBuf.readUntil(asByteBuf("-"), DASH, 0, 0), null);
+        assertBytes(EasyByteBuf.readUntil(asByteBuf("-"), DASH, 0, 100)).isEqualTo("");
+        assertBytes(EasyByteBuf.readUntil(asByteBuf("-"), DASH, 0, 0)).isNull();
 
-        assertByteBuf(EasyByteBuf.readUntil(asByteBuf(""), DASH, 0, 100), null);
-        assertByteBuf(EasyByteBuf.readUntil(asByteBuf(""), DASH, 0, 1), null);
-        assertByteBuf(EasyByteBuf.readUntil(asByteBuf(""), DASH, 0, 0), null);
+        assertBytes(EasyByteBuf.readUntil(asByteBuf(""), DASH, 0, 100)).isNull();
+        assertBytes(EasyByteBuf.readUntil(asByteBuf(""), DASH, 0, 1)).isNull();
+        assertBytes(EasyByteBuf.readUntil(asByteBuf(""), DASH, 0, 0)).isNull();
     }
 
     @Test
     public void readUntil_readIndex() {
         ByteBuf content = asByteBuf("foo-bar-baz");
-        assertByteBuf(EasyByteBuf.readUntil(content, DASH, 0, 100), "foo");
-        assertByteBuf(content, "bar-baz");
-        assertByteBuf(EasyByteBuf.readUntil(content, DASH, 0, 100), "bar");
-        assertByteBuf(content, "baz");
-        assertByteBuf(EasyByteBuf.readUntil(content, DASH, 0, 100), null);
+        assertBytes(EasyByteBuf.readUntil(content, DASH, 0, 100)).isEqualTo("foo");
+        assertBytes(content).isEqualTo("bar-baz");
+        assertBytes(EasyByteBuf.readUntil(content, DASH, 0, 100)).isEqualTo("bar");
+        assertBytes(content).isEqualTo("baz");
+        assertBytes(EasyByteBuf.readUntil(content, DASH, 0, 100)).isNull();
     }
 
     @Test
     public void readUntil_readIndex_empty() {
         ByteBuf content = asByteBuf("---");
-        assertByteBuf(EasyByteBuf.readUntil(content, DASH, 0, 100), "");
-        assertByteBuf(content, "--");
-        assertByteBuf(EasyByteBuf.readUntil(content, DASH, 0, 100), "");
-        assertByteBuf(content, "-");
-        assertByteBuf(EasyByteBuf.readUntil(content, DASH, 0, 100), "");
-        assertByteBuf(content, "");
-        assertByteBuf(EasyByteBuf.readUntil(content, DASH, 0, 100), null);
+        assertBytes(EasyByteBuf.readUntil(content, DASH, 0, 100)).isEqualTo("");
+        assertBytes(content).isEqualTo("--");
+        assertBytes(EasyByteBuf.readUntil(content, DASH, 0, 100)).isEqualTo("");
+        assertBytes(content).isEqualTo("-");
+        assertBytes(EasyByteBuf.readUntil(content, DASH, 0, 100)).isEqualTo("");
+        assertBytes(content).isEqualTo("");
+        assertBytes(EasyByteBuf.readUntil(content, DASH, 0, 100)).isNull();
     }
 
     @Test
     public void parseIntSafe_simple() {
-        assertEquals(1, EasyByteBuf.parseIntSafe(asByteBuf("1"), 0));
-        assertEquals(9, EasyByteBuf.parseIntSafe(asByteBuf("9"), 0));
-        assertEquals(123, EasyByteBuf.parseIntSafe(asByteBuf("123"), 0));
-        assertEquals(12345678, EasyByteBuf.parseIntSafe(asByteBuf("12345678"), 0));
-        assertEquals(0, EasyByteBuf.parseIntSafe(asByteBuf("0"), -1));
+        assertThat(EasyByteBuf.parseIntSafe(asByteBuf("1"), 0)).isEqualTo(1);
+        assertThat(EasyByteBuf.parseIntSafe(asByteBuf("9"), 0)).isEqualTo(9);
+        assertThat(EasyByteBuf.parseIntSafe(asByteBuf("123"), 0)).isEqualTo(123);
+        assertThat(EasyByteBuf.parseIntSafe(asByteBuf("12345678"), 0)).isEqualTo(12345678);
+        assertThat(EasyByteBuf.parseIntSafe(asByteBuf("0"), -1)).isEqualTo(0);
 
-        assertEquals(-1, EasyByteBuf.parseIntSafe(asByteBuf(""), -1));
-        assertEquals(-1, EasyByteBuf.parseIntSafe(asByteBuf("foo"), -1));
-        assertEquals(-1, EasyByteBuf.parseIntSafe(asByteBuf("1+2"), -1));
+        assertThat(EasyByteBuf.parseIntSafe(asByteBuf(""), -1)).isEqualTo(-1);
+        assertThat(EasyByteBuf.parseIntSafe(asByteBuf("foo"), -1)).isEqualTo(-1);
+        assertThat(EasyByteBuf.parseIntSafe(asByteBuf("1+2"), -1)).isEqualTo(-1);
     }
 
     @Test
     public void parseIntSafe_plus_or_minus() {
-        assertEquals(0, EasyByteBuf.parseIntSafe(asByteBuf("+0"), -1));
-        assertEquals(0, EasyByteBuf.parseIntSafe(asByteBuf("+00"), -1));
-        assertEquals(0, EasyByteBuf.parseIntSafe(asByteBuf("-0"), -1));
-        assertEquals(0, EasyByteBuf.parseIntSafe(asByteBuf("-00"), -1));
+        assertThat(EasyByteBuf.parseIntSafe(asByteBuf("+0"), -1)).isEqualTo(0);
+        assertThat(EasyByteBuf.parseIntSafe(asByteBuf("+00"), -1)).isEqualTo(0);
+        assertThat(EasyByteBuf.parseIntSafe(asByteBuf("-0"), -1)).isEqualTo(0);
+        assertThat(EasyByteBuf.parseIntSafe(asByteBuf("-00"), -1)).isEqualTo(0);
 
-        assertEquals(1, EasyByteBuf.parseIntSafe(asByteBuf("+1"), 0));
-        assertEquals(100, EasyByteBuf.parseIntSafe(asByteBuf("+100"), 0));
-        assertEquals(-1, EasyByteBuf.parseIntSafe(asByteBuf("-1"), 0));
-        assertEquals(-100, EasyByteBuf.parseIntSafe(asByteBuf("-100"), 0));
+        assertThat(EasyByteBuf.parseIntSafe(asByteBuf("+1"), 0)).isEqualTo(1);
+        assertThat(EasyByteBuf.parseIntSafe(asByteBuf("+100"), 0)).isEqualTo(100);
+        assertThat(EasyByteBuf.parseIntSafe(asByteBuf("-1"), 0)).isEqualTo(-1);
+        assertThat(EasyByteBuf.parseIntSafe(asByteBuf("-100"), 0)).isEqualTo(-100);
     }
 
     @Test
     public void parseIntSafe_edge_cases() {
-        assertEquals(Integer.MAX_VALUE, EasyByteBuf.parseIntSafe(asByteBuf("2147483647"), 0));
-        assertEquals(Integer.MIN_VALUE, EasyByteBuf.parseIntSafe(asByteBuf("-2147483648"), 0));
+        assertThat(EasyByteBuf.parseIntSafe(asByteBuf("2147483647"), 0)).isEqualTo(Integer.MAX_VALUE);
+        assertThat(EasyByteBuf.parseIntSafe(asByteBuf("-2147483648"), 0)).isEqualTo(Integer.MIN_VALUE);
 
-        assertEquals(Integer.MAX_VALUE - 1, EasyByteBuf.parseIntSafe(asByteBuf("2147483646"), 0));
-        assertEquals(Integer.MIN_VALUE + 1, EasyByteBuf.parseIntSafe(asByteBuf("-2147483647"), 0));
+        assertThat(EasyByteBuf.parseIntSafe(asByteBuf("2147483646"), 0)).isEqualTo(Integer.MAX_VALUE - 1);
+        assertThat(EasyByteBuf.parseIntSafe(asByteBuf("-2147483647"), 0)).isEqualTo(Integer.MIN_VALUE + 1);
 
-        assertEquals(0, EasyByteBuf.parseIntSafe(asByteBuf("2147483648"), 0));
-        assertEquals(0, EasyByteBuf.parseIntSafe(asByteBuf("-2147483649"), 0));
-        assertEquals(0, EasyByteBuf.parseIntSafe(asByteBuf("9223372036854775807"), 0));
-        assertEquals(0, EasyByteBuf.parseIntSafe(asByteBuf("-9223372036854775808"), 0));
+        assertThat(EasyByteBuf.parseIntSafe(asByteBuf("2147483648"), 0)).isEqualTo(0);
+        assertThat(EasyByteBuf.parseIntSafe(asByteBuf("-2147483649"), 0)).isEqualTo(0);
+        assertThat(EasyByteBuf.parseIntSafe(asByteBuf("9223372036854775807"), 0)).isEqualTo(0);
+        assertThat(EasyByteBuf.parseIntSafe(asByteBuf("-9223372036854775808"), 0)).isEqualTo(0);
     }
 
     @Test
     public void parseLongSafe_simple() {
-        assertEquals(1, EasyByteBuf.parseLongSafe(asByteBuf("1"), 0));
-        assertEquals(9, EasyByteBuf.parseLongSafe(asByteBuf("9"), 0));
-        assertEquals(123, EasyByteBuf.parseLongSafe(asByteBuf("123"), 0));
-        assertEquals(12345678, EasyByteBuf.parseLongSafe(asByteBuf("12345678"), 0));
-        assertEquals(0, EasyByteBuf.parseLongSafe(asByteBuf("0"), -1));
+        assertThat(EasyByteBuf.parseLongSafe(asByteBuf("1"), 0)).isEqualTo(1);
+        assertThat(EasyByteBuf.parseLongSafe(asByteBuf("9"), 0)).isEqualTo(9);
+        assertThat(EasyByteBuf.parseLongSafe(asByteBuf("123"), 0)).isEqualTo(123);
+        assertThat(EasyByteBuf.parseLongSafe(asByteBuf("12345678"), 0)).isEqualTo(12345678);
+        assertThat(EasyByteBuf.parseLongSafe(asByteBuf("0"), -1)).isEqualTo(0);
 
-        assertEquals(-1, EasyByteBuf.parseLongSafe(asByteBuf(""), -1));
-        assertEquals(-1, EasyByteBuf.parseLongSafe(asByteBuf("foo"), -1));
-        assertEquals(-1, EasyByteBuf.parseLongSafe(asByteBuf("1+2"), -1));
+        assertThat(EasyByteBuf.parseLongSafe(asByteBuf(""), -1)).isEqualTo(-1);
+        assertThat(EasyByteBuf.parseLongSafe(asByteBuf("foo"), -1)).isEqualTo(-1);
+        assertThat(EasyByteBuf.parseLongSafe(asByteBuf("1+2"), -1)).isEqualTo(-1);
     }
 
     @Test
     public void parseLongSafe_plus_or_minus() {
-        assertEquals(0, EasyByteBuf.parseLongSafe(asByteBuf("+0"), -1));
-        assertEquals(0, EasyByteBuf.parseLongSafe(asByteBuf("+00"), -1));
-        assertEquals(0, EasyByteBuf.parseLongSafe(asByteBuf("-0"), -1));
-        assertEquals(0, EasyByteBuf.parseLongSafe(asByteBuf("-00"), -1));
+        assertThat(EasyByteBuf.parseLongSafe(asByteBuf("+0"), -1)).isEqualTo(0);
+        assertThat(EasyByteBuf.parseLongSafe(asByteBuf("+00"), -1)).isEqualTo(0);
+        assertThat(EasyByteBuf.parseLongSafe(asByteBuf("-0"), -1)).isEqualTo(0);
+        assertThat(EasyByteBuf.parseLongSafe(asByteBuf("-00"), -1)).isEqualTo(0);
 
-        assertEquals(1, EasyByteBuf.parseLongSafe(asByteBuf("+1"), 0));
-        assertEquals(100, EasyByteBuf.parseLongSafe(asByteBuf("+100"), 0));
-        assertEquals(-1, EasyByteBuf.parseLongSafe(asByteBuf("-1"), 0));
-        assertEquals(-100, EasyByteBuf.parseLongSafe(asByteBuf("-100"), 0));
+        assertThat(EasyByteBuf.parseLongSafe(asByteBuf("+1"), 0)).isEqualTo(1);
+        assertThat(EasyByteBuf.parseLongSafe(asByteBuf("+100"), 0)).isEqualTo(100);
+        assertThat(EasyByteBuf.parseLongSafe(asByteBuf("-1"), 0)).isEqualTo(-1);
+        assertThat(EasyByteBuf.parseLongSafe(asByteBuf("-100"), 0)).isEqualTo(-100);
     }
 
     @Test
     public void parseLongSafe_edge_cases() {
-        assertEquals(Long.MAX_VALUE, EasyByteBuf.parseLongSafe(asByteBuf("9223372036854775807"), 0));
-        assertEquals(Long.MIN_VALUE, EasyByteBuf.parseLongSafe(asByteBuf("-9223372036854775808"), 0));
+        assertThat(EasyByteBuf.parseLongSafe(asByteBuf("9223372036854775807"), 0)).isEqualTo(Long.MAX_VALUE);
+        assertThat(EasyByteBuf.parseLongSafe(asByteBuf("-9223372036854775808"), 0)).isEqualTo(Long.MIN_VALUE);
 
-        assertEquals(Long.MAX_VALUE - 1, EasyByteBuf.parseLongSafe(asByteBuf("9223372036854775806"), 0));
-        assertEquals(Long.MIN_VALUE + 1, EasyByteBuf.parseLongSafe(asByteBuf("-9223372036854775807"), 0));
+        assertThat(EasyByteBuf.parseLongSafe(asByteBuf("9223372036854775806"), 0)).isEqualTo(Long.MAX_VALUE - 1);
+        assertThat(EasyByteBuf.parseLongSafe(asByteBuf("-9223372036854775807"), 0)).isEqualTo(Long.MIN_VALUE + 1);
 
-        assertEquals(0, EasyByteBuf.parseLongSafe(asByteBuf("9223372036854775808"), 0));
-        assertEquals(0, EasyByteBuf.parseLongSafe(asByteBuf("-9223372036854775809"), 0));
+        assertThat(EasyByteBuf.parseLongSafe(asByteBuf("9223372036854775808"), 0)).isEqualTo(0);
+        assertThat(EasyByteBuf.parseLongSafe(asByteBuf("-9223372036854775809"), 0)).isEqualTo(0);
     }
 
     @Test
     public void writeIntString_simple() {
-        assertByteBuf(withNewBuffer(content -> EasyByteBuf.writeIntString(0, content)), "0");
-        assertByteBuf(withNewBuffer(content -> EasyByteBuf.writeIntString(101, content)), "101");
-        assertByteBuf(withNewBuffer(content -> EasyByteBuf.writeIntString(-101, content)), "-101");
+        assertBytes(withNewBuffer(content -> EasyByteBuf.writeIntString(0, content))).isEqualTo("0");
+        assertBytes(withNewBuffer(content -> EasyByteBuf.writeIntString(101, content))).isEqualTo("101");
+        assertBytes(withNewBuffer(content -> EasyByteBuf.writeIntString(-101, content))).isEqualTo("-101");
     }
 
     @Test
     public void writeLongString_simple() {
-        assertByteBuf(withNewBuffer(content -> EasyByteBuf.writeLongString(0, content)), "0");
-        assertByteBuf(withNewBuffer(content -> EasyByteBuf.writeLongString(101, content)), "101");
-        assertByteBuf(withNewBuffer(content -> EasyByteBuf.writeLongString(-101, content)), "-101");
+        assertBytes(withNewBuffer(content -> EasyByteBuf.writeLongString(0, content))).isEqualTo("0");
+        assertBytes(withNewBuffer(content -> EasyByteBuf.writeLongString(101, content))).isEqualTo("101");
+        assertBytes(withNewBuffer(content -> EasyByteBuf.writeLongString(-101, content))).isEqualTo("-101");
     }
 
     private static @NotNull ByteBuf withNewBuffer(@NotNull Consumer<ByteBuf> consumer) {

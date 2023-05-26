@@ -20,7 +20,7 @@ import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 import static com.google.common.truth.Truth.assertThat;
-import static org.junit.jupiter.api.Assertions.*;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
 
 public class ProtobufMarshallerIntegrationTest {
     private final ProtobufMarshaller marshaller = Testing.testStartup().getInstance(ProtobufMarshaller.class);
@@ -46,7 +46,7 @@ public class ProtobufMarshallerIntegrationTest {
     public void proto_roundtrip(Class<Message> klass) throws Exception {
         Message message = TEST_MESSAGES.get(klass);
         assertNotNull(message, "Add the class %s to the test map".formatted(klass));
-        assertEquals(klass, message.getClass());
+        assertThat(message.getClass()).isEqualTo(klass);
 
         assertProtoStreamRoundTrip(message, klass);
         assertProtoBytesRoundTrip(message, klass);

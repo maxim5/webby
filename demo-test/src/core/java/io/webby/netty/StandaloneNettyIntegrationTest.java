@@ -20,7 +20,8 @@ import java.util.function.Consumer;
 import java.util.logging.Level;
 
 import static com.google.common.truth.Truth.assertThat;
-import static io.webby.testing.OkAsserts.*;
+import static io.webby.testing.OkAsserts.assertClient;
+import static io.webby.testing.OkAsserts.describe;
 import static io.webby.testing.OkRequests.files;
 import static io.webby.testing.OkRequests.json;
 import static org.junit.jupiter.api.Assertions.fail;
@@ -36,45 +37,45 @@ public class StandaloneNettyIntegrationTest {
     @Test
     public void get_hello_world() {
         call(Ok.get("/"), response -> {
-            assertClientCode(response, 200);
-            assertClientBody(response, "Hello World!");
-            assertClientHeader(response, "Content-Type", "text/html; charset=UTF-8");
+            assertClient(response).is200();
+            assertClient(response).hasBody("Hello World!");
+            assertClient(response).hasHeader("Content-Type", "text/html; charset=UTF-8");
         });
     }
 
     @Test
     public void post_json() {
         call(Ok.post("/string/foo-bar/777", json("{a: 1, b: 2, c:3}")), response -> {
-            assertClientCode(response, 200);
-            assertClientBody(response, "Vars: str=foo-bar y=777 content=<{a=1.0, b=2.0, c=3.0}>");
-            assertClientHeader(response, "Content-Type", "text/html; charset=UTF-8");
+            assertClient(response).is200();
+            assertClient(response).hasBody("Vars: str=foo-bar y=777 content=<{a=1.0, b=2.0, c=3.0}>");
+            assertClient(response).hasHeader("Content-Type", "text/html; charset=UTF-8");
         });
     }
 
     @Test
     public void async_response() {
         call(Ok.get("/r/async/futures/timeout/300"), response -> {
-            assertClientCode(response, 200);
-            assertClientBody(response, "Thanks for waiting");
-            assertClientHeader(response, "Content-Type", "text/html; charset=UTF-8");
+            assertClient(response).is200();
+            assertClient(response).hasBody("Thanks for waiting");
+            assertClient(response).hasHeader("Content-Type", "text/html; charset=UTF-8");
         });
     }
 
     @Test
     public void streaming_response() {
         call(Ok.get("/headers/zip"), response -> {
-            assertClientCode(response, 200);
-            assertClientBody(response, 388);
-            assertClientHeader(response, "Content-Type", "application/zip");
+            assertClient(response).is200();
+            assertClient(response).hasBody(388);
+            assertClient(response).hasHeader("Content-Type", "application/zip");
         });
     }
 
     @Test
     public void upload_file() {
         call(Ok.post("/upload/file", files(DevPaths.DEMO_WEB + "favicon.ico")), response -> {
-            assertClientCode(response, 200);
-            assertClientHeader(response, "Content-Type", "text/html; charset=UTF-8");
-            assertClientBody(response, """
+            assertClient(response).is200();
+            assertClient(response).hasHeader("Content-Type", "text/html; charset=UTF-8");
+            assertClient(response).hasBody("""
                 Mixed: content-disposition: form-data; name="favicon.ico"; filename="favicon.ico"
                 content-type: application/octet-stream; charset=UTF-8
                 content-length: 15406
@@ -86,9 +87,9 @@ public class StandaloneNettyIntegrationTest {
     @Test
     public void upload_many_files() {
         call(Ok.post("/upload/file", files(Map.of("foo.txt", new byte[64], "bar.png", new byte[64]))), response -> {
-            assertClientCode(response, 200);
-            assertClientHeader(response, "Content-Type", "text/html; charset=UTF-8");
-            assertClientBody(response, content -> {
+            assertClient(response).is200();
+            assertClient(response).hasHeader("Content-Type", "text/html; charset=UTF-8");
+            assertClient(response).hasBody(content -> {
                 assertThat(content.split("\n\n")).asList().containsExactly(
                     """
                     Mixed: content-disposition: form-data; name="foo.txt"; filename="foo.txt"
@@ -110,9 +111,9 @@ public class StandaloneNettyIntegrationTest {
     @Test
     public void upload_large_file() {
         call(Ok.post("/upload/file", files(Map.of("foo.png", new byte[8 << 20]))), response -> {
-            assertClientCode(response, 200);
-            assertClientHeader(response, "Content-Type", "text/html; charset=UTF-8");
-            assertClientBody(response, """
+            assertClient(response).is200();
+            assertClient(response).hasHeader("Content-Type", "text/html; charset=UTF-8");
+            assertClient(response).hasBody("""
                 Mixed: content-disposition: form-data; name="foo.png"; filename="foo.png"
                 content-type: application/octet-stream; charset=UTF-8
                 content-length: 8388608

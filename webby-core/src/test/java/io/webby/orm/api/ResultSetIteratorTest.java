@@ -18,7 +18,6 @@ import java.util.List;
 import java.util.stream.Collectors;
 
 import static com.google.common.truth.Truth.assertThat;
-import static org.junit.jupiter.api.Assertions.*;
 
 @Tag("sql")
 public class ResultSetIteratorTest {
@@ -30,15 +29,15 @@ public class ResultSetIteratorTest {
         try (Statement statement = SQL.connection().createStatement()) {
             try (ResultSet resultSet = statement.executeQuery("SELECT 1, 2")) {
                 try (ResultSetIterator<String> iterator = ResultSetIterator.of(resultSet, this::rowToString)) {
-                    assertTrue(iterator.hasNext());
-                    assertTrue(iterator.hasNext());
-                    assertTrue(iterator.hasNext());
-                    assertTrue(iterator.hasNext());
+                    assertThat(iterator.hasNext()).isTrue();
+                    assertThat(iterator.hasNext()).isTrue();
+                    assertThat(iterator.hasNext()).isTrue();
+                    assertThat(iterator.hasNext()).isTrue();
 
-                    assertEquals("1.2", iterator.next());
-                    assertFalse(iterator.hasNext());
-                    assertFalse(iterator.hasNext());
-                    assertFalse(iterator.hasNext());
+                    assertThat(iterator.next()).isEqualTo("1.2");
+                    assertThat(iterator.hasNext()).isFalse();
+                    assertThat(iterator.hasNext()).isFalse();
+                    assertThat(iterator.hasNext()).isFalse();
                 }
             }
         }
@@ -49,13 +48,13 @@ public class ResultSetIteratorTest {
         try (Statement statement = SQL.connection().createStatement()) {
             try (ResultSet resultSet = statement.executeQuery("SELECT 1, 2, 3")) {
                 try (ResultSetIterator<String> iterator = ResultSetIterator.of(resultSet, this::rowToString)) {
-                    assertFalse(resultSet.isClosed());
+                    assertThat(resultSet.isClosed()).isFalse();
                     assertThat(Lists.newArrayList(iterator)).containsExactly("1.2.3");
-                    assertFalse(statement.isClosed());
+                    assertThat(statement.isClosed()).isFalse();
                 }
-                assertTrue(resultSet.isClosed());
+                assertThat(resultSet.isClosed()).isTrue();
             }
-            assertTrue(statement.isClosed());
+            assertThat(statement.isClosed()).isTrue();
         }
     }
 
@@ -64,13 +63,13 @@ public class ResultSetIteratorTest {
         try (PreparedStatement prepared = SQL.connection().prepareStatement("SELECT 1, 2, 3, 4")) {
             try (ResultSet resultSet = prepared.executeQuery()) {
                 try (ResultSetIterator<String> iterator = ResultSetIterator.of(resultSet, this::rowToString)) {
-                    assertFalse(resultSet.isClosed());
+                    assertThat(resultSet.isClosed()).isFalse();
                     assertThat(Lists.newArrayList(iterator)).containsExactly("1.2.3.4");
-                    assertFalse(prepared.isClosed());
+                    assertThat(prepared.isClosed()).isFalse();
                 }
-                assertTrue(resultSet.isClosed());
+                assertThat(resultSet.isClosed()).isTrue();
             }
-            assertTrue(prepared.isClosed());
+            assertThat(prepared.isClosed()).isTrue();
         }
     }
 

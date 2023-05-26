@@ -2,30 +2,39 @@ package io.webby.util.base;
 
 import org.junit.jupiter.api.Test;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
+import static com.google.common.truth.Truth.assertThat;
 
 public class EasyStringsTest {
     @Test
     public void removePrefix_simple() {
-        assertEquals(EasyStrings.removePrefix("", ""), "");
-        assertEquals(EasyStrings.removePrefix("", "foo"), "");
+        assertThat(EasyStrings.removePrefix("", "")).isEqualTo("");
+        assertThat(EasyStrings.removePrefix("", "foo")).isEqualTo("");
 
-        assertEquals(EasyStrings.removePrefix("foobar", "foo"), "bar");
-        assertEquals(EasyStrings.removePrefix("foobar", ""), "foobar");
+        assertThat(EasyStrings.removePrefix("foobar", "foo")).isEqualTo("bar");
+        assertThat(EasyStrings.removePrefix("foobar", "")).isEqualTo("foobar");
 
-        assertEquals(EasyStrings.removePrefix("foobar", "fox"), "foobar");
-        assertEquals(EasyStrings.removePrefix("foobar", "Foo"), "foobar");
+        assertThat(EasyStrings.removePrefix("foobar", "fox")).isEqualTo("foobar");
+        assertThat(EasyStrings.removePrefix("foobar", "Foo")).isEqualTo("foobar");
     }
 
     @Test
     public void removeSuffix_simple() {
-        assertEquals(EasyStrings.removeSuffix("", ""), "");
-        assertEquals(EasyStrings.removeSuffix("", "foo"), "");
+        assertThat(EasyStrings.removeSuffix("", "")).isEqualTo("");
+        assertThat(EasyStrings.removeSuffix("", "foo")).isEqualTo("");
 
-        assertEquals(EasyStrings.removeSuffix("foobar", "bar"), "foo");
-        assertEquals(EasyStrings.removeSuffix("foobar", ""), "foobar");
+        assertThat(EasyStrings.removeSuffix("foobar", "bar")).isEqualTo("foo");
+        assertThat(EasyStrings.removeSuffix("foobar", "")).isEqualTo("foobar");
 
-        assertEquals(EasyStrings.removeSuffix("foobar", "baz"), "foobar");
-        assertEquals(EasyStrings.removeSuffix("foobar", "Bar"), "foobar");
+        assertThat(EasyStrings.removeSuffix("foobar", "baz")).isEqualTo("foobar");
+        assertThat(EasyStrings.removeSuffix("foobar", "Bar")).isEqualTo("foobar");
+    }
+    
+    @Test
+    public void firstNotEmpty_simple() {
+        assertThat(EasyStrings.firstNotEmpty("foo", "bar")).isEqualTo("foo");
+        assertThat(EasyStrings.firstNotEmpty("foo", "")).isEqualTo("foo");
+        assertThat(EasyStrings.firstNotEmpty("f", "")).isEqualTo("f");
+        assertThat(EasyStrings.firstNotEmpty("", "bar")).isEqualTo("bar");
+        assertThat(EasyStrings.firstNotEmpty("", "b")).isEqualTo("b");
     }
 }

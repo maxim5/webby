@@ -6,6 +6,8 @@ import com.carrotsearch.hppc.cursors.LongCursor;
 import com.carrotsearch.hppc.predicates.IntPredicate;
 import com.carrotsearch.hppc.procedures.IntIntProcedure;
 import com.carrotsearch.hppc.procedures.IntObjectProcedure;
+import com.carrotsearch.hppc.procedures.LongLongProcedure;
+import com.carrotsearch.hppc.procedures.LongObjectProcedure;
 import com.google.common.collect.Streams;
 import com.google.errorprone.annotations.CheckReturnValue;
 import io.webby.util.func.ThrowConsumer;
@@ -135,6 +137,18 @@ public class EasyHppc {
     public static <T> @NotNull Map<Integer, T> toJavaMap(@NotNull IntObjectMap<T> map) {
         HashMap<Integer, T> result = new HashMap<>(map.size());
         map.forEach((IntObjectProcedure<T>) result::put);
+        return result;
+    }
+
+    public static @NotNull HashMap<Long, Long> toJavaMap(@NotNull LongLongMap map) {
+        HashMap<Long, Long> result = new HashMap<>(map.size());
+        map.forEach((LongLongProcedure) result::put);
+        return result;
+    }
+
+    public static <T> @NotNull Map<Long, T> toJavaMap(@NotNull LongObjectMap<T> map) {
+        HashMap<Long, T> result = new HashMap<>(map.size());
+        map.forEach((LongObjectProcedure<T>) result::put);
         return result;
     }
 

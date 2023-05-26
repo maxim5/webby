@@ -17,7 +17,7 @@ import java.util.List;
 import java.util.stream.IntStream;
 import java.util.stream.LongStream;
 
-import static org.junit.jupiter.api.Assertions.assertTrue;
+import static com.google.common.truth.Truth.assertThat;
 
 public class BridgeIntLongModelTableTest
         extends SqlDbTableTest<BridgeIntLongModel, BridgeIntLongModelTable>
@@ -52,7 +52,7 @@ public class BridgeIntLongModelTableTest
                                                               ForeignInt.ofId(relation.first()),
                                                               ForeignLong.ofId(relation.second()),
                                                               relation.first() > relation.second());
-            assertTrue(table.insertAutoIncPk(model) > 0);
+            assertThat(table.insertAutoIncPk(model) > 0).isTrue();
         }
     }
 

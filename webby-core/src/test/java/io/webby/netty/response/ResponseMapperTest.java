@@ -16,9 +16,11 @@ import java.util.ArrayList;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.function.Function;
 
+import static com.google.common.truth.Truth.assertThat;
 import static io.webby.testing.AssertResponse.streamContentOf;
-import static io.webby.testing.TestingBytes.assertByteBuf;
-import static org.junit.jupiter.api.Assertions.*;
+import static io.webby.testing.TestingBytes.assertBytes;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertNull;
 
 public class ResponseMapperTest {
     private final ResponseMapper mapper = Testing.testStartup().getInstance(ResponseMapper.class);
@@ -38,7 +40,7 @@ public class ResponseMapperTest {
         assertLookupClass(byteBuffer, "foo");
 
         ByteBuffer byteBufferWithoutArray = byteBuffer.asReadOnlyBuffer();
-        assertFalse(byteBufferWithoutArray.hasArray());
+        assertThat(byteBufferWithoutArray.hasArray()).isFalse();
         assertLookupClass(byteBufferWithoutArray, "foo");
     }
 
@@ -51,7 +53,7 @@ public class ResponseMapperTest {
         assertLookupClass(charBuffer, "foo");
 
         CharBuffer charBufferWithoutArray = CharBuffer.wrap("foo");
-        assertFalse(charBufferWithoutArray.hasArray());
+        assertThat(charBufferWithoutArray.hasArray()).isFalse();
         assertLookupClass(charBufferWithoutArray, "foo");
     }
 
@@ -98,7 +100,7 @@ public class ResponseMapperTest {
             }
         };
         mapper.mapInstance(stream).apply(stream);
-        assertTrue(closed.get());
+        assertThat(closed.get()).isTrue();
     }
 
     @Test
@@ -112,7 +114,7 @@ public class ResponseMapperTest {
             }
         };
         mapper.mapInstance(reader).apply(reader);
-        assertTrue(closed.get());
+        assertThat(closed.get()).isTrue();
     }
 
     private void assertLookupClass(Object obj, String expected) {
@@ -129,7 +131,7 @@ public class ResponseMapperTest {
         if (expected != null) {
             assertNotNull(lookup, () -> describe(obj));
             HttpResponse response = lookup.apply(obj);
-            assertByteBuf(streamContentOf(response), expected);
+            assertBytes(streamContentOf(response)).isEqualTo(expected);
         } else {
             assertNull(lookup, () -> describe(obj));
         }

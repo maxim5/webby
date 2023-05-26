@@ -3,13 +3,12 @@ package io.webby.util.collect;
 import org.junit.jupiter.api.Test;
 
 import java.util.List;
-import java.util.Optional;
 import java.util.stream.Stream;
 
 import static com.google.common.truth.Truth.assertThat;
+import static com.google.common.truth.Truth8.assertThat;
 import static io.webby.testing.TestingBasics.iterable;
 import static io.webby.testing.TestingBasics.sortedSetOf;
-import static org.junit.jupiter.api.Assertions.*;
 
 public class EasyIterablesTest {
     @Test
@@ -41,52 +40,52 @@ public class EasyIterablesTest {
 
     @Test
     public void estimateSize_collection() {
-        assertEquals(EasyIterables.estimateSize(List.of(), -1), 0);
-        assertEquals(EasyIterables.estimateSize(List.of(1), -1), 1);
-        assertEquals(EasyIterables.estimateSize(List.of(1, 2), -1), 2);
+        assertThat(EasyIterables.estimateSize(List.of(), -1)).isEqualTo(0);
+        assertThat(EasyIterables.estimateSize(List.of(1), -1)).isEqualTo(1);
+        assertThat(EasyIterables.estimateSize(List.of(1, 2), -1)).isEqualTo(2);
     }
 
     @Test
     public void allEqual() {
-        assertTrue(EasyIterables.allEqual(Stream.of()));
-        assertTrue(EasyIterables.allEqual(Stream.of(1)));
-        assertTrue(EasyIterables.allEqual(Stream.of(1, 1)));
-        assertTrue(EasyIterables.allEqual(Stream.of(1, 1, 1)));
-        assertFalse(EasyIterables.allEqual(Stream.of(1, 2)));
-        assertFalse(EasyIterables.allEqual(Stream.of(1, 2, 1)));
-        assertFalse(EasyIterables.allEqual(Stream.of(1, 2, 2)));
-        assertFalse(EasyIterables.allEqual(Stream.of(1, 1, 2)));
+        assertThat(EasyIterables.allEqual(Stream.of())).isTrue();
+        assertThat(EasyIterables.allEqual(Stream.of(1))).isTrue();
+        assertThat(EasyIterables.allEqual(Stream.of(1, 1))).isTrue();
+        assertThat(EasyIterables.allEqual(Stream.of(1, 1, 1))).isTrue();
+        assertThat(EasyIterables.allEqual(Stream.of(1, 2))).isFalse();
+        assertThat(EasyIterables.allEqual(Stream.of(1, 2, 1))).isFalse();
+        assertThat(EasyIterables.allEqual(Stream.of(1, 2, 2))).isFalse();
+        assertThat(EasyIterables.allEqual(Stream.of(1, 1, 2))).isFalse();
     }
 
     @Test
     public void getOnlyItemOrEmpty_simple() {
-        assertEquals(Stream.of().collect(EasyIterables.getOnlyItemOrEmpty()), Optional.empty());
-        assertEquals(Stream.of(1).collect(EasyIterables.getOnlyItemOrEmpty()), Optional.of(1));
-        assertEquals(Stream.of(1, 2).collect(EasyIterables.getOnlyItemOrEmpty()), Optional.empty());
-        assertEquals(Stream.of(1, 2, 3).collect(EasyIterables.getOnlyItemOrEmpty()), Optional.empty());
-        assertEquals(Stream.of(1, 2, 3, 4).collect(EasyIterables.getOnlyItemOrEmpty()), Optional.empty());
+        assertThat(Stream.of().collect(EasyIterables.getOnlyItemOrEmpty())).isEmpty();
+        assertThat(Stream.of(1).collect(EasyIterables.getOnlyItemOrEmpty())).hasValue(1);
+        assertThat(Stream.of(1, 2).collect(EasyIterables.getOnlyItemOrEmpty())).isEmpty();
+        assertThat(Stream.of(1, 2, 3).collect(EasyIterables.getOnlyItemOrEmpty())).isEmpty();
+        assertThat(Stream.of(1, 2, 3, 4).collect(EasyIterables.getOnlyItemOrEmpty())).isEmpty();
     }
 
     @Test
     public void getOnlyItemOrEmpty_all_nulls() {
-        assertEquals(Stream.of((Object) null).collect(EasyIterables.getOnlyItemOrEmpty()), Optional.empty());
-        assertEquals(Stream.of(null, null).collect(EasyIterables.getOnlyItemOrEmpty()), Optional.empty());
-        assertEquals(Stream.of(null, null, null).collect(EasyIterables.getOnlyItemOrEmpty()), Optional.empty());
+        assertThat(Stream.of((Object) null).collect(EasyIterables.getOnlyItemOrEmpty())).isEmpty();
+        assertThat(Stream.of(null, null).collect(EasyIterables.getOnlyItemOrEmpty())).isEmpty();
+        assertThat(Stream.of(null, null, null).collect(EasyIterables.getOnlyItemOrEmpty())).isEmpty();
     }
 
     @Test
     public void getOnlyItemOrEmpty_nulls_and_one_value() {
-        assertEquals(Stream.of(1, null).collect(EasyIterables.getOnlyItemOrEmpty()), Optional.of(1));
-        assertEquals(Stream.of(null, 1).collect(EasyIterables.getOnlyItemOrEmpty()), Optional.of(1));
-        assertEquals(Stream.of(null, null, 1, null).collect(EasyIterables.getOnlyItemOrEmpty()), Optional.of(1));
+        assertThat(Stream.of(1, null).collect(EasyIterables.getOnlyItemOrEmpty())).hasValue(1);
+        assertThat(Stream.of(null, 1).collect(EasyIterables.getOnlyItemOrEmpty())).hasValue(1);
+        assertThat(Stream.of(null, null, 1, null).collect(EasyIterables.getOnlyItemOrEmpty())).hasValue(1);
     }
 
     @Test
     public void getOnlyItemOrEmpty_nulls_and_several_values() {
-        assertEquals(Stream.of(1, 2, null).collect(EasyIterables.getOnlyItemOrEmpty()), Optional.empty());
-        assertEquals(Stream.of(1, null, 2).collect(EasyIterables.getOnlyItemOrEmpty()), Optional.empty());
-        assertEquals(Stream.of(1, null, null, 2).collect(EasyIterables.getOnlyItemOrEmpty()), Optional.empty());
-        assertEquals(Stream.of(null, 1, null, 2).collect(EasyIterables.getOnlyItemOrEmpty()), Optional.empty());
-        assertEquals(Stream.of(null, null, 1, 2, null).collect(EasyIterables.getOnlyItemOrEmpty()), Optional.empty());
+        assertThat(Stream.of(1, 2, null).collect(EasyIterables.getOnlyItemOrEmpty())).isEmpty();
+        assertThat(Stream.of(1, null, 2).collect(EasyIterables.getOnlyItemOrEmpty())).isEmpty();
+        assertThat(Stream.of(1, null, null, 2).collect(EasyIterables.getOnlyItemOrEmpty())).isEmpty();
+        assertThat(Stream.of(null, 1, null, 2).collect(EasyIterables.getOnlyItemOrEmpty())).isEmpty();
+        assertThat(Stream.of(null, null, 1, 2, null).collect(EasyIterables.getOnlyItemOrEmpty())).isEmpty();
     }
 }

@@ -24,7 +24,7 @@ import java.util.List;
 
 import static com.google.common.truth.Truth.assertThat;
 import static io.webby.orm.api.query.Shortcuts.var;
-import static io.webby.testing.AssertPrimitives.assertThat;
+import static io.webby.testing.AssertPrimitives.assertArray;
 import static io.webby.testing.TestingBasics.array;
 import static io.webby.testing.orm.MockingJdbc.assertThat;
 import static io.webby.testing.orm.MockingJdbc.mockConnection;
@@ -294,7 +294,7 @@ public class QueryRunnerTest {
 
         IntArrayList fetched = runner.fetchIntColumn(HardcodedSelectQuery.of("select ints"));
 
-        assertThat(fetched).containsExactlyInOrder(111, 222, 0);
+        assertArray(fetched).containsExactlyInOrder(111, 222, 0);
         assertThat(mockedConnection).executedQueries().containsExactly("select ints");
     }
 
@@ -305,7 +305,7 @@ public class QueryRunnerTest {
 
         IntArrayList fetched = runner.fetchIntColumn(HardcodedSelectQuery.of("select ints"));
 
-        assertThat(fetched).containsExactlyInOrder(111, 222, 0);
+        assertArray(fetched).containsExactlyInOrder(111, 222, 0);
         assertThat(mockedConnection).executedQueries().containsExactly("select ints");
     }
 
@@ -318,7 +318,7 @@ public class QueryRunnerTest {
 
         LongArrayList fetched = runner.fetchLongColumn(HardcodedSelectQuery.of("select longs"));
 
-        assertThat(fetched).containsExactlyInOrder(111, 222, 0);
+        assertArray(fetched).containsExactlyInOrder(111, 222, 0);
         assertThat(mockedConnection).executedQueries().containsExactly("select longs");
     }
 
@@ -329,7 +329,7 @@ public class QueryRunnerTest {
 
         LongArrayList fetched = runner.fetchLongColumn(HardcodedSelectQuery.of("select longs"));
 
-        assertThat(fetched).containsExactlyInOrder(111, 222, 0);
+        assertArray(fetched).containsExactlyInOrder(111, 222, 0);
         assertThat(mockedConnection).executedQueries().containsExactly("select longs");
     }
 
@@ -454,46 +454,46 @@ public class QueryRunnerTest {
 
     @Test
     public void setPreparedParams_objects_array() throws SQLException {
-        assertEquals(QueryRunner.setPreparedParams(mockStatement, 1, "2", 3L, 4.0f, null), 5);
+        assertThat(QueryRunner.setPreparedParams(mockStatement, 1, "2", 3L, 4.0f, null)).isEqualTo(5);
         assertThat(mockStatement).withParams().equalExactly(1, "2", 3L, 4.0f, null);
     }
 
     @Test
     public void setPreparedParams_objects_iterable() throws SQLException {
-        assertEquals(QueryRunner.setPreparedParams(mockStatement, Array.of(1, "2", 3L, 4.0f, null)), 5);
+        assertThat(QueryRunner.setPreparedParams(mockStatement, Array.of(1, "2", 3L, 4.0f, null))).isEqualTo(5);
         assertThat(mockStatement).withParams().equalExactly(1, "2", 3L, 4.0f, null);
     }
 
     @Test
     public void setPreparedParams_objects_iterable_with_offset() throws SQLException {
         mockStatement.setDouble(1, 0.0d);
-        assertEquals(QueryRunner.setPreparedParams(mockStatement, Array.of(1, "2", 3L, 4.0f, null), 1), 6);
+        assertThat(QueryRunner.setPreparedParams(mockStatement, Array.of(1, "2", 3L, 4.0f, null), 1)).isEqualTo(6);
         assertThat(mockStatement).withParams().equalExactly(0.0d, 1, "2", 3L, 4.0f, null);
     }
 
     @Test
     public void setPreparedParams_int_array() throws SQLException {
-        assertEquals(QueryRunner.setPreparedParams(mockStatement, IntArrayList.from(111, 222, 333)), 3);
+        assertThat(QueryRunner.setPreparedParams(mockStatement, IntArrayList.from(111, 222, 333))).isEqualTo(3);
         assertThat(mockStatement).withParams().equalExactly(111, 222, 333);
     }
 
     @Test
     public void setPreparedParams_int_array_with_offset() throws SQLException {
         mockStatement.setDouble(1, 0.0d);
-        assertEquals(QueryRunner.setPreparedParams(mockStatement, IntArrayList.from(111, 222, 333), 1), 4);
+        assertThat(QueryRunner.setPreparedParams(mockStatement, IntArrayList.from(111, 222, 333), 1)).isEqualTo(4);
         assertThat(mockStatement).withParams().equalExactly(0.0d, 111, 222, 333);
     }
 
     @Test
     public void setPreparedParams_long_array() throws SQLException {
-        assertEquals(QueryRunner.setPreparedParams(mockStatement, LongArrayList.from(111, 222, 333)), 3);
+        assertThat(QueryRunner.setPreparedParams(mockStatement, LongArrayList.from(111, 222, 333))).isEqualTo(3);
         assertThat(mockStatement).withParams().equalExactly(111L, 222L, 333L);
     }
 
     @Test
     public void setPreparedParams_long_array_with_offset() throws SQLException {
         mockStatement.setDouble(1, 0.0d);
-        assertEquals(QueryRunner.setPreparedParams(mockStatement, LongArrayList.from(111, 222, 333), 1), 4);
+        assertThat(QueryRunner.setPreparedParams(mockStatement, LongArrayList.from(111, 222, 333), 1)).isEqualTo(4);
         assertThat(mockStatement).withParams().equalExactly(0.0d, 111L, 222L, 333L);
     }
 

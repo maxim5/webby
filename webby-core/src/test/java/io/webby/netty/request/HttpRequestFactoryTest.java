@@ -14,9 +14,8 @@ import org.junit.jupiter.api.Test;
 
 import java.util.Map;
 
+import static com.google.common.truth.Truth.assertThat;
 import static io.webby.testing.HttpRequestBuilder.post;
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertNull;
 
 class HttpRequestFactoryTest {
     private final EmbeddedChannel channel = new EmbeddedChannel();
@@ -31,8 +30,8 @@ class HttpRequestFactoryTest {
         DefaultHttpRequestEx request1 = factory.createRequest(post("/a").withContent(content1).full(), channel, context);
         DefaultHttpRequestEx request2 = factory.createRequest(post("/a").withContent(content2).full(), channel, context);
 
-        assertNull(request1.contentAsJson(Foo.class).fooBar);
-        assertEquals("bar", request2.contentAsJson(Foo.class).fooBar);
+        assertThat(request1.contentAsJson(Foo.class).fooBar).isNull();
+        assertThat(request2.contentAsJson(Foo.class).fooBar).isEqualTo("bar");
     }
 
     @Test
@@ -45,8 +44,8 @@ class HttpRequestFactoryTest {
         DefaultHttpRequestEx request1 = factory.createRequest(post("/a").withContent(content1).full(), channel, context);
         DefaultHttpRequestEx request2 = factory.createRequest(post("/a").withContent(content2).full(), channel, context);
 
-        assertEquals("bar", request1.contentAsJson(Foo.class).fooBar);
-        assertNull(request2.contentAsJson(Foo.class).fooBar);
+        assertThat(request1.contentAsJson(Foo.class).fooBar).isEqualTo("bar");
+        assertThat(request2.contentAsJson(Foo.class).fooBar).isNull();
     }
 
     private static @NotNull HttpRequestFactory getFactoryInstance(@NotNull Module @NotNull ... modules) {

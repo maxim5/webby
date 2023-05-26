@@ -25,7 +25,6 @@ import static io.webby.demo.model.IntsModelTable.OwnColumn.*;
 import static io.webby.demo.model.IntsModelTable.newIntsModelBatch;
 import static io.webby.demo.model.IntsModelTable.newIntsModelData;
 import static io.webby.orm.api.query.Shortcuts.*;
-import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 
 public class IntsModelTableTest
@@ -47,14 +46,14 @@ public class IntsModelTableTest
 
     @Test
     public void insert_ok() {
-        assertEquals(table.insert(new IntsModel(1, 2, 3)), 1);
+        assertThat(table.insert(new IntsModel(1, 2, 3))).isEqualTo(1);
         assertThat(table.fetchAll()).containsExactly(new IntsModel(1, 2, 3));
     }
 
     @Test
     public void insert_duplicate_ok() {
-        assertEquals(table.insert(new IntsModel(1, 2, 3)), 1);
-        assertEquals(table.insert(new IntsModel(1, 2, 3)), 1);
+        assertThat(table.insert(new IntsModel(1, 2, 3))).isEqualTo(1);
+        assertThat(table.insert(new IntsModel(1, 2, 3))).isEqualTo(1);
         assertThat(table.fetchAll()).containsExactly(new IntsModel(1, 2, 3), new IntsModel(1, 2, 3));
     }
 
@@ -63,15 +62,15 @@ public class IntsModelTableTest
     @Test
     public void insert_ignore_ok() {
         assumeOneOfEngines(Engine.SQLite, Engine.MySQL);
-        assertEquals(table.insertIgnore(new IntsModel(1, 2, 3)), 1);
+        assertThat(table.insertIgnore(new IntsModel(1, 2, 3))).isEqualTo(1);
         assertThat(table.fetchAll()).containsExactly(new IntsModel(1, 2, 3));
     }
 
     @Test
     public void insert_ignore_duplicate_ok() {
         assumeOneOfEngines(Engine.SQLite, Engine.MySQL);
-        assertEquals(table.insertIgnore(new IntsModel(1, 2, 3)), 1);
-        assertEquals(table.insertIgnore(new IntsModel(1, 2, 3)), 1);
+        assertThat(table.insertIgnore(new IntsModel(1, 2, 3))).isEqualTo(1);
+        assertThat(table.insertIgnore(new IntsModel(1, 2, 3))).isEqualTo(1);
         assertThat(table.fetchAll()).containsExactly(new IntsModel(1, 2, 3), new IntsModel(1, 2, 3));
     }
 
@@ -80,21 +79,21 @@ public class IntsModelTableTest
     @Test
     public void insert_data_complete_ok() {
         EntityIntData data = newIntsModelData(IntArrayList.from(1, 2, 3));
-        assertEquals(table.insertData(data), 1);
+        assertThat(table.insertData(data)).isEqualTo(1);
         assertThat(table.fetchAll()).containsExactly(new IntsModel(1, 2, 3));
     }
 
     @Test
     public void insert_data_incomplete_two_columns_ok() {
         EntityIntData data = new EntityIntData(List.of(foo, bar), IntArrayList.from(1, 2));
-        assertEquals(table.insertData(data), 1);
+        assertThat(table.insertData(data)).isEqualTo(1);
         assertThat(table.fetchAll()).containsExactly(new IntsModel(1, 2, 0));
     }
 
     @Test
     public void insert_data_incomplete_one_column_ok() {
         EntityIntData data = new EntityIntData(List.of(bar), IntArrayList.from(777));
-        assertEquals(table.insertData(data), 1);
+        assertThat(table.insertData(data)).isEqualTo(1);
         assertThat(table.fetchAll()).containsExactly(new IntsModel(0, 777, 0));
     }
 
@@ -147,7 +146,7 @@ public class IntsModelTableTest
             new IntsModel(1, 2, 333),
             Where.and(lookupBy(foo, var(1)), lookupBy(bar, var(2)))
         );
-        assertEquals(updated, 1);
+        assertThat(updated).isEqualTo(1);
         assertThat(table.fetchAll()).containsExactly(new IntsModel(1, 2, 333));
     }
 
@@ -159,7 +158,7 @@ public class IntsModelTableTest
             new IntsModel(1, 2, 333),
             Where.of(lookupBy(foo, var(111)))
         );
-        assertEquals(updated, 0);
+        assertThat(updated).isEqualTo(0);
         assertThat(table.fetchAll()).containsExactly(new IntsModel(1, 2, 3));
     }
 
@@ -171,7 +170,7 @@ public class IntsModelTableTest
             new IntsModel(1, 2, 333),
             Where.of(lookupBy(foo, var(1)))
         );
-        assertEquals(updated, 2);
+        assertThat(updated).isEqualTo(2);
         assertThat(table.fetchAll()).containsExactly(new IntsModel(1, 2, 333), new IntsModel(1, 2, 333));
     }
 
@@ -185,7 +184,7 @@ public class IntsModelTableTest
             newIntsModelData(IntArrayList.from(1, 2, 333)),
             Where.and(lookupBy(foo, var(1)), lookupBy(bar, var(2)))
         );
-        assertEquals(updated, 1);
+        assertThat(updated).isEqualTo(1);
         assertThat(table.fetchAll()).containsExactly(new IntsModel(1, 2, 333));
     }
 
@@ -197,7 +196,7 @@ public class IntsModelTableTest
             new EntityIntData(List.of(bar), IntArrayList.from(777)),
             Where.of(lookupBy(foo, var(1)))
         );
-        assertEquals(updated, 1);
+        assertThat(updated).isEqualTo(1);
         assertThat(table.fetchAll()).containsExactly(new IntsModel(1, 777, 3));
     }
 
@@ -209,7 +208,7 @@ public class IntsModelTableTest
             newIntsModelData(IntArrayList.from(1, 2, 333)),
             Where.of(lookupBy(foo, var(111)))
         );
-        assertEquals(updated, 0);
+        assertThat(updated).isEqualTo(0);
         assertThat(table.fetchAll()).containsExactly(new IntsModel(1, 2, 3));
     }
 
@@ -221,7 +220,7 @@ public class IntsModelTableTest
             newIntsModelData(IntArrayList.from(1, 2, 333)),
             Where.and(lookupBy(foo, var(1)), lookupBy(bar, var(2)))
         );
-        assertEquals(updated, 2);
+        assertThat(updated).isEqualTo(2);
         assertThat(table.fetchAll()).containsExactly(new IntsModel(1, 2, 333), new IntsModel(1, 2, 333));
     }
 
@@ -337,7 +336,7 @@ public class IntsModelTableTest
             new IntsModel(1, 2, 333),
             Where.and(lookupBy(foo, var(1)), lookupBy(bar, var(2)))
         );
-        assertEquals(affected, 1);
+        assertThat(affected).isEqualTo(1);
         assertThat(table.fetchAll()).containsExactly(new IntsModel(1, 2, 333));
     }
 
@@ -349,7 +348,7 @@ public class IntsModelTableTest
             new IntsModel(111, 222, 333),
             Where.and(lookupBy(foo, var(111)), lookupBy(bar, var(222)))
         );
-        assertEquals(affected, 1);
+        assertThat(affected).isEqualTo(1);
         assertThat(table.fetchAll()).containsExactly(new IntsModel(1, 2, 3), new IntsModel(111, 222, 333));
     }
 
@@ -363,7 +362,7 @@ public class IntsModelTableTest
             newIntsModelData(IntArrayList.from(1, 2, 333)),
             Where.and(lookupBy(foo, var(1)), lookupBy(bar, var(2)))
         );
-        assertEquals(affected, 1);
+        assertThat(affected).isEqualTo(1);
         assertThat(table.fetchAll()).containsExactly(new IntsModel(1, 2, 333));
     }
 
@@ -375,7 +374,7 @@ public class IntsModelTableTest
             newIntsModelData(IntArrayList.from(111, 222, 333)),
             Where.and(lookupBy(foo, var(111)), lookupBy(bar, var(222)))
         );
-        assertEquals(affected, 1);
+        assertThat(affected).isEqualTo(1);
         assertThat(table.fetchAll()).containsExactly(new IntsModel(1, 2, 3), new IntsModel(111, 222, 333));
     }
 
@@ -386,7 +385,7 @@ public class IntsModelTableTest
         table.insertBatch(List.of(new IntsModel(1, 2, 3), new IntsModel(4, 5, 6)));
 
         int deleted = table.deleteWhere(Where.of(lookupBy(foo, 1)));
-        assertEquals(deleted, 1);
+        assertThat(deleted).isEqualTo(1);
         assertThat(table.fetchAll()).containsExactly(new IntsModel(4, 5, 6));
     }
 
@@ -395,7 +394,7 @@ public class IntsModelTableTest
         table.insertBatch(List.of(new IntsModel(1, 2, 3), new IntsModel(4, 5, 6)));
 
         int deleted = table.deleteWhere(Where.of(lookupBy(foo, 111)));
-        assertEquals(deleted, 0);
+        assertThat(deleted).isEqualTo(0);
         assertThat(table.fetchAll()).containsExactly(new IntsModel(1, 2, 3), new IntsModel(4, 5, 6));
     }
 
@@ -404,7 +403,7 @@ public class IntsModelTableTest
         table.insertBatch(List.of(new IntsModel(1, 2, 3), new IntsModel(111, 222, 3)));
 
         int deleted = table.deleteWhere(Where.of(lookupBy(value, 3)));
-        assertEquals(deleted, 2);
+        assertThat(deleted).isEqualTo(2);
         assertThat(table.fetchAll()).isEmpty();
     }
 }

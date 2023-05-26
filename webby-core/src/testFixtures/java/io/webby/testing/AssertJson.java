@@ -14,14 +14,13 @@ import java.util.Map;
 import java.util.function.Consumer;
 
 import static com.google.common.truth.Truth.assertThat;
-import static org.junit.jupiter.api.Assertions.*;
 
 public class AssertJson {
     public static void assertJsonEquivalent(@Nullable Object actual, @NotNull Iterable<?> expected) {
-        assertNotNull(actual);
-        assertTrue(actual instanceof Iterable);
+        assertThat(actual).isNotNull();
+        assertThat(actual instanceof Iterable).isTrue();
         BiStream.zip(Streams.stream((Iterable<?>) actual), Streams.stream(expected))
-                .forEach(AssertJson::assertJsonEquivalent);
+            .forEach(AssertJson::assertJsonEquivalent);
     }
 
     public static void assertJsonEquivalent(@Nullable Object actual, @Nullable Object expected) {
@@ -30,26 +29,26 @@ public class AssertJson {
         } else if (expected instanceof Iterable<?> iterable) {
             assertJsonEquivalent(actual, iterable);
         } else if (expected instanceof Map<?, ?> map) {
-            assertTrue(actual instanceof Map<?, ?>);
+            assertThat(actual instanceof Map<?, ?>).isTrue();
             Map<?, ?> actualMap = (Map<?, ?>) actual;
-            assertEquals(map.size(), actualMap.size());
+            assertThat(actualMap.size()).isEqualTo(map.size());
             assertJsonEquivalent(actualMap.entrySet(), map.entrySet());
         } else if (expected instanceof Map.Entry<?, ?> entry) {
-            assertTrue(actual instanceof Map.Entry<?, ?>);
+            assertThat(actual instanceof Map.Entry<?, ?>).isTrue();
             Map.Entry<?, ?> actualEntry = (Map.Entry<?, ?>) actual;
             assertJsonEquivalent(actualEntry.getKey(), entry.getKey());
             assertJsonEquivalent(actualEntry.getValue(), entry.getValue());
         } else {
-            assertEquals(actual, expected);
+            assertThat(expected).isEqualTo(actual);
         }
     }
 
     public static void assertSameNumber(@Nullable Object actual, @NotNull Number expected) {
-        assertNotNull(actual);
-        assertTrue(actual instanceof Number);
-        assertEquals(((Number) actual).intValue(), expected.intValue());
-        assertEquals(((Number) actual).longValue(), expected.longValue());
-        assertEquals(((Number) actual).doubleValue(), expected.doubleValue());
+        assertThat(actual).isNotNull();
+        assertThat(actual instanceof Number).isTrue();
+        assertThat(expected.intValue()).isEqualTo(((Number) actual).intValue());
+        assertThat(expected.longValue()).isEqualTo(((Number) actual).longValue());
+        assertThat(expected.doubleValue()).isEqualTo(((Number) actual).doubleValue());
     }
 
     public static void assertJsonStringRoundTrip(@NotNull Object object) {
@@ -57,13 +56,13 @@ public class AssertJson {
         String string = json.writeString(object);
         assertThat(string).isNotEmpty();
         Object another = json.readString(string, object.getClass());
-        assertEquals(object, another);
+        assertThat(another).isEqualTo(object);
     }
 
     public static void assertJsonValue(@NotNull ByteBuf actual, @NotNull Object object) {
         Json json = Testing.Internals.json();
         Object another = json.readByteBuf(actual, object.getClass());
-        assertEquals(object, another);
+        assertThat(another).isEqualTo(object);
     }
 
     public static @NotNull Consumer<AppSettings> withJsonLibrary(@NotNull SupportedJsonLibrary library) {

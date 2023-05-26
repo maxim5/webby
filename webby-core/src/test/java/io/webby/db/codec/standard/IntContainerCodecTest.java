@@ -6,7 +6,7 @@ import io.webby.db.codec.Codec;
 import org.jetbrains.annotations.NotNull;
 import org.junit.jupiter.api.Test;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
+import static com.google.common.truth.Truth.assertThat;
 
 public class IntContainerCodecTest {
     @Test
@@ -28,7 +28,7 @@ public class IntContainerCodecTest {
     private static <T> void assertCodecRoundtrip(@NotNull Codec<T> codec, @NotNull T value) {
         byte[] bytes = codec.writeToBytes(value);
         T readValue = codec.readFromBytes(bytes);
-        assertEquals(bytes.length, codec.sizeOf(value));
-        assertEquals(value, readValue);
+        assertThat(codec.sizeOf(value)).isEqualTo(bytes.length);
+        assertThat(readValue).isEqualTo(value);
     }
 }

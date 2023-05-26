@@ -15,12 +15,12 @@ import java.io.StringReader;
 import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
 
+import static com.google.common.truth.Truth.assertThat;
 import static io.webby.testing.AssertJson.*;
 import static io.webby.testing.TestingBytes.*;
 import static io.webby.url.view.EasyRender.outputToBytes;
 import static io.webby.url.view.EasyRender.writeToString;
 import static org.junit.Assume.assumeTrue;
-import static org.junit.jupiter.api.Assertions.assertEquals;
 
 @RunWith(Parameterized.class)
 public class JsonIntegrationTest {
@@ -145,10 +145,10 @@ public class JsonIntegrationTest {
 
     private static void assertJsonWrite(Object instance, String expected) throws Exception {
         Json json = Testing.Internals.json();
-        assertEquals(expected, json.writeString(instance));
-        assertEquals(expected, writeToString(writer -> json.writeChars(writer, instance)));
-        assertBytes(json.writeBytes(instance), expected);
-        assertBytes(outputToBytes(outputStream -> json.writeBytes(outputStream, instance)), expected);
-        assertByteBuf(json.writeByteBuf(instance), expected);
+        assertThat(json.writeString(instance)).isEqualTo(expected);
+        assertThat(writeToString(writer -> json.writeChars(writer, instance))).isEqualTo(expected);
+        assertBytes(json.writeBytes(instance)).isEqualTo(expected);
+        assertBytes(outputToBytes(outputStream -> json.writeBytes(outputStream, instance))).isEqualTo(expected);
+        assertBytes(json.writeByteBuf(instance)).isEqualTo(expected);
     }
 }
