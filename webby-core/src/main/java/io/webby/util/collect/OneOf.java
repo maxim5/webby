@@ -4,9 +4,7 @@ import com.google.errorprone.annotations.Immutable;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
-import java.util.function.Consumer;
-import java.util.function.Function;
-import java.util.function.ToIntFunction;
+import java.util.function.*;
 
 /**
  * Can hold an immutable pair of nullable objects, only one of which is set at a time.
@@ -82,6 +80,18 @@ public class OneOf<U, V> {
 
     public int mapToInt(@NotNull ToIntFunction<U> fromFirst, @NotNull ToIntFunction<V> fromSecond) {
         return hasFirst() ? fromFirst.applyAsInt(first) : fromSecond.applyAsInt(second);
+    }
+
+    public long mapToLong(@NotNull ToLongFunction<U> fromFirst, @NotNull ToLongFunction<V> fromSecond) {
+        return hasFirst() ? fromFirst.applyAsLong(first) : fromSecond.applyAsLong(second);
+    }
+
+    public double mapToDouble(@NotNull ToDoubleFunction<U> fromFirst, @NotNull ToDoubleFunction<V> fromSecond) {
+        return hasFirst() ? fromFirst.applyAsDouble(first) : fromSecond.applyAsDouble(second);
+    }
+
+    public boolean test(@NotNull Predicate<U> forFirst, @NotNull Predicate<V> forSecond) {
+        return hasFirst() ? forFirst.test(first) : forSecond.test(second);
     }
 
     public void apply(@NotNull Consumer<U> takeFirst, @NotNull Consumer<V> takeSecond) {
