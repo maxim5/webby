@@ -6,11 +6,14 @@ import io.webby.db.model.BlobKv;
 import io.webby.demo.model.*;
 import io.webby.orm.arch.factory.ArchJavaRunner;
 import io.webby.orm.arch.factory.ModelInput;
+import io.webby.orm.arch.factory.PojoInput;
 import io.webby.orm.arch.factory.RunInputs;
+
+import java.util.List;
 
 public class DemoTablesCodegenMain {
     private static final String DESTINATION_DIRECTORY = "demo-frontend/build/generated/sources/orm";
-    private static final RunInputs RUN_INPUTS = RunInputs.of(
+    private static final List<ModelInput> MODEL_INPUTS = List.of(
         ModelInput.of(DefaultUser.class),
         ModelInput.of(DefaultSession.class),
         ModelInput.of(BlobKv.class),
@@ -48,6 +51,9 @@ public class DemoTablesCodegenMain {
 
         ModelInput.of(UserRateModel.class)
     );
+    private static final List<PojoInput> POJO_INPUTS = List.of(
+    );
+    private static final RunInputs RUN_INPUTS = new RunInputs(MODEL_INPUTS, POJO_INPUTS);
 
     public static void main(String[] args) throws Exception {
         ArchJavaRunner runner = new ArchJavaRunner();

@@ -3,29 +3,33 @@ package io.webby.orm.arch.factory;
 import com.google.common.collect.Streams;
 import org.jetbrains.annotations.NotNull;
 
-import java.util.Iterator;
 import java.util.List;
 import java.util.Optional;
 
-public class RunInputs implements Iterable<ModelInput> {
-    private final List<ModelInput> inputs;
+public class RunInputs {
+    private final List<ModelInput> models;
+    private final List<PojoInput> pojos;
 
-    RunInputs(@NotNull List<ModelInput> inputs) {
-        this.inputs = inputs;
+    public RunInputs(@NotNull List<ModelInput> models, @NotNull List<PojoInput> pojos) {
+        this.models = models;
+        this.pojos = pojos;
     }
 
-    public static @NotNull RunInputs of(@NotNull ModelInput @NotNull ... inputs) {
-        return new RunInputs(List.of(inputs));
+    public static @NotNull RunInputs of(@NotNull ModelInput @NotNull ... models) {
+        return new RunInputs(List.of(models), List.of());
     }
 
     public @NotNull Optional<ModelInput> findInputByModel(@NotNull Class<?> modelClass) {
-        return Streams.stream(inputs)
+        return Streams.stream(models)
             .filter(input -> input.modelClass().equals(modelClass))
             .findFirst();
     }
 
-    @Override
-    public @NotNull Iterator<ModelInput> iterator() {
-        return inputs.iterator();
+    public @NotNull Iterable<ModelInput> models() {
+        return models;
+    }
+
+    public @NotNull Iterable<PojoInput> pojos() {
+        return pojos;
     }
 }

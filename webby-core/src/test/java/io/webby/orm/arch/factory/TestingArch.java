@@ -35,12 +35,12 @@ public class TestingArch {
 
     public static @NotNull RunInputs newRunInputs(@NotNull Class<?> @NotNull ... models) {
         List<ModelInput> modelInputs = Arrays.stream(models).map(ModelInput::of).toList();
-        return new RunInputs(modelInputs);
+        return new RunInputs(modelInputs, List.of());
     }
 
     public static @NotNull RunInputs newRunInputs(@NotNull Collection<Class<?>> models) {
         List<ModelInput> modelInputs = models.stream().map(ModelInput::of).toList();
-        return new RunInputs(modelInputs);
+        return new RunInputs(modelInputs, List.of());
     }
 
     public static @NotNull TableArchSubject assertThat(@NotNull TableArch tableArch) {
