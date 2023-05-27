@@ -23,7 +23,7 @@ public class PojoFieldNative extends PojoField {
     }
 
     public @NotNull Column column() {
-        return new Column(fullSqlName(), new ColumnType(jdbcType));
+        return Column.of(fullSqlName(), jdbcType);
     }
 
     @Override

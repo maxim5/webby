@@ -11,32 +11,32 @@ public class AdapterApiTest {
     @Test
     public void classToAdapterColumns_duration_adapter() {
         List<Column> columns = AdapterApi.classToAdapterColumns(DurationJdbcAdapter.class, "foo");
-        assertThat(columns).containsExactly(new Column("foo", new ColumnType(JdbcType.Long))).inOrder();
+        assertThat(columns).containsExactly(Column.of("foo", JdbcType.Long)).inOrder();
     }
 
     @Test
     public void classToAdapterColumns_instant_adapter() {
         List<Column> columns = AdapterApi.classToAdapterColumns(InstantJdbcAdapter.class, "foo");
-        assertThat(columns).containsExactly(new Column("foo", new ColumnType(JdbcType.Timestamp))).inOrder();
+        assertThat(columns).containsExactly(Column.of("foo", JdbcType.Timestamp)).inOrder();
     }
 
     @Test
     public void classToAdapterColumns_offset_time_adapter() {
         List<Column> columns = AdapterApi.classToAdapterColumns(OffsetTimeJdbcAdapter.class, "foo");
-        assertThat(columns).containsExactly(new Column("foo_time", new ColumnType(JdbcType.Time)),
-                                            new Column("foo_zone_offset_seconds", new ColumnType(JdbcType.Int))).inOrder();
+        assertThat(columns).containsExactly(Column.of("foo_time", JdbcType.Time),
+                                            Column.of("foo_zone_offset_seconds", JdbcType.Int)).inOrder();
     }
 
     @Test
     public void classToAdapterColumns_offset_date_time_adapter() {
         List<Column> columns = AdapterApi.classToAdapterColumns(OffsetDateTimeJdbcAdapter.class, "foo");
-        assertThat(columns).containsExactly(new Column("foo_timestamp", new ColumnType(JdbcType.Timestamp)),
-                                            new Column("foo_zone_offset_seconds", new ColumnType(JdbcType.Int))).inOrder();
+        assertThat(columns).containsExactly(Column.of("foo_timestamp", JdbcType.Timestamp),
+                                            Column.of("foo_zone_offset_seconds", JdbcType.Int)).inOrder();
     }
 
     @Test
     public void classToAdapterColumns_period_adapter() {
         List<Column> columns = AdapterApi.classToAdapterColumns(PeriodJdbcAdapter.class, "foo");
-        assertThat(columns).containsExactly(new Column("foo", new ColumnType(JdbcType.String))).inOrder();
+        assertThat(columns).containsExactly(Column.of("foo", JdbcType.String)).inOrder();
     }
 }
