@@ -1,7 +1,6 @@
 package io.webby.orm.arch.factory;
 
 import com.google.common.collect.Streams;
-import io.webby.orm.codegen.ModelInput;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.Iterator;

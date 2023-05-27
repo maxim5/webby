@@ -6,7 +6,6 @@ import io.webby.orm.arch.model.*;
 import io.webby.orm.arch.util.AnnotationsAnalyzer;
 import io.webby.orm.arch.util.JavaClassAnalyzer;
 import io.webby.orm.arch.util.Naming;
-import io.webby.orm.codegen.ModelInput;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 

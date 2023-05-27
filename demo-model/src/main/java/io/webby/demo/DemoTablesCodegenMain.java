@@ -5,8 +5,8 @@ import io.webby.auth.user.DefaultUser;
 import io.webby.db.model.BlobKv;
 import io.webby.demo.model.*;
 import io.webby.orm.arch.factory.ArchJavaRunner;
+import io.webby.orm.arch.factory.ModelInput;
 import io.webby.orm.arch.factory.RunInputs;
-import io.webby.orm.codegen.ModelInput;
 
 public class DemoTablesCodegenMain {
     private static final String DESTINATION_DIRECTORY = "demo-frontend/build/generated/sources/orm";

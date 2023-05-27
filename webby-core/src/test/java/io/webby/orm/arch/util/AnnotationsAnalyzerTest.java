@@ -9,7 +9,7 @@ import io.webby.orm.api.annotate.Model;
 import io.webby.orm.api.annotate.Sql;
 import io.webby.orm.api.annotate.Sql.*;
 import io.webby.orm.arch.InvalidSqlModelException;
-import io.webby.orm.codegen.ModelInput;
+import io.webby.orm.arch.factory.ModelInput;
 import io.webby.util.reflect.EasyMembers;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;

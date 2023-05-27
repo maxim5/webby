@@ -3,7 +3,6 @@ package io.webby.orm.arch.factory;
 import com.google.common.truth.Truth;
 import com.google.errorprone.annotations.CanIgnoreReturnValue;
 import io.webby.orm.arch.model.*;
-import io.webby.orm.codegen.ModelInput;
 import io.webby.testing.TestingBasics.SimpleBitSet;
 import io.webby.testing.orm.FakeModelAdaptersScanner;
 import io.webby.util.collect.ListBuilder;

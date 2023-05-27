@@ -6,7 +6,6 @@ import io.webby.orm.arch.model.TableArch;
 import io.webby.orm.arch.model.TableField;
 import io.webby.orm.arch.util.JavaClassAnalyzer;
 import io.webby.orm.codegen.ModelAdaptersScanner;
-import io.webby.orm.codegen.ModelInput;
 import org.jetbrains.annotations.NotNull;
 
 public class ArchFactory {

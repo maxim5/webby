@@ -1,4 +1,4 @@
-package io.webby.orm.codegen;
+package io.webby.orm.arch.factory;
 
 import io.webby.orm.api.annotate.Model;
 import io.webby.orm.arch.util.Naming;
