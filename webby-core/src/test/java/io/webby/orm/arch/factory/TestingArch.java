@@ -52,6 +52,10 @@ public class TestingArch {
         return new TableFieldSubject(tableField);
     }
 
+    public static @NotNull PojoArchSubject assertThat(@NotNull PojoArch pojoArch) {
+        return new PojoArchSubject(pojoArch);
+    }
+
     @CanIgnoreReturnValue
     public record TableArchSubject(@NotNull TableArch tableArch) {
         public @NotNull TableArchSubject hasTableName(@NotNull String sqlName,
@@ -243,5 +247,18 @@ public class TestingArch {
         public boolean isForeignKey() { return bitSet.get(1); }
         public boolean isUnique() { return bitSet.get(2); }
         public boolean isNullable() { return bitSet.get(3); }
+    }
+
+    @CanIgnoreReturnValue
+    public record PojoArchSubject(@NotNull PojoArch pojoArch) {
+        public @NotNull PojoArchSubject hasAdapterName(@NotNull String name) {
+            Truth.assertThat(pojoArch.adapterName()).isEqualTo(name);
+            return this;
+        }
+
+        public @NotNull PojoArchSubject hasColumns(@NotNull Column @NotNull... columns) {
+            Truth.assertThat(pojoArch.columns()).containsExactly((Object[]) columns).inOrder();
+            return this;
+        }
     }
 }
