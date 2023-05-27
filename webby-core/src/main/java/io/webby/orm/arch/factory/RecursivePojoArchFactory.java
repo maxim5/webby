@@ -20,17 +20,21 @@ class RecursivePojoArchFactory {
     }
 
     public @NotNull PojoArch buildPojoArchFor(@NotNull Field field) {
-        return runContext.pojos().getOrCompute(field.getType(), () -> buildPojoArchForImpl(field));
+        return buildPojoArchFor(field.getType());
     }
 
-    private @NotNull PojoArch buildPojoArchForImpl(@NotNull Field field) {
-        ImmutableList<PojoField> pojoFields = JavaClassAnalyzer.getAllFieldsOrdered(field.getType()).stream().map(subField -> {
+    public @NotNull PojoArch buildPojoArchFor(@NotNull Class<?> klass) {
+        return runContext.pojos().getOrCompute(klass, () -> buildPojoArchForImpl(klass));
+    }
+
+    private @NotNull PojoArch buildPojoArchForImpl(@NotNull Class<?> klass) {
+        ImmutableList<PojoField> pojoFields = JavaClassAnalyzer.getAllFieldsOrdered(klass).stream().map(subField -> {
             ModelField modelField = JavaClassAnalyzer.toModelField(subField);
             ResolveResult resolved = fieldResolver.resolve(subField);
             return switch (resolved.type()) {
                 case NATIVE -> PojoFieldNative.ofNative(modelField, resolved.jdbcType());
                 case FOREIGN_KEY ->
-                    throw new InvalidSqlModelException("Foreign keys in nested classes are not supported: %s", field);
+                    throw new InvalidSqlModelException("Foreign keys in nested classes are not supported: %s", subField);
                 case HAS_MAPPER -> {
                     MapperApi mapperApi = MapperApi.ofExistingMapper(resolved.mapperClass(),
                                                                      subField.getGenericType(),
@@ -45,6 +49,6 @@ class RecursivePojoArchFactory {
                 }
             };
         }).collect(ImmutableList.toImmutableList());
-        return new PojoArch(field.getType(), pojoFields);
+        return new PojoArch(klass, pojoFields);
     }
 }

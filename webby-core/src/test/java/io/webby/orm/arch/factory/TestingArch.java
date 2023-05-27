@@ -30,6 +30,10 @@ public class TestingArch {
         return runResult.getTableOrDie(model);
     }
 
+    public static @NotNull RunContext newRunContext() {
+        return new RunContext(newRunInputs(), FakeModelAdaptersScanner.FAKE_SCANNER);
+    }
+
     public static @NotNull RunInputs newRunInputs(@NotNull Class<?> @NotNull ... models) {
         List<ModelInput> modelInputs = Arrays.stream(models).map(ModelInput::of).toList();
         return new RunInputs(modelInputs);
