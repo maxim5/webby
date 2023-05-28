@@ -52,6 +52,9 @@ public class DemoTablesCodegenMain {
         ModelInput.of(UserRateModel.class)
     );
     private static final List<PojoInput> POJO_INPUTS = List.of(
+        PojoInput.of(PrimitiveModel.PrimitiveDuo.class),
+        PojoInput.of(PrimitiveModel.PrimitiveTrio.class),
+        PojoInput.of(StringModel.StringDuo.class)
     );
     private static final RunInputs RUN_INPUTS = new RunInputs(MODEL_INPUTS, POJO_INPUTS);
 
