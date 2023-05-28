@@ -4,15 +4,19 @@ import com.google.common.collect.Streams;
 import io.webby.orm.adapter.JdbcAdapt;
 import io.webby.orm.adapter.JdbcArrayAdapter;
 import io.webby.orm.adapter.JdbcSingleValueAdapter;
+import io.webby.orm.api.ResultSetIterator;
 import io.webby.orm.arch.model.*;
 import io.webby.orm.arch.util.Naming;
 import io.webby.util.collect.EasyMaps;
 import org.jetbrains.annotations.NotNull;
 
+import java.sql.ResultSet;
+import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.function.Function;
 import java.util.stream.Stream;
 
 import static io.webby.orm.codegen.JavaSupport.INDENT1;
@@ -51,6 +55,7 @@ public class ModelAdapterCodegen extends BaseCodegen {
     private void imports() {
         List<String> classesToImport = Streams.concat(
             Stream.of(JdbcAdapt.class, getBaseClass()).map(FQN::of),
+            Stream.of(ResultSetIterator.class, ResultSet.class, SQLException.class).map(FQN::of),
             getNestedAdapters().stream().map(FQN::of)
         ).filter(fqn -> !isSkippablePackage(fqn.packageName())).map(FQN::importName).sorted().distinct().toList();
         Map<String, String> context = Map.of(
@@ -94,7 +99,7 @@ public class ModelAdapterCodegen extends BaseCodegen {
 
         appendCode(0, """
         @JdbcAdapt(value = $ModelClass.class, names = { $names })
-        public class $AdapterClass implements $BaseClass<$BaseGeneric> {
+        public class $AdapterClass implements $BaseClass<$BaseGeneric>, ResultSetIterator.Converter<$BaseGeneric> {
         """, EasyMaps.merge(context, mainContext));
     }
 
@@ -108,12 +113,18 @@ public class ModelAdapterCodegen extends BaseCodegen {
         PojoArch pojo = adapter.pojoArch();
         Map<String, String> context = Map.of(
             "$params", pojo.columns().stream().map(ModelAdapterCodegen::columnToParam).collect(COMMA_JOINER),
-            "$constructor", fieldConstructor(pojo, nativeFieldsColumnIndex(pojo), new StringBuilder())
+            "$constructor", fieldConstructor(pojo, nativeFieldsColumnIndex(pojo), new StringBuilder()),
+            "$fromResultSetArgs", fromResultSetArgs(pojo, "result")
         );
 
         appendCode("""
         public @Nonnull $ModelClass createInstance($params) {
             return $constructor;
+        }
+        
+        @Override
+        public @Nonnull $ModelClass apply(@Nonnull ResultSet result) throws SQLException {
+            return createInstance($fromResultSetArgs);
         }\n
         """, EasyMaps.merge(mainContext, context));
     }
@@ -159,6 +170,17 @@ public class ModelAdapterCodegen extends BaseCodegen {
         }
         builder.setLength(builder.length() - 2);  // last comma
         return builder.append(")").toString();
+    }
+
+    private static @NotNull String fromResultSetArgs(@NotNull PojoArch pojo, @NotNull String resultVariable) {
+        return pojo.columns().stream().map(new Function<Column, String>() {
+            private int counter = 1;
+
+            @Override
+            public String apply(Column column) {
+                return "%s.%s(%s)".formatted(resultVariable, column.jdbcType().getterMethod(), counter++);
+            }
+        }).collect(COMMA_JOINER);
     }
 
     private void toValueObject() {
@@ -244,7 +266,7 @@ public class ModelAdapterCodegen extends BaseCodegen {
 
         appendCode("""
         @Override
-        public @Nonnull Object[] toNewValuesArray($ModelClass instance) {
+        public @Nonnull Object[] toNewValuesArray(@Nonnull $ModelClass instance) {
             Object[] array = new Object[$columns_number];
             fillArrayValues(instance, array, 0);
             return array;
