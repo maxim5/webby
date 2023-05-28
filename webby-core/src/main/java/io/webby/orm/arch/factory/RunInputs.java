@@ -1,35 +1,39 @@
 package io.webby.orm.arch.factory;
 
-import com.google.common.collect.Streams;
+import com.google.common.collect.ImmutableList;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.List;
 import java.util.Optional;
 
 public class RunInputs {
-    private final List<ModelInput> models;
-    private final List<PojoInput> pojos;
+    private final ImmutableList<ModelInput> models;
+    private final ImmutableList<PojoInput> pojos;
 
     public RunInputs(@NotNull List<ModelInput> models, @NotNull List<PojoInput> pojos) {
-        this.models = models;
-        this.pojos = pojos;
+        this.models = ImmutableList.copyOf(models);
+        this.pojos = ImmutableList.copyOf(pojos);
     }
 
     public static @NotNull RunInputs of(@NotNull ModelInput @NotNull ... models) {
-        return new RunInputs(List.of(models), List.of());
+        return of(ImmutableList.copyOf(models), ImmutableList.of());
+    }
+
+    public static @NotNull RunInputs of(@NotNull List<ModelInput> models, @NotNull List<PojoInput> pojos) {
+        return new RunInputs(models, pojos);
     }
 
     public @NotNull Optional<ModelInput> findInputByModel(@NotNull Class<?> modelClass) {
-        return Streams.stream(models)
+        return models.stream()
             .filter(input -> input.modelClass().equals(modelClass))
             .findFirst();
     }
 
-    public @NotNull Iterable<ModelInput> models() {
+    public @NotNull ImmutableList<ModelInput> models() {
         return models;
     }
 
-    public @NotNull Iterable<PojoInput> pojos() {
+    public @NotNull ImmutableList<PojoInput> pojos() {
         return pojos;
     }
 }
