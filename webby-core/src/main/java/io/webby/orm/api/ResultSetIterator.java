@@ -3,7 +3,6 @@ package io.webby.orm.api;
 import com.google.errorprone.annotations.MustBeClosed;
 import io.webby.util.base.Unchecked;
 import io.webby.util.collect.Pair;
-import io.webby.util.func.ThrowConsumer;
 import io.webby.util.func.ThrowFunction;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
@@ -103,12 +102,12 @@ public class ResultSetIterator<E> implements Iterator<E>, Closeable {
      */
     @FunctionalInterface
     public interface Converter<E> extends ThrowFunction<ResultSet, E, SQLException> {
+        /**
+         * Converts the {@code resultSet} to the {@code E} entity object.
+         * The implementation is expected to return a non-null result or throw an exception if impossible.
+         */
         @Override
-        E apply(@NotNull ResultSet resultSet) throws SQLException;
-
-        default @NotNull ThrowConsumer<ResultSet, SQLException> via(@NotNull ThrowConsumer<E, SQLException> consumer) {
-            return resultSet -> consumer.accept(apply(resultSet));
-        }
+        @NotNull E apply(@NotNull ResultSet resultSet) throws SQLException;
     }
 
     /**
