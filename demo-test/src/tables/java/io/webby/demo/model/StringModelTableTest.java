@@ -51,8 +51,8 @@ public class StringModelTableTest extends SqlDbTableTest<StringModel, StringMode
         table.insertBatch(List.of(createEntity("1", 111), createEntity("2", 222)));
         List<StringDuo> expected = List.of(new StringDuo("1", "1"), new StringDuo("2", "2"));
 
-        StringDuo duo = runner().runAndGet(SELECT_DUO_QUERY, StringModel_StringDuo_JdbcAdapter.ADAPTER);
-        assertThat(duo).isEqualTo(expected.get(0));
+        StringDuo one = runner().runAndGet(SELECT_DUO_QUERY, StringModel_StringDuo_JdbcAdapter.ADAPTER);
+        assertThat(one).isEqualTo(expected.get(0));
 
         List<StringDuo> fetched = runner().fetchAll(SELECT_DUO_QUERY, StringModel_StringDuo_JdbcAdapter.ADAPTER);
         assertThat(fetched).containsExactlyElementsIn(expected).inOrder();

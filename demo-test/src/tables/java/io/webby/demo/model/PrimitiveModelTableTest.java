@@ -48,8 +48,8 @@ public class PrimitiveModelTableTest
         table.insertBatch(List.of(createEntity(1, 111), createEntity(2, 222)));
         List<PrimitiveDuo> expected = List.of(new PrimitiveDuo(111, 1), new PrimitiveDuo(222, 1));
 
-        PrimitiveDuo duo = runner().runAndGet(SELECT_DUO_QUERY, PrimitiveModel_PrimitiveDuo_JdbcAdapter.ADAPTER);
-        assertThat(duo).isEqualTo(expected.get(0));
+        PrimitiveDuo one = runner().runAndGet(SELECT_DUO_QUERY, PrimitiveModel_PrimitiveDuo_JdbcAdapter.ADAPTER);
+        assertThat(one).isEqualTo(expected.get(0));
 
         List<PrimitiveDuo> fetched = runner().fetchAll(SELECT_DUO_QUERY, PrimitiveModel_PrimitiveDuo_JdbcAdapter.ADAPTER);
         assertThat(fetched).containsExactlyElementsIn(expected).inOrder();
@@ -64,8 +64,8 @@ public class PrimitiveModelTableTest
         table.insertBatch(List.of(createEntity(1, 777)));
         List<PrimitiveTrio> expected = List.of(new PrimitiveTrio((byte) 2, (short) 3, 'M'));
 
-        PrimitiveTrio duo = runner().runAndGet(SELECT_TRIO_QUERY, PrimitiveModel_PrimitiveTrio_JdbcAdapter.ADAPTER);
-        assertThat(duo).isEqualTo(expected.get(0));
+        PrimitiveTrio one = runner().runAndGet(SELECT_TRIO_QUERY, PrimitiveModel_PrimitiveTrio_JdbcAdapter.ADAPTER);
+        assertThat(one).isEqualTo(expected.get(0));
 
         List<PrimitiveTrio> fetched = runner().fetchAll(SELECT_TRIO_QUERY, PrimitiveModel_PrimitiveTrio_JdbcAdapter.ADAPTER);
         assertThat(fetched).containsExactlyElementsIn(expected).inOrder();
