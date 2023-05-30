@@ -3,7 +3,6 @@ package io.webby.db.count.vote;
 import com.carrotsearch.hppc.IntContainer;
 import com.carrotsearch.hppc.IntHashSet;
 import com.carrotsearch.hppc.IntObjectMap;
-import com.carrotsearch.hppc.cursors.IntCursor;
 import com.carrotsearch.hppc.procedures.IntObjectProcedure;
 import io.webby.db.StorageType;
 import io.webby.db.count.StoreId;

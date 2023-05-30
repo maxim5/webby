@@ -13,7 +13,7 @@ public enum FakeEnumColumn implements Column {
 
     FakeEnumColumn(@NotNull TermType type) {
         this.type = type;
-    };
+    }
 
     @Override
     public @NotNull TermType type() {

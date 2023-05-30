@@ -322,7 +322,7 @@ public class ResultSetConversionMakerTest {
         """);
     }
 
-    private static @NotNull SqlSubject assertThatSql(@NotNull Snippet snippet) {
+    private static @NotNull SqlSubject<SqlSubject<?>> assertThatSql(@NotNull Snippet snippet) {
         return AssertSql.assertThatSql(snippet.join());
     }
 }

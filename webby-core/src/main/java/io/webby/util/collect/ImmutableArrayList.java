@@ -36,6 +36,7 @@ public class ImmutableArrayList<E> extends ArrayList<E> {
     );
 
     private ImmutableArrayList() {
+        super(0);
     }
 
     /*package*/ ImmutableArrayList(@NotNull Collection<? extends E> c) {

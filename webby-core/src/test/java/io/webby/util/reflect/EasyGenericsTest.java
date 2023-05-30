@@ -16,6 +16,7 @@ import static java.util.Objects.requireNonNull;
 public class EasyGenericsTest {
     @Test
     public void getGenericTypeArgumentsOfField_optional() {
+        @SuppressWarnings("rawtypes")
         record Foo(Optional<Integer> ints, Optional<String> str, Optional<Object> obj, Optional<?> wild, Optional opt) {}
 
         assertJavaClass(Foo.class)

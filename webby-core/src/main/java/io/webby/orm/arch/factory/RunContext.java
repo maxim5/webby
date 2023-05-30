@@ -13,8 +13,7 @@ class RunContext implements AutoCloseable {
     private final TableArchCollector tables;
     private final ErrorHandler errorHandler;
 
-    public RunContext(@NotNull RunInputs inputs,
-                      @NotNull ModelAdaptersScanner adaptersScanner) {
+    public RunContext(@NotNull RunInputs inputs, @NotNull ModelAdaptersScanner adaptersScanner) {
         this.inputs = inputs;
         this.adaptersScanner = adaptersScanner;
         this.pojos = new PojoArchCollector();
