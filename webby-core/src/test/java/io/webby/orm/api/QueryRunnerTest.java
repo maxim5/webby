@@ -12,6 +12,7 @@ import io.webby.testing.CalledOnce;
 import io.webby.util.collect.Array;
 import io.webby.util.collect.Pair;
 import io.webby.util.func.ThrowConsumer;
+import io.webby.util.func.ThrowFunction;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -89,6 +90,49 @@ public class QueryRunnerTest {
         resultSetHandler.prepareThrowsSQLException("select fail");
         QueryException exception = assertThrows(QueryException.class, () ->
             runner.runAndGet(HardcodedSelectQuery.of("select fail"))
+        );
+        assertThat(exception.getQuery()).isEqualTo("select fail");
+        assertThat(exception.getArgs()).isEmpty();
+        assertThat(mockedConnection).executedQueries().isEmpty();
+    }
+
+    /** {@link QueryRunner#runAndGet(SelectQuery, ThrowFunction)} **/
+
+    @Test
+    public void runAndGet_convert_one_result() {
+        resultSetHandler.clearResultSets();
+        String selectX = runner.runAndGet(HardcodedSelectQuery.of("select x"), resultSet -> fail());
+        assertThat(selectX).isNull();
+
+        resultSetHandler.prepareResultSet("select str", mockResultSet("foo"));
+        String selectStr = runner.runAndGet(HardcodedSelectQuery.of("select str"), resultSet -> resultSet.getString(1));
+        assertThat(selectStr).isEqualTo("foo");
+
+        resultSetHandler.prepareResultSet("select null", mockResultSet(NULL));
+        String selectNull = runner.runAndGet(HardcodedSelectQuery.of("select null"), resultSet -> resultSet.getString(1));
+        assertThat(selectNull).isEqualTo(NULL);
+
+        assertThat(mockedConnection).executedQueries().containsExactly("select x", "select str", "select null");
+    }
+
+    @Test
+    public void runAndGet_convert_several_results() {
+        resultSetHandler.prepareResultSet("select many", mockResultSet("foo", "bar"));
+        String selectMany = runner.runAndGet(HardcodedSelectQuery.of("select many"), resultSet -> resultSet.getString(1));
+        assertThat(selectMany).isEqualTo("foo");
+
+        resultSetHandler.prepareResultSet("select more", mockResultSet(NULL, "foo", "bar"));
+        String selectMore = runner.runAndGet(HardcodedSelectQuery.of("select more"), resultSet -> resultSet.getString(1));
+        assertThat(selectMore).isEqualTo(NULL);
+
+        assertThat(mockedConnection).executedQueries().containsExactly("select many", "select more");
+    }
+
+    @Test
+    public void runAndGet_convert_fails() {
+        resultSetHandler.prepareThrowsSQLException("select fail");
+        QueryException exception = assertThrows(QueryException.class, () ->
+            runner.runAndGet(HardcodedSelectQuery.of("select fail"), resultSet -> fail("Must not be called"))
         );
         assertThat(exception.getQuery()).isEqualTo("select fail");
         assertThat(exception.getArgs()).isEmpty();
