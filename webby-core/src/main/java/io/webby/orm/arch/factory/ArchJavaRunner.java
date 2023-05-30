@@ -8,6 +8,7 @@ import io.webby.orm.arch.model.JavaNameHolder;
 import io.webby.orm.arch.model.TableArch;
 import io.webby.orm.codegen.ModelAdapterCodegen;
 import io.webby.orm.codegen.ModelAdaptersScanner;
+import io.webby.orm.codegen.ModelAdaptersScannerImpl;
 import io.webby.orm.codegen.ModelTableCodegen;
 import io.webby.util.base.TimeIt;
 import org.jetbrains.annotations.NotNull;
@@ -30,7 +31,7 @@ public class ArchJavaRunner {
     }
 
     public ArchJavaRunner() {
-        this(new ModelAdaptersScanner(new AppSettings(), new ClasspathScanner()));
+        this(new ModelAdaptersScannerImpl(new AppSettings(), new ClasspathScanner()));
     }
 
     public void runGenerate(@NotNull String destinationPath, @NotNull RunInputs inputs) throws IOException {
