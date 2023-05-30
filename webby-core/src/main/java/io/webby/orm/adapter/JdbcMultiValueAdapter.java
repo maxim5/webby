@@ -1,6 +1,7 @@
 package io.webby.orm.adapter;
 
 import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 
 /**
  * An adapter which requires multiple JDBC values to represent the entity.
@@ -14,7 +15,7 @@ public interface JdbcMultiValueAdapter<E> extends JdbcArrayAdapter<E> {
     int valuesNumber();
 
     @Override
-    default @NotNull Object[] toNewValuesArray(E instance) {
+    default @Nullable Object @NotNull [] toNewValuesArray(E instance) {
         Object[] array = new Object[valuesNumber()];
         fillArrayValues(instance, array, 0);
         return array;
