@@ -195,7 +195,7 @@ public class ModelAdapterCodegen extends BaseCodegen {
 
         appendCode("""
         @Override
-        public Object toValueObject($ModelClass instance) {
+        public Object toValueObject(@Nonnull $ModelClass instance) {
             return $instance_getter;
         }\n
         """, EasyMaps.merge(context, mainContext));
@@ -226,7 +226,7 @@ public class ModelAdapterCodegen extends BaseCodegen {
 
         appendCode("""
         @Override
-        public void fillArrayValues(@Nonnull $ModelClass instance, Object[] array, int start) {
+        public void fillArrayValues(@Nonnull $ModelClass instance, @Nonnull Object[] array, int start) {
         $assignments
         }\n
         """, EasyMaps.merge(mainContext, context));
