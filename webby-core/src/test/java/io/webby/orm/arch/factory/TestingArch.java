@@ -18,19 +18,33 @@ import static com.google.common.collect.MoreCollectors.onlyElement;
 
 public class TestingArch {
     public static @NotNull TableArch buildTableArch(@NotNull Class<?> model) {
-        RunInputs inputs = newRunInputs(model);
-        RunResult runResult = new ArchFactory(FakeModelAdaptersScanner.FAKE_SCANNER).build(inputs);
-        return runResult.getTableOrDie(model);
+        return buildTableArch(FakeModelAdaptersScanner.FAKE_SCANNER, model);
     }
 
     public static @NotNull TableArch buildTableArch(@NotNull Class<?> model, @NotNull List<Class<?>> rest) {
+        return buildTableArch(FakeModelAdaptersScanner.FAKE_SCANNER, model, rest);
+    }
+
+    public static @NotNull TableArch buildTableArch(@NotNull FakeModelAdaptersScanner fakeScanner, @NotNull Class<?> model) {
+        RunInputs inputs = newRunInputs(model);
+        RunResult runResult = new ArchFactory(fakeScanner).build(inputs);
+        return runResult.getTableOrDie(model);
+    }
+
+    public static @NotNull TableArch buildTableArch(@NotNull FakeModelAdaptersScanner fakeScanner,
+                                                    @NotNull Class<?> model,
+                                                    @NotNull List<Class<?>> rest) {
         RunInputs inputs = newRunInputs(ListBuilder.concatOne(rest, model));
-        RunResult runResult = new ArchFactory(FakeModelAdaptersScanner.FAKE_SCANNER).build(inputs);
+        RunResult runResult = new ArchFactory(fakeScanner).build(inputs);
         return runResult.getTableOrDie(model);
     }
 
     public static @NotNull RunContext newRunContext() {
-        return new RunContext(newRunInputs(), FakeModelAdaptersScanner.FAKE_SCANNER);
+        return newRunContext(FakeModelAdaptersScanner.FAKE_SCANNER);
+    }
+
+    public static @NotNull RunContext newRunContext(@NotNull FakeModelAdaptersScanner fakeScanner) {
+        return new RunContext(newRunInputs(), fakeScanner);
     }
 
     public static @NotNull RunInputs newRunInputs(@NotNull Class<?> @NotNull ... models) {

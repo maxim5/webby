@@ -41,7 +41,17 @@ public class FakeModelAdaptersScanner implements ModelAdaptersScanner {
     }
 
     public <T> void setupAdapter(@NotNull Class<T> model, @NotNull Class<? extends JdbcArrayAdapter<T>> adapter) {
+        setupStaticAdapter(model, adapter);
+    }
+
+    public <T> void setupStaticAdapter(@NotNull Class<T> model, @NotNull Class<?> adapter) {
         assert !byClassMap.containsKey(model) : "Map already contains key: key=" + model + " map=" + byClassMap;
         byClassMap.put(model, adapter);
+    }
+
+    public void setupAdapters(@NotNull Map<Class<?>, Class<?>> map) {
+        for (Map.Entry<Class<?>, Class<?>> entry : map.entrySet()) {
+            setupStaticAdapter(entry.getKey(), entry.getValue());
+        }
     }
 }
