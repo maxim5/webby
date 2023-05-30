@@ -2,7 +2,7 @@ package io.webby.orm.arch.util;
 
 import com.google.common.collect.ImmutableList;
 import io.webby.orm.api.annotate.Sql;
-import io.webby.orm.codegen.ModelInput;
+import io.webby.orm.arch.factory.ModelInput;
 import io.webby.util.base.EasyStrings;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;

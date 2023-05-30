@@ -1,7 +1,6 @@
 package io.webby.orm.arch.factory;
 
 import io.webby.orm.arch.InvalidSqlModelException;
-import io.webby.orm.codegen.ModelInput;
 import org.jetbrains.annotations.NotNull;
 
 import java.lang.reflect.Field;

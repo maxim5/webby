@@ -105,7 +105,7 @@ public class AdapterApi implements ApiFormatter<AdapterApi.AdapterApiCallFormatt
         if (parameters.length == 1) {
             JdbcType paramType = JdbcType.findByMatchingNativeType(parameters[0].getType());
             failIf(paramType == null, "JDBC adapter `%s` has incompatible parameters: %s", CREATE_INSTANCE, klass);
-            Column column = new Column(fieldSqlName, new ColumnType(paramType));
+            Column column = Column.of(fieldSqlName, paramType);
             return List.of(column);
         } else {
             Optional<String[]> names = EasyAnnotations.getOptionalAnnotation(klass, JdbcAdapt.class).map(JdbcAdapt::names);

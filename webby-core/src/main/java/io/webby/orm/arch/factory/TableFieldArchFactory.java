@@ -6,7 +6,6 @@ import io.webby.orm.arch.model.*;
 import io.webby.orm.arch.util.AnnotationsAnalyzer;
 import io.webby.orm.arch.util.JavaClassAnalyzer;
 import io.webby.orm.arch.util.Naming;
-import io.webby.orm.codegen.ModelInput;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
@@ -77,13 +76,13 @@ class TableFieldArchFactory {
         ResolveResult resolved = fieldResolver.resolve(field);
         return switch (resolved.type()) {
             case NATIVE -> {
-                Column column = new Column(fieldSqlName, new ColumnType(resolved.jdbcType()));
+                Column column = Column.of(fieldSqlName, resolved.jdbcType());
                 yield FieldInference.ofNativeColumn(column);
             }
             case FOREIGN_KEY -> {
                 String foreignIdSqlName = AnnotationsAnalyzer.getSqlName(field)
                     .orElseGet(() -> Naming.concatSqlNames(fieldSqlName, "id"));
-                Column column = new Column(foreignIdSqlName, new ColumnType(resolved.foreignTable().second()));
+                Column column = Column.of(foreignIdSqlName, resolved.foreignTable().second());
                 yield FieldInference.ofForeignKey(column, resolved.foreignTable().first());
             }
             case HAS_MAPPER -> {

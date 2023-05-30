@@ -1,6 +1,7 @@
 package io.webby.orm.adapter;
 
 import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 
 /**
  * An adapter which requires a single JDBC value to represent the entity.
@@ -17,12 +18,12 @@ public interface JdbcSingleValueAdapter<E> extends JdbcArrayAdapter<E> {
     Object toValueObject(E instance);
 
     @Override
-    default void fillArrayValues(E instance, @NotNull Object[] array, int start) {
+    default void fillArrayValues(E instance, @Nullable Object @NotNull [] array, int start) {
         array[start] = toValueObject(instance);
     }
 
     @Override
-    default @NotNull Object[] toNewValuesArray(E instance) {
+    default @Nullable Object @NotNull [] toNewValuesArray(E instance) {
         Object[] array = new Object[1];
         fillArrayValues(instance, array, 0);
         return array;

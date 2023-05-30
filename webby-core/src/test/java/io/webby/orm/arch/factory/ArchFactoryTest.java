@@ -2,6 +2,7 @@ package io.webby.orm.arch.factory;
 
 import com.google.common.truth.Truth;
 import com.google.errorprone.annotations.CanIgnoreReturnValue;
+import io.webby.orm.adapter.lang.AtomicIntegerJdbcAdapter;
 import io.webby.orm.api.ForeignInt;
 import io.webby.orm.api.ForeignLong;
 import io.webby.orm.api.ForeignObj;
@@ -13,7 +14,6 @@ import io.webby.testing.orm.FakeModelAdaptersScanner;
 import io.webby.util.base.EasyPrimitives.OptionalBool;
 import io.webby.util.collect.Pair;
 import org.jetbrains.annotations.NotNull;
-import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 
 import java.awt.*;
@@ -223,15 +223,16 @@ public class ArchFactoryTest {
     }
 
     @Test
-    @Disabled("Needs to patch FakeModelAdaptersScanner (add an AtomicInteger adapter)")
     void single_field_atomic_integer() {
         record User(AtomicInteger atomic) {}
 
-        assertThat(buildTableArch(User.class)).hasFields(ONLY_ORDINARY).hasSingleFieldThat("atomic")
+        FakeModelAdaptersScanner scanner = FakeModelAdaptersScanner.empty();
+        scanner.setupAdapter(AtomicInteger.class, AtomicIntegerJdbcAdapter.class);
+        assertThat(buildTableArch(scanner, User.class)).hasFields(ONLY_ORDINARY).hasSingleFieldThat("atomic")
             .isFromTable("user")
             .hasInJava(AtomicInteger.class, "atomic()")
             .isSingleColumn("atomic", JdbcType.Int)
-            .hasConstraints(ORDINARY.nullable())
+            .hasConstraints(ORDINARY.nonnull())
             .doesNotHaveAnyDefaults()
             .isAdapterSupportedType();
     }

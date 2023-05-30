@@ -13,6 +13,9 @@ public record StringModel(String id, CharSequence sequence, char[] chars, byte[]
 
     @Override
     public int hashCode() {
-        return Objects.hash(id, Arrays.hashCode(chars), Arrays.hashCode(rawBytes));
+        return Objects.hash(id, sequence, Arrays.hashCode(chars), Arrays.hashCode(rawBytes));
     }
+
+    // Pojos for custom adapters
+    public record StringDuo(String id, CharSequence sequence) {}
 }

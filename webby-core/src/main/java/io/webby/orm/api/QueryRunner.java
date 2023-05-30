@@ -14,6 +14,7 @@ import io.webby.orm.api.query.DataDefinitionQuery;
 import io.webby.orm.api.query.SelectQuery;
 import io.webby.orm.api.tx.InTransaction;
 import io.webby.util.func.ThrowConsumer;
+import io.webby.util.func.ThrowFunction;
 import io.webby.util.func.ThrowSupplier;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
@@ -53,6 +54,16 @@ public class QueryRunner {
         try (PreparedStatement statement = prepareQuery(query);
              ResultSet resultSet = statement.executeQuery()) {
             return resultSet.next() ? resultSet.getObject(1) : null;
+        } catch (SQLException e) {
+            throw new QueryException("Failed to execute select query", query.repr(), query.args(), e);
+        }
+    }
+
+    public <E> @Nullable E runAndGet(@NotNull SelectQuery query,
+                                     @NotNull ThrowFunction<ResultSet, E, SQLException> converter) {
+        try (PreparedStatement statement = prepareQuery(query);
+             ResultSet resultSet = statement.executeQuery()) {
+            return resultSet.next() ? converter.apply(resultSet) : null;
         } catch (SQLException e) {
             throw new QueryException("Failed to execute select query", query.repr(), query.args(), e);
         }

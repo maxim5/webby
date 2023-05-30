@@ -88,7 +88,7 @@ public class MapperApi implements ApiFormatter<MapperApi.MapperCallFormatter> {
     }
 
     public @NotNull Column mapperColumn(@NotNull String fieldSqlName) {
-        return new Column(fieldSqlName, new ColumnType(jdbcType));
+        return Column.of(fieldSqlName, jdbcType);
     }
 
     @Override

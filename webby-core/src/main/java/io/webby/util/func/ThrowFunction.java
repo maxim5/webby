@@ -1,5 +1,7 @@
 package io.webby.util.func;
 
+import org.jetbrains.annotations.NotNull;
+
 /**
  * Represents a function that accepts one argument and produces a result
  * and potentially throws a {@link Throwable}.
@@ -22,4 +24,11 @@ public interface ThrowFunction<T, R, E extends Throwable> {
      * @return the function result
      */
     R apply(T t) throws E;
+
+    /**
+     * Chains the {@code consumer} of {@code R} with this function to make the consumer of {@code T}.
+     */
+    default @NotNull ThrowConsumer<T, E> via(@NotNull ThrowConsumer<R, E> consumer) {
+        return t -> consumer.accept(apply(t));
+    }
 }

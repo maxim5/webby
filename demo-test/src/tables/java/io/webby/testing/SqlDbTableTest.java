@@ -2,6 +2,7 @@ package io.webby.testing;
 
 import io.webby.orm.api.BaseTable;
 import io.webby.orm.api.Connector;
+import io.webby.orm.api.QueryRunner;
 import io.webby.orm.api.debug.DebugSql;
 import io.webby.testing.ext.SqlDbExtension;
 import org.jetbrains.annotations.NotNull;
@@ -76,5 +77,9 @@ public abstract class SqlDbTableTest<E, T extends BaseTable<E>> implements BaseT
 
     protected @NotNull Connector connector() {
         return SQL;
+    }
+
+    protected @NotNull QueryRunner runner() {
+        return connector().runner();
     }
 }

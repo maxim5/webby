@@ -1,6 +1,7 @@
 package io.webby.util.collect;
 
 import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 
 import java.util.Arrays;
 import java.util.List;
@@ -9,12 +10,12 @@ import java.util.stream.IntStream;
 public class ArrayTabular<T> implements Tabular<T> {
     private final T[][] array;
 
-    public ArrayTabular(T @NotNull[] @NotNull[] array) {
+    public ArrayTabular(@Nullable T @NotNull [] @NotNull [] array) {
         this.array = array;
     }
 
     @SafeVarargs
-    public static <T> @NotNull ArrayTabular<T> of(T @NotNull[] @NotNull... rows) {
+    public static <T> @NotNull ArrayTabular<T> of(@Nullable T @NotNull [] @NotNull ... rows) {
         return new ArrayTabular<>(rows);
     }
 
@@ -39,7 +40,7 @@ public class ArrayTabular<T> implements Tabular<T> {
         return Arrays.stream(fastRow(row)).toList();
     }
 
-    public T @NotNull[] fastRow(int row) {
+    public T @NotNull [] fastRow(int row) {
         assert row < rows() : "Out of bounds: [%d]".formatted(row);
         return array[row];
     }

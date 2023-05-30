@@ -1,6 +1,7 @@
 package io.webby.orm.adapter;
 
 import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 
 /**
  * Represents an adapter that can convert the entity from an array and back for JDBC communication.
@@ -26,7 +27,7 @@ public interface JdbcArrayAdapter<E> {
      * The implementation may assume that {@code instance} is not-null if the adapter is only being used within
      * {@code io.webby.orm.api.BaseTable} implementation. Otherwise, the implementation may handle the null as well.
      */
-    void fillArrayValues(E instance, @NotNull Object[] array, int start);
+    void fillArrayValues(E instance, @Nullable Object @NotNull [] array, int start);
 
     /**
      * Returns a newly allocated array holding the full JDBC representation of the {@code instance}.
@@ -37,5 +38,5 @@ public interface JdbcArrayAdapter<E> {
      * The implementation may assume that {@code instance} is not-null if the adapter is only being used within
      * {@code io.webby.orm.api.BaseTable} implementation. Otherwise, the implementation may handle the null as well.
      */
-    @NotNull Object[] toNewValuesArray(E instance);
+    @Nullable Object @NotNull [] toNewValuesArray(E instance);
 }

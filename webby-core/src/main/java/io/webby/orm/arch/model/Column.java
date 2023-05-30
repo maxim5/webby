@@ -3,6 +3,10 @@ package io.webby.orm.arch.model;
 import org.jetbrains.annotations.NotNull;
 
 public record Column(@NotNull String sqlName, @NotNull ColumnType type) {
+    public static @NotNull Column of(@NotNull String sqlName, @NotNull JdbcType jdbcType) {
+        return new Column(sqlName, new ColumnType(jdbcType));
+    }
+
     public @NotNull Column renamed(@NotNull String newName) {
         return new Column(newName, type);
     }

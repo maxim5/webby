@@ -3,7 +3,6 @@ package io.webby.orm.arch.factory;
 import com.google.common.truth.Truth;
 import com.google.errorprone.annotations.CanIgnoreReturnValue;
 import io.webby.orm.arch.model.*;
-import io.webby.orm.codegen.ModelInput;
 import io.webby.testing.TestingBasics.SimpleBitSet;
 import io.webby.testing.orm.FakeModelAdaptersScanner;
 import io.webby.util.collect.ListBuilder;
@@ -19,25 +18,43 @@ import static com.google.common.collect.MoreCollectors.onlyElement;
 
 public class TestingArch {
     public static @NotNull TableArch buildTableArch(@NotNull Class<?> model) {
-        RunInputs inputs = newRunInputs(model);
-        RunResult runResult = new ArchFactory(FakeModelAdaptersScanner.FAKE_SCANNER).build(inputs);
-        return runResult.getTableOrDie(model);
+        return buildTableArch(FakeModelAdaptersScanner.FAKE_SCANNER, model);
     }
 
     public static @NotNull TableArch buildTableArch(@NotNull Class<?> model, @NotNull List<Class<?>> rest) {
-        RunInputs inputs = newRunInputs(ListBuilder.concatOne(rest, model));
-        RunResult runResult = new ArchFactory(FakeModelAdaptersScanner.FAKE_SCANNER).build(inputs);
+        return buildTableArch(FakeModelAdaptersScanner.FAKE_SCANNER, model, rest);
+    }
+
+    public static @NotNull TableArch buildTableArch(@NotNull FakeModelAdaptersScanner fakeScanner, @NotNull Class<?> model) {
+        RunInputs inputs = newRunInputs(model);
+        RunResult runResult = new ArchFactory(fakeScanner).build(inputs);
         return runResult.getTableOrDie(model);
+    }
+
+    public static @NotNull TableArch buildTableArch(@NotNull FakeModelAdaptersScanner fakeScanner,
+                                                    @NotNull Class<?> model,
+                                                    @NotNull List<Class<?>> rest) {
+        RunInputs inputs = newRunInputs(ListBuilder.concatOne(rest, model));
+        RunResult runResult = new ArchFactory(fakeScanner).build(inputs);
+        return runResult.getTableOrDie(model);
+    }
+
+    public static @NotNull RunContext newRunContext() {
+        return newRunContext(FakeModelAdaptersScanner.FAKE_SCANNER);
+    }
+
+    public static @NotNull RunContext newRunContext(@NotNull FakeModelAdaptersScanner fakeScanner) {
+        return new RunContext(newRunInputs(), fakeScanner);
     }
 
     public static @NotNull RunInputs newRunInputs(@NotNull Class<?> @NotNull ... models) {
         List<ModelInput> modelInputs = Arrays.stream(models).map(ModelInput::of).toList();
-        return new RunInputs(modelInputs);
+        return new RunInputs(modelInputs, List.of());
     }
 
     public static @NotNull RunInputs newRunInputs(@NotNull Collection<Class<?>> models) {
         List<ModelInput> modelInputs = models.stream().map(ModelInput::of).toList();
-        return new RunInputs(modelInputs);
+        return new RunInputs(modelInputs, List.of());
     }
 
     public static @NotNull TableArchSubject assertThat(@NotNull TableArch tableArch) {
@@ -46,6 +63,10 @@ public class TestingArch {
 
     public static @NotNull TableFieldSubject assertThat(@NotNull TableField tableField) {
         return new TableFieldSubject(tableField);
+    }
+
+    public static @NotNull PojoArchSubject assertThat(@NotNull PojoArch pojoArch) {
+        return new PojoArchSubject(pojoArch);
     }
 
     @CanIgnoreReturnValue
@@ -239,5 +260,18 @@ public class TestingArch {
         public boolean isForeignKey() { return bitSet.get(1); }
         public boolean isUnique() { return bitSet.get(2); }
         public boolean isNullable() { return bitSet.get(3); }
+    }
+
+    @CanIgnoreReturnValue
+    public record PojoArchSubject(@NotNull PojoArch pojoArch) {
+        public @NotNull PojoArchSubject hasAdapterName(@NotNull String name) {
+            Truth.assertThat(pojoArch.adapterName()).isEqualTo(name);
+            return this;
+        }
+
+        public @NotNull PojoArchSubject hasColumns(@NotNull Column @NotNull... columns) {
+            Truth.assertThat(pojoArch.columns()).containsExactly((Object[]) columns).inOrder();
+            return this;
+        }
     }
 }

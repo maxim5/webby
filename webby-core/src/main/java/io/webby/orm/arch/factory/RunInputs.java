@@ -1,32 +1,39 @@
 package io.webby.orm.arch.factory;
 
-import com.google.common.collect.Streams;
-import io.webby.orm.codegen.ModelInput;
+import com.google.common.collect.ImmutableList;
 import org.jetbrains.annotations.NotNull;
 
-import java.util.Iterator;
 import java.util.List;
 import java.util.Optional;
 
-public class RunInputs implements Iterable<ModelInput> {
-    private final List<ModelInput> inputs;
+public class RunInputs {
+    private final ImmutableList<ModelInput> models;
+    private final ImmutableList<PojoInput> pojos;
 
-    RunInputs(@NotNull List<ModelInput> inputs) {
-        this.inputs = inputs;
+    public RunInputs(@NotNull List<ModelInput> models, @NotNull List<PojoInput> pojos) {
+        this.models = ImmutableList.copyOf(models);
+        this.pojos = ImmutableList.copyOf(pojos);
     }
 
-    public static @NotNull RunInputs of(@NotNull ModelInput @NotNull ... inputs) {
-        return new RunInputs(List.of(inputs));
+    public static @NotNull RunInputs of(@NotNull ModelInput @NotNull ... models) {
+        return of(ImmutableList.copyOf(models), ImmutableList.of());
+    }
+
+    public static @NotNull RunInputs of(@NotNull List<ModelInput> models, @NotNull List<PojoInput> pojos) {
+        return new RunInputs(models, pojos);
     }
 
     public @NotNull Optional<ModelInput> findInputByModel(@NotNull Class<?> modelClass) {
-        return Streams.stream(inputs)
+        return models.stream()
             .filter(input -> input.modelClass().equals(modelClass))
             .findFirst();
     }
 
-    @Override
-    public @NotNull Iterator<ModelInput> iterator() {
-        return inputs.iterator();
+    public @NotNull ImmutableList<ModelInput> models() {
+        return models;
+    }
+
+    public @NotNull ImmutableList<PojoInput> pojos() {
+        return pojos;
     }
 }
