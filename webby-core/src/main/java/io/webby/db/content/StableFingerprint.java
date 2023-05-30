@@ -19,7 +19,7 @@ public class StableFingerprint {
         key = xor(settings.securityKey(), DEFAULT_BYTES);
     }
 
-    public @NotNull ContentId computeFingerprint(@NotNull BitSize bitSize, byte @NotNull[] content) {
+    public @NotNull ContentId computeFingerprint(@NotNull BitSize bitSize, byte @NotNull [] content) {
         MessageDigest instance = bitSize.getMessageDigest();
         instance.update(key);
         byte[] digest = instance.digest(content);
@@ -27,7 +27,7 @@ public class StableFingerprint {
         return new ContentId(encoded);
     }
 
-    private static byte @NotNull[] xor(byte @NotNull[] input, byte @NotNull[] key) {
+    private static byte @NotNull [] xor(byte @NotNull [] input, byte @NotNull [] key) {
         byte[] output = new byte[input.length];
         for (int i = 0; i < output.length; i++) {
             output[i] = (byte) (input[i] ^ key[i % key.length]);

@@ -17,7 +17,7 @@ public interface DbStatsListener {
         return reportKeys(stat, EasyIterables.asList(keys));
     }
 
-    default @NotNull OpContext reportKeys(@NotNull Stat stat, @NotNull Object[] keys) {
+    default @NotNull OpContext reportKeys(@NotNull Stat stat, @NotNull Object @NotNull [] keys) {
         return reportKeys(stat, List.of(keys));
     }
 

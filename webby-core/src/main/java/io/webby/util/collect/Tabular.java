@@ -6,6 +6,8 @@ import java.util.List;
 
 /**
  * Represents 2-dimensional table-like structure, for example 2d array or list of lists.
+ * <p>
+ * Supports null values.
  *
  * @param <T> type of items
  */
@@ -28,7 +30,7 @@ public interface Tabular<T> {
     }
 
     /**
-     * Returns the raw value at the specified cell.
+     * Returns the raw value at the specified cell. May be null if this tabular allows null values.
      */
     T cell(int row, int col);
 

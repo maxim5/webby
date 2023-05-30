@@ -46,7 +46,7 @@ public class Shortcuts {
         return new Variable(value, TermType.STRING);
     }
 
-    public static @NotNull Variable var(byte @NotNull[] value) {
+    public static @NotNull Variable var(byte @NotNull [] value) {
         return new Variable(value, TermType.STRING);
     }
 
