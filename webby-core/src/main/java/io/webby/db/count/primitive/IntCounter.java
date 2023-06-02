@@ -31,6 +31,7 @@ import javax.annotation.concurrent.ThreadSafe;
  * </ul>
  *
  * @see ManagedPersistent
+ * @see io.webby.db.count.vote.VotingCounter
  */
 @ThreadSafe
 public interface IntCounter extends ManagedPersistent {
@@ -55,18 +56,18 @@ public interface IntCounter extends ManagedPersistent {
     int update(int key, int delta);
 
     /**
-     * Returns the current count estimate per {@code key}.
+     * Returns the total count estimate per {@code key}.
      */
     int estimateCount(int key);
 
     /**
-     * Returns the current counts for a collection of {@code keys} in a batch.
+     * Returns the total counts for a collection of {@code keys} in a batch.
      * In case of a concurrent modification, the result view map may or may not be read-consistent.
      */
     @NotNull IntIntMap estimateCounts(@NotNull IntContainer keys);
 
     /**
-     * Returns the current counts for an array of {@code keys} in a batch.
+     * Returns the total counts for an array of {@code keys} in a batch.
      * In case of a concurrent modification, the result view map may or may not be read-consistent.
      */
     default @NotNull IntIntMap estimateCounts(int @NotNull [] keys) {
