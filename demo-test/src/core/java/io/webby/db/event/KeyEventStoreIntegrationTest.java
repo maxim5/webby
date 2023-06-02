@@ -8,7 +8,7 @@ import com.google.inject.Injector;
 import io.webby.app.AppLifetime;
 import io.webby.app.AppSettings;
 import io.webby.common.Lifetime;
-import io.webby.db.cache.FlushMode;
+import io.webby.db.managed.FlushMode;
 import io.webby.db.kv.DbType;
 import io.webby.db.kv.KeyValueSettings;
 import io.webby.orm.api.Engine;

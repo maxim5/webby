@@ -4,7 +4,7 @@ import com.google.common.collect.ImmutableList;
 import com.google.inject.Inject;
 import io.webby.app.Settings;
 import io.webby.common.Lifetime;
-import io.webby.db.cache.BackgroundCacheCleaner;
+import io.webby.db.managed.BackgroundCacheCleaner;
 import io.webby.db.codec.Codec;
 import io.webby.db.codec.CodecProvider;
 import io.webby.db.codec.CodecSize;

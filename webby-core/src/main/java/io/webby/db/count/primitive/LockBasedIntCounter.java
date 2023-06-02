@@ -6,8 +6,8 @@ import com.carrotsearch.hppc.IntIntMap;
 import com.google.common.eventbus.EventBus;
 import com.google.common.eventbus.Subscribe;
 import io.webby.db.DbReadyEvent;
-import io.webby.db.cache.FlushMode;
-import io.webby.db.cache.HasCache;
+import io.webby.db.managed.FlushMode;
+import io.webby.db.managed.HasCache;
 import io.webby.util.hppc.EasyHppc;
 import org.jetbrains.annotations.NotNull;
 

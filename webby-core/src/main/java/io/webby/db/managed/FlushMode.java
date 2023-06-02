@@ -1,4 +1,4 @@
-package io.webby.db.cache;
+package io.webby.db.managed;
 
 import org.jetbrains.annotations.NotNull;
 

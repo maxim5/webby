@@ -1,4 +1,4 @@
-package io.webby.db.cache;
+package io.webby.db.managed;
 
 /**
  * Represents the preference for the cache clear operation.

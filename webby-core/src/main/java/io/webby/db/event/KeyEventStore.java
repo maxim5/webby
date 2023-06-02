@@ -1,6 +1,6 @@
 package io.webby.db.event;
 
-import io.webby.db.cache.ManagedPersistent;
+import io.webby.db.managed.ManagedPersistent;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.List;
