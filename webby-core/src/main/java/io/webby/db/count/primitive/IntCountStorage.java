@@ -4,6 +4,9 @@ import com.carrotsearch.hppc.*;
 import com.carrotsearch.hppc.procedures.IntIntProcedure;
 import org.jetbrains.annotations.NotNull;
 
+/**
+ * Represents the persistent storage backing the {@link IntCounter}.
+ */
 public interface IntCountStorage {
     default int size() {
         return -1;

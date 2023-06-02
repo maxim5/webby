@@ -15,6 +15,13 @@ import javax.annotation.concurrent.ThreadSafe;
 import java.util.concurrent.locks.ReadWriteLock;
 import java.util.concurrent.locks.ReentrantReadWriteLock;
 
+/**
+ * An {@link IntCounter} implementation based on a global read-write lock.
+ * <p>
+ * Always returns exact counts, batch methods always return a consistent view.
+ * <p>
+ * The implementation uses an in-memory cache and a persistent storage.
+ */
 @ThreadSafe
 public class LockBasedIntCounter implements IntCounter, HasCache<IntIntMap> {
     private final ReadWriteLock LOCK = new ReentrantReadWriteLock();
