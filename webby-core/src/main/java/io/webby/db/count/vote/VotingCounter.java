@@ -3,13 +3,13 @@ package io.webby.db.count.vote;
 import com.carrotsearch.hppc.IntArrayList;
 import com.carrotsearch.hppc.IntContainer;
 import com.carrotsearch.hppc.IntIntMap;
-import io.webby.db.cache.Persistable;
+import io.webby.db.cache.ManagedPersistent;
 import org.jetbrains.annotations.NotNull;
 
 import javax.annotation.concurrent.ThreadSafe;
 
 @ThreadSafe
-public interface VotingCounter extends Persistable {
+public interface VotingCounter extends ManagedPersistent {
     int increment(int key, int actor);
 
     int decrement(int key, int actor);

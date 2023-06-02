@@ -3,7 +3,7 @@ package io.webby.db.count.primitive;
 import com.carrotsearch.hppc.IntArrayList;
 import com.carrotsearch.hppc.IntContainer;
 import com.carrotsearch.hppc.IntIntMap;
-import io.webby.db.cache.Persistable;
+import io.webby.db.cache.ManagedPersistent;
 import org.jetbrains.annotations.NotNull;
 
 import javax.annotation.concurrent.ThreadSafe;
@@ -30,10 +30,10 @@ import javax.annotation.concurrent.ThreadSafe;
  *     <li>Clicks counter</li>
  * </ul>
  *
- * @see Persistable
+ * @see ManagedPersistent
  */
 @ThreadSafe
-public interface IntCounter extends Persistable {
+public interface IntCounter extends ManagedPersistent {
     /**
      * Increments the value per specified {@code key} by 1 and returns the current total count estimate.
      */

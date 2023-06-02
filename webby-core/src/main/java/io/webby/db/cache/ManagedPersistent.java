@@ -6,7 +6,7 @@ import java.io.Closeable;
 import java.io.Flushable;
 import java.io.UncheckedIOException;
 
-public interface Persistable extends Closeable, Flushable {
+public interface ManagedPersistent extends Closeable, Flushable {
     @Override
     default void flush() throws UncheckedIOException {
         flush(FlushMode.INCREMENTAL);

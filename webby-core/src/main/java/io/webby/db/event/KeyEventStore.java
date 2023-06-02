@@ -1,6 +1,6 @@
 package io.webby.db.event;
 
-import io.webby.db.cache.Persistable;
+import io.webby.db.cache.ManagedPersistent;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.List;
@@ -12,7 +12,7 @@ import java.util.List;
  * @param <K> the key type
  * @param <E> event type (must have a codec)
  */
-public interface KeyEventStore<K, E> extends Persistable {
+public interface KeyEventStore<K, E> extends ManagedPersistent {
     /**
      * Appends the {@code event} by the {@code key}.
      */
