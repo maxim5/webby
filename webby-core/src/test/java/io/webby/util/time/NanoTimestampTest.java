@@ -6,8 +6,6 @@ import org.junit.jupiter.api.Test;
 import java.time.Instant;
 
 import static com.google.common.truth.Truth.assertThat;
-import static io.webby.util.time.NanoTimestamp.instantToLongNano;
-import static io.webby.util.time.NanoTimestamp.longNanoToInstant;
 
 public class NanoTimestampTest {
     @Test
@@ -26,8 +24,8 @@ public class NanoTimestampTest {
     }
 
     private static void assertInstantRoundtrip(@NotNull Instant instant) {
-        long timestamp = instantToLongNano(instant);
-        Instant back = longNanoToInstant(timestamp);
+        long timestamp = NanoTimestamp.instantToLongNano(instant);
+        Instant back = NanoTimestamp.longNanoToInstant(timestamp);
         assertThat(back).isEqualTo(instant);
     }
 }

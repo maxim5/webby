@@ -6,8 +6,6 @@ import org.junit.jupiter.api.Test;
 import java.time.Instant;
 
 import static com.google.common.truth.Truth.assertThat;
-import static io.webby.util.time.MicroTimestamp.instantToLongMicro;
-import static io.webby.util.time.MicroTimestamp.longMicroToInstant;
 
 public class MicroTimestampTest {
     @Test
@@ -24,8 +22,8 @@ public class MicroTimestampTest {
     }
 
     private static void assertInstantRoundtrip(@NotNull Instant instant) {
-        long timestamp = instantToLongMicro(instant);
-        Instant back = longMicroToInstant(timestamp);
+        long timestamp = MicroTimestamp.instantToLongMicro(instant);
+        Instant back = MicroTimestamp.longMicroToInstant(timestamp);
         assertThat(back).isEqualTo(instant);
     }
 }
