@@ -20,4 +20,5 @@ Then `Ctrl-F9` in IJ should work normally
 
 ## Running Locally
 
+- Make sure `demo-frontend\.data\userdata` directory exists
 - `Main`
