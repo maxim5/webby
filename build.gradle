@@ -39,6 +39,9 @@ subprojects {
         testImplementation group: 'org.junit.jupiter', name: 'junit-jupiter-api', version: '5.9.2'
         testCompileOnly group: 'org.junit.jupiter', name: 'junit-jupiter-params', version: '5.9.2'
         testRuntimeOnly group: 'org.junit.jupiter', name: 'junit-jupiter-engine', version: '5.9.2'
+
+        // Helps IJ with AllTests classpath.
+        runtimeOnly 'com.google.jimfs:jimfs:1.2'
     }
 
     test {
