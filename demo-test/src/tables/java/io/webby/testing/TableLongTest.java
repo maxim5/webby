@@ -14,7 +14,6 @@ import java.util.List;
 import java.util.Map;
 
 import static com.google.common.truth.Truth.assertThat;
-import static com.google.common.truth.Truth8.assertThat;
 import static io.webby.testing.AssertPrimitives.assertArray;
 import static io.webby.testing.AssertPrimitives.assertMap;
 import static io.webby.testing.TestingBasics.array;

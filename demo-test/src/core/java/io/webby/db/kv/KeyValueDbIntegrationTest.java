@@ -38,7 +38,6 @@ import java.util.Map;
 import java.util.stream.Stream;
 
 import static com.google.common.truth.Truth.assertThat;
-import static com.google.common.truth.Truth8.assertThat;
 import static io.webby.testing.TestingBasics.array;
 
 @Tags({@Tag("sql"), @Tag("slow")})
