@@ -10,9 +10,9 @@ dependencies {
     api group: 'com.google.guava', name: 'guava', version: '33.2.0-jre'
     api group: 'com.google.inject', name: 'guice', version: '7.0.0'
     api group: 'com.google.inject.extensions', name: 'guice-assistedinject', version: '7.0.0'
-    api group: 'com.google.mug', name: 'mug', version: '6.5'
+    api group: 'com.google.mug', name: 'mug', version: '7.2'
     api group: 'io.netty', name: 'netty-all', version: '4.1.90.Final'
-    api group: 'com.carrotsearch', name: 'hppc', version: '0.9.1'
+    api group: 'com.carrotsearch', name: 'hppc', version: '0.10.0'
     // RouteKit
     api group: 'io.routekit', name: 'routekit', version: 'v0.2.0'
 
