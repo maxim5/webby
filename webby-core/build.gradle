@@ -30,7 +30,7 @@ dependencies {
     testFixturesApi group: 'org.junit.jupiter', name: 'junit-jupiter-params', version: '5.10.2'
     testFixturesApi group: 'org.junit.jupiter', name: 'junit-jupiter-engine', version: '5.10.2'
     testFixturesApi group: 'com.google.truth', name: 'truth', version: '1.4.2'
-    testFixturesApi group: 'com.mockrunner', name: 'mockrunner-jdbc', version: '2.0.6'
+    testFixturesApi group: 'com.mockrunner', name: 'mockrunner-jdbc', version: '2.0.7'
     testFixturesApi group: 'org.mockito', name: 'mockito-inline', version: '5.2.0'
     // Utilities for Unit tests
     testFixturesApi group: 'org.jetbrains', name: 'annotations', version: '24.0.1'
