@@ -16,7 +16,7 @@ dependencies {
     // RouteKit
     api group: 'io.routekit', name: 'routekit', version: 'v0.2.0'
 
-    implementation group: 'org.jetbrains', name: 'annotations', version: '24.0.1'
+    implementation group: 'org.jetbrains', name: 'annotations', version: '24.1.0'
 }
 
 configurations {
@@ -26,9 +26,9 @@ configurations {
 // Testing
 dependencies {
     // JUnit, Truth, Mockito
-    testFixturesApi group: 'org.junit.jupiter', name: 'junit-jupiter-api', version: '5.9.2'
-    testFixturesApi group: 'org.junit.jupiter', name: 'junit-jupiter-params', version: '5.9.2'
-    testFixturesApi group: 'org.junit.jupiter', name: 'junit-jupiter-engine', version: '5.9.2'
+    testFixturesApi group: 'org.junit.jupiter', name: 'junit-jupiter-api', version: '5.10.2'
+    testFixturesApi group: 'org.junit.jupiter', name: 'junit-jupiter-params', version: '5.10.2'
+    testFixturesApi group: 'org.junit.jupiter', name: 'junit-jupiter-engine', version: '5.10.2'
     testFixturesApi group: 'com.google.truth', name: 'truth', version: '1.1.3'
     testFixturesApi group: 'com.google.truth.extensions', name: 'truth-java8-extension', version: '1.1.3'
     testFixturesApi group: 'com.mockrunner', name: 'mockrunner-jdbc', version: '2.0.6'
