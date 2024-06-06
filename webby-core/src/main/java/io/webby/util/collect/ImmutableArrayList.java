@@ -1,5 +1,7 @@
 package io.webby.util.collect;
 
+import com.google.errorprone.annotations.Immutable;
+import org.checkerframework.dataflow.qual.Pure;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
@@ -22,6 +24,7 @@ import static io.webby.util.base.EasyCast.castAny;
  *     hence supports holding items of different types.</li>
  * </ul>
  */
+@Immutable
 public class ImmutableArrayList<E> extends ArrayList<E> {
     @SuppressWarnings("MismatchedQueryAndUpdateOfCollection")
     private static final ImmutableArrayList<?> EMPTY = new ImmutableArrayList<>();

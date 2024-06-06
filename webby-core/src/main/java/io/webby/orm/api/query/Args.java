@@ -304,6 +304,7 @@ public final class Args {
         return internal.toString();
     }
 
+    @SuppressWarnings("SameReturnValue")
     private static boolean warnAboutPotentialBugs(@NotNull Iterable<?> args) {
         if (!log.at(Level.WARNING).isEnabled()) {
             return true;

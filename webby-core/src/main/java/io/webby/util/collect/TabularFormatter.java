@@ -1,6 +1,8 @@
 package io.webby.util.collect;
 
 import com.google.common.base.Strings;
+import com.google.errorprone.annotations.Immutable;
+import org.checkerframework.dataflow.qual.Pure;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.Arrays;
@@ -29,6 +31,7 @@ import java.util.stream.Stream;
  *   -----
  * </pre>
  */
+@Immutable
 public record TabularFormatter(@NotNull String cellPrefix,
                                @NotNull String cellDelim,
                                @NotNull String cellSuffix,
@@ -47,6 +50,7 @@ public record TabularFormatter(@NotNull String cellPrefix,
         );
     }
 
+    @Pure
     public <T> @NotNull String formatIntoTableString(@NotNull Tabular<T> tab) {
         if (tab.isEmpty()) {
             return "<empty>";

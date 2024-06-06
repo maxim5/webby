@@ -1,5 +1,6 @@
 package io.webby.util.collect;
 
+import com.google.errorprone.annotations.Immutable;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
@@ -14,6 +15,7 @@ import java.util.function.UnaryOperator;
  *
  * @see BaseArray
  */
+@Immutable
 public final class ImmutableArray<E> extends BaseArray<E> {
     private ImmutableArray(@Nullable E @NotNull [] arr) {
         super(arr);

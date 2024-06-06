@@ -1,8 +1,11 @@
 package io.webby.util.base;
 
+import com.google.errorprone.annotations.Immutable;
+import org.checkerframework.dataflow.qual.Pure;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
+@Immutable
 public class FastFormat {
     private final String pattern;
 
@@ -46,6 +49,7 @@ public class FastFormat {
         return pattern.replace("%s", Boolean.toString(arg));
     }
 
+    @Pure
     public static @NotNull String format(@NotNull String pattern, @Nullable Object @NotNull ... args) {
         StringBuilder builder = new StringBuilder(pattern.length());
         int prevStart = 0;

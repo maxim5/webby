@@ -1,5 +1,6 @@
 package io.webby.orm.codegen;
 
+import com.google.common.collect.ImmutableList;
 import com.google.errorprone.annotations.CheckReturnValue;
 import org.jetbrains.annotations.NotNull;
 
@@ -52,8 +53,8 @@ class Snippet {
         return lines.size();
     }
 
-    public @NotNull List<String> lines() {
-        return lines;
+    public @NotNull ImmutableList<String> lines() {
+        return ImmutableList.copyOf(lines);
     }
 
     @CheckReturnValue
