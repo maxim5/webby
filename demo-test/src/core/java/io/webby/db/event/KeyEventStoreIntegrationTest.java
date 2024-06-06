@@ -32,7 +32,7 @@ import java.util.Collections;
 import static com.google.common.truth.Truth.assertThat;
 import static io.webby.testing.TestingBasics.array;
 
-@Tags({@Tag("sql"), @Tag("slow")})
+@Tag("sql") @Tag("slow")
 public class KeyEventStoreIntegrationTest {
     @RegisterExtension static final TempDirectoryExtension TEMP_DIRECTORY = new TempDirectoryExtension();
     @RegisterExtension static final EmbeddedRedisExtension REDIS = new EmbeddedRedisExtension();

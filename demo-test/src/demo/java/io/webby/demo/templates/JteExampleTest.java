@@ -7,6 +7,7 @@ import io.webby.testing.BaseHttpIntegrationTest;
 import io.webby.testing.TestingModules;
 import org.jetbrains.annotations.NotNull;
 import org.junit.Test;
+import org.junit.jupiter.api.Tag;
 import org.junit.runner.RunWith;
 import org.junit.runners.Parameterized;
 
@@ -14,6 +15,7 @@ import java.util.function.Consumer;
 
 import static io.webby.demo.templates.TestingRender.assertThat;
 
+@Tag("slow")
 @RunWith(Parameterized.class)
 public class JteExampleTest extends BaseHttpIntegrationTest {
     public JteExampleTest(@NotNull TestingRender.Config config) {

@@ -4,6 +4,7 @@ import io.webby.netty.marshal.MarshallerFactory.SupportedJsonLibrary;
 import io.webby.testing.BaseHttpIntegrationTest;
 import org.jetbrains.annotations.NotNull;
 import org.junit.Test;
+import org.junit.jupiter.api.Tag;
 import org.junit.runner.RunWith;
 import org.junit.runners.Parameterized;
 
@@ -15,6 +16,7 @@ import static io.webby.testing.AssertJson.assertJsonEquivalent;
 import static io.webby.testing.AssertJson.withJsonLibrary;
 import static io.webby.testing.AssertResponse.assertThat;
 
+@Tag("slow")
 @RunWith(Parameterized.class)
 public class AcceptJsonContentIntegrationTest extends BaseHttpIntegrationTest {
     private final AcceptJsonContent handler;

@@ -40,7 +40,7 @@ import java.util.stream.Stream;
 import static com.google.common.truth.Truth.assertThat;
 import static io.webby.testing.TestingBasics.array;
 
-@Tags({@Tag("sql"), @Tag("slow")})
+@Tag("sql") @Tag("slow")
 public class KeyValueDbIntegrationTest {
     @RegisterExtension static final CloseAllExtension CLOSE_ALL = new CloseAllExtension();
     @RegisterExtension static final TempDirectoryExtension TEMP_DIRECTORY = new TempDirectoryExtension();
