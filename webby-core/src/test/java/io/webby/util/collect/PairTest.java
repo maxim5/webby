@@ -99,6 +99,22 @@ public class PairTest {
     }
 
     @Test
+    public void pair_testFirst() {
+        assertThat(Pair.of(1, 2).testFirst(x -> x == 1)).isTrue();
+        assertThat(Pair.of(1, 2).testFirst(x -> x != 1)).isFalse();
+        assertThat(Pair.of(null, 2).testFirst(java.util.Objects::isNull)).isTrue();
+        assertThat(Pair.of(null, 2).testFirst(java.util.Objects::nonNull)).isFalse();
+    }
+
+    @Test
+    public void pair_testSecond() {
+        assertThat(Pair.of(1, 2).testSecond(x -> x == 2)).isTrue();
+        assertThat(Pair.of(1, 2).testSecond(x -> x != 2)).isFalse();
+        assertThat(Pair.of(1, null).testSecond(java.util.Objects::isNull)).isTrue();
+        assertThat(Pair.of(1, null).testSecond(java.util.Objects::nonNull)).isFalse();
+    }
+
+    @Test
     public void pair_test() {
         assertThat(Pair.of(1, 1).test((x, y) -> x - y == 0)).isTrue();
         assertThat(Pair.of(1, 2).test((x, y) -> x - y == 0)).isFalse();
