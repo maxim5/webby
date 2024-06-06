@@ -16,6 +16,8 @@ allprojects {
         module {
             outputDir file('build/idea/main')
             testOutputDir file('build/idea/test')
+            downloadJavadoc = false
+            downloadSources = true
         }
     }
 }
