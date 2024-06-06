@@ -6,7 +6,7 @@ import org.jetbrains.annotations.NotNull;
 
 import java.util.List;
 
-public class ColumnEnumMaker {
+class ColumnEnumMaker {
     public static @NotNull Snippet make(@NotNull List<PrefixedColumn> columns) {
         return new Snippet()
             .withLines(columns.stream().map(column -> "%s(TermType.%s)".formatted(column.sqlName(), termTypeOf(column))));
