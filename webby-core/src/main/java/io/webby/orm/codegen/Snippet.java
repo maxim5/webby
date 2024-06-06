@@ -2,6 +2,7 @@ package io.webby.orm.codegen;
 
 import com.google.common.collect.ImmutableList;
 import com.google.errorprone.annotations.CheckReturnValue;
+import org.checkerframework.dataflow.qual.Pure;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.ArrayList;
@@ -57,16 +58,25 @@ class Snippet {
         return ImmutableList.copyOf(lines);
     }
 
+    @Pure
     @CheckReturnValue
-    public @NotNull String join() {
-        return String.join("\n", lines);
+    public @NotNull String joinLines() {
+        return join("\n");
     }
 
+    @Pure
     @CheckReturnValue
-    public @NotNull String join(@NotNull String indent) {
+    public @NotNull String joinLines(@NotNull String indent) {
         return join(Collectors.joining("\n" + indent, "", ""));
     }
 
+    @Pure
+    @CheckReturnValue
+    public @NotNull String join(@NotNull String delimiter) {
+        return String.join(delimiter, lines);
+    }
+
+    @Pure
     @CheckReturnValue
     public @NotNull String join(@NotNull Collector<CharSequence, ?, String> collector) {
         return lines.stream().collect(collector);
@@ -74,6 +84,6 @@ class Snippet {
 
     @Override
     public String toString() {
-        return join();
+        return joinLines();
     }
 }

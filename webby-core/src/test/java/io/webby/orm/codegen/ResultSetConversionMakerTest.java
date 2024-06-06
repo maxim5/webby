@@ -6,13 +6,10 @@ import io.webby.orm.api.ForeignLong;
 import io.webby.orm.api.ForeignObj;
 import io.webby.orm.api.annotate.Sql;
 import io.webby.orm.arch.model.TableArch;
-import io.webby.testing.orm.AssertSql;
-import io.webby.testing.orm.AssertSql.SqlSubject;
 import io.webby.util.base.EasyPrimitives.MutableBool;
 import io.webby.util.base.EasyPrimitives.MutableInt;
 import io.webby.util.base.EasyPrimitives.MutableLong;
 import io.webby.util.base.EasyPrimitives.OptionalBool;
-import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import org.junit.jupiter.api.Test;
 
@@ -20,6 +17,7 @@ import java.util.List;
 import java.util.Optional;
 
 import static io.webby.orm.arch.factory.TestingArch.buildTableArch;
+import static io.webby.orm.codegen.AssertSnippet.assertThatSql;
 
 public class ResultSetConversionMakerTest {
     @Test
@@ -320,9 +318,5 @@ public class ResultSetConversionMakerTest {
                 }
             };
         """);
-    }
-
-    private static @NotNull SqlSubject<SqlSubject<?>> assertThatSql(@NotNull Snippet snippet) {
-        return AssertSql.assertThatSql(snippet.join());
     }
 }

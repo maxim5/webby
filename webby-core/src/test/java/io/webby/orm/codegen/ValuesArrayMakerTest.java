@@ -19,7 +19,7 @@ import java.util.List;
 import java.util.Optional;
 
 import static io.webby.orm.arch.factory.TestingArch.buildTableArch;
-import static io.webby.testing.orm.AssertSql.assertThatSql;
+import static io.webby.orm.codegen.AssertSnippet.assertThatSql;
 
 public class ValuesArrayMakerTest {
     @Test
@@ -318,12 +318,12 @@ public class ValuesArrayMakerTest {
     @CanIgnoreReturnValue
     private record ValuesArrayMakerSubject(@NotNull ValuesArrayMaker valuesArrayMaker) {
         public @NotNull ValuesArrayMakerSubject matchesInitValues(@NotNull String expected) {
-            assertThatSql(valuesArrayMaker.makeInitValues().join()).matches(expected);
+            assertThatSql(valuesArrayMaker.makeInitValues()).matches(expected);
             return this;
         }
 
         public @NotNull ValuesArrayMakerSubject matchesConvertValues(@NotNull String expected) {
-            assertThatSql(valuesArrayMaker.makeConvertValues().join()).matches(expected);
+            assertThatSql(valuesArrayMaker.makeConvertValues()).matches(expected);
             return this;
         }
     }

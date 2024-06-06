@@ -604,7 +604,7 @@ public class ModelTableCodegen extends BaseCodegen {
     private void insert() {
         Snippet query = new InsertMaker(InsertMaker.Ignore.DEFAULT).makeAll(table);
         Map<String, String> context = Map.of(
-            "$model_id_assert", AssertModelIdMaker.makeAssert("$model_param", table).join(),
+            "$model_id_assert", AssertModelIdMaker.makeAssert("$model_param", table).joinLines(),
             "$sql_query_literal", wrapAsStringLiteral(query, INDENT2)
         );
 
@@ -624,7 +624,7 @@ public class ModelTableCodegen extends BaseCodegen {
 
     private void insertIgnore() {
         Map<String, String> context = Map.of(
-            "$model_id_assert", AssertModelIdMaker.makeAssert("$model_param", table).join(),
+            "$model_id_assert", AssertModelIdMaker.makeAssert("$model_param", table).joinLines(),
             "$sql_query_literal1", wrapAsStringLiteral(new InsertMaker(InsertMaker.Ignore.IGNORE).makeAll(table), INDENT3),
             "$sql_query_literal2", wrapAsStringLiteral(new InsertMaker(InsertMaker.Ignore.OR_IGNORE).makeAll(table), INDENT3)
         );
@@ -1226,8 +1226,7 @@ public class ModelTableCodegen extends BaseCodegen {
 
     private void columnsEnum() {
         Map<String, String> context = Map.of(
-            "$own_enum_values", ColumnEnumMaker.make(table.columns(ReadFollow.NO_FOLLOW))
-                .join(Collectors.joining(",\n" + INDENT1)),
+            "$own_enum_values", ColumnEnumMaker.make(table.columns(ReadFollow.NO_FOLLOW)).join(",\n" + INDENT1),
             "$all_columns_list", table.columns().stream().map(column -> "OwnColumn.%s".formatted(column.sqlName()))
                 .collect(Collectors.joining(",\n" + INDENT2))
         );
@@ -1235,13 +1234,13 @@ public class ModelTableCodegen extends BaseCodegen {
         appendCode("""
         public enum OwnColumn implements Column {
             $own_enum_values;
-            
+
             public static final List<Column> ALL_COLUMNS = List.of(
                 $all_columns_list
             );
-            
+
             public final FullColumn FULL = this.fullFrom(META);
-            
+
             private final TermType type;
 
             OwnColumn(TermType type) {

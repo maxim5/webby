@@ -11,10 +11,18 @@ class JavaSupport {
 
     public static @NotNull Snippet wrapAsStringLiteral(@NotNull Snippet snippet) {
         if (snippet.linesNumber() <= 1) {
-            return new Snippet().withFormattedLine("\"%s\"", snippet.join());
+            return new Snippet().withFormattedLine("\"%s\"", snippet.joinLines());
         } else {
             return wrapAsTextBlock(snippet);
         }
+    }
+
+    public static @NotNull String wrapAsStringLiteral(@NotNull Snippet snippet, @NotNull String indent) {
+        return wrapAsStringLiteral(snippet).joinLines(indent);
+    }
+
+    public static @NotNull String wrapAsStringLiteral(@NotNull String snippet) {
+        return "\"%s\"".formatted(snippet);
     }
 
     public static @NotNull Snippet wrapAsTextBlock(@NotNull Snippet snippet) {
@@ -24,15 +32,7 @@ class JavaSupport {
                 .withLine("\"\"\"");
     }
 
-    public static @NotNull String wrapAsStringLiteral(@NotNull Snippet snippet, @NotNull String indent) {
-        return wrapAsStringLiteral(snippet).join(indent);
-    }
-
     public static @NotNull String wrapAsTextBlock(@NotNull Snippet snippet, @NotNull String indent) {
-        return wrapAsTextBlock(snippet).join(indent);
-    }
-
-    public static @NotNull String wrapAsStringLiteral(@NotNull String snippet) {
-        return "\"%s\"".formatted(snippet);
+        return wrapAsTextBlock(snippet).joinLines(indent);
     }
 }

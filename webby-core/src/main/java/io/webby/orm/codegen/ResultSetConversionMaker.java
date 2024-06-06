@@ -70,7 +70,8 @@ class ResultSetConversionMaker {
         return new Snippet()
             .withFormattedLine("switch (%s) {", followParam)
             .withLines(indented)
-            .withLine("}").join(INDENT1);
+            .withLine("}")
+            .joinLines(INDENT1);
     }
 
     private @NotNull String caseForNotNull(@NotNull ForeignTableField field, @NotNull ReadFollow follow) {
