@@ -7,7 +7,7 @@
 - `gradle compileDemoRocker`
 - `DemoTablesCodegenMain`
 
-Then `Ctrl-F9` in IJ should work normally
+After this `Ctrl-F9` in IJ should work normally.
 
 ## IntelliJ Tips
 
@@ -22,3 +22,11 @@ Then `Ctrl-F9` in IJ should work normally
 
 - Make sure `demo-frontend\.data\userdata` directory exists
 - `Main`
+
+## Windows Issues
+
+> `UnsatisfiedLinkError: Could not load library. Reasons: [no leveldbjni64-1.8 in java.library.path ...`
+ 
+Install Microsoft Visual C++ 2010 Redistributable package. Sources: \
+https://github.com/fusesource/leveldbjni/issues/80 \
+https://github.com/fusesource/leveldbjni/issues/41
