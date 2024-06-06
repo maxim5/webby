@@ -1,13 +1,14 @@
 package io.webby.netty.marshal;
 
 import com.alibaba.fastjson.JSON;
-import com.alibaba.fastjson.serializer.JSONSerializer;
-import com.alibaba.fastjson.serializer.SerializeWriter;
 import com.google.common.io.CharStreams;
 import com.google.inject.Inject;
 import org.jetbrains.annotations.NotNull;
 
-import java.io.*;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.OutputStream;
+import java.io.Reader;
 import java.nio.charset.Charset;
 
 public record FastJsonMarshaller(@NotNull Charset charset) implements Json, Marshaller {
@@ -21,12 +22,15 @@ public record FastJsonMarshaller(@NotNull Charset charset) implements Json, Mars
         return charset == this.charset ? this : new FastJsonMarshaller(charset);
     }
 
+    /*
+    // 1.2.x support
     @Override
     public void writeChars(@NotNull Writer writer, @NotNull Object instance) {
         try (SerializeWriter serializeWriter = new SerializeWriter(writer)) {
-            new JSONSerializer(serializeWriter).write(instance);  // TODO: serialize config?
+            new JSONSerializer(serializeWriter).write(instance);  // serialize config?
         }
     }
+    */
 
     @Override
     public @NotNull String writeString(@NotNull Object instance) {
