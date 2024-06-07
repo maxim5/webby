@@ -25,6 +25,7 @@ import io.webby.util.base.Unchecked.Consumers;
 import io.webby.util.base.Unchecked.Guava;
 import io.webby.util.collect.Pair;
 import io.webby.util.func.ThrowConsumer;
+import io.webby.util.netty.EasyByteBuf;
 import org.checkerframework.checker.nullness.qual.Nullable;
 import org.jetbrains.annotations.NotNull;
 
@@ -143,11 +144,11 @@ class NettyHttpStepConverter implements ChannelContextBound {
             consumer.accept(new OutputStream() {
                 @Override
                 public void write(byte @NotNull [] bytes) {
-                    context.write(new DefaultHttpContent(Unpooled.wrappedBuffer(bytes)));
+                    context.write(new DefaultHttpContent(EasyByteBuf.allocate(context.alloc(), bytes)));
                 }
                 @Override
                 public void write(byte @NotNull [] bytes, int offset, int length) {
-                    context.write(new DefaultHttpContent(Unpooled.wrappedBuffer(bytes, offset, length)));
+                    context.write(new DefaultHttpContent(EasyByteBuf.allocate(context.alloc(), bytes, offset, length)));
                 }
                 @Override
                 public void write(int b) {
