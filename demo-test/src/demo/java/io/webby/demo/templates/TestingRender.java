@@ -18,7 +18,7 @@ import org.jetbrains.annotations.Nullable;
 import java.util.function.Consumer;
 
 public class TestingRender {
-    enum Config {
+    public enum Config {
         BytesStatsEnabled,
         BytesStatsDisabled,
         StreamingEnabled;
