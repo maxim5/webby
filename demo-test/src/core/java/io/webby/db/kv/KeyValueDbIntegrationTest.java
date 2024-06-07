@@ -39,7 +39,7 @@ import java.util.stream.Stream;
 import static com.google.common.truth.Truth.assertThat;
 import static io.webby.testing.TestingBasics.array;
 
-@Tag("sql") @Tag("slow")
+@Tag("slow") @Tag("integration") @Tag("sql")
 public class KeyValueDbIntegrationTest {
     @RegisterExtension static final CloseAllExtension CLOSE_ALL = new CloseAllExtension();
     @RegisterExtension static final TempDirectoryExtension TEMP_DIRECTORY = new TempDirectoryExtension();
@@ -369,7 +369,7 @@ public class KeyValueDbIntegrationTest {
     }
 
     @CheckReturnValue
-    public static <K, V> @NotNull KeyValueDbSubject<K, V> assertDb(@NotNull KeyValueDb<K, V> db) {
+    private static <K, V> @NotNull KeyValueDbSubject<K, V> assertDb(@NotNull KeyValueDb<K, V> db) {
         return new KeyValueDbSubject<>(db);
     }
 

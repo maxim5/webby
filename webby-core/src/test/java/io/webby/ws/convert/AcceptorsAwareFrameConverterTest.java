@@ -20,6 +20,7 @@ import io.webby.ws.convert.InFrameConverter.ParsedFrameConsumer;
 import io.webby.ws.impl.Acceptor;
 import io.webby.ws.meta.FrameMetadata;
 import org.jetbrains.annotations.NotNull;
+import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
 
 import java.lang.reflect.Method;
@@ -36,6 +37,7 @@ import static io.webby.testing.TestingBytes.asString;
 import static io.webby.ws.convert.AcceptorsAwareFrameConverter.resolveFrameType;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 
+@Tag("slow")
 public class AcceptorsAwareFrameConverterTest {
     private static final Method DUMMY_METHOD = Testing.class.getDeclaredMethods()[0];
     private static final ParsedFrameConsumer<Object> EMPTY_CONSUMER = (accept, payload, ctx) -> {};

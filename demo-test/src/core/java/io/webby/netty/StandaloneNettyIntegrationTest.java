@@ -26,7 +26,7 @@ import static io.webby.testing.OkRequests.files;
 import static io.webby.testing.OkRequests.json;
 import static org.junit.jupiter.api.Assertions.fail;
 
-@Tag("integration") @Tag("slow")
+@Tag("slow") @Tag("integration")
 public class StandaloneNettyIntegrationTest {
     private static final FluentLogger log = FluentLogger.forEnclosingClass();
 

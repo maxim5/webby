@@ -23,7 +23,7 @@ import static io.webby.url.view.EasyRender.outputToBytes;
 import static io.webby.url.view.EasyRender.writeToString;
 import static org.junit.Assume.assumeTrue;
 
-@Tag("integration") @Tag("slow")
+@Tag("slow") @Tag("integration")
 @RunWith(Parameterized.class)
 public class JsonIntegrationTest {
     public JsonIntegrationTest(@NotNull SupportedJsonLibrary library) {

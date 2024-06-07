@@ -88,7 +88,7 @@ public class EasyByteBuf {
         return buffer != null ? Unpooled.wrappedBuffer(buffer) : null;
     }
 
-    public static @Nullable ByteBuf wrapNullable(byte @Nullable[] bytes) {
+    public static @Nullable ByteBuf wrapNullable(byte @Nullable [] bytes) {
         return bytes != null ? Unpooled.wrappedBuffer(bytes) : null;
     }
 }

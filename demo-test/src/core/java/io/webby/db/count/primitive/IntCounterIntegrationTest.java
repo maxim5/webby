@@ -21,7 +21,7 @@ import static io.webby.testing.AssertPrimitives.assertMap;
 import static io.webby.testing.TestingPrimitives.newIntMap;
 
 // FIX[minor]: more test cases (existing state, check group by count, flush)
-@Tag("sql")
+@Tag("integration") @Tag("sql")
 public class IntCounterIntegrationTest {
     @RegisterExtension static final SqlDbExtension SQL = SqlDbExtension.fromProperties().withManualCleanup(UserRateModelTable.META);
 

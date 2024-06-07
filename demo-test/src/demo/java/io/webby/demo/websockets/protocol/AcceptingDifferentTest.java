@@ -11,6 +11,7 @@ import io.webby.ws.context.ClientFrameType;
 import io.webby.ws.meta.FrameMetadata;
 import io.webby.ws.meta.TextSeparatorFrameMetadata;
 import org.jetbrains.annotations.NotNull;
+import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
 
 import java.util.Queue;
@@ -18,6 +19,7 @@ import java.util.Queue;
 import static com.google.common.truth.Truth.assertThat;
 import static io.webby.testing.AssertFrame.*;
 
+@Tag("slow")
 public class AcceptingDifferentTest extends BaseWebsocketIntegrationTest {
     private static final TextSeparatorFrameMetadata TEXT_SEPARATOR_META = new TextSeparatorFrameMetadata();
 

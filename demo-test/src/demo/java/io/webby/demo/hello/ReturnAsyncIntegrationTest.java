@@ -2,10 +2,12 @@ package io.webby.demo.hello;
 
 import io.webby.testing.BaseHttpIntegrationTest;
 import io.webby.testing.TestingBasics;
+import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
 
 import static io.webby.testing.AssertResponse.assertThat;
 
+@Tag("slow")
 public class ReturnAsyncIntegrationTest extends BaseHttpIntegrationTest {
     protected final ReturnAsync handler = testSetup(ReturnAsync.class).initHandler();
 

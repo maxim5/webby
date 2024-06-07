@@ -8,6 +8,7 @@ import com.google.rpc.Code;
 import com.google.rpc.Status;
 import io.webby.testing.Testing;
 import okio.Buffer;
+import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.ValueSource;
 
@@ -22,6 +23,7 @@ import java.util.stream.Stream;
 import static com.google.common.truth.Truth.assertThat;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 
+@Tag("integration")
 public class ProtobufMarshallerIntegrationTest {
     private final ProtobufMarshaller marshaller = Testing.testStartup().getInstance(ProtobufMarshaller.class);
 
