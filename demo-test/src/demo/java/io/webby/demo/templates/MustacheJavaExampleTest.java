@@ -5,11 +5,13 @@ import io.webby.testing.BaseHttpIntegrationTest;
 import io.webby.testing.TestingModules;
 import org.jetbrains.annotations.NotNull;
 import org.junit.Test;
+import org.junit.experimental.categories.Category;
 import org.junit.runner.RunWith;
 import org.junit.runners.Parameterized;
 
 import static io.webby.demo.templates.TestingRender.assertThat;
 
+@Category(Parameterized.class)
 @RunWith(Parameterized.class)
 public class MustacheJavaExampleTest extends BaseHttpIntegrationTest {
     public MustacheJavaExampleTest(@NotNull TestingRender.Config config) {

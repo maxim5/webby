@@ -6,6 +6,7 @@ import io.webby.netty.marshal.MarshallerFactory.SupportedJsonLibrary;
 import io.webby.testing.BaseHttpIntegrationTest;
 import org.jetbrains.annotations.NotNull;
 import org.junit.Test;
+import org.junit.experimental.categories.Category;
 import org.junit.runner.RunWith;
 import org.junit.runners.Parameterized;
 
@@ -16,6 +17,7 @@ import static io.webby.testing.AssertJson.withJsonLibrary;
 import static io.webby.testing.AssertResponse.assertThat;
 import static org.junit.Assume.assumeTrue;
 
+@Category(Parameterized.class)
 @RunWith(Parameterized.class)
 public class ReturnJsonIntegrationTest extends BaseHttpIntegrationTest {
     public ReturnJsonIntegrationTest(@NotNull SupportedJsonLibrary library) {
