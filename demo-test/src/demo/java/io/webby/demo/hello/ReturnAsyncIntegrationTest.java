@@ -38,8 +38,38 @@ public class ReturnAsyncIntegrationTest extends BaseHttpIntegrationTest {
     }
 
     @Test
-    public void consumer() {
+    public void consumer_simple() {
         assertThat(get("/r/async/consumer/simple")).is200().hasContent("OutputStream!");
+    }
+
+    @Test
+    public void consumer_singles() {
+        assertThat(get("/r/async/consumer/singles/0")).is200().hasContent("");
+        assertThat(get("/r/async/consumer/singles/1")).is200().hasContent("0");
+        assertThat(get("/r/async/consumer/singles/2")).is200().hasContent("01");
+        assertThat(get("/r/async/consumer/singles/5")).is200().hasContent("01234");
+        assertThat(get("/r/async/consumer/singles/10")).is200().hasContent("0123456789");
+    }
+
+    @Test
+    public void consumer_buffer_reuse() {
+        assertThat(get("/r/async/consumer/buffer/reuse/1/4/1234")).is200().hasContent("1234");
+        assertThat(get("/r/async/consumer/buffer/reuse/1/3/1234")).is200().hasContent("1234");
+        assertThat(get("/r/async/consumer/buffer/reuse/1/2/1234")).is200().hasContent("1234");
+        assertThat(get("/r/async/consumer/buffer/reuse/1/1/1234")).is200().hasContent("1234");
+
+        assertThat(get("/r/async/consumer/buffer/reuse/1/8/1234")).is200().hasContent("1234");
+        assertThat(get("/r/async/consumer/buffer/reuse/2/8/1234")).is200().hasContent("12341234");
+        assertThat(get("/r/async/consumer/buffer/reuse/3/8/1234")).is200().hasContent("123412341234");
+
+        assertThat(get("/r/async/consumer/buffer/reuse/1/4/1234")).is200().hasContent("1234");
+        assertThat(get("/r/async/consumer/buffer/reuse/2/4/1234")).is200().hasContent("12341234");
+        assertThat(get("/r/async/consumer/buffer/reuse/3/4/1234")).is200().hasContent("123412341234");
+
+        assertThat(get("/r/async/consumer/buffer/reuse/1/8/123456")).is200().hasContent("123456");
+        assertThat(get("/r/async/consumer/buffer/reuse/2/8/123456")).is200().hasContent("123456123456");
+        assertThat(get("/r/async/consumer/buffer/reuse/3/8/123456")).is200().hasContent("123456123456123456");
+        assertThat(get("/r/async/consumer/buffer/reuse/4/8/123456")).is200().hasContent("123456123456123456123456");
     }
 
     @Test

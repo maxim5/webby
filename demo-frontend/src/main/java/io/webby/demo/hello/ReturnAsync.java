@@ -85,8 +85,46 @@ public class ReturnAsync {
         return rethrow(outputStream -> {
             try (outputStream) {
                 outputStream.write("Output".getBytes());
-                outputStream.write("Stream".getBytes());
+                outputStream.write("SStream".getBytes(), 1, 6);
                 outputStream.write('!');
+            }
+        });
+    }
+
+    @GET(url = "/r/async/consumer/singles/{times}")
+    Consumer<OutputStream> consumer_singles(int times) {
+        return rethrow(outputStream -> {
+            try (outputStream) {
+                for (int i = 0; i < times; ++i) {
+                    outputStream.write('0' + i);
+                    outputStream.flush();
+                }
+            }
+        });
+    }
+
+    @GET(url = "/r/async/consumer/buffer/reuse/{times}/{size}/{str}")
+    Consumer<OutputStream> consumer_buffer_reuse(int times, int size, String str) {
+        return rethrow(outputStream -> {
+            try (outputStream) {
+                // Iterates over the `str` a number of `times`,
+                // but uses the same buffer instance for sending over.
+                // The result must be equal to `str.repeat(times)`.
+                byte[] bytes = str.getBytes();
+                byte[] buffer = new byte[size];
+                int bufferPos = 0;
+                for (int i = 0; i < times; ++i) {
+                    int startPos = bufferPos;
+                    for (byte b : bytes) {
+                        buffer[bufferPos] = b;
+                        bufferPos = (bufferPos + 1) % size;
+                        if (bufferPos == 0) {
+                            outputStream.write(buffer, startPos, buffer.length - startPos);
+                            startPos = 0;
+                        }
+                    }
+                    outputStream.write(buffer, startPos, bufferPos - startPos);
+                }
             }
         });
     }
