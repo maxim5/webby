@@ -2,6 +2,7 @@ package io.webby.demo.model;
 
 import java.util.Objects;
 
+@SuppressWarnings("FieldMayBeFinal")
 public class InheritedModel extends InheritedModelBase {
     private int inheritedModelId;
     private boolean boolValue;
@@ -35,6 +36,7 @@ public class InheritedModel extends InheritedModelBase {
     }
 }
 
+@SuppressWarnings("FieldMayBeFinal")
 class InheritedModelBase {
     private String str;
     private int intValue;

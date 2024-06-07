@@ -115,7 +115,7 @@ public class JetcdDb<K, V> extends ByteArrayDb<K, V> implements KeyValueDb<K, V>
     }
 
     private @NotNull GetOption withGetOptions(boolean keysOnly) {
-        return GetOption.newBuilder()
+        return GetOption.builder()
                 .withKeysOnly(keysOnly)
                 .withSortField(GetOption.SortTarget.KEY)
                 .withSortOrder(GetOption.SortOrder.DESCEND)

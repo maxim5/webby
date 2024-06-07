@@ -81,7 +81,7 @@ public class ConnectionAdapter implements Connection {
 
     @Override
     public int getTransactionIsolation() {
-        return 0;
+        return Connection.TRANSACTION_NONE;
     }
 
     @Override

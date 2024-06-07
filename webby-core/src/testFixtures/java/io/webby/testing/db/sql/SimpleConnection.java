@@ -46,7 +46,7 @@ public class SimpleConnection extends ConnectionAdapter {
     }
 
     private void markAccess(@NotNull String message) {
-        long threadId = Thread.currentThread().getId();
+        long threadId = Thread.currentThread().threadId();
         log.at(Level.FINE).log("[%d] %s", message, threadId);
         access.add(threadId);
     }

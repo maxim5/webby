@@ -109,11 +109,11 @@ public class TestingArch {
     }
 
     public static class TableFieldsStatus extends SimpleBitSet<TableFieldsStatus> {
-        public static @NotNull TableFieldsStatus ONLY_ORDINARY = new TableFieldsStatus();
-        public static @NotNull TableFieldsStatus PRIMARY_OBJ = new TableFieldsStatus().withPrimaryObj();
-        public static @NotNull TableFieldsStatus PRIMARY_INT = new TableFieldsStatus().withPrimaryInt();
-        public static @NotNull TableFieldsStatus PRIMARY_LONG = new TableFieldsStatus().withPrimaryLong();
-        public static @NotNull TableFieldsStatus FOREIGN = new TableFieldsStatus().withForeign();
+        public static final TableFieldsStatus ONLY_ORDINARY = new TableFieldsStatus();
+        public static final TableFieldsStatus PRIMARY_OBJ = new TableFieldsStatus().withPrimaryObj();
+        public static final TableFieldsStatus PRIMARY_INT = new TableFieldsStatus().withPrimaryInt();
+        public static final TableFieldsStatus PRIMARY_LONG = new TableFieldsStatus().withPrimaryLong();
+        public static final TableFieldsStatus FOREIGN = new TableFieldsStatus().withForeign();
 
         public @NotNull TableFieldsStatus withPrimaryObj() { return setBit(0); }
         public @NotNull TableFieldsStatus withPrimaryInt() { return setBit(0).setBit(1); }
@@ -245,10 +245,10 @@ public class TestingArch {
     }
 
     public static class FieldConstraints extends SimpleBitSet<FieldConstraints> {
-        public static @NotNull FieldConstraints ORDINARY = new FieldConstraints();
-        public static @NotNull FieldConstraints PRIMARY_KEY = new FieldConstraints().primaryKey();
-        public static @NotNull FieldConstraints FOREIGN_KEY = new FieldConstraints().foreignKey();
-        public static @NotNull FieldConstraints UNIQUE = new FieldConstraints().unique();
+        public static final FieldConstraints ORDINARY = new FieldConstraints();
+        public static final FieldConstraints PRIMARY_KEY = new FieldConstraints().primaryKey();
+        public static final FieldConstraints FOREIGN_KEY = new FieldConstraints().foreignKey();
+        public static final FieldConstraints UNIQUE = new FieldConstraints().unique();
 
         public @NotNull FieldConstraints primaryKey() { return setBit(0); }
         public @NotNull FieldConstraints foreignKey() { return setBit(1); }

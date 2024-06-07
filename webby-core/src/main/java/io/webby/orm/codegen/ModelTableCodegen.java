@@ -819,7 +819,7 @@ public class ModelTableCodegen extends BaseCodegen {
         public int insertData(@Nonnull EntityData<?> data) {
             Collection<? extends Column> columns = data.columns();
             assert columns.size() > 0 : "Entity data contains empty columns: " + data;
-            
+
             String query = makeInsertQueryForColumns(columns);
             try (PreparedStatement statement = runner().prepareQuery(query)) {
                 data.provideValues(statement);
@@ -1146,7 +1146,7 @@ public class ModelTableCodegen extends BaseCodegen {
                 String sql = "$left_pk_sql IN (SELECT $left_fk_sql FROM $table_sql WHERE $right_fk_sql = ?)";
                 return leftsTable.iterator(Where.hardcoded(sql, Args.of(rightId)));
             }
-                        
+
             public void forEachRightId$TypeMarker$($left_id_native leftId, @Nonnull $TypeMarker$Consumer consumer) {
                 String query = "SELECT $right_fk_sql FROM $table_sql WHERE $left_fk_sql = ?";
                 try (PreparedStatement statement = runner().prepareQuery(query, leftId);

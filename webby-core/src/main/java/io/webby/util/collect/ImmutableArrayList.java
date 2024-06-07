@@ -1,7 +1,6 @@
 package io.webby.util.collect;
 
 import com.google.errorprone.annotations.Immutable;
-import org.checkerframework.dataflow.qual.Pure;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
@@ -84,17 +83,17 @@ public class ImmutableArrayList<E> extends ArrayList<E> {
     }
 
     @Override
-    public Iterator<E> iterator() {
+    public @NotNull Iterator<E> iterator() {
         return new ImmutableListIterator(size());
     }
 
     @Override
-    public ListIterator<E> listIterator() {
+    public @NotNull ListIterator<E> listIterator() {
         return new ImmutableListIterator(size());
     }
 
     @Override
-    public ListIterator<E> listIterator(int index) {
+    public @NotNull ListIterator<E> listIterator(int index) {
         if (index < 0 || index > size()) {
             throw new IndexOutOfBoundsException("Index " + index + " is out of bounds, list size: " + size());
         }
@@ -102,7 +101,7 @@ public class ImmutableArrayList<E> extends ArrayList<E> {
     }
 
     @Override
-    public ImmutableArrayList<E> subList(int fromIndex, int toIndex) {
+    public @NotNull ImmutableArrayList<E> subList(int fromIndex, int toIndex) {
         if (fromIndex < 0 || fromIndex > toIndex) {
             throw new IndexOutOfBoundsException("Index " + fromIndex + " is out of bounds, list size: " + size());
         }

@@ -8,7 +8,7 @@ import static java.util.Objects.requireNonNull;
  * Represents an operation that accepts two input arguments and returns no result.
  * This is the two-arity specialization of {@link java.util.function.Consumer}.
  * Unlike most other functional interfaces, {@code TriConsumer} is expected
- * to operate via side-effects.
+ * to operate via side effects.
  *
  * @param <T> the type of the first argument to the operation
  * @param <U> the type of the second argument to the operation

@@ -204,9 +204,19 @@ public class AcceptorsAwareFrameConverterTest {
                                                                         @NotNull FrameType supportedType,
                                                                         @NotNull Acceptor ... acceptors) {
         Injector injector = Testing.testStartup();
+        AcceptorsAwareFrameConverter converter = new AcceptorsAwareFrameConverter(
+            injector.getInstance(MarshallerFactory.class).getMarshaller(marshal),
+            dummyFrameMetadata(),
+            Maps.uniqueIndex(List.of(acceptors), Acceptor::id),
+            supportedType
+        );
+        converter.onBeforeHandshake(FakeClients.DEFAULT);
+        return converter;
+    }
 
+    private static @NotNull FrameMetadata dummyFrameMetadata() {
         AtomicInteger requestIdCounter = new AtomicInteger();
-        FrameMetadata metadata = new FrameMetadata() {
+        return new FrameMetadata() {
             @Override
             public void parse(@NotNull ByteBuf frameContent, @NotNull MetadataConsumer consumer) {
                 consumer.accept(frameContent, requestIdCounter.incrementAndGet(), frameContent);
@@ -217,16 +227,6 @@ public class AcceptorsAwareFrameConverterTest {
                 return asByteBuf("%d:%d:%s".formatted(requestId, code, asString(content)));
             }
         };
-
-        AcceptorsAwareFrameConverter converter = new AcceptorsAwareFrameConverter(
-                injector.getInstance(MarshallerFactory.class).getMarshaller(marshal),
-                metadata,
-                Maps.uniqueIndex(List.of(acceptors), Acceptor::id),
-                supportedType
-        );
-        converter.onBeforeHandshake(FakeClients.DEFAULT);
-
-        return converter;
     }
 
     private @NotNull Acceptor dummyMessageAcceptor(@NotNull String id) {
