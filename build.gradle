@@ -102,7 +102,7 @@ subprojects {
         common group: 'com.linkedin.paldb', name: 'paldb', version: '1.2.0'
         common group: 'com.yahoo.oak', name: 'oak', version: '0.2.3.1'
         common group: 'io.swaydb', name: 'java_2.13', version: '0.16.2'
-        common group: 'net.openhft', name: 'chronicle-map', version: '3.24ea0'
+        common group: 'net.openhft', name: 'chronicle-map', version: '3.25ea6'
         common group: 'org.deephacks.lmdbjni', name: 'lmdbjni', version: '0.4.6'
         common group: 'org.deephacks.lmdbjni', name: "lmdbjni-$os", version: '0.4.6'
         common group: 'org.fusesource.leveldbjni', name: 'leveldbjni', version: '1.8'
