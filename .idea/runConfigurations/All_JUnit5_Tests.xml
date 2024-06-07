@@ -1,6 +1,6 @@
 <component name="ProjectRunConfigurationManager">
   <configuration default="false" name="All JUnit5 Tests" type="JUnit" factoryName="JUnit">
-    <shortenClasspath name="MANIFEST" />
+    <shortenClasspath name="ARGS_FILE" />
     <extension name="coverage">
       <pattern>
         <option name="PATTERN" value="io.webby.*" />
