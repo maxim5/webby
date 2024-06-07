@@ -77,8 +77,8 @@ public class ThymeleafRenderer implements Renderer<String> {
 
     private @NotNull IContext toContext(@NotNull Object model) {
         Locale locale = settings.getOptionalProperty("thymeleaf.context.locale.language")
-                .map(Locale::forLanguageTag)
-                .orElse(Locale.getDefault());
+            .map(Locale::forLanguageTag)
+            .orElse(Locale.getDefault());
         Map<String, Object> variables = castMapOrFail(model, obj -> new RenderException(
             "Thymeleaf engine accepts only Map<String, Object> context, but got instead: %s".formatted(obj)
         ));

@@ -5,12 +5,12 @@ import com.google.inject.Inject;
 import gg.jte.ContentType;
 import gg.jte.TemplateEngine;
 import gg.jte.output.StringOutput;
-import gg.jte.output.StringOutputPool;
 import gg.jte.output.Utf8ByteOutput;
 import gg.jte.resolve.DirectoryCodeResolver;
 import gg.jte.runtime.Constants;
 import io.webby.app.Settings;
 import io.webby.common.InjectorHelper;
+import io.webby.common.SystemProperties;
 import io.webby.util.func.ThrowConsumer;
 import org.jetbrains.annotations.NotNull;
 
@@ -27,7 +27,6 @@ import static io.webby.util.base.EasyCast.castMap;
 public class JteRenderer implements Renderer<String> {
     private static final FluentLogger log = FluentLogger.forEnclosingClass();
 
-    private final StringOutputPool pool = new StringOutputPool();
     @Inject private InjectorHelper helper;
     @Inject private Settings settings;
     private TemplateEngine templateEngine;
@@ -59,7 +58,7 @@ public class JteRenderer implements Renderer<String> {
 
     @Override
     public @NotNull String renderToString(@NotNull String template, @NotNull Object model) {
-        StringOutput output = pool.get();
+        StringOutput output = new StringOutput(SystemProperties.DEFAULT_SIZE_CHARS);
         if (model instanceof Map<?, ?> mapModel) {
             templateEngine.render(template, castMap(mapModel), output);
         } else {
@@ -93,8 +92,8 @@ public class JteRenderer implements Renderer<String> {
         boolean precompile = settings.getBoolProperty("jte.class.precompile.enabled", settings.isProdMode());
 
         DirectoryCodeResolver codeResolver = paths.stream()
-                .map(DirectoryCodeResolver::new)
-                .findFirst().orElseThrow();
+            .map(DirectoryCodeResolver::new)
+            .findFirst().orElseThrow();
         if (paths.size() > 1) {
             log.at(Level.INFO)
                 .log("JTE engine does not support multiple source directories. Using %s", codeResolver.getRoot());
@@ -105,11 +104,11 @@ public class JteRenderer implements Renderer<String> {
         }
 
         TemplateEngine templateEngine = TemplateEngine.create(
-                codeResolver,
-                classDir,
-                contentType,
-                classLoader,
-                packageName
+            codeResolver,
+            classDir,
+            contentType,
+            classLoader,
+            packageName
         );
         if (isUtf8Byte) {
             templateEngine.setBinaryStaticContent(true);

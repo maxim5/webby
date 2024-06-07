@@ -39,23 +39,23 @@ public class RockerRenderer implements Renderer<BindableRockerModel> {
     @Override
     public @NotNull String renderToString(@NotNull BindableRockerModel template, @NotNull Object model) {
         return bindIfNecessary(template, model)
-                .render(StringBuilderOutput::new)
-                .toString();
+            .render(StringBuilderOutput::new)
+            .toString();
     }
 
     @Override
     public byte @NotNull [] renderToBytes(@NotNull BindableRockerModel template, @NotNull Object model) {
         return bindIfNecessary(template, model)
-                .render(ArrayOfByteArraysOutput::new)
-                .toByteArray();
+            .render(ArrayOfByteArraysOutput::new)
+            .toByteArray();
     }
 
     @Override
     public @NotNull ThrowConsumer<OutputStream, Exception>
-            renderToByteStream(@NotNull BindableRockerModel template, @NotNull Object model) {
+    renderToByteStream(@NotNull BindableRockerModel template, @NotNull Object model) {
         return stream ->
-                bindIfNecessary(template, model)
-                        .render((contentType, charsetName) -> new OutputStreamOutput(contentType, stream, charsetName));
+            bindIfNecessary(template, model)
+                .render((contentType, charsetName) -> new OutputStreamOutput(contentType, stream, charsetName));
     }
 
     private static @NotNull RockerModel bindIfNecessary(@NotNull BindableRockerModel template, @NotNull Object model) {

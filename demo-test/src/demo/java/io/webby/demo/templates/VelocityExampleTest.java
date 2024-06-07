@@ -26,7 +26,8 @@ public class VelocityExampleTest extends BaseHttpIntegrationTest {
         HttpResponse response = get("/templates/velocity/hello");
         assertThat(response)
             .is200()
-            .hasContentWhichContains("<table class=\"gridtable\">", "<td>1)</td>", "<td>foo</td>",
+            .hasContentWhichContains("<html>", "</html>",
+                                     "<table class=\"gridtable\">", "<td>1)</td>", "<td>foo</td>",
                                      "<td>1.23</td>", "<td>2)</td>", "<td>bar</td>", "<td>100.0</td>")
             .hasRenderedStatsHeaderForCurrentConfig();
     }
