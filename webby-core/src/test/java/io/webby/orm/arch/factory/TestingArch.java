@@ -2,6 +2,7 @@ package io.webby.orm.arch.factory;
 
 import com.google.common.truth.Truth;
 import com.google.errorprone.annotations.CanIgnoreReturnValue;
+import com.google.errorprone.annotations.CheckReturnValue;
 import io.webby.orm.arch.model.*;
 import io.webby.testing.TestingBasics.SimpleBitSet;
 import io.webby.testing.orm.FakeModelAdaptersScanner;
@@ -57,14 +58,17 @@ public class TestingArch {
         return new RunInputs(modelInputs, List.of());
     }
 
+    @CheckReturnValue
     public static @NotNull TableArchSubject assertThat(@NotNull TableArch tableArch) {
         return new TableArchSubject(tableArch);
     }
 
+    @CheckReturnValue
     public static @NotNull TableFieldSubject assertThat(@NotNull TableField tableField) {
         return new TableFieldSubject(tableField);
     }
 
+    @CheckReturnValue
     public static @NotNull PojoArchSubject assertThat(@NotNull PojoArch pojoArch) {
         return new PojoArchSubject(pojoArch);
     }

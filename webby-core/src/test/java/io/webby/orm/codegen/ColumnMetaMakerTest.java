@@ -4,6 +4,7 @@ import com.google.common.collect.MoreCollectors;
 import com.google.common.truth.StringSubject;
 import com.google.common.truth.Truth;
 import com.google.errorprone.annotations.CanIgnoreReturnValue;
+import com.google.errorprone.annotations.CheckReturnValue;
 import io.webby.orm.api.annotate.Sql;
 import io.webby.orm.arch.model.Column;
 import io.webby.orm.arch.model.TableArch;
@@ -94,6 +95,7 @@ class ColumnMetaMakerTest {
             );
     }
 
+    @CheckReturnValue
     private static @NotNull ColumnMetaMakerSubject assertThat(@NotNull TableArch tableArch) {
         return new ColumnMetaMakerSubject(tableArch);
     }

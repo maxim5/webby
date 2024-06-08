@@ -1,6 +1,7 @@
 package io.webby.util.reflect;
 
 import com.google.errorprone.annotations.CanIgnoreReturnValue;
+import com.google.errorprone.annotations.CheckReturnValue;
 import com.google.inject.internal.MoreTypes;
 import io.webby.util.func.Reversible;
 import org.jetbrains.annotations.NotNull;
@@ -61,6 +62,7 @@ public class EasyGenericsTest {
             .findsGenericTypeArgumentsForInterface(Reversible.class, String.class, Integer.class);
     }
 
+    @CheckReturnValue
     private static @NotNull EasyGenericsSubject assertJavaClass(@NotNull Class<?> klass) {
         return new EasyGenericsSubject(klass);
     }

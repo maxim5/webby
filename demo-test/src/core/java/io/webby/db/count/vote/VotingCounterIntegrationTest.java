@@ -6,6 +6,7 @@ import com.carrotsearch.hppc.cursors.IntObjectCursor;
 import com.google.common.collect.HashBasedTable;
 import com.google.common.eventbus.EventBus;
 import com.google.common.primitives.Ints;
+import com.google.errorprone.annotations.CheckReturnValue;
 import com.google.mu.util.stream.BiStream;
 import io.webby.db.DbReadyEvent;
 import io.webby.db.StorageType;
@@ -619,10 +620,12 @@ public class VotingCounterIntegrationTest {
         }
     }
 
+    @CheckReturnValue
     private static @NotNull VotingCounterSubject assertCounter(@NotNull VotingCounter counter) {
         return new VotingCounterSubject(counter);
     }
 
+    @CheckReturnValue
     private static @NotNull VotingStorageSubject assertStorage(@NotNull VotingStorage storage) {
         return new VotingStorageSubject(storage);
     }

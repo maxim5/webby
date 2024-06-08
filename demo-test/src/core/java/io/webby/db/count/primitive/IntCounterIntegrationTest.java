@@ -3,6 +3,7 @@ package io.webby.db.count.primitive;
 import com.carrotsearch.hppc.IntIntHashMap;
 import com.carrotsearch.hppc.cursors.IntIntCursor;
 import com.google.common.eventbus.EventBus;
+import com.google.errorprone.annotations.CheckReturnValue;
 import io.webby.db.StorageType;
 import io.webby.db.kv.javamap.JavaMapDbFactory;
 import io.webby.demo.model.UserRateModelTable;
@@ -71,6 +72,7 @@ public class IntCounterIntegrationTest {
         assertCounter(counter).hasCountEstimates(A, 7, B, -2, C, -1);
     }
 
+    @CheckReturnValue
     private static @NotNull IntCounterSubject assertCounter(@NotNull IntCounter counter) {
         return new IntCounterSubject(counter);
     }

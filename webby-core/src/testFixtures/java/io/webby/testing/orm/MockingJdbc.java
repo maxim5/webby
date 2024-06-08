@@ -3,6 +3,7 @@ package io.webby.testing.orm;
 import com.google.common.truth.IterableSubject;
 import com.google.common.truth.Truth;
 import com.google.errorprone.annotations.CanIgnoreReturnValue;
+import com.google.errorprone.annotations.CheckReturnValue;
 import com.mockrunner.mock.jdbc.*;
 import io.webby.util.base.Unchecked;
 import org.jetbrains.annotations.NotNull;
@@ -48,32 +49,39 @@ public class MockingJdbc {
         return mockResultSet;
     }
 
+    @CheckReturnValue
     public static @NotNull MockConnectionSubject assertThat(@NotNull MockConnection connection) {
         return new MockConnectionSubject(connection);
     }
 
+    @CheckReturnValue
     public static @NotNull MockMockPreparedStatementSubject assertThat(@NotNull MockPreparedStatement statement) {
         return new MockMockPreparedStatementSubject(statement);
     }
 
+    @CheckReturnValue
     public static @NotNull MockMockPreparedStatementSubject assertThat(@NotNull PreparedStatement statement) {
         return assertThat(((MockPreparedStatement) statement));
     }
 
+    @CheckReturnValue
     public static @NotNull MockParameterMapSubject assertThat(@NotNull MockParameterMap parameterMap) {
         return new MockParameterMapSubject(parameterMap);
     }
 
+    @CheckReturnValue
     public static @NotNull MockResultSetSubject assertThat(@NotNull MockResultSet resultSet) {
         return new MockResultSetSubject(resultSet);
     }
 
+    @CheckReturnValue
     public static @NotNull MockResultSetSubject assertThat(@NotNull ResultSet resultSet) {
         return assertThat(((MockResultSet) resultSet));
     }
 
     @CanIgnoreReturnValue
     public record MockConnectionSubject(@NotNull MockConnection connection) {
+        @CheckReturnValue
         public IterableSubject executedQueries() {
             return Truth.assertThat(connection.getPreparedStatementResultSetHandler().getExecutedStatements());
         }

@@ -1,5 +1,6 @@
 package io.webby.orm.api.query;
 
+import com.google.errorprone.annotations.CheckReturnValue;
 import io.webby.orm.api.Engine;
 import io.webby.testing.AssertPrimitives;
 import io.webby.testing.ext.SqlDbExtension;
@@ -385,6 +386,7 @@ public class SelectQueryTest {
         assertArray(SQL.runner().fetchLongColumn(query)).containsExactlyInOrder(100, 110, 120, 130);
     }
 
+    @CheckReturnValue
     private static @NotNull UnitSubject<UnitSubject<?>> assertQuery(@NotNull SelectQuery query) {
         return new UnitSubject<>((Unit) query);
     }

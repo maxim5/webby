@@ -3,6 +3,7 @@ package io.webby.testing.netty.intercept;
 import com.google.common.collect.ImmutableList;
 import com.google.common.truth.IterableSubject;
 import com.google.common.truth.Truth;
+import com.google.errorprone.annotations.CheckReturnValue;
 import io.netty.handler.codec.http.HttpResponse;
 import io.webby.netty.errors.ServeException;
 import io.webby.netty.intercept.Interceptor;
@@ -81,6 +82,7 @@ public class MockingInterceptor implements Interceptor {
         return ImmutableList.copyOf(events.get());
     }
 
+    @CheckReturnValue
     public @NotNull IterableSubject assertEvents() {
         return Truth.assertThat(events.get());
     }
@@ -101,6 +103,7 @@ public class MockingInterceptor implements Interceptor {
             return ImmutableList.copyOf(events);
         }
 
+        @CheckReturnValue
         public @NotNull IterableSubject assertEvents() {
             return Truth.assertThat(events);
         }

@@ -1,5 +1,6 @@
 package io.webby.orm.api.query;
 
+import com.google.errorprone.annotations.CheckReturnValue;
 import io.webby.orm.api.Engine;
 import io.webby.orm.testing.FakeColumn;
 import io.webby.testing.orm.AssertSql;
@@ -174,6 +175,7 @@ public class SelectWhereTest {
         assertReprThrows(() -> SelectWhere.from("table").select(num(1)).with(Offset.of(3)).with(Offset.of(9)).build());
     }
 
+    @CheckReturnValue
     private static @NotNull SelectWhereSubject assertThat(@NotNull SelectWhere query) {
         return new SelectWhereSubject(query);
     }

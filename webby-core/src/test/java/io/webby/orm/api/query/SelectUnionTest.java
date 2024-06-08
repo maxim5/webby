@@ -1,5 +1,6 @@
 package io.webby.orm.api.query;
 
+import com.google.errorprone.annotations.CheckReturnValue;
 import io.webby.orm.testing.FakeColumn;
 import io.webby.testing.orm.AssertSql;
 import org.jetbrains.annotations.NotNull;
@@ -111,6 +112,7 @@ public class SelectUnionTest {
         });
     }
 
+    @CheckReturnValue
     private static @NotNull SelectUnionSubject assertThat(@NotNull SelectUnion query) {
         return new SelectUnionSubject(query);
     }

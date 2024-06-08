@@ -1,5 +1,6 @@
 package io.webby.orm.api.query;
 
+import com.google.errorprone.annotations.CheckReturnValue;
 import io.webby.orm.testing.FakeColumn;
 import io.webby.testing.orm.AssertSql;
 import org.jetbrains.annotations.NotNull;
@@ -42,6 +43,7 @@ public class SelectJoinTest {
             .containsNoArgs();
     }
 
+    @CheckReturnValue
     private static @NotNull SelectJoinSubject assertThat(@NotNull SelectJoin query) {
         return new SelectJoinSubject(query);
     }

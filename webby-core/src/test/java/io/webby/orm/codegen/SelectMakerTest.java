@@ -1,6 +1,7 @@
 package io.webby.orm.codegen;
 
 import com.google.errorprone.annotations.CanIgnoreReturnValue;
+import com.google.errorprone.annotations.CheckReturnValue;
 import io.webby.orm.api.ForeignInt;
 import io.webby.orm.arch.model.TableArch;
 import org.jetbrains.annotations.NotNull;
@@ -60,6 +61,7 @@ public class SelectMakerTest {
                 """);
     }
 
+    @CheckReturnValue
     private static @NotNull SelectMakerSubject assertThat(@NotNull SelectMaker selectMaker) {
         return new SelectMakerSubject(selectMaker);
     }

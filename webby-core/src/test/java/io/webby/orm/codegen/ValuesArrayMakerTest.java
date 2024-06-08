@@ -1,6 +1,7 @@
 package io.webby.orm.codegen;
 
 import com.google.errorprone.annotations.CanIgnoreReturnValue;
+import com.google.errorprone.annotations.CheckReturnValue;
 import io.webby.orm.api.Engine;
 import io.webby.orm.api.ForeignInt;
 import io.webby.orm.api.ForeignLong;
@@ -19,7 +20,7 @@ import java.util.List;
 import java.util.Optional;
 
 import static io.webby.orm.arch.factory.TestingArch.buildTableArch;
-import static io.webby.orm.codegen.AssertSnippet.assertThatSql;
+import static io.webby.orm.codegen.AssertSnippet.assertThatJava;
 
 public class ValuesArrayMakerTest {
     @Test
@@ -311,6 +312,7 @@ public class ValuesArrayMakerTest {
                 """);
     }
 
+    @CheckReturnValue
     private static @NotNull ValuesArrayMakerSubject assertThat(@NotNull ValuesArrayMaker valuesArrayMaker) {
         return new ValuesArrayMakerSubject(valuesArrayMaker);
     }
@@ -318,12 +320,12 @@ public class ValuesArrayMakerTest {
     @CanIgnoreReturnValue
     private record ValuesArrayMakerSubject(@NotNull ValuesArrayMaker valuesArrayMaker) {
         public @NotNull ValuesArrayMakerSubject matchesInitValues(@NotNull String expected) {
-            assertThatSql(valuesArrayMaker.makeInitValues()).matches(expected);
+            assertThatJava(valuesArrayMaker.makeInitValues()).matches(expected);
             return this;
         }
 
         public @NotNull ValuesArrayMakerSubject matchesConvertValues(@NotNull String expected) {
-            assertThatSql(valuesArrayMaker.makeConvertValues()).matches(expected);
+            assertThatJava(valuesArrayMaker.makeConvertValues()).matches(expected);
             return this;
         }
     }

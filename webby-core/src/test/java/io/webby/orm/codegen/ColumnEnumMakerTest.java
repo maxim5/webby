@@ -6,7 +6,7 @@ import org.junit.jupiter.api.Test;
 
 import java.util.List;
 
-import static com.google.common.truth.Truth.assertThat;
+import static io.webby.orm.codegen.AssertSnippet.assertThatJava;
 
 
 public class ColumnEnumMakerTest {
@@ -27,7 +27,7 @@ public class ColumnEnumMakerTest {
             Column.of("l", JdbcType.Timestamp)
         );
         Snippet snippet = ColumnEnumMaker.make(columns.stream().map(x -> x.prefixed("prefix")).toList());
-        assertThat(snippet.joinLines()).isEqualTo("""
+        assertThatJava(snippet).matches("""
             a(TermType.BOOL)
             b(TermType.NUMBER)
             c(TermType.NUMBER)
@@ -39,7 +39,7 @@ public class ColumnEnumMakerTest {
             i(TermType.STRING)
             j(TermType.TIME)
             k(TermType.TIME)
-            l(TermType.TIME)\
+            l(TermType.TIME)
             """);
     }
 }
