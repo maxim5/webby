@@ -9,12 +9,15 @@
       <w>deps</w>
       <w>dest</w>
       <w>dists</w>
+      <w>escaper</w>
+      <w>escapers</w>
       <w>etag</w>
       <w>hashable</w>
       <w>httpd</w>
       <w>ints</w>
       <w>jetcd</w>
       <w>marshallers</w>
+      <w>multilines</w>
       <w>noname</w>
       <w>nums</w>
       <w>persistable</w>
