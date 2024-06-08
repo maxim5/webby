@@ -21,6 +21,8 @@ import java.util.stream.Stream;
 import static io.webby.orm.api.ReadFollow.FOLLOW_ALL;
 import static io.webby.orm.api.ReadFollow.FOLLOW_ONE_LEVEL;
 import static io.webby.orm.arch.InvalidSqlModelException.create;
+import static io.webby.orm.arch.model.JavaNameValidator.validateJavaIdentifier;
+import static io.webby.orm.arch.model.JavaNameValidator.validateJavaPackage;
 
 @Immutable
 public final class TableArch implements JavaNameHolder, HasColumns, HasPrefixedColumns {
@@ -39,9 +41,9 @@ public final class TableArch implements JavaNameHolder, HasColumns, HasPrefixedC
                      @NotNull String modelName,
                      @Nullable BridgeInfo bridgeInfo) {
         this.sqlName = sqlName;
-        this.javaName = javaName;
+        this.javaName = validateJavaIdentifier(javaName);
         this.modelClass = modelClass;
-        this.modelName = modelName;
+        this.modelName = validateJavaIdentifier(modelName);
         this.bridgeInfo = bridgeInfo;
     }
 
@@ -55,7 +57,7 @@ public final class TableArch implements JavaNameHolder, HasColumns, HasPrefixedC
 
     @Override
     public @NotNull String packageName() {
-        return modelClass.getPackageName();
+        return validateJavaPackage(modelClass.getPackageName());
     }
 
     public @NotNull Class<?> modelClass() {

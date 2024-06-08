@@ -4,7 +4,15 @@ import io.webby.orm.arch.model.JavaNameHolder;
 import io.webby.orm.arch.util.Naming;
 import org.jetbrains.annotations.NotNull;
 
+import static io.webby.orm.arch.model.JavaNameValidator.validateJavaIdentifier;
+import static io.webby.orm.arch.model.JavaNameValidator.validateJavaPackage;
+
 public record FQN(@NotNull String packageName, @NotNull String className) {
+    public FQN {
+        validateJavaIdentifier(className);
+        validateJavaPackage(packageName);
+    }
+
     public static @NotNull FQN of(@NotNull Class<?> klass) {
         return new FQN(klass.getPackageName(), Naming.shortCanonicalJavaName(klass));
     }

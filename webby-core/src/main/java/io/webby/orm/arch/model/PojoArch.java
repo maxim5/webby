@@ -11,6 +11,8 @@ import java.util.List;
 import java.util.Objects;
 import java.util.function.Consumer;
 
+import static io.webby.orm.arch.model.JavaNameValidator.validateJavaIdentifier;
+
 public final class PojoArch implements HasColumns {
     private final @NotNull Class<?> pojoType;
     private final @NotNull ImmutableList<PojoField> fields;
@@ -30,7 +32,7 @@ public final class PojoArch implements HasColumns {
     }
 
     public @NotNull String adapterName() {
-        return Naming.defaultAdapterName(pojoType);
+        return validateJavaIdentifier(Naming.defaultAdapterName(pojoType));
     }
 
     public void iterateAllFields(@NotNull Consumer<PojoField> consumer) {
@@ -65,8 +67,8 @@ public final class PojoArch implements HasColumns {
 
     public @NotNull PojoArch reattachedTo(@NotNull PojoParent parent) {
         ImmutableList<PojoField> reattachedFields = fields.stream()
-                .map(field -> field.reattachedTo(parent))
-                .collect(ImmutableList.toImmutableList());
+            .map(field -> field.reattachedTo(parent))
+            .collect(ImmutableList.toImmutableList());
         return new PojoArch(pojoType, reattachedFields);
     }
 
