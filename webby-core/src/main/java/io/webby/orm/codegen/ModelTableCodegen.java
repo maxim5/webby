@@ -356,7 +356,7 @@ public class ModelTableCodegen extends BaseCodegen {
         String constants = Arrays.stream(ReadFollow.values())
             .map(follow -> new SelectMaker(table).make(follow))
             .map(snippet -> new Snippet().withLines(snippet))
-            .map(query -> wrapAsStringLiteral(query, INDENT1))
+            .map(query -> wrapAsStringLiteral(query).joinLines(INDENT1))
             .collect(Collectors.joining(",\n" + INDENT1, INDENT1, ""));
 
         appendCode("""
@@ -373,7 +373,7 @@ public class ModelTableCodegen extends BaseCodegen {
 
         Snippet where = new Snippet().withLines(WhereMaker.makeForPrimaryColumns(table));
         Map<String, String> context = EasyMaps.asMap(
-            "$sql_where_literal", wrapAsStringLiteral(where, INDENT2),
+            "$sql_where_literal", wrapAsStringLiteral(where).joinLines(INDENT2),
             "$pk_object", toPrimaryKeyObject(requireNonNull(table.primaryKeyField()), "$pk_name")
         );
 
@@ -398,7 +398,7 @@ public class ModelTableCodegen extends BaseCodegen {
 
         Snippet where = new Snippet().withLines(WhereMaker.makeForPrimaryColumns(table));
         Map<String, String> context = EasyMaps.asMap(
-            "$sql_where_literal", wrapAsStringLiteral(where, INDENT2),
+            "$sql_where_literal", wrapAsStringLiteral(where).joinLines(INDENT2),
             "$pk_object", toPrimaryKeyObject(requireNonNull(table.primaryKeyField()), "$pk_name")
         );
 
@@ -605,7 +605,7 @@ public class ModelTableCodegen extends BaseCodegen {
         Snippet query = new InsertMaker(InsertMaker.Ignore.DEFAULT).makeAll(table);
         Map<String, String> context = Map.of(
             "$model_id_assert", AssertModelIdMaker.makeAssert("$model_param", table).joinLines(),
-            "$sql_query_literal", wrapAsStringLiteral(query, INDENT2)
+            "$sql_query_literal", wrapAsStringLiteral(query).joinLines(INDENT2)
         );
 
         appendCode("""
@@ -625,8 +625,8 @@ public class ModelTableCodegen extends BaseCodegen {
     private void insertIgnore() {
         Map<String, String> context = Map.of(
             "$model_id_assert", AssertModelIdMaker.makeAssert("$model_param", table).joinLines(),
-            "$sql_query_literal1", wrapAsStringLiteral(new InsertMaker(InsertMaker.Ignore.IGNORE).makeAll(table), INDENT3),
-            "$sql_query_literal2", wrapAsStringLiteral(new InsertMaker(InsertMaker.Ignore.OR_IGNORE).makeAll(table), INDENT3)
+            "$sql_query_literal1", wrapAsStringLiteral(new InsertMaker(InsertMaker.Ignore.IGNORE).makeAll(table)).joinLines(INDENT3),
+            "$sql_query_literal2", wrapAsStringLiteral(new InsertMaker(InsertMaker.Ignore.OR_IGNORE).makeAll(table)).joinLines(INDENT3)
         );
 
         appendCode("""
@@ -674,7 +674,7 @@ public class ModelTableCodegen extends BaseCodegen {
         Snippet query = new InsertMaker(InsertMaker.Ignore.DEFAULT)
             .make(table, table.columns(Predicate.not(TableField::isPrimaryKey)));
         Map<String, String> context = Map.of(
-            "$sql_query_literal", wrapAsStringLiteral(query, INDENT2)
+            "$sql_query_literal", wrapAsStringLiteral(query).joinLines(INDENT2)
         );
 
         appendCode("""
@@ -717,7 +717,7 @@ public class ModelTableCodegen extends BaseCodegen {
         Snippet query = new Snippet()
             .withLines(UpdateMaker.make(table, table.columns(Predicate.not(TableField::isPrimaryKey))));
         Map<String, String> context = EasyMaps.asMap(
-            "$sql_query_literal", wrapAsStringLiteral(query, INDENT2)
+            "$sql_query_literal", wrapAsStringLiteral(query).joinLines(INDENT2)
         );
 
         appendCode("""
@@ -773,7 +773,7 @@ public class ModelTableCodegen extends BaseCodegen {
             .withLines(UpdateMaker.make(table, table.columns(Predicate.not(TableField::isPrimaryKey))))
             .withLines(WhereMaker.makeForPrimaryColumns(table));
         Map<String, String> context = EasyMaps.asMap(
-            "$sql_query_literal", wrapAsStringLiteral(query, INDENT2)
+            "$sql_query_literal", wrapAsStringLiteral(query).joinLines(INDENT2)
         );
 
         appendCode("""
@@ -867,7 +867,7 @@ public class ModelTableCodegen extends BaseCodegen {
         Map<String, String> context = Map.of(
             // TODO[minor]: add an assert for batch
             // "$model_id_assert", AssertModelIdMaker.makeAssert("$model_param", table).join(),
-            "$sql_query_literal", wrapAsStringLiteral(query, INDENT2)
+            "$sql_query_literal", wrapAsStringLiteral(query).joinLines(INDENT2)
         );
 
         appendCode("""
@@ -887,7 +887,7 @@ public class ModelTableCodegen extends BaseCodegen {
         Snippet query = new Snippet()
             .withLines(UpdateMaker.make(table, table.columns(Predicate.not(TableField::isPrimaryKey))));
         Map<String, String> context = EasyMaps.asMap(
-            "$sql_query_literal", wrapAsStringLiteral(query, INDENT2)
+            "$sql_query_literal", wrapAsStringLiteral(query).joinLines(INDENT2)
         );
 
         appendCode("""
@@ -951,7 +951,7 @@ public class ModelTableCodegen extends BaseCodegen {
             .withLines(DeleteMaker.make(table))
             .withLines(WhereMaker.makeForPrimaryColumns(table));
         Map<String, String> context = EasyMaps.asMap(
-            "$sql_query_literal", wrapAsStringLiteral(query, INDENT2),
+            "$sql_query_literal", wrapAsStringLiteral(query).joinLines(INDENT2),
             "$pk_object", toPrimaryKeyObject(requireNonNull(table.primaryKeyField()), "$pk_name")
         );
 
@@ -969,9 +969,9 @@ public class ModelTableCodegen extends BaseCodegen {
     }
 
     private void deleteWhere() {
-        Snippet query = new Snippet().withLines(DeleteMaker.make(table));
+        Snippet query = new Snippet().withLines(DeleteMaker.make(table)).withForceBlock(true);
         Map<String, String> context = EasyMaps.asMap(
-            "$sql_query_literal", wrapAsTextBlock(query, INDENT2)
+            "$sql_query_literal", wrapAsStringLiteral(query).joinLines(INDENT2)
         );
 
         appendCode("""

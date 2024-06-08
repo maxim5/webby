@@ -1,5 +1,6 @@
 package io.webby.orm.codegen;
 
+import io.webby.util.guava.SourceCodeEscapers;
 import org.jetbrains.annotations.NotNull;
 
 class JavaSupport {
@@ -10,29 +11,29 @@ class JavaSupport {
     public static final String EMPTY_LINE = "/* EMPTY */";
 
     public static @NotNull Snippet wrapAsStringLiteral(@NotNull Snippet snippet) {
-        if (snippet.linesNumber() <= 1) {
-            return new Snippet().withFormattedLine("\"%s\"", snippet.joinLines());
-        } else {
+        if (snippet.isBlock()) {
             return wrapAsTextBlock(snippet);
+        } else {
+            return wrapAsSingleLineLiteral(snippet);
         }
     }
 
-    public static @NotNull String wrapAsStringLiteral(@NotNull Snippet snippet, @NotNull String indent) {
-        return wrapAsStringLiteral(snippet).joinLines(indent);
-    }
-
     public static @NotNull String wrapAsStringLiteral(@NotNull String snippet) {
-        return "\"%s\"".formatted(snippet);
+        return wrapAsStringLiteral(new Snippet().withMultiline(snippet)).joinLines();
     }
 
-    public static @NotNull Snippet wrapAsTextBlock(@NotNull Snippet snippet) {
+    private static @NotNull Snippet wrapAsSingleLineLiteral(@NotNull Snippet snippet) {
+        return new Snippet().withFormattedLine("\"%s\"", snippet.map(JavaSupport::escapeJavaStringLiteral).joinLines());
+    }
+
+    private static @NotNull Snippet wrapAsTextBlock(@NotNull Snippet snippet) {
         return new Snippet()
-                .withLine("\"\"\"")
-                .withLines(snippet)
-                .withLine("\"\"\"");
+            .withLine("\"\"\"")
+            .withLines(snippet.map(JavaSupport::escapeJavaStringLiteral))
+            .withLine("\"\"\"");
     }
 
-    public static @NotNull String wrapAsTextBlock(@NotNull Snippet snippet, @NotNull String indent) {
-        return wrapAsTextBlock(snippet).joinLines(indent);
+    private static @NotNull String escapeJavaStringLiteral(@NotNull String str) {
+        return SourceCodeEscapers.javaCharEscaper().escape(str);
     }
 }

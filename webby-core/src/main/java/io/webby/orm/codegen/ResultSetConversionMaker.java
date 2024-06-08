@@ -29,7 +29,7 @@ class ResultSetConversionMaker {
     }
 
     public @NotNull Snippet make(@NotNull TableArch table) {
-        return new Snippet().withLines(table.fields().stream().map(this::assignFieldLine));
+        return new Snippet().withMultilines(table.fields().stream().map(this::assignFieldLine));
     }
 
     private @NotNull String assignFieldLine(@NotNull TableField field) {
