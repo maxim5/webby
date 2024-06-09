@@ -634,7 +634,7 @@ public class ModelTableCodegen extends BaseCodegen {
         public int insertIgnore(@Nonnull $ModelClass $model_param) {
             $model_id_assert
             String query = switch (engine()) {
-                case MySQL, H2 -> $sql_query_literal1;
+                case MySQL, MariaDB, H2 -> $sql_query_literal1;
                 case SQLite -> $sql_query_literal2;
                 default -> throw new UnsupportedOperationException(
                     "Insert-ignore unsupported for %s. Use insert() inside try-catch block".formatted(engine()));

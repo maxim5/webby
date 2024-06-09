@@ -45,7 +45,7 @@ public class DbAdmin {
         }
 
         return switch (engine()) {
-            case MySQL -> runner().runAndGetString(HardcodedSelectQuery.of("SELECT DATABASE()"));
+            case MySQL, MariaDB -> runner().runAndGetString(HardcodedSelectQuery.of("SELECT DATABASE()"));
             case SQLite ->
                 runner().runAndGetString(HardcodedSelectQuery.of("SELECT name FROM pragma_database_list LIMIT 1"));
             default -> throw new UnsupportedOperationException("Failed to get the current database in " + engine());
@@ -68,7 +68,7 @@ public class DbAdmin {
 
     @CanIgnoreReturnValue
     public boolean setOptionIfSupported(@NotNull String name, @NotNull String value) {
-        if (engine() == Engine.MySQL || engine() == Engine.H2) {
+        if (engine().isOneOf(Engine.MySQL, Engine.MariaDB, Engine.H2)) {
             doRunUpdate(hardcoded("SET %s = %s".formatted(name, value)));
             return true;
         }

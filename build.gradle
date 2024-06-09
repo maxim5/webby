@@ -121,6 +121,7 @@ subprojects {
         common group: 'com.zaxxer', name: 'HikariCP', version: '5.1.0'
         common group: 'mysql', name: 'mysql-connector-java', version: '8.0.32'
         common group: 'org.xerial', name: 'sqlite-jdbc', version: '3.46.0.0'
+        common 'org.mariadb.jdbc:mariadb-java-client:3.4.0'
 
         // MimeType utils
         common group: 'com.j256.simplemagic', name: 'simplemagic', version: '1.17'

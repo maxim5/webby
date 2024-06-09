@@ -141,7 +141,7 @@ public class CreateTableQuery extends Unit implements DataDefinitionQuery {
         static @NotNull SchemaSupport of(@NotNull Engine engine) {
             return switch (engine) {
                 case SQLite -> new SqliteSchemaSupport();
-                case MySQL -> new MySqlSchemaSupport();
+                case MySQL, MariaDB -> new MySqlSchemaSupport();
                 case H2 -> new H2SchemaSupport();
                 default -> throw new IllegalArgumentException("Engine not supported for table creation: " + engine);
             };

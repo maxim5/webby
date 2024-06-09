@@ -153,7 +153,7 @@ public class KeyEventStoreIntegrationTest {
     public void many_events_per_key(DbType dbType) {
         KeyEventStoreFactory factory = setup(dbType).getInstance(KeyEventStoreFactory.class);
 
-        int maxSize = dbType == DbType.SQL_DB && SQL.engine() == Engine.MySQL ? 2000 : Integer.MAX_VALUE;
+        int maxSize = dbType == DbType.SQL_DB && SQL.engine().isOneOf(Engine.MySQL, Engine.MariaDB) ? 2000 : Integer.MAX_VALUE;
         int size = Math.min(100000, maxSize);
         int flushEvery = size / 10;
 
@@ -215,8 +215,8 @@ public class KeyEventStoreIntegrationTest {
         settings.setProperty("db.event.store.flush.batch.size", 1);
         settings.setProperty("db.event.store.average.size", 80);
 
-        settings.setProperty("db.redis.port", REDIS.getPort());
-        return Testing.testStartup(settings, SQL::setUp, SQL.combinedTestingModule());
+        settings.setProperty("db.redis.port", REDIS.port());
+        return Testing.testStartup(settings, SQL::setupTestData, SQL.combinedTestingModule());
     }
 
     @CanIgnoreReturnValue
