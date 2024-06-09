@@ -18,7 +18,7 @@ import static com.google.common.truth.Truth.assertThat;
 
 @Tag("slow")
 public class StatsInterceptorTest {
-    @RegisterExtension static final FluentLoggingCapture LOGGING = new FluentLoggingCapture(StatsInterceptor.class);
+    @RegisterExtension private static final FluentLoggingCapture LOGGING = new FluentLoggingCapture(StatsInterceptor.class);
 
     private final StatsInterceptor interceptor = Testing.testStartup().getInstance(StatsInterceptor.class);
 

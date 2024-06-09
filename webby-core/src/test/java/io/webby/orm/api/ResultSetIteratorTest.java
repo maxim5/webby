@@ -21,7 +21,7 @@ import static com.google.common.truth.Truth.assertThat;
 
 @Tag("sql")
 public class ResultSetIteratorTest {
-    @RegisterExtension static final SqlDbExtension SQL = SqlDbExtension.fromProperties().withSavepoints();
+    @RegisterExtension private static final SqlDbExtension SQL = SqlDbExtension.fromProperties().withSavepoints();
 
     @SuppressWarnings("ConstantConditions")
     @Test

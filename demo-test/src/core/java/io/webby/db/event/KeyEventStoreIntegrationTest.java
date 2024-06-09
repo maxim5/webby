@@ -33,9 +33,9 @@ import static io.webby.testing.TestingBasics.array;
 
 @Tag("slow") @Tag("integration") @Tag("sql")
 public class KeyEventStoreIntegrationTest {
-    @RegisterExtension static final TempDirectoryExtension TEMP_DIRECTORY = new TempDirectoryExtension();
-    @RegisterExtension static final EmbeddedRedisExtension REDIS = new EmbeddedRedisExtension();
-    @RegisterExtension static final SqlDbExtension SQL = SqlDbExtension.fromProperties().withSavepoints();
+    @RegisterExtension private static final TempDirectoryExtension TEMP_DIRECTORY = new TempDirectoryExtension();
+    @RegisterExtension private static final EmbeddedRedisExtension REDIS = new EmbeddedRedisExtension();
+    @RegisterExtension private static final SqlDbExtension SQL = SqlDbExtension.fromProperties().withSavepoints();
 
     @Test
     public void simple_empty_store() {
