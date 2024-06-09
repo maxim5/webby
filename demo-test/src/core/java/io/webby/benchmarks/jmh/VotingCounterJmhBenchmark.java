@@ -51,7 +51,7 @@ public class VotingCounterJmhBenchmark {
 
         @Setup(Level.Trial)
         public void setUp(BenchmarkParams params) {
-            connection = SqlSettings.connect(SqlSettings.MYSQL_TEST);
+            connection = SqlSettings.connectNotForProduction(SqlSettings.MYSQL_TEST);
             UserRateModelTable table = new UserRateModelTable(() -> connection);
 
             /*
