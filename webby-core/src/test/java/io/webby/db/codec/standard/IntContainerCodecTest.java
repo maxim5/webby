@@ -2,14 +2,14 @@ package io.webby.db.codec.standard;
 
 import com.carrotsearch.hppc.IntArrayList;
 import com.carrotsearch.hppc.IntHashSet;
-import io.webby.testing.ext.HppcInstrumentationExtension;
+import io.webby.testing.ext.HppcBytecodeExtension;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.RegisterExtension;
 
 import static io.webby.db.codec.AssertCodec.assertCodec;
 
 public class IntContainerCodecTest {
-    @RegisterExtension private static final HppcInstrumentationExtension HPPC_FIX = new HppcInstrumentationExtension();
+    @RegisterExtension private static final HppcBytecodeExtension HPPC_ORDER_FIX = new HppcBytecodeExtension();
 
     @Test
     public void int_array_list() throws Exception {

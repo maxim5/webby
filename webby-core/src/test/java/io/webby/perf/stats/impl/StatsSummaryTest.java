@@ -3,7 +3,7 @@ package io.webby.perf.stats.impl;
 import com.google.gson.Gson;
 import io.webby.perf.stats.Stat;
 import io.webby.testing.Testing;
-import io.webby.testing.ext.HppcIterationSeedExtension;
+import io.webby.testing.ext.HppcReflectionExtension;
 import org.jetbrains.annotations.NotNull;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.RegisterExtension;
@@ -13,7 +13,7 @@ import java.util.concurrent.TimeUnit;
 import static com.google.common.truth.Truth.assertThat;
 
 public class StatsSummaryTest {
-    @RegisterExtension static final HppcIterationSeedExtension ITERATION_SEED = new HppcIterationSeedExtension();
+    @RegisterExtension private static final HppcReflectionExtension HPPC_ORDER_FIX = new HppcReflectionExtension();
 
     private final StatsCollector stats = new StatsCollector(999);
     private final StatsSummary summary = new StatsSummary(Testing.defaultAppSettings(), stats);

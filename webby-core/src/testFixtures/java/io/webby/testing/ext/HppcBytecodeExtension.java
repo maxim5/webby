@@ -18,14 +18,23 @@ import static net.bytebuddy.matcher.ElementMatchers.named;
 
 /**
  * Addresses <a href="https://github.com/carrotsearch/hppc/issues/14">Random iteration</a> HPPC feature in tests.
+ * <p>
+ * This extension applies byte-code manipulation to intercept calls to
+ * {@link IntHashSet#nextIterationSeed()},
+ * {@link LongHashSet#nextIterationSeed()},
+ * etc.
+ * Interception adds performance penalty per each call, which makes the test slightly slower.
+ * But it fixes the order for <b>all</b> iterations for all instances within the test.
+ *
+ * @link <a href="https://stackoverflow.com/questions/42804253/how-to-apply-remove-and-re-apply-the-bytebuddy-transformation">(1)</a>
+ * @link <a href="https://stackoverflow.com/questions/71816195/redefine-methods-with-bytebuddy">(2)</a>
+ * @link <a href="https://stackoverflow.com/questions/61148740/bytebuddy-agent-to-replace-one-method-param-with-another">(3)</a>
  */
-// https://stackoverflow.com/questions/42804253/how-to-apply-remove-and-re-apply-the-bytebuddy-transformation
-// https://stackoverflow.com/questions/71816195/redefine-methods-with-bytebuddy
-// https://stackoverflow.com/questions/61148740/bytebuddy-agent-to-replace-one-method-param-with-another
-public class HppcInstrumentationExtension implements BeforeEachCallback, AfterEachCallback {
+@SuppressWarnings("JavadocReference")
+public class HppcBytecodeExtension implements BeforeEachCallback, AfterEachCallback {
     private ResettableClassFileTransformer resetter;
 
-    public HppcInstrumentationExtension() {
+    public HppcBytecodeExtension() {
         ByteBuddyAgent.install();
     }
 

@@ -7,14 +7,15 @@ import io.webby.auth.user.DefaultUser;
 import io.webby.testing.SessionBuilder;
 import io.webby.testing.Testing;
 import io.webby.testing.UserBuilder;
-import io.webby.testing.ext.HppcInstrumentationExtension;
+import io.webby.testing.ext.HppcBytecodeExtension;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.RegisterExtension;
 
 import static io.webby.db.codec.AssertCodec.assertCodec;
 
 public class CodecProviderTest {
-    @RegisterExtension private static final HppcInstrumentationExtension HPPC_FIX = new HppcInstrumentationExtension();
+    @RegisterExtension private static final HppcBytecodeExtension HPPC_ORDER_FIX = new HppcBytecodeExtension();
+
     private final CodecProvider provider = Testing.testStartup().getInstance(CodecProvider.class);
 
     @Test
