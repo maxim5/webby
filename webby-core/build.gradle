@@ -43,7 +43,7 @@ dependencies {
     // SQLs for Unit tests
     testFixturesApi 'com.h2database:h2:1.4.200'
     testFixturesApi 'com.zaxxer:HikariCP:5.1.0'
-    testFixturesApi 'mysql:mysql-connector-j:8.4.0'
+    testFixturesApi 'com.mysql:mysql-connector-j:8.4.0'
     testFixturesApi 'org.testcontainers:mysql:1.19.8'
     testFixturesApi 'org.testcontainers:testcontainers:1.19.8'
     testFixturesApi 'org.xerial:sqlite-jdbc:3.46.0.0'
