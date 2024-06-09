@@ -1,6 +1,7 @@
 package io.webby.util.netty;
 
 import io.netty.buffer.ByteBuf;
+import io.netty.buffer.ByteBufAllocator;
 import io.netty.buffer.Unpooled;
 import io.netty.util.AsciiString;
 import org.jetbrains.annotations.NotNull;
@@ -10,6 +11,18 @@ import java.nio.ByteBuffer;
 import java.nio.charset.StandardCharsets;
 
 public class EasyByteBuf {
+    public static @NotNull ByteBuf allocate(@NotNull ByteBufAllocator allocator, byte @NotNull [] bytes) {
+        ByteBuf buffer = allocator.buffer(bytes.length);
+        buffer.writeBytes(bytes);
+        return buffer;
+    }
+
+    public static @NotNull ByteBuf allocate(@NotNull ByteBufAllocator allocator, byte @NotNull [] bytes, int offset, int length) {
+        ByteBuf buffer = allocator.buffer(length);
+        buffer.writeBytes(bytes, offset, length);
+        return buffer;
+    }
+
     public static @NotNull AsciiString toAsciiString(byte @NotNull [] bytes) {
         return new AsciiString(bytes, false);
     }
@@ -75,7 +88,7 @@ public class EasyByteBuf {
         return buffer != null ? Unpooled.wrappedBuffer(buffer) : null;
     }
 
-    public static @Nullable ByteBuf wrapNullable(byte @Nullable[] bytes) {
+    public static @Nullable ByteBuf wrapNullable(byte @Nullable [] bytes) {
         return bytes != null ? Unpooled.wrappedBuffer(bytes) : null;
     }
 }

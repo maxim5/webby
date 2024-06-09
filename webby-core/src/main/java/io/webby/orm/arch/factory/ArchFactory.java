@@ -10,7 +10,7 @@ import io.webby.orm.arch.util.JavaClassAnalyzer;
 import io.webby.orm.codegen.ModelAdaptersScanner;
 import org.jetbrains.annotations.NotNull;
 
-public class ArchFactory {
+class ArchFactory {
     private final ModelAdaptersScanner locator;
 
     public ArchFactory(@NotNull ModelAdaptersScanner locator) {

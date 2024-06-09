@@ -20,11 +20,11 @@ public class JedisDbFactory extends BaseKeyValueFactory {
 
             HostAndPort hp = new HostAndPort(redisSettings.host(), redisSettings.port());
             DefaultJedisClientConfig config = DefaultJedisClientConfig.builder()
-                    .user(redisSettings.user())
-                    .password(redisSettings.password())
-                    .database(redisSettings.database())
-                    .ssl(redisSettings.ssl())
-                    .build();
+                .user(redisSettings.user())
+                .password(redisSettings.password())
+                .database(redisSettings.database())
+                .ssl(redisSettings.ssl())
+                .build();
             Jedis jedis = new Jedis(hp, config);
 
             return new JedisDb<>(jedis, options.name(), keyCodec, valueCodec);

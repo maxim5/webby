@@ -1,6 +1,7 @@
 package io.webby.orm.codegen;
 
 import com.google.errorprone.annotations.CanIgnoreReturnValue;
+import com.google.errorprone.annotations.CheckReturnValue;
 import io.webby.orm.api.ForeignInt;
 import io.webby.orm.arch.model.TableArch;
 import org.jetbrains.annotations.NotNull;
@@ -10,7 +11,7 @@ import java.util.List;
 
 import static io.webby.orm.api.ReadFollow.*;
 import static io.webby.orm.arch.factory.TestingArch.buildTableArch;
-import static io.webby.testing.orm.AssertSql.assertThatSql;
+import static io.webby.orm.codegen.AssertSnippet.assertThatSql;
 
 public class SelectMakerTest {
     @Test
@@ -60,6 +61,7 @@ public class SelectMakerTest {
                 """);
     }
 
+    @CheckReturnValue
     private static @NotNull SelectMakerSubject assertThat(@NotNull SelectMaker selectMaker) {
         return new SelectMakerSubject(selectMaker);
     }
@@ -67,17 +69,17 @@ public class SelectMakerTest {
     @CanIgnoreReturnValue
     private record SelectMakerSubject(@NotNull SelectMaker selectMaker) {
         public @NotNull SelectMakerSubject assertNoFollow(@NotNull String expected) {
-            assertThatSql(selectMaker.make(NO_FOLLOW).join()).matches(expected);
+            assertThatSql(selectMaker.make(NO_FOLLOW)).matches(expected);
             return this;
         }
 
         public @NotNull SelectMakerSubject assertFollowOneLevel(@NotNull String expected) {
-            assertThatSql(selectMaker.make(FOLLOW_ONE_LEVEL).join()).matches(expected);
+            assertThatSql(selectMaker.make(FOLLOW_ONE_LEVEL)).matches(expected);
             return this;
         }
 
         public @NotNull SelectMakerSubject assertFollowAll(@NotNull String expected) {
-            assertThatSql(selectMaker.make(FOLLOW_ALL).join()).matches(expected);
+            assertThatSql(selectMaker.make(FOLLOW_ALL)).matches(expected);
             return this;
         }
 

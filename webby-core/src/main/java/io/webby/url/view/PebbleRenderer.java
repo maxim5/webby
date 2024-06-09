@@ -91,7 +91,7 @@ public class PebbleRenderer implements Renderer<PebbleTemplate> {
                 return fileLoader;
             }).toList();
 
-        Loader<?> loader = loaders.size() == 1 ? loaders.get(0) : new DelegatingLoader(castAny(loaders));
+        Loader<?> loader = loaders.size() == 1 ? loaders.getFirst() : new DelegatingLoader(castAny(loaders));
         loader.setCharset(charset.displayName());
         loader.setSuffix(suffix);
 

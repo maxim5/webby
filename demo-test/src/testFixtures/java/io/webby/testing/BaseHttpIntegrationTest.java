@@ -12,10 +12,12 @@ import io.webby.app.AppSettings;
 import io.webby.netty.dispatch.http.NettyHttpHandler;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
+import org.junit.jupiter.api.Tag;
 
 import java.util.Queue;
 import java.util.function.Consumer;
 
+@Tag("integration")
 public abstract class BaseHttpIntegrationTest extends BaseChannelTest {
     protected <T> @NotNull HttpSetup<T> testSetup(@NotNull Class<T> klass) {
         return testSetup(klass, settings -> {});

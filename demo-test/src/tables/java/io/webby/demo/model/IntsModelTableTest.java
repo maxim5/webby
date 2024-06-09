@@ -61,14 +61,14 @@ public class IntsModelTableTest
 
     @Test
     public void insert_ignore_ok() {
-        assumeOneOfEngines(Engine.SQLite, Engine.MySQL);
+        assumeOneOfEngines(Engine.SQLite, Engine.MySQL, Engine.MariaDB);
         assertThat(table.insertIgnore(new IntsModel(1, 2, 3))).isEqualTo(1);
         assertThat(table.fetchAll()).containsExactly(new IntsModel(1, 2, 3));
     }
 
     @Test
     public void insert_ignore_duplicate_ok() {
-        assumeOneOfEngines(Engine.SQLite, Engine.MySQL);
+        assumeOneOfEngines(Engine.SQLite, Engine.MySQL, Engine.MariaDB);
         assertThat(table.insertIgnore(new IntsModel(1, 2, 3))).isEqualTo(1);
         assertThat(table.insertIgnore(new IntsModel(1, 2, 3))).isEqualTo(1);
         assertThat(table.fetchAll()).containsExactly(new IntsModel(1, 2, 3), new IntsModel(1, 2, 3));

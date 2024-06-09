@@ -19,7 +19,6 @@ import io.webby.testing.ext.SqlDbExtension;
 import io.webby.testing.ext.TempDirectoryExtension;
 import org.jetbrains.annotations.NotNull;
 import org.junit.jupiter.api.Tag;
-import org.junit.jupiter.api.Tags;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.RegisterExtension;
 import org.junit.jupiter.params.ParameterizedTest;
@@ -32,7 +31,7 @@ import java.util.Collections;
 import static com.google.common.truth.Truth.assertThat;
 import static io.webby.testing.TestingBasics.array;
 
-@Tags({@Tag("sql"), @Tag("slow")})
+@Tag("slow") @Tag("integration") @Tag("sql")
 public class KeyEventStoreIntegrationTest {
     @RegisterExtension static final TempDirectoryExtension TEMP_DIRECTORY = new TempDirectoryExtension();
     @RegisterExtension static final EmbeddedRedisExtension REDIS = new EmbeddedRedisExtension();
@@ -154,7 +153,7 @@ public class KeyEventStoreIntegrationTest {
     public void many_events_per_key(DbType dbType) {
         KeyEventStoreFactory factory = setup(dbType).getInstance(KeyEventStoreFactory.class);
 
-        int maxSize = dbType == DbType.SQL_DB && SQL.engine() == Engine.MySQL ? 2000 : Integer.MAX_VALUE;
+        int maxSize = dbType == DbType.SQL_DB && SQL.engine().isOneOf(Engine.MySQL, Engine.MariaDB) ? 2000 : Integer.MAX_VALUE;
         int size = Math.min(100000, maxSize);
         int flushEvery = size / 10;
 
@@ -216,8 +215,8 @@ public class KeyEventStoreIntegrationTest {
         settings.setProperty("db.event.store.flush.batch.size", 1);
         settings.setProperty("db.event.store.average.size", 80);
 
-        settings.setProperty("db.redis.port", REDIS.getPort());
-        return Testing.testStartup(settings, SQL::setUp, SQL.combinedTestingModule());
+        settings.setProperty("db.redis.port", REDIS.port());
+        return Testing.testStartup(settings, SQL::setupTestData, SQL.combinedTestingModule());
     }
 
     @CanIgnoreReturnValue

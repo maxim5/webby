@@ -1,6 +1,7 @@
 package io.webby.orm.api.query;
 
 import com.google.errorprone.annotations.Immutable;
+import io.webby.orm.api.entity.EntityData;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.List;

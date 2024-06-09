@@ -52,7 +52,7 @@ public class StringModelTableTest extends SqlDbTableTest<StringModel, StringMode
         List<StringDuo> expected = List.of(new StringDuo("1", "1"), new StringDuo("2", "2"));
 
         StringDuo one = runner().runAndGet(SELECT_DUO_QUERY, StringModel_StringDuo_JdbcAdapter.ADAPTER);
-        assertThat(one).isEqualTo(expected.get(0));
+        assertThat(one).isEqualTo(expected.getFirst());
 
         List<StringDuo> fetched = runner().fetchAll(SELECT_DUO_QUERY, StringModel_StringDuo_JdbcAdapter.ADAPTER);
         assertThat(fetched).containsExactlyElementsIn(expected).inOrder();

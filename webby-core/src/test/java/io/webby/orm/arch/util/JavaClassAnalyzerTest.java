@@ -1,6 +1,7 @@
 package io.webby.orm.arch.util;
 
 import com.google.errorprone.annotations.CanIgnoreReturnValue;
+import com.google.errorprone.annotations.CheckReturnValue;
 import io.webby.util.reflect.EasyMembers;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
@@ -153,6 +154,7 @@ public class JavaClassAnalyzerTest {
         assertThat(fields.stream().map(Field::getName).toList()).containsExactlyElementsIn(names);
     }
 
+    @CheckReturnValue
     private static @NotNull JavaClassAnalyzerSubject assertJavaClass(@NotNull Class<?> klass) {
         return new JavaClassAnalyzerSubject(klass);
     }

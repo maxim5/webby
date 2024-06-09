@@ -11,10 +11,12 @@ import io.webby.testing.netty.intercept.FakeInterceptorScanner;
 import io.webby.testing.netty.intercept.MockingInterceptor;
 import io.webby.url.impl.Endpoint;
 import org.jetbrains.annotations.NotNull;
+import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
 
 import static io.webby.testing.AssertResponse.assertThat;
 
+@Tag("slow")
 public class InterceptorsTest {
     private final DefaultHttpRequestEx request = HttpRequestBuilder.get("/foo").ex();
     private final Endpoint endpoint = FakeEndpoints.fakeEndpoint();

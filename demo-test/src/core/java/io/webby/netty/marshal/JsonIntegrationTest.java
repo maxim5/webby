@@ -8,6 +8,7 @@ import io.webby.testing.Testing;
 import io.webby.testing.UserBuilder;
 import org.jetbrains.annotations.NotNull;
 import org.junit.Test;
+import org.junit.jupiter.api.Tag;
 import org.junit.runner.RunWith;
 import org.junit.runners.Parameterized;
 
@@ -22,6 +23,7 @@ import static io.webby.url.view.EasyRender.outputToBytes;
 import static io.webby.url.view.EasyRender.writeToString;
 import static org.junit.Assume.assumeTrue;
 
+@Tag("slow") @Tag("integration")
 @RunWith(Parameterized.class)
 public class JsonIntegrationTest {
     public JsonIntegrationTest(@NotNull SupportedJsonLibrary library) {

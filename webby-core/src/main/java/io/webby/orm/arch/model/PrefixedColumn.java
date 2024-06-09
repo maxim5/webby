@@ -2,9 +2,11 @@ package io.webby.orm.arch.model;
 
 import org.jetbrains.annotations.NotNull;
 
+import static io.webby.orm.arch.model.SqlNameValidator.validateSqlName;
+
 public record PrefixedColumn(@NotNull Column column, @NotNull String prefix) {
     public @NotNull String sqlName() {
-        return column.sqlName();
+        return validateSqlName(column.sqlName());
     }
 
     public @NotNull ColumnType type() {

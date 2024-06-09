@@ -9,8 +9,10 @@ import io.webby.testing.Testing;
 import io.webby.testing.TestingStorage;
 import org.jetbrains.annotations.NotNull;
 import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.Tag;
 
 // FIX[major]: transform into an extension. A scenario needs to be a class param for that.
+@Tag("integration")
 public abstract class BaseCoreIntegrationTest {
     @AfterEach
     protected void tearDown() {

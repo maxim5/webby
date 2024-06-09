@@ -1,5 +1,6 @@
 package io.webby.orm.api;
 
+import com.google.errorprone.annotations.Immutable;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
@@ -16,6 +17,7 @@ import static java.util.Objects.requireNonNull;
  *
  * @see Page
  */
+@Immutable
 public record PageToken(@Nullable String lastItem, int offset) {
     private static final int NO_OFFSET = -1;
 
@@ -71,7 +73,7 @@ public record PageToken(@Nullable String lastItem, int offset) {
         }
     }
 
-    enum Preference {
+    public enum Preference {
         PREFER_LAST_ITEM,
         PREFER_OFFSET,
     }

@@ -80,7 +80,7 @@ public class QueryParams {
 
     public @Nullable String getOrNull(@NotNull String name) {
         List<String> values = parameters.get(name);
-        return values != null ? values.get(0) : null;
+        return values != null ? values.getFirst() : null;
     }
 
     public int getInt(@NotNull String name, int def) {

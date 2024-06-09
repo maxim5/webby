@@ -3,8 +3,10 @@ package io.webby.testing.orm;
 import com.google.common.truth.Ordered;
 import com.google.common.truth.Truth;
 import com.google.errorprone.annotations.CanIgnoreReturnValue;
+import com.google.errorprone.annotations.CheckReturnValue;
 import io.webby.orm.api.debug.DebugSql;
 import io.webby.orm.api.query.*;
+import io.webby.testing.orm.AssertCode.CodeSubject;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
@@ -18,26 +20,32 @@ import static io.webby.util.base.EasyCast.castAny;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 
 public class AssertSql {
+    @CheckReturnValue
     public static @NotNull SqlSubject<SqlSubject<?>> assertThatSql(@NotNull String query) {
         return new SqlSubject<>(query);
     }
 
+    @CheckReturnValue
     public static @NotNull SqlSubject<SqlSubject<?>> assertThatSql(@NotNull Representable repr) {
         return assertThatSql(repr.repr());
     }
 
+    @CheckReturnValue
     public static @NotNull ArgsSubject<ArgsSubject<?>> assertThat(@NotNull Args args) {
         return new ArgsSubject<>(args);
     }
 
+    @CheckReturnValue
     public static @NotNull UnitSubject<UnitSubject<?>> assertThat(@NotNull Unit unit) {
         return new UnitSubject<>(unit);
     }
 
+    @CheckReturnValue
     public static @NotNull TermSubject<TermSubject<?>> assertTerm(@NotNull Term term) {
         return new TermSubject<>(term);
     }
 
+    @CheckReturnValue
     public static @NotNull RowsSubject assertRows(@NotNull List<DebugSql.Row> rows) {
         return new RowsSubject(rows);
     }
@@ -46,17 +54,13 @@ public class AssertSql {
         assertThrows(InvalidQueryException.class, repr::get);
     }
 
-    @CanIgnoreReturnValue
-    public static class SqlSubject<T extends SqlSubject<?>> {
-        private final @NotNull String query;
-
+    public static class SqlSubject<T extends SqlSubject<?>> extends CodeSubject<T> {
         public SqlSubject(@NotNull String query) {
-            this.query = query;
+            super(query);
         }
 
-        public @NotNull T matches(@NotNull String expected) {
-            Truth.assertThat(query.trim()).isEqualTo(expected.trim());
-            return castAny(this);
+        public @NotNull T matchesIgnoringCase(@NotNull String expected) {
+            return matchesConverted(expected, String::toLowerCase);
         }
     }
 

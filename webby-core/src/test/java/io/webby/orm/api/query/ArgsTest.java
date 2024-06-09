@@ -317,8 +317,8 @@ public class ArgsTest {
         assertThrows(AssertionError.class, () -> args.resolveArgsByOrderedList(List.of("foo", "bar")));
     }
 
-    private static @NotNull ArgsAssert with(@NotNull Args args) {
-        return new ArgsAssert(args);
+    private static @NotNull ArgsSubject with(@NotNull Args args) {
+        return new ArgsSubject(args);
     }
 
     private static @NotNull HasArgs wrap(@NotNull Args args) {
@@ -336,15 +336,13 @@ public class ArgsTest {
     }
 
     @CanIgnoreReturnValue
-    private static class ArgsAssert {
-        private final Args args;
-
-        public ArgsAssert(@NotNull Args args) {
+    private record ArgsSubject(Args args) {
+        private ArgsSubject(@NotNull Args args) {
             this.args = args;
             assertInternalConsistency();
         }
 
-        public @NotNull ArgsAssert assertInternalConsistency() {
+        public @NotNull ArgsSubject assertInternalConsistency() {
             String type = getPrivateFieldValue(args, "type").toString();
             Class<?> expectedClass = switch (type) {
                 case "INTS" -> IntArrayList.class;
@@ -356,12 +354,12 @@ public class ArgsTest {
             return this;
         }
 
-        public @NotNull ArgsAssert assertAllResolved() {
+        public @NotNull ArgsSubject assertAllResolved() {
             assertThat(args.isAllResolved()).isTrue();
             return this;
         }
 
-        public @NotNull ArgsAssert assertUnresolved(@NotNull UnresolvedArg @NotNull ... unresolvedArgs) {
+        public @NotNull ArgsSubject assertUnresolved(@NotNull UnresolvedArg @NotNull ... unresolvedArgs) {
             assertThat(args.isAllResolved()).isFalse();
 
             List<String> names = Arrays.stream(unresolvedArgs).map(UnresolvedArg::name).toList();
@@ -379,7 +377,7 @@ public class ArgsTest {
             return this;
         }
 
-        public @NotNull ArgsAssert assertItems(@Nullable Object @NotNull ... expected) {
+        public @NotNull ArgsSubject assertItems(@Nullable Object @NotNull ... expected) {
             assertThat(args.size()).isEqualTo(expected.length);
             assertThat(args.isEmpty()).isEqualTo(expected.length == 0);
             assertThat(args.asList()).containsExactlyElementsIn(expected).inOrder();
@@ -390,7 +388,7 @@ public class ArgsTest {
             return this;
         }
 
-        public @NotNull ArgsAssert assertPreparedParams(@Nullable Object @NotNull ... expected) {
+        public @NotNull ArgsSubject assertPreparedParams(@Nullable Object @NotNull ... expected) {
             MockPreparedStatement statement = mockPreparedStatement();
             int added = runRethrow(() -> args.setPreparedParams(statement));
             assertThat(expected.length).isEqualTo(added);
@@ -398,7 +396,7 @@ public class ArgsTest {
             return this;
         }
 
-        public @NotNull ArgsAssert assertPreparedParamsWithOffset(@Nullable Object @NotNull ... expected) {
+        public @NotNull ArgsSubject assertPreparedParamsWithOffset(@Nullable Object @NotNull ... expected) {
             MockPreparedStatement statement = mockPreparedStatement();
             int added = runRethrow(() -> {
                 statement.setObject(1, null);
@@ -410,7 +408,7 @@ public class ArgsTest {
             return this;
         }
 
-        public @NotNull ArgsAssert assertInternalType(@NotNull Class<?> klass) {
+        public @NotNull ArgsSubject assertInternalType(@NotNull Class<?> klass) {
             assertPrivateFieldClass(args, "internal", klass);
             assertPrivateFieldClass(args, "external", klass);
             return this;

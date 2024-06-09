@@ -10,11 +10,13 @@ import io.webby.netty.request.DefaultHttpRequestEx;
 import io.webby.testing.HttpRequestBuilder;
 import io.webby.testing.Testing;
 import io.webby.testing.ext.FluentLoggingCapture;
+import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.RegisterExtension;
 
 import static com.google.common.truth.Truth.assertThat;
 
+@Tag("slow")
 public class StatsInterceptorTest {
     @RegisterExtension static final FluentLoggingCapture LOGGING = new FluentLoggingCapture(StatsInterceptor.class);
 

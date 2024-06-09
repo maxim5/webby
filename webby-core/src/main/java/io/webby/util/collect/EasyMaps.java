@@ -1,6 +1,7 @@
 package io.webby.util.collect;
 
 import com.google.common.collect.ImmutableMap;
+import org.checkerframework.dataflow.qual.Pure;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
@@ -12,10 +13,12 @@ import java.util.Map;
 import static io.webby.util.base.EasyCast.castAny;
 
 public class EasyMaps {
+    @Pure
     public static <K, V> @NotNull LinkedHashMap<K, V> asMap(@Nullable Object @NotNull ... items) {
         return asMap(Arrays.asList(items));
     }
 
+    @Pure
     public static <K, V> @NotNull LinkedHashMap<K, V> asMap(@NotNull List<?> items) {
         assert items.size() % 2 == 0 : "Invalid number of items: %d".formatted(items.size());
         LinkedHashMap<K, V> result = new LinkedHashMap<>();
@@ -26,7 +29,7 @@ public class EasyMaps {
         return result;
     }
 
-    @SuppressWarnings("UnstableApiUsage")
+    @Pure
     public static <K, V> @NotNull ImmutableMap<K, V> immutableOf(@NotNull K k1, @NotNull V v1, @NotNull Object @NotNull ... items) {
         assert items.length % 2 == 0 : "Invalid number of items: %d".formatted(items.length);
         ImmutableMap.Builder<K, V> builder = ImmutableMap.builderWithExpectedSize(1 + items.length >> 1);
@@ -37,12 +40,14 @@ public class EasyMaps {
         return builder.build();
     }
 
+    @Pure
     public static <K, V> @NotNull Map<K, V> merge(@NotNull Map<K, V> map1, @NotNull Map<K, V> map2) {
         LinkedHashMap<K, V> result = new LinkedHashMap<>(map1);
         result.putAll(map2);
         return result;
     }
 
+    @Pure
     public static <K, V> @NotNull Map<K, V> merge(@NotNull Map<K, V> map1,
                                                   @NotNull Map<K, V> map2,
                                                   @NotNull Map<K, V> map3) {
@@ -52,11 +57,13 @@ public class EasyMaps {
         return result;
     }
 
+    @Pure
     public static <K, V> @NotNull ImmutableMap<K, V> mergeToImmutable(@NotNull Map<K, V> map1,
                                                                       @NotNull Map<K, V> map2) {
         return ImmutableMap.<K, V>builder().putAll(map1).putAll(map2).build();
     }
 
+    @Pure
     public static <K, V> @NotNull ImmutableMap<K, V> mergeToImmutable(@NotNull Map<K, V> map1,
                                                                       @NotNull Map<K, V> map2,
                                                                       @NotNull Map<K, V> map3) {

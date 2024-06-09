@@ -35,7 +35,7 @@ public class FreeMarkerRenderer implements Renderer<Template> {
         configuration = helper.getOrDefault(Configuration.class, this::createDefault);
         if (settings.isHotReload()) {
             log.at(Level.INFO).log("FreeMarker hot reload enabled with update delay = %d ms",
-                    configuration.getTemplateUpdateDelayMilliseconds());
+                                   configuration.getTemplateUpdateDelayMilliseconds());
         }
     }
 
@@ -79,17 +79,17 @@ public class FreeMarkerRenderer implements Renderer<Template> {
 
     private @NotNull Configuration createDefault() {
         TemplateLoader[] loaders = settings.viewPaths()
-                .stream()
-                .map(Path::toFile)
-                .map(rethrow(FileTemplateLoader::new))
-                .toArray(TemplateLoader[]::new);
+            .stream()
+            .map(Path::toFile)
+            .map(rethrow(FileTemplateLoader::new))
+            .toArray(TemplateLoader[]::new);
         TemplateLoader templateLoader = loaders.length == 1 ? loaders[0] : new MultiTemplateLoader(loaders);
 
         Version version = new Version(settings.getProperty("freemarker.version", Configuration.getVersion()));
 
         Duration reloadDelay = settings.isHotReload() ?
-                Duration.ofMillis(settings.getIntProperty("freemarker.dev.reload.millis", 100)) :
-                Duration.ofDays(settings.getIntProperty("freemarker.prod.reload.days", 365));
+            Duration.ofMillis(settings.getIntProperty("freemarker.dev.reload.millis", 100)) :
+            Duration.ofDays(settings.getIntProperty("freemarker.prod.reload.days", 365));
 
         Configuration configuration = new Configuration(version);
         configuration.setTemplateLoader(templateLoader);

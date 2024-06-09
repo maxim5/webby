@@ -8,6 +8,7 @@ import java.util.List;
  * Represents 2-dimensional table-like structure, for example 2d array or list of lists.
  * <p>
  * Supports null values.
+ * The interface exposes read-only methods, so the implementations are expected to be immutable.
  *
  * @param <T> type of items
  */

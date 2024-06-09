@@ -11,8 +11,9 @@ import static io.webby.orm.codegen.SqlSupport.EQ_QUESTION;
 
 class UpdateMaker {
     public static @NotNull Snippet make(@NotNull TableArch table, @NotNull List<Column> columns) {
-         return new Snippet()
-                 .withLine("UPDATE ", table.sqlName())
-                 .withLine("SET ", columns.stream().map(Column::sqlName).map(EQ_QUESTION::formatted).collect(COMMA_JOINER));
+        assert !columns.isEmpty() : "No columns to update: " + table.sqlName();
+        return new Snippet()
+            .withLine("UPDATE ", table.sqlName())
+            .withLine("SET ", columns.stream().map(Column::sqlName).map(EQ_QUESTION::formatted).collect(COMMA_JOINER));
     }
 }

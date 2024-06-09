@@ -167,10 +167,10 @@ public class WebsocketAgentBinder {
             }).toList();
 
             Field senderField = Arrays.stream(klass.getDeclaredFields())
-                    .filter(WebsocketAgentBinder::isSenderField)
-                    .peek(field -> field.setAccessible(true))
-                    .findAny()
-                    .orElse(null);
+                .filter(WebsocketAgentBinder::isSenderField)
+                .peek(field -> field.setAccessible(true))
+                .findAny()
+                .orElse(null);
             if (acceptsFrame && senderField != null && isMessageSenderField(senderField)) {
                 throw new WebsocketAgentConfigError(
                     "Agents not defining the message type can't use MessageSender (replace with Sender): %s",
@@ -188,7 +188,7 @@ public class WebsocketAgentBinder {
             String url = binding.url();
             try {
                 List<Token> tokens = settings.urlParser().parse(url);
-                boolean isValidUrl = tokens.size() == 1 && tokens.get(0) instanceof ConstToken;
+                boolean isValidUrl = tokens.size() == 1 && tokens.getFirst() instanceof ConstToken;
                 assure(isValidUrl, "Websocket URL can't contain variables: %s", url);
             } catch (QueryParseException e) {
                 throw new UrlConfigError("Invalid URL: %s".formatted(url), e);
@@ -212,7 +212,7 @@ public class WebsocketAgentBinder {
                     Marshaller marshaller = marshallers.getMarshaller(marshal);
                     FrameMetadata metadata = getFrameMetadata(metaClass, acceptorsById.keySet());
                     FrameConverter<Object> converter =
-                            new AcceptorsAwareFrameConverter(marshaller, metadata, acceptorsById, supportedType);
+                        new AcceptorsAwareFrameConverter(marshaller, metadata, acceptorsById, supportedType);
 
                     if (sender instanceof OutFrameConverterListener<?> listener) {
                         listener.onConverter(castAny(converter));
@@ -222,12 +222,12 @@ public class WebsocketAgentBinder {
                 }
             } catch (ConfigurationException e) {
                 String message =
-                        "Websocket agent instance of %s can't be found or createdAt (use @Inject to register a constructor)"
-                        .formatted(binding.agentClass());
+                    "Websocket agent instance of %s can't be found or createdAt (use @Inject to register a constructor)"
+                    .formatted(binding.agentClass());
                 throw new WebsocketAgentConfigError(message, e);
             } catch (IllegalAccessException e) {
                 String message = "Failed to access %s field of the Websocket agent %s"
-                        .formatted(binding.senderField(), binding.agentClass());
+                    .formatted(binding.senderField(), binding.agentClass());
                 throw new WebsocketAgentConfigError(message, e);
             } catch (IllegalArgumentException e) {
                 String message = "API identifier is not unique in the Websocket agent %s".formatted(binding.agentClass());
@@ -293,8 +293,8 @@ public class WebsocketAgentBinder {
     static boolean isMessageContextAcceptor(@NotNull Method method, @NotNull Class<?> messageClass) {
         Class<?>[] parameterTypes = method.getParameterTypes();
         return parameterTypes.length == 2 &&
-                messageClass.isAssignableFrom(parameterTypes[0]) &&
-                RequestContext.class.isAssignableFrom(parameterTypes[1]);
+               messageClass.isAssignableFrom(parameterTypes[0]) &&
+               RequestContext.class.isAssignableFrom(parameterTypes[1]);
     }
 
     private static @NotNull Method[] filter(@NotNull Collection<Method> methods, @NotNull IntPredicate predicate) {

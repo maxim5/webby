@@ -17,7 +17,6 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
-import java.util.function.Predicate;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
@@ -356,7 +355,7 @@ public class ModelTableCodegen extends BaseCodegen {
         String constants = Arrays.stream(ReadFollow.values())
             .map(follow -> new SelectMaker(table).make(follow))
             .map(snippet -> new Snippet().withLines(snippet))
-            .map(query -> wrapAsStringLiteral(query, INDENT1))
+            .map(query -> wrapAsStringLiteral(query).joinLines(INDENT1))
             .collect(Collectors.joining(",\n" + INDENT1, INDENT1, ""));
 
         appendCode("""
@@ -373,7 +372,7 @@ public class ModelTableCodegen extends BaseCodegen {
 
         Snippet where = new Snippet().withLines(WhereMaker.makeForPrimaryColumns(table));
         Map<String, String> context = EasyMaps.asMap(
-            "$sql_where_literal", wrapAsStringLiteral(where, INDENT2),
+            "$sql_where_literal", wrapAsStringLiteral(where).joinLines(INDENT2),
             "$pk_object", toPrimaryKeyObject(requireNonNull(table.primaryKeyField()), "$pk_name")
         );
 
@@ -398,7 +397,7 @@ public class ModelTableCodegen extends BaseCodegen {
 
         Snippet where = new Snippet().withLines(WhereMaker.makeForPrimaryColumns(table));
         Map<String, String> context = EasyMaps.asMap(
-            "$sql_where_literal", wrapAsStringLiteral(where, INDENT2),
+            "$sql_where_literal", wrapAsStringLiteral(where).joinLines(INDENT2),
             "$pk_object", toPrimaryKeyObject(requireNonNull(table.primaryKeyField()), "$pk_name")
         );
 
@@ -461,7 +460,7 @@ public class ModelTableCodegen extends BaseCodegen {
 
         Map<String, String> context = EasyMaps.asMap(
             "$query_execution", queryExecution,
-            "$pk_column", primaryColumns.get(0),
+            "$pk_column", primaryColumns.getFirst(),
             "$pk_getter", primaryField.javaAccessor()
         );
 
@@ -508,7 +507,7 @@ public class ModelTableCodegen extends BaseCodegen {
     private void fetchPks() {
         String primaryKeyColumn = Optional.ofNullable(table.primaryKeyField())
             .map(HasColumns::columns)
-            .map(cols -> cols.get(0))
+            .map(cols -> cols.getFirst())
             .map(Column::sqlName)
             .orElse(null);
 
@@ -604,8 +603,8 @@ public class ModelTableCodegen extends BaseCodegen {
     private void insert() {
         Snippet query = new InsertMaker(InsertMaker.Ignore.DEFAULT).makeAll(table);
         Map<String, String> context = Map.of(
-            "$model_id_assert", AssertModelIdMaker.makeAssert("$model_param", table).join(),
-            "$sql_query_literal", wrapAsStringLiteral(query, INDENT2)
+            "$model_id_assert", AssertModelIdMaker.makeAssert("$model_param", table).joinLines(),
+            "$sql_query_literal", wrapAsStringLiteral(query).joinLines(INDENT2)
         );
 
         appendCode("""
@@ -624,9 +623,9 @@ public class ModelTableCodegen extends BaseCodegen {
 
     private void insertIgnore() {
         Map<String, String> context = Map.of(
-            "$model_id_assert", AssertModelIdMaker.makeAssert("$model_param", table).join(),
-            "$sql_query_literal1", wrapAsStringLiteral(new InsertMaker(InsertMaker.Ignore.IGNORE).makeAll(table), INDENT3),
-            "$sql_query_literal2", wrapAsStringLiteral(new InsertMaker(InsertMaker.Ignore.OR_IGNORE).makeAll(table), INDENT3)
+            "$model_id_assert", AssertModelIdMaker.makeAssert("$model_param", table).joinLines(),
+            "$sql_query_literal1", wrapAsStringLiteral(new InsertMaker(InsertMaker.Ignore.IGNORE).makeAll(table)).joinLines(INDENT3),
+            "$sql_query_literal2", wrapAsStringLiteral(new InsertMaker(InsertMaker.Ignore.OR_IGNORE).makeAll(table)).joinLines(INDENT3)
         );
 
         appendCode("""
@@ -634,7 +633,7 @@ public class ModelTableCodegen extends BaseCodegen {
         public int insertIgnore(@Nonnull $ModelClass $model_param) {
             $model_id_assert
             String query = switch (engine()) {
-                case MySQL, H2 -> $sql_query_literal1;
+                case MySQL, MariaDB, H2 -> $sql_query_literal1;
                 case SQLite -> $sql_query_literal2;
                 default -> throw new UnsupportedOperationException(
                     "Insert-ignore unsupported for %s. Use insert() inside try-catch block".formatted(engine()));
@@ -672,9 +671,9 @@ public class ModelTableCodegen extends BaseCodegen {
         }
 
         Snippet query = new InsertMaker(InsertMaker.Ignore.DEFAULT)
-            .make(table, table.columns(Predicate.not(TableField::isPrimaryKey)));
+            .make(table, table.columns(TableField::isNotPrimaryKey));
         Map<String, String> context = Map.of(
-            "$sql_query_literal", wrapAsStringLiteral(query, INDENT2)
+            "$sql_query_literal", wrapAsStringLiteral(query).joinLines(INDENT2)
         );
 
         appendCode("""
@@ -695,7 +694,7 @@ public class ModelTableCodegen extends BaseCodegen {
             return;
         }
 
-        List<TableField> nonPrimary = table.fields().stream().filter(Predicate.not(TableField::isPrimaryKey)).toList();
+        List<TableField> nonPrimary = table.fields().stream().filter(TableField::isNotPrimaryKey).toList();
         ValuesArrayMaker maker = new ValuesArrayMaker("$model_param", nonPrimary);
         Map<String, String> context = Map.of(
             "$array_init", maker.makeInitValues().join(linesJoiner(INDENT2)),
@@ -715,9 +714,9 @@ public class ModelTableCodegen extends BaseCodegen {
 
     private void updateWhere() {
         Snippet query = new Snippet()
-            .withLines(UpdateMaker.make(table, table.columns(Predicate.not(TableField::isPrimaryKey))));
+            .withLines(UpdateMaker.make(table, table.columns(TableField::isNotPrimaryKey)));
         Map<String, String> context = EasyMaps.asMap(
-            "$sql_query_literal", wrapAsStringLiteral(query, INDENT2)
+            "$sql_query_literal", wrapAsStringLiteral(query).joinLines(INDENT2)
         );
 
         appendCode("""
@@ -735,7 +734,7 @@ public class ModelTableCodegen extends BaseCodegen {
     }
 
     private void valuesForUpdateWhere() {
-        List<TableField> nonPrimary = table.fields().stream().filter(Predicate.not(TableField::isPrimaryKey)).toList();
+        List<TableField> nonPrimary = table.fields().stream().filter(TableField::isNotPrimaryKey).toList();
         ValuesArrayMaker maker = new ValuesArrayMaker("$model_param", nonPrimary);
         Map<String, String> context = Map.of(
             "$array_init", maker.makeInitValues().join(linesJoiner(INDENT2)),
@@ -770,10 +769,10 @@ public class ModelTableCodegen extends BaseCodegen {
         }
 
         Snippet query = new Snippet()
-            .withLines(UpdateMaker.make(table, table.columns(Predicate.not(TableField::isPrimaryKey))))
+            .withLines(UpdateMaker.make(table, table.columns(TableField::isNotPrimaryKey)))
             .withLines(WhereMaker.makeForPrimaryColumns(table));
         Map<String, String> context = EasyMaps.asMap(
-            "$sql_query_literal", wrapAsStringLiteral(query, INDENT2)
+            "$sql_query_literal", wrapAsStringLiteral(query).joinLines(INDENT2)
         );
 
         appendCode("""
@@ -795,7 +794,7 @@ public class ModelTableCodegen extends BaseCodegen {
         }
 
         List<TableField> primary = table.fields().stream().filter(TableField::isPrimaryKey).toList();
-        List<TableField> nonPrimary = table.fields().stream().filter(Predicate.not(TableField::isPrimaryKey)).toList();
+        List<TableField> nonPrimary = table.fields().stream().filter(TableField::isNotPrimaryKey).toList();
         ValuesArrayMaker maker = new ValuesArrayMaker("$model_param", Iterables.concat(nonPrimary, primary));
         Map<String, String> context = Map.of(
             "$array_init", maker.makeInitValues().join(linesJoiner(INDENT2)),
@@ -819,7 +818,7 @@ public class ModelTableCodegen extends BaseCodegen {
         public int insertData(@Nonnull EntityData<?> data) {
             Collection<? extends Column> columns = data.columns();
             assert columns.size() > 0 : "Entity data contains empty columns: " + data;
-            
+
             String query = makeInsertQueryForColumns(columns);
             try (PreparedStatement statement = runner().prepareQuery(query)) {
                 data.provideValues(statement);
@@ -867,7 +866,7 @@ public class ModelTableCodegen extends BaseCodegen {
         Map<String, String> context = Map.of(
             // TODO[minor]: add an assert for batch
             // "$model_id_assert", AssertModelIdMaker.makeAssert("$model_param", table).join(),
-            "$sql_query_literal", wrapAsStringLiteral(query, INDENT2)
+            "$sql_query_literal", wrapAsStringLiteral(query).joinLines(INDENT2)
         );
 
         appendCode("""
@@ -885,9 +884,9 @@ public class ModelTableCodegen extends BaseCodegen {
 
     private void updateWhereBatch() {
         Snippet query = new Snippet()
-            .withLines(UpdateMaker.make(table, table.columns(Predicate.not(TableField::isPrimaryKey))));
+            .withLines(UpdateMaker.make(table, table.columns(TableField::isNotPrimaryKey)));
         Map<String, String> context = EasyMaps.asMap(
-            "$sql_query_literal", wrapAsStringLiteral(query, INDENT2)
+            "$sql_query_literal", wrapAsStringLiteral(query).joinLines(INDENT2)
         );
 
         appendCode("""
@@ -951,7 +950,7 @@ public class ModelTableCodegen extends BaseCodegen {
             .withLines(DeleteMaker.make(table))
             .withLines(WhereMaker.makeForPrimaryColumns(table));
         Map<String, String> context = EasyMaps.asMap(
-            "$sql_query_literal", wrapAsStringLiteral(query, INDENT2),
+            "$sql_query_literal", wrapAsStringLiteral(query).joinLines(INDENT2),
             "$pk_object", toPrimaryKeyObject(requireNonNull(table.primaryKeyField()), "$pk_name")
         );
 
@@ -969,9 +968,9 @@ public class ModelTableCodegen extends BaseCodegen {
     }
 
     private void deleteWhere() {
-        Snippet query = new Snippet().withLines(DeleteMaker.make(table));
+        Snippet query = new Snippet().withLines(DeleteMaker.make(table)).withForceBlock(true);
         Map<String, String> context = EasyMaps.asMap(
-            "$sql_query_literal", wrapAsTextBlock(query, INDENT2)
+            "$sql_query_literal", wrapAsStringLiteral(query).joinLines(INDENT2)
         );
 
         appendCode("""
@@ -1146,7 +1145,7 @@ public class ModelTableCodegen extends BaseCodegen {
                 String sql = "$left_pk_sql IN (SELECT $left_fk_sql FROM $table_sql WHERE $right_fk_sql = ?)";
                 return leftsTable.iterator(Where.hardcoded(sql, Args.of(rightId)));
             }
-                        
+
             public void forEachRightId$TypeMarker$($left_id_native leftId, @Nonnull $TypeMarker$Consumer consumer) {
                 String query = "SELECT $right_fk_sql FROM $table_sql WHERE $left_fk_sql = ?";
                 try (PreparedStatement statement = runner().prepareQuery(query, leftId);
@@ -1226,8 +1225,7 @@ public class ModelTableCodegen extends BaseCodegen {
 
     private void columnsEnum() {
         Map<String, String> context = Map.of(
-            "$own_enum_values", ColumnEnumMaker.make(table.columns(ReadFollow.NO_FOLLOW))
-                .join(Collectors.joining(",\n" + INDENT1)),
+            "$own_enum_values", ColumnEnumMaker.make(table.columns(ReadFollow.NO_FOLLOW)).join(",\n" + INDENT1),
             "$all_columns_list", table.columns().stream().map(column -> "OwnColumn.%s".formatted(column.sqlName()))
                 .collect(Collectors.joining(",\n" + INDENT2))
         );
@@ -1235,13 +1233,13 @@ public class ModelTableCodegen extends BaseCodegen {
         appendCode("""
         public enum OwnColumn implements Column {
             $own_enum_values;
-            
+
             public static final List<Column> ALL_COLUMNS = List.of(
                 $all_columns_list
             );
-            
+
             public final FullColumn FULL = this.fullFrom(META);
-            
+
             private final TermType type;
 
             OwnColumn(TermType type) {

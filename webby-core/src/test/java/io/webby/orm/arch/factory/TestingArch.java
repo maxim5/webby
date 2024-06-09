@@ -2,6 +2,7 @@ package io.webby.orm.arch.factory;
 
 import com.google.common.truth.Truth;
 import com.google.errorprone.annotations.CanIgnoreReturnValue;
+import com.google.errorprone.annotations.CheckReturnValue;
 import io.webby.orm.arch.model.*;
 import io.webby.testing.TestingBasics.SimpleBitSet;
 import io.webby.testing.orm.FakeModelAdaptersScanner;
@@ -39,11 +40,11 @@ public class TestingArch {
         return runResult.getTableOrDie(model);
     }
 
-    public static @NotNull RunContext newRunContext() {
+    static @NotNull RunContext newRunContext() {
         return newRunContext(FakeModelAdaptersScanner.FAKE_SCANNER);
     }
 
-    public static @NotNull RunContext newRunContext(@NotNull FakeModelAdaptersScanner fakeScanner) {
+    static @NotNull RunContext newRunContext(@NotNull FakeModelAdaptersScanner fakeScanner) {
         return new RunContext(newRunInputs(), fakeScanner);
     }
 
@@ -57,14 +58,17 @@ public class TestingArch {
         return new RunInputs(modelInputs, List.of());
     }
 
+    @CheckReturnValue
     public static @NotNull TableArchSubject assertThat(@NotNull TableArch tableArch) {
         return new TableArchSubject(tableArch);
     }
 
+    @CheckReturnValue
     public static @NotNull TableFieldSubject assertThat(@NotNull TableField tableField) {
         return new TableFieldSubject(tableField);
     }
 
+    @CheckReturnValue
     public static @NotNull PojoArchSubject assertThat(@NotNull PojoArch pojoArch) {
         return new PojoArchSubject(pojoArch);
     }
@@ -109,11 +113,11 @@ public class TestingArch {
     }
 
     public static class TableFieldsStatus extends SimpleBitSet<TableFieldsStatus> {
-        public static @NotNull TableFieldsStatus ONLY_ORDINARY = new TableFieldsStatus();
-        public static @NotNull TableFieldsStatus PRIMARY_OBJ = new TableFieldsStatus().withPrimaryObj();
-        public static @NotNull TableFieldsStatus PRIMARY_INT = new TableFieldsStatus().withPrimaryInt();
-        public static @NotNull TableFieldsStatus PRIMARY_LONG = new TableFieldsStatus().withPrimaryLong();
-        public static @NotNull TableFieldsStatus FOREIGN = new TableFieldsStatus().withForeign();
+        public static final TableFieldsStatus ONLY_ORDINARY = new TableFieldsStatus();
+        public static final TableFieldsStatus PRIMARY_OBJ = new TableFieldsStatus().withPrimaryObj();
+        public static final TableFieldsStatus PRIMARY_INT = new TableFieldsStatus().withPrimaryInt();
+        public static final TableFieldsStatus PRIMARY_LONG = new TableFieldsStatus().withPrimaryLong();
+        public static final TableFieldsStatus FOREIGN = new TableFieldsStatus().withForeign();
 
         public @NotNull TableFieldsStatus withPrimaryObj() { return setBit(0); }
         public @NotNull TableFieldsStatus withPrimaryInt() { return setBit(0).setBit(1); }
@@ -206,7 +210,7 @@ public class TestingArch {
 
         public @NotNull TableFieldSubject hasDefault(@Nullable String value) {
             hasSize(1);
-            Truth.assertThat(tableField.columnDefault(tableField.columns().get(0))).isEqualTo(value);
+            Truth.assertThat(tableField.columnDefault(tableField.columns().getFirst())).isEqualTo(value);
             return this;
         }
 
@@ -245,10 +249,10 @@ public class TestingArch {
     }
 
     public static class FieldConstraints extends SimpleBitSet<FieldConstraints> {
-        public static @NotNull FieldConstraints ORDINARY = new FieldConstraints();
-        public static @NotNull FieldConstraints PRIMARY_KEY = new FieldConstraints().primaryKey();
-        public static @NotNull FieldConstraints FOREIGN_KEY = new FieldConstraints().foreignKey();
-        public static @NotNull FieldConstraints UNIQUE = new FieldConstraints().unique();
+        public static final FieldConstraints ORDINARY = new FieldConstraints();
+        public static final FieldConstraints PRIMARY_KEY = new FieldConstraints().primaryKey();
+        public static final FieldConstraints FOREIGN_KEY = new FieldConstraints().foreignKey();
+        public static final FieldConstraints UNIQUE = new FieldConstraints().unique();
 
         public @NotNull FieldConstraints primaryKey() { return setBit(0); }
         public @NotNull FieldConstraints foreignKey() { return setBit(1); }

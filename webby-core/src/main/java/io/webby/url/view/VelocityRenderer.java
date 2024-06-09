@@ -80,9 +80,9 @@ public class VelocityRenderer implements Renderer<Template> {
 
     private @NotNull VelocityEngine createDefault() {
         String viewPaths = settings.viewPaths()
-                .stream()
-                .map(Path::toString)
-                .collect(Collectors.joining(","));
+            .stream()
+            .map(Path::toString)
+            .collect(Collectors.joining(","));
 
         Properties configuration = new Properties();
         configuration.setProperty(RuntimeConstants.RESOURCE_LOADER, "file");

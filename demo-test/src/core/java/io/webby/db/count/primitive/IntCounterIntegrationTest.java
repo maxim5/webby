@@ -3,6 +3,7 @@ package io.webby.db.count.primitive;
 import com.carrotsearch.hppc.IntIntHashMap;
 import com.carrotsearch.hppc.cursors.IntIntCursor;
 import com.google.common.eventbus.EventBus;
+import com.google.errorprone.annotations.CheckReturnValue;
 import io.webby.db.StorageType;
 import io.webby.db.kv.javamap.JavaMapDbFactory;
 import io.webby.demo.model.UserRateModelTable;
@@ -21,7 +22,7 @@ import static io.webby.testing.AssertPrimitives.assertMap;
 import static io.webby.testing.TestingPrimitives.newIntMap;
 
 // FIX[minor]: more test cases (existing state, check group by count, flush)
-@Tag("sql")
+@Tag("integration") @Tag("sql")
 public class IntCounterIntegrationTest {
     @RegisterExtension static final SqlDbExtension SQL = SqlDbExtension.fromProperties().withManualCleanup(UserRateModelTable.META);
 
@@ -71,6 +72,7 @@ public class IntCounterIntegrationTest {
         assertCounter(counter).hasCountEstimates(A, 7, B, -2, C, -1);
     }
 
+    @CheckReturnValue
     private static @NotNull IntCounterSubject assertCounter(@NotNull IntCounter counter) {
         return new IntCounterSubject(counter);
     }

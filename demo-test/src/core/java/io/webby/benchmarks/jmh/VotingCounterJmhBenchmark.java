@@ -14,6 +14,9 @@ import io.webby.orm.api.query.Shortcuts;
 import io.webby.orm.api.query.Where;
 import org.openjdk.jmh.annotations.*;
 import org.openjdk.jmh.infra.BenchmarkParams;
+import org.openjdk.jmh.runner.Runner;
+import org.openjdk.jmh.runner.options.Options;
+import org.openjdk.jmh.runner.options.OptionsBuilder;
 
 import java.sql.Connection;
 import java.sql.SQLException;
@@ -48,7 +51,7 @@ public class VotingCounterJmhBenchmark {
 
         @Setup(Level.Trial)
         public void setUp(BenchmarkParams params) {
-            connection = SqlSettings.connect(SqlSettings.MYSQL_TEST);
+            connection = SqlSettings.connectNotForProduction(SqlSettings.MYSQL_TEST);
             UserRateModelTable table = new UserRateModelTable(() -> connection);
 
             /*
@@ -103,5 +106,11 @@ public class VotingCounterJmhBenchmark {
             IntArrayList keys = IntArrayList.from(IntStream.range(0, plan.keysBatchSize).map(j -> plan.random.nextInt(plan.keys)).toArray());
             IntIntMap counts = plan.counter.estimateCounts(keys);
         }
+    }
+
+    public static void main(String[] args) throws Exception {
+        System.setProperty("jmh.separateClasspathJAR", "true");
+        Options options = new OptionsBuilder().include(VotingCounterJmhBenchmark.class.getSimpleName()).build();
+        new Runner(options).run();
     }
 }

@@ -3,10 +3,12 @@ package io.webby.netty.dispatch.http;
 import com.google.inject.Injector;
 import io.webby.app.AppSettings;
 import io.webby.testing.Testing;
+import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
 
 import static com.google.common.truth.Truth.assertThat;
 
+@Tag("fast")
 public class NettyHttpStepNavigatorTest {
     private final Injector injector = Testing.testStartup();
     private final NettyHttpStepNavigator handler = injector.getInstance(NettyHttpStepNavigator.class);

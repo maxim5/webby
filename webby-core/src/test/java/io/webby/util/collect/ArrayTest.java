@@ -3,6 +3,7 @@ package io.webby.util.collect;
 import com.google.common.collect.Lists;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
+import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
 
 import java.util.Arrays;
@@ -13,6 +14,7 @@ import static io.webby.testing.AssertBasics.assertPrivateFieldClass;
 import static io.webby.util.base.EasyCast.castAny;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 
+@Tag("fast")
 public class ArrayTest {
     @Test
     public void array_of_empty() {
@@ -104,7 +106,8 @@ public class ArrayTest {
     @Test
     public void array_remove_throws() {
         assertThrows(UnsupportedOperationException.class, () -> Array.of("1").remove("1"));
-        assertThrows(UnsupportedOperationException.class, () -> Array.of("1").remove(0));
+        assertThrows(UnsupportedOperationException.class, () -> Array.of("1").remove(1));
+        assertThrows(UnsupportedOperationException.class, () -> Array.of("1").removeFirst());
         assertThrows(UnsupportedOperationException.class, () -> Array.of("1").removeIf("1"::equals));
         assertThrows(UnsupportedOperationException.class, () -> Array.of("1").removeAll(List.of("1", "2")));
         assertThrows(UnsupportedOperationException.class, () -> Array.of("1").clear());

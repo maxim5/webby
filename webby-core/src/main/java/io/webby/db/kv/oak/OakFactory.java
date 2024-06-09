@@ -28,11 +28,11 @@ public class OakFactory extends BaseKeyValueFactory {
     public @NotNull <K, V> OakDb<K, V> getInternalDb(@NotNull DbOptions<K, V> options) {
         return cacheIfAbsent(options, () -> {
             OakRecord<K> keyRecord =
-                    Optional.ofNullable(OakKnownTypes.lookupRecord(options.key()))
+                Optional.ofNullable(OakKnownTypes.lookupRecord(options.key()))
                     .orElseGet(() -> helper.getOrDefault(new TypeLiteral<OakRecord<K>>() {}, () -> inferOakRecord(options)));
 
             OakSerializer<V> valueSerializer =
-                    Optional.ofNullable(OakKnownTypes.lookupRecord(options.value()))
+                Optional.ofNullable(OakKnownTypes.lookupRecord(options.value()))
                     .map(OakRecord::serializer)
                     .orElseGet(() -> {
                         Codec<V> codec = valueCodecOrDie(options);
@@ -48,9 +48,9 @@ public class OakFactory extends BaseKeyValueFactory {
                                                               keyRecord.serializer(),
                                                               valueSerializer,
                                                               keyRecord.minValue())
-                    .setChunkMaxItems(chunkMaxItems)
-                    .setMemoryCapacity(memoryCapacity)
-                    .setPreferredBlockSize(preferredBlockSize);
+                .setChunkMaxItems(chunkMaxItems)
+                .setMemoryCapacity(memoryCapacity)
+                .setPreferredBlockSize(preferredBlockSize);
             return new OakDb<>(builder.build());
         });
     }
@@ -69,8 +69,14 @@ public class OakFactory extends BaseKeyValueFactory {
 
         log.at(Level.WARNING).log("Potential performance problem: inferring Oak comparator for key: %s. " +
                                   "Consider injecting OakRecord<> provider", key);
+        OakComparator<K> comparator = getOakComparator(byteSize, keyCodec);
+
+        return new OakRecord<>(comparator, keySerializer, minValue);
+    }
+
+    private <K> @NotNull OakComparator<K> getOakComparator(int byteSize, @NotNull Codec<K> keyCodec) {
         OakIntBufferComparator bufferComparator = new OakIntBufferComparator(byteSize);
-        OakComparator<K> comparator = new OakComparator<>() {
+        return new OakComparator<>() {
             @Override
             public int compareKeys(K key1, K key2) {
                 if (key1 instanceof Comparable<?> comparable) {
@@ -78,18 +84,14 @@ public class OakFactory extends BaseKeyValueFactory {
                 }
                 return bufferComparator.compareKeys(keyCodec.writeToByteBuffer(key1), keyCodec.writeToByteBuffer(key2));
             }
-
             @Override
             public int compareSerializedKeys(OakScopedReadBuffer serializedKey1, OakScopedReadBuffer serializedKey2) {
                 return bufferComparator.compareSerializedKeys(serializedKey1, serializedKey2);
             }
-
             @Override
             public int compareKeyAndSerializedKey(K key, OakScopedReadBuffer serializedKey) {
                 return bufferComparator.compareKeyAndSerializedKey(keyCodec.writeToByteBuffer(key), serializedKey);
             }
         };
-
-        return new OakRecord<>(comparator, keySerializer, minValue);
     }
 }

@@ -6,8 +6,7 @@ import org.junit.jupiter.api.Test;
 import java.nio.file.Path;
 
 import static com.google.common.truth.Truth.assertThat;
-import static io.webby.testing.AssertResponse.ICON_MIME_TYPES;
-import static io.webby.testing.AssertResponse.JS_MIME_TYPES;
+import static io.webby.testing.AssertResponse.*;
 
 public class ContentTypeDetectorTest {
     private final ContentTypeDetector detector = Testing.testStartup().getInstance(ContentTypeDetector.class);
@@ -41,7 +40,7 @@ public class ContentTypeDetectorTest {
 
     @Test
     public void guessContentType_exclusive_simplemagic() {
-        assertThat(detector.guessContentType(Path.of("foo.rmi"))).isEqualTo("audio/midi");
+        assertThat(detector.guessContentType(Path.of("foo.rmi"))).isIn(MIDI_MIME_TYPES);
         assertThat(detector.guessContentType(Path.of("foo.psd"))).isEqualTo("image/vnd.adobe.photoshop");
     }
 

@@ -12,16 +12,20 @@ import java.util.concurrent.atomic.AtomicInteger;
 
 /**
  * Addresses <a href="https://github.com/carrotsearch/hppc/issues/14">Random iteration</a> HPPC feature in tests.
+ * <p>
+ * This extension patches a shared {@link HashContainers#ITERATION_SEED} value before each test run.
+ * This is relatively cheap and usually enough to stabilize the iteration order.
  */
-public class HppcIterationSeedExtension implements BeforeEachCallback {
+@SuppressWarnings("JavadocReference")
+public class HppcReflectionExtension implements BeforeEachCallback {
     private final AtomicInteger seedRef;
     private final int seedValue;
 
-    public HppcIterationSeedExtension() {
+    public HppcReflectionExtension() {
         this(0);
     }
 
-    public HppcIterationSeedExtension(int seedValue) {
+    public HppcReflectionExtension(int seedValue) {
         this.seedRef = findSeedRef();
         this.seedValue = seedValue;
     }

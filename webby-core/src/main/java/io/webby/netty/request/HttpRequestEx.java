@@ -33,7 +33,7 @@ public interface HttpRequestEx extends FullHttpRequest {
 
     /**
      * Returns the attribute at a given {@code position} or null if not set.
-     * The attributes are usually set by the interceptors (session, user, debug or performance information, etc).
+     * The attributes are usually set by the interceptors (session, user, debug or performance information, etc.).
      *
      * @see #attrOrDie(int)
      */
@@ -41,7 +41,7 @@ public interface HttpRequestEx extends FullHttpRequest {
 
     /**
      * Returns the attribute at a given {@code position} or throws if not set or the type doesn't match.
-     * The attributes are usually set by the interceptors (session, user, debug or performance information, etc).
+     * The attributes are usually set by the interceptors (session, user, debug or performance information, etc.).
      * <p>
      * This method generally should be used only by the attribute owner, i.e. by the same interceptor which sets it.
      *

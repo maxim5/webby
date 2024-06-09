@@ -4,6 +4,7 @@ import com.carrotsearch.hppc.*;
 import com.carrotsearch.hppc.cursors.IntCursor;
 import com.carrotsearch.hppc.cursors.LongCursor;
 import com.google.common.truth.IterableSubject;
+import com.google.errorprone.annotations.CheckReturnValue;
 import io.webby.testing.MockConsumer;
 import org.jetbrains.annotations.NotNull;
 import org.junit.Test;
@@ -272,10 +273,12 @@ public class EasyHppcTest {
         assertMap(map).containsExactly(1, "111", 2, "222", 3, "333");
     }
 
+    @CheckReturnValue
     private static @NotNull IterableSubject assertIntStreamThat(@NotNull Stream<IntCursor> stream) {
         return assertThat(stream.map(cursor -> cursor.value).toList());
     }
 
+    @CheckReturnValue
     private static @NotNull IterableSubject assertLongStreamThat(@NotNull Stream<LongCursor> stream) {
         return assertThat(stream.map(cursor -> cursor.value).toList());
     }

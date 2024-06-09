@@ -63,7 +63,7 @@ public class KeyEventStoreFactory {
                     return INT32_SIZE;
                 }
                 if (valueCodec.size().isFixed()) {
-                    return instance.size() * valueCodec.sizeOf(instance.get(0)) + INT32_SIZE;
+                    return instance.size() * valueCodec.sizeOf(instance.getFirst()) + INT32_SIZE;
                 }
                 return instance.stream().mapToInt(valueCodec::sizeOf).sum() + INT32_SIZE;
             }

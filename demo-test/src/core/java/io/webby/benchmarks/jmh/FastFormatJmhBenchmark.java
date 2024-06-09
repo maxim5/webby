@@ -15,7 +15,7 @@ import java.util.concurrent.TimeUnit;
 @OutputTimeUnit(TimeUnit.SECONDS)
 @Warmup(iterations = 1, time = 3000, timeUnit = TimeUnit.MILLISECONDS)
 @Measurement(iterations = 5, time = 5000, timeUnit = TimeUnit.MILLISECONDS)
-public class FastFormatBenchmark {
+public class FastFormatJmhBenchmark {
     private static final int LOOPS = 1000;
 
     @Benchmark
@@ -149,10 +149,8 @@ public class FastFormatBenchmark {
     }
 
     public static void main(String[] args) throws RunnerException {
-        Options options = new OptionsBuilder()
-            .include(FastFormatBenchmark.class.getSimpleName())
-            .forks(1)
-            .build();
+        System.setProperty("jmh.separateClasspathJAR", "true");
+        Options options = new OptionsBuilder().include(FastFormatJmhBenchmark.class.getSimpleName()).build();
         new Runner(options).run();
     }
 }

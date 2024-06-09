@@ -1,6 +1,7 @@
 package io.webby.testing;
 
 import com.google.common.truth.Truth;
+import com.google.errorprone.annotations.CheckReturnValue;
 import io.netty.buffer.ByteBuf;
 import io.netty.buffer.ByteBufHolder;
 import io.netty.buffer.DuplicatedByteBuf;
@@ -65,10 +66,16 @@ public class TestingBytes {
         return asLines(asStringOrNull(buf));
     }
 
+    public static @NotNull String oneLiner(@NotNull String str) {
+        return str.replaceAll("[\\r\\n]", " ").replaceAll("\\s+", " ").trim();
+    }
+
+    @CheckReturnValue
     public static @NotNull ByteBufSubject assertBytes(byte @Nullable [] bytes) {
         return assertBytes(asByteBufOrNull(bytes));
     }
 
+    @CheckReturnValue
     public static @NotNull ByteBufSubject assertBytes(@Nullable ByteBuf byteBuf) {
         return new ByteBufSubject(byteBuf);
     }

@@ -37,6 +37,23 @@ public enum Engine {
         return jdbcType;
     }
 
+    public boolean isOneOf(@NotNull Engine engine1, @NotNull Engine engine2) {
+        return this == engine1 || this == engine2;
+    }
+
+    public boolean isOneOf(@NotNull Engine engine1, @NotNull Engine engine2, @NotNull Engine engine3) {
+        return this == engine1 || this == engine2 || this == engine3;
+    }
+
+    public boolean isOneOf(@NotNull Engine @NotNull ... engines) {
+        for (Engine engine : engines) {
+            if (this == engine) {
+                return true;
+            }
+        }
+        return false;
+    }
+
     private static final Map<String, Engine> ENGINE_MAP =
             Arrays.stream(Engine.values()).collect(Collectors.toMap(Engine::jdbcType, value -> value));
 

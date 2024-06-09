@@ -14,6 +14,7 @@ import static io.webby.orm.codegen.SqlSupport.EQ_QUESTION;
 
 class WhereMaker {
     public static @NotNull Snippet makeForPrimaryColumns(@NotNull TableArch table) {
+        assert table.hasPrimaryKeyField() : "No primary columns to use: " + table.sqlName();
         return make(table.columns(ReadFollow.NO_FOLLOW, TableField::isPrimaryKey), BoolOpType.AND.joiner());
     }
 

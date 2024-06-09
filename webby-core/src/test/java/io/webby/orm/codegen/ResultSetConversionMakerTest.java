@@ -6,13 +6,10 @@ import io.webby.orm.api.ForeignLong;
 import io.webby.orm.api.ForeignObj;
 import io.webby.orm.api.annotate.Sql;
 import io.webby.orm.arch.model.TableArch;
-import io.webby.testing.orm.AssertSql;
-import io.webby.testing.orm.AssertSql.SqlSubject;
 import io.webby.util.base.EasyPrimitives.MutableBool;
 import io.webby.util.base.EasyPrimitives.MutableInt;
 import io.webby.util.base.EasyPrimitives.MutableLong;
 import io.webby.util.base.EasyPrimitives.OptionalBool;
-import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import org.junit.jupiter.api.Test;
 
@@ -20,6 +17,7 @@ import java.util.List;
 import java.util.Optional;
 
 import static io.webby.orm.arch.factory.TestingArch.buildTableArch;
+import static io.webby.orm.codegen.AssertSnippet.assertThatJava;
 
 public class ResultSetConversionMakerTest {
     @Test
@@ -27,7 +25,7 @@ public class ResultSetConversionMakerTest {
         record Primitives(int id, int i, long l, byte b, short s, char ch, float f, double d, boolean bool) {}
 
         TableArch tableArch = buildTableArch(Primitives.class);
-        assertThatSql(new ResultSetConversionMaker("$resultSet", "$follow", "$index").make(tableArch)).matches("""
+        assertThatJava(new ResultSetConversionMaker("$resultSet", "$follow", "$index").make(tableArch)).matches("""
             int id = $resultSet.getInt(++$index);
             int i = $resultSet.getInt(++$index);
             long l = $resultSet.getLong(++$index);
@@ -45,7 +43,7 @@ public class ResultSetConversionMakerTest {
         record Wrappers(Integer id, Integer i, Long l, Byte b, Short s, Character ch, Float f, Double d, Boolean bool) {}
 
         TableArch tableArch = buildTableArch(Wrappers.class);
-        assertThatSql(new ResultSetConversionMaker("$resultSet", "$follow", "$index").make(tableArch)).matches("""
+        assertThatJava(new ResultSetConversionMaker("$resultSet", "$follow", "$index").make(tableArch)).matches("""
             Integer id = $resultSet.getInt(++$index);
             Integer i = $resultSet.getInt(++$index);
             Long l = $resultSet.getLong(++$index);
@@ -63,7 +61,7 @@ public class ResultSetConversionMakerTest {
         record Enums(Engine engine, OptionalBool bool) {}
 
         TableArch tableArch = buildTableArch(Enums.class);
-        assertThatSql(new ResultSetConversionMaker("$resultSet", "$follow", "$index").make(tableArch)).matches("""
+        assertThatJava(new ResultSetConversionMaker("$resultSet", "$follow", "$index").make(tableArch)).matches("""
             Engine engine = Engine.values()[$resultSet.getInt(++$index)];
             EasyPrimitives.OptionalBool bool = EasyPrimitives.OptionalBool.values()[$resultSet.getInt(++$index)];
             """);
@@ -74,7 +72,7 @@ public class ResultSetConversionMakerTest {
         record Mappers(Optional<String> str) {}
 
         TableArch tableArch = buildTableArch(Mappers.class);
-        assertThatSql(new ResultSetConversionMaker("$resultSet", "$follow", "$index").make(tableArch)).matches("""
+        assertThatJava(new ResultSetConversionMaker("$resultSet", "$follow", "$index").make(tableArch)).matches("""
             Optional str = Optional.ofNullable($resultSet.getString(++$index));
             """);
     }
@@ -84,7 +82,7 @@ public class ResultSetConversionMakerTest {
         record Adapters(MutableInt i, MutableBool bool, MutableLong l, java.awt.Point point) {}
 
         TableArch tableArch = buildTableArch(Adapters.class);
-        assertThatSql(new ResultSetConversionMaker("$resultSet", "$follow", "$index").make(tableArch)).matches("""
+        assertThatJava(new ResultSetConversionMaker("$resultSet", "$follow", "$index").make(tableArch)).matches("""
             EasyPrimitives.MutableInt i = EasyPrimitives_MutableInt_JdbcAdapter.ADAPTER.createInstance($resultSet.getInt(++$index));
             EasyPrimitives.MutableBool bool = EasyPrimitives_MutableBool_JdbcAdapter.ADAPTER.createInstance($resultSet.getBoolean(++$index));
             EasyPrimitives.MutableLong l = EasyPrimitives_MutableLong_JdbcAdapter.ADAPTER.createInstance($resultSet.getLong(++$index));
@@ -100,7 +98,7 @@ public class ResultSetConversionMakerTest {
                         @Sql(nullable = true) java.awt.Point point) {}
 
         TableArch tableArch = buildTableArch(Adapters.class);
-        assertThatSql(new ResultSetConversionMaker("$resultSet", "$follow", "$index").make(tableArch)).matches("""
+        assertThatJava(new ResultSetConversionMaker("$resultSet", "$follow", "$index").make(tableArch)).matches("""
             EasyPrimitives.MutableInt i = EasyPrimitives_MutableInt_JdbcAdapter.ADAPTER.createInstance($resultSet.getInt(++$index));
             EasyPrimitives.MutableBool bool = EasyPrimitives_MutableBool_JdbcAdapter.ADAPTER.createInstance($resultSet.getBoolean(++$index));
             EasyPrimitives.MutableLong l = EasyPrimitives_MutableLong_JdbcAdapter.ADAPTER.createInstance($resultSet.getLong(++$index));
@@ -119,7 +117,7 @@ public class ResultSetConversionMakerTest {
                              @javax.annotation.Nullable Nested nest) {}
 
         TableArch tableArch = buildTableArch(NullableModel.class);
-        assertThatSql(new ResultSetConversionMaker("$resultSet", "$follow", "$index").make(tableArch)).matches("""
+        assertThatJava(new ResultSetConversionMaker("$resultSet", "$follow", "$index").make(tableArch)).matches("""
             String id = $resultSet.getString(++$index);
             String str = $resultSet.getString(++$index);
             Integer i = $resultSet.getInt(++$index);
@@ -134,7 +132,7 @@ public class ResultSetConversionMakerTest {
         record Song(ForeignInt<User> author) {}
 
         TableArch tableArch = buildTableArch(Song.class, List.of(User.class));
-        assertThatSql(new ResultSetConversionMaker("$resultSet", "$follow", "$index").make(tableArch)).matches("""
+        assertThatJava(new ResultSetConversionMaker("$resultSet", "$follow", "$index").make(tableArch)).matches("""
             ForeignInt author = switch ($follow) {
                 case NO_FOLLOW -> ForeignInt.ofId($resultSet.getInt(++$index));
                 case FOLLOW_ONE_LEVEL -> ForeignInt.ofEntity($resultSet.getInt(++$index), UserTable.fromRow($resultSet, ReadFollow.NO_FOLLOW, ($index += 2) - 2));
@@ -149,7 +147,7 @@ public class ResultSetConversionMakerTest {
         record Song(ForeignLong<User> author) {}
 
         TableArch tableArch = buildTableArch(Song.class, List.of(User.class));
-        assertThatSql(new ResultSetConversionMaker("$resultSet", "$follow", "$index").make(tableArch)).matches("""
+        assertThatJava(new ResultSetConversionMaker("$resultSet", "$follow", "$index").make(tableArch)).matches("""
             ForeignLong author = switch ($follow) {
                 case NO_FOLLOW -> ForeignLong.ofId($resultSet.getLong(++$index));
                 case FOLLOW_ONE_LEVEL -> ForeignLong.ofEntity($resultSet.getLong(++$index), UserTable.fromRow($resultSet, ReadFollow.NO_FOLLOW, ($index += 2) - 2));
@@ -164,7 +162,7 @@ public class ResultSetConversionMakerTest {
         record Song(ForeignObj<String, User> author) {}
 
         TableArch tableArch = buildTableArch(Song.class, List.of(User.class));
-        assertThatSql(new ResultSetConversionMaker("$resultSet", "$follow", "$index").make(tableArch)).matches("""
+        assertThatJava(new ResultSetConversionMaker("$resultSet", "$follow", "$index").make(tableArch)).matches("""
             ForeignObj author = switch ($follow) {
                 case NO_FOLLOW -> ForeignObj.ofId($resultSet.getString(++$index));
                 case FOLLOW_ONE_LEVEL -> ForeignObj.ofEntity($resultSet.getString(++$index), UserTable.fromRow($resultSet, ReadFollow.NO_FOLLOW, ($index += 2) - 2));
@@ -180,7 +178,7 @@ public class ResultSetConversionMakerTest {
         record Single(ForeignInt<Song> hitSong) {}
 
         TableArch tableArch = buildTableArch(Single.class, List.of(Song.class, User.class));
-        assertThatSql(new ResultSetConversionMaker("$resultSet", "$follow", "$index").make(tableArch)).matches("""
+        assertThatJava(new ResultSetConversionMaker("$resultSet", "$follow", "$index").make(tableArch)).matches("""
             ForeignInt hitSong = switch ($follow) {
                 case NO_FOLLOW -> ForeignInt.ofId($resultSet.getInt(++$index));
                 case FOLLOW_ONE_LEVEL -> ForeignInt.ofEntity($resultSet.getInt(++$index), SongTable.fromRow($resultSet, ReadFollow.NO_FOLLOW, ($index += 2) - 2));
@@ -195,7 +193,7 @@ public class ResultSetConversionMakerTest {
         record Song(@Sql.Null ForeignInt<User> author) {}
 
         TableArch tableArch = buildTableArch(Song.class, List.of(User.class));
-        assertThatSql(new ResultSetConversionMaker("$resultSet", "$follow", "$index").make(tableArch)).matches("""
+        assertThatJava(new ResultSetConversionMaker("$resultSet", "$follow", "$index").make(tableArch)).matches("""
             ForeignInt author = switch ($follow) {
                 case NO_FOLLOW -> ForeignInt.ofId($resultSet.getInt(++$index));
                 case FOLLOW_ONE_LEVEL -> {
@@ -226,7 +224,7 @@ public class ResultSetConversionMakerTest {
         record Song(@Sql.Null ForeignLong<User> author) {}
 
         TableArch tableArch = buildTableArch(Song.class, List.of(User.class));
-        assertThatSql(new ResultSetConversionMaker("$resultSet", "$follow", "$index").make(tableArch)).matches("""
+        assertThatJava(new ResultSetConversionMaker("$resultSet", "$follow", "$index").make(tableArch)).matches("""
             ForeignLong author = switch ($follow) {
                 case NO_FOLLOW -> ForeignLong.ofId($resultSet.getLong(++$index));
                 case FOLLOW_ONE_LEVEL -> {
@@ -257,7 +255,7 @@ public class ResultSetConversionMakerTest {
         record Song(@Sql.Null ForeignObj<String, User> author) {}
 
         TableArch tableArch = buildTableArch(Song.class, List.of(User.class));
-        assertThatSql(new ResultSetConversionMaker("$resultSet", "$follow", "$index").make(tableArch)).matches("""
+        assertThatJava(new ResultSetConversionMaker("$resultSet", "$follow", "$index").make(tableArch)).matches("""
             ForeignObj author = switch ($follow) {
                 case NO_FOLLOW -> {
                     String _author = $resultSet.getString(++$index);
@@ -297,7 +295,7 @@ public class ResultSetConversionMakerTest {
         record Single(@Sql.Null ForeignInt<Song> hitSong) {}
 
         TableArch tableArch = buildTableArch(Single.class, List.of(Song.class, User.class));
-        assertThatSql(new ResultSetConversionMaker("$resultSet", "$follow", "$index").make(tableArch)).matches("""
+        assertThatJava(new ResultSetConversionMaker("$resultSet", "$follow", "$index").make(tableArch)).matches("""
             ForeignInt hitSong = switch ($follow) {
                 case NO_FOLLOW -> ForeignInt.ofId($resultSet.getInt(++$index));
                 case FOLLOW_ONE_LEVEL -> {
@@ -320,9 +318,5 @@ public class ResultSetConversionMakerTest {
                 }
             };
         """);
-    }
-
-    private static @NotNull SqlSubject<SqlSubject<?>> assertThatSql(@NotNull Snippet snippet) {
-        return AssertSql.assertThatSql(snippet.join());
     }
 }

@@ -1,5 +1,6 @@
 package io.webby.util.collect;
 
+import com.google.errorprone.annotations.Immutable;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
@@ -7,6 +8,7 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.stream.IntStream;
 
+@Immutable
 public class ArrayTabular<T> implements Tabular<T> {
     private final T[][] array;
 

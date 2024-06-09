@@ -39,6 +39,7 @@ public class AssertResponse {
     // See https://stackoverflow.com/questions/13827325/correct-mime-type-for-favicon-ico
     public static final List<CharSequence> ICON_MIME_TYPES = List.of("image/x-icon", "image/x-ico", "image/vnd.microsoft.icon");
     public static final List<CharSequence> JS_MIME_TYPES = List.of("application/javascript", "text/javascript");
+    public static final List<CharSequence> MIDI_MIME_TYPES = List.of("audio/midi", "audio/mid");
 
     @CheckReturnValue
     public static @NotNull HttpResponseSubject<HttpResponseSubject<?>> assertThat(@Nullable HttpResponse response) {

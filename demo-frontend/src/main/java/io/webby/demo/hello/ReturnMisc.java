@@ -9,16 +9,16 @@ import java.io.*;
 
 @Serve
 public class ReturnMisc {
-    @GET(url="/r/void")
+    @GET(url = "/r/void")
     public void misc_void(@NotNull HttpRequest request) {
     }
 
-    @GET(url="/r/null")
+    @GET(url = "/r/null")
     public Object misc_null() {
         return null;
     }
 
-    @GET(url="/r/error/npe")
+    @GET(url = "/r/error/npe")
     public Object error_npe() {
         throw new NullPointerException("Message");
     }
@@ -52,7 +52,7 @@ public class ReturnMisc {
     public Reader reader_fails_to_read() {
         return new Reader() {
             @Override
-            public int read(char[] buf, int off, int len) throws IOException {
+            public int read(char @NotNull [] buf, int off, int len) throws IOException {
                 throw new IOException("Forced failure");
             }
 
@@ -65,7 +65,7 @@ public class ReturnMisc {
     public Reader reader_fails_to_close() {
         return new Reader() {
             @Override
-            public int read(char[] buf, int off, int len) {
+            public int read(char @NotNull [] buf, int off, int len) {
                 return -1;
             }
 

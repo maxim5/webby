@@ -4,14 +4,14 @@ import io.netty.handler.codec.http.FullHttpRequest;
 import io.netty.handler.codec.http.HttpResponse;
 import io.webby.testing.BaseHttpIntegrationTest;
 import io.webby.testing.HttpRequestBuilder;
-import io.webby.testing.ext.HppcIterationSeedExtension;
+import io.webby.testing.ext.HppcReflectionExtension;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.RegisterExtension;
 
 import static io.webby.testing.AssertResponse.assertThat;
 
 public class RequestAttrIntegrationTest extends BaseHttpIntegrationTest {
-    @RegisterExtension static final HppcIterationSeedExtension ITERATION_SEED = new HppcIterationSeedExtension();
+    @RegisterExtension private static final HppcReflectionExtension HPPC_ORDER_FIX = new HppcReflectionExtension();
 
     protected final RequestAttr handler = testSetup(RequestAttr.class).initHandler();
 

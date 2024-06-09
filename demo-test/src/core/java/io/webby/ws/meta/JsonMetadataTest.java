@@ -4,6 +4,7 @@ import io.netty.buffer.ByteBuf;
 import io.webby.netty.marshal.MarshallerFactory.SupportedJsonLibrary;
 import io.webby.netty.ws.errors.BadFrameException;
 import io.webby.testing.Testing;
+import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.EnumSource;
 
@@ -14,6 +15,7 @@ import static io.webby.testing.TestingBytes.assertBytes;
 import static io.webby.testing.ws.meta.AssertMeta.*;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 
+@Tag("slow")
 public class JsonMetadataTest {
     @ParameterizedTest
     @EnumSource(SupportedJsonLibrary.class)

@@ -89,7 +89,7 @@ public class ThreadLocalConnectorTest {
                           Runnable beforeCalls, Runnable afterCalls) implements Runnable {
         @Override
         public void run() {
-            log.at(Level.FINE).log("Starting %d", Thread.currentThread().getId());
+            log.at(Level.FINE).log("Starting %d", Thread.currentThread().threadId());
             SimpleConnection last = null;
 
             for (int req = 0; req < requests; req++) {
@@ -104,18 +104,19 @@ public class ThreadLocalConnectorTest {
             if (last != null && !last.isClosed()) {
                 last.close();
             }
-            log.at(Level.FINE).log("Complete %d", Thread.currentThread().getId());
+            log.at(Level.FINE).log("Complete %d", Thread.currentThread().threadId());
         }
     }
 
     private static void executeWorkers(int requests, int threads, @NotNull Supplier<Runnable> supplier) throws Exception {
-        ExecutorService executor = Executors.newFixedThreadPool(threads);
-        for (int i = 0; i < requests; i++) {
-            executor.execute(supplier.get());
-        }
-        executor.shutdown();
-        if (!executor.awaitTermination(100, TimeUnit.MILLISECONDS)) {
-            executor.shutdownNow();
+        try (ExecutorService executor = Executors.newFixedThreadPool(threads)) {
+            for (int i = 0; i < requests; i++) {
+                executor.execute(supplier.get());
+            }
+            executor.shutdown();
+            if (!executor.awaitTermination(100, TimeUnit.MILLISECONDS)) {
+                executor.shutdownNow();
+            }
         }
     }
 

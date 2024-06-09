@@ -1,5 +1,6 @@
 package io.webby.orm.api.query;
 
+import com.google.errorprone.annotations.CheckReturnValue;
 import io.webby.orm.testing.FakeColumn;
 import io.webby.testing.orm.AssertSql;
 import org.jetbrains.annotations.NotNull;
@@ -67,6 +68,7 @@ public class SelectGroupByTest {
             SelectGroupBy.from("table").groupBy(FakeColumn.FOO).aggregate(SQUARE.apply(FakeColumn.INT)).build());
     }
 
+    @CheckReturnValue
     private static @NotNull SelectGroupBySubject assertThat(@NotNull SelectGroupBy query) {
         return new SelectGroupBySubject(query);
     }

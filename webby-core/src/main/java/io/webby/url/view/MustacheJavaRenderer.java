@@ -43,8 +43,8 @@ public class MustacheJavaRenderer implements Renderer<Mustache> {
     public @NotNull Mustache compileTemplate(@NotNull String name) {
         // See https://github.com/spullara/mustache.java/issues/57
         MustacheFactory factory = settings.isHotReload() ?
-                helper.getOrDefault(MustacheFactory.class, this::createDefault) :
-                this.factory;
+            helper.getOrDefault(MustacheFactory.class, this::createDefault) :
+            this.factory;
         return factory.compile(name);
     }
 

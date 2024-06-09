@@ -1,6 +1,7 @@
 package io.webby.util.collect;
 
 import com.google.common.collect.Lists;
+import com.google.errorprone.annotations.CheckReturnValue;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import org.junit.jupiter.api.Test;
@@ -63,6 +64,7 @@ public class ImmutableArrayListTest {
         assertThat(Stream.of(null, 1, null).collect(toImmutableArrayList())).isEqualTo(ImmutableArrayList.of(null, 1, null));
     }
 
+    @CheckReturnValue
     private static <T> @NotNull ImmutableArrayListSubject<T> assertArrayList(@NotNull ImmutableArrayList<T> list) {
         return new ImmutableArrayListSubject<>(list);
     }

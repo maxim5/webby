@@ -19,10 +19,10 @@ dependencies {
     testFixturesApi project(':demo-frontend')
     testFixturesApi testFixtures(project(':webby-core'))
 
-    coreImplementation group: 'com.volkhart.memory', name: 'measurer', version: '0.1.1'
+    coreImplementation 'com.volkhart.memory:measurer:0.1.1'
     // JMH
-    coreImplementation group: 'org.openjdk.jmh', name: 'jmh-core', version: '1.35'
-    coreImplementation group: 'org.openjdk.jmh', name: 'jmh-generator-annprocess', version: '1.35'
+    coreImplementation 'org.openjdk.jmh:jmh-core:1.37'
+    coreImplementation 'org.openjdk.jmh:jmh-generator-annprocess:1.37'
 
     coreImplementation sourceSets.testFixtures.output
     demoImplementation sourceSets.testFixtures.output

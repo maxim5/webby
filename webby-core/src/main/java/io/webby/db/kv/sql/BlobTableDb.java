@@ -42,7 +42,7 @@ public class BlobTableDb<V, K> extends ByteArrayDb<K, V> implements KeyValueDb<K
         this.namespace = namespace.getBytes();
         this.whereNamespace = switch (table.engine()) {
             case H2 -> Where.of(like(ID_COLUMN, literal(lowerhex(this.namespace) + "%")));
-            case MySQL, SQLite -> Where.of(like(ID_COLUMN, literal(namespace + "%")));
+            case MySQL, MariaDB, SQLite -> Where.of(like(ID_COLUMN, literal(namespace + "%")));
             default -> throw new UnsupportedOperationException("BlobTableDb not implemented for SQL engine: " + table.engine());
         };
     }
@@ -63,7 +63,7 @@ public class BlobTableDb<V, K> extends ByteArrayDb<K, V> implements KeyValueDb<K
         byte[] bytes = fromValue(value);
         Compare compare = switch (table.engine()) {
             case SQLite -> EQ.compare(Func.HEX.apply(VALUE_COLUMN), var(upperhex(bytes)));
-            case MySQL, H2 -> EQ.compare(VALUE_COLUMN, var(bytes));
+            case MySQL, MariaDB, H2 -> EQ.compare(VALUE_COLUMN, var(bytes));
             default -> throw new UnsupportedOperationException("containsValue() not implemented for SQL engine:" + table.engine());
         };
 

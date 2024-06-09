@@ -3,6 +3,7 @@ package io.webby.testing;
 import com.carrotsearch.hppc.*;
 import com.google.common.truth.MapSubject;
 import com.google.common.truth.Truth;
+import com.google.errorprone.annotations.CheckReturnValue;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
@@ -13,26 +14,32 @@ import static io.webby.util.hppc.EasyHppc.toArrayList;
 import static io.webby.util.hppc.EasyHppc.toJavaMap;
 
 public class AssertPrimitives {
+    @CheckReturnValue
     public static @NotNull IntContainerSubject assertArray(@NotNull IntContainer container) {
         return new IntContainerSubject(container);
     }
 
+    @CheckReturnValue
     public static @NotNull LongContainerSubject assertArray(@NotNull LongContainer container) {
         return new LongContainerSubject(container);
     }
 
+    @CheckReturnValue
     public static @NotNull IntIntMapSubject assertMap(@NotNull IntIntMap map) {
         return new IntIntMapSubject(map);
     }
 
+    @CheckReturnValue
     public static <T> @NotNull IntObjectMapSubject<T> assertMap(@NotNull IntObjectMap<T> map) {
         return new IntObjectMapSubject<>(map);
     }
 
+    @CheckReturnValue
     public static @NotNull LongLongMapSubject assertMap(@NotNull LongLongMap map) {
         return new LongLongMapSubject(map);
     }
 
+    @CheckReturnValue
     public static <T> @NotNull LongObjectMapSubject<T> assertMap(@NotNull LongObjectMap<T> map) {
         return new LongObjectMapSubject<>(map);
     }
@@ -94,10 +101,12 @@ public class AssertPrimitives {
             isEqualTo(trim(newIntMap(expectedKeysValues)));
         }
 
+        @CheckReturnValue
         public @NotNull IntIntMapSubject trimmed() {
             return new IntIntMapSubject(trim(map));
         }
 
+        @CheckReturnValue
         public @NotNull MapSubject asJavaMap() {
             return Truth.assertThat(toJavaMap(map));
         }
@@ -128,6 +137,7 @@ public class AssertPrimitives {
             isEqualTo(newIntObjectMap(expectedKeysValues));
         }
 
+        @CheckReturnValue
         public @NotNull MapSubject asJavaMap() {
             return Truth.assertThat(toJavaMap(map));
         }
@@ -162,10 +172,12 @@ public class AssertPrimitives {
             isEqualTo(trim(newLongMap(expectedKeysValues)));
         }
 
+        @CheckReturnValue
         public @NotNull LongLongMapSubject trimmed() {
             return new LongLongMapSubject(trim(map));
         }
 
+        @CheckReturnValue
         public @NotNull MapSubject asJavaMap() {
             return Truth.assertThat(toJavaMap(map));
         }
@@ -196,6 +208,7 @@ public class AssertPrimitives {
             isEqualTo(newLongObjectMap(expectedKeysValues));
         }
 
+        @CheckReturnValue
         public @NotNull MapSubject asJavaMap() {
             return Truth.assertThat(toJavaMap(map));
         }

@@ -1,20 +1,17 @@
 package io.webby.netty.marshal;
 
-import com.google.api.LabelDescriptor;
-import com.google.api.Usage;
-import com.google.api.UsageRule;
+import com.google.protobuf.DescriptorProtos;
 import com.google.protobuf.Message;
-import com.google.rpc.Code;
-import com.google.rpc.Status;
+import com.google.protobuf.compiler.PluginProtos;
 import io.webby.testing.Testing;
 import okio.Buffer;
+import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.ValueSource;
 
 import java.io.IOException;
 import java.io.StringReader;
 import java.io.StringWriter;
-import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
@@ -22,27 +19,32 @@ import java.util.stream.Stream;
 import static com.google.common.truth.Truth.assertThat;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 
+@Tag("integration")
 public class ProtobufMarshallerIntegrationTest {
     private final ProtobufMarshaller marshaller = Testing.testStartup().getInstance(ProtobufMarshaller.class);
 
     private static final Map<Class<? extends Message>, Message> TEST_MESSAGES = Stream.of(
-        Status.newBuilder()
-                .setCode(Code.OK.getNumber())
-                .addAllDetails(List.of())
-                .build(),
-        LabelDescriptor.newBuilder()
-                .setKey("key")
-                .setValueType(LabelDescriptor.ValueType.STRING)
-                .setDescription("Description")
-                .build(),
-        Usage.newBuilder()
-                .addAllRequirements(List.of("foo/bar"))
-                .addAllRules(List.of(UsageRule.newBuilder().setSelector("*").setSkipServiceControl(true).build()))
-                .build()
+        PluginProtos.CodeGeneratorRequest.newBuilder()
+            .setCompilerVersion(PluginProtos.Version.newBuilder().setMajor(1).setMinor(2))
+            .addProtoFile(
+                DescriptorProtos.FileDescriptorProto.newBuilder()
+                    .addEnumType(DescriptorProtos.EnumDescriptorProto.newBuilder().addReservedName("name"))
+                    .setOptions(
+                        DescriptorProtos.FileOptions.newBuilder()
+                            .setCcGenericServices(true)
+                            .setFeatures(
+                                DescriptorProtos.FeatureSet.newBuilder()
+                                    .setEnumType(DescriptorProtos.FeatureSet.EnumType.OPEN)
+                            ).build()
+                    ).build()
+            ).build(),
+        PluginProtos.CodeGeneratorResponse.newBuilder()
+            .setError("Error")
+            .build()
     ).collect(Collectors.toMap(Message::getClass, message -> message));
 
     @ParameterizedTest
-    @ValueSource(classes = {Status.class, LabelDescriptor.class, Usage.class})
+    @ValueSource(classes = {PluginProtos.CodeGeneratorRequest.class, PluginProtos.CodeGeneratorResponse.class})
     public void proto_roundtrip(Class<Message> klass) throws Exception {
         Message message = TEST_MESSAGES.get(klass);
         assertNotNull(message, "Add the class %s to the test map".formatted(klass));

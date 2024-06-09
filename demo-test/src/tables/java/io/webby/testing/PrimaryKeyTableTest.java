@@ -14,7 +14,6 @@ import java.util.Collection;
 import java.util.List;
 
 import static com.google.common.truth.Truth.assertThat;
-import static com.google.common.truth.Truth8.assertThat;
 import static io.webby.testing.MoreTruth.assertThat;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assumptions.assumeTrue;
@@ -165,7 +164,7 @@ public interface PrimaryKeyTableTest<K, E, T extends TableObj<K, E>> extends Bas
         // 2) table().runner().runUpdate("SET MODE MYSQL")
         //
         // https://stackoverflow.com/questions/42364935/how-to-add-the-mode-mysql-to-embedded-h2-db-in-spring-boot-1-4-1-for-datajpates
-        assumeOneOfEngines(Engine.SQLite, Engine.MySQL);
+        assumeOneOfEngines(Engine.SQLite, Engine.MySQL, Engine.MariaDB);
 
         assumeKeys(2);
         E entity = createEntity(keys()[0]);
@@ -207,6 +206,7 @@ public interface PrimaryKeyTableTest<K, E, T extends TableObj<K, E>> extends Bas
 
     @Test
     default void insert_batch_of_two_duplicates() {
+        assumeNoneOfEngines(Engine.MariaDB);
         assumeKeys(2);
         E entity = createEntity(keys()[0]);
         assertThrows(QueryException.class, () -> table().insertBatch(List.of(entity, entity)));
@@ -215,6 +215,18 @@ public interface PrimaryKeyTableTest<K, E, T extends TableObj<K, E>> extends Bas
         assertTableContains(keys()[0], entity);
         assertTableNotContains(keys()[1]);
         assertTableAll(entity);
+    }
+
+    @Test
+    default void insert_batch_of_two_duplicates_does_nothing() {
+        assumeOneOfEngines(Engine.MariaDB);
+        assumeKeys(2);
+        E entity = createEntity(keys()[0]);
+        assertThrows(QueryException.class, () -> table().insertBatch(List.of(entity, entity)));
+
+        assertTableCount(0);
+        assertTableNotContains(keys()[0]);
+        assertThat(table().fetchAll()).isEmpty();
     }
 
     /** {@link TableObj#updateByPk(Object)} **/

@@ -2,12 +2,14 @@ package io.webby.util.collect;
 
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
+import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
 
 import static com.google.common.truth.Truth.assertThat;
 import static io.webby.testing.MockFunction.failing;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 
+@Tag("fast")
 public class OneOfTest {
     @Test
     public void oneOf_simple() {
@@ -61,6 +63,20 @@ public class OneOfTest {
     public void oneOf_mapToDouble() {
         assertThat(OneOf.ofFirst(1).mapToDouble(x -> x + 1, failing())).isEqualTo(2.0);
         assertThat(OneOf.ofSecond(2).mapToDouble(failing(), x -> x + 1)).isEqualTo(3.0);
+    }
+
+    @Test
+    public void oneOf_testFirst() {
+        assertThat(OneOf.ofFirst(1).testFirstIfSet(x -> x > 0)).isTrue();
+        assertThat(OneOf.ofFirst(-1).testFirstIfSet(x -> x > 0)).isFalse();
+        assertThat(OneOf.ofSecond(1).testFirstIfSet(failing())).isFalse();
+    }
+
+    @Test
+    public void oneOf_testSecond() {
+        assertThat(OneOf.ofSecond(1).testSecondIfSet(x -> x > 0)).isTrue();
+        assertThat(OneOf.ofSecond(-1).testSecondIfSet(x -> x > 0)).isFalse();
+        assertThat(OneOf.ofFirst(1).testSecondIfSet(failing())).isFalse();
     }
 
     @Test

@@ -29,7 +29,7 @@ class ResultSetConversionMaker {
     }
 
     public @NotNull Snippet make(@NotNull TableArch table) {
-        return new Snippet().withLines(table.fields().stream().map(this::assignFieldLine));
+        return new Snippet().withMultilines(table.fields().stream().map(this::assignFieldLine));
     }
 
     private @NotNull String assignFieldLine(@NotNull TableField field) {
@@ -70,7 +70,8 @@ class ResultSetConversionMaker {
         return new Snippet()
             .withFormattedLine("switch (%s) {", followParam)
             .withLines(indented)
-            .withLine("}").join(INDENT1);
+            .withLine("}")
+            .joinLines(INDENT1);
     }
 
     private @NotNull String caseForNotNull(@NotNull ForeignTableField field, @NotNull ReadFollow follow) {

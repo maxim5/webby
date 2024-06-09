@@ -55,7 +55,7 @@ public class JetcdDb<K, V> extends ByteArrayDb<K, V> implements KeyValueDb<K, V>
     @Override
     public @Nullable V get(@NotNull K key) {
         List<KeyValue> keyValues = runRethrow(() -> asyncGet(key).get().getKvs());
-        return keyValues.isEmpty() ? null : toValue(keyValues.get(0).getValue());
+        return keyValues.isEmpty() ? null : toValue(keyValues.getFirst().getValue());
     }
 
     @Override
@@ -115,7 +115,7 @@ public class JetcdDb<K, V> extends ByteArrayDb<K, V> implements KeyValueDb<K, V>
     }
 
     private @NotNull GetOption withGetOptions(boolean keysOnly) {
-        return GetOption.newBuilder()
+        return GetOption.builder()
                 .withKeysOnly(keysOnly)
                 .withSortField(GetOption.SortTarget.KEY)
                 .withSortOrder(GetOption.SortOrder.DESCEND)

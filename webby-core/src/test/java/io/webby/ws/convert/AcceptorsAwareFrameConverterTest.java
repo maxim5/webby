@@ -20,6 +20,7 @@ import io.webby.ws.convert.InFrameConverter.ParsedFrameConsumer;
 import io.webby.ws.impl.Acceptor;
 import io.webby.ws.meta.FrameMetadata;
 import org.jetbrains.annotations.NotNull;
+import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
 
 import java.lang.reflect.Method;
@@ -36,6 +37,7 @@ import static io.webby.testing.TestingBytes.asString;
 import static io.webby.ws.convert.AcceptorsAwareFrameConverter.resolveFrameType;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 
+@Tag("slow")
 public class AcceptorsAwareFrameConverterTest {
     private static final Method DUMMY_METHOD = Testing.class.getDeclaredMethods()[0];
     private static final ParsedFrameConsumer<Object> EMPTY_CONSUMER = (accept, payload, ctx) -> {};
@@ -202,9 +204,19 @@ public class AcceptorsAwareFrameConverterTest {
                                                                         @NotNull FrameType supportedType,
                                                                         @NotNull Acceptor ... acceptors) {
         Injector injector = Testing.testStartup();
+        AcceptorsAwareFrameConverter converter = new AcceptorsAwareFrameConverter(
+            injector.getInstance(MarshallerFactory.class).getMarshaller(marshal),
+            dummyFrameMetadata(),
+            Maps.uniqueIndex(List.of(acceptors), Acceptor::id),
+            supportedType
+        );
+        converter.onBeforeHandshake(FakeClients.DEFAULT);
+        return converter;
+    }
 
+    private static @NotNull FrameMetadata dummyFrameMetadata() {
         AtomicInteger requestIdCounter = new AtomicInteger();
-        FrameMetadata metadata = new FrameMetadata() {
+        return new FrameMetadata() {
             @Override
             public void parse(@NotNull ByteBuf frameContent, @NotNull MetadataConsumer consumer) {
                 consumer.accept(frameContent, requestIdCounter.incrementAndGet(), frameContent);
@@ -215,16 +227,6 @@ public class AcceptorsAwareFrameConverterTest {
                 return asByteBuf("%d:%d:%s".formatted(requestId, code, asString(content)));
             }
         };
-
-        AcceptorsAwareFrameConverter converter = new AcceptorsAwareFrameConverter(
-                injector.getInstance(MarshallerFactory.class).getMarshaller(marshal),
-                metadata,
-                Maps.uniqueIndex(List.of(acceptors), Acceptor::id),
-                supportedType
-        );
-        converter.onBeforeHandshake(FakeClients.DEFAULT);
-
-        return converter;
     }
 
     private @NotNull Acceptor dummyMessageAcceptor(@NotNull String id) {

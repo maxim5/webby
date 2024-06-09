@@ -50,7 +50,7 @@ public class InjectorHelper {
                                               @NotNull TypeLiteral<? extends T> typeLiteral,
                                               @NotNull Supplier<? extends T> defaultSupplier) {
         try {
-            if (injector.findBindingsByType(typeLiteral).size() > 0) {  // perf: getBindings?
+            if (!injector.findBindingsByType(typeLiteral).isEmpty()) {  // perf: getBindings?
                 Provider<? extends T> provider = injector.getProvider(Key.get(typeLiteral));
                 log.at(Level.FINE).log("Found explicit %s Guice provider: %s", typeLiteral, provider);
                 return provider.get();

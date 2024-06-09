@@ -2,33 +2,28 @@ package io.webby.db.codec.standard;
 
 import com.carrotsearch.hppc.IntArrayList;
 import com.carrotsearch.hppc.IntHashSet;
-import io.webby.db.codec.Codec;
-import org.jetbrains.annotations.NotNull;
+import io.webby.testing.ext.HppcBytecodeExtension;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.RegisterExtension;
 
-import static com.google.common.truth.Truth.assertThat;
+import static io.webby.db.codec.AssertCodec.assertCodec;
 
 public class IntContainerCodecTest {
+    @RegisterExtension private static final HppcBytecodeExtension HPPC_ORDER_FIX = new HppcBytecodeExtension();
+
     @Test
-    public void int_array_list() {
-        assertCodecRoundtrip(IntArrayListCodec.INSTANCE, new IntArrayList());
-        assertCodecRoundtrip(IntArrayListCodec.INSTANCE, IntArrayList.from(1));
-        assertCodecRoundtrip(IntArrayListCodec.INSTANCE, IntArrayList.from(1, 2, 3));
-        assertCodecRoundtrip(IntArrayListCodec.INSTANCE, IntArrayList.from(1, 2, 3, 4, 5, 6, 7, 8, 9, 10));
+    public void int_array_list() throws Exception {
+        assertCodec(IntArrayListCodec.INSTANCE).roundtrip(new IntArrayList());
+        assertCodec(IntArrayListCodec.INSTANCE).roundtrip(IntArrayList.from(1));
+        assertCodec(IntArrayListCodec.INSTANCE).roundtrip(IntArrayList.from(1, 2, 3));
+        assertCodec(IntArrayListCodec.INSTANCE).roundtrip(IntArrayList.from(1, 2, 3, 4, 5, 6, 7, 8, 9, 10));
     }
 
     @Test
-    public void int_hash_set() {
-        assertCodecRoundtrip(IntHashSetCodec.INSTANCE, new IntHashSet());
-        assertCodecRoundtrip(IntHashSetCodec.INSTANCE, IntHashSet.from(1));
-        assertCodecRoundtrip(IntHashSetCodec.INSTANCE, IntHashSet.from(1, 2, 3));
-        assertCodecRoundtrip(IntHashSetCodec.INSTANCE, IntHashSet.from(1, 2, 3, 4, 5, 6, 7, 8, 9, 10));
-    }
-
-    private static <T> void assertCodecRoundtrip(@NotNull Codec<T> codec, @NotNull T value) {
-        byte[] bytes = codec.writeToBytes(value);
-        T readValue = codec.readFromBytes(bytes);
-        assertThat(codec.sizeOf(value)).isEqualTo(bytes.length);
-        assertThat(readValue).isEqualTo(value);
+    public void int_hash_set() throws Exception {
+        assertCodec(IntHashSetCodec.INSTANCE).roundtrip(new IntHashSet());
+        assertCodec(IntHashSetCodec.INSTANCE).roundtrip(IntHashSet.from(1));
+        assertCodec(IntHashSetCodec.INSTANCE).roundtrip(IntHashSet.from(1, 2, 3));
+        assertCodec(IntHashSetCodec.INSTANCE).roundtrip(IntHashSet.from(1, 2, 3, 4, 5, 6, 7, 8, 9, 10));
     }
 }

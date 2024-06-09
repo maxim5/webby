@@ -5,7 +5,6 @@ import io.webby.orm.testing.FakeColumn;
 import org.junit.jupiter.api.Test;
 
 import static com.google.common.truth.Truth.assertThat;
-import static com.google.common.truth.Truth8.assertThat;
 import static io.webby.orm.api.query.Pagination.*;
 
 public class PaginationTest {

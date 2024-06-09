@@ -18,8 +18,8 @@ public class SessionTableTest
     @Override
     protected void setUp(@NotNull Connector connector) throws Exception {
         table = new SessionTable(connector);
-        table.admin().createTable(CreateTableQuery.of(table).ifNotExists());
         table.admin().createTable(CreateTableQuery.of(UserTable.META).ifNotExists());
+        table.admin().createTable(CreateTableQuery.of(table).ifNotExists());
     }
 
     @Override

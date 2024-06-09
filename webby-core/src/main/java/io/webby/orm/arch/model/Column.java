@@ -2,7 +2,13 @@ package io.webby.orm.arch.model;
 
 import org.jetbrains.annotations.NotNull;
 
+import static io.webby.orm.arch.model.SqlNameValidator.validateSqlName;
+
 public record Column(@NotNull String sqlName, @NotNull ColumnType type) {
+    public Column {
+        validateSqlName(sqlName);
+    }
+
     public static @NotNull Column of(@NotNull String sqlName, @NotNull JdbcType jdbcType) {
         return new Column(sqlName, new ColumnType(jdbcType));
     }

@@ -25,7 +25,6 @@ import io.webby.testing.ext.TempDirectoryExtension;
 import io.webby.util.collect.Pair;
 import org.jetbrains.annotations.NotNull;
 import org.junit.jupiter.api.Tag;
-import org.junit.jupiter.api.Tags;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.RegisterExtension;
 import org.junit.jupiter.params.ParameterizedTest;
@@ -38,10 +37,9 @@ import java.util.Map;
 import java.util.stream.Stream;
 
 import static com.google.common.truth.Truth.assertThat;
-import static com.google.common.truth.Truth8.assertThat;
 import static io.webby.testing.TestingBasics.array;
 
-@Tags({@Tag("sql"), @Tag("slow")})
+@Tag("slow") @Tag("integration") @Tag("sql")
 public class KeyValueDbIntegrationTest {
     @RegisterExtension static final CloseAllExtension CLOSE_ALL = new CloseAllExtension();
     @RegisterExtension static final TempDirectoryExtension TEMP_DIRECTORY = new TempDirectoryExtension();
@@ -371,7 +369,7 @@ public class KeyValueDbIntegrationTest {
     }
 
     @CheckReturnValue
-    public static <K, V> @NotNull KeyValueDbSubject<K, V> assertDb(@NotNull KeyValueDb<K, V> db) {
+    private static <K, V> @NotNull KeyValueDbSubject<K, V> assertDb(@NotNull KeyValueDb<K, V> db) {
         return new KeyValueDbSubject<>(db);
     }
 
@@ -442,11 +440,11 @@ public class KeyValueDbIntegrationTest {
         settings.setProperty("db.swaydb.segment.size.bytes", 64 << 10);
         settings.setProperty("db.swaydb.appendix.flush.checkpoint.size.bytes", 1 << 10);
 
-        settings.setProperty("db.redis.port", REDIS.getPort());
+        settings.setProperty("db.redis.port", REDIS.port());
 
         if (dbType == DbType.SQL_DB) {
             settings.storageSettings().enableSql(SQL.settings());
-            return Testing.testStartup(settings, SQL::setUp, SQL.combinedTestingModule());
+            return Testing.testStartup(settings, SQL::setupTestData, SQL.combinedTestingModule());
         }
 
         return Testing.testStartup(settings);

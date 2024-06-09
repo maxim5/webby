@@ -11,7 +11,7 @@ import org.junit.jupiter.params.provider.EnumSource;
 import static com.google.common.truth.Truth.assertThat;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 
-@Tag("sql")
+@Tag("slow") @Tag("sql")
 public class UserStoreIntegrationTest extends BaseCoreIntegrationTest {
     @RegisterExtension static final SqlDbExtension SQL = SqlDbExtension.fromProperties().withManualCleanup(UserTable.META);
 

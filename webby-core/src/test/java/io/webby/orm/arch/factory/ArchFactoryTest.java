@@ -457,6 +457,73 @@ public class ArchFactoryTest {
             .usesAdapter("TupleJdbcAdapter.ADAPTER");
     }
 
+    /** Single unique field **/
+
+    @Test
+    void single_field_int_unique() {
+        record User(@Sql(unique = true) int foo) {}
+
+        assertThat(buildTableArch(User.class)).hasFields(ONLY_ORDINARY).hasSingleFieldThat("foo")
+            .isFromTable("user")
+            .hasInJava(int.class, "foo()")
+            .isSingleColumn("foo", JdbcType.Int)
+            .hasConstraints(UNIQUE.nonnull())
+            .doesNotHaveDefault()
+            .isNativelySupportedType();
+    }
+
+    @Test
+    void single_field_long_unique() {
+        record User(@Sql(unique = true) long foo) {}
+
+        assertThat(buildTableArch(User.class)).hasFields(ONLY_ORDINARY).hasSingleFieldThat("foo")
+            .isFromTable("user")
+            .hasInJava(long.class, "foo()")
+            .isSingleColumn("foo", JdbcType.Long)
+            .hasConstraints(UNIQUE.nonnull())
+            .doesNotHaveDefault()
+            .isNativelySupportedType();
+    }
+
+    @Test
+    void single_field_string_unique() {
+        record User(@Sql(unique = true) String foo) {}
+
+        assertThat(buildTableArch(User.class)).hasFields(ONLY_ORDINARY).hasSingleFieldThat("foo")
+            .isFromTable("user")
+            .hasInJava(String.class, "foo()")
+            .isSingleColumn("foo", JdbcType.String)
+            .hasConstraints(UNIQUE.nonnull())
+            .doesNotHaveDefault()
+            .isNativelySupportedType();
+    }
+
+    @Test
+    void single_field_integer_unique() {
+        record User(@Sql(unique = true) Integer foo) {}
+
+        assertThat(buildTableArch(User.class)).hasFields(ONLY_ORDINARY).hasSingleFieldThat("foo")
+            .isFromTable("user")
+            .hasInJava(Integer.class, "foo()")
+            .isSingleColumn("foo", JdbcType.Int)
+            .hasConstraints(UNIQUE.nonnull())
+            .doesNotHaveDefault()
+            .isNativelySupportedType();
+    }
+
+    @Test
+    void single_field_string_unique_shortcut_annotation() {
+        record User(@Sql.Unique String foo) {}
+
+        assertThat(buildTableArch(User.class)).hasFields(ONLY_ORDINARY).hasSingleFieldThat("foo")
+            .isFromTable("user")
+            .hasInJava(String.class, "foo()")
+            .isSingleColumn("foo", JdbcType.String)
+            .hasConstraints(UNIQUE.nonnull())
+            .doesNotHaveDefault()
+            .isNativelySupportedType();
+    }
+
     /** Invalid models **/
 
     @Test

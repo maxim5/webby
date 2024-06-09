@@ -78,10 +78,10 @@ public class TrimouRenderer implements Renderer<Mustache> {
         boolean resolverEnabled = settings.getBoolProperty("trimou.combined.index.resolver.enabled");
 
         MustacheEngineBuilder builder = MustacheEngineBuilder.newBuilder()
-                .setProperty(EngineConfigurationKey.TEMPLATE_CACHE_ENABLED, !hotReload)
-                .setProperty(EngineConfigurationKey.SKIP_VALUE_ESCAPING, skipValueEscaping)
-                .setProperty(CombinedIndexResolver.ENABLED_KEY, resolverEnabled)
-                .registerHelpers(HelpersBuilder.extra().build());
+            .setProperty(EngineConfigurationKey.TEMPLATE_CACHE_ENABLED, !hotReload)
+            .setProperty(EngineConfigurationKey.SKIP_VALUE_ESCAPING, skipValueEscaping)
+            .setProperty(CombinedIndexResolver.ENABLED_KEY, resolverEnabled)
+            .registerHelpers(HelpersBuilder.extra().build());
 
         for (Path path : viewPaths) {
             builder.addTemplateLocator(new FileSystemTemplateLocator(1, path.toString(), "trimou"));

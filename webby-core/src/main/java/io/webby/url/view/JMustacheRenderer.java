@@ -80,10 +80,10 @@ public class JMustacheRenderer implements Renderer<Template> {
         }
 
         return Mustache.compiler()
-                .escapeHTML(escapeHtml)
-                .standardsMode(standardsMode)
-                .emptyStringIsFalse(emptyStringIsFalse)
-                .zeroIsFalse(zeroIsFalse)
-                .withLoader(name -> new FileReader(viewPath.resolve(name).toFile()));
+            .escapeHTML(escapeHtml)
+            .standardsMode(standardsMode)
+            .emptyStringIsFalse(emptyStringIsFalse)
+            .zeroIsFalse(zeroIsFalse)
+            .withLoader(name -> new FileReader(viewPath.resolve(name).toFile()));
     }
 }

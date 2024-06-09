@@ -93,14 +93,14 @@ public class CallerFactory {
 
         if (instance instanceof IntHandler<?> handler && isMethodImplementsInterface(method, IntHandler.class)) {
             assertVarsMatchParams(vars, 1, method);
-            String var = vars.get(0);
+            String var = vars.getFirst();
             IntConverter validator = getConstraint(constraints, var, int.class);
             return new NativeIntCaller(handler, validator, var);
         }
 
         if (instance instanceof StringHandler<?> handler && isMethodImplementsInterface(method, StringHandler.class)) {
             assertVarsMatchParams(vars, 1, method);
-            String var = vars.get(0);
+            String var = vars.getFirst();
             Constraint<CharArray> validator = getConstraint(constraints, var, CharArray.class);
             return new NativeStringCaller(handler, validator, var);
         }
@@ -159,7 +159,7 @@ public class CallerFactory {
             }
 
             assertVarsMatchParams(vars, 1, method);
-            String var = vars.get(0);
+            String var = vars.getFirst();
 
             if (isInt(type)) {
                 IntConverter constraint = getConstraint(constraints, var, type);

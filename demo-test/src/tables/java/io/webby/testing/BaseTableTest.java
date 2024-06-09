@@ -6,10 +6,10 @@ import io.webby.orm.api.TableMeta;
 import org.jetbrains.annotations.NotNull;
 import org.junit.jupiter.api.Test;
 
-import java.util.Arrays;
 import java.util.List;
 
 import static com.google.common.truth.Truth.assertThat;
+import static org.junit.jupiter.api.Assumptions.assumeFalse;
 import static org.junit.jupiter.api.Assumptions.assumeTrue;
 
 public interface BaseTableTest<E, T extends BaseTable<E>> extends TableTestApi<E, T> {
@@ -32,7 +32,12 @@ public interface BaseTableTest<E, T extends BaseTable<E>> extends TableTestApi<E
     List<String> parseColumnNamesFromDb(@NotNull String name);
 
     default void assumeOneOfEngines(@NotNull Engine ... engines) {
-        assumeTrue(Arrays.asList(engines).contains(table().engine()),
+        assumeTrue(table().engine().isOneOf(engines),
                    "Can't run the test because engine is not supported: %s".formatted(table().engine()));
+    }
+
+    default void assumeNoneOfEngines(@NotNull Engine ... engines) {
+        assumeFalse(table().engine().isOneOf(engines),
+                    "Can't run the test because engine is not supported: %s".formatted(table().engine()));
     }
 }

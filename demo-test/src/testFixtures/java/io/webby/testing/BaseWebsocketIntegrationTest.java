@@ -20,6 +20,7 @@ import io.webby.ws.impl.AgentEndpoint;
 import io.webby.ws.impl.WebsocketRouter;
 import io.webby.ws.meta.FrameMetadata;
 import org.jetbrains.annotations.NotNull;
+import org.junit.jupiter.api.Tag;
 
 import java.lang.reflect.Constructor;
 import java.util.ArrayDeque;
@@ -29,6 +30,7 @@ import java.util.function.Consumer;
 import static io.webby.util.base.EasyCast.castAny;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 
+@Tag("integration")
 public class BaseWebsocketIntegrationTest extends BaseChannelTest {
     protected <T> @NotNull WebsocketSetup<T> testSetup(@NotNull Class<T> klass) {
         return testSetup(klass, settings -> {});

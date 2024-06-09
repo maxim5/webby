@@ -27,7 +27,7 @@ import static io.webby.testing.AssertPrimitives.assertMap;
 import static io.webby.testing.TestingPrimitives.ints;
 import static io.webby.testing.TestingPrimitives.newIntObjectMap;
 
-@Tag("sql")
+@Tag("slow") @Tag("integration") @Tag("sql")
 public class TableVotingStorageIntegrationTest {
     @RegisterExtension static final SqlDbExtension SQL = SqlDbExtension.fromProperties().withManualCleanup(UserRateModelTable.META);
     @RegisterExtension static final FluentLoggingCapture LOGGING = new FluentLoggingCapture(Consistency.class);

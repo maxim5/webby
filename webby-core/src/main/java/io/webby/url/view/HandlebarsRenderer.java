@@ -80,10 +80,10 @@ public class HandlebarsRenderer implements Renderer<Template> {
     private @NotNull Handlebars createDefault() {
         String suffix = settings.getProperty("handlebars.filename.suffix", TemplateLoader.DEFAULT_SUFFIX);
         TemplateLoader[] loaders = settings.viewPaths()
-                .stream()
-                .map(Path::toFile)
-                .map(file -> new FileTemplateLoader(file, suffix))
-                .toArray(TemplateLoader[]::new);
+            .stream()
+            .map(Path::toFile)
+            .map(file -> new FileTemplateLoader(file, suffix))
+            .toArray(TemplateLoader[]::new);
         TemplateLoader templateLoader = loaders.length == 1 ? loaders[0] : new CompositeTemplateLoader(loaders);
 
         String type = settings.getProperty("handlebars.cache.type", "HighConcurrency");
