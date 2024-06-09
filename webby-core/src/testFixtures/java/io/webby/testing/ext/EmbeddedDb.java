@@ -16,7 +16,7 @@ public interface EmbeddedDb extends AutoCloseable {
     static @NotNull EmbeddedDb getDb(@NotNull SqlSettings settings) {
         return switch (settings.engine()) {
             case MariaDB -> new EmbeddedMariaDbServer(settings);
-            case SQLite, H2 -> new EmbeddedDb() {
+            case SQLite, H2, MySQL -> new EmbeddedDb() {
                 @Override
                 public @NotNull EmbeddedDb startup() {
                     return this;
