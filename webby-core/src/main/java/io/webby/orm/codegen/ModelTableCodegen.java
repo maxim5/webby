@@ -17,7 +17,6 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
-import java.util.function.Predicate;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
@@ -672,7 +671,7 @@ public class ModelTableCodegen extends BaseCodegen {
         }
 
         Snippet query = new InsertMaker(InsertMaker.Ignore.DEFAULT)
-            .make(table, table.columns(Predicate.not(TableField::isPrimaryKey)));
+            .make(table, table.columns(TableField::isNotPrimaryKey));
         Map<String, String> context = Map.of(
             "$sql_query_literal", wrapAsStringLiteral(query).joinLines(INDENT2)
         );
@@ -695,7 +694,7 @@ public class ModelTableCodegen extends BaseCodegen {
             return;
         }
 
-        List<TableField> nonPrimary = table.fields().stream().filter(Predicate.not(TableField::isPrimaryKey)).toList();
+        List<TableField> nonPrimary = table.fields().stream().filter(TableField::isNotPrimaryKey).toList();
         ValuesArrayMaker maker = new ValuesArrayMaker("$model_param", nonPrimary);
         Map<String, String> context = Map.of(
             "$array_init", maker.makeInitValues().join(linesJoiner(INDENT2)),
@@ -715,7 +714,7 @@ public class ModelTableCodegen extends BaseCodegen {
 
     private void updateWhere() {
         Snippet query = new Snippet()
-            .withLines(UpdateMaker.make(table, table.columns(Predicate.not(TableField::isPrimaryKey))));
+            .withLines(UpdateMaker.make(table, table.columns(TableField::isNotPrimaryKey)));
         Map<String, String> context = EasyMaps.asMap(
             "$sql_query_literal", wrapAsStringLiteral(query).joinLines(INDENT2)
         );
@@ -735,7 +734,7 @@ public class ModelTableCodegen extends BaseCodegen {
     }
 
     private void valuesForUpdateWhere() {
-        List<TableField> nonPrimary = table.fields().stream().filter(Predicate.not(TableField::isPrimaryKey)).toList();
+        List<TableField> nonPrimary = table.fields().stream().filter(TableField::isNotPrimaryKey).toList();
         ValuesArrayMaker maker = new ValuesArrayMaker("$model_param", nonPrimary);
         Map<String, String> context = Map.of(
             "$array_init", maker.makeInitValues().join(linesJoiner(INDENT2)),
@@ -770,7 +769,7 @@ public class ModelTableCodegen extends BaseCodegen {
         }
 
         Snippet query = new Snippet()
-            .withLines(UpdateMaker.make(table, table.columns(Predicate.not(TableField::isPrimaryKey))))
+            .withLines(UpdateMaker.make(table, table.columns(TableField::isNotPrimaryKey)))
             .withLines(WhereMaker.makeForPrimaryColumns(table));
         Map<String, String> context = EasyMaps.asMap(
             "$sql_query_literal", wrapAsStringLiteral(query).joinLines(INDENT2)
@@ -795,7 +794,7 @@ public class ModelTableCodegen extends BaseCodegen {
         }
 
         List<TableField> primary = table.fields().stream().filter(TableField::isPrimaryKey).toList();
-        List<TableField> nonPrimary = table.fields().stream().filter(Predicate.not(TableField::isPrimaryKey)).toList();
+        List<TableField> nonPrimary = table.fields().stream().filter(TableField::isNotPrimaryKey).toList();
         ValuesArrayMaker maker = new ValuesArrayMaker("$model_param", Iterables.concat(nonPrimary, primary));
         Map<String, String> context = Map.of(
             "$array_init", maker.makeInitValues().join(linesJoiner(INDENT2)),
@@ -885,7 +884,7 @@ public class ModelTableCodegen extends BaseCodegen {
 
     private void updateWhereBatch() {
         Snippet query = new Snippet()
-            .withLines(UpdateMaker.make(table, table.columns(Predicate.not(TableField::isPrimaryKey))));
+            .withLines(UpdateMaker.make(table, table.columns(TableField::isNotPrimaryKey)));
         Map<String, String> context = EasyMaps.asMap(
             "$sql_query_literal", wrapAsStringLiteral(query).joinLines(INDENT2)
         );

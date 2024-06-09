@@ -61,6 +61,10 @@ public abstract class TableField implements HasColumns, HasPrefixedColumns {
         return primaryKey;
     }
 
+    public boolean isNotPrimaryKey() {
+        return !primaryKey;
+    }
+
     public boolean isUnique() {
         return unique;
     }
