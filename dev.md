@@ -30,3 +30,11 @@ After this `Ctrl-F9` in IJ should work normally.
 Install Microsoft Visual C++ 2010 Redistributable package. Sources: \
 https://github.com/fusesource/leveldbjni/issues/80 \
 https://github.com/fusesource/leveldbjni/issues/41
+
+## MySQL Shell Tips
+
+- `\connect localhost:3306`
+- `\sql`
+- `CREATE USER 'test'@'localhost';`
+- `CREATE DATABASE test;`
+- `GRANT ALL PRIVILEGES ON test.* To 'test'@'localhost';`
