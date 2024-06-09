@@ -4,6 +4,7 @@
       <w>appenders</w>
       <w>bytebuf</w>
       <w>closeables</w>
+      <w>creds</w>
       <w>decl</w>
       <w>delim</w>
       <w>deps</w>
@@ -31,6 +32,7 @@
       <w>savepoints</w>
       <w>skippable</w>
       <w>substr</w>
+      <w>teardown</w>
       <w>trimou</w>
       <w>tupl</w>
     </words>
