@@ -92,6 +92,18 @@ public class EasyPrimitives {
     }
 
     @Pure
+    public static int requirePositive(int val) {
+        assert val > 0 : "Value must be positive: " + val;
+        return val;
+    }
+
+    @Pure
+    public static int requireNonNegative(int val) {
+        assert val >= 0 : "Value must be non-negative: " + val;
+        return val;
+    }
+
+    @Pure
     public static int parseIntSafe(@Nullable CharSequence val, int def) {
         try {
             return val != null ? Integer.parseInt(val, 0, val.length(), 10) : def;
