@@ -28,7 +28,7 @@ public class EmbeddedRedisExtension implements BeforeAllCallback, AfterAllCallba
 
     @Override
     public void beforeAll(ExtensionContext context) {
-        log.at(Level.INFO).log("Starting embedded Redis server at %d...", getPort());
+        log.at(Level.INFO).log("Starting embedded Redis server at %d...", port());
         redisServer.start();
     }
 
@@ -38,7 +38,7 @@ public class EmbeddedRedisExtension implements BeforeAllCallback, AfterAllCallba
         redisServer.stop();
     }
 
-    public int getPort() {
+    public int port() {
         return redisServer.ports().get(0);
     }
 }
