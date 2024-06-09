@@ -6,7 +6,7 @@ package io.webby.db.managed;
 public enum ClearCacheMode {
     /**
      * Means that complete cache purge is expected.
-     * The internal cache used by the storage systems must be clean.
+     * All internal caches used by the storage systems must be clean, i.e. everything is persisted.
      */
     FORCE_CLEAR_ALL,
     /**
