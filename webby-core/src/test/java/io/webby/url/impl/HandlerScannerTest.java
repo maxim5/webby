@@ -44,8 +44,7 @@ public class HandlerScannerTest {
     @Test
     public void isHandlerClass_serve_class_get_method_matches() {
         @Serve interface Foo {
-            @GET
-            void foo();
+            @GET void foo();
         }
 
         assertThat(isHandlerClassDefault(Foo.class)).isTrue();
@@ -63,8 +62,7 @@ public class HandlerScannerTest {
     @Test
     public void isHandlerClass_only_post_method_matches() {
         interface Foo {
-            @POST
-            void foo();
+            @POST void foo();
         }
 
         assertThat(isHandlerClassDefault(Foo.class)).isTrue();
@@ -73,8 +71,7 @@ public class HandlerScannerTest {
     @Test
     public void isHandlerClass_only_call_method_matches() {
         interface Foo {
-            @Call
-            void foo();
+            @Call void foo();
         }
 
         assertThat(isHandlerClassDefault(Foo.class)).isTrue();

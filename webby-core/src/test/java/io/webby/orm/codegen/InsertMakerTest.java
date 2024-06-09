@@ -10,26 +10,6 @@ import static io.webby.orm.codegen.AssertSnippet.assertThatSql;
 
 public class InsertMakerTest {
     @Test
-    public void make_two_columns() {
-        record User(int userId, String name) {}
-
-        TableArch tableArch = buildTableArch(User.class);
-
-        assertThatSql(new InsertMaker(Ignore.DEFAULT).makeAll(tableArch)).matches("""
-            INSERT INTO user (user_id, name)
-            VALUES (?, ?)
-            """);
-        assertThatSql(new InsertMaker(Ignore.IGNORE).makeAll(tableArch)).matches("""
-            INSERT IGNORE INTO user (user_id, name)
-            VALUES (?, ?)
-            """);
-        assertThatSql(new InsertMaker(Ignore.OR_IGNORE).makeAll(tableArch)).matches("""
-            INSERT OR IGNORE INTO user (user_id, name)
-            VALUES (?, ?)
-            """);
-    }
-
-    @Test
     public void make_one_column() {
         record User(boolean value) {}
 
@@ -46,6 +26,26 @@ public class InsertMakerTest {
         assertThatSql(new InsertMaker(Ignore.OR_IGNORE).makeAll(tableArch)).matches("""
             INSERT OR IGNORE INTO user (value)
             VALUES (?)
+            """);
+    }
+
+    @Test
+    public void make_two_columns() {
+        record User(int userId, String name) {}
+
+        TableArch tableArch = buildTableArch(User.class);
+
+        assertThatSql(new InsertMaker(Ignore.DEFAULT).makeAll(tableArch)).matches("""
+            INSERT INTO user (user_id, name)
+            VALUES (?, ?)
+            """);
+        assertThatSql(new InsertMaker(Ignore.IGNORE).makeAll(tableArch)).matches("""
+            INSERT IGNORE INTO user (user_id, name)
+            VALUES (?, ?)
+            """);
+        assertThatSql(new InsertMaker(Ignore.OR_IGNORE).makeAll(tableArch)).matches("""
+            INSERT OR IGNORE INTO user (user_id, name)
+            VALUES (?, ?)
             """);
     }
 }
