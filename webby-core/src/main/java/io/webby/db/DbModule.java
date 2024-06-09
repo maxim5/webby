@@ -3,7 +3,7 @@ package io.webby.db;
 import com.google.inject.AbstractModule;
 import io.webby.app.AppSettings;
 import io.webby.common.InjectorHelper;
-import io.webby.db.cache.BackgroundCacheCleaner;
+import io.webby.db.managed.BackgroundCacheCleaner;
 import io.webby.db.codec.CodecProvider;
 import io.webby.db.content.FileSystemStorage;
 import io.webby.db.content.StableFingerprint;

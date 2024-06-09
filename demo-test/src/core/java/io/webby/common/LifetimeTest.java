@@ -2,7 +2,7 @@ package io.webby.common;
 
 import com.google.common.collect.Lists;
 import io.webby.app.AppSettings;
-import io.webby.db.cache.BackgroundCacheCleaner;
+import io.webby.db.managed.BackgroundCacheCleaner;
 import io.webby.db.kv.KeyValueSettings;
 import io.webby.db.sql.ConnectionPool;
 import io.webby.db.sql.SqlSettings;

@@ -6,8 +6,8 @@ import com.carrotsearch.hppc.IntIntMap;
 import com.google.common.eventbus.EventBus;
 import com.google.common.eventbus.Subscribe;
 import io.webby.db.DbReadyEvent;
-import io.webby.db.cache.FlushMode;
-import io.webby.db.cache.HasCache;
+import io.webby.db.managed.FlushMode;
+import io.webby.db.managed.HasCache;
 import io.webby.util.hppc.EasyHppc;
 import org.jetbrains.annotations.NotNull;
 
@@ -15,6 +15,13 @@ import javax.annotation.concurrent.ThreadSafe;
 import java.util.concurrent.locks.ReadWriteLock;
 import java.util.concurrent.locks.ReentrantReadWriteLock;
 
+/**
+ * An {@link IntCounter} implementation based on a global read-write lock.
+ * <p>
+ * Always returns exact counts, batch methods always return a consistent view.
+ * <p>
+ * The implementation uses an in-memory cache and a persistent storage.
+ */
 @ThreadSafe
 public class LockBasedIntCounter implements IntCounter, HasCache<IntIntMap> {
     private final ReadWriteLock LOCK = new ReentrantReadWriteLock();

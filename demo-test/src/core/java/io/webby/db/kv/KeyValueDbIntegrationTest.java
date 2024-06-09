@@ -41,10 +41,10 @@ import static io.webby.testing.TestingBasics.array;
 
 @Tag("slow") @Tag("integration") @Tag("sql")
 public class KeyValueDbIntegrationTest {
-    @RegisterExtension static final CloseAllExtension CLOSE_ALL = new CloseAllExtension();
-    @RegisterExtension static final TempDirectoryExtension TEMP_DIRECTORY = new TempDirectoryExtension();
-    @RegisterExtension static final EmbeddedRedisExtension REDIS = new EmbeddedRedisExtension();
-    @RegisterExtension static final SqlDbExtension SQL = SqlDbExtension.fromProperties().withSavepoints();
+    @RegisterExtension private static final CloseAllExtension CLOSE_ALL = new CloseAllExtension();
+    @RegisterExtension private static final TempDirectoryExtension TEMP_DIRECTORY = new TempDirectoryExtension();
+    @RegisterExtension private static final EmbeddedRedisExtension REDIS = new EmbeddedRedisExtension();
+    @RegisterExtension private static final SqlDbExtension SQL = SqlDbExtension.fromProperties().withSavepoints();
 
     @ParameterizedTest
     @EnumSource(DbType.class)

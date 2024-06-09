@@ -1,4 +1,4 @@
-package io.webby.db.cache;
+package io.webby.db.managed;
 
 import com.google.common.flogger.FluentLogger;
 import com.google.inject.Inject;
@@ -18,7 +18,7 @@ public class BackgroundCacheCleaner {
     private static final long SOFT_CLEAN_TIMEOUT_SEC = TimeUnit.HOURS.toSeconds(1);
     private static final long HARD_CLEAN_TIMEOUT_MILLIS = TimeUnit.HOURS.toMillis(12);
 
-    private final ConcurrentMap<String, Persistable> caches = new ConcurrentHashMap<>();
+    private final ConcurrentMap<String, ManagedPersistent> caches = new ConcurrentHashMap<>();
     private final AtomicBoolean cleanInProgress = new AtomicBoolean();
     private final AtomicLong lastHardClean = new AtomicLong(System.currentTimeMillis());
 
@@ -29,7 +29,7 @@ public class BackgroundCacheCleaner {
         lifetime.onTerminate(executor::shutdown);
     }
 
-    public void register(@NotNull String name, @NotNull Persistable cache) {
+    public void register(@NotNull String name, @NotNull ManagedPersistent cache) {
         assert !caches.containsKey(name) : "Cache already exists: " + name;
         caches.put(name, cache);
     }
@@ -48,9 +48,9 @@ public class BackgroundCacheCleaner {
         FlushMode mode = sinceLastHardClean < HARD_CLEAN_TIMEOUT_MILLIS ? FlushMode.INCREMENTAL : FlushMode.FULL_COMPACT;
 
         try {
-            for (Map.Entry<String, Persistable> entry : caches.entrySet()) {
+            for (Map.Entry<String, ManagedPersistent> entry : caches.entrySet()) {
                 String name = entry.getKey();
-                Persistable cache = entry.getValue();
+                ManagedPersistent cache = entry.getValue();
                 log.at(Level.INFO).log("Flushing cache=`%s` mode=`%s`...", name, mode);
                 try {
                     cache.flush(mode);

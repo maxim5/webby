@@ -5,7 +5,7 @@ import com.google.inject.Inject;
 import com.google.inject.Provider;
 import io.webby.app.Settings;
 import io.webby.common.Lifetime;
-import io.webby.db.cache.BackgroundCacheCleaner;
+import io.webby.db.managed.BackgroundCacheCleaner;
 import io.webby.db.kv.DbOptions;
 import io.webby.db.kv.KeyValueFactory;
 import io.webby.db.sql.TableManager;

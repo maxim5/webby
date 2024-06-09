@@ -31,7 +31,7 @@ public class StandaloneNettyIntegrationTest {
     private static final FluentLogger log = FluentLogger.forEnclosingClass();
 
     private static final AppSettings SETTINGS = createSettingsForTest();
-    @RegisterExtension static final StandaloneNettyExtension STANDALONE = new StandaloneNettyExtension(SETTINGS);
+    @RegisterExtension private static final StandaloneNettyExtension STANDALONE = new StandaloneNettyExtension(SETTINGS);
     private static final OkRequests Ok = OkRequests.ofLocalhost(STANDALONE.port());
 
     @Test
