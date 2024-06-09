@@ -318,14 +318,14 @@ public class SelectQueryTest {
             .aggregate(COUNT.apply(PersonColumn.id))
             .where(Where.of(PersonColumn.sex.bool()))
             .groupBy(PersonColumn.name)
-            .orderBy(OrderBy.of(PersonColumn.id, Order.ASC))
+            .orderBy(OrderBy.of(PersonColumn.name, Order.ASC))
             .build();
         assertQuery(query).matches("""
             SELECT name, count(id)
             FROM person
             WHERE sex
             GROUP BY name
-            ORDER BY id ASC
+            ORDER BY name ASC
             """);
         assertQuery(query).containsNoArgs();
         assertRows(SQL.runQuery(query)).containsExactly(
