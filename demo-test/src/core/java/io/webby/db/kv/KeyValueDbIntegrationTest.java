@@ -440,11 +440,11 @@ public class KeyValueDbIntegrationTest {
         settings.setProperty("db.swaydb.segment.size.bytes", 64 << 10);
         settings.setProperty("db.swaydb.appendix.flush.checkpoint.size.bytes", 1 << 10);
 
-        settings.setProperty("db.redis.port", REDIS.getPort());
+        settings.setProperty("db.redis.port", REDIS.port());
 
         if (dbType == DbType.SQL_DB) {
             settings.storageSettings().enableSql(SQL.settings());
-            return Testing.testStartup(settings, SQL::setUp, SQL.combinedTestingModule());
+            return Testing.testStartup(settings, SQL::setupTestData, SQL.combinedTestingModule());
         }
 
         return Testing.testStartup(settings);

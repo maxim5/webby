@@ -108,7 +108,7 @@ public class CompositeFilter extends Unit implements Filter {
                 with(Offset.of(pagination.offset()));
             }
             switch (engine) {
-                case H2, MySQL, PostgreSQL, SQLite -> with(Limit.of(pagination.limit()));
+                case H2, MySQL, MariaDB, PostgreSQL, SQLite -> with(Limit.of(pagination.limit()));
                 case MsSqlServer, Oracle -> with(FetchOnly.of(pagination.limit()));
             }
             return this;
