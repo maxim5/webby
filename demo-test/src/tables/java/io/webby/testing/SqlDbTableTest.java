@@ -19,7 +19,7 @@ import static org.junit.jupiter.api.Assertions.assertFalse;
 
 @Tag("sql")
 public abstract class SqlDbTableTest<E, T extends BaseTable<E>> implements BaseTableTest<E, T> {
-    @RegisterExtension private final SqlDbExtension SQL = SqlDbExtension.fromProperties().withSavepoints();
+    @RegisterExtension private static final SqlDbExtension SQL = SqlDbExtension.fromProperties().withSavepoints();
 
     protected T table;
 
@@ -31,7 +31,7 @@ public abstract class SqlDbTableTest<E, T extends BaseTable<E>> implements BaseT
     @BeforeEach
     void setUp() throws Exception {
         setUp(connector());
-        SQL.setUp();
+        SQL.setupTestData();
         fillUp(connector());
     }
 
@@ -59,7 +59,7 @@ public abstract class SqlDbTableTest<E, T extends BaseTable<E>> implements BaseT
                     .map(line -> line.replaceFirst("(\\w+) .*", "$1"))
                     .toList();
             }
-            case H2, MySQL -> SQL.runQuery("SHOW COLUMNS FROM " + name).stream()
+            case H2, MySQL, MariaDB -> SQL.runQuery("SHOW COLUMNS FROM " + name).stream()
                     .map(row -> row.getValueAt(0))
                     .map(DebugSql.RowValue::strValue)
                     .map(String::toLowerCase)

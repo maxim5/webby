@@ -14,31 +14,37 @@ import io.webby.orm.api.query.DropTableQuery;
 import io.webby.orm.api.query.TruncateTableQuery;
 import io.webby.testing.TestingModules;
 import io.webby.testing.TestingProps;
+import io.webby.util.base.Unchecked;
 import io.webby.util.base.Unchecked.Runnables;
-import io.webby.util.collect.OneOf;
+import io.webby.util.lazy.AtomicLazyRecycle;
+import io.webby.util.lazy.LazyRecycle;
 import org.jetbrains.annotations.NotNull;
-import org.junit.jupiter.api.extension.AfterAllCallback;
-import org.junit.jupiter.api.extension.AfterEachCallback;
-import org.junit.jupiter.api.extension.BeforeEachCallback;
-import org.junit.jupiter.api.extension.ExtensionContext;
+import org.jetbrains.annotations.Nullable;
+import org.junit.jupiter.api.extension.*;
 
 import java.sql.Connection;
+import java.sql.SQLException;
 import java.sql.Savepoint;
 import java.util.List;
+import java.util.function.Supplier;
 import java.util.logging.Level;
 
-public class SqlDbExtension implements AfterAllCallback, BeforeEachCallback, AfterEachCallback, Connector, DebugRunner {
+import static java.util.Objects.requireNonNull;
+
+public class SqlDbExtension implements BeforeAllCallback, AfterAllCallback,
+                                       BeforeEachCallback, AfterEachCallback,
+                                       Connector, DebugRunner {
     private static final FluentLogger log = FluentLogger.forEnclosingClass();
 
     private final SqlSettings settings;
-    private final Connection connection;
-    private OneOf<SavepointHandler, ManualTablesHandler> handler;
+    private final LazyRecycle<EmbeddedDb> embeddedDb = AtomicLazyRecycle.createUninitialized();
+    private final ConnectionWrapper connection;
+    private TestDataHandler testDataHandler;
 
-    public SqlDbExtension(@NotNull SqlSettings settings) {
-        this.settings = settings;
-        this.connection = SqlSettings.connect(settings);
-        this.handler = OneOf.ofFirst(new SavepointHandler(connection));
-        log.at(Level.FINE).log("[SQL] Connection opened: %s", settings.url());
+    private SqlDbExtension(@NotNull SqlSettings rawSettings) {
+        this.settings = LocalPortResolver.tryResolveSqlSettings(rawSettings);
+        this.connection = new ConnectionWrapper(settings);
+        this.testDataHandler = new SavepointHandler(this::connection);
     }
 
     public static @NotNull SqlDbExtension from(@NotNull SqlSettings settings) {
@@ -50,38 +56,86 @@ public class SqlDbExtension implements AfterAllCallback, BeforeEachCallback, Aft
     }
 
     public @NotNull SqlDbExtension withSavepoints() {
-        handler = OneOf.ofFirst(new SavepointHandler(connection));
+        testDataHandler = new SavepointHandler(this::connection);
         return this;
     }
 
     public @NotNull SqlDbExtension withManualCleanup(@NotNull TableMeta @NotNull ... tables) {
-        handler = OneOf.ofSecond(new ManualTablesHandler(this, List.of(tables)));
+        testDataHandler = new ManualTablesHandler(this, List.of(tables));
         return this;
     }
 
+    // JUnit 5 Lifecycle
+
     @Override
-    public void afterAll(ExtensionContext context) throws Exception {
-        log.at(Level.FINE).log("[SQL] Connection close");
-        connection.close();
+    public void beforeAll(ExtensionContext context) {
+        embeddedDb.initializeOrDie(EmbeddedDb.getDb(settings).startup());
+    }
+
+    @Override
+    public void afterAll(ExtensionContext context) {
+        connection.disconnect();
+        embeddedDb.recycle(EmbeddedDb::shutdown);
     }
 
     @Override
     public void beforeEach(ExtensionContext context) {
-        setUp();
+        connection.connect();
+        setupTestData();
     }
 
     @Override
     public void afterEach(ExtensionContext context) {
-        tearDown();
+        teardownTestData();
+        connection.disconnect();
     }
 
-    public void setUp() {
-        handler.apply(SavepointHandler::savepoint, ManualTablesHandler::prepare);
+    // Connection
+
+    private static class ConnectionWrapper {
+        private final SqlSettings settings;
+        private @Nullable Connection connection;
+
+        public ConnectionWrapper(@NotNull SqlSettings settings) {
+            this.settings = settings;
+            this.connection = null;
+        }
+
+        public @NotNull Connection current() {
+            return requireNonNull(connection);
+        }
+
+        public void connect() {
+            if (connection != null) {
+                disconnect(connection);
+            }
+            connection = connect(settings);
+        }
+
+        public void disconnect() {
+            if (connection != null) {
+                disconnect(connection);
+                connection = null;
+            }
+        }
+
+        private static @NotNull Connection connect(@NotNull SqlSettings settings) {
+            Connection connection = SqlSettings.connectNotForProduction(settings);
+            log.at(Level.FINE).log("[SQL] Connection opened: %s", settings.url());
+            return connection;
+        }
+
+        private static void disconnect(@NotNull Connection connection) {
+            try {
+                connection.close();
+                log.at(Level.FINE).log("[SQL] Connection close");
+            } catch (SQLException e) {
+                Unchecked.rethrow(e);
+            }
+        }
     }
 
-    public void tearDown() {
-        handler.apply(SavepointHandler::rollback, ManualTablesHandler::cleanup);
-    }
+    // External API once connected
 
     public @NotNull SqlSettings settings() {
         return settings;
@@ -89,23 +143,23 @@ public class SqlDbExtension implements AfterAllCallback, BeforeEachCallback, Aft
 
     @Override
     public @NotNull Connection connection() {
-        return connection;
+        return connection.current();
     }
 
     @Override
     public @NotNull Engine engine() {
-        return settings.engine();
+        return settings().engine();
     }
 
-    public @NotNull ConnectionPool singleConnectionPool() {
+    private @NotNull ConnectionPool singleConnectionPool() {
         return new ConnectionPool() {
             @Override
             public @NotNull Connection getConnection() {
-                return connection;
+                return connection();
             }
             @Override
             public @NotNull Engine engine() {
-                return settings.engine();
+                return settings().engine();
             }
             @Override
             public boolean isRunning() {
@@ -122,37 +176,73 @@ public class SqlDbExtension implements AfterAllCallback, BeforeEachCallback, Aft
         return Modules.combine(singleConnectionPoolModule(), TestingModules.PERSISTENT_DB_CLEANER_MODULE);
     }
 
-    private static class SavepointHandler {
-        private final Connection connection;
+    // Test Data Handler
+
+    public void setupTestData() {
+        testDataHandler.setup();
+    }
+
+    public void teardownTestData() {
+        testDataHandler.teardown();
+    }
+
+    private interface TestDataHandler {
+        void setup();
+        void teardown();
+    }
+
+    private static class SavepointHandler implements TestDataHandler {
+        private final Supplier<Connection> connection;
         private Savepoint savepoint;
 
-        public SavepointHandler(@NotNull Connection connection) {
+        public SavepointHandler(@NotNull Supplier<Connection> connection) {
             this.connection = connection;
         }
 
-        public void savepoint() {
+        @Override
+        public void setup() {
+            savepoint();
+        }
+
+        @Override
+        public void teardown() {
+            rollback();
+        }
+
+        private void savepoint() {
             Runnables.runRethrow(() -> {
                 log.at(Level.FINE).log("[SQL] Set savepoint");
-                connection.setAutoCommit(false);
-                savepoint = connection.setSavepoint("save");
+                connection.get().setAutoCommit(false);
+                savepoint = connection.get().setSavepoint("save");
             });
         }
 
-        public void rollback() {
+        private void rollback() {
             Runnables.runRethrow(() -> {
                 if (savepoint != null) {
                     log.at(Level.FINE).log("[SQL] Rollback to savepoint");
-                    connection.rollback(savepoint);
-                    connection.releaseSavepoint(savepoint);
+                    connection.get().rollback(savepoint);
+                    connection.get().releaseSavepoint(savepoint);
                     savepoint = null;
-                    connection.setAutoCommit(true);
+                    connection.get().setAutoCommit(true);
                 }
             });
         }
     }
 
-    private record ManualTablesHandler(@NotNull Connector connector, @NotNull List<TableMeta> tables) {
-        public void prepare() {
+    private record ManualTablesHandler(@NotNull Connector connector,
+                                       @NotNull List<TableMeta> tables) implements TestDataHandler {
+        @Override
+        public void setup() {
+            prepare();
+        }
+
+        @Override
+        public void teardown() {
+            cleanup();
+        }
+
+        private void prepare() {
             connector.runner().adminTx().run(admin -> {
                 for (TableMeta table : tables) {
                     admin.ignoringForeignKeyChecks().dropTable(DropTableQuery.of(table).ifExists().cascade());
@@ -161,7 +251,7 @@ public class SqlDbExtension implements AfterAllCallback, BeforeEachCallback, Aft
             });
         }
 
-        public void cleanup() {
+        private void cleanup() {
             connector.runner().adminTx().run(admin -> {
                 for (TableMeta table : tables) {
                     admin.ignoringForeignKeyChecks().truncateTable(TruncateTableQuery.of(table));
