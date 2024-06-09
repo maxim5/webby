@@ -17,34 +17,42 @@ public class FastFormat {
         return new FastFormat(pattern);
     }
 
+    @Pure
     public @NotNull String formatted(@Nullable Object arg) {
         return format(pattern, arg);
     }
 
+    @Pure
     public @NotNull String formatted(int arg) {
         return format(pattern, arg);
     }
 
+    @Pure
     public @NotNull String formatted(long arg) {
         return format(pattern, arg);
     }
 
+    @Pure
     public @NotNull String formatted(boolean arg) {
         return format(pattern, arg);
     }
 
+    @Pure
     public static @NotNull String format(@NotNull String pattern, @Nullable Object arg) {
         return pattern.replace("%s", String.valueOf(arg));
     }
 
+    @Pure
     public static @NotNull String format(@NotNull String pattern, int arg) {
         return pattern.replace("%s", Integer.toString(arg));
     }
 
+    @Pure
     public static @NotNull String format(@NotNull String pattern, long arg) {
         return pattern.replace("%s", Long.toString(arg));
     }
 
+    @Pure
     public static @NotNull String format(@NotNull String pattern, boolean arg) {
         return pattern.replace("%s", Boolean.toString(arg));
     }

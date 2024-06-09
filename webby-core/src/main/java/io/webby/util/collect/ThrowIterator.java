@@ -6,6 +6,10 @@ import java.util.Iterator;
 
 import static io.webby.util.base.Unchecked.*;
 
+/**
+ * Same as {@link Iterator} but allows to throw check exceptions during iteration.
+ * Also adapts to {@link Iterator} API but converting checked exceptions into unchecked.
+ */
 public interface ThrowIterator<T, E extends Throwable> extends Iterator<T> {
     boolean hasNextThrow() throws E;
 
