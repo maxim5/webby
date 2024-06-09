@@ -49,7 +49,7 @@ public class AgentLifecycleFanOut implements AgentLifecycle {
         if (delegates.isEmpty()) {
             return new AgentLifecycleAdapter();
         } else if (delegates.size() == 1) {
-            return delegates.get(0);
+            return delegates.getFirst();
         } else {
             return new AgentLifecycleFanOut(delegates);
         }

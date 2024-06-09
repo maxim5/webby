@@ -25,7 +25,7 @@ public class AssertBasics {
                                                         field -> field.getName().equals(name),
                                                         ReflectionUtils.HierarchyTraversalMode.BOTTOM_UP);
         assertThat(fields).hasSize(1);
-        Field field = fields.get(0);
+        Field field = fields.getFirst();
         field.setAccessible(true);
         return Unchecked.Suppliers.rethrow(() -> field.get(object)).get();
     }

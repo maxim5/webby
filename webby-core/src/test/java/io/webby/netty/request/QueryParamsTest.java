@@ -326,7 +326,7 @@ public class QueryParamsTest {
             String key = entry.getKey();
             List<String> value = entry.getValue();
             assertThat(params.contains(key)).isTrue();
-            assertThat(params.getOrNull(key)).isEqualTo(value.get(0));
+            assertThat(params.getOrNull(key)).isEqualTo(value.getFirst());
             assertThat(params.getAll(key)).isEqualTo(value);
 
             String altKey = "anti-%s!".formatted(key);

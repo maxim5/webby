@@ -32,7 +32,7 @@ public class RowListTabular<T, R> implements Tabular<T> {
 
     @Override
     public int columns() {
-        return rows.isEmpty() ? 0 : rowToCol.apply(rows.get(0)).size();
+        return rows.isEmpty() ? 0 : rowToCol.apply(rows.getFirst()).size();
     }
 
     @Override

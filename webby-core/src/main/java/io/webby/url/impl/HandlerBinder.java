@@ -106,7 +106,8 @@ public class HandlerBinder {
     }
 
     @VisibleForTesting
-    @NotNull List<Binding> getBindings(@NotNull Iterable<? extends Class<?>> handlerClasses) {
+    @NotNull
+    List<Binding> getBindings(@NotNull Iterable<? extends Class<?>> handlerClasses) {
         try {
             return TimeIt.timeItOrDie(
                 () -> {
@@ -149,8 +150,8 @@ public class HandlerBinder {
 
             for (Method method : klass.getDeclaredMethods()) {
                 Marshal in = method.getParameterCount() > 0 ?
-                        getMarshalFromAnnotations(method.getParameters()[method.getParameterCount() - 1], classIn) :
-                        null;
+                    getMarshalFromAnnotations(method.getParameters()[method.getParameterCount() - 1], classIn) :
+                    null;
                 Marshal out = getMarshalFromAnnotations(method, classOut);
                 EndpointHttp http = getEndpointHttpFromAnnotation(method).mergeWithDefault(classHttp);
                 EndpointView<?> view = getEndpointViewFromAnnotation(method, classRender);
@@ -205,21 +206,21 @@ public class HandlerBinder {
                     Class<?> klass = method.getDeclaringClass();
                     Object instance = handlersCache.computeIfAbsent(klass, key -> injector.getInstance(klass));
                     Map<String, Constraint<?>> compute = constraintsCache
-                            .computeIfAbsent(klass, key -> extractConstraints(klass, instance));
+                        .computeIfAbsent(klass, key -> extractConstraints(klass, instance));
                     EndpointContext context = new EndpointContext(compute, false, isVoid(method));
 
                     List<String> vars = parser.parse(binding.url())
-                            .stream()
-                            .map(token -> token instanceof Variable var ? var.name() : null)
-                            .filter(Objects::nonNull)
-                            .toList();
+                        .stream()
+                        .map(token -> token instanceof Variable var ? var.name() : null)
+                        .filter(Objects::nonNull)
+                        .toList();
 
                     Caller caller = callerFactory.create(instance, binding, context.constraints(), vars);
                     return SingleRouteEndpoint.fromBinding(binding, caller, context);
                 }).toList();
 
                 String url = group.stream().map(Binding::url).findFirst().orElseThrow();
-                RouteEndpoint endpoint = endpoints.size() == 1 ? endpoints.get(0) : MultiRouteEndpoint.fromEndpoints(endpoints);
+                RouteEndpoint endpoint = endpoints.size() == 1 ? endpoints.getFirst() : MultiRouteEndpoint.fromEndpoints(endpoints);
                 consumer.accept(url, endpoint);
             });
         } catch (ConfigurationException e) {
@@ -251,14 +252,14 @@ public class HandlerBinder {
                     log.at(Level.FINE).log("Recognized a constraint for %s variable", var);
                 } else {
                     log.at(Level.WARNING).log(
-                            "Field %s.%s is not used as converter/validator because is not a Constraint instance " +
-                            "(rename to stop seeing this warning)",
-                            instance, fieldName);
+                        "Field %s.%s is not used as converter/validator because is not a Constraint instance " +
+                        "(rename to stop seeing this warning)",
+                        instance, fieldName);
                 }
             } catch (IllegalAccessException e) {
                 log.at(Level.WARNING).log(
-                        "Field %s.%s can't be accessed (remove @Param annotation to stop seeing this warning)",
-                        instance, fieldName);
+                    "Field %s.%s can't be accessed (remove @Param annotation to stop seeing this warning)",
+                    instance, fieldName);
             }
         }
         return map;
@@ -315,8 +316,8 @@ public class HandlerBinder {
         return getOptionalAnnotation(element, Http.class).map(http -> {
             String contentType = http.contentType();
             List<Pair<String, String>> headers = Arrays.stream(http.headers())
-                    .map(header -> Pair.of(header.name(), header.value()))
-                    .toList();
+                .map(header -> Pair.of(header.name(), header.value()))
+                .toList();
             return new EndpointHttp(contentType, headers);
         }).orElse(EndpointHttp.EMPTY);
     }

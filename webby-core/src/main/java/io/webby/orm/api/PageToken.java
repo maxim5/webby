@@ -73,7 +73,7 @@ public record PageToken(@Nullable String lastItem, int offset) {
         }
     }
 
-    enum Preference {
+    public enum Preference {
         PREFER_LAST_ITEM,
         PREFER_OFFSET,
     }

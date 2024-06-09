@@ -145,7 +145,7 @@ public enum Func implements Representable {
     }
 
     public boolean matchesInput(@NotNull Term term) {
-        return arity() == 1 && match(inputTypes.get(0), term.type());
+        return arity() == 1 && match(inputTypes.getFirst(), term.type());
     }
 
     public boolean matchesInput(@NotNull Term term1, @NotNull Term term2) {

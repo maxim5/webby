@@ -40,11 +40,11 @@ public class TestingArch {
         return runResult.getTableOrDie(model);
     }
 
-    public static @NotNull RunContext newRunContext() {
+    static @NotNull RunContext newRunContext() {
         return newRunContext(FakeModelAdaptersScanner.FAKE_SCANNER);
     }
 
-    public static @NotNull RunContext newRunContext(@NotNull FakeModelAdaptersScanner fakeScanner) {
+    static @NotNull RunContext newRunContext(@NotNull FakeModelAdaptersScanner fakeScanner) {
         return new RunContext(newRunInputs(), fakeScanner);
     }
 
@@ -210,7 +210,7 @@ public class TestingArch {
 
         public @NotNull TableFieldSubject hasDefault(@Nullable String value) {
             hasSize(1);
-            Truth.assertThat(tableField.columnDefault(tableField.columns().get(0))).isEqualTo(value);
+            Truth.assertThat(tableField.columnDefault(tableField.columns().getFirst())).isEqualTo(value);
             return this;
         }
 

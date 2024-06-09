@@ -461,7 +461,7 @@ public class ModelTableCodegen extends BaseCodegen {
 
         Map<String, String> context = EasyMaps.asMap(
             "$query_execution", queryExecution,
-            "$pk_column", primaryColumns.get(0),
+            "$pk_column", primaryColumns.getFirst(),
             "$pk_getter", primaryField.javaAccessor()
         );
 
@@ -508,7 +508,7 @@ public class ModelTableCodegen extends BaseCodegen {
     private void fetchPks() {
         String primaryKeyColumn = Optional.ofNullable(table.primaryKeyField())
             .map(HasColumns::columns)
-            .map(cols -> cols.get(0))
+            .map(cols -> cols.getFirst())
             .map(Column::sqlName)
             .orElse(null);
 

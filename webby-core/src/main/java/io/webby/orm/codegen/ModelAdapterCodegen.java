@@ -205,7 +205,7 @@ public class ModelAdapterCodegen extends BaseCodegen {
         List<PojoField> fields = pojo.fields();
         assert fields.size() == 1 : "Expected a single pojo field, but found: %s".formatted(fields);
 
-        PojoField field = fields.get(0);
+        PojoField field = fields.getFirst();
         String accessor = "instance.%s".formatted(field.javaAccessor());
         return switch (field.typeSupport()) {
             case NATIVE -> accessor;

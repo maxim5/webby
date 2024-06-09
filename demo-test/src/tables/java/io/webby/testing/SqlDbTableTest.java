@@ -72,7 +72,7 @@ public abstract class SqlDbTableTest<E, T extends BaseTable<E>> implements BaseT
         List<DebugSql.Row> rows = SQL.runQuery("SELECT sql FROM sqlite_master WHERE name=?", name);
         assertFalse(rows.isEmpty(), "SQL table not found in DB: %s".formatted(name));
         assertThat(rows).hasSize(1);
-        return rows.get(0).findValue("sql").map(DebugSql.RowValue::strValue).orElseThrow();
+        return rows.getFirst().findValue("sql").map(DebugSql.RowValue::strValue).orElseThrow();
     }
 
     protected @NotNull Connector connector() {

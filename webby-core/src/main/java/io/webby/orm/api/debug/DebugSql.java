@@ -38,7 +38,7 @@ public class DebugSql {
     public static @NotNull Row getSingleDebugRowOrDie(@NotNull ResultSet resultSet) {
         List<Row> rows = toDebugRows(resultSet);
         assert rows.size() == 1 : "Expected exactly one row, found: " + rows;
-        return rows.get(0);
+        return rows.getFirst();
     }
 
     public static @NotNull Row toDebugRow(@NotNull ResultSet row) throws SQLException {
@@ -66,7 +66,7 @@ public class DebugSql {
             }
             int shift = withHeader ? 1 : 0;
             String[][] array = new String[rows.size() + shift][];
-            array[0] = withHeader ? rows.get(0).toStringArray(RowValue::name) : null;
+            array[0] = withHeader ? rows.getFirst().toStringArray(RowValue::name) : null;
             for (int i = 0; i < rows.size(); i++) {
                 array[i + shift] = rows.get(i).toStringArray(RowValue::strValue);
             }

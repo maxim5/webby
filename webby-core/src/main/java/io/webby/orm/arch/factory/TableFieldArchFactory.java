@@ -118,7 +118,7 @@ class TableFieldArchFactory {
         }
 
         public static FieldInference ofColumns(@NotNull List<Column> columns, @NotNull AdapterApi adapterApi) {
-            return columns.size() == 1 ? ofSingleColumn(columns.get(0), adapterApi) : ofMultiColumns(columns, adapterApi);
+            return columns.size() == 1 ? ofSingleColumn(columns.getFirst(), adapterApi) : ofMultiColumns(columns, adapterApi);
         }
 
         public static FieldInference ofSingleColumn(@NotNull Column column, @NotNull MapperApi mapperApi) {

@@ -39,6 +39,6 @@ public class EmbeddedRedisExtension implements BeforeAllCallback, AfterAllCallba
     }
 
     public int port() {
-        return redisServer.ports().get(0);
+        return redisServer.ports().getFirst();
     }
 }
