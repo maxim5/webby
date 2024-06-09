@@ -9,6 +9,8 @@ import org.jetbrains.annotations.Nullable;
 
 import java.util.List;
 
+import static io.webby.orm.arch.model.JavaNameValidator.validateJavaIdentifier;
+import static io.webby.orm.arch.model.SqlNameValidator.validateSqlName;
 import static io.webby.util.base.EasyStrings.ofNonEmpty;
 
 public record ModelInput(@NotNull Class<?> modelClass,
@@ -16,6 +18,12 @@ public record ModelInput(@NotNull Class<?> modelClass,
                          @NotNull String javaModelName,
                          @NotNull String sqlName,
                          @NotNull String javaTableName) {
+    public ModelInput {
+        validateJavaIdentifier(javaModelName);
+        validateSqlName(sqlName);
+        validateJavaIdentifier(javaTableName);
+    }
+
     public static @NotNull ModelInput of(@NotNull Class<?> modelClass) {
         Model annotation = EasyAnnotations.getAnnotationOrNull(modelClass, Model.class);
         if (annotation != null) {
