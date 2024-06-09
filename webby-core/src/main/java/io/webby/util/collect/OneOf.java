@@ -90,6 +90,14 @@ public class OneOf<U, V> {
         return hasFirst() ? fromFirst.applyAsDouble(first) : fromSecond.applyAsDouble(second);
     }
 
+    public boolean testFirstIfSet(@NotNull Predicate<U> predicate) {
+        return hasFirst() && predicate.test(first);
+    }
+
+    public boolean testSecondIfSet(@NotNull Predicate<V> predicate) {
+        return hasSecond() && predicate.test(second);
+    }
+
     public boolean test(@NotNull Predicate<U> forFirst, @NotNull Predicate<V> forSecond) {
         return hasFirst() ? forFirst.test(first) : forSecond.test(second);
     }
