@@ -47,6 +47,8 @@ dependencies {
     testFixturesApi group: 'org.testcontainers', name: 'mysql', version: '1.17.6'
     testFixturesApi group: 'org.testcontainers', name: 'testcontainers', version: '1.17.6'
     testFixturesApi group: 'org.xerial', name: 'sqlite-jdbc', version: '3.46.0.0'
+    testFixturesApi 'org.mariadb.jdbc:mariadb-java-client:3.4.0'
+    testFixturesApi 'ch.vorburger.mariaDB4j:mariaDB4j:3.1.0'
     // NoSQLs for Integration tests
     testFixturesApi group: 'io.etcd', name: 'jetcd-test', version: '0.8.0'
     testFixturesApi group: 'it.ozimov', name: 'embedded-redis', version: '0.7.3'
