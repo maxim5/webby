@@ -7,7 +7,7 @@ import com.google.common.reflect.ClassPath;
 import com.google.inject.Inject;
 import io.webby.app.ClassFilter;
 import io.webby.util.base.Unchecked;
-import io.webby.util.base.TimeIt;
+import io.webby.util.time.TimeIt;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.VisibleForTesting;
 

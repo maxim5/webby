@@ -1,6 +1,6 @@
 package io.webby.app;
 
-import io.routekit.QueryParser;
+import io.webby.routekit.QueryParser;
 import io.webby.url.annotate.FrameType;
 import io.webby.url.annotate.Marshal;
 import io.webby.url.annotate.Render;

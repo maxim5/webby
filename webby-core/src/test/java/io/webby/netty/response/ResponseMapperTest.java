@@ -3,7 +3,7 @@ package io.webby.netty.response;
 import io.netty.buffer.ByteBuf;
 import io.netty.buffer.Unpooled;
 import io.netty.handler.codec.http.HttpResponse;
-import io.routekit.util.CharArray;
+import io.webby.util.base.CharArray;
 import io.webby.testing.Testing;
 import io.webby.testing.TestingBytes;
 import org.junit.jupiter.api.Disabled;

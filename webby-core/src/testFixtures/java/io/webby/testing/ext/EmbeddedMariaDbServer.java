@@ -6,7 +6,7 @@ import ch.vorburger.mariadb4j.DBConfiguration;
 import ch.vorburger.mariadb4j.DBConfigurationBuilder;
 import com.google.common.flogger.FluentLogger;
 import io.webby.db.sql.SqlSettings;
-import io.webby.util.base.TimeIt;
+import io.webby.util.time.TimeIt;
 import io.webby.util.base.Unchecked;
 import io.webby.util.lazy.AtomicLazyInit;
 import io.webby.util.lazy.LazyInit;

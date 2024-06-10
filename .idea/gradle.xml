@@ -11,10 +11,12 @@
         <option name="modules">
           <set>
             <option value="$PROJECT_DIR$" />
+            <option value="$PROJECT_DIR$/base-util" />
             <option value="$PROJECT_DIR$/demo-frontend" />
             <option value="$PROJECT_DIR$/demo-model" />
             <option value="$PROJECT_DIR$/demo-test" />
             <option value="$PROJECT_DIR$/webby-core" />
+            <option value="$PROJECT_DIR$/webby-routekit" />
           </set>
         </option>
       </GradleProjectSettings>

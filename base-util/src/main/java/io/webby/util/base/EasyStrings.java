@@ -1,6 +1,5 @@
 package io.webby.util.base;
 
-import com.google.mu.util.Optionals;
 import org.checkerframework.dataflow.qual.Pure;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
@@ -35,6 +34,6 @@ public class EasyStrings {
 
     @Pure
     public static @NotNull Optional<String> ofNonEmpty(@Nullable String s) {
-        return Optionals.optional(s != null && !s.isEmpty(), s);
+        return s != null && !s.isEmpty() ? Optional.of(s) : Optional.empty();
     }
 }

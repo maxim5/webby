@@ -7,7 +7,7 @@ import io.netty.buffer.Unpooled;
 import io.netty.handler.codec.http.FullHttpResponse;
 import io.netty.handler.codec.http.HttpResponse;
 import io.netty.handler.codec.http.HttpResponseStatus;
-import io.routekit.util.CharArray;
+import io.webby.util.base.CharArray;
 import io.webby.app.Settings;
 import io.webby.util.base.Unchecked;
 import org.jetbrains.annotations.NotNull;

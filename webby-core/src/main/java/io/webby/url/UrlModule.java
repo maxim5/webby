@@ -2,7 +2,7 @@ package io.webby.url;
 
 import com.google.inject.AbstractModule;
 import com.google.inject.TypeLiteral;
-import io.routekit.Router;
+import io.webby.routekit.Router;
 import io.webby.url.caller.CallerFactory;
 import io.webby.url.caller.ContentProviderFactory;
 import io.webby.url.impl.HandlerBinder;

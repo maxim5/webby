@@ -1,6 +1,6 @@
 package io.webby.demo.hello;
 
-import io.routekit.util.CharArray;
+import io.webby.util.base.CharArray;
 import io.webby.url.annotate.GET;
 import io.webby.url.annotate.Param;
 import io.webby.url.convert.CharArrayConstraint;

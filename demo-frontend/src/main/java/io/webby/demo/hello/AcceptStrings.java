@@ -1,6 +1,6 @@
 package io.webby.demo.hello;
 
-import io.routekit.util.CharArray;
+import io.webby.util.base.CharArray;
 import io.webby.url.annotate.GET;
 
 public class AcceptStrings {

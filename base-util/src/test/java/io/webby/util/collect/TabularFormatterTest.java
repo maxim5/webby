@@ -285,7 +285,7 @@ public class TabularFormatterTest {
     public void formatIntoTableString_2x2_multiline_empty_column() {
         Tabular<String> tab = ArrayTabular.of(
             array("foo\nbar", ""),
-            array("baz",   "\n\n\n")
+            array("baz",      "\n\n\n")
         );
         String table = ASCII_FORMATTER.formatIntoTableString(tab);
         assertThat(table).isEqualTo("""

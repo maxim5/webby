@@ -3,7 +3,7 @@ package io.webby.netty.request;
 import com.google.common.collect.ImmutableMap;
 import com.google.mu.util.stream.BiStream;
 import io.netty.handler.codec.http.QueryStringDecoder;
-import io.routekit.util.CharArray;
+import io.webby.util.base.CharArray;
 import io.webby.url.convert.Constraint;
 import io.webby.url.convert.ConversionError;
 import org.jetbrains.annotations.NotNull;

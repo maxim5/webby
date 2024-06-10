@@ -1,8 +1,8 @@
 package io.webby.app;
 
 import com.google.errorprone.annotations.CanIgnoreReturnValue;
-import io.routekit.QueryParser;
-import io.routekit.SimpleQueryParser;
+import io.webby.routekit.QueryParser;
+import io.webby.routekit.SimpleQueryParser;
 import io.webby.url.annotate.FrameType;
 import io.webby.url.annotate.Marshal;
 import io.webby.url.annotate.Render;
