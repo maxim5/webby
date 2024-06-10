@@ -19,12 +19,9 @@ dependencies {
 }
 
 dependencies {
-    // JUnit, Truth, Mockito
-    testFixturesImplementation 'org.junit.jupiter:junit-jupiter-api:5.10.2'
-    testFixturesImplementation 'org.junit.jupiter:junit-jupiter-params:5.10.2'
-    testFixturesImplementation 'org.junit.jupiter:junit-jupiter-engine:5.10.2'
     testFixturesImplementation 'com.google.truth:truth:1.4.2'
-    // Utilities for Unit tests
+    testFixturesImplementation 'org.junit.jupiter:junit-jupiter-api:5.10.2'
+
     testFixturesImplementation 'org.jetbrains:annotations:24.1.0'
     testFixturesImplementation 'com.google.inject:guice:7.0.0'
     testFixturesImplementation 'com.carrotsearch:hppc:0.10.0'
