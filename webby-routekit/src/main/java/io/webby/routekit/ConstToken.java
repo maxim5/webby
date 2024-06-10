@@ -1,4 +1,4 @@
-package io.routekit;
+package io.webby.routekit;
 
 import io.webby.util.base.CharArray;
 

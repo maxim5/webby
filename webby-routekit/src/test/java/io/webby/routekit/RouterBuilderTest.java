@@ -1,4 +1,4 @@
-package io.routekit;
+package io.webby.routekit;
 
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
@@ -6,7 +6,7 @@ import org.junit.jupiter.api.Test;
 import java.util.Arrays;
 import java.util.List;
 
-import static io.routekit.NodePrinter.printlnToString;
+import static io.webby.routekit.NodePrinter.printlnToString;
 
 public class RouterBuilderTest {
     @Test

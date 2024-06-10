@@ -1,7 +1,7 @@
-package io.routekit.jmh;
+package io.webby.routekit.jmh;
 
-import io.routekit.Router;
-import io.routekit.RouterSetup;
+import io.webby.routekit.Router;
+import io.webby.routekit.RouterSetup;
 import org.openjdk.jmh.annotations.*;
 
 import java.util.concurrent.TimeUnit;

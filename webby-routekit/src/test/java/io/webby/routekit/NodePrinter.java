@@ -1,4 +1,4 @@
-package io.routekit;
+package io.webby.routekit;
 
 import java.io.ByteArrayOutputStream;
 import java.io.PrintStream;

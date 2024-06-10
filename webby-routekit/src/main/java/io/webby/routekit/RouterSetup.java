@@ -1,4 +1,4 @@
-package io.routekit;
+package io.webby.routekit;
 
 import java.util.ArrayList;
 import java.util.List;

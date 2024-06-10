@@ -1,4 +1,4 @@
-package io.routekit;
+package io.webby.routekit;
 
 public class QueryParseException extends RouteException {
     public QueryParseException(String message) {
