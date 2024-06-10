@@ -1,7 +1,7 @@
 package io.webby.testing;
 
 import io.netty.handler.codec.http.FullHttpRequest;
-import io.routekit.util.CharArray;
+import io.webby.util.base.CharArray;
 import io.webby.url.caller.Caller;
 import io.webby.url.impl.Endpoint;
 import io.webby.url.impl.EndpointContext;

@@ -1,7 +1,7 @@
 package io.routekit;
 
-import io.routekit.util.CharArray;
-import io.routekit.util.MutableCharArray;
+import io.webby.util.base.CharArray;
+import io.webby.util.base.MutableCharArray;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 

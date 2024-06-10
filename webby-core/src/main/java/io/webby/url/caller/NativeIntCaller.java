@@ -1,7 +1,7 @@
 package io.webby.url.caller;
 
 import io.netty.handler.codec.http.FullHttpRequest;
-import io.routekit.util.CharArray;
+import io.webby.util.base.CharArray;
 import io.webby.netty.request.HttpRequestEx;
 import io.webby.url.handle.IntHandler;
 import io.webby.url.convert.IntConverter;

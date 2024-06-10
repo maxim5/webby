@@ -5,7 +5,7 @@ import com.google.common.flogger.FluentLogger;
 import com.google.inject.Inject;
 import com.google.inject.Injector;
 import io.netty.handler.codec.http.HttpRequest;
-import io.routekit.util.CharArray;
+import io.webby.util.base.CharArray;
 import io.webby.app.AppConfigException;
 import io.webby.url.HandlerConfigError;
 import io.webby.url.annotate.Json;

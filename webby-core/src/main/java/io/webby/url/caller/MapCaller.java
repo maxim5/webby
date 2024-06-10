@@ -2,7 +2,7 @@ package io.webby.url.caller;
 
 import com.google.mu.util.stream.BiStream;
 import io.netty.handler.codec.http.FullHttpRequest;
-import io.routekit.util.CharArray;
+import io.webby.util.base.CharArray;
 import io.webby.url.convert.Constraint;
 import org.jetbrains.annotations.NotNull;
 

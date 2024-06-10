@@ -1,6 +1,6 @@
 package io.routekit;
 
-import io.routekit.util.CharArray;
+import io.webby.util.base.CharArray;
 
 /**
  * A separable variable matches everything until the first {@code separator}.

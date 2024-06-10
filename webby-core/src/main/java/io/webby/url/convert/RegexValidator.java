@@ -1,6 +1,6 @@
 package io.webby.url.convert;
 
-import io.routekit.util.CharArray;
+import io.webby.util.base.CharArray;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 

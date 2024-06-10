@@ -1,4 +1,4 @@
-package io.routekit.util;
+package io.webby.util.base;
 
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;

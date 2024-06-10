@@ -4,6 +4,8 @@ plugins {
 }
 
 dependencies {
+    implementation project(':base-util')
+
     testImplementation 'org.openjdk.jmh:jmh-core:1.37'
     testImplementation 'org.openjdk.jmh:jmh-generator-annprocess:1.37'
 }
