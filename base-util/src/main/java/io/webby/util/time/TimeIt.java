@@ -1,4 +1,4 @@
-package io.webby.util.base;
+package io.webby.util.time;
 
 import com.google.common.base.Stopwatch;
 import io.webby.util.func.ThrowRunnable;

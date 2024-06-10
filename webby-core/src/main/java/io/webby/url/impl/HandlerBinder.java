@@ -18,7 +18,7 @@ import io.webby.url.caller.CallerFactory;
 import io.webby.url.convert.Constraint;
 import io.webby.url.view.Renderer;
 import io.webby.url.view.RendererFactory;
-import io.webby.util.base.TimeIt;
+import io.webby.util.time.TimeIt;
 import io.webby.util.collect.Pair;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;

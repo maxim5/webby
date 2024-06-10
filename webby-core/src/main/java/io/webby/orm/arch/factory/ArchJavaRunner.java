@@ -10,7 +10,7 @@ import io.webby.orm.codegen.ModelAdapterCodegen;
 import io.webby.orm.codegen.ModelAdaptersScanner;
 import io.webby.orm.codegen.ModelAdaptersScannerImpl;
 import io.webby.orm.codegen.ModelTableCodegen;
-import io.webby.util.base.TimeIt;
+import io.webby.util.time.TimeIt;
 import org.jetbrains.annotations.NotNull;
 
 import java.io.File;
