@@ -1,5 +1,6 @@
 rootProject.name = 'webby'
 
+include 'base-util'
 include 'demo-model'
 include 'demo-frontend'
 include 'demo-test'
