@@ -1,7 +1,8 @@
 plugins {
     id 'java'
-    id 'java-library'
 }
+
+version = '0.3.0'
 
 // Include exported util sources
 compileJava.dependsOn ':base-util:exportSrc'
