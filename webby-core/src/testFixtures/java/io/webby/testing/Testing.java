@@ -121,7 +121,7 @@ public class Testing {
         }
 
         public static @NotNull Charset charset() {
-            return injector != null ? getInstance(Charset.class) : Charset.defaultCharset();
+            return injector != null ? getInstance(Charset.class) : TestingBytes.CHARSET;
         }
 
         public static @NotNull AppSettings settings() {
