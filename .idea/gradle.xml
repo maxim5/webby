@@ -16,6 +16,7 @@
             <option value="$PROJECT_DIR$/demo-model" />
             <option value="$PROJECT_DIR$/demo-test" />
             <option value="$PROJECT_DIR$/webby-core" />
+            <option value="$PROJECT_DIR$/webby-routekit" />
           </set>
         </option>
       </GradleProjectSettings>
