@@ -9,18 +9,24 @@ dependencies {
     implementation 'org.checkerframework:checker-qual:3.44.0'
     implementation 'com.google.guava:guava:33.2.0-jre'
     implementation 'com.carrotsearch:hppc:0.10.0'
+    implementation 'io.netty:netty-all:4.1.110.Final'
 
     testImplementation 'com.google.truth:truth:1.4.2'
 }
 
 dependencies {
+    testImplementation 'com.google.inject:guice:7.0.0'
+}
+
+dependencies {
     // JUnit, Truth, Mockito
-    testFixturesApi 'org.junit.jupiter:junit-jupiter-api:5.10.2'
-    testFixturesApi 'org.junit.jupiter:junit-jupiter-params:5.10.2'
-    testFixturesApi 'org.junit.jupiter:junit-jupiter-engine:5.10.2'
-    testFixturesApi 'com.google.truth:truth:1.4.2'
+    testFixturesImplementation 'org.junit.jupiter:junit-jupiter-api:5.10.2'
+    testFixturesImplementation 'org.junit.jupiter:junit-jupiter-params:5.10.2'
+    testFixturesImplementation 'org.junit.jupiter:junit-jupiter-engine:5.10.2'
+    testFixturesImplementation 'com.google.truth:truth:1.4.2'
     // Utilities for Unit tests
-    testFixturesApi 'org.jetbrains:annotations:24.1.0'
-    testFixturesApi 'com.google.inject:guice:7.0.0'
-    testFixturesApi 'com.carrotsearch:hppc:0.10.0'
+    testFixturesImplementation 'org.jetbrains:annotations:24.1.0'
+    testFixturesImplementation 'com.google.inject:guice:7.0.0'
+    testFixturesImplementation 'com.carrotsearch:hppc:0.10.0'
+    testFixturesImplementation 'io.netty:netty-all:4.1.110.Final'
 }

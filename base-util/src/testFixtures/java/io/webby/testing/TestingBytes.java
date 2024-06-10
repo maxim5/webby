@@ -17,7 +17,7 @@ import java.util.List;
 import static io.webby.util.base.EasyCast.castAny;
 
 public class TestingBytes {
-    public static final Charset CHARSET = Testing.Internals.charset();
+    public static final Charset CHARSET = Charset.defaultCharset(); /*Testing.Internals.charset()*/
     private static final Readability READABILITY_MODE = Readability.HUMAN_READABLE;
 
     private enum Readability { ORIGINAL, HUMAN_READABLE, BYTE_DETAILS }
