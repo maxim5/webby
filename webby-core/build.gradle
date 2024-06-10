@@ -27,6 +27,8 @@ configurations {
 
 // Testing
 dependencies {
+    testFixturesApi testFixtures(project(':base-util'))
+
     // JUnit, Truth, Mockito
     testFixturesApi 'org.junit.jupiter:junit-jupiter-api:5.10.2'
     testFixturesApi 'org.junit.jupiter:junit-jupiter-params:5.10.2'
