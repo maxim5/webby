@@ -3,6 +3,12 @@ plugins {
     id 'java-library'
 }
 
+// Include exported util sources
+compileJava.dependsOn ':base-util:exportSrc'
+sourceSets {
+    sourceSets.main.java.srcDirs += ["${project(':base-util').exportDir}/arrays"]
+}
+
 dependencies {
     implementation project(':base-util')
 
