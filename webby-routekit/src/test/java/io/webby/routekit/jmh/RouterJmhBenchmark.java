@@ -3,6 +3,9 @@ package io.webby.routekit.jmh;
 import io.webby.routekit.Router;
 import io.webby.routekit.RouterSetup;
 import org.openjdk.jmh.annotations.*;
+import org.openjdk.jmh.runner.Runner;
+import org.openjdk.jmh.runner.options.Options;
+import org.openjdk.jmh.runner.options.OptionsBuilder;
 
 import java.util.concurrent.TimeUnit;
 
@@ -11,7 +14,7 @@ import java.util.concurrent.TimeUnit;
 @OutputTimeUnit(TimeUnit.SECONDS)
 @Warmup(iterations = 4, time = 1000, timeUnit = TimeUnit.MILLISECONDS)
 @Measurement(iterations = 10, time = 1000, timeUnit = TimeUnit.MILLISECONDS)
-public class RouterBenchmark {
+public class RouterJmhBenchmark {
     @State(Scope.Benchmark)
     public static class ExecutionPlan {
         @Param({ "1000" })
@@ -88,5 +91,11 @@ public class RouterBenchmark {
         for (int i = 0; i < plan.iterations; i++) {
             plan.router.routeOrNull("/post/12345/java-microbenchmark-harness/comments");
         }
+    }
+
+    public static void main(String[] args) throws Exception {
+        System.setProperty("jmh.separateClasspathJAR", "true");
+        Options options = new OptionsBuilder().include(RouterJmhBenchmark.class.getSimpleName()).build();
+        new Runner(options).run();
     }
 }
