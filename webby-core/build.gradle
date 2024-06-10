@@ -30,7 +30,6 @@ dependencies {
 
     // JUnit, Truth, Mockito
     testFixturesApi 'org.junit.jupiter:junit-jupiter-api:5.10.2'
-    testFixturesApi 'org.junit.jupiter:junit-jupiter-params:5.10.2'
     testFixturesApi 'org.junit.jupiter:junit-jupiter-engine:5.10.2'
     testFixturesApi 'com.google.truth:truth:1.4.2'
     testFixturesApi 'com.mockrunner:mockrunner-jdbc:2.0.7'
@@ -39,16 +38,12 @@ dependencies {
     testFixturesApi 'org.jetbrains:annotations:24.1.0'
     testFixturesApi 'com.google.code.gson:gson:2.10.1'
     testFixturesApi 'com.google.flogger:flogger-log4j2-backend:0.8'
-    testFixturesApi 'com.j256.simplemagic:simplemagic:1.17'
     testFixturesApi 'com.squareup.okhttp3:okhttp:4.12.0'
     testFixturesApi 'com.squareup.okio:okio:3.9.0'
-    testFixturesApi 'eu.medsea.mimeutil:mime-util:2.1.3'
     // SQLs for Unit tests
     testFixturesApi 'com.h2database:h2:1.4.200'
     testFixturesApi 'com.zaxxer:HikariCP:5.1.0'
     testFixturesApi 'com.mysql:mysql-connector-j:8.4.0'
-    testFixturesApi 'org.testcontainers:mysql:1.19.8'
-    testFixturesApi 'org.testcontainers:testcontainers:1.19.8'
     testFixturesApi 'org.xerial:sqlite-jdbc:3.46.0.0'
     testFixturesApi 'org.mariadb.jdbc:mariadb-java-client:3.4.0'
     testFixturesApi 'ch.vorburger.mariaDB4j:mariaDB4j:3.1.0'
@@ -56,6 +51,8 @@ dependencies {
     testFixturesApi 'io.etcd:jetcd-test:0.8.0'
     testFixturesApi 'it.ozimov:embedded-redis:0.7.3'
 
-    // For FileSystem tests.
+    // Core tests.
     testImplementation 'com.google.jimfs:jimfs:1.3.0'
+    testImplementation 'com.j256.simplemagic:simplemagic:1.17'
+    testImplementation 'eu.medsea.mimeutil:mime-util:2.1.3'
 }
