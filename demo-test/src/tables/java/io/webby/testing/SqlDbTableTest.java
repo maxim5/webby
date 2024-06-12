@@ -15,7 +15,7 @@ import java.util.Arrays;
 import java.util.List;
 
 import static com.google.common.truth.Truth.assertThat;
-import static org.junit.jupiter.api.Assertions.assertFalse;
+import static io.webby.testing.MoreTruth.assertThat;
 
 @Tag("sql")
 public abstract class SqlDbTableTest<E, T extends BaseTable<E>> implements BaseTableTest<E, T> {
@@ -70,7 +70,7 @@ public abstract class SqlDbTableTest<E, T extends BaseTable<E>> implements BaseT
 
     private @NotNull String descTableInSqlite(@NotNull String name) {
         List<DebugSql.Row> rows = SQL.runQuery("SELECT sql FROM sqlite_master WHERE name=?", name);
-        assertFalse(rows.isEmpty(), "SQL table not found in DB: %s".formatted(name));
+        assertThat(rows.isEmpty()).withMessage("SQL table not found in DB: %s", name).isFalse();
         assertThat(rows).hasSize(1);
         return rows.getFirst().findValue("sql").map(DebugSql.RowValue::strValue).orElseThrow();
     }

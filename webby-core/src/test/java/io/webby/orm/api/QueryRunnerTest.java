@@ -9,6 +9,7 @@ import com.mockrunner.mock.jdbc.MockPreparedStatement;
 import com.mockrunner.mock.jdbc.MockResultSet;
 import io.webby.orm.api.query.*;
 import io.webby.testing.CalledOnce;
+import io.webby.testing.MoreTruth;
 import io.webby.util.collect.Array;
 import io.webby.util.collect.Pair;
 import io.webby.util.func.ThrowConsumer;
@@ -31,7 +32,8 @@ import static io.webby.testing.orm.MockingJdbc.assertThat;
 import static io.webby.testing.orm.MockingJdbc.mockConnection;
 import static io.webby.testing.orm.MockingJdbc.mockPreparedStatement;
 import static io.webby.testing.orm.MockingJdbc.mockResultSet;
-import static org.junit.jupiter.api.Assertions.*;
+import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.junit.jupiter.api.Assertions.fail;
 
 // FIX[norm]: more tests: .runAndGetInt() result type mismatch
 public class QueryRunnerTest {
@@ -54,7 +56,9 @@ public class QueryRunnerTest {
     @AfterEach
     void tearDown() {
         resultSetHandler.getPreparedStatements().forEach(statement -> {
-            assertTrue(statement.isClosed(), "Statement was not closed: \"%s\"".formatted(statement.getSQL()));
+            MoreTruth.assertThat(statement.isClosed())
+                .withMessage("Statement was not closed: \"%s\"", statement.getSQL())
+                .isTrue();
         });
     }
 

@@ -7,8 +7,8 @@ import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicReference;
 import java.util.function.Consumer;
 
+import static io.webby.testing.MoreTruth.assertThat;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
-import static org.junit.jupiter.api.Assertions.assertTrue;
 
 public class CalledOnce<T, E extends Throwable> implements Consumer<T>, ThrowConsumer<T, E>, AutoCloseable {
     private final AtomicReference<T> value = new AtomicReference<>(null);
@@ -28,15 +28,16 @@ public class CalledOnce<T, E extends Throwable> implements Consumer<T>, ThrowCon
         if (!allowNulls) {
             assertNotNull(item, "Called with a null");
         }
-        assertTrue(value.compareAndSet(null, item),
-                   "Called more than once. First: %s, then: %s".formatted(value.get(), item));
+        assertThat(value.compareAndSet(null, item))
+            .withMessage("Called more than once. First: %s, then: %s", value.get(), item)
+            .isTrue();
         boolean set = called.compareAndSet(false, true);
         assert set : "Internal error: the flag is already set: " + this;
     }
 
     public @NotNull T getValue() {
         T result = value.get();
-        assertTrue(called.get(), "Expected to be called, but it wasn't");
+        assertThat(called.get()).withMessage("Expected to be called, but it wasn't").isTrue();
         if (!allowNulls) {
             assertNotNull(result, "Called with a null");
         }

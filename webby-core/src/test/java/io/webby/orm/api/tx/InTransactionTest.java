@@ -5,6 +5,7 @@ import com.mockrunner.mock.jdbc.MockConnection;
 import io.webby.orm.api.QueryRunner;
 import io.webby.orm.api.query.HardcodedSelectQuery;
 import io.webby.testing.CalledOnce;
+import io.webby.testing.MoreTruth;
 import io.webby.util.base.Unchecked;
 import io.webby.util.func.ThrowConsumer;
 import io.webby.util.func.ThrowFunction;
@@ -19,7 +20,6 @@ import static io.webby.testing.orm.MockingJdbc.assertThat;
 import static io.webby.testing.orm.MockingJdbc.mockConnection;
 import static io.webby.testing.orm.MockingJdbc.mockResultSet;
 import static org.junit.jupiter.api.Assertions.assertThrows;
-import static org.junit.jupiter.api.Assertions.assertTrue;
 
 // FIX[minor]: more tests: force .commit() or .rollback() to fail
 public class InTransactionTest {
@@ -37,7 +37,9 @@ public class InTransactionTest {
     @AfterEach
     void tearDown() {
         resultSetHandler.getPreparedStatements().forEach(statement -> {
-            assertTrue(statement.isClosed(), "Statement was not closed: \"%s\"".formatted(statement.getSQL()));
+            MoreTruth.assertThat(statement.isClosed())
+                .withMessage("Statement was not closed: \"%s\"", statement.getSQL())
+                .isTrue();
         });
     }
 

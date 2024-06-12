@@ -10,7 +10,7 @@ import org.jetbrains.annotations.NotNull;
 import java.util.Queue;
 import java.util.stream.Stream;
 
-import static org.junit.jupiter.api.Assertions.assertFalse;
+import static com.google.common.truth.Truth.assertThat;
 
 public class CompositeHttpResponse extends DefaultHttpResponse implements ContentHolder {
     private ByteBuf content = Unpooled.EMPTY_BUFFER;
@@ -20,11 +20,12 @@ public class CompositeHttpResponse extends DefaultHttpResponse implements Conten
     }
 
     public static @NotNull CompositeHttpResponse fromObjects(@NotNull Queue<HttpObject> objects) {
-        assertFalse(objects.isEmpty(), "No objects provided: " + objects);
+        MoreTruth.assertThat(objects.isEmpty()).withMessage("No objects provided: %s", objects).isFalse();
 
         HttpResponse response = (HttpResponse) objects.poll();
-        assertFalse(response instanceof FullHttpResponse);
-        CompositeHttpResponse httpResponse = new CompositeHttpResponse(response.protocolVersion(), response.status(), response.headers());
+        assertThat(response instanceof FullHttpResponse).isFalse();
+        CompositeHttpResponse httpResponse =
+            new CompositeHttpResponse(response.protocolVersion(), response.status(), response.headers());
 
         Stream<HttpContent> stream = objects.stream().map(object -> (HttpContent) object);
         byte[] bytes = AssertResponse.readAllFrom(stream);
