@@ -1,135 +1,128 @@
 package io.webby.routekit;
 
-import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 
-import java.util.Arrays;
-import java.util.Collection;
+import static com.google.common.truth.Truth.assertThat;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 
 public class SimpleQueryParserTest {
     @Test
     public void parse_no_variables() {
-        assertOrdered(SimpleQueryParser.DEFAULT.parse("/"), constant("/"));
-        assertOrdered(SimpleQueryParser.DEFAULT.parse("//"), constant("//"));
-        assertOrdered(SimpleQueryParser.DEFAULT.parse("//*"), constant("//*"));
-        assertOrdered(SimpleQueryParser.DEFAULT.parse("foo/bar/baz"), constant("foo/bar/baz"));
-        assertOrdered(SimpleQueryParser.DEFAULT.parse("/foo/bar/baz"), constant("/foo/bar/baz"));
-        assertOrdered(SimpleQueryParser.DEFAULT.parse("foo-bar-baz"), constant("foo-bar-baz"));
+        assertThat(SimpleQueryParser.DEFAULT.parse("/")).containsExactly(constant("/")).inOrder();
+        assertThat(SimpleQueryParser.DEFAULT.parse("//")).containsExactly(constant("//")).inOrder();
+        assertThat(SimpleQueryParser.DEFAULT.parse("//*")).containsExactly(constant("//*")).inOrder();
+        assertThat(SimpleQueryParser.DEFAULT.parse("foo/bar/baz")).containsExactly(constant("foo/bar/baz")).inOrder();
+        assertThat(SimpleQueryParser.DEFAULT.parse("/foo/bar/baz")).containsExactly(constant("/foo/bar/baz")).inOrder();
+        assertThat(SimpleQueryParser.DEFAULT.parse("foo-bar-baz")).containsExactly(constant("foo-bar-baz")).inOrder();
     }
 
     @Test
     public void parse_variable() {
-        assertOrdered(SimpleQueryParser.DEFAULT.parse("{foo}"), var("foo"));
-        assertOrdered(SimpleQueryParser.DEFAULT.parse("/{foo}"), constant("/"), var("foo"));
-        assertOrdered(SimpleQueryParser.DEFAULT.parse("{foo}/"), var("foo"), constant("/"));
-        assertOrdered(SimpleQueryParser.DEFAULT.parse("/{foo}/"), constant("/"), var("foo"), constant("/"));
-        assertOrdered(SimpleQueryParser.DEFAULT.parse("/foo/{foo}"), constant("/foo/"), var("foo"));
-        assertOrdered(SimpleQueryParser.DEFAULT.parse("foo{foo}/foo"), constant("foo"), var("foo"), constant("/foo"));
+        assertThat(SimpleQueryParser.DEFAULT.parse("{foo}")).containsExactly(var("foo")).inOrder();
+        assertThat(SimpleQueryParser.DEFAULT.parse("/{foo}")).containsExactly(constant("/"), var("foo")).inOrder();
+        assertThat(SimpleQueryParser.DEFAULT.parse("{foo}/")).containsExactly(var("foo"), constant("/")).inOrder();
+        assertThat(SimpleQueryParser.DEFAULT.parse("/{foo}/")).containsExactly(constant("/"), var("foo"), constant("/")).inOrder();
+        assertThat(SimpleQueryParser.DEFAULT.parse("/foo/{foo}")).containsExactly(constant("/foo/"), var("foo")).inOrder();
+        assertThat(SimpleQueryParser.DEFAULT.parse("foo{foo}/foo")).containsExactly(constant("foo"), var("foo"), constant("/foo")).inOrder();
 
-        assertOrdered(SimpleQueryParser.DEFAULT.parse("{X}"), var("X"));
-        assertOrdered(SimpleQueryParser.DEFAULT.parse("{XyZ}"), var("XyZ"));
+        assertThat(SimpleQueryParser.DEFAULT.parse("{X}")).containsExactly(var("X")).inOrder();
+        assertThat(SimpleQueryParser.DEFAULT.parse("{XyZ}")).containsExactly(var("XyZ")).inOrder();
     }
 
     @Test
     public void parse_two_variables() {
-        assertOrdered(SimpleQueryParser.DEFAULT.parse("{foo}/{bar}"), var("foo"), constant("/"), var("bar"));
-        assertOrdered(SimpleQueryParser.DEFAULT.parse("/{foo}/{bar}"), constant("/"), var("foo"), constant("/"), var("bar"));
-        assertOrdered(SimpleQueryParser.DEFAULT.parse("/{foo}/{bar}/"), constant("/"), var("foo"), constant("/"), var("bar"), constant("/"));
+        assertThat(SimpleQueryParser.DEFAULT.parse("{foo}/{bar}"))
+            .containsExactly(var("foo"), constant("/"), var("bar")).inOrder();
+        assertThat(SimpleQueryParser.DEFAULT.parse("/{foo}/{bar}"))
+            .containsExactly(constant("/"), var("foo"), constant("/"), var("bar")).inOrder();
+        assertThat(SimpleQueryParser.DEFAULT.parse("/{foo}/{bar}/"))
+            .containsExactly(constant("/"), var("foo"), constant("/"), var("bar"), constant("/")).inOrder();
 
-        assertOrdered(SimpleQueryParser.DEFAULT.parse("{X}/{Y}"), var("X"), constant("/"), var("Y"));
-        assertOrdered(SimpleQueryParser.DEFAULT.parse("{X}/ {Y}"), var("X"), constant("/ "), var("Y"));
-        assertOrdered(SimpleQueryParser.DEFAULT.parse("{X}/_{Y}"), var("X"), constant("/_"), var("Y"));
-        assertOrdered(SimpleQueryParser.DEFAULT.parse("{X}/-{Y}"), var("X"), constant("/-"), var("Y"));
+        assertThat(SimpleQueryParser.DEFAULT.parse("{X}/{Y}")).containsExactly(var("X"), constant("/"), var("Y")).inOrder();
+        assertThat(SimpleQueryParser.DEFAULT.parse("{X}/ {Y}")).containsExactly(var("X"), constant("/ "), var("Y")).inOrder();
+        assertThat(SimpleQueryParser.DEFAULT.parse("{X}/_{Y}")).containsExactly(var("X"), constant("/_"), var("Y")).inOrder();
+        assertThat(SimpleQueryParser.DEFAULT.parse("{X}/-{Y}")).containsExactly(var("X"), constant("/-"), var("Y")).inOrder();
     }
 
     @Test
     public void parse_wildcard() {
-        assertOrdered(SimpleQueryParser.DEFAULT.parse("{*foo}"), wildcard("foo"));
-        assertOrdered(SimpleQueryParser.DEFAULT.parse("*{*foo}"), constant("*"), wildcard("foo"));
-        assertOrdered(SimpleQueryParser.DEFAULT.parse("/{*foo}"), constant("/"), wildcard("foo"));
-        assertOrdered(SimpleQueryParser.DEFAULT.parse("/foo/{*foo}"), constant("/foo/"), wildcard("foo"));
+        assertThat(SimpleQueryParser.DEFAULT.parse("{*foo}")).containsExactly(wildcard("foo")).inOrder();
+        assertThat(SimpleQueryParser.DEFAULT.parse("*{*foo}")).containsExactly(constant("*"), wildcard("foo")).inOrder();
+        assertThat(SimpleQueryParser.DEFAULT.parse("/{*foo}")).containsExactly(constant("/"), wildcard("foo")).inOrder();
+        assertThat(SimpleQueryParser.DEFAULT.parse("/foo/{*foo}")).containsExactly(constant("/foo/"), wildcard("foo")).inOrder();
 
-        assertOrdered(SimpleQueryParser.DEFAULT.parse("{*X}"), wildcard("X"));
-        assertOrdered(SimpleQueryParser.DEFAULT.parse("{*XyZ}"), wildcard("XyZ"));
+        assertThat(SimpleQueryParser.DEFAULT.parse("{*X}")).containsExactly(wildcard("X")).inOrder();
+        assertThat(SimpleQueryParser.DEFAULT.parse("{*XyZ}")).containsExactly(wildcard("XyZ")).inOrder();
     }
 
     @Test
     public void parse_wildcard_and_variable() {
-        assertOrdered(SimpleQueryParser.DEFAULT.parse("{foo}/{*bar}"), var("foo"), constant("/"), wildcard("bar"));
-        assertOrdered(SimpleQueryParser.DEFAULT.parse("/foo/{foo}/{*bar}"), constant("/foo/"), var("foo"), constant("/"), wildcard("bar"));
+        assertThat(SimpleQueryParser.DEFAULT.parse("{foo}/{*bar}"))
+            .containsExactly(var("foo"), constant("/"), wildcard("bar")).inOrder();
+        assertThat(SimpleQueryParser.DEFAULT.parse("/foo/{foo}/{*bar}"))
+            .containsExactly(constant("/foo/"), var("foo"), constant("/"), wildcard("bar")).inOrder();
     }
 
     @Test
     public void parse_many_variables() {
-        assertOrdered(
-            SimpleQueryParser.DEFAULT.parse("/{foo}/{bar}/{baz}"),
-            constant("/"), var("foo"), constant("/"), var("bar"), constant("/"), var("baz")
-        );
-        assertOrdered(
-            SimpleQueryParser.DEFAULT.parse("/foo/{bar}/{baz}/"),
-            constant("/foo/"), var("bar"), constant("/"), var("baz"), constant("/")
-        );
-        assertOrdered(
-            SimpleQueryParser.DEFAULT.parse("/foo/{xxx}/{y}/{*z}"),
-            constant("/foo/"), var("xxx"), constant("/"), var("y"), constant("/"), wildcard("z")
-        );
+        assertThat(SimpleQueryParser.DEFAULT.parse("/{foo}/{bar}/{baz}"))
+            .containsExactly(constant("/"), var("foo"), constant("/"), var("bar"), constant("/"), var("baz")).inOrder();
+        assertThat(SimpleQueryParser.DEFAULT.parse("/foo/{bar}/{baz}/"))
+            .containsExactly(constant("/foo/"), var("bar"), constant("/"), var("baz"), constant("/")).inOrder();
+        assertThat(SimpleQueryParser.DEFAULT.parse("/foo/{xxx}/{y}/{*z}"))
+            .containsExactly(constant("/foo/"), var("xxx"), constant("/"), var("y"), constant("/"), wildcard("z")).inOrder();
     }
 
     @Test
     public void parse_invalid() {
-        Assertions.assertThrows(QueryParseException.class, () -> SimpleQueryParser.DEFAULT.parse(""));
+        assertThrows(QueryParseException.class, () -> SimpleQueryParser.DEFAULT.parse(""));
 
         // Invalid brackets
-        Assertions.assertThrows(QueryParseException.class, () -> SimpleQueryParser.DEFAULT.parse("{"));
-        Assertions.assertThrows(QueryParseException.class, () -> SimpleQueryParser.DEFAULT.parse("}"));
-        Assertions.assertThrows(QueryParseException.class, () -> SimpleQueryParser.DEFAULT.parse("}{"));
-        Assertions.assertThrows(QueryParseException.class, () -> SimpleQueryParser.DEFAULT.parse("}foo{"));
-        Assertions.assertThrows(QueryParseException.class, () -> SimpleQueryParser.DEFAULT.parse("}{foo}"));
-        Assertions.assertThrows(QueryParseException.class, () -> SimpleQueryParser.DEFAULT.parse("}{}{"));
-        Assertions.assertThrows(QueryParseException.class, () -> SimpleQueryParser.DEFAULT.parse("{{}}"));  // nesting not allowed
+        assertThrows(QueryParseException.class, () -> SimpleQueryParser.DEFAULT.parse("{"));
+        assertThrows(QueryParseException.class, () -> SimpleQueryParser.DEFAULT.parse("}"));
+        assertThrows(QueryParseException.class, () -> SimpleQueryParser.DEFAULT.parse("}{"));
+        assertThrows(QueryParseException.class, () -> SimpleQueryParser.DEFAULT.parse("}foo{"));
+        assertThrows(QueryParseException.class, () -> SimpleQueryParser.DEFAULT.parse("}{foo}"));
+        assertThrows(QueryParseException.class, () -> SimpleQueryParser.DEFAULT.parse("}{}{"));
+        assertThrows(QueryParseException.class, () -> SimpleQueryParser.DEFAULT.parse("{{}}"));  // nesting not allowed
 
         // Invalid name
-        Assertions.assertThrows(QueryParseException.class, () -> SimpleQueryParser.DEFAULT.parse("{}"));
-        Assertions.assertThrows(QueryParseException.class, () -> SimpleQueryParser.DEFAULT.parse("{*}"));
-        Assertions.assertThrows(QueryParseException.class, () -> SimpleQueryParser.DEFAULT.parse("{**}"));
-        Assertions.assertThrows(QueryParseException.class, () -> SimpleQueryParser.DEFAULT.parse("{foo*}"));
-        Assertions.assertThrows(QueryParseException.class, () -> SimpleQueryParser.DEFAULT.parse("{foo*foo}"));
-        Assertions.assertThrows(QueryParseException.class, () -> SimpleQueryParser.DEFAULT.parse("{*foo*}"));
-        Assertions.assertThrows(QueryParseException.class, () -> SimpleQueryParser.DEFAULT.parse("{{foo}}"));
-        Assertions.assertThrows(QueryParseException.class, () -> SimpleQueryParser.DEFAULT.parse("{foo-bar}"));
-        Assertions.assertThrows(QueryParseException.class, () -> SimpleQueryParser.DEFAULT.parse("{foo+bar}"));
+        assertThrows(QueryParseException.class, () -> SimpleQueryParser.DEFAULT.parse("{}"));
+        assertThrows(QueryParseException.class, () -> SimpleQueryParser.DEFAULT.parse("{*}"));
+        assertThrows(QueryParseException.class, () -> SimpleQueryParser.DEFAULT.parse("{**}"));
+        assertThrows(QueryParseException.class, () -> SimpleQueryParser.DEFAULT.parse("{foo*}"));
+        assertThrows(QueryParseException.class, () -> SimpleQueryParser.DEFAULT.parse("{foo*foo}"));
+        assertThrows(QueryParseException.class, () -> SimpleQueryParser.DEFAULT.parse("{*foo*}"));
+        assertThrows(QueryParseException.class, () -> SimpleQueryParser.DEFAULT.parse("{{foo}}"));
+        assertThrows(QueryParseException.class, () -> SimpleQueryParser.DEFAULT.parse("{foo-bar}"));
+        assertThrows(QueryParseException.class, () -> SimpleQueryParser.DEFAULT.parse("{foo+bar}"));
 
         // Duplicates
-        Assertions.assertThrows(QueryParseException.class, () -> SimpleQueryParser.DEFAULT.parse("{dup}{dup}"));
-        Assertions.assertThrows(QueryParseException.class, () -> SimpleQueryParser.DEFAULT.parse("/{dup}/{dup}"));
-        Assertions.assertThrows(QueryParseException.class, () -> SimpleQueryParser.DEFAULT.parse("{dup}{*dup}"));
-        Assertions.assertThrows(QueryParseException.class, () -> SimpleQueryParser.DEFAULT.parse("/{dup}/{*dup}"));
+        assertThrows(QueryParseException.class, () -> SimpleQueryParser.DEFAULT.parse("{dup}{dup}"));
+        assertThrows(QueryParseException.class, () -> SimpleQueryParser.DEFAULT.parse("/{dup}/{dup}"));
+        assertThrows(QueryParseException.class, () -> SimpleQueryParser.DEFAULT.parse("{dup}{*dup}"));
+        assertThrows(QueryParseException.class, () -> SimpleQueryParser.DEFAULT.parse("/{dup}/{*dup}"));
 
         // Wildcard not at the end
-        Assertions.assertThrows(QueryParseException.class, () -> SimpleQueryParser.DEFAULT.parse("{*bar}/foo"));
-        Assertions.assertThrows(QueryParseException.class, () -> SimpleQueryParser.DEFAULT.parse("{*bar}/{foo}"));
-        Assertions.assertThrows(QueryParseException.class, () -> SimpleQueryParser.DEFAULT.parse("{*bar}{foo}"));
-        Assertions.assertThrows(QueryParseException.class, () -> SimpleQueryParser.DEFAULT.parse("{*bar}{*bar}"));
-        Assertions.assertThrows(QueryParseException.class, () -> SimpleQueryParser.DEFAULT.parse("/foo/{*bar}/"));
-        Assertions.assertThrows(QueryParseException.class, () -> SimpleQueryParser.DEFAULT.parse("/foo/{foo}/{*bar}/"));
+        assertThrows(QueryParseException.class, () -> SimpleQueryParser.DEFAULT.parse("{*bar}/foo"));
+        assertThrows(QueryParseException.class, () -> SimpleQueryParser.DEFAULT.parse("{*bar}/{foo}"));
+        assertThrows(QueryParseException.class, () -> SimpleQueryParser.DEFAULT.parse("{*bar}{foo}"));
+        assertThrows(QueryParseException.class, () -> SimpleQueryParser.DEFAULT.parse("{*bar}{*bar}"));
+        assertThrows(QueryParseException.class, () -> SimpleQueryParser.DEFAULT.parse("/foo/{*bar}/"));
+        assertThrows(QueryParseException.class, () -> SimpleQueryParser.DEFAULT.parse("/foo/{foo}/{*bar}/"));
 
         // Vars not separated
-        Assertions.assertThrows(QueryParseException.class, () -> SimpleQueryParser.DEFAULT.parse("{foo}{bar}"));
-        Assertions.assertThrows(QueryParseException.class, () -> SimpleQueryParser.DEFAULT.parse("/{foo}{bar}"));
-        Assertions.assertThrows(QueryParseException.class, () -> SimpleQueryParser.DEFAULT.parse("{foo}{bar}/"));
-        Assertions.assertThrows(QueryParseException.class, () -> SimpleQueryParser.DEFAULT.parse("{foo}{*bar}"));
-        Assertions.assertThrows(QueryParseException.class, () -> SimpleQueryParser.DEFAULT.parse("/{foo}{*bar}"));
-        Assertions.assertThrows(QueryParseException.class, () -> SimpleQueryParser.DEFAULT.parse("/foo/{foo}{*bar}"));
+        assertThrows(QueryParseException.class, () -> SimpleQueryParser.DEFAULT.parse("{foo}{bar}"));
+        assertThrows(QueryParseException.class, () -> SimpleQueryParser.DEFAULT.parse("/{foo}{bar}"));
+        assertThrows(QueryParseException.class, () -> SimpleQueryParser.DEFAULT.parse("{foo}{bar}/"));
+        assertThrows(QueryParseException.class, () -> SimpleQueryParser.DEFAULT.parse("{foo}{*bar}"));
+        assertThrows(QueryParseException.class, () -> SimpleQueryParser.DEFAULT.parse("/{foo}{*bar}"));
+        assertThrows(QueryParseException.class, () -> SimpleQueryParser.DEFAULT.parse("/foo/{foo}{*bar}"));
 
         // Vars not properly separated
-        Assertions.assertThrows(QueryParseException.class, () -> SimpleQueryParser.DEFAULT.parse("{X} {Y}"));
-        Assertions.assertThrows(QueryParseException.class, () -> SimpleQueryParser.DEFAULT.parse("{X}_{Y}"));
-        Assertions.assertThrows(QueryParseException.class, () -> SimpleQueryParser.DEFAULT.parse("{X}-{Y}"));
-    }
-
-    @SafeVarargs
-    private static <T> void assertOrdered(Collection<T> actual, T ... expected) {
-        Assertions.assertEquals(Arrays.asList(expected), actual);
+        assertThrows(QueryParseException.class, () -> SimpleQueryParser.DEFAULT.parse("{X} {Y}"));
+        assertThrows(QueryParseException.class, () -> SimpleQueryParser.DEFAULT.parse("{X}_{Y}"));
+        assertThrows(QueryParseException.class, () -> SimpleQueryParser.DEFAULT.parse("{X}-{Y}"));
     }
 
     private static ConstToken constant(String token) {

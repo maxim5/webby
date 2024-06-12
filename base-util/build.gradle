@@ -15,7 +15,7 @@ dependencies {
 }
 
 dependencies {
-    testImplementation 'com.google.inject:guice:7.0.0'
+    testImplementation 'com.google.inject:guice:7.0.0'  // testing generics
 }
 
 dependencies {

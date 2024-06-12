@@ -4,7 +4,7 @@ import java.io.ByteArrayOutputStream;
 import java.io.PrintStream;
 import java.nio.charset.Charset;
 
-public class NodePrinter {
+class NodePrinter {
     private static final int DEFAULT_TAB = 4;
 
     public static <T> void println(Router.Node<T> node) {

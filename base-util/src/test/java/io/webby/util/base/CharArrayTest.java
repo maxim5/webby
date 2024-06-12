@@ -5,6 +5,8 @@ import org.junit.jupiter.api.Test;
 import java.nio.CharBuffer;
 
 import static com.google.common.truth.Truth.assertThat;
+import static io.webby.testing.MoreTruth.assertThat;
+import static io.webby.testing.MoreTruth.assertAlso;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 
 public class CharArrayTest {
@@ -50,19 +52,19 @@ public class CharArrayTest {
 
     @Test
     public void equals_and_hashCode() {
-        assertEqualsHashCode(new CharArray(""), new CharArray(""));
-        assertEqualsHashCode(new CharArray(""), new CharArray("foo", 0, 0));
-        assertEqualsHashCode(new CharArray(""), new CharArray("foo", 1, 1));
-        assertEqualsHashCode(new CharArray(""), new CharArray("foo", 2, 2));
-        assertEqualsHashCode(new CharArray(""), new CharArray("foo", 3, 3));
-        assertEqualsHashCode(new CharArray("foo"), new CharArray("foo"));
-        assertEqualsHashCode(new CharArray("foo"), new CharArray("foobar", 0, 3));
-        assertEqualsHashCode(new CharArray("foo"), new CharArray("barfoo", 3, 6));
+        assertAlso(new CharArray("")).isEquivalentTo(new CharArray(""));
+        assertAlso(new CharArray("")).isEquivalentTo(new CharArray("foo", 0, 0));
+        assertAlso(new CharArray("")).isEquivalentTo(new CharArray("foo", 1, 1));
+        assertAlso(new CharArray("")).isEquivalentTo(new CharArray("foo", 2, 2));
+        assertAlso(new CharArray("")).isEquivalentTo(new CharArray("foo", 3, 3));
+        assertAlso(new CharArray("foo")).isEquivalentTo(new CharArray("foo"));
+        assertAlso(new CharArray("foo")).isEquivalentTo(new CharArray("foobar", 0, 3));
+        assertAlso(new CharArray("foo")).isEquivalentTo(new CharArray("barfoo", 3, 6));
     }
 
     @Test
     public void create_invalid_pointers() {
-        //noinspection ConstantConditions
+        // noinspection ConstantConditions
         assertThrows(AssertionError.class, () -> new CharArray((char[]) null, 0, 0));
         assertThrows(AssertionError.class, () -> new CharArray("foo", -1, 2));
         assertThrows(AssertionError.class, () -> new CharArray("foo", 2, 1));
@@ -490,7 +492,7 @@ public class CharArrayTest {
     @Test
     public void chars() {
         int[] array = new CharArray("foobar").chars().toArray();
-        assertThat(array).isEqualTo(new int[] { 102, 111, 111,  98, 97, 114 });
+        assertThat(array).isEqualTo(new int[] { 102, 111, 111, 98, 97, 114 });
     }
 
     @Test
@@ -508,7 +510,7 @@ public class CharArrayTest {
     @Test
     public void codepoints() {
         int[] array = new CharArray("foobar").codePoints().toArray();
-        assertThat(array).isEqualTo(new int[] { 102, 111, 111,  98, 97, 114 });
+        assertThat(array).isEqualTo(new int[] { 102, 111, 111, 98, 97, 114 });
     }
 
     @Test
@@ -521,10 +523,5 @@ public class CharArrayTest {
     public void codepoints_of_subbuffer() {
         int[] array = new CharArray("foobar", 1, 3).codePoints().toArray();
         assertThat(array).isEqualTo(new int[] { 111, 111 });
-    }
-
-    private static void assertEqualsHashCode(CharArray lhs, CharArray rhs) {
-        assertThat(lhs).isEqualTo(rhs);
-        assertThat(lhs.hashCode()).isEqualTo(rhs.hashCode());
     }
 }
