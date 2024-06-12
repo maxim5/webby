@@ -33,7 +33,11 @@ public class TestingRender {
 
     @CheckReturnValue
     public static @NotNull RenderedHttpResponseSubject assertThat(@Nullable HttpResponse response) {
-        return Truth.assertAbout(RenderedHttpResponseSubjectBuilder::new).that(response);
+        return Truth.assertAbout(metadata -> new CustomSubjectBuilder(metadata) {
+            public @NotNull RenderedHttpResponseSubject that(@Nullable HttpResponse response) {
+                return new RenderedHttpResponseSubject(metadata(), response);
+            }
+        }).that(response);
     }
 
     @CanIgnoreReturnValue
@@ -84,16 +88,6 @@ public class TestingRender {
             return headers.copy()
                 .remove(HttpConst.SET_COOKIE)
                 .remove(HttpConst.SERVER_TIMING);
-        }
-    }
-
-    private static class RenderedHttpResponseSubjectBuilder extends CustomSubjectBuilder {
-        protected RenderedHttpResponseSubjectBuilder(@NotNull FailureMetadata metadata) {
-            super(metadata);
-        }
-
-        public @NotNull RenderedHttpResponseSubject that(@Nullable HttpResponse response) {
-            return new RenderedHttpResponseSubject(metadata(), response);
         }
     }
 }
