@@ -16,6 +16,7 @@
       <w>hashable</w>
       <w>httpd</w>
       <w>ints</w>
+      <w>iter</w>
       <w>jetcd</w>
       <w>marshallers</w>
       <w>multilines</w>
