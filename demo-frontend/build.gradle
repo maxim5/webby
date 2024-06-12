@@ -9,7 +9,7 @@ dependencies {
 }
 
 configurations {
-    compileOnly.extendsFrom(common)
+    implementation.extendsFrom(common)
 }
 
 // https://github.com/etiennestuder/gradle-rocker-plugin
