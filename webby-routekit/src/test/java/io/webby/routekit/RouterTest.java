@@ -1,6 +1,5 @@
 package io.webby.routekit;
 
-import com.google.common.truth.Truth;
 import io.webby.util.base.CharArray;
 import io.webby.util.base.MutableCharArray;
 import org.jetbrains.annotations.NotNull;
@@ -13,6 +12,8 @@ import java.util.Collections;
 import java.util.LinkedHashMap;
 import java.util.Map;
 import java.util.stream.Collectors;
+
+import static com.google.common.truth.Truth.assertThat;
 
 public class RouterTest {
     // Trivial cases
@@ -506,15 +507,15 @@ public class RouterTest {
 
     private record RouteSubject(@Nullable Match<String> match) {
         public void isOk(String tag, String... variables) {
-            Truth.assertThat(match).isEqualTo(match(tag, variables));
+            assertThat(match).isEqualTo(match(tag, variables));
         }
 
         public void isOk(String tag, Map<String, String> variables) {
-            Truth.assertThat(match).isEqualTo(match(tag, variables));
+            assertThat(match).isEqualTo(match(tag, variables));
         }
 
         public void is404() {
-            Truth.assertThat(match).isNull();
+            assertThat(match).isNull();
         }
 
         private static Match<String> match(String tag, String ... variables) {

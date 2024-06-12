@@ -19,7 +19,6 @@ import java.util.function.Predicate;
 import java.util.logging.Level;
 import java.util.stream.Collectors;
 
-@SuppressWarnings("UnstableApiUsage")
 public class ClasspathScanner {
     private static final FluentLogger log = FluentLogger.forEnclosingClass();
 

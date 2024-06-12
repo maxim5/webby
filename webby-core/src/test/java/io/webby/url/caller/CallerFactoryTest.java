@@ -392,7 +392,6 @@ public class CallerFactoryTest {
         return methods[0];
     }
 
-    @SuppressWarnings("UnstableApiUsage")
     private static Map<String, CharArray> vars(Object @NotNull ... items) {
         List<CharSequence> list = Streams.mapWithIndex(
             Arrays.stream(items),

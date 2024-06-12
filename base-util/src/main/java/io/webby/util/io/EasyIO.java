@@ -9,7 +9,6 @@ import java.io.IOException;
 
 public interface EasyIO {
     interface Close {
-        @SuppressWarnings("UnstableApiUsage")
         static void closeQuietly(@Nullable Closeable closeable) {
             try {
                 Closeables.close(closeable, true);
@@ -18,7 +17,6 @@ public interface EasyIO {
             }
         }
 
-        @SuppressWarnings("UnstableApiUsage")
         static void closeRethrow(@Nullable Closeable closeable) {
             try {
                 Closeables.close(closeable, false);

@@ -112,7 +112,6 @@ class NettyHttpStepConverter implements ChannelContextBound {
         };
     }
 
-    @SuppressWarnings("UnstableApiUsage")
     private @NotNull HttpResponse addCallback(@NotNull Future<?> future, @NotNull EndpointOptions options) {
         ListenableFuture<?> listenable = (future instanceof ListenableFuture<?> listenableFuture) ?
             listenableFuture :
