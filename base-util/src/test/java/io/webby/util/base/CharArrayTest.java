@@ -5,7 +5,6 @@ import org.junit.jupiter.api.Test;
 import java.nio.CharBuffer;
 
 import static com.google.common.truth.Truth.assertThat;
-import static io.webby.testing.MoreTruth.assertThat;
 import static io.webby.testing.MoreTruth.assertAlso;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 
