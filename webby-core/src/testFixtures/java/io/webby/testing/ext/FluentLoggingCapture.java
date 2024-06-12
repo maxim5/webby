@@ -4,13 +4,13 @@ import com.google.common.flogger.AbstractLogger;
 import com.google.common.flogger.FluentLogger;
 import com.google.common.flogger.backend.LogData;
 import com.google.common.flogger.backend.LoggerBackend;
+import com.google.common.truth.Truth;
 import io.webby.util.base.Unchecked;
 import io.webby.util.func.ThrowRunnable;
 import io.webby.util.reflect.EasyMembers;
 import org.apache.logging.log4j.Level;
 import org.apache.logging.log4j.core.config.Configurator;
 import org.jetbrains.annotations.NotNull;
-import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.extension.AfterEachCallback;
 import org.junit.jupiter.api.extension.BeforeEachCallback;
 import org.junit.jupiter.api.extension.ExtensionContext;
@@ -90,7 +90,7 @@ public class FluentLoggingCapture implements BeforeEachCallback, AfterEachCallba
 
     private static @NotNull LoggerBackend extractBackend(@NotNull FluentLogger logger) throws IllegalAccessException {
         Field field = EasyMembers.findField(AbstractLogger.class, "backend");
-        Assertions.assertNotNull(field);
+        Truth.assertThat(field).isNotNull();
         field.setAccessible(true);
         return (LoggerBackend) field.get(logger);
     }
@@ -98,14 +98,14 @@ public class FluentLoggingCapture implements BeforeEachCallback, AfterEachCallba
     private static void injectBackend(@NotNull FluentLogger logger,
                                       @NotNull LoggerBackend backend) throws IllegalAccessException {
         Field field = EasyMembers.findField(AbstractLogger.class, "backend");
-        Assertions.assertNotNull(field);
+        Truth.assertThat(field).isNotNull();
         field.setAccessible(true);
         field.set(logger, backend);
     }
 
     private static @NotNull FluentLogger getFluentLogger(@NotNull Class<?> klass) throws IllegalAccessException {
         Field field = EasyMembers.findField(klass, it -> it.getType().equals(FluentLogger.class));
-        Assertions.assertNotNull(field);
+        Truth.assertThat(field).isNotNull();
         field.setAccessible(true);
         return (FluentLogger) field.get(null);
     }
