@@ -2,6 +2,8 @@ package io.webby.util.lazy;
 
 import org.jetbrains.annotations.NotNull;
 
+import java.util.function.Supplier;
+
 /**
  * Allows to defer lazy value initialization. The clients should only provide a default non-null value.
  * The clients are not expected to call initialize methods with different values,
@@ -12,24 +14,31 @@ import org.jetbrains.annotations.NotNull;
  */
 public interface LazyInit<T> {
     /**
-     * Returns true if the instance already holds the value.
+     * Returns true if this instance already holds the value.
      */
     boolean isInitialized();
 
     /**
-     * Initializes the instance if it's not already, otherwise fails (even if it stores the same value).
+     * Initializes this instance if it's not already, otherwise fails (even if it stores the same value).
      * Calling this method twice is guaranteed to throw.
      */
     void initializeOrDie(@NotNull T value);
 
     /**
-     * Initializes the instance if it's not already, otherwise fails (unless it stores the same value).
+     * Initializes this instance if it's not already, otherwise fails (unless it stores the same value).
      * Calling this method twice with different arguments is guaranteed to throw.
      */
     void initializeOrCompare(@NotNull T value);
 
     /**
-     * Returns the value if the instance has been initialized, otherwise fails.
+     * Initializes this instance if it's not already, otherwise does nothing.
+     * This method never throws and does not compare values.
+     * The {@code valueSupplier} is only called if necessary.
+     */
+    @NotNull T initializeIfNotYet(@NotNull Supplier<T> valueSupplier);
+
+    /**
+     * Returns the value if this instance has been initialized, otherwise fails.
      */
     @NotNull T getOrDie();
 }

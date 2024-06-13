@@ -4,6 +4,7 @@ import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.concurrent.atomic.AtomicReference;
+import java.util.function.Supplier;
 
 import static java.util.Objects.requireNonNull;
 
@@ -38,6 +39,11 @@ public class AtomicLazyInit<T> implements LazyInit<T> {
         assert success || ref.get() == value :
             "Invalid state. %s already initialized with another value: %s. New value: %s"
             .formatted(getClass().getSimpleName(), ref.get(), value);
+    }
+
+    @Override
+    public @NotNull T initializeIfNotYet(@NotNull Supplier<T> valueSupplier) {
+        return ref.updateAndGet(current -> current != null ? current : valueSupplier.get());
     }
 
     @Override
