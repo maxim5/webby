@@ -4,7 +4,7 @@ import com.google.common.collect.ImmutableMap;
 import com.google.inject.Inject;
 import io.webby.app.ClassFilter;
 import io.webby.app.Settings;
-import io.webby.common.ClasspathScanner;
+import io.webby.app.AppClasspathScanner;
 import io.webby.orm.adapter.JdbcAdapt;
 import io.webby.orm.arch.util.Naming;
 import org.jetbrains.annotations.NotNull;
@@ -15,20 +15,18 @@ import java.util.regex.Pattern;
 
 public class ModelAdaptersScannerImpl implements ModelAdaptersScanner {
     private static final Pattern ADAPTER_NAME = Pattern.compile("\\w+JdbcAdapter");
-    private static final ClassFilter FILTER_BY_NAME = new ClassFilter((pkg, cls) -> ADAPTER_NAME.matcher(cls).matches());
+    private static final ClassFilter FILTER_BY_NAME = ClassFilter.of((pkg, cls) -> ADAPTER_NAME.matcher(cls).matches());
 
     private final ImmutableMap<Class<?>, Class<?>> byClass;
     private final ImmutableMap<String, Class<?>> bySimpleName;
 
     @Inject
-    public ModelAdaptersScannerImpl(@NotNull Settings settings, @NotNull ClasspathScanner scanner) {
+    public ModelAdaptersScannerImpl(@NotNull Settings settings, @NotNull AppClasspathScanner scanner) {
         ImmutableMap.Builder<Class<?>, Class<?>> byClass = ImmutableMap.builder();
         ImmutableMap.Builder<String, Class<?>> bySimpleName = ImmutableMap.builder();
-        Set<? extends Class<?>> adapters = scanner.getMatchingClasses(
-            ClassFilter.matchingAllOf(settings.modelFilter(), FILTER_BY_NAME),
-            klass -> true,
-            "model adapter"
-        );
+        Set<Class<?>> adapters = scanner
+            .timed("model adapter")
+            .scanToSet(ClassFilter.matchingAllOf(settings.modelFilter(), FILTER_BY_NAME));
         for (Class<?> adapter : adapters) {
             if (adapter.isAnnotationPresent(JdbcAdapt.class)) {
                 JdbcAdapt annotation = adapter.getAnnotation(JdbcAdapt.class);

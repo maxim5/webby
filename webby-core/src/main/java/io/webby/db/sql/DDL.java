@@ -5,7 +5,7 @@ import com.google.common.eventbus.Subscribe;
 import com.google.common.flogger.FluentLogger;
 import com.google.inject.Inject;
 import io.webby.app.Settings;
-import io.webby.common.GuiceCompleteEvent;
+import io.webby.app.GuiceCompleteEvent;
 import io.webby.orm.api.Connector;
 import io.webby.orm.api.QueryRunner;
 import io.webby.orm.api.TableMeta;

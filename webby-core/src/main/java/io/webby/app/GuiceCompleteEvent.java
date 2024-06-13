@@ -1,4 +1,4 @@
-package io.webby.common;
+package io.webby.app;
 
 public class GuiceCompleteEvent {
 }

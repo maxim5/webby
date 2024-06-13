@@ -2,7 +2,7 @@ package io.webby.orm.arch.factory;
 
 import com.google.common.flogger.FluentLogger;
 import io.webby.app.AppSettings;
-import io.webby.common.ClasspathScanner;
+import io.webby.app.AppClasspathScanner;
 import io.webby.orm.arch.model.AdapterArch;
 import io.webby.orm.arch.model.JavaNameHolder;
 import io.webby.orm.arch.model.TableArch;
@@ -31,7 +31,7 @@ public class ArchJavaRunner {
     }
 
     public ArchJavaRunner() {
-        this(new ModelAdaptersScannerImpl(new AppSettings(), new ClasspathScanner()));
+        this(new ModelAdaptersScannerImpl(new AppSettings(), new AppClasspathScanner()));
     }
 
     public void runGenerate(@NotNull String destinationPath, @NotNull RunInputs inputs) throws IOException {

@@ -34,9 +34,9 @@ public final class AppSettings implements Settings {
 
     private Charset charset = Charset.defaultCharset();
 
-    private final ClassFilter modelFilter = new ClassFilter();
-    private final ClassFilter handlerFilter = new ClassFilter();
-    private final ClassFilter interceptorFilter = new ClassFilter();
+    private final ClassFilter modelFilter = ClassFilter.empty();
+    private final ClassFilter handlerFilter = ClassFilter.empty();
+    private final ClassFilter interceptorFilter = ClassFilter.empty();
 
     private QueryParser urlParser = SimpleQueryParser.DEFAULT;
 

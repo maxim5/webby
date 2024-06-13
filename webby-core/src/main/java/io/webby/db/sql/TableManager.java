@@ -5,7 +5,7 @@ import com.google.common.flogger.FluentLogger;
 import com.google.common.primitives.Primitives;
 import com.google.inject.Inject;
 import io.webby.app.Settings;
-import io.webby.common.ClasspathScanner;
+import io.webby.app.AppClasspathScanner;
 import io.webby.common.Lifetime;
 import io.webby.orm.api.*;
 import io.webby.util.lazy.AtomicLazyRecycle;
@@ -33,7 +33,7 @@ public class TableManager implements HasEngine {
     @Inject
     public TableManager(@NotNull Settings settings,
                         @NotNull ConnectionPool pool,
-                        @NotNull ClasspathScanner scanner,
+                        @NotNull AppClasspathScanner scanner,
                         @NotNull Lifetime lifetime) throws Exception {
         assert settings.storageSettings().isSqlEnabled() : "SQL storage is disabled";
         assert pool.isRunning() : "Invalid pool state: %s".formatted(pool);
@@ -41,7 +41,7 @@ public class TableManager implements HasEngine {
         connector = new ThreadLocalConnector(pool, settings.getLongProperty("db.sql.connection.expiration.millis", 30_000));
         engine = pool.engine();
 
-        Set<? extends Class<?>> tableClasses = scanner.getDerivedClasses(settings.modelFilter(), BaseTable.class);
+        Set<Class<?>> tableClasses = scanner.timed("BaseTable").getDerivedClasses(settings.modelFilter(), BaseTable.class);
         tableMap = buildTableMap(tableClasses);
 
         initializeStatic(this);
@@ -120,7 +120,7 @@ public class TableManager implements HasEngine {
     }
 
     @VisibleForTesting
-    static ImmutableMap<Class<?>, EntityTable> buildTableMap(@NotNull Iterable<? extends Class<?>> tableClasses) throws Exception {
+    static ImmutableMap<Class<?>, EntityTable> buildTableMap(@NotNull Iterable<Class<?>> tableClasses) throws Exception {
         ImmutableMap.Builder<Class<?>, EntityTable> result = new ImmutableMap.Builder<>();
         for (Class<?> tableClass : tableClasses) {
             TableMeta meta = castAny(tableClass.getField("META").get(null));

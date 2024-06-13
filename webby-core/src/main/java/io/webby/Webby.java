@@ -11,7 +11,7 @@ import com.google.inject.util.Modules;
 import io.webby.app.*;
 import io.webby.auth.AuthModule;
 import io.webby.common.CommonModule;
-import io.webby.common.GuiceCompleteEvent;
+import io.webby.app.GuiceCompleteEvent;
 import io.webby.db.DbModule;
 import io.webby.db.kv.DbType;
 import io.webby.db.kv.KeyValueSettings;

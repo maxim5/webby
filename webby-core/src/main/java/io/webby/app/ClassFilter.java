@@ -1,31 +1,43 @@
 package io.webby.app;
 
 import com.google.common.base.Strings;
-import io.webby.common.Packages;
+import io.webby.util.classpath.ClassNamePredicate;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.List;
 import java.util.Set;
-import java.util.function.BiPredicate;
 import java.util.stream.Collectors;
 
-public final class ClassFilter {
-    private static final BiPredicate<String, String> EXCLUDE_IMPLEMENTATION_PACKAGES =
+public final class ClassFilter implements ClassNamePredicate {
+    private static final ClassNamePredicate EXCLUDE_IMPLEMENTATION_PACKAGES =
             (pkg, __) -> !pkg.startsWith(Packages.RENDER_IMPL) &&
                          !pkg.startsWith(Packages.DB_KV_IMPL + ".") &&  // the dot means subpackages
                          !pkg.startsWith(Packages.DB_SQL_IMPL);
 
-    private BiPredicate<String, String> predicate;
+    private ClassNamePredicate predicate;
 
     ClassFilter() {
         this.predicate = null;
     }
 
-    public ClassFilter(@NotNull BiPredicate<String, String> predicate) {
+    ClassFilter(@NotNull ClassNamePredicate predicate) {
         this.predicate = predicate.and(EXCLUDE_IMPLEMENTATION_PACKAGES);
     }
 
-    public @NotNull BiPredicate<String, String> predicateOrDefault() {
+    public static @NotNull ClassFilter empty() {
+        return new ClassFilter();
+    }
+
+    public static @NotNull ClassFilter of(@NotNull ClassNamePredicate filter) {
+        return new ClassFilter(filter);
+    }
+
+    @Override
+    public boolean test(@NotNull String packageName, @NotNull String simpleClassName) {
+        return predicateOrDefault().test(packageName, simpleClassName);
+    }
+
+    public @NotNull ClassNamePredicate predicateOrDefault() {
         return predicate != null ? predicate : EXCLUDE_IMPLEMENTATION_PACKAGES;
     }
 
@@ -33,7 +45,7 @@ public final class ClassFilter {
         return predicate != null;
     }
 
-    public void setPredicate(@NotNull BiPredicate<String, String> predicate) {
+    public void setPredicate(@NotNull ClassNamePredicate predicate) {
         this.predicate = predicate.and(EXCLUDE_IMPLEMENTATION_PACKAGES);
     }
 
@@ -65,7 +77,7 @@ public final class ClassFilter {
         setCommonPackageOf(List.of(classes));
     }
 
-    public void setPredicateUnsafe(@NotNull BiPredicate<String, String> predicate) {
+    public void setPredicateUnsafe(@NotNull ClassNamePredicate predicate) {
         this.predicate = predicate;
     }
 
@@ -77,16 +89,16 @@ public final class ClassFilter {
         return new ClassFilter(first.predicateOrDefault().and(second.predicateOrDefault()));
     }
 
-    private static @NotNull BiPredicate<String, String> onlyClass(@NotNull Class<?> klass) {
+    private static @NotNull ClassNamePredicate onlyClass(@NotNull Class<?> klass) {
         return (pkg, cls) -> pkg.equals(klass.getPackageName()) && cls.equals(klass.getSimpleName());
     }
 
-    private static @NotNull BiPredicate<String, String> packagesOf(@NotNull List<Class<?>> classes) {
+    private static @NotNull ClassNamePredicate packagesOf(@NotNull List<Class<?>> classes) {
         Set<String> packages = classes.stream().map(Class::getPackageName).collect(Collectors.toSet());
         return (pkg, cls) -> packages.contains(pkg);
     }
 
-    private static @NotNull BiPredicate<String, String> allInPackage(@NotNull String packageName) {
+    private static @NotNull ClassNamePredicate allInPackage(@NotNull String packageName) {
         return (pkg, cls) -> pkg.startsWith(packageName);
     }
 

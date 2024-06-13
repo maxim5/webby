@@ -21,6 +21,7 @@ public class AppModule extends AbstractModule {
         bind(AppLifetime.class).asEagerSingleton();
         bind(AppMaintenance.class).asEagerSingleton();
         bind(Lifetime.class).toProvider(AppLifetime.class);
+        bind(AppClasspathScanner.class).asEagerSingleton();
 
         bind(EventBus.class).asEagerSingleton();
     }
