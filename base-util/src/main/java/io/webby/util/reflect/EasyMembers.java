@@ -10,7 +10,7 @@ import java.lang.reflect.Modifier;
 import java.util.Arrays;
 import java.util.function.Predicate;
 
-import static io.webby.util.reflect.EasyClasspath.classForNameOrNull;
+import static io.webby.util.classpath.EasyClasspath.classForNameOrNull;
 
 public class EasyMembers {
     public static boolean isPublicStatic(@NotNull Member member) {

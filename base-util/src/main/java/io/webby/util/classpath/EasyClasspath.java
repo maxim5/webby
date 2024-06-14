@@ -1,4 +1,4 @@
-package io.webby.util.reflect;
+package io.webby.util.classpath;
 
 import com.google.common.flogger.FluentLogger;
 import org.jetbrains.annotations.NotNull;
