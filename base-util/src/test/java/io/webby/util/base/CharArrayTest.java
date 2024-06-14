@@ -1,398 +1,401 @@
 package io.webby.util.base;
 
-import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 
 import java.nio.CharBuffer;
+
+import static com.google.common.truth.Truth.assertThat;
+import static io.webby.testing.MoreTruth.assertAlso;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 
 public class CharArrayTest {
     @Test
     public void create_empty_string() {
         CharArray array = new CharArray("");
-        Assertions.assertEquals(array.start(), 0);
-        Assertions.assertEquals(array.end(), 0);
-        Assertions.assertEquals(array.length(), 0);
+        assertThat(array.start()).isEqualTo(0);
+        assertThat(array.end()).isEqualTo(0);
+        assertThat(array.length()).isEqualTo(0);
     }
 
     @Test
     public void create_empty_same_pointers() {
         CharArray array = new CharArray("foo", 3, 3);
-        Assertions.assertEquals(array.start(), 3);
-        Assertions.assertEquals(array.end(), 3);
-        Assertions.assertEquals(array.length(), 0);
+        assertThat(array.start()).isEqualTo(3);
+        assertThat(array.end()).isEqualTo(3);
+        assertThat(array.length()).isEqualTo(0);
     }
 
     @Test
     public void create_from_nio_buffer_readonly() {
         CharBuffer nioBuffer = CharBuffer.wrap("foobar", 2, 5);
-        Assertions.assertTrue(nioBuffer.isReadOnly());
+        assertThat(nioBuffer.isReadOnly()).isTrue();
 
         CharArray array = new CharArray(nioBuffer);
-        Assertions.assertEquals(new CharArray("oba"), array);
-        Assertions.assertArrayEquals("oba".toCharArray(), array.chars);
-        Assertions.assertEquals(0, array.start);
-        Assertions.assertEquals(3, array.end);
+        assertThat(new CharArray("oba")).isEqualTo(array);
+        assertThat("oba".toCharArray()).isEqualTo(array.chars);
+        assertThat(0).isEqualTo(array.start);
+        assertThat(3).isEqualTo(array.end);
     }
 
     @Test
     public void create_from_nio_buffer_writable() {
         CharBuffer nioBuffer = CharBuffer.wrap("foobar".toCharArray(), 2, 3);
-        Assertions.assertFalse(nioBuffer.isReadOnly());
+        assertThat(nioBuffer.isReadOnly()).isFalse();
 
         CharArray array = new CharArray(nioBuffer);
-        Assertions.assertEquals(new CharArray("oba"), array);
-        Assertions.assertArrayEquals("foobar".toCharArray(), array.chars);
-        Assertions.assertEquals(2, array.start);
-        Assertions.assertEquals(5, array.end);
+        assertThat(new CharArray("oba")).isEqualTo(array);
+        assertThat("foobar".toCharArray()).isEqualTo(array.chars);
+        assertThat(2).isEqualTo(array.start);
+        assertThat(5).isEqualTo(array.end);
     }
 
     @Test
     public void equals_and_hashCode() {
-        assertEqualsHashCode(new CharArray(""), new CharArray(""));
-        assertEqualsHashCode(new CharArray(""), new CharArray("foo", 0, 0));
-        assertEqualsHashCode(new CharArray(""), new CharArray("foo", 1, 1));
-        assertEqualsHashCode(new CharArray(""), new CharArray("foo", 2, 2));
-        assertEqualsHashCode(new CharArray(""), new CharArray("foo", 3, 3));
-        assertEqualsHashCode(new CharArray("foo"), new CharArray("foo"));
-        assertEqualsHashCode(new CharArray("foo"), new CharArray("foobar", 0, 3));
-        assertEqualsHashCode(new CharArray("foo"), new CharArray("barfoo", 3, 6));
+        assertAlso(new CharArray("")).isEquivalentTo(new CharArray(""));
+        assertAlso(new CharArray("")).isEquivalentTo(new CharArray("foo", 0, 0));
+        assertAlso(new CharArray("")).isEquivalentTo(new CharArray("foo", 1, 1));
+        assertAlso(new CharArray("")).isEquivalentTo(new CharArray("foo", 2, 2));
+        assertAlso(new CharArray("")).isEquivalentTo(new CharArray("foo", 3, 3));
+        assertAlso(new CharArray("foo")).isEquivalentTo(new CharArray("foo"));
+        assertAlso(new CharArray("foo")).isEquivalentTo(new CharArray("foobar", 0, 3));
+        assertAlso(new CharArray("foo")).isEquivalentTo(new CharArray("barfoo", 3, 6));
     }
 
     @Test
     public void create_invalid_pointers() {
-        //noinspection ConstantConditions
-        Assertions.assertThrows(AssertionError.class, () -> new CharArray((char[]) null, 0, 0));
-        Assertions.assertThrows(AssertionError.class, () -> new CharArray("foo", -1, 2));
-        Assertions.assertThrows(AssertionError.class, () -> new CharArray("foo", 2, 1));
-        Assertions.assertThrows(AssertionError.class, () -> new CharArray("foo", 0, 4));
-        Assertions.assertThrows(AssertionError.class, () -> new CharArray("foo", 4, 4));
+        // noinspection ConstantConditions
+        assertThrows(AssertionError.class, () -> new CharArray((char[]) null, 0, 0));
+        assertThrows(AssertionError.class, () -> new CharArray("foo", -1, 2));
+        assertThrows(AssertionError.class, () -> new CharArray("foo", 2, 1));
+        assertThrows(AssertionError.class, () -> new CharArray("foo", 0, 4));
+        assertThrows(AssertionError.class, () -> new CharArray("foo", 4, 4));
     }
 
     @Test
     public void indexOf() {
         CharArray array = new CharArray("foo-bar-baz");
 
-        Assertions.assertEquals(0, array.indexOf('f'));
-        Assertions.assertEquals(1, array.indexOf('o'));
-        Assertions.assertEquals(3, array.indexOf('-'));
-        Assertions.assertEquals(5, array.indexOf('a'));
-        Assertions.assertEquals(10, array.indexOf('z'));
-        Assertions.assertEquals(-1, array.indexOf('w'));
+        assertThat(array.indexOf('f')).isEqualTo(0);
+        assertThat(array.indexOf('o')).isEqualTo(1);
+        assertThat(array.indexOf('-')).isEqualTo(3);
+        assertThat(array.indexOf('a')).isEqualTo(5);
+        assertThat(array.indexOf('z')).isEqualTo(10);
+        assertThat(array.indexOf('w')).isEqualTo(-1);
 
-        Assertions.assertEquals(-1, array.indexOf('f', 1));
-        Assertions.assertEquals(-2, array.indexOf('f', 1, -2));
-        Assertions.assertEquals(11, array.indexOf('f', 1, array.length()));
-        Assertions.assertEquals(1, array.indexOf('o', 1));
-        Assertions.assertEquals(1, array.indexOf('o', 1, -2));
-        Assertions.assertEquals(3, array.indexOf('-', 3));
-        Assertions.assertEquals(3, array.indexOf('-', 3, array.length()));
-        Assertions.assertEquals(7, array.indexOf('-', 4));
-        Assertions.assertEquals(7, array.indexOf('-', 4, array.length()));
-        Assertions.assertEquals(7, array.indexOf('-', 4, -2));
-        Assertions.assertEquals(7, array.indexOf('-', 7, array.length()));
-        Assertions.assertEquals(11, array.indexOf('-', 8, array.length()));
+        assertThat(array.indexOf('f', 1)).isEqualTo(-1);
+        assertThat(array.indexOf('f', 1, -2)).isEqualTo(-2);
+        assertThat(array.indexOf('f', 1, array.length())).isEqualTo(11);
+        assertThat(array.indexOf('o', 1)).isEqualTo(1);
+        assertThat(array.indexOf('o', 1, -2)).isEqualTo(1);
+        assertThat(array.indexOf('-', 3)).isEqualTo(3);
+        assertThat(array.indexOf('-', 3, array.length())).isEqualTo(3);
+        assertThat(array.indexOf('-', 4)).isEqualTo(7);
+        assertThat(array.indexOf('-', 4, array.length())).isEqualTo(7);
+        assertThat(array.indexOf('-', 4, -2)).isEqualTo(7);
+        assertThat(array.indexOf('-', 7, array.length())).isEqualTo(7);
+        assertThat(array.indexOf('-', 8, array.length())).isEqualTo(11);
     }
 
     @Test
     public void indexOf_subarray() {
         CharArray array = new CharArray("foobar", 1, 4);  // oob
 
-        Assertions.assertEquals(-1, array.indexOf('f'));
-        Assertions.assertEquals(-1, array.indexOf('a'));
-        Assertions.assertEquals(2, array.indexOf('b'));
-        Assertions.assertEquals(-1, array.indexOf('o', 3));
-        Assertions.assertEquals(-2, array.indexOf('o', 3, -2));
+        assertThat(array.indexOf('f')).isEqualTo(-1);
+        assertThat(array.indexOf('a')).isEqualTo(-1);
+        assertThat(array.indexOf('b')).isEqualTo(2);
+        assertThat(array.indexOf('o', 3)).isEqualTo(-1);
+        assertThat(array.indexOf('o', 3, -2)).isEqualTo(-2);
     }
 
     @Test
     public void indexOfAny() {
         CharArray array = new CharArray("foo-bar-baz");
 
-        Assertions.assertEquals(0, array.indexOfAny('f', 'o'));
-        Assertions.assertEquals(1, array.indexOfAny('o', 'o'));
-        Assertions.assertEquals(3, array.indexOfAny('a', '-'));
-        Assertions.assertEquals(5, array.indexOfAny('a', 'z'));
-        Assertions.assertEquals(10, array.indexOfAny('z', 'w'));
-        Assertions.assertEquals(-1, array.indexOfAny('x', 'y'));
+        assertThat(array.indexOfAny('f', 'o')).isEqualTo(0);
+        assertThat(array.indexOfAny('o', 'o')).isEqualTo(1);
+        assertThat(array.indexOfAny('a', '-')).isEqualTo(3);
+        assertThat(array.indexOfAny('a', 'z')).isEqualTo(5);
+        assertThat(array.indexOfAny('z', 'w')).isEqualTo(10);
+        assertThat(array.indexOfAny('x', 'y')).isEqualTo(-1);
 
-        Assertions.assertEquals(-1, array.indexOfAny('f', 'g', 1));
-        Assertions.assertEquals(-2, array.indexOfAny('f', 'g', 1, -2));
-        Assertions.assertEquals(11, array.indexOfAny('f', 'g', 1, array.length()));
-        Assertions.assertEquals(1, array.indexOfAny('o', 'a', 1));
-        Assertions.assertEquals(1, array.indexOfAny('o', 'a', 1, -2));
-        Assertions.assertEquals(3, array.indexOfAny('-', 'a', 3));
-        Assertions.assertEquals(3, array.indexOfAny('-', 'a', 3, array.length()));
-        Assertions.assertEquals(7, array.indexOfAny('z', '-', 4));
-        Assertions.assertEquals(7, array.indexOfAny('z', '-', 4, array.length()));
-        Assertions.assertEquals(7, array.indexOfAny('z', '-', 4, -2));
-        Assertions.assertEquals(7, array.indexOfAny('z', '-', 7, array.length()));
-        Assertions.assertEquals(9, array.indexOfAny('a', '-', 8, array.length()));
-        Assertions.assertEquals(10, array.indexOfAny('z', '-', 8, array.length()));
-        Assertions.assertEquals(11, array.indexOfAny('z', '-', 11, array.length()));
-        Assertions.assertEquals(11, array.indexOfAny('o', '-', 8, array.length()));
+        assertThat(array.indexOfAny('f', 'g', 1)).isEqualTo(-1);
+        assertThat(array.indexOfAny('f', 'g', 1, -2)).isEqualTo(-2);
+        assertThat(array.indexOfAny('f', 'g', 1, array.length())).isEqualTo(11);
+        assertThat(array.indexOfAny('o', 'a', 1)).isEqualTo(1);
+        assertThat(array.indexOfAny('o', 'a', 1, -2)).isEqualTo(1);
+        assertThat(array.indexOfAny('-', 'a', 3)).isEqualTo(3);
+        assertThat(array.indexOfAny('-', 'a', 3, array.length())).isEqualTo(3);
+        assertThat(array.indexOfAny('z', '-', 4)).isEqualTo(7);
+        assertThat(array.indexOfAny('z', '-', 4, array.length())).isEqualTo(7);
+        assertThat(array.indexOfAny('z', '-', 4, -2)).isEqualTo(7);
+        assertThat(array.indexOfAny('z', '-', 7, array.length())).isEqualTo(7);
+        assertThat(array.indexOfAny('a', '-', 8, array.length())).isEqualTo(9);
+        assertThat(array.indexOfAny('z', '-', 8, array.length())).isEqualTo(10);
+        assertThat(array.indexOfAny('z', '-', 11, array.length())).isEqualTo(11);
+        assertThat(array.indexOfAny('o', '-', 8, array.length())).isEqualTo(11);
     }
 
     @Test
     public void indexOfAny_subarray() {
         CharArray array = new CharArray("foobar", 1, 4);  // oob
 
-        Assertions.assertEquals(-1, array.indexOfAny('f', 'a'));
-        Assertions.assertEquals(2, array.indexOfAny('f', 'b'));
-        Assertions.assertEquals(-1, array.indexOfAny('o', 'o', 3));
-        Assertions.assertEquals(-2, array.indexOfAny('o', 'o', 3, -2));
+        assertThat(array.indexOfAny('f', 'a')).isEqualTo(-1);
+        assertThat(array.indexOfAny('f', 'b')).isEqualTo(2);
+        assertThat(array.indexOfAny('o', 'o', 3)).isEqualTo(-1);
+        assertThat(array.indexOfAny('o', 'o', 3, -2)).isEqualTo(-2);
     }
 
     @Test
     public void lastIndexOf() {
         CharArray array = new CharArray("foo-bar-baz");
 
-        Assertions.assertEquals(0, array.lastIndexOf('f'));
-        Assertions.assertEquals(2, array.lastIndexOf('o'));
-        Assertions.assertEquals(7, array.lastIndexOf('-'));
-        Assertions.assertEquals(9, array.lastIndexOf('a'));
-        Assertions.assertEquals(10, array.lastIndexOf('z'));
-        Assertions.assertEquals(-1, array.lastIndexOf('w'));
+        assertThat(array.lastIndexOf('f')).isEqualTo(0);
+        assertThat(array.lastIndexOf('o')).isEqualTo(2);
+        assertThat(array.lastIndexOf('-')).isEqualTo(7);
+        assertThat(array.lastIndexOf('a')).isEqualTo(9);
+        assertThat(array.lastIndexOf('z')).isEqualTo(10);
+        assertThat(array.lastIndexOf('w')).isEqualTo(-1);
 
-        Assertions.assertEquals(0, array.lastIndexOf('f', 10));
-        Assertions.assertEquals(0, array.lastIndexOf('f', 10, -1));
-        Assertions.assertEquals(9, array.lastIndexOf('a', 10));
-        Assertions.assertEquals(9, array.lastIndexOf('a', 9));
-        Assertions.assertEquals(5, array.lastIndexOf('a', 8));
-        Assertions.assertEquals(5, array.lastIndexOf('a', 5));
-        Assertions.assertEquals(-1, array.lastIndexOf('a', 4));
-        Assertions.assertEquals(-2, array.lastIndexOf('a', 4, -2));
+        assertThat(array.lastIndexOf('f', 10)).isEqualTo(0);
+        assertThat(array.lastIndexOf('f', 10, -1)).isEqualTo(0);
+        assertThat(array.lastIndexOf('a', 10)).isEqualTo(9);
+        assertThat(array.lastIndexOf('a', 9)).isEqualTo(9);
+        assertThat(array.lastIndexOf('a', 8)).isEqualTo(5);
+        assertThat(array.lastIndexOf('a', 5)).isEqualTo(5);
+        assertThat(array.lastIndexOf('a', 4)).isEqualTo(-1);
+        assertThat(array.lastIndexOf('a', 4, -2)).isEqualTo(-2);
     }
 
     @Test
     public void lastIndexOf_subarray() {
         CharArray array = new CharArray("foobar", 1, 4);  // oob
 
-        Assertions.assertEquals(-1, array.lastIndexOf('f'));
-        Assertions.assertEquals(-1, array.lastIndexOf('a'));
-        Assertions.assertEquals(-1, array.lastIndexOf('a', 2));
-        Assertions.assertEquals(-1, array.lastIndexOf('a', 3));
-        Assertions.assertEquals(2, array.lastIndexOf('b'));
-        Assertions.assertEquals(2, array.lastIndexOf('b', 2));
-        Assertions.assertEquals(2, array.lastIndexOf('b', 3));
-        Assertions.assertEquals(0, array.lastIndexOf('o', 0));
-        Assertions.assertEquals(1, array.lastIndexOf('o', 3));
-        Assertions.assertEquals(1, array.lastIndexOf('o', 3, -2));
+        assertThat(array.lastIndexOf('f')).isEqualTo(-1);
+        assertThat(array.lastIndexOf('a')).isEqualTo(-1);
+        assertThat(array.lastIndexOf('a', 2)).isEqualTo(-1);
+        assertThat(array.lastIndexOf('a', 3)).isEqualTo(-1);
+        assertThat(array.lastIndexOf('b')).isEqualTo(2);
+        assertThat(array.lastIndexOf('b', 2)).isEqualTo(2);
+        assertThat(array.lastIndexOf('b', 3)).isEqualTo(2);
+        assertThat(array.lastIndexOf('o', 0)).isEqualTo(0);
+        assertThat(array.lastIndexOf('o', 3)).isEqualTo(1);
+        assertThat(array.lastIndexOf('o', 3, -2)).isEqualTo(1);
     }
 
     @Test
     public void lastIndexOfAny() {
         CharArray array = new CharArray("foo-bar-baz");
 
-        Assertions.assertEquals(0, array.lastIndexOfAny('f', 'g'));
-        Assertions.assertEquals(2, array.lastIndexOfAny('f', 'o'));
-        Assertions.assertEquals(2, array.lastIndexOfAny('o', 'f'));
-        Assertions.assertEquals(2, array.lastIndexOfAny('o', 'x'));
-        Assertions.assertEquals(7, array.lastIndexOfAny('-', 'o'));
-        Assertions.assertEquals(9, array.lastIndexOfAny('-', 'a'));
-        Assertions.assertEquals(10, array.lastIndexOfAny('-', 'z'));
-        Assertions.assertEquals(-1, array.lastIndexOfAny('x', 'y'));
+        assertThat(array.lastIndexOfAny('f', 'g')).isEqualTo(0);
+        assertThat(array.lastIndexOfAny('f', 'o')).isEqualTo(2);
+        assertThat(array.lastIndexOfAny('o', 'f')).isEqualTo(2);
+        assertThat(array.lastIndexOfAny('o', 'x')).isEqualTo(2);
+        assertThat(array.lastIndexOfAny('-', 'o')).isEqualTo(7);
+        assertThat(array.lastIndexOfAny('-', 'a')).isEqualTo(9);
+        assertThat(array.lastIndexOfAny('-', 'z')).isEqualTo(10);
+        assertThat(array.lastIndexOfAny('x', 'y')).isEqualTo(-1);
 
-        Assertions.assertEquals(0, array.lastIndexOfAny('f', 'g', 10));
-        Assertions.assertEquals(0, array.lastIndexOfAny('f', 'g', 10, -1));
-        Assertions.assertEquals(10, array.lastIndexOfAny('f', 'z', 10));
-        Assertions.assertEquals(10, array.lastIndexOfAny('f', 'z', 10, -1));
-        Assertions.assertEquals(10, array.lastIndexOfAny('a', 'z', 10));
-        Assertions.assertEquals(9, array.lastIndexOfAny('a', 'r', 10));
-        Assertions.assertEquals(9, array.lastIndexOfAny('a', 'z', 9));
-        Assertions.assertEquals(5, array.lastIndexOfAny('a', 'z', 8));
-        Assertions.assertEquals(5, array.lastIndexOfAny('a', 'r', 5));
-        Assertions.assertEquals(-1, array.lastIndexOfAny('a', 'r', 4));
-        Assertions.assertEquals(-2, array.lastIndexOfAny('a', 'r', 4, -2));
+        assertThat(array.lastIndexOfAny('f', 'g', 10)).isEqualTo(0);
+        assertThat(array.lastIndexOfAny('f', 'g', 10, -1)).isEqualTo(0);
+        assertThat(array.lastIndexOfAny('f', 'z', 10)).isEqualTo(10);
+        assertThat(array.lastIndexOfAny('f', 'z', 10, -1)).isEqualTo(10);
+        assertThat(array.lastIndexOfAny('a', 'z', 10)).isEqualTo(10);
+        assertThat(array.lastIndexOfAny('a', 'r', 10)).isEqualTo(9);
+        assertThat(array.lastIndexOfAny('a', 'z', 9)).isEqualTo(9);
+        assertThat(array.lastIndexOfAny('a', 'z', 8)).isEqualTo(5);
+        assertThat(array.lastIndexOfAny('a', 'r', 5)).isEqualTo(5);
+        assertThat(array.lastIndexOfAny('a', 'r', 4)).isEqualTo(-1);
+        assertThat(array.lastIndexOfAny('a', 'r', 4, -2)).isEqualTo(-2);
     }
 
     @Test
     public void lastIndexOfAny_subarray() {
         CharArray array = new CharArray("foobar", 1, 4);  // oob
 
-        Assertions.assertEquals(-1, array.lastIndexOfAny('f', 'a'));
-        Assertions.assertEquals(-1, array.lastIndexOfAny('a', 'f'));
-        Assertions.assertEquals(-1, array.lastIndexOfAny('a', 'f', 2));
-        Assertions.assertEquals(-1, array.lastIndexOfAny('a', 'f', 3));
-        Assertions.assertEquals(2, array.lastIndexOfAny('b', 'o'));
-        Assertions.assertEquals(2, array.lastIndexOfAny('b', 'o', 2));
-        Assertions.assertEquals(2, array.lastIndexOfAny('b', 'o', 3));
-        Assertions.assertEquals(0, array.lastIndexOfAny('o', 'f', 0));
-        Assertions.assertEquals(1, array.lastIndexOfAny('o', 'f', 3));
-        Assertions.assertEquals(1, array.lastIndexOfAny('o', 'f', 3, -2));
+        assertThat(array.lastIndexOfAny('f', 'a')).isEqualTo(-1);
+        assertThat(array.lastIndexOfAny('a', 'f')).isEqualTo(-1);
+        assertThat(array.lastIndexOfAny('a', 'f', 2)).isEqualTo(-1);
+        assertThat(array.lastIndexOfAny('a', 'f', 3)).isEqualTo(-1);
+        assertThat(array.lastIndexOfAny('b', 'o')).isEqualTo(2);
+        assertThat(array.lastIndexOfAny('b', 'o', 2)).isEqualTo(2);
+        assertThat(array.lastIndexOfAny('b', 'o', 3)).isEqualTo(2);
+        assertThat(array.lastIndexOfAny('o', 'f', 0)).isEqualTo(0);
+        assertThat(array.lastIndexOfAny('o', 'f', 3)).isEqualTo(1);
+        assertThat(array.lastIndexOfAny('o', 'f', 3, -2)).isEqualTo(1);
     }
 
     @Test
     public void contains() {
         CharArray array = new CharArray("foobar", 1, 4);  // oob
 
-        Assertions.assertTrue(array.contains('o'));
-        Assertions.assertTrue(array.contains('b'));
-        Assertions.assertFalse(array.contains('f'));
-        Assertions.assertFalse(array.contains('a'));
-        Assertions.assertFalse(array.contains('x'));
+        assertThat(array.contains('o')).isTrue();
+        assertThat(array.contains('b')).isTrue();
+        assertThat(array.contains('f')).isFalse();
+        assertThat(array.contains('a')).isFalse();
+        assertThat(array.contains('x')).isFalse();
     }
 
     @Test
     public void containsAny() {
         CharArray array = new CharArray("foobar", 1, 4);  // oob
 
-        Assertions.assertTrue(array.containsAny('o', 'b'));
-        Assertions.assertTrue(array.containsAny('o', 'x'));
-        Assertions.assertTrue(array.containsAny('b', 'x'));
-        Assertions.assertTrue(array.containsAny('b', 'a'));
-        Assertions.assertFalse(array.containsAny('a', 'x'));
+        assertThat(array.containsAny('o', 'b')).isTrue();
+        assertThat(array.containsAny('o', 'x')).isTrue();
+        assertThat(array.containsAny('b', 'x')).isTrue();
+        assertThat(array.containsAny('b', 'a')).isTrue();
+        assertThat(array.containsAny('a', 'x')).isFalse();
     }
 
     @Test
     public void commonPrefix() {
-        Assertions.assertEquals(0, new CharArray("foo").commonPrefix("bar"));
-        Assertions.assertEquals(2, new CharArray("bar").commonPrefix("baz"));
-        Assertions.assertEquals(3, new CharArray("foo").commonPrefix("foo"));
+        assertThat(new CharArray("foo").commonPrefix("bar")).isEqualTo(0);
+        assertThat(new CharArray("bar").commonPrefix("baz")).isEqualTo(2);
+        assertThat(new CharArray("foo").commonPrefix("foo")).isEqualTo(3);
 
-        Assertions.assertEquals(0, new CharArray("foo").commonPrefix(new CharArray("bar")));
-        Assertions.assertEquals(2, new CharArray("bar").commonPrefix(new CharArray("baz")));
+        assertThat(new CharArray("foo").commonPrefix(new CharArray("bar"))).isEqualTo(0);
+        assertThat(new CharArray("bar").commonPrefix(new CharArray("baz"))).isEqualTo(2);
 
-        Assertions.assertEquals(0, new CharArray("foo").commonPrefix(new CharArray("foobar", 3, 6)));
-        Assertions.assertEquals(2, new CharArray("bar").commonPrefix(new CharArray("barbaz", 3, 6)));
-        Assertions.assertEquals(0, new CharArray("foobar", 3, 6).commonPrefix(new CharArray("foo")));
-        Assertions.assertEquals(2, new CharArray("barbaz", 3, 6).commonPrefix(new CharArray("bar")));
+        assertThat(new CharArray("foo").commonPrefix(new CharArray("foobar", 3, 6))).isEqualTo(0);
+        assertThat(new CharArray("bar").commonPrefix(new CharArray("barbaz", 3, 6))).isEqualTo(2);
+        assertThat(new CharArray("foobar", 3, 6).commonPrefix(new CharArray("foo"))).isEqualTo(0);
+        assertThat(new CharArray("barbaz", 3, 6).commonPrefix(new CharArray("bar"))).isEqualTo(2);
     }
 
     @Test
     public void commonPrefix_empty() {
-        Assertions.assertEquals(0, new CharArray("").commonPrefix(new CharArray("")));
-        Assertions.assertEquals(0, new CharArray("foo").commonPrefix(new CharArray("")));
-        Assertions.assertEquals(0, new CharArray("").commonPrefix(new CharArray("foo")));
+        assertThat(new CharArray("").commonPrefix(new CharArray(""))).isEqualTo(0);
+        assertThat(new CharArray("foo").commonPrefix(new CharArray(""))).isEqualTo(0);
+        assertThat(new CharArray("").commonPrefix(new CharArray("foo"))).isEqualTo(0);
 
-        Assertions.assertEquals(0, new CharArray("foo", 1, 2).commonPrefix(new CharArray("foo", 3, 3)));
-        Assertions.assertEquals(0, new CharArray("xxx", 1, 1).commonPrefix(new CharArray("xxx", 2, 2)));
+        assertThat(new CharArray("foo", 1, 2).commonPrefix(new CharArray("foo", 3, 3))).isEqualTo(0);
+        assertThat(new CharArray("xxx", 1, 1).commonPrefix(new CharArray("xxx", 2, 2))).isEqualTo(0);
     }
 
     @Test
     public void commonPrefix_same_prefix() {
-        Assertions.assertEquals(3, new CharArray("foo").commonPrefix(new CharArray("foo")));
-        Assertions.assertEquals(3, new CharArray("foo").commonPrefix(new CharArray("foobar")));
-        Assertions.assertEquals(3, new CharArray("foobar").commonPrefix(new CharArray("foo")));
+        assertThat(new CharArray("foo").commonPrefix(new CharArray("foo"))).isEqualTo(3);
+        assertThat(new CharArray("foo").commonPrefix(new CharArray("foobar"))).isEqualTo(3);
+        assertThat(new CharArray("foobar").commonPrefix(new CharArray("foo"))).isEqualTo(3);
 
-        Assertions.assertEquals(3, new CharArray("foo").commonPrefix(new CharArray("barfoo", 3, 6)));
-        Assertions.assertEquals(3, new CharArray("barfoo", 3, 6).commonPrefix(new CharArray("foo")));
+        assertThat(new CharArray("foo").commonPrefix(new CharArray("barfoo", 3, 6))).isEqualTo(3);
+        assertThat(new CharArray("barfoo", 3, 6).commonPrefix(new CharArray("foo"))).isEqualTo(3);
     }
 
     @Test
     public void commonSuffix() {
-        Assertions.assertEquals(0, new CharArray("foo").commonSuffix("bar"));
-        Assertions.assertEquals(2, new CharArray("foo").commonSuffix("boo"));
-        Assertions.assertEquals(3, new CharArray("foo").commonSuffix("foo"));
+        assertThat(new CharArray("foo").commonSuffix("bar")).isEqualTo(0);
+        assertThat(new CharArray("foo").commonSuffix("boo")).isEqualTo(2);
+        assertThat(new CharArray("foo").commonSuffix("foo")).isEqualTo(3);
 
-        Assertions.assertEquals(0, new CharArray("foo").commonSuffix(new CharArray("bar")));
-        Assertions.assertEquals(2, new CharArray("foo").commonSuffix(new CharArray("boo")));
+        assertThat(new CharArray("foo").commonSuffix(new CharArray("bar"))).isEqualTo(0);
+        assertThat(new CharArray("foo").commonSuffix(new CharArray("boo"))).isEqualTo(2);
 
-        Assertions.assertEquals(0, new CharArray("foo").commonSuffix(new CharArray("foobar", 3, 6)));
-        Assertions.assertEquals(2, new CharArray("foo").commonSuffix(new CharArray("fooboo", 3, 6)));
-        Assertions.assertEquals(0, new CharArray("foobar", 3, 6).commonSuffix(new CharArray("foo")));
-        Assertions.assertEquals(2, new CharArray("fooboo", 3, 6).commonSuffix(new CharArray("foo")));
+        assertThat(new CharArray("foo").commonSuffix(new CharArray("foobar", 3, 6))).isEqualTo(0);
+        assertThat(new CharArray("foo").commonSuffix(new CharArray("fooboo", 3, 6))).isEqualTo(2);
+        assertThat(new CharArray("foobar", 3, 6).commonSuffix(new CharArray("foo"))).isEqualTo(0);
+        assertThat(new CharArray("fooboo", 3, 6).commonSuffix(new CharArray("foo"))).isEqualTo(2);
     }
 
     @Test
     public void commonSuffix_empty() {
-        Assertions.assertEquals(0, new CharArray("").commonSuffix(new CharArray("")));
-        Assertions.assertEquals(0, new CharArray("foo").commonSuffix(new CharArray("")));
-        Assertions.assertEquals(0, new CharArray("").commonSuffix(new CharArray("foo")));
+        assertThat(new CharArray("").commonSuffix(new CharArray(""))).isEqualTo(0);
+        assertThat(new CharArray("foo").commonSuffix(new CharArray(""))).isEqualTo(0);
+        assertThat(new CharArray("").commonSuffix(new CharArray("foo"))).isEqualTo(0);
 
-        Assertions.assertEquals(0, new CharArray("foo", 1, 2).commonSuffix(new CharArray("foo", 3, 3)));
-        Assertions.assertEquals(0, new CharArray("xxx", 1, 1).commonSuffix(new CharArray("xxx", 2, 2)));
+        assertThat(new CharArray("foo", 1, 2).commonSuffix(new CharArray("foo", 3, 3))).isEqualTo(0);
+        assertThat(new CharArray("xxx", 1, 1).commonSuffix(new CharArray("xxx", 2, 2))).isEqualTo(0);
     }
 
     @Test
     public void commonSuffix_same_suffix() {
-        Assertions.assertEquals(3, new CharArray("foo").commonSuffix(new CharArray("foo")));
-        Assertions.assertEquals(3, new CharArray("foo").commonSuffix(new CharArray("barfoo")));
-        Assertions.assertEquals(3, new CharArray("barfoo").commonSuffix(new CharArray("foo")));
+        assertThat(new CharArray("foo").commonSuffix(new CharArray("foo"))).isEqualTo(3);
+        assertThat(new CharArray("foo").commonSuffix(new CharArray("barfoo"))).isEqualTo(3);
+        assertThat(new CharArray("barfoo").commonSuffix(new CharArray("foo"))).isEqualTo(3);
 
-        Assertions.assertEquals(3, new CharArray("foo").commonSuffix(new CharArray("barfoo", 3, 6)));
-        Assertions.assertEquals(3, new CharArray("barfoo", 3, 6).commonSuffix(new CharArray("foo")));
+        assertThat(new CharArray("foo").commonSuffix(new CharArray("barfoo", 3, 6))).isEqualTo(3);
+        assertThat(new CharArray("barfoo", 3, 6).commonSuffix(new CharArray("foo"))).isEqualTo(3);
     }
 
     @Test
     public void startsWith() {
         CharArray array = new CharArray("foo");
-        Assertions.assertTrue(array.startsWith(new CharArray("")));
-        Assertions.assertTrue(array.startsWith(new CharArray("f")));
-        Assertions.assertTrue(array.startsWith(new CharArray("fo")));
-        Assertions.assertTrue(array.startsWith(new CharArray("foo")));
+        assertThat(array.startsWith(new CharArray(""))).isTrue();
+        assertThat(array.startsWith(new CharArray("f"))).isTrue();
+        assertThat(array.startsWith(new CharArray("fo"))).isTrue();
+        assertThat(array.startsWith(new CharArray("foo"))).isTrue();
 
-        Assertions.assertFalse(array.startsWith(new CharArray("x")));
-        Assertions.assertFalse(array.startsWith(new CharArray("bar")));
-        Assertions.assertFalse(array.startsWith(new CharArray("foe")));
-        Assertions.assertFalse(array.startsWith(new CharArray("foo!")));
-        Assertions.assertFalse(array.startsWith(new CharArray("foobar")));
+        assertThat(array.startsWith(new CharArray("x"))).isFalse();
+        assertThat(array.startsWith(new CharArray("bar"))).isFalse();
+        assertThat(array.startsWith(new CharArray("foe"))).isFalse();
+        assertThat(array.startsWith(new CharArray("foo!"))).isFalse();
+        assertThat(array.startsWith(new CharArray("foobar"))).isFalse();
     }
 
     @Test
     public void startsWith_string() {
         CharArray array = new CharArray("foo");
-        Assertions.assertTrue(array.startsWith(""));
-        Assertions.assertTrue(array.startsWith("f"));
-        Assertions.assertTrue(array.startsWith("fo"));
-        Assertions.assertTrue(array.startsWith("foo"));
+        assertThat(array.startsWith("")).isTrue();
+        assertThat(array.startsWith("f")).isTrue();
+        assertThat(array.startsWith("fo")).isTrue();
+        assertThat(array.startsWith("foo")).isTrue();
 
-        Assertions.assertFalse(array.startsWith("x"));
-        Assertions.assertFalse(array.startsWith("bar"));
-        Assertions.assertFalse(array.startsWith("foe"));
-        Assertions.assertFalse(array.startsWith("foo!"));
-        Assertions.assertFalse(array.startsWith("foobar"));
+        assertThat(array.startsWith("x")).isFalse();
+        assertThat(array.startsWith("bar")).isFalse();
+        assertThat(array.startsWith("foe")).isFalse();
+        assertThat(array.startsWith("foo!")).isFalse();
+        assertThat(array.startsWith("foobar")).isFalse();
     }
 
     @Test
     public void startsWith_char() {
         CharArray array = new CharArray("foo");
-        Assertions.assertTrue(array.startsWith('f'));
-        Assertions.assertFalse(array.startsWith('o'));
-        Assertions.assertFalse(array.startsWith('a'));
-        Assertions.assertFalse(array.startsWith('x'));
+        assertThat(array.startsWith('f')).isTrue();
+        assertThat(array.startsWith('o')).isFalse();
+        assertThat(array.startsWith('a')).isFalse();
+        assertThat(array.startsWith('x')).isFalse();
 
-        Assertions.assertFalse(new CharArray("").startsWith(' '));
+        assertThat(new CharArray("").startsWith(' ')).isFalse();
     }
 
     @Test
     public void endsWith() {
         CharArray array = new CharArray("foo");
-        Assertions.assertTrue(array.endsWith(new CharArray("")));
-        Assertions.assertTrue(array.endsWith(new CharArray("o")));
-        Assertions.assertTrue(array.endsWith(new CharArray("oo")));
-        Assertions.assertTrue(array.endsWith(new CharArray("foo")));
+        assertThat(array.endsWith(new CharArray(""))).isTrue();
+        assertThat(array.endsWith(new CharArray("o"))).isTrue();
+        assertThat(array.endsWith(new CharArray("oo"))).isTrue();
+        assertThat(array.endsWith(new CharArray("foo"))).isTrue();
 
-        Assertions.assertFalse(array.endsWith(new CharArray("x")));
-        Assertions.assertFalse(array.endsWith(new CharArray("bar")));
-        Assertions.assertFalse(array.endsWith(new CharArray("boo")));
-        Assertions.assertFalse(array.endsWith(new CharArray("!foo")));
-        Assertions.assertFalse(array.endsWith(new CharArray("barfoo")));
+        assertThat(array.endsWith(new CharArray("x"))).isFalse();
+        assertThat(array.endsWith(new CharArray("bar"))).isFalse();
+        assertThat(array.endsWith(new CharArray("boo"))).isFalse();
+        assertThat(array.endsWith(new CharArray("!foo"))).isFalse();
+        assertThat(array.endsWith(new CharArray("barfoo"))).isFalse();
     }
 
     @Test
     public void endsWith_string() {
         CharArray array = new CharArray("foo");
-        Assertions.assertTrue(array.endsWith(""));
-        Assertions.assertTrue(array.endsWith("o"));
-        Assertions.assertTrue(array.endsWith("oo"));
-        Assertions.assertTrue(array.endsWith("foo"));
+        assertThat(array.endsWith("")).isTrue();
+        assertThat(array.endsWith("o")).isTrue();
+        assertThat(array.endsWith("oo")).isTrue();
+        assertThat(array.endsWith("foo")).isTrue();
 
-        Assertions.assertFalse(array.endsWith("x"));
-        Assertions.assertFalse(array.endsWith("bar"));
-        Assertions.assertFalse(array.endsWith("boo"));
-        Assertions.assertFalse(array.endsWith("!foo"));
-        Assertions.assertFalse(array.endsWith("barfoo"));
+        assertThat(array.endsWith("x")).isFalse();
+        assertThat(array.endsWith("bar")).isFalse();
+        assertThat(array.endsWith("boo")).isFalse();
+        assertThat(array.endsWith("!foo")).isFalse();
+        assertThat(array.endsWith("barfoo")).isFalse();
     }
 
     @Test
     public void endsWith_char() {
         CharArray array = new CharArray("foo");
-        Assertions.assertTrue(array.endsWith('o'));
-        Assertions.assertFalse(array.endsWith('f'));
-        Assertions.assertFalse(array.endsWith('a'));
-        Assertions.assertFalse(array.endsWith('x'));
+        assertThat(array.endsWith('o')).isTrue();
+        assertThat(array.endsWith('f')).isFalse();
+        assertThat(array.endsWith('a')).isFalse();
+        assertThat(array.endsWith('x')).isFalse();
 
-        Assertions.assertFalse(new CharArray("").endsWith(' '));
+        assertThat(new CharArray("").endsWith(' ')).isFalse();
     }
 
     @Test
@@ -402,10 +405,10 @@ public class CharArrayTest {
         CharArray bar = array.substringFrom(3);
         CharArray join = CharArray.join(foo, bar);
 
-        Assertions.assertSame(array.chars, foo.chars);
-        Assertions.assertSame(array.chars, bar.chars);
-        Assertions.assertSame(array.chars, join.chars);
-        Assertions.assertEquals(array, join);
+        assertThat(array.chars).isSameInstanceAs(foo.chars);
+        assertThat(array.chars).isSameInstanceAs(bar.chars);
+        assertThat(array.chars).isSameInstanceAs(join.chars);
+        assertThat(array).isEqualTo(join);
     }
 
     @Test
@@ -415,10 +418,10 @@ public class CharArrayTest {
         CharArray bar = new CharArray("bar");
         CharArray join = CharArray.join(foo, bar);
 
-        Assertions.assertNotSame(array.chars, foo.chars);
-        Assertions.assertNotSame(array.chars, bar.chars);
-        Assertions.assertNotSame(array.chars, join.chars);
-        Assertions.assertEquals(array, join);
+        assertThat(array.chars).isNotSameInstanceAs(foo.chars);
+        assertThat(array.chars).isNotSameInstanceAs(bar.chars);
+        assertThat(array.chars).isNotSameInstanceAs(join.chars);
+        assertThat(array).isEqualTo(join);
     }
 
     @Test
@@ -428,29 +431,29 @@ public class CharArrayTest {
         CharArray bar = new CharArray("bar");
         CharArray empty = new CharArray("");
 
-        Assertions.assertEquals(foobar.cutPrefix(empty), foobar);
-        Assertions.assertEquals(foobar.cutPrefix(foo), bar);
-        Assertions.assertEquals(foobar.cutPrefix(foo), bar);
-        Assertions.assertEquals(foobar.cutPrefix(foobar), empty);
+        assertThat(foobar.cutPrefix(empty)).isEqualTo(foobar);
+        assertThat(foobar.cutPrefix(foo)).isEqualTo(bar);
+        assertThat(foobar.cutPrefix(foo)).isEqualTo(bar);
+        assertThat(foobar.cutPrefix(foobar)).isEqualTo(empty);
 
-        Assertions.assertEquals(foobar.substringFrom(3), bar);
-        Assertions.assertEquals(foobar.substringFrom(3).cutPrefix(foo), bar);
-        Assertions.assertEquals(foobar.substringFrom(3).cutPrefix(bar), empty);
-        Assertions.assertEquals(foobar.substringFrom(3).cutPrefix(bar.substringUntil(0)), bar);
-        Assertions.assertEquals(foobar.substringFrom(3).cutPrefix(bar.substringUntil(1)), new CharArray("ar"));  // cut b
-        Assertions.assertEquals(foobar.substringFrom(3).cutPrefix(bar.substringUntil(2)), new CharArray("r"));   // cut ba
+        assertThat(foobar.substringFrom(3)).isEqualTo(bar);
+        assertThat(foobar.substringFrom(3).cutPrefix(foo)).isEqualTo(bar);
+        assertThat(foobar.substringFrom(3).cutPrefix(bar)).isEqualTo(empty);
+        assertThat(foobar.substringFrom(3).cutPrefix(bar.substringUntil(0))).isEqualTo(bar);
+        assertThat(foobar.substringFrom(3).cutPrefix(bar.substringUntil(1))).isEqualTo(new CharArray("ar"));  // cut b
+        assertThat(foobar.substringFrom(3).cutPrefix(bar.substringUntil(2))).isEqualTo(new CharArray("r"));   // cut ba
     }
 
     @Test
     public void cutPrefix_str() {
-        Assertions.assertEquals(new CharArray("foobar").cutPrefix(""), new CharArray("foobar"));
-        Assertions.assertEquals(new CharArray("foobar").cutPrefix("foo"), new CharArray("bar"));
-        Assertions.assertEquals(new CharArray("foobar").cutPrefix("bar"), new CharArray("foobar"));
-        Assertions.assertEquals(new CharArray("foobar").cutPrefix("fooba"), new CharArray("r"));
-        Assertions.assertEquals(new CharArray("foobar").cutPrefix("foobar"), new CharArray(""));
-        Assertions.assertEquals(new CharArray("foobar").cutPrefix("foobarbaz"), new CharArray("foobar"));
-        Assertions.assertEquals(new CharArray("foobar").cutPrefix('f'), new CharArray("oobar"));
-        Assertions.assertEquals(new CharArray("foobar").cutPrefix('o'), new CharArray("foobar"));
+        assertThat(new CharArray("foobar").cutPrefix("")).isEqualTo(new CharArray("foobar"));
+        assertThat(new CharArray("foobar").cutPrefix("foo")).isEqualTo(new CharArray("bar"));
+        assertThat(new CharArray("foobar").cutPrefix("bar")).isEqualTo(new CharArray("foobar"));
+        assertThat(new CharArray("foobar").cutPrefix("fooba")).isEqualTo(new CharArray("r"));
+        assertThat(new CharArray("foobar").cutPrefix("foobar")).isEqualTo(new CharArray(""));
+        assertThat(new CharArray("foobar").cutPrefix("foobarbaz")).isEqualTo(new CharArray("foobar"));
+        assertThat(new CharArray("foobar").cutPrefix('f')).isEqualTo(new CharArray("oobar"));
+        assertThat(new CharArray("foobar").cutPrefix('o')).isEqualTo(new CharArray("foobar"));
     }
 
     @Test
@@ -460,69 +463,64 @@ public class CharArrayTest {
         CharArray bar = new CharArray("bar");
         CharArray empty = new CharArray("");
 
-        Assertions.assertEquals(foobar.cutSuffix(empty), foobar);
-        Assertions.assertEquals(foobar.cutSuffix(bar), foo);
-        Assertions.assertEquals(foobar.cutSuffix(foo), foobar);
-        Assertions.assertEquals(foobar.cutSuffix(foobar), empty);
+        assertThat(foobar.cutSuffix(empty)).isEqualTo(foobar);
+        assertThat(foobar.cutSuffix(bar)).isEqualTo(foo);
+        assertThat(foobar.cutSuffix(foo)).isEqualTo(foobar);
+        assertThat(foobar.cutSuffix(foobar)).isEqualTo(empty);
 
-        Assertions.assertEquals(foobar.substringFrom(3), bar);
-        Assertions.assertEquals(foobar.substringFrom(3).cutSuffix(foo), bar);
-        Assertions.assertEquals(foobar.substringFrom(3).cutSuffix(bar), empty);
-        Assertions.assertEquals(foobar.substringFrom(3).cutSuffix(bar.substringFrom(1)), new CharArray("b"));   // cut ar
-        Assertions.assertEquals(foobar.substringFrom(3).cutSuffix(bar.substringFrom(2)), new CharArray("ba"));  // cut r
-        Assertions.assertEquals(foobar.substringFrom(3).cutSuffix(bar.substringFrom(3)), bar);
+        assertThat(foobar.substringFrom(3)).isEqualTo(bar);
+        assertThat(foobar.substringFrom(3).cutSuffix(foo)).isEqualTo(bar);
+        assertThat(foobar.substringFrom(3).cutSuffix(bar)).isEqualTo(empty);
+        assertThat(foobar.substringFrom(3).cutSuffix(bar.substringFrom(1))).isEqualTo(new CharArray("b"));   // cut ar
+        assertThat(foobar.substringFrom(3).cutSuffix(bar.substringFrom(2))).isEqualTo(new CharArray("ba"));  // cut r
+        assertThat(foobar.substringFrom(3).cutSuffix(bar.substringFrom(3))).isEqualTo(bar);
     }
 
     @Test
     public void cutSuffix_str() {
-        Assertions.assertEquals(new CharArray("foobar").cutSuffix(""), new CharArray("foobar"));
-        Assertions.assertEquals(new CharArray("foobar").cutSuffix("bar"), new CharArray("foo"));
-        Assertions.assertEquals(new CharArray("foobar").cutSuffix("foo"), new CharArray("foobar"));
-        Assertions.assertEquals(new CharArray("foobar").cutSuffix("oobar"), new CharArray("f"));
-        Assertions.assertEquals(new CharArray("foobar").cutSuffix("foobar"), new CharArray(""));
-        Assertions.assertEquals(new CharArray("foobar").cutSuffix("foofoobar"), new CharArray("foobar"));
-        Assertions.assertEquals(new CharArray("foobar").cutSuffix('r'), new CharArray("fooba"));
-        Assertions.assertEquals(new CharArray("foobar").cutSuffix('a'), new CharArray("foobar"));
+        assertThat(new CharArray("foobar").cutSuffix("")).isEqualTo(new CharArray("foobar"));
+        assertThat(new CharArray("foobar").cutSuffix("bar")).isEqualTo(new CharArray("foo"));
+        assertThat(new CharArray("foobar").cutSuffix("foo")).isEqualTo(new CharArray("foobar"));
+        assertThat(new CharArray("foobar").cutSuffix("oobar")).isEqualTo(new CharArray("f"));
+        assertThat(new CharArray("foobar").cutSuffix("foobar")).isEqualTo(new CharArray(""));
+        assertThat(new CharArray("foobar").cutSuffix("foofoobar")).isEqualTo(new CharArray("foobar"));
+        assertThat(new CharArray("foobar").cutSuffix('r')).isEqualTo(new CharArray("fooba"));
+        assertThat(new CharArray("foobar").cutSuffix('a')).isEqualTo(new CharArray("foobar"));
     }
 
     @Test
     public void chars() {
         int[] array = new CharArray("foobar").chars().toArray();
-        Assertions.assertArrayEquals(new int[]{ 102, 111, 111,  98, 97, 114 }, array);
+        assertThat(array).isEqualTo(new int[] { 102, 111, 111, 98, 97, 114 });
     }
 
     @Test
     public void chars_empty() {
         int[] array = new CharArray("").chars().toArray();
-        Assertions.assertArrayEquals(new int[0], array);
+        assertThat(array).isEqualTo(new int[0]);
     }
 
     @Test
     public void chars_of_subbuffer() {
         int[] array = new CharArray("foobar", 1, 3).chars().toArray();
-        Assertions.assertArrayEquals(new int[]{ 111, 111 }, array);
+        assertThat(array).isEqualTo(new int[] { 111, 111 });
     }
 
     @Test
     public void codepoints() {
         int[] array = new CharArray("foobar").codePoints().toArray();
-        Assertions.assertArrayEquals(new int[]{ 102, 111, 111,  98, 97, 114 }, array);
+        assertThat(array).isEqualTo(new int[] { 102, 111, 111, 98, 97, 114 });
     }
 
     @Test
     public void codepoints_empty() {
         int[] array = new CharArray("").codePoints().toArray();
-        Assertions.assertArrayEquals(new int[0], array);
+        assertThat(array).isEqualTo(new int[0]);
     }
 
     @Test
     public void codepoints_of_subbuffer() {
         int[] array = new CharArray("foobar", 1, 3).codePoints().toArray();
-        Assertions.assertArrayEquals(new int[]{ 111, 111 }, array);
-    }
-
-    private static void assertEqualsHashCode(CharArray lhs, CharArray rhs) {
-        Assertions.assertEquals(lhs, rhs);
-        Assertions.assertEquals(lhs.hashCode(), rhs.hashCode());
+        assertThat(array).isEqualTo(new int[] { 111, 111 });
     }
 }

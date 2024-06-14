@@ -7,7 +7,7 @@ import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.logging.Level;
 
-import static org.junit.jupiter.api.Assertions.assertFalse;
+import static io.webby.testing.MoreTruth.assertThat;
 
 public class SimpleConnection extends ConnectionAdapter {
     private static final FluentLogger log = FluentLogger.forEnclosingClass();
@@ -28,7 +28,7 @@ public class SimpleConnection extends ConnectionAdapter {
     @Override
     public void close() {
         markAccess("SimpleConnection.close()");
-        assertFalse(closed, "SimpleConnection is already closed");
+        assertThat(closed).withMessage("SimpleConnection is already closed").isFalse();
         closed = true;
     }
 

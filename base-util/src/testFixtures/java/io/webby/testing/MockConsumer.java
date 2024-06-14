@@ -12,7 +12,7 @@ import java.util.Stack;
 import java.util.function.Consumer;
 
 import static com.google.common.truth.Truth.assertThat;
-import static org.junit.jupiter.api.Assertions.assertTrue;
+import static io.webby.testing.MoreTruth.assertThat;
 
 /**
  * A {@link Consumer} and {@link ThrowConsumer} implementation that allows to set up expectations
@@ -66,7 +66,7 @@ public class MockConsumer<T, E extends Throwable> implements Consumer<T>, ThrowC
     @Override
     public void accept(T item) {
         if (expected != null) {
-            assertTrue(expected.size() > items.size(), "Unexpected item added: " + item);
+            assertThat(expected.size() > items.size()).withMessage("Unexpected item added: %s", item).isTrue();
             assertThat(item).isEqualTo(expected.get(items.size()));
         }
         items.add(item);

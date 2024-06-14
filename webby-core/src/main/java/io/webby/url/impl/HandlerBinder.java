@@ -50,7 +50,7 @@ public class HandlerBinder {
     @Inject private UserContentServing userContentServing;
 
     public @NotNull Router<RouteEndpoint> buildHandlerRouter() throws AppConfigException {
-        Set<? extends Class<?>> handlerClasses = scanner.getHandlerClassesFromClasspath();
+        Set<Class<?>> handlerClasses = scanner.getHandlerClassesFromClasspath();
         List<Binding> bindings = getBindings(handlerClasses);
         RouterSetup<RouteEndpoint> setup = getRouterSetup(bindings);
         return setup.build();
@@ -107,7 +107,7 @@ public class HandlerBinder {
 
     @VisibleForTesting
     @NotNull
-    List<Binding> getBindings(@NotNull Iterable<? extends Class<?>> handlerClasses) {
+    List<Binding> getBindings(@NotNull Iterable<Class<?>> handlerClasses) {
         try {
             return TimeIt.timeItOrDie(
                 () -> {
@@ -125,7 +125,7 @@ public class HandlerBinder {
     }
 
     @VisibleForTesting
-    void bindHandlers(@NotNull Iterable<? extends Class<?>> handlerClasses, @NotNull Consumer<Binding> consumer) {
+    void bindHandlers(@NotNull Iterable<Class<?>> handlerClasses, @NotNull Consumer<Binding> consumer) {
         Marshal defaultIn = settings.defaultRequestContentMarshal();
         Marshal defaultOut = settings.defaultResponseContentMarshal();
         Render defaultRender = settings.defaultRender();

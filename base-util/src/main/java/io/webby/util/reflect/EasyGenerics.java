@@ -18,7 +18,6 @@ public class EasyGenerics {
         return getGenericTypeArguments(field.getGenericType());
     }
 
-    @SuppressWarnings("UnstableApiUsage")
     public static @Nullable Type[] getGenericTypeArgumentsOfInterface(@NotNull Class<?> klass,
                                                                       @NotNull Class<?> interfaceClass) {
         return TypeToken.of(klass).getTypes().interfaces().stream()

@@ -62,7 +62,7 @@ public class WebsocketAgentBinder {
     @Inject private Injector injector;
 
     public @NotNull Map<String, AgentEndpoint> bindAgents() {
-        Set<? extends Class<?>> agentClasses = scanner.getAgentClassesFromClasspath();
+        Set<Class<?>> agentClasses = scanner.getAgentClassesFromClasspath();
         List<AgentBinding> bindings = getBindings(agentClasses);
         Map<String, AgentEndpoint> result = new HashMap<>();
         processBindings(bindings, (url, endpoint) -> {
@@ -77,14 +77,14 @@ public class WebsocketAgentBinder {
     }
 
     @VisibleForTesting
-    @NotNull List<AgentBinding> getBindings(@NotNull Set<? extends Class<?>> agentClasses) {
+    @NotNull List<AgentBinding> getBindings(@NotNull Set<Class<?>> agentClasses) {
         List<AgentBinding> result = new ArrayList<>();
         bindAgents(agentClasses, result::add);
         return result;
     }
 
     @VisibleForTesting
-    void bindAgents(@NotNull Iterable<? extends Class<?>> agentClasses, @NotNull Consumer<AgentBinding> consumer) {
+    void bindAgents(@NotNull Iterable<Class<?>> agentClasses, @NotNull Consumer<AgentBinding> consumer) {
         FrameType defaultFrameType = settings.defaultFrameType();
         Marshal defaultMarshal = settings.defaultFrameContentMarshal();
         String defaultApiVersion = settings.defaultApiVersion();

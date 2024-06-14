@@ -209,7 +209,6 @@ public class Codecs {
         StandardCharsets.UTF_16LE
     );
 
-    @SuppressWarnings("UnstableApiUsage")
     @VisibleForTesting
     static int getByteLength(@Nullable CharSequence s, @NotNull Charset charset) {
         if (s == null || s.isEmpty()) {

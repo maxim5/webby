@@ -1,62 +1,63 @@
 package io.webby.util.base;
 
-import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
+
+import static com.google.common.truth.Truth.assertThat;
 
 public class MutableCharArrayTest {
     @Test
     public void create_empty_string() {
         MutableCharArray array = new MutableCharArray("");
-        Assertions.assertEquals(array.start(), 0);
-        Assertions.assertEquals(array.end(), 0);
-        Assertions.assertEquals(array.length(), 0);
+        assertThat(array.start()).isEqualTo(0);
+        assertThat(array.end()).isEqualTo(0);
+        assertThat(array.length()).isEqualTo(0);
     }
 
     @Test
     public void create_empty_same_pointers() {
         MutableCharArray array = new MutableCharArray("foo", 3, 3);
-        Assertions.assertEquals(array.start(), 3);
-        Assertions.assertEquals(array.end(), 3);
-        Assertions.assertEquals(array.length(), 0);
+        assertThat(array.start()).isEqualTo(3);
+        assertThat(array.end()).isEqualTo(3);
+        assertThat(array.length()).isEqualTo(0);
     }
 
     @Test
     public void immutable_to_others() {
         CharArray array = new CharArray("foo");
 
-        Assertions.assertEquals(array, array.mutable());
-        Assertions.assertEquals(array, array.mutableCopy());
+        assertThat(array.mutable()).isEqualTo(array);
+        assertThat(array.mutableCopy()).isEqualTo(array);
 
-        Assertions.assertSame(array, array.immutable());
-        Assertions.assertEquals(array, array.immutableCopy());
-        Assertions.assertFalse(array.immutable() instanceof MutableCharArray);
-        Assertions.assertFalse(array.immutableCopy() instanceof MutableCharArray);
+        assertThat(array.immutable()).isSameInstanceAs(array);
+        assertThat(array.immutableCopy()).isEqualTo(array);
+        assertThat(array.immutable() instanceof MutableCharArray).isFalse();
+        assertThat(array.immutableCopy() instanceof MutableCharArray).isFalse();
     }
 
     @Test
     public void mutable_to_others() {
         MutableCharArray array = new MutableCharArray("foo");
 
-        Assertions.assertSame(array, array.mutable());
-        Assertions.assertEquals(array, array.mutableCopy());
-        Assertions.assertNotSame(array, array.mutableCopy());
+        assertThat(array.mutable()).isSameInstanceAs(array);
+        assertThat(array.mutableCopy()).isEqualTo(array);
+        assertThat(array.mutableCopy()).isNotSameInstanceAs(array);
 
-        Assertions.assertEquals(array, array.immutable());
-        Assertions.assertEquals(array, array.immutableCopy());
-        Assertions.assertFalse(array.immutable() instanceof MutableCharArray);
-        Assertions.assertFalse(array.immutableCopy() instanceof MutableCharArray);
+        assertThat(array.immutable()).isEqualTo(array);
+        assertThat(array.immutableCopy()).isEqualTo(array);
+        assertThat(array.immutable() instanceof MutableCharArray).isFalse();
+        assertThat(array.immutableCopy() instanceof MutableCharArray).isFalse();
     }
 
     @Test
     public void substring() {
         MutableCharArray array = new MutableCharArray("foobar");
 
-        Assertions.assertFalse(array.substring(0, 3) instanceof MutableCharArray);
-        Assertions.assertFalse(array.substring(3, 6) instanceof MutableCharArray);
+        assertThat(array.substring(0, 3) instanceof MutableCharArray).isFalse();
+        assertThat(array.substring(3, 6) instanceof MutableCharArray).isFalse();
 
-        Assertions.assertEquals(array.substring(0, 3), array.mutableSubstring(0, 3));
-        Assertions.assertEquals(array.substring(1, 4), array.mutableSubstring(1, 4));
-        Assertions.assertEquals(array.substring(3, 6), array.mutableSubstring(3, 6));
+        assertThat(array.mutableSubstring(0, 3)).isEqualTo(array.substring(0, 3));
+        assertThat(array.mutableSubstring(1, 4)).isEqualTo(array.substring(1, 4));
+        assertThat(array.mutableSubstring(3, 6)).isEqualTo(array.substring(3, 6));
     }
 
     @Test
@@ -64,16 +65,16 @@ public class MutableCharArrayTest {
         MutableCharArray array = new MutableCharArray("foobar");
 
         array.offsetStart(1);
-        Assertions.assertEquals("oobar", array.toString());
+        assertThat(array.toString()).isEqualTo("oobar");
 
         array.offsetEnd(1);
-        Assertions.assertEquals("ooba", array.toString());
+        assertThat(array.toString()).isEqualTo("ooba");
 
         array.offsetStart(2);
-        Assertions.assertEquals("ba", array.toString());
+        assertThat(array.toString()).isEqualTo("ba");
 
         array.offsetEnd(2);
-        Assertions.assertEquals("", array.toString());
+        assertThat(array.toString()).isEqualTo("");
     }
 
     @Test
@@ -81,22 +82,22 @@ public class MutableCharArrayTest {
         MutableCharArray array = new MutableCharArray("foobar");
 
         array.offsetPrefix(new CharArray("food"));
-        Assertions.assertEquals("foobar", array.toString());
+        assertThat(array.toString()).isEqualTo("foobar");
 
         array.offsetPrefix(new CharArray("foo"));
-        Assertions.assertEquals("bar", array.toString());
+        assertThat(array.toString()).isEqualTo("bar");
 
         array.offsetPrefix(new CharArray("a"));
-        Assertions.assertEquals("bar", array.toString());
+        assertThat(array.toString()).isEqualTo("bar");
 
         array.offsetPrefix(new CharArray("b"));
-        Assertions.assertEquals("ar", array.toString());
+        assertThat(array.toString()).isEqualTo("ar");
 
         array.offsetPrefix('a');
-        Assertions.assertEquals("r", array.toString());
+        assertThat(array.toString()).isEqualTo("r");
 
         array.offsetPrefix('r');
-        Assertions.assertEquals("", array.toString());
+        assertThat(array.toString()).isEqualTo("");
     }
 
     @Test
@@ -104,22 +105,22 @@ public class MutableCharArrayTest {
         MutableCharArray array = new MutableCharArray("foobar");
 
         array.offsetSuffix(new CharArray("var"));
-        Assertions.assertEquals("foobar", array.toString());
+        assertThat(array.toString()).isEqualTo("foobar");
 
         array.offsetSuffix(new CharArray("bar"));
-        Assertions.assertEquals("foo", array.toString());
+        assertThat(array.toString()).isEqualTo("foo");
 
         array.offsetSuffix(new CharArray("a"));
-        Assertions.assertEquals("foo", array.toString());
+        assertThat(array.toString()).isEqualTo("foo");
 
         array.offsetSuffix(new CharArray("o"));
-        Assertions.assertEquals("fo", array.toString());
+        assertThat(array.toString()).isEqualTo("fo");
 
         array.offsetSuffix('o');
-        Assertions.assertEquals("f", array.toString());
+        assertThat(array.toString()).isEqualTo("f");
 
         array.offsetSuffix('f');
-        Assertions.assertEquals("", array.toString());
+        assertThat(array.toString()).isEqualTo("");
     }
 
     @Test
@@ -127,17 +128,17 @@ public class MutableCharArrayTest {
         MutableCharArray array = new MutableCharArray("foobar", 3, 5);
 
         array.resetStart();
-        Assertions.assertEquals("fooba", array.toString());
+        assertThat(array.toString()).isEqualTo("fooba");
 
         array.resetEnd();
-        Assertions.assertEquals("foobar", array.toString());
+        assertThat(array.toString()).isEqualTo("foobar");
 
         array.offsetStart(2);
         array.offsetEnd(2);
-        Assertions.assertEquals("ob", array.toString());
+        assertThat(array.toString()).isEqualTo("ob");
 
         array.reset();
-        Assertions.assertEquals("foobar", array.toString());
+        assertThat(array.toString()).isEqualTo("foobar");
     }
 
     @Test
@@ -146,14 +147,14 @@ public class MutableCharArrayTest {
         CharArray foo = foobar.substring(0, 3);
         CharArray bar = foobar.substring(3, 6);
 
-        Assertions.assertEquals(foobar, MutableCharArray.join(foo, bar));
-        Assertions.assertSame(foobar.chars, MutableCharArray.join(foo, bar).chars);
-        Assertions.assertSame(foobar.chars, MutableCharArray.join(foo.immutableCopy(), bar).chars);
-        Assertions.assertSame(foobar.chars, MutableCharArray.join(foo, bar.immutableCopy()).chars);
-        Assertions.assertSame(foobar.chars, MutableCharArray.join(foo.immutableCopy(), bar.immutableCopy()).chars);
-        Assertions.assertSame(foobar.chars, MutableCharArray.join(foo.mutable(), bar).chars);
-        Assertions.assertSame(foobar.chars, MutableCharArray.join(foo, bar.mutable()).chars);
-        Assertions.assertSame(foobar.chars, MutableCharArray.join(foo.mutable(), bar.mutable()).chars);
+        assertThat(MutableCharArray.join(foo, bar)).isEqualTo(foobar);
+        assertThat(MutableCharArray.join(foo, bar).chars).isSameInstanceAs(foobar.chars);
+        assertThat(MutableCharArray.join(foo.immutableCopy(), bar).chars).isSameInstanceAs(foobar.chars);
+        assertThat(MutableCharArray.join(foo, bar.immutableCopy()).chars).isSameInstanceAs(foobar.chars);
+        assertThat(MutableCharArray.join(foo.immutableCopy(), bar.immutableCopy()).chars).isSameInstanceAs(foobar.chars);
+        assertThat(MutableCharArray.join(foo.mutable(), bar).chars).isSameInstanceAs(foobar.chars);
+        assertThat(MutableCharArray.join(foo, bar.mutable()).chars).isSameInstanceAs(foobar.chars);
+        assertThat(MutableCharArray.join(foo.mutable(), bar.mutable()).chars).isSameInstanceAs(foobar.chars);
     }
 
     @Test
@@ -162,13 +163,13 @@ public class MutableCharArrayTest {
         CharArray foo = new CharArray("foo");
         CharArray bar = new CharArray("bar");
 
-        Assertions.assertEquals(foobar, MutableCharArray.join(foo, bar));
-        Assertions.assertNotSame(foobar.chars, MutableCharArray.join(foo, bar).chars);
-        Assertions.assertNotSame(foobar.chars, MutableCharArray.join(foo.immutableCopy(), bar).chars);
-        Assertions.assertNotSame(foobar.chars, MutableCharArray.join(foo, bar.immutableCopy()).chars);
-        Assertions.assertNotSame(foobar.chars, MutableCharArray.join(foo.immutableCopy(), bar.immutableCopy()).chars);
-        Assertions.assertNotSame(foobar.chars, MutableCharArray.join(foo.mutable(), bar).chars);
-        Assertions.assertNotSame(foobar.chars, MutableCharArray.join(foo, bar.mutable()).chars);
-        Assertions.assertNotSame(foobar.chars, MutableCharArray.join(foo.mutable(), bar.mutable()).chars);
+        assertThat(MutableCharArray.join(foo, bar)).isEqualTo(foobar);
+        assertThat(MutableCharArray.join(foo, bar).chars).isNotSameInstanceAs(foobar.chars);
+        assertThat(MutableCharArray.join(foo.immutableCopy(), bar).chars).isNotSameInstanceAs(foobar.chars);
+        assertThat(MutableCharArray.join(foo, bar.immutableCopy()).chars).isNotSameInstanceAs(foobar.chars);
+        assertThat(MutableCharArray.join(foo.immutableCopy(), bar.immutableCopy()).chars).isNotSameInstanceAs(foobar.chars);
+        assertThat(MutableCharArray.join(foo.mutable(), bar).chars).isNotSameInstanceAs(foobar.chars);
+        assertThat(MutableCharArray.join(foo, bar.mutable()).chars).isNotSameInstanceAs(foobar.chars);
+        assertThat(MutableCharArray.join(foo.mutable(), bar.mutable()).chars).isNotSameInstanceAs(foobar.chars);
     }
 }

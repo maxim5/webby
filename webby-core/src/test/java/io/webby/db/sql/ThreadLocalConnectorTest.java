@@ -1,6 +1,7 @@
 package io.webby.db.sql;
 
 import com.google.common.flogger.FluentLogger;
+import io.webby.testing.MoreTruth;
 import io.webby.testing.db.sql.FakeConnectionPool;
 import io.webby.testing.db.sql.SimpleConnection;
 import org.jetbrains.annotations.NotNull;
@@ -17,7 +18,6 @@ import java.util.function.Supplier;
 import java.util.logging.Level;
 
 import static com.google.common.truth.Truth.assertThat;
-import static org.junit.jupiter.api.Assertions.assertTrue;
 
 public class ThreadLocalConnectorTest {
     private static final FluentLogger log = FluentLogger.forEnclosingClass();
@@ -122,9 +122,11 @@ public class ThreadLocalConnectorTest {
 
     private static void assertSingleThreadAccessAndClosed(@NotNull List<SimpleConnection> connections, int expected) {
         assertThat(connections.size()).isEqualTo(expected);
-        assertTrue(connections.stream().allMatch(SimpleConnection::isSingleThreadAccess),
-                   () -> "Not all connections are accessed by only one thread. Connections: %s".formatted(connections));
-        assertTrue(connections.stream().allMatch(SimpleConnection::isClosed),
-                   () -> "Not all connections are closed. Connections: %s".formatted(connections));
+        MoreTruth.assertThat(connections.stream().allMatch(SimpleConnection::isSingleThreadAccess))
+            .withMessage("Not all connections are accessed by only one thread. Connections: %s", connections)
+            .isTrue();
+        MoreTruth.assertThat(connections.stream().allMatch(SimpleConnection::isClosed))
+            .withMessage("Not all connections are accessed by only one thread. Connections: %s", connections)
+            .isTrue();
     }
 }

@@ -43,7 +43,11 @@ public class AssertResponse {
 
     @CheckReturnValue
     public static @NotNull HttpResponseSubject<HttpResponseSubject<?>> assertThat(@Nullable HttpResponse response) {
-        return Truth.assertAbout(HttpResponseSubjectBuilder::new).that(response);
+        return Truth.assertAbout(metadata -> new CustomSubjectBuilder(metadata) {
+            public @NotNull HttpResponseSubject<HttpResponseSubject<?>> that(@Nullable HttpResponse response) {
+                return new HttpResponseSubject<>(metadata(), response);
+            }
+        }).that(response);
     }
 
     @CanIgnoreReturnValue
@@ -193,16 +197,6 @@ public class AssertResponse {
 
         protected @NotNull ByteBuf content() {
             return AssertResponse.contentOf(response());
-        }
-    }
-
-    private static class HttpResponseSubjectBuilder extends CustomSubjectBuilder {
-        protected HttpResponseSubjectBuilder(@NotNull FailureMetadata metadata) {
-            super(metadata);
-        }
-
-        public @NotNull HttpResponseSubject<HttpResponseSubject<?>> that(@Nullable HttpResponse response) {
-            return new HttpResponseSubject<>(metadata(), response);
         }
     }
 

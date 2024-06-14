@@ -4,10 +4,10 @@ import com.google.common.collect.Streams;
 import com.google.inject.Inject;
 import com.google.inject.Injector;
 import io.webby.app.ClassFilter;
+import io.webby.app.Packages;
 import io.webby.app.Settings;
-import io.webby.common.ClasspathScanner;
-import io.webby.common.Packages;
 import io.webby.netty.intercept.attr.AttributeOwner;
+import io.webby.util.classpath.ClasspathScanner;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.Arrays;
@@ -18,7 +18,7 @@ import java.util.stream.Stream;
 import static io.webby.util.base.EasyCast.castAny;
 
 public class InterceptorScanner {
-    private static final ClassFilter DEFAULTS_FILTER = new ClassFilter(
+    private static final ClassFilter DEFAULTS_FILTER = ClassFilter.of(
         (pkg, cls) -> pkg.startsWith(Packages.INTERCEPTORS) && cls.contains("Interceptor")
     );
 
@@ -27,11 +27,17 @@ public class InterceptorScanner {
     @Inject private Injector injector;
 
     public @NotNull List<InterceptItem> getInterceptorsFromClasspath() {
-        Stream<? extends Class<?>> custom = scanner.getDerivedClasses(settings.interceptorFilter(), Interceptor.class).stream();
+        Stream<Class<?>> custom = scanner
+            .timed("custom Interceptor")
+            .getDerivedClasses(settings.interceptorFilter(), Interceptor.class)
+            .stream();
 
         boolean includeDefaultInterceptors = settings.getBoolProperty("interceptors.default.always.include", true);
         if (includeDefaultInterceptors) {
-            Stream<? extends Class<?>> defaults = scanner.getDerivedClasses(DEFAULTS_FILTER, Interceptor.class).stream();
+            Stream<Class<?>> defaults = scanner
+                .timed("default Interceptor")
+                .getDerivedClasses(DEFAULTS_FILTER, Interceptor.class)
+                .stream();
             Stream<Class<?>> joint = Streams.concat(defaults, custom).distinct();
             return toItems(joint);
         } else {
@@ -39,7 +45,7 @@ public class InterceptorScanner {
         }
     }
 
-    private @NotNull List<InterceptItem> toItems(@NotNull Stream<? extends Class<?>> stream) {
+    private @NotNull List<InterceptItem> toItems(@NotNull Stream<Class<?>> stream) {
         return stream
             .filter(klass -> !klass.isAnonymousClass())  // exclude the tests
             .map(klass -> {

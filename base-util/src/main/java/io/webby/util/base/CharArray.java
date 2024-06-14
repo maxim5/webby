@@ -1,5 +1,7 @@
 package io.webby.util.base;
 
+import org.jetbrains.annotations.NotNull;
+
 import java.nio.CharBuffer;
 import java.util.Arrays;
 import java.util.function.IntConsumer;
@@ -88,12 +90,12 @@ public class CharArray implements CharSequence {
     }
 
     @Override
-    public IntStream chars() {
+    public @NotNull IntStream chars() {
         return asRawBuffer().chars();
     }
 
     @Override
-    public IntStream codePoints() {
+    public @NotNull IntStream codePoints() {
         return asRawBuffer().codePoints();
     }
 
@@ -112,7 +114,7 @@ public class CharArray implements CharSequence {
     }
 
     @Override
-    public CharSequence subSequence(int start, int end) {
+    public @NotNull CharSequence subSequence(int start, int end) {
         return substring(start, end);
     }
 
@@ -324,7 +326,7 @@ public class CharArray implements CharSequence {
     }
 
     @Override
-    public String toString() {
+    public @NotNull String toString() {
         return new String(chars, start, end - start);
     }
 

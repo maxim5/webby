@@ -5,11 +5,12 @@ plugins {
 }
 
 dependencies {
-    api project(':demo-model')
+    implementation project(':demo-model')
+    implementation project(':orm-api')
 }
 
 configurations {
-    compileOnly.extendsFrom(common)
+    implementation.extendsFrom(common)
 }
 
 // https://github.com/etiennestuder/gradle-rocker-plugin

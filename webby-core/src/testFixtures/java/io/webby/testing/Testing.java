@@ -8,7 +8,7 @@ import io.webby.app.AppLifetime;
 import io.webby.app.AppSettings;
 import io.webby.auth.session.DefaultSession;
 import io.webby.auth.user.DefaultUser;
-import io.webby.common.ClasspathScanner;
+import io.webby.app.AppClasspathScanner;
 import io.webby.db.model.BlobKv;
 import io.webby.netty.marshal.Json;
 import io.webby.netty.marshal.Marshaller;
@@ -80,7 +80,7 @@ public class Testing {
         setLogLevelsFromSettings(settings);
         Locale.setDefault(Locale.US);  // any way to remove this?
 
-        Module testingClasspathScanner = TestingModules.instance(new ClasspathScanner());
+        Module testingClasspathScanner = TestingModules.instance(new AppClasspathScanner());
         Module module = Modules.override(testingClasspathScanner).with(modules);
         Internals.injector = Webby.getReady(settings, module);
         callback.run();
@@ -121,7 +121,7 @@ public class Testing {
         }
 
         public static @NotNull Charset charset() {
-            return injector != null ? getInstance(Charset.class) : Charset.defaultCharset();
+            return injector != null ? getInstance(Charset.class) : TestingBytes.CHARSET;
         }
 
         public static @NotNull AppSettings settings() {

@@ -70,7 +70,6 @@ public class TempDirectoryExtension implements BeforeAllCallback, BeforeEachCall
         }
     }
 
-    @SuppressWarnings("UnstableApiUsage")
     private static void deleteAll(@NotNull Path path) {
         log.at(Level.FINE).log("Cleaning-up temp path %s", path);
         try {
