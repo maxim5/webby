@@ -1,16 +1,17 @@
-package io.webby.orm.codegen;
+package io.webby.orm;
 
 import com.google.inject.Inject;
 import io.webby.app.ClassFilter;
 import io.webby.app.Settings;
+import io.webby.orm.codegen.DefaultModelAdaptersLocator;
 import io.webby.util.classpath.ClasspathScanner;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.Set;
 
-public class AppModelAdaptersScanner extends DefaultModelAdaptersLocator {
+public class ModelAdaptersScanner extends DefaultModelAdaptersLocator {
     @Inject
-    public AppModelAdaptersScanner(@NotNull Settings settings, @NotNull ClasspathScanner scanner) {
+    public ModelAdaptersScanner(@NotNull Settings settings, @NotNull ClasspathScanner scanner) {
         super(scanAdapters(settings, scanner));
     }
 
