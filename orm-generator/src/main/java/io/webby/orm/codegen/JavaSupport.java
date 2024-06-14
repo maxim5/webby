@@ -4,10 +4,6 @@ import io.webby.util.guava.SourceCodeEscapers;
 import org.jetbrains.annotations.NotNull;
 
 class JavaSupport {
-    public static final String INDENT1 = "    ";
-    public static final String INDENT2 = "        ";
-    public static final String INDENT3 = "            ";
-
     public static final String EMPTY_LINE = "/* EMPTY */";
 
     public static @NotNull Snippet wrapAsStringLiteral(@NotNull Snippet snippet) {

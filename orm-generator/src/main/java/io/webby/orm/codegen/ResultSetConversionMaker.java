@@ -12,7 +12,7 @@ import java.util.Set;
 import java.util.stream.Stream;
 
 import static io.webby.orm.api.ReadFollow.*;
-import static io.webby.orm.codegen.JavaSupport.INDENT1;
+import static io.webby.orm.codegen.Indent.INDENT1;
 import static io.webby.orm.codegen.Joining.COMMA_JOINER;
 
 class ResultSetConversionMaker {
@@ -66,7 +66,7 @@ class ResultSetConversionMaker {
         Stream<String> indented = Arrays.stream(ReadFollow.values())
             .map(follow -> field.isNotNull() ? caseForNotNull(field, follow) : caseForNullable(field, follow))
             .flatMap(String::lines)
-            .map(line -> INDENT1 + line);
+            .map(line -> INDENT1.spaces() + line);
         return new Snippet()
             .withFormattedLine("switch (%s) {", followParam)
             .withLines(indented)

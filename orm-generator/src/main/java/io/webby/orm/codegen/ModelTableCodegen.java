@@ -20,7 +20,9 @@ import java.util.Optional;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
-import static io.webby.orm.codegen.JavaSupport.*;
+import static io.webby.orm.codegen.Indent.*;
+import static io.webby.orm.codegen.JavaSupport.EMPTY_LINE;
+import static io.webby.orm.codegen.JavaSupport.wrapAsStringLiteral;
 import static io.webby.orm.codegen.Joining.*;
 import static java.util.Objects.requireNonNull;
 
@@ -356,7 +358,7 @@ public class ModelTableCodegen extends BaseCodegen {
             .map(follow -> new SelectMaker(table).make(follow))
             .map(snippet -> new Snippet().withLines(snippet))
             .map(query -> wrapAsStringLiteral(query).joinLines(INDENT1))
-            .collect(Collectors.joining(",\n" + INDENT1, INDENT1, ""));
+            .collect(Collectors.joining(INDENT1.commaDelimiter(), INDENT1.prefix(), ""));
 
         appendCode("""
         private static final String[] SELECT_ENTITY_ALL = {
@@ -1225,9 +1227,9 @@ public class ModelTableCodegen extends BaseCodegen {
 
     private void columnsEnum() {
         Map<String, String> context = Map.of(
-            "$own_enum_values", ColumnEnumMaker.make(table.columns(ReadFollow.NO_FOLLOW)).join(",\n" + INDENT1),
+            "$own_enum_values", ColumnEnumMaker.make(table.columns(ReadFollow.NO_FOLLOW)).join(INDENT1.commaDelimiter()),
             "$all_columns_list", table.columns().stream().map(column -> "OwnColumn.%s".formatted(column.sqlName()))
-                .collect(Collectors.joining(",\n" + INDENT2))
+                .collect(Collectors.joining(INDENT2.commaDelimiter()))
         );
 
         appendCode("""
@@ -1258,7 +1260,7 @@ public class ModelTableCodegen extends BaseCodegen {
         Map<String, String> context = Map.of(
             "$column_meta_list", table.columnsWithFields().stream()
                 .map(pair -> ColumnMetaMaker.makeColumnMeta(pair.first(), pair.second()))
-                .collect(Collectors.joining(",\n" + INDENT3)),
+                .collect(Collectors.joining(INDENT3.commaDelimiter())),
             "$primary_keys", table.columnsWithFields().stream().filter(pair -> pair.first().isPrimaryKey()).map(pair -> {
                 String column = pair.second().sqlName();
                 return "OwnColumn.%s".formatted(column);
@@ -1267,7 +1269,7 @@ public class ModelTableCodegen extends BaseCodegen {
                 String columns = field.columns().stream().map(Column::sqlName).map("OwnColumn.%s"::formatted)
                     .collect(Collectors.joining(", "));
                 return "Constraint.of(%s)".formatted(columns);
-            }).collect(Collectors.joining(",\n" + INDENT3))
+            }).collect(Collectors.joining(INDENT3.commaDelimiter()))
         );
 
         appendCode("""

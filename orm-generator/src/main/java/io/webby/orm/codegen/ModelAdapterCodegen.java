@@ -19,7 +19,7 @@ import java.util.Map;
 import java.util.function.Function;
 import java.util.stream.Stream;
 
-import static io.webby.orm.codegen.JavaSupport.INDENT1;
+import static io.webby.orm.codegen.Indent.INDENT1;
 import static io.webby.orm.codegen.Joining.*;
 
 @SuppressWarnings("UnnecessaryStringEscape")
