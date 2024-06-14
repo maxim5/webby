@@ -44,7 +44,7 @@ class FieldResolver {
             return ResolveResult.ofInlineMapper(inlineMapperApi);
         }
 
-        Class<?> adapterClass = runContext.adaptersScanner().locateAdapterClass(field.getType());
+        Class<?> adapterClass = runContext.adapters().locateAdapterClass(field.getType());
         if (adapterClass != null) {
             return ResolveResult.ofAdapter(adapterClass);
         }

@@ -5,7 +5,7 @@ import com.google.errorprone.annotations.CanIgnoreReturnValue;
 import com.google.errorprone.annotations.CheckReturnValue;
 import io.webby.orm.arch.model.*;
 import io.webby.testing.TestingBasics.SimpleBitSet;
-import io.webby.testing.orm.FakeModelAdaptersScanner;
+import io.webby.testing.orm.FakeModelAdaptersLocator;
 import io.webby.util.collect.ListBuilder;
 import io.webby.util.collect.Pair;
 import org.jetbrains.annotations.NotNull;
@@ -19,33 +19,33 @@ import static com.google.common.collect.MoreCollectors.onlyElement;
 
 public class TestingArch {
     public static @NotNull TableArch buildTableArch(@NotNull Class<?> model) {
-        return buildTableArch(FakeModelAdaptersScanner.FAKE_SCANNER, model);
+        return buildTableArch(FakeModelAdaptersLocator.FAKE_LOCATOR, model);
     }
 
     public static @NotNull TableArch buildTableArch(@NotNull Class<?> model, @NotNull List<Class<?>> rest) {
-        return buildTableArch(FakeModelAdaptersScanner.FAKE_SCANNER, model, rest);
+        return buildTableArch(FakeModelAdaptersLocator.FAKE_LOCATOR, model, rest);
     }
 
-    public static @NotNull TableArch buildTableArch(@NotNull FakeModelAdaptersScanner fakeScanner, @NotNull Class<?> model) {
+    public static @NotNull TableArch buildTableArch(@NotNull FakeModelAdaptersLocator fakeLocator, @NotNull Class<?> model) {
         RunInputs inputs = newRunInputs(model);
-        RunResult runResult = new ArchFactory(fakeScanner).build(inputs);
+        RunResult runResult = new ArchFactory(fakeLocator).build(inputs);
         return runResult.getTableOrDie(model);
     }
 
-    public static @NotNull TableArch buildTableArch(@NotNull FakeModelAdaptersScanner fakeScanner,
+    public static @NotNull TableArch buildTableArch(@NotNull FakeModelAdaptersLocator fakeLocator,
                                                     @NotNull Class<?> model,
                                                     @NotNull List<Class<?>> rest) {
         RunInputs inputs = newRunInputs(ListBuilder.concatOne(rest, model));
-        RunResult runResult = new ArchFactory(fakeScanner).build(inputs);
+        RunResult runResult = new ArchFactory(fakeLocator).build(inputs);
         return runResult.getTableOrDie(model);
     }
 
     static @NotNull RunContext newRunContext() {
-        return newRunContext(FakeModelAdaptersScanner.FAKE_SCANNER);
+        return newRunContext(FakeModelAdaptersLocator.FAKE_LOCATOR);
     }
 
-    static @NotNull RunContext newRunContext(@NotNull FakeModelAdaptersScanner fakeScanner) {
-        return new RunContext(newRunInputs(), fakeScanner);
+    static @NotNull RunContext newRunContext(@NotNull FakeModelAdaptersLocator fakeLocator) {
+        return new RunContext(newRunInputs(), fakeLocator);
     }
 
     public static @NotNull RunInputs newRunInputs(@NotNull Class<?> @NotNull ... models) {

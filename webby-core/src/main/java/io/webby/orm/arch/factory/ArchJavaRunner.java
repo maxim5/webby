@@ -1,14 +1,12 @@
 package io.webby.orm.arch.factory;
 
 import com.google.common.flogger.FluentLogger;
-import io.webby.app.AppSettings;
-import io.webby.app.AppClasspathScanner;
 import io.webby.orm.arch.model.AdapterArch;
 import io.webby.orm.arch.model.JavaNameHolder;
 import io.webby.orm.arch.model.TableArch;
+import io.webby.orm.codegen.DefaultModelAdaptersLocator;
 import io.webby.orm.codegen.ModelAdapterCodegen;
-import io.webby.orm.codegen.ModelAdaptersScanner;
-import io.webby.orm.codegen.ModelAdaptersScannerImpl;
+import io.webby.orm.codegen.ModelAdaptersLocator;
 import io.webby.orm.codegen.ModelTableCodegen;
 import io.webby.util.time.TimeIt;
 import org.jetbrains.annotations.NotNull;
@@ -23,15 +21,16 @@ import java.util.logging.Level;
 public class ArchJavaRunner {
     private static final FluentLogger log = FluentLogger.forEnclosingClass();
 
-    private final ModelAdaptersScanner locator;
+    private final ModelAdaptersLocator locator;
     private String destination;
 
-    public ArchJavaRunner(@NotNull ModelAdaptersScanner locator) {
+    @jakarta.inject.Inject
+    public ArchJavaRunner(@NotNull ModelAdaptersLocator locator) {
         this.locator = locator;
     }
 
     public ArchJavaRunner() {
-        this(new ModelAdaptersScannerImpl(new AppSettings(), new AppClasspathScanner()));
+        this(new DefaultModelAdaptersLocator());
     }
 
     public void runGenerate(@NotNull String destinationPath, @NotNull RunInputs inputs) throws IOException {

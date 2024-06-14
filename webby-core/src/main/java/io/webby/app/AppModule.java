@@ -3,6 +3,7 @@ package io.webby.app;
 import com.google.common.eventbus.EventBus;
 import com.google.inject.AbstractModule;
 import io.webby.common.Lifetime;
+import io.webby.util.classpath.ClasspathScanner;
 import org.jetbrains.annotations.NotNull;
 
 import java.nio.charset.Charset;
@@ -22,6 +23,7 @@ public class AppModule extends AbstractModule {
         bind(AppMaintenance.class).asEagerSingleton();
         bind(Lifetime.class).toProvider(AppLifetime.class);
         bind(AppClasspathScanner.class).asEagerSingleton();
+        bind(ClasspathScanner.class).to(AppClasspathScanner.class).asEagerSingleton();
 
         bind(EventBus.class).asEagerSingleton();
     }

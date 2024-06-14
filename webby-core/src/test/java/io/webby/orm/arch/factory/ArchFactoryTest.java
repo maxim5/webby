@@ -10,7 +10,7 @@ import io.webby.orm.api.annotate.Model;
 import io.webby.orm.api.annotate.Sql;
 import io.webby.orm.arch.InvalidSqlModelException;
 import io.webby.orm.arch.model.JdbcType;
-import io.webby.testing.orm.FakeModelAdaptersScanner;
+import io.webby.testing.orm.FakeModelAdaptersLocator;
 import io.webby.util.base.EasyPrimitives.OptionalBool;
 import io.webby.util.collect.Pair;
 import org.jetbrains.annotations.NotNull;
@@ -226,9 +226,9 @@ public class ArchFactoryTest {
     void single_field_atomic_integer() {
         record User(AtomicInteger atomic) {}
 
-        FakeModelAdaptersScanner scanner = FakeModelAdaptersScanner.empty();
-        scanner.setupAdapter(AtomicInteger.class, AtomicIntegerJdbcAdapter.class);
-        assertThat(buildTableArch(scanner, User.class)).hasFields(ONLY_ORDINARY).hasSingleFieldThat("atomic")
+        FakeModelAdaptersLocator locator = FakeModelAdaptersLocator.empty();
+        locator.setupAdapter(AtomicInteger.class, AtomicIntegerJdbcAdapter.class);
+        assertThat(buildTableArch(locator, User.class)).hasFields(ONLY_ORDINARY).hasSingleFieldThat("atomic")
             .isFromTable("user")
             .hasInJava(AtomicInteger.class, "atomic()")
             .isSingleColumn("atomic", JdbcType.Int)
@@ -594,7 +594,7 @@ public class ArchFactoryTest {
     @CanIgnoreReturnValue
     private static @NotNull InvalidSqlModelException assertInvalidModel(@NotNull Class<?> @NotNull ... models) {
         return assertThrows(InvalidSqlModelException.class, () ->
-            new ArchFactory(FakeModelAdaptersScanner.FAKE_SCANNER).build(TestingArch.newRunInputs(models))
+            new ArchFactory(FakeModelAdaptersLocator.FAKE_LOCATOR).build(TestingArch.newRunInputs(models))
         );
     }
 }

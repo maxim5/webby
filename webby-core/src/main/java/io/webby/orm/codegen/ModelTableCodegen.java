@@ -26,16 +26,16 @@ import static java.util.Objects.requireNonNull;
 
 @SuppressWarnings("UnnecessaryStringEscape")
 public class ModelTableCodegen extends BaseCodegen {
-    private final ModelAdaptersScanner adaptersScanner;
+    private final ModelAdaptersLocator adaptersLocator;
     private final TableArch table;
 
     private final Map<String, String> mainContext;
     private final Map<String, String> pkContext;
 
-    public ModelTableCodegen(@NotNull ModelAdaptersScanner adaptersScanner,
+    public ModelTableCodegen(@NotNull ModelAdaptersLocator adaptersLocator,
                              @NotNull TableArch table, @NotNull Appendable writer) {
         super(writer);
-        this.adaptersScanner = adaptersScanner;
+        this.adaptersLocator = adaptersLocator;
         this.table = table;
 
         this.mainContext = EasyMaps.asMap(
@@ -156,7 +156,7 @@ public class ModelTableCodegen extends BaseCodegen {
             mappedTypes.stream().map(FQN::of),
             mapperTypes.stream().map(FQN::of),
             adapterClasses.stream().map(FQN::of),
-            adapterClasses.stream().map(adaptersScanner::locateAdapterFqn),
+            adapterClasses.stream().map(adaptersLocator::locateAdapterFqn),
             foreignKeyClasses.stream().map(FQN::of),
             foreignTableClasses.stream().map(FQN::of),
             foreignModelClasses.stream().map(FQN::of)

@@ -6,7 +6,7 @@ import io.webby.orm.adapter.lang.AtomicLongJdbcAdapter;
 import io.webby.orm.arch.model.Column;
 import io.webby.orm.arch.model.JdbcType;
 import io.webby.orm.arch.model.PojoArch;
-import io.webby.testing.orm.FakeModelAdaptersScanner;
+import io.webby.testing.orm.FakeModelAdaptersLocator;
 import io.webby.util.base.EasyPrimitives.OptionalBool;
 import org.junit.jupiter.api.Test;
 
@@ -20,8 +20,8 @@ import java.util.concurrent.atomic.AtomicReference;
 import static io.webby.orm.arch.factory.TestingArch.assertThat;
 
 public class RecursivePojoArchFactoryTest {
-    private final FakeModelAdaptersScanner scanner = FakeModelAdaptersScanner.empty();
-    private final RecursivePojoArchFactory factory = new RecursivePojoArchFactory(TestingArch.newRunContext(scanner));
+    private final FakeModelAdaptersLocator locator = FakeModelAdaptersLocator.empty();
+    private final RecursivePojoArchFactory factory = new RecursivePojoArchFactory(TestingArch.newRunContext(locator));
 
     @Test
     public void pojo_native_columns() {
@@ -37,7 +37,7 @@ public class RecursivePojoArchFactoryTest {
     public void pojo_char_column() {
         record Foo(char ch) {}
 
-        scanner.setupAdapters(FakeModelAdaptersScanner.DEFAULT_MAP);
+        locator.setupAdapters(FakeModelAdaptersLocator.DEFAULT_MAP);
         PojoArch pojoArch = factory.buildPojoArchFor(Foo.class);
         assertThat(pojoArch)
             .hasAdapterName("FooJdbcAdapter")
@@ -78,9 +78,9 @@ public class RecursivePojoArchFactoryTest {
     public void pojo_atomic_columns() {
         record Foo(AtomicInteger x, AtomicLong y, AtomicBoolean z) {}
 
-        scanner.setupAdapter(AtomicInteger.class, AtomicIntegerJdbcAdapter.class);
-        scanner.setupAdapter(AtomicLong.class, AtomicLongJdbcAdapter.class);
-        scanner.setupAdapter(AtomicBoolean.class, AtomicBooleanJdbcAdapter.class);
+        locator.setupAdapter(AtomicInteger.class, AtomicIntegerJdbcAdapter.class);
+        locator.setupAdapter(AtomicLong.class, AtomicLongJdbcAdapter.class);
+        locator.setupAdapter(AtomicBoolean.class, AtomicBooleanJdbcAdapter.class);
         PojoArch pojoArch = factory.buildPojoArchFor(Foo.class);
         assertThat(pojoArch)
             .hasAdapterName("FooJdbcAdapter")

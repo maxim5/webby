@@ -7,13 +7,13 @@ import io.webby.orm.arch.model.PojoArch;
 import io.webby.orm.arch.model.TableArch;
 import io.webby.orm.arch.model.TableField;
 import io.webby.orm.arch.util.JavaClassAnalyzer;
-import io.webby.orm.codegen.ModelAdaptersScanner;
+import io.webby.orm.codegen.ModelAdaptersLocator;
 import org.jetbrains.annotations.NotNull;
 
 class ArchFactory {
-    private final ModelAdaptersScanner locator;
+    private final ModelAdaptersLocator locator;
 
-    public ArchFactory(@NotNull ModelAdaptersScanner locator) {
+    public ArchFactory(@NotNull ModelAdaptersLocator locator) {
         this.locator = locator;
     }
 

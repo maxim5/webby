@@ -1,6 +1,6 @@
 package io.webby.orm.arch.factory;
 
-import io.webby.orm.codegen.ModelAdaptersScanner;
+import io.webby.orm.codegen.ModelAdaptersLocator;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.concurrent.atomic.AtomicBoolean;
@@ -8,14 +8,14 @@ import java.util.concurrent.atomic.AtomicBoolean;
 class RunContext implements AutoCloseable {
     private final AtomicBoolean closed = new AtomicBoolean();
     private final RunInputs inputs;
-    private final ModelAdaptersScanner adaptersScanner;
+    private final ModelAdaptersLocator adapters;
     private final PojoArchCollector pojos;
     private final TableArchCollector tables;
     private final ErrorHandler errorHandler;
 
-    public RunContext(@NotNull RunInputs inputs, @NotNull ModelAdaptersScanner adaptersScanner) {
+    public RunContext(@NotNull RunInputs inputs, @NotNull ModelAdaptersLocator adapters) {
         this.inputs = inputs;
-        this.adaptersScanner = adaptersScanner;
+        this.adapters = adapters;
         this.pojos = new PojoArchCollector();
         this.tables = new TableArchCollector();
         this.errorHandler = new ErrorHandler();
@@ -26,9 +26,9 @@ class RunContext implements AutoCloseable {
         return inputs;
     }
 
-    public @NotNull ModelAdaptersScanner adaptersScanner() {
+    public @NotNull ModelAdaptersLocator adapters() {
         assert !closed.get() : "RunContext is closed";
-        return adaptersScanner;
+        return adapters;
     }
 
     public @NotNull PojoArchCollector pojos() {
