@@ -2,8 +2,8 @@ package io.webby.url.impl;
 
 import com.google.inject.Inject;
 import io.webby.app.Settings;
-import io.webby.app.AppClasspathScanner;
 import io.webby.url.annotate.*;
+import io.webby.util.classpath.ClasspathScanner;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.VisibleForTesting;
 
@@ -20,7 +20,7 @@ public class HandlerScanner {
             HANDLER_METHOD_ANNOTATIONS = Set.of(GET.class, POST.class, PUT.class, DELETE.class, Call.class);
 
     @Inject private Settings settings;
-    @Inject private AppClasspathScanner scanner;
+    @Inject private ClasspathScanner scanner;
 
     // More precisely, handler candidates.
     public @NotNull Set<Class<?>> getHandlerClassesFromClasspath() {

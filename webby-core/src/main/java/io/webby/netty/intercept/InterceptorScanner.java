@@ -4,10 +4,10 @@ import com.google.common.collect.Streams;
 import com.google.inject.Inject;
 import com.google.inject.Injector;
 import io.webby.app.ClassFilter;
-import io.webby.app.Settings;
-import io.webby.app.AppClasspathScanner;
 import io.webby.app.Packages;
+import io.webby.app.Settings;
 import io.webby.netty.intercept.attr.AttributeOwner;
+import io.webby.util.classpath.ClasspathScanner;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.Arrays;
@@ -23,7 +23,7 @@ public class InterceptorScanner {
     );
 
     @Inject private Settings settings;
-    @Inject private AppClasspathScanner scanner;
+    @Inject private ClasspathScanner scanner;
     @Inject private Injector injector;
 
     public @NotNull List<InterceptItem> getInterceptorsFromClasspath() {

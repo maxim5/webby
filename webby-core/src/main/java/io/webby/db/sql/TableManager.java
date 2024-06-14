@@ -5,9 +5,9 @@ import com.google.common.flogger.FluentLogger;
 import com.google.common.primitives.Primitives;
 import com.google.inject.Inject;
 import io.webby.app.Settings;
-import io.webby.app.AppClasspathScanner;
 import io.webby.common.Lifetime;
 import io.webby.orm.api.*;
+import io.webby.util.classpath.ClasspathScanner;
 import io.webby.util.lazy.AtomicLazyRecycle;
 import io.webby.util.lazy.LazyRecycle;
 import org.jetbrains.annotations.NotNull;
@@ -33,7 +33,7 @@ public class TableManager implements HasEngine {
     @Inject
     public TableManager(@NotNull Settings settings,
                         @NotNull ConnectionPool pool,
-                        @NotNull AppClasspathScanner scanner,
+                        @NotNull ClasspathScanner scanner,
                         @NotNull Lifetime lifetime) throws Exception {
         assert settings.storageSettings().isSqlEnabled() : "SQL storage is disabled";
         assert pool.isRunning() : "Invalid pool state: %s".formatted(pool);
