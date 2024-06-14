@@ -1,13 +1,12 @@
 package io.webby.orm.arch;
 
-import io.webby.app.AppConfigException;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
 /**
  * Represents an error related to SQL model processing and table generation.
  */
-public class InvalidSqlModelException extends AppConfigException {
+public class InvalidSqlModelException extends RuntimeException {
     public InvalidSqlModelException() {
     }
 

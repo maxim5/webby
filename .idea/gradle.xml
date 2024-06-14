@@ -15,6 +15,8 @@
             <option value="$PROJECT_DIR$/demo-frontend" />
             <option value="$PROJECT_DIR$/demo-model" />
             <option value="$PROJECT_DIR$/demo-test" />
+            <option value="$PROJECT_DIR$/orm-api" />
+            <option value="$PROJECT_DIR$/orm-generator" />
             <option value="$PROJECT_DIR$/webby-core" />
             <option value="$PROJECT_DIR$/webby-routekit" />
           </set>

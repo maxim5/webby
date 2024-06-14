@@ -5,7 +5,8 @@ plugins {
 }
 
 dependencies {
-    api project(':demo-model')
+    implementation project(':demo-model')
+    implementation project(':orm-api')
 }
 
 configurations {

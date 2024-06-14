@@ -7,6 +7,8 @@ plugins {
 // Prod
 dependencies {
     api project(':base-util')
+    api project(':orm-api')
+    api project(':orm-generator')
     api project(':webby-routekit')
 
     // API
