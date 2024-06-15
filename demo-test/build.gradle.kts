@@ -20,6 +20,7 @@ val demo = sourceSets.named("demo").get()
 val tables = sourceSets.named("tables").get()
 val testFixtures = sourceSets.named("testFixtures").get()
 
+// https://stackoverflow.com/questions/70396466/gradle-how-to-declare-a-dependency-to-a-specific-configuration-of-a-project-pro
 private fun SourceSet.implementation(dependencyNotation: Any) =
     dependencies.add("${this.name}Implementation", dependencyNotation)
 
