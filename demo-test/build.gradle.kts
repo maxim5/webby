@@ -4,18 +4,15 @@ plugins {
 }
 
 sourceSets {
-    create("core") {
-        java.srcDir("src/${this.name}/java")
-        resources.srcDir("src/${this.name}/resources")
+    listOf("core", "demo", "tables").forEach {
+        create(it) {
+            java.srcDir("src/${this.name}/java")
+            resources.srcDir("src/${this.name}/resources")
+        }
     }
-    create("demo") {
-        java.srcDir("src/${this.name}/java")
-        resources.srcDir("src/${this.name}/resources")
-    }
-    create("tables") {
-        java.srcDir("src/${this.name}/java")
-        resources.srcDir("src/${this.name}/resources")
-    }
+    // Drop default `java` sourceSets as they are not used.
+    main.get().java.setSrcDirs(listOf<String>())
+    test.get().java.setSrcDirs(listOf<String>())
 }
 
 // Useful:
