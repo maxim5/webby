@@ -7,7 +7,7 @@ version = "0.3.0"
 // Include exported util sources
 tasks.compileJava.get().dependsOn(":base-util:exportSrc")
 sourceSets {
-    main.get().java.srcDirs(listOf("${project(":base-util").extra.get("exportDir")}/arrays"))
+    main.get().java.srcDirs(listOf("${project(":base-util").extra["exportDir"]}/arrays"))
 }
 
 dependencies {
