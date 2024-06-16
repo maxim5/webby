@@ -20,16 +20,6 @@ val demo = sourceSets.named("demo").get()
 val tables = sourceSets.named("tables").get()
 val testFixtures = sourceSets.named("testFixtures").get()
 
-// https://stackoverflow.com/questions/70396466/gradle-how-to-declare-a-dependency-to-a-specific-configuration-of-a-project-pro
-private fun SourceSet.implementation(dependencyNotation: Any) =
-    dependencies.add("${this.name}Implementation", dependencyNotation)
-
-private val SourceSet.implementation
-    get() = object {
-        fun extendsFrom(superConfig: Configuration) =
-            configurations["${name}Implementation"].extendsFrom(superConfig)
-    }
-
 // Useful:
 // https://leanmind.es/en/blog/test-fixtures-with-gradle/
 // https://remonsinnema.com/2016/05/09/how-to-manage-dependencies-in-a-gradle-multi-project-build/
@@ -53,3 +43,15 @@ dependencies {
     testFixtures.implementation(project(":demo-frontend"))  // DevPaths
     testFixtures.implementation.extendsFrom(configurations.common.get())
 }
+
+// FIX: TO BE REUSED (via a plugin)
+
+// https://stackoverflow.com/questions/70396466/gradle-how-to-declare-a-dependency-to-a-specific-configuration-of-a-project-pro
+private fun SourceSet.implementation(dependencyNotation: Any) =
+    dependencies.add("${this.name}Implementation", dependencyNotation)
+
+private val SourceSet.implementation
+    get() = object {
+        fun extendsFrom(superConfig: Configuration) =
+            configurations["${name}Implementation"].extendsFrom(superConfig)
+    }
