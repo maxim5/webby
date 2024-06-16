@@ -28,8 +28,7 @@ dependencies {
 
 // Exports
 
-
-extra["exportDir"] = "${project.layout.buildDirectory.get()}/exported/sources"
+project.extra["exportDir"] = "${project.layout.buildDirectory.get()}/exported/sources"
 val exports = mapOf("*CharArray*.java" to "arrays")
 
 tasks.register<Copy>("exportSrc") {
@@ -38,7 +37,7 @@ tasks.register<Copy>("exportSrc") {
         // https://stackoverflow.com/questions/40984658/using-a-wildcard-in-gradle-copy-task
         from(sourceSets.main.get().java.srcDirs)
         include("**/${files}")
-        into("${extra["exportDir"]}/${dest}")
+        into("${project.extra["exportDir"]}/${dest}")
     }
     dependsOn(tasks.compileJava.get())
 }

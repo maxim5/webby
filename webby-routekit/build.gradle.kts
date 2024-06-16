@@ -5,7 +5,9 @@ plugins {
 version = "0.3.0"
 
 // Include exported util sources
-tasks.compileJava.get().dependsOn(":base-util:exportSrc")
+tasks.compileJava {
+    dependsOn(":base-util:exportSrc")
+}
 sourceSets {
     main.get().java.srcDirs(listOf("${project(":base-util").extra["exportDir"]}/arrays"))
 }
