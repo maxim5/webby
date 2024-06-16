@@ -18,7 +18,6 @@ import io.webby.db.kv.mapdb.MapDbImpl;
 import io.webby.db.kv.paldb.PalDbFactory;
 import io.webby.db.kv.paldb.PalDbImpl;
 import io.webby.testing.*;
-import io.webby.testing.ext.CloseAllExtension;
 import io.webby.testing.ext.EmbeddedRedisExtension;
 import io.webby.testing.ext.SqlDbExtension;
 import io.webby.testing.ext.TempDirectoryExtension;
@@ -41,9 +40,8 @@ import static io.webby.testing.TestingBasics.array;
 
 @Tag("slow") @Tag("integration") @Tag("sql")
 public class KeyValueDbIntegrationTest {
-    @RegisterExtension private static final CloseAllExtension CLOSE_ALL = new CloseAllExtension();
-    @RegisterExtension private static final TempDirectoryExtension TEMP_DIRECTORY = new TempDirectoryExtension();
-    @RegisterExtension private static final EmbeddedRedisExtension REDIS = new EmbeddedRedisExtension();
+    @RegisterExtension private static final TempDirectoryExtension TEMP_DIRECTORY = TempDirectoryExtension.withCleanup();
+    @RegisterExtension private static final EmbeddedRedisExtension REDIS = EmbeddedRedisExtension.ofDefaultPort();
     @RegisterExtension private static final SqlDbExtension SQL = SqlDbExtension.fromProperties().withSavepoints();
 
     @ParameterizedTest

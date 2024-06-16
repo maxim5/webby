@@ -1,6 +1,8 @@
 package io.webby.testing.ext;
 
 import com.google.common.flogger.FluentLogger;
+import io.webby.util.io.EasyNet;
+import org.jetbrains.annotations.NotNull;
 import org.junit.jupiter.api.extension.AfterAllCallback;
 import org.junit.jupiter.api.extension.BeforeAllCallback;
 import org.junit.jupiter.api.extension.ExtensionContext;
@@ -22,8 +24,16 @@ public class EmbeddedRedisExtension implements BeforeAllCallback, AfterAllCallba
         redisServer = RedisServer.builder().port(port).setting("maxmemory 512M").build();
     }
 
-    public EmbeddedRedisExtension() {
-        this(DEFAULT_PORT);
+    public static @NotNull EmbeddedRedisExtension of(int port) {
+        return new EmbeddedRedisExtension(port);
+    }
+
+    public static @NotNull EmbeddedRedisExtension ofDefaultPort() {
+        return of(DEFAULT_PORT);
+    }
+
+    public static @NotNull EmbeddedRedisExtension ofAnyAvailablePort() {
+        return of(EasyNet.nextAvailablePort());
     }
 
     @Override
