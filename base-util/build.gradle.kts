@@ -26,6 +26,8 @@ dependencies {
     testFixturesCompileOnly("com.google.inject:guice:7.0.0")
     testFixturesCompileOnly("com.carrotsearch:hppc:0.10.0")
     testFixturesCompileOnly("io.netty:netty-all:4.1.110.Final")
+    testFixturesCompileOnly("net.bytebuddy:byte-buddy:1.14.17")
+    testFixturesCompileOnly("net.bytebuddy:byte-buddy-agent:1.14.17")
 }
 
 // Exports
