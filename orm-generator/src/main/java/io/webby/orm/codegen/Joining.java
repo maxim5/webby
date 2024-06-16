@@ -16,15 +16,15 @@ class Joining {
     public static final Collector<CharSequence, ?, String> COMMA_JOINER = Collectors.joining(", ");
     public static final Collector<CharSequence, ?, String> LINE_JOINER = Collectors.joining("\n");
 
-    public static @NotNull Collector<CharSequence, ?, String> linesJoiner(@NotNull String indent) {
-        return Collectors.joining("\n" + indent, indent, "");
+    public static @NotNull Collector<CharSequence, ?, String> linesJoiner(@NotNull Indent indent) {
+        return Collectors.joining(indent.delimiter(), indent.prefix(), "");
     }
 
-    public static @NotNull Collector<CharSequence, ?, String> linesJoiner(@NotNull String indent, boolean filterEmpty) {
+    public static @NotNull Collector<CharSequence, ?, String> linesJoiner(@NotNull Indent indent, boolean filterEmpty) {
         return new Collector<CharSequence, StringJoiner, String>() {
             @Override
             public Supplier<StringJoiner> supplier() {
-                return () -> new StringJoiner("\n" + indent, indent, "");
+                return () -> new StringJoiner(indent.delimiter(), indent.prefix(), "");
             }
 
             @Override

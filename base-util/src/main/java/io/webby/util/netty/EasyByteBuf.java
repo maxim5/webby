@@ -4,6 +4,7 @@ import io.netty.buffer.ByteBuf;
 import io.netty.buffer.ByteBufAllocator;
 import io.netty.buffer.Unpooled;
 import io.netty.util.AsciiString;
+import io.webby.util.classpath.RuntimeRequirement;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
@@ -11,6 +12,10 @@ import java.nio.ByteBuffer;
 import java.nio.charset.StandardCharsets;
 
 public class EasyByteBuf {
+    static {
+        RuntimeRequirement.verify("io.netty.buffer.ByteBuf");
+    }
+
     public static @NotNull ByteBuf allocate(@NotNull ByteBufAllocator allocator, byte @NotNull [] bytes) {
         ByteBuf buffer = allocator.buffer(bytes.length);
         buffer.writeBytes(bytes);

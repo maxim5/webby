@@ -106,8 +106,8 @@ class Snippet {
     }
 
     @Pure
-    public @NotNull String joinLines(@NotNull String indent) {
-        return join(Collectors.joining("\n" + indent, "", ""));
+    public @NotNull String joinLines(@NotNull Indent indent) {
+        return join(Collectors.joining(indent.delimiter(), "", ""));
     }
 
     @Pure

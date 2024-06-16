@@ -10,6 +10,7 @@ import com.carrotsearch.hppc.procedures.LongLongProcedure;
 import com.carrotsearch.hppc.procedures.LongObjectProcedure;
 import com.google.common.collect.Streams;
 import com.google.errorprone.annotations.CheckReturnValue;
+import io.webby.util.classpath.RuntimeRequirement;
 import io.webby.util.func.ThrowConsumer;
 import org.checkerframework.dataflow.qual.Impure;
 import org.checkerframework.dataflow.qual.Pure;
@@ -26,10 +27,14 @@ import java.util.stream.Stream;
 
 @CheckReturnValue
 public class EasyHppc {
+    static {
+        RuntimeRequirement.verify("com.carrotsearch.hppc.IntArrayList");
+    }
+
     @Pure
     public static @NotNull IntArrayList slice(@NotNull IntArrayList list, int fromIndex, int toIndex) {
         assert fromIndex >= 0 && toIndex >= 0 && fromIndex <= toIndex :
-                "Invalid range: from=%d to=%d".formatted(fromIndex, toIndex);
+            "Invalid range: from=%d to=%d".formatted(fromIndex, toIndex);
         fromIndex = Math.min(fromIndex, list.elementsCount);
         toIndex = Math.min(toIndex, list.elementsCount);
         IntArrayList slice = new IntArrayList();

@@ -9,7 +9,7 @@ import java.lang.reflect.Method;
 import java.util.logging.Level;
 import java.util.logging.LogManager;
 
-import static io.webby.util.reflect.EasyClasspath.classForNameOrNull;
+import static io.webby.util.classpath.EasyClasspath.classForNameOrNull;
 import static io.webby.util.reflect.EasyMembers.findMethod;
 
 public final class AnyLog {

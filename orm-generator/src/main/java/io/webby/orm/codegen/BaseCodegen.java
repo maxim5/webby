@@ -6,8 +6,8 @@ import org.jetbrains.annotations.NotNull;
 import java.util.Map;
 import java.util.stream.Stream;
 
+import static io.webby.orm.codegen.Indent.INDENT1;
 import static io.webby.orm.codegen.JavaSupport.EMPTY_LINE;
-import static io.webby.orm.codegen.JavaSupport.INDENT1;
 
 @SuppressWarnings("UnusedReturnValue")
 public abstract class BaseCodegen {
@@ -24,7 +24,7 @@ public abstract class BaseCodegen {
 
     private BaseCodegen indent(int level) {
         for (int i = 0; i < level; i++) {
-            writer.append(INDENT1);
+            writer.append(INDENT1.spaces());
         }
         return this;
     }
