@@ -17,13 +17,15 @@ dependencies {
 }
 
 dependencies {
-    testFixturesImplementation("com.google.truth:truth:1.4.2")
-    testFixturesImplementation("org.junit.jupiter:junit-jupiter-api:5.10.2")
+    testFixturesCompileOnly("com.google.flogger:flogger:0.8")
+    testFixturesCompileOnly("com.google.truth:truth:1.4.2")
+    testFixturesCompileOnly("org.junit.jupiter:junit-jupiter-api:5.10.2")
+    testFixturesCompileOnly("org.junit.jupiter:junit-jupiter-engine:5.10.2")
 
-    testFixturesImplementation("org.jetbrains:annotations:24.1.0")
-    testFixturesImplementation("com.google.inject:guice:7.0.0")
-    testFixturesImplementation("com.carrotsearch:hppc:0.10.0")
-    testFixturesImplementation("io.netty:netty-all:4.1.110.Final")
+    testFixturesCompileOnly("org.jetbrains:annotations:24.1.0")
+    testFixturesCompileOnly("com.google.inject:guice:7.0.0")
+    testFixturesCompileOnly("com.carrotsearch:hppc:0.10.0")
+    testFixturesCompileOnly("io.netty:netty-all:4.1.110.Final")
 }
 
 // Exports
