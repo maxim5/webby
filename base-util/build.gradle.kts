@@ -6,9 +6,9 @@ plugins {
 dependencies {
     compileOnly("com.google.errorprone:error_prone_annotations:2.28.0")
     compileOnly("org.checkerframework:checker-qual:3.44.0")
-    implementation("com.google.guava:guava:33.2.0-jre")
-    implementation("com.carrotsearch:hppc:0.10.0")
-    implementation("io.netty:netty-all:4.1.110.Final")
+    compileOnly("com.google.guava:guava:33.2.0-jre")
+    implementation("com.carrotsearch:hppc:0.10.0")      // testing EasyHppc
+    implementation("io.netty:netty-all:4.1.110.Final")  // testing EasyByteBuf
 }
 
 dependencies {
@@ -31,7 +31,7 @@ dependencies {
 // Exports
 
 project.extra["exportDir"] = "${project.layout.buildDirectory.get()}/exported/sources"
-val exports = mapOf("*CharArray*.java" to "arrays")
+val exports = mapOf("*CharArray*.java" to "arrays")  // file-pattern -> directory
 
 tasks.register<Copy>("exportSrc") {
     includeEmptyDirs = false
