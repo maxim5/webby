@@ -118,9 +118,9 @@ public class ValuesArrayMakerTest {
                 null,
                 """)
             .matchesConvertValues("""
-                EasyPrimitives_MutableInt_JdbcAdapter.ADAPTER.fillArrayValues($param.i(), array, 0);
-                EasyPrimitives_MutableBool_JdbcAdapter.ADAPTER.fillArrayValues($param.bool(), array, 1);
-                EasyPrimitives_MutableLong_JdbcAdapter.ADAPTER.fillArrayValues($param.l(), array, 2);
+                EasyWrappers_MutableInt_JdbcAdapter.ADAPTER.fillArrayValues($param.i(), array, 0);
+                EasyWrappers_MutableBool_JdbcAdapter.ADAPTER.fillArrayValues($param.bool(), array, 1);
+                EasyWrappers_MutableLong_JdbcAdapter.ADAPTER.fillArrayValues($param.l(), array, 2);
                 PointJdbcAdapter.ADAPTER.fillArrayValues($param.point(), array, 3);
                 """);
     }
@@ -144,10 +144,10 @@ public class ValuesArrayMakerTest {
                 null,
                 """)
             .matchesConvertValues("""
-                EasyPrimitives_MutableInt_JdbcAdapter.ADAPTER.fillArrayValues($param.i(), array, 0);
+                EasyWrappers_MutableInt_JdbcAdapter.ADAPTER.fillArrayValues($param.i(), array, 0);
                 Optional.ofNullable($param.bool()).ifPresent(bool ->\
-                 EasyPrimitives_MutableBool_JdbcAdapter.ADAPTER.fillArrayValues(bool, array, 1));
-                EasyPrimitives_MutableLong_JdbcAdapter.ADAPTER.fillArrayValues($param.l(), array, 2);
+                 EasyWrappers_MutableBool_JdbcAdapter.ADAPTER.fillArrayValues(bool, array, 1));
+                EasyWrappers_MutableLong_JdbcAdapter.ADAPTER.fillArrayValues($param.l(), array, 2);
                 Optional.ofNullable($param.point()).ifPresent(point ->\
                  PointJdbcAdapter.ADAPTER.fillArrayValues(point, array, 3));
                 """);
