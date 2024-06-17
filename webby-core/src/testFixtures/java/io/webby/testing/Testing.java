@@ -12,7 +12,7 @@ import io.webby.app.AppClasspathScanner;
 import io.webby.db.model.BlobKv;
 import io.webby.netty.marshal.Json;
 import io.webby.netty.marshal.Marshaller;
-import io.webby.util.collect.Pair;
+import io.webby.util.base.Pair;
 import org.apache.logging.log4j.Level;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.core.config.Configurator;

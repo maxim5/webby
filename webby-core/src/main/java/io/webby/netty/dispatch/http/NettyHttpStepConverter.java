@@ -23,7 +23,7 @@ import io.webby.url.impl.EndpointView;
 import io.webby.url.view.Renderer;
 import io.webby.util.base.Unchecked.Consumers;
 import io.webby.util.base.Unchecked.Guava;
-import io.webby.util.collect.Pair;
+import io.webby.util.base.Pair;
 import io.webby.util.func.ThrowConsumer;
 import io.webby.util.netty.EasyByteBuf;
 import org.checkerframework.checker.nullness.qual.Nullable;

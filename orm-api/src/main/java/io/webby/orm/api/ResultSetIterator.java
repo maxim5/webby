@@ -2,7 +2,7 @@ package io.webby.orm.api;
 
 import com.google.errorprone.annotations.MustBeClosed;
 import io.webby.util.base.Unchecked;
-import io.webby.util.collect.Pair;
+import io.webby.util.base.Pair;
 import io.webby.util.func.ThrowFunction;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;

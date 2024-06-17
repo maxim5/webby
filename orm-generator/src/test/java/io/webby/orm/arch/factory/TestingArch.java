@@ -7,7 +7,7 @@ import io.webby.orm.arch.model.*;
 import io.webby.testing.TestingBasics.SimpleBitSet;
 import io.webby.testing.orm.FakeModelAdaptersLocator;
 import io.webby.util.collect.ListBuilder;
-import io.webby.util.collect.Pair;
+import io.webby.util.base.Pair;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 

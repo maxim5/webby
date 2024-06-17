@@ -21,7 +21,7 @@ import io.webby.testing.*;
 import io.webby.testing.ext.EmbeddedRedisExtension;
 import io.webby.testing.ext.SqlDbExtension;
 import io.webby.testing.ext.TempDirectoryExtension;
-import io.webby.util.collect.Pair;
+import io.webby.util.base.Pair;
 import org.jetbrains.annotations.NotNull;
 import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;

@@ -2,7 +2,7 @@ package io.webby.db.kv;
 
 import io.webby.db.kv.javamap.JavaMapDbFactory;
 import io.webby.testing.db.model.FakeIntIdGenerator;
-import io.webby.util.collect.Pair;
+import io.webby.util.base.Pair;
 import org.jetbrains.annotations.NotNull;
 import org.junit.jupiter.api.Test;
 

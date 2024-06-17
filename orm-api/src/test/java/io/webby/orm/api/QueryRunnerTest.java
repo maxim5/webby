@@ -11,7 +11,7 @@ import io.webby.orm.api.query.*;
 import io.webby.testing.CalledOnce;
 import io.webby.testing.MoreTruth;
 import io.webby.util.collect.Array;
-import io.webby.util.collect.Pair;
+import io.webby.util.base.Pair;
 import io.webby.util.func.ThrowConsumer;
 import io.webby.util.func.ThrowFunction;
 import org.junit.jupiter.api.AfterEach;
