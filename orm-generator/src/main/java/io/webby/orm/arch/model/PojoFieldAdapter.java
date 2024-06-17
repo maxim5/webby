@@ -12,7 +12,7 @@ import java.util.Objects;
 public class PojoFieldAdapter extends PojoField {
     private final Class<?> adapter;
     private final AdapterApi adapterApi;
-    private final CacheCompute<List<Column>> columnsRef = AtomicCacheCompute.createEmpty();
+    private final CacheCompute<List<Column>> columnsCache = AtomicCacheCompute.createEmpty();
 
     protected PojoFieldAdapter(@NotNull PojoParent parent, @NotNull ModelField field, @NotNull Class<?> adapter) {
         super(parent, field, TypeSupport.ADAPTER_API);
@@ -34,7 +34,7 @@ public class PojoFieldAdapter extends PojoField {
     }
 
     public @NotNull List<Column> columns() {
-        return columnsRef.getOrCompute(() -> adapterApi.adapterColumns(fullSqlName()));
+        return columnsCache.getOrCompute(() -> adapterApi.adapterColumns(fullSqlName()));
     }
 
     @Override

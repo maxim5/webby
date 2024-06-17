@@ -16,12 +16,12 @@ import java.util.concurrent.TimeUnit;
 import static io.webby.util.base.Unchecked.rethrow;
 
 public class TuplFactory extends BaseKeyValueFactory {
-    private final CacheCompute<Database> db = AtomicCacheCompute.createEmpty();
+    private final CacheCompute<Database> dbCache = AtomicCacheCompute.createEmpty();
 
     @Override
     public @NotNull <K, V> TuplDb<K, V> getInternalDb(@NotNull DbOptions<K, V> options) {
         return cacheIfAbsent(options, () -> {
-            Database database = db.getOrCompute(Unchecked.Suppliers.rethrow(() -> Database.open(getDatabaseConfig())));
+            Database database = openDb();
 
             try {
                 Codec<K> keyCodec = keyCodecOrDie(options);
@@ -32,6 +32,10 @@ public class TuplFactory extends BaseKeyValueFactory {
                 return rethrow(e);
             }
         });
+    }
+
+    private @NotNull Database openDb() {
+        return dbCache.getOrCompute(Unchecked.Suppliers.rethrow(() -> Database.open(getDatabaseConfig())));
     }
 
     private @NotNull DatabaseConfig getDatabaseConfig() {
@@ -55,20 +59,20 @@ public class TuplFactory extends BaseKeyValueFactory {
         assert cacheMinSize <= cacheMaxSize : "Invalid TUPL cache settings: %d vs %d".formatted(cacheMinSize, cacheMaxSize);
 
         return new DatabaseConfig()
-                .baseFile(storagePath.resolve(filename).toFile())
-                .minCacheSize(cacheMinSize)
-                .maxCacheSize(cacheMaxSize)
-                .durabilityMode(durabilityMode)
-                .lockUpgradeRule(lockUpgradeRule)
-                .lockTimeout(lockTimeoutMillis, TimeUnit.MILLISECONDS)
-                .checkpointRate(checkpointRateMillis, TimeUnit.MILLISECONDS)
-                .checkpointSizeThreshold(checkpointThresholdBytes)
-                .maxCheckpointThreads(checkpointMaxThreads)
-                .syncWrites(syncWrites)
-                .readOnly(readOnly)
-                .pageSize(pageSizeBytes)
-                .directPageAccess(directPageAccess)
-                .cachePriming(cachePriming)
-                .cleanShutdown(cleanShutdown);
+            .baseFile(storagePath.resolve(filename).toFile())
+            .minCacheSize(cacheMinSize)
+            .maxCacheSize(cacheMaxSize)
+            .durabilityMode(durabilityMode)
+            .lockUpgradeRule(lockUpgradeRule)
+            .lockTimeout(lockTimeoutMillis, TimeUnit.MILLISECONDS)
+            .checkpointRate(checkpointRateMillis, TimeUnit.MILLISECONDS)
+            .checkpointSizeThreshold(checkpointThresholdBytes)
+            .maxCheckpointThreads(checkpointMaxThreads)
+            .syncWrites(syncWrites)
+            .readOnly(readOnly)
+            .pageSize(pageSizeBytes)
+            .directPageAccess(directPageAccess)
+            .cachePriming(cachePriming)
+            .cleanShutdown(cleanShutdown);
     }
 }
