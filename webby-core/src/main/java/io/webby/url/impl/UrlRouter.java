@@ -17,7 +17,7 @@ public class UrlRouter implements Provider<Router<RouteEndpoint>> {
 
     @Inject
     public UrlRouter(@NotNull HandlerBinder handlerBinder, @NotNull WebsocketAgentBinder agentBinder) {
-        this.router = TimeIt
+        router = TimeIt
             .timeIt(handlerBinder::buildHandlerRouter)
             .onDone((__, millis) -> log.at(Level.INFO).log("URL router built in %d ms", millis));
     }

@@ -1,5 +1,6 @@
 package io.webby.ws.impl;
 
+import com.google.common.collect.ImmutableMap;
 import com.google.common.flogger.FluentLogger;
 import com.google.inject.Inject;
 import io.webby.util.time.TimeIt;
@@ -13,13 +14,14 @@ import java.util.logging.Level;
 public class WebsocketRouter {
     private static final FluentLogger log = FluentLogger.forEnclosingClass();
 
-    private final Map<String, AgentEndpoint> router;
+    private final ImmutableMap<String, AgentEndpoint> router;
 
     @Inject
     public WebsocketRouter(@NotNull WebsocketAgentBinder agentBinder) {
-        this.router = TimeIt
-            .timeIt(() -> agentBinder.bindAgents())
-            .onDone((__, millis) -> log.at(Level.INFO).log("Websocket router built in %d ms", millis));
+        router = TimeIt.timeIt(() -> {
+            Map<String, AgentEndpoint> boundAgents = agentBinder.bindAgents();
+            return ImmutableMap.copyOf(boundAgents);
+        }).onDone((__, millis) -> log.at(Level.INFO).log("Websocket router built in %d ms", millis));
     }
 
     public @Nullable AgentEndpoint route(@NotNull String url) {
