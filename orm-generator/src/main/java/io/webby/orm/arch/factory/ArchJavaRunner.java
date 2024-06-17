@@ -35,7 +35,7 @@ public class ArchJavaRunner {
 
     public void runGenerate(@NotNull String destinationPath, @NotNull RunInputs inputs) throws IOException {
         destination = destinationPath;
-        TimeIt.timeItOrDie(() -> {
+        TimeIt.timeIt(() -> {
             RunResult runResult = new ArchFactory(locator).build(inputs);
 
             for (AdapterArch adapterArch : runResult.adapters()) {
@@ -46,7 +46,7 @@ public class ArchJavaRunner {
             }
 
             return runResult;
-        }, (runResult, millis) -> {
+        }).onDone((runResult, millis) -> {
             int adapters = runResult.adapters().size();
             int tables = runResult.tables().size();
             log.at(Level.INFO).log("Generated %d adapters and %d tables in %d millis", adapters, tables, millis);

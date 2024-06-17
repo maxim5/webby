@@ -34,19 +34,17 @@ public class TimedClasspathScanner implements ClasspathScanner {
             }
         };
 
-        TimeIt.timeIt(
-            () -> delegate.scan(classNamePredicate, classPredicate, consumer.andThen(counter)),
-            millis -> log.at(Level.INFO).log("Found %d %s classes in %d ms", counter.count, name, millis)
-        );
+        TimeIt
+            .timeIt(() -> delegate.scan(classNamePredicate, classPredicate, consumer.andThen(counter)))
+            .onDone(millis -> log.at(Level.INFO).log("Found %d %s classes in %d ms", counter.count, name, millis));
     }
 
     @Override
     public @NotNull Set<Class<?>> scanToSet(@NotNull ClassNamePredicate classNamePredicate,
                                             @NotNull ClassPredicate classPredicate) {
-        return TimeIt.timeIt(
-            () -> delegate.scanToSet(classNamePredicate, classPredicate),
-            (result, millis) -> log.at(Level.INFO).log("Found %d %s classes in %d ms", result.size(), name, millis)
-        );
+        return TimeIt
+            .timeIt(() -> delegate.scanToSet(classNamePredicate, classPredicate))
+            .onDone((set, millis) -> log.at(Level.INFO).log("Found %d %s classes in %d ms", set.size(), name, millis));
     }
 
     @Override

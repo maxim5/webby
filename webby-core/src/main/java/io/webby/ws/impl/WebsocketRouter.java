@@ -17,10 +17,9 @@ public class WebsocketRouter {
 
     @Inject
     public WebsocketRouter(@NotNull WebsocketAgentBinder agentBinder) {
-        this.router = TimeIt.timeIt(
-            agentBinder::bindAgents,
-            (result, millis) -> log.at(Level.INFO).log("Websocket router built in %d ms", millis)
-        );
+        this.router = TimeIt
+            .timeIt(() -> agentBinder.bindAgents())
+            .onDone((__, millis) -> log.at(Level.INFO).log("Websocket router built in %d ms", millis));
     }
 
     public @Nullable AgentEndpoint route(@NotNull String url) {
@@ -32,9 +31,9 @@ public class WebsocketRouter {
     @VisibleForTesting
     public @Nullable AgentEndpoint findAgentEndpointByClass(@NotNull Class<?> klass) {
         return router.values()
-                .stream()
-                .filter(endpoint -> klass.isInstance(endpoint.agent()))
-                .findAny()
-                .orElse(null);
+            .stream()
+            .filter(endpoint -> klass.isInstance(endpoint.agent()))
+            .findAny()
+            .orElse(null);
     }
 }

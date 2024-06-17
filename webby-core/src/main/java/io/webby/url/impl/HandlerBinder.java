@@ -66,32 +66,29 @@ public class HandlerBinder {
             log.at(Level.FINE).log("Rule: %s -> %s", url, LazyArgs.lazy(endpoint::describe));
         };
 
-        TimeIt.timeIt(
-            () -> processBindings(bindings, parser, setupConsumer),
-            millis -> log.at(Level.FINE).log("Endpoints mapped to urls in %d ms", millis)
-        );
+        TimeIt
+            .timeIt(() -> processBindings(bindings, parser, setupConsumer))
+            .onDone(millis -> log.at(Level.FINE).log("Endpoints mapped to urls in %d ms", millis));
 
         String staticFilesUrlPrefix = settings.getProperty("url.static.files.prefix", "/");
         boolean staticFilesDynamicLookup = settings.getBoolProperty("url.static.files.dynamic.lookup", settings.isDevMode());
         try {
             if (staticFilesDynamicLookup) {
-                TimeIt.timeItOrDie(
-                    () -> staticServing.iterateStaticDirectories(dir -> {
+                TimeIt.timeIt(() ->
+                    staticServing.iterateStaticDirectories(dir -> {
                         String url = UrlFix.joinWithSlash(staticFilesUrlPrefix, dir, "{path}");
                         RouteEndpoint endpoint = new DynamicServingRouteEndpoint(staticFilesUrlPrefix, dir, staticServing);
                         setupConsumer.accept(url, endpoint);
-                    }),
-                    millis -> log.at(Level.FINE).log("Static files urls processed in %d ms", millis)
-                );
+                    })
+                ).onDone(millis -> log.at(Level.FINE).log("Static files urls processed in %d ms", millis));
             } else {
-                TimeIt.timeItOrDie(
-                    () -> staticServing.iterateStaticFiles(path -> {
+                TimeIt.timeIt(() ->
+                    staticServing.iterateStaticFiles(path -> {
                         String url = UrlFix.joinWithSlash(staticFilesUrlPrefix, path);
                         RouteEndpoint endpoint = new StaticRouteEndpoint(path, staticServing);
                         setupConsumer.accept(url, endpoint);
-                    }),
-                    millis -> log.at(Level.FINE).log("Static files urls processed in %d ms", millis)
-                );
+                    })
+                ).onDone(millis -> log.at(Level.FINE).log("Static files urls processed in %d ms", millis));
             }
         } catch (IOException e) {
             throw new UrlConfigError("Failed to add static files to URL router", e);
@@ -106,17 +103,13 @@ public class HandlerBinder {
     }
 
     @VisibleForTesting
-    @NotNull
-    List<Binding> getBindings(@NotNull Iterable<Class<?>> handlerClasses) {
+    @NotNull List<Binding> getBindings(@NotNull Iterable<Class<?>> handlerClasses) {
         try {
-            return TimeIt.timeItOrDie(
-                () -> {
-                    ArrayList<Binding> bindings = new ArrayList<>();
-                    bindHandlers(handlerClasses, bindings::add);
-                    return bindings;
-                },
-                (result, millis) -> log.at(Level.FINE).log("Extracted %d bindings in %d ms", result.size(), millis)
-            );
+            return TimeIt.timeIt(() -> {
+                ArrayList<Binding> bindings = new ArrayList<>();
+                bindHandlers(handlerClasses, bindings::add);
+                return bindings;
+            }).onDone((bindings, millis) -> log.at(Level.FINE).log("Extracted %d bindings in %d ms", bindings.size(), millis));
         } catch (AppConfigException e) {
             throw e;
         } catch (Exception e) {
