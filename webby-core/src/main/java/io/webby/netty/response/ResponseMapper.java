@@ -23,7 +23,7 @@ import java.util.Map;
 import java.util.function.Function;
 
 import static io.webby.util.base.EasyCast.castAny;
-import static io.webby.util.io.EasyIO.Close.closeRethrow;
+import static io.webby.util.io.EasyIo.Close.closeRethrow;
 import static io.webby.util.base.Unchecked.Functions.rethrow;
 
 public class ResponseMapper {
