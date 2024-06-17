@@ -1,7 +1,6 @@
-package io.webby.util.collect;
+package io.webby.util.base;
 
 import com.google.common.base.Objects;
-import io.webby.util.base.Pair;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import org.junit.jupiter.api.Test;
