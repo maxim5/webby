@@ -22,11 +22,14 @@ public class ContentTypeDetector {
     }
 
     public @NotNull CharSequence guessContentType(@NotNull Path path) {
-        return firstNonNull(List.of(
-            () -> contentTypeProvider.getContentType(path),
-            () -> URLConnection.guessContentTypeFromName(path.toString()),
-            Unchecked.Suppliers.rethrow(() -> Files.probeContentType(path)),
-            Unchecked.Suppliers.rethrow(() -> ThirdPartyMimeTypeDetectors.detect(path.toFile()))
-        ), HttpConst.APPLICATION_OCTET_STREAM);
+        return firstNonNull(
+            List.of(
+                () -> contentTypeProvider.getContentType(path),
+                () -> URLConnection.guessContentTypeFromName(path.toString()),
+                Unchecked.Suppliers.rethrow(() -> Files.probeContentType(path)),
+                Unchecked.Suppliers.rethrow(() -> ThirdPartyMimeTypeDetectors.detect(path.toFile()))
+            ),
+            HttpConst.APPLICATION_OCTET_STREAM
+        );
     }
 }
