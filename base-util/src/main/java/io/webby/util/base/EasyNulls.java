@@ -7,7 +7,7 @@ import java.util.function.Supplier;
 
 import static java.util.Objects.requireNonNull;
 
-public class EasyObjects {
+public class EasyNulls {
     public static <T> @NotNull T firstNonNull(@Nullable T first, @Nullable T second) {
         return first != null ? first : requireNonNull(second, "Both arguments are null");
     }

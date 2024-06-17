@@ -18,8 +18,8 @@ import java.util.function.Supplier;
 
 import static io.webby.app.AppConfigException.assure;
 import static io.webby.util.base.EasyCast.castAny;
-import static io.webby.util.base.EasyObjects.firstNonNull;
-import static io.webby.util.base.EasyObjects.firstNonNullIfExist;
+import static io.webby.util.base.EasyNulls.firstNonNull;
+import static io.webby.util.base.EasyNulls.firstNonNullIfExist;
 
 public abstract class BaseKeyValueFactory implements InternalKeyValueFactory {
     protected final Map<String, KeyValueDb<?, ?>> cache = new HashMap<>();

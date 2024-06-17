@@ -11,7 +11,7 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.List;
 
-import static io.webby.util.base.EasyObjects.*;
+import static io.webby.util.base.EasyNulls.*;
 
 public class ContentTypeDetector {
     private ContentTypeProvider contentTypeProvider;

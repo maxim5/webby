@@ -21,7 +21,7 @@ import java.util.logging.Level;
 import java.util.stream.Collectors;
 
 import static io.webby.orm.arch.InvalidSqlModelException.failIf;
-import static io.webby.util.base.EasyObjects.firstNonNullIfExist;
+import static io.webby.util.base.EasyNulls.firstNonNullIfExist;
 import static io.webby.util.reflect.EasyMembers.isPrivate;
 import static io.webby.util.reflect.EasyMembers.isStatic;
 
