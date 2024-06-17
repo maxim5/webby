@@ -12,14 +12,14 @@ import java.util.logging.LogManager;
 import static io.webby.util.classpath.EasyClasspath.classForNameOrNull;
 import static io.webby.util.reflect.EasyMembers.findMethod;
 
-public final class AnyLog {
+public final class EasyLogs {
     @CanIgnoreReturnValue
-    public static boolean setLogLevelAll(Object level) {
+    public static boolean setLogLevelAny(Object level) {
         return Log4j2.setAllLevels(level) || JavaLogging.setRootLogLevel(level);
     }
 
     @CanIgnoreReturnValue
-    public static boolean shutdown() {
+    public static boolean shutdownAny() {
         return Log4j2.shutdown() || JavaLogging.shutdown();
     }
 

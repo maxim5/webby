@@ -12,7 +12,7 @@ import io.webby.app.AppLifetime;
 import io.webby.app.AppMaintenance;
 import io.webby.app.Settings;
 import io.webby.common.Lifetime;
-import io.webby.util.log.AnyLog;
+import io.webby.util.log.EasyLogs;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.logging.Level;
@@ -74,7 +74,7 @@ public class NettyBootstrap {
             log.at(Level.WARNING).log("Lifetime terminated");
 
             log.at(Level.FINE).log("Shutting down the logger...");
-            AnyLog.shutdown();
+            EasyLogs.shutdownAny();
         }));
     }
 }
