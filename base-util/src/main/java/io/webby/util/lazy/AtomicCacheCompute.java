@@ -1,7 +1,7 @@
 package io.webby.util.lazy;
 
+import com.google.errorprone.annotations.ThreadSafe;
 import org.jetbrains.annotations.NotNull;
-import org.jetbrains.annotations.Nullable;
 
 import java.util.concurrent.atomic.AtomicReference;
 import java.util.function.Supplier;
@@ -9,15 +9,12 @@ import java.util.function.Supplier;
 /**
  * An implementation of {@link CacheCompute} using an {@link AtomicReference}.
  */
+@ThreadSafe
 public class AtomicCacheCompute<T> implements CacheCompute<T> {
-    protected final AtomicReference<T> ref;
-
-    protected AtomicCacheCompute(@Nullable T initValue) {
-        ref = new AtomicReference<>(initValue);
-    }
+    protected final AtomicReference<T> ref = new AtomicReference<>(null);
 
     public static <T> @NotNull CacheCompute<T> createEmpty() {
-        return new AtomicCacheCompute<>(null);
+        return new AtomicCacheCompute<>();
     }
 
     @Override
