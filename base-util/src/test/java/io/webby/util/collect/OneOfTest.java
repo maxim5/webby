@@ -1,5 +1,6 @@
 package io.webby.util.collect;
 
+import io.webby.util.base.OneOf;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import org.junit.jupiter.api.Tag;

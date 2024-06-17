@@ -1,4 +1,4 @@
-package io.webby.util.collect;
+package io.webby.util.base;
 
 import com.google.errorprone.annotations.Immutable;
 import org.jetbrains.annotations.NotNull;

@@ -4,7 +4,7 @@ import com.google.mu.util.stream.BiStream;
 import io.webby.orm.adapter.JdbcAdapt;
 import io.webby.orm.arch.util.Naming;
 import io.webby.util.base.EasyPrimitives.MutableInt;
-import io.webby.util.collect.OneOf;
+import io.webby.util.base.OneOf;
 import io.webby.util.reflect.EasyAnnotations;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
