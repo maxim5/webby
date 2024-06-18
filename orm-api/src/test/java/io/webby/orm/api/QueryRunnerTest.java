@@ -26,7 +26,7 @@ import java.util.List;
 
 import static com.google.common.truth.Truth.assertThat;
 import static io.webby.orm.api.query.Shortcuts.var;
-import static io.webby.testing.AssertPrimitives.assertArray;
+import static io.webby.testing.AssertHppc.assertArray;
 import static io.webby.testing.TestingBasics.array;
 import static io.webby.testing.orm.MockingJdbc.assertThat;
 import static io.webby.testing.orm.MockingJdbc.mockConnection;

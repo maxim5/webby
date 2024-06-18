@@ -18,8 +18,8 @@ import org.junit.jupiter.params.provider.EnumSource;
 import static com.google.common.truth.Truth.assertThat;
 import static io.webby.demo.model.UserRateModelTable.OwnColumn.content_id;
 import static io.webby.demo.model.UserRateModelTable.OwnColumn.user_id;
-import static io.webby.testing.AssertPrimitives.assertMap;
-import static io.webby.testing.TestingPrimitives.newIntMap;
+import static io.webby.testing.AssertHppc.assertMap;
+import static io.webby.testing.TestingHppc.newIntMap;
 
 // FIX[minor]: more test cases (existing state, check group by count, flush)
 @Tag("integration") @Tag("sql")
