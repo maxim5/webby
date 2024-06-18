@@ -1,10 +1,10 @@
 package io.webby.orm;
 
 import com.google.inject.Inject;
+import io.spbx.orm.codegen.DefaultModelAdaptersLocator;
+import io.spbx.util.classpath.ClasspathScanner;
 import io.webby.app.ClassFilter;
 import io.webby.app.Settings;
-import io.webby.orm.codegen.DefaultModelAdaptersLocator;
-import io.spbx.util.classpath.ClasspathScanner;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.Set;
