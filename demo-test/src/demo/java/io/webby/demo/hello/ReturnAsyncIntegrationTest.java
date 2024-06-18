@@ -1,11 +1,11 @@
 package io.webby.demo.hello;
 
-import io.webby.testing.BaseHttpIntegrationTest;
+import io.spbx.webby.testing.BaseHttpIntegrationTest;
 import io.spbx.util.testing.TestingBasics;
 import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
 
-import static io.webby.testing.AssertResponse.assertThat;
+import static io.spbx.webby.testing.AssertResponse.assertThat;
 
 @Tag("slow")
 public class ReturnAsyncIntegrationTest extends BaseHttpIntegrationTest {

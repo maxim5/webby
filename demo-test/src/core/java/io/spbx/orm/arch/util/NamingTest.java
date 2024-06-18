@@ -1,9 +1,9 @@
 package io.spbx.orm.arch.util;
 
-import io.webby.auth.session.DefaultSession;
-import io.webby.auth.session.SessionModel;
-import io.webby.auth.user.DefaultUser;
-import io.webby.auth.user.UserModel;
+import io.spbx.webby.auth.session.DefaultSession;
+import io.spbx.webby.auth.session.SessionModel;
+import io.spbx.webby.auth.user.DefaultUser;
+import io.spbx.webby.auth.user.UserModel;
 import io.webby.demo.model.NestedModel;
 import org.junit.jupiter.api.Test;
 

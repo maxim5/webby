@@ -1,10 +1,10 @@
 package io.webby.demo.hello;
 
 import io.netty.handler.codec.http.HttpResponse;
-import io.webby.testing.BaseHttpIntegrationTest;
+import io.spbx.webby.testing.BaseHttpIntegrationTest;
 import org.junit.jupiter.api.Test;
 
-import static io.webby.testing.AssertResponse.assertThat;
+import static io.spbx.webby.testing.AssertResponse.assertThat;
 
 public class ReturnValueIntegrationTest extends BaseHttpIntegrationTest {
     protected final ReturnValue handler = testSetup(ReturnValue.class).initHandler();

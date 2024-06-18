@@ -1,8 +1,8 @@
 package io.webby.demo.hello;
 
-import io.webby.netty.request.HttpRequestEx;
-import io.webby.url.annotate.GET;
-import io.webby.url.annotate.Serve;
+import io.spbx.webby.netty.request.HttpRequestEx;
+import io.spbx.webby.url.annotate.GET;
+import io.spbx.webby.url.annotate.Serve;
 import org.jetbrains.annotations.NotNull;
 
 @Serve

@@ -4,12 +4,12 @@ import io.spbx.orm.api.Connector;
 import io.spbx.orm.api.ForeignInt;
 import io.spbx.orm.api.query.CreateTableQuery;
 import io.spbx.util.base.Pair;
-import io.webby.auth.user.DefaultUser;
-import io.webby.auth.user.UserTable;
+import io.spbx.webby.auth.user.DefaultUser;
+import io.spbx.webby.auth.user.UserTable;
+import io.spbx.webby.testing.UserBuilder;
 import io.webby.testing.BridgeTableTest;
 import io.webby.testing.SqlDbTableTest;
 import io.webby.testing.TestingSql;
-import io.webby.testing.UserBuilder;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.List;

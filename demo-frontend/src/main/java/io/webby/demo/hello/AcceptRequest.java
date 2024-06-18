@@ -5,10 +5,10 @@ import io.netty.handler.codec.http.DefaultHttpRequest;
 import io.netty.handler.codec.http.FullHttpRequest;
 import io.netty.handler.codec.http.HttpRequest;
 import io.spbx.util.base.CharArray;
-import io.webby.netty.request.DefaultHttpRequestEx;
-import io.webby.netty.request.HttpRequestEx;
-import io.webby.url.annotate.GET;
-import io.webby.url.annotate.Serve;
+import io.spbx.webby.netty.request.DefaultHttpRequestEx;
+import io.spbx.webby.netty.request.HttpRequestEx;
+import io.spbx.webby.url.annotate.GET;
+import io.spbx.webby.url.annotate.Serve;
 import org.jetbrains.annotations.NotNull;
 
 @Serve

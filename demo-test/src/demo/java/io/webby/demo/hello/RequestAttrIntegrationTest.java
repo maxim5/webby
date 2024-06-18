@@ -2,13 +2,13 @@ package io.webby.demo.hello;
 
 import io.netty.handler.codec.http.FullHttpRequest;
 import io.netty.handler.codec.http.HttpResponse;
-import io.webby.testing.BaseHttpIntegrationTest;
-import io.webby.testing.HttpRequestBuilder;
+import io.spbx.webby.testing.BaseHttpIntegrationTest;
+import io.spbx.webby.testing.HttpRequestBuilder;
 import io.spbx.util.testing.ext.HppcReflectionExtension;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.RegisterExtension;
 
-import static io.webby.testing.AssertResponse.assertThat;
+import static io.spbx.webby.testing.AssertResponse.assertThat;
 
 public class RequestAttrIntegrationTest extends BaseHttpIntegrationTest {
     @RegisterExtension private static final HppcReflectionExtension HPPC_ORDER_FIX = new HppcReflectionExtension();

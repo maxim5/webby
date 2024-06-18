@@ -1,8 +1,8 @@
 package io.webby.demo.hello;
 
-import io.webby.netty.request.HttpRequestEx;
-import io.webby.url.annotate.Access;
-import io.webby.url.annotate.GET;
+import io.spbx.webby.netty.request.HttpRequestEx;
+import io.spbx.webby.url.annotate.Access;
+import io.spbx.webby.url.annotate.GET;
 import org.jetbrains.annotations.NotNull;
 
 @Access(Access.AuthUsersOnly)

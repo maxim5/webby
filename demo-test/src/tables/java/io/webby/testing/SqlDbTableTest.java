@@ -4,7 +4,7 @@ import io.spbx.orm.api.BaseTable;
 import io.spbx.orm.api.Connector;
 import io.spbx.orm.api.QueryRunner;
 import io.spbx.orm.api.debug.DebugSql;
-import io.webby.testing.ext.SqlDbExtension;
+import io.spbx.webby.testing.ext.SqlDbExtension;
 import org.jetbrains.annotations.NotNull;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Tag;

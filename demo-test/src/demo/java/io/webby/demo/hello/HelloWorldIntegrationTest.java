@@ -2,11 +2,11 @@ package io.webby.demo.hello;
 
 import io.netty.handler.codec.DecoderResult;
 import io.netty.handler.codec.http.FullHttpRequest;
-import io.webby.testing.BaseHttpIntegrationTest;
-import io.webby.testing.HttpRequestBuilder;
+import io.spbx.webby.testing.BaseHttpIntegrationTest;
+import io.spbx.webby.testing.HttpRequestBuilder;
 import org.junit.jupiter.api.Test;
 
-import static io.webby.testing.AssertResponse.assertThat;
+import static io.spbx.webby.testing.AssertResponse.assertThat;
 
 public class HelloWorldIntegrationTest extends BaseHttpIntegrationTest {
     protected final HelloWorld handler = testSetup(HelloWorld.class).initHandler();

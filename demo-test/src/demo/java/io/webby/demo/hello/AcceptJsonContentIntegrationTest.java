@@ -1,7 +1,7 @@
 package io.webby.demo.hello;
 
-import io.webby.netty.marshal.MarshallerFactory.SupportedJsonLibrary;
-import io.webby.testing.BaseHttpIntegrationTest;
+import io.spbx.webby.netty.marshal.MarshallerFactory.SupportedJsonLibrary;
+import io.spbx.webby.testing.BaseHttpIntegrationTest;
 import org.jetbrains.annotations.NotNull;
 import org.junit.Test;
 import org.junit.experimental.categories.Category;
@@ -13,9 +13,9 @@ import java.util.List;
 import java.util.Map;
 
 import static com.google.common.truth.Truth.assertThat;
-import static io.webby.testing.AssertJson.assertJsonEquivalent;
-import static io.webby.testing.AssertJson.withJsonLibrary;
-import static io.webby.testing.AssertResponse.assertThat;
+import static io.spbx.webby.testing.AssertJson.assertJsonEquivalent;
+import static io.spbx.webby.testing.AssertJson.withJsonLibrary;
+import static io.spbx.webby.testing.AssertResponse.assertThat;
 
 @Tag("slow")
 @Category(Parameterized.class)

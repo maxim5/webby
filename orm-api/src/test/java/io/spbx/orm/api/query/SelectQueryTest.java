@@ -3,7 +3,7 @@ package io.spbx.orm.api.query;
 import com.google.errorprone.annotations.CheckReturnValue;
 import io.spbx.orm.api.Engine;
 import io.spbx.util.testing.AssertHppc;
-import io.webby.testing.ext.SqlDbExtension;
+import io.spbx.webby.testing.ext.SqlDbExtension;
 import org.jetbrains.annotations.NotNull;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Tag;

@@ -1,12 +1,12 @@
 package io.webby.demo.hello;
 
 import io.spbx.util.base.CharArray;
-import io.webby.url.annotate.GET;
-import io.webby.url.annotate.Param;
-import io.webby.url.convert.CharArrayConstraint;
-import io.webby.url.convert.Constraint;
-import io.webby.url.convert.IntConverter;
-import io.webby.url.convert.StringConstraint;
+import io.spbx.webby.url.annotate.GET;
+import io.spbx.webby.url.annotate.Param;
+import io.spbx.webby.url.convert.CharArrayConstraint;
+import io.spbx.webby.url.convert.Constraint;
+import io.spbx.webby.url.convert.IntConverter;
+import io.spbx.webby.url.convert.StringConstraint;
 
 public class AcceptConstraints {
     @Param private static final Constraint<String> str = StringConstraint.MAX_256;

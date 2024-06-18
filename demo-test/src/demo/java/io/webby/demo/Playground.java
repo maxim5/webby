@@ -3,7 +3,7 @@ package io.webby.demo;
 import com.google.common.io.BaseEncoding;
 import io.spbx.orm.api.QueryRunner;
 import io.spbx.orm.api.debug.DebugSql;
-import io.webby.db.sql.SqlSettings;
+import io.spbx.webby.db.sql.SqlSettings;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 

@@ -1,16 +1,16 @@
 package io.webby.demo.model;
 
 import com.google.inject.Inject;
-import io.webby.auth.session.SessionModel;
-import io.webby.auth.user.DefaultUser;
-import io.webby.auth.user.UserAccess;
-import io.webby.auth.user.UserModel;
-import io.webby.auth.user.UserStore;
-import io.webby.netty.errors.NotFoundException;
-import io.webby.netty.request.HttpRequestEx;
-import io.webby.url.annotate.GET;
-import io.webby.url.annotate.POST;
-import io.webby.url.annotate.Serve;
+import io.spbx.webby.auth.session.SessionModel;
+import io.spbx.webby.auth.user.DefaultUser;
+import io.spbx.webby.auth.user.UserAccess;
+import io.spbx.webby.auth.user.UserModel;
+import io.spbx.webby.auth.user.UserStore;
+import io.spbx.webby.netty.errors.NotFoundException;
+import io.spbx.webby.netty.request.HttpRequestEx;
+import io.spbx.webby.url.annotate.GET;
+import io.spbx.webby.url.annotate.POST;
+import io.spbx.webby.url.annotate.Serve;
 import org.jetbrains.annotations.NotNull;
 
 @Serve

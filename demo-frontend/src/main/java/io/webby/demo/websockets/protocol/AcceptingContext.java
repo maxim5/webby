@@ -1,10 +1,10 @@
 package io.webby.demo.websockets.protocol;
 
-import io.webby.url.annotate.Serve;
-import io.webby.url.annotate.WebsocketProtocol;
+import io.spbx.webby.url.annotate.Serve;
+import io.spbx.webby.url.annotate.WebsocketProtocol;
 import io.webby.demo.websockets.protocol.ExampleMessages.SimpleMessage;
 import io.webby.demo.websockets.protocol.ExampleMessages.StringMessage;
-import io.webby.ws.context.RequestContext;
+import io.spbx.webby.ws.context.RequestContext;
 import org.jetbrains.annotations.NotNull;
 
 @Serve(url = "/ws/accept/context", websocket = true)

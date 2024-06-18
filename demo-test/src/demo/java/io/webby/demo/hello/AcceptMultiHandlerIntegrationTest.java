@@ -1,9 +1,9 @@
 package io.webby.demo.hello;
 
-import io.webby.testing.BaseHttpIntegrationTest;
+import io.spbx.webby.testing.BaseHttpIntegrationTest;
 import org.junit.jupiter.api.Test;
 
-import static io.webby.testing.AssertResponse.assertThat;
+import static io.spbx.webby.testing.AssertResponse.assertThat;
 
 public class AcceptMultiHandlerIntegrationTest extends BaseHttpIntegrationTest {
     protected final AcceptMultiHandler handler = testSetup(AcceptMultiHandler.class).initHandler();

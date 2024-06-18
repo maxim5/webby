@@ -3,8 +3,8 @@ package io.webby.demo.hello;
 import com.google.common.collect.ImmutableMap;
 import com.google.gson.Gson;
 import com.google.gson.JsonElement;
-import io.webby.url.annotate.GET;
-import io.webby.url.annotate.Json;
+import io.spbx.webby.url.annotate.GET;
+import io.spbx.webby.url.annotate.Json;
 
 import java.util.List;
 

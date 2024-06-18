@@ -6,7 +6,7 @@ import com.google.inject.Singleton;
 import io.netty.util.concurrent.DefaultEventExecutor;
 import io.netty.util.concurrent.EventExecutor;
 import io.netty.util.concurrent.Promise;
-import io.webby.url.annotate.GET;
+import io.spbx.webby.url.annotate.GET;
 
 import java.io.OutputStream;
 import java.util.concurrent.*;

@@ -1,12 +1,12 @@
 package io.webby.demo.websockets.lowlevel;
 
 import io.netty.handler.codec.http.websocketx.WebSocketFrame;
-import io.webby.testing.BaseWebsocketIntegrationTest;
+import io.spbx.webby.testing.BaseWebsocketIntegrationTest;
 import org.junit.jupiter.api.Test;
 
 import java.util.Queue;
 
-import static io.webby.testing.AssertFrame.assertFrames;
+import static io.spbx.webby.testing.AssertFrame.assertFrames;
 
 public class LLSendingTest extends BaseWebsocketIntegrationTest {
     private final LLSending agent = testSetup(LLSending.class).initAgent();

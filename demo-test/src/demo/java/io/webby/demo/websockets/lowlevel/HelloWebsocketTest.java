@@ -1,13 +1,13 @@
 package io.webby.demo.websockets.lowlevel;
 
 import io.netty.handler.codec.http.websocketx.WebSocketFrame;
-import io.webby.testing.BaseWebsocketIntegrationTest;
+import io.spbx.webby.testing.BaseWebsocketIntegrationTest;
 import org.junit.jupiter.api.Test;
 
 import java.util.Queue;
 
 import static com.google.common.truth.Truth.assertThat;
-import static io.webby.testing.AssertFrame.assertFrames;
+import static io.spbx.webby.testing.AssertFrame.assertFrames;
 import static io.spbx.util.testing.TestingBytes.asByteBuf;
 
 public class HelloWebsocketTest extends BaseWebsocketIntegrationTest {

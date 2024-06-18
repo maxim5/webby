@@ -2,11 +2,11 @@ package io.webby.demo.websockets.lowlevel;
 
 import com.google.inject.Inject;
 import io.netty.handler.codec.http.websocketx.TextWebSocketFrame;
-import io.webby.url.annotate.Serve;
-import io.webby.netty.ws.sender.Sender;
+import io.spbx.webby.url.annotate.Serve;
+import io.spbx.webby.netty.ws.sender.Sender;
 import org.jetbrains.annotations.NotNull;
 
-import static io.webby.netty.ws.sender.Sender.text;
+import static io.spbx.webby.netty.ws.sender.Sender.text;
 
 @Serve(url = "/ws/ll/send", websocket = true)
 public class LLSending {

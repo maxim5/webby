@@ -2,7 +2,7 @@ package io.webby.demo.model;
 
 import io.spbx.orm.api.ForeignInt;
 import io.spbx.orm.api.annotate.ManyToMany;
-import io.webby.auth.user.DefaultUser;
+import io.spbx.webby.auth.user.DefaultUser;
 import org.jetbrains.annotations.NotNull;
 
 @ManyToMany

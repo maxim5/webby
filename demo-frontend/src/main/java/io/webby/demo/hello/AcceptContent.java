@@ -2,11 +2,11 @@ package io.webby.demo.hello;
 
 import io.netty.buffer.ByteBuf;
 import io.netty.handler.codec.http.multipart.HttpPostRequestDecoder;
-import io.webby.netty.request.HttpRequestEx;
-import io.webby.url.annotate.POST;
-import io.webby.url.annotate.Param;
-import io.webby.url.annotate.Serve;
-import io.webby.url.convert.IntConverter;
+import io.spbx.webby.netty.request.HttpRequestEx;
+import io.spbx.webby.url.annotate.POST;
+import io.spbx.webby.url.annotate.Param;
+import io.spbx.webby.url.annotate.Serve;
+import io.spbx.webby.url.convert.IntConverter;
 
 import java.util.HashMap;
 import java.util.List;

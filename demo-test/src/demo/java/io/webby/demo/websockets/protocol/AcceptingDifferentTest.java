@@ -3,13 +3,13 @@ package io.webby.demo.websockets.protocol;
 import io.netty.handler.codec.http.websocketx.WebSocketFrame;
 import io.webby.demo.websockets.protocol.ExampleMessages.PrimitiveMessage;
 import io.webby.demo.websockets.protocol.ExampleMessages.StringMessage;
-import io.webby.testing.BaseWebsocketIntegrationTest;
-import io.webby.testing.FakeClients;
-import io.webby.url.annotate.FrameType;
-import io.webby.url.annotate.Marshal;
-import io.webby.ws.context.ClientFrameType;
-import io.webby.ws.meta.FrameMetadata;
-import io.webby.ws.meta.TextSeparatorFrameMetadata;
+import io.spbx.webby.testing.BaseWebsocketIntegrationTest;
+import io.spbx.webby.testing.FakeClients;
+import io.spbx.webby.url.annotate.FrameType;
+import io.spbx.webby.url.annotate.Marshal;
+import io.spbx.webby.ws.context.ClientFrameType;
+import io.spbx.webby.ws.meta.FrameMetadata;
+import io.spbx.webby.ws.meta.TextSeparatorFrameMetadata;
 import org.jetbrains.annotations.NotNull;
 import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
@@ -17,7 +17,7 @@ import org.junit.jupiter.api.Test;
 import java.util.Queue;
 
 import static com.google.common.truth.Truth.assertThat;
-import static io.webby.testing.AssertFrame.*;
+import static io.spbx.webby.testing.AssertFrame.*;
 
 @Tag("slow")
 public class AcceptingDifferentTest extends BaseWebsocketIntegrationTest {

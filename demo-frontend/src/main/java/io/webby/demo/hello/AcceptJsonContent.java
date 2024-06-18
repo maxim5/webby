@@ -1,7 +1,7 @@
 package io.webby.demo.hello;
 
-import io.webby.url.annotate.Json;
-import io.webby.url.annotate.POST;
+import io.spbx.webby.url.annotate.Json;
+import io.spbx.webby.url.annotate.POST;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.List;

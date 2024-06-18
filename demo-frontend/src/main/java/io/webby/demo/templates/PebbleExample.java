@@ -4,11 +4,11 @@ import com.google.common.base.Suppliers;
 import io.pebbletemplates.pebble.PebbleEngine;
 import io.pebbletemplates.pebble.loader.ClasspathLoader;
 import io.pebbletemplates.pebble.template.PebbleTemplate;
-import io.webby.url.annotate.GET;
-import io.webby.url.annotate.Render;
-import io.webby.url.annotate.Serve;
-import io.webby.url.annotate.View;
-import io.webby.url.view.EasyRender;
+import io.spbx.webby.url.annotate.GET;
+import io.spbx.webby.url.annotate.Render;
+import io.spbx.webby.url.annotate.Serve;
+import io.spbx.webby.url.annotate.View;
+import io.spbx.webby.url.view.EasyRender;
 import org.jetbrains.annotations.NotNull;
 
 import java.io.IOException;

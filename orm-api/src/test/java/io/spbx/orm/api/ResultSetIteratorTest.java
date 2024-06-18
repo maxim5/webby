@@ -4,7 +4,7 @@ import com.google.common.collect.Lists;
 import io.spbx.orm.api.debug.DebugSql;
 import io.spbx.orm.testing.AssertSql;
 import io.spbx.util.base.Pair;
-import io.webby.testing.ext.SqlDbExtension;
+import io.spbx.webby.testing.ext.SqlDbExtension;
 import org.jetbrains.annotations.NotNull;
 import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;

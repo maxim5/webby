@@ -1,6 +1,6 @@
 package io.webby.demo.hello;
 
-import io.webby.url.annotate.*;
+import io.spbx.webby.url.annotate.*;
 
 @Serve(url = "/multi/{id}")
 public class AcceptMultiHandler {

@@ -2,8 +2,8 @@ package io.webby.demo.hello;
 
 import io.netty.handler.codec.http.HttpRequest;
 import io.netty.handler.codec.http.HttpResponseStatus;
-import io.webby.netty.errors.*;
-import io.webby.url.annotate.GET;
+import io.spbx.webby.netty.errors.*;
+import io.spbx.webby.url.annotate.GET;
 import org.jetbrains.annotations.NotNull;
 
 public class ThrowServeError {

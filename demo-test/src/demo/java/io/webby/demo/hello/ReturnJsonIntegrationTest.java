@@ -1,9 +1,9 @@
 package io.webby.demo.hello;
 
 import io.netty.handler.codec.http.HttpResponse;
-import io.webby.netty.HttpConst;
-import io.webby.netty.marshal.MarshallerFactory.SupportedJsonLibrary;
-import io.webby.testing.BaseHttpIntegrationTest;
+import io.spbx.webby.netty.HttpConst;
+import io.spbx.webby.netty.marshal.MarshallerFactory.SupportedJsonLibrary;
+import io.spbx.webby.testing.BaseHttpIntegrationTest;
 import org.jetbrains.annotations.NotNull;
 import org.junit.Test;
 import org.junit.experimental.categories.Category;
@@ -12,9 +12,9 @@ import org.junit.runners.Parameterized;
 
 import java.util.List;
 
-import static io.webby.testing.AssertJson.getJsonLibrary;
-import static io.webby.testing.AssertJson.withJsonLibrary;
-import static io.webby.testing.AssertResponse.assertThat;
+import static io.spbx.webby.testing.AssertJson.getJsonLibrary;
+import static io.spbx.webby.testing.AssertJson.withJsonLibrary;
+import static io.spbx.webby.testing.AssertResponse.assertThat;
 import static org.junit.Assume.assumeTrue;
 
 @Category(Parameterized.class)

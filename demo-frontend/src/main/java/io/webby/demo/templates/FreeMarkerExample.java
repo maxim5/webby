@@ -4,11 +4,11 @@ import com.google.common.base.Suppliers;
 import freemarker.cache.ClassTemplateLoader;
 import freemarker.template.Configuration;
 import freemarker.template.Template;
-import io.webby.url.annotate.GET;
-import io.webby.url.annotate.Render;
-import io.webby.url.annotate.Serve;
-import io.webby.url.annotate.View;
-import io.webby.url.view.EasyRender;
+import io.spbx.webby.url.annotate.GET;
+import io.spbx.webby.url.annotate.Render;
+import io.spbx.webby.url.annotate.Serve;
+import io.spbx.webby.url.annotate.View;
+import io.spbx.webby.url.view.EasyRender;
 
 import java.io.IOException;
 import java.util.Map;

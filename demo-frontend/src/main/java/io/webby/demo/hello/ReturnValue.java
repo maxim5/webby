@@ -3,8 +3,8 @@ package io.webby.demo.hello;
 import io.netty.buffer.ByteBuf;
 import io.netty.buffer.Unpooled;
 import io.webby.demo.DevPaths;
-import io.webby.url.annotate.GET;
-import io.webby.url.annotate.Serve;
+import io.spbx.webby.url.annotate.GET;
+import io.spbx.webby.url.annotate.Serve;
 
 import java.io.ByteArrayInputStream;
 import java.io.File;

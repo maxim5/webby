@@ -1,12 +1,12 @@
 package io.webby.demo.hello;
 
-import io.webby.auth.session.SessionModel;
-import io.webby.auth.user.UserModel;
-import io.webby.netty.intercept.attr.Attributes;
-import io.webby.netty.request.HttpRequestEx;
-import io.webby.perf.stats.Stat;
-import io.webby.perf.stats.impl.LocalStatsHolder;
-import io.webby.url.annotate.GET;
+import io.spbx.webby.auth.session.SessionModel;
+import io.spbx.webby.auth.user.UserModel;
+import io.spbx.webby.netty.intercept.attr.Attributes;
+import io.spbx.webby.netty.request.HttpRequestEx;
+import io.spbx.webby.perf.stats.Stat;
+import io.spbx.webby.perf.stats.impl.LocalStatsHolder;
+import io.spbx.webby.url.annotate.GET;
 import org.jetbrains.annotations.NotNull;
 
 public class RequestAttr {

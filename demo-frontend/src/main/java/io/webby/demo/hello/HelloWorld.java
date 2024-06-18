@@ -1,9 +1,9 @@
 package io.webby.demo.hello;
 
-import io.webby.url.annotate.GET;
-import io.webby.url.annotate.Param;
-import io.webby.url.annotate.Serve;
-import io.webby.url.convert.IntConverter;
+import io.spbx.webby.url.annotate.GET;
+import io.spbx.webby.url.annotate.Param;
+import io.spbx.webby.url.annotate.Serve;
+import io.spbx.webby.url.convert.IntConverter;
 
 @Serve
 public class HelloWorld {

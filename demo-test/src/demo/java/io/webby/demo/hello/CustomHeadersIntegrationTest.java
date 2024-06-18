@@ -2,8 +2,8 @@ package io.webby.demo.hello;
 
 import com.google.common.io.ByteStreams;
 import io.netty.handler.codec.http.HttpResponse;
-import io.webby.netty.HttpConst;
-import io.webby.testing.BaseHttpIntegrationTest;
+import io.spbx.webby.netty.HttpConst;
+import io.spbx.webby.testing.BaseHttpIntegrationTest;
 import org.jetbrains.annotations.NotNull;
 import org.junit.jupiter.api.Test;
 
@@ -15,8 +15,8 @@ import java.util.zip.ZipEntry;
 import java.util.zip.ZipInputStream;
 
 import static com.google.common.truth.Truth.assertThat;
-import static io.webby.testing.AssertResponse.assertThat;
-import static io.webby.testing.AssertResponse.contentOf;
+import static io.spbx.webby.testing.AssertResponse.assertThat;
+import static io.spbx.webby.testing.AssertResponse.contentOf;
 
 public class CustomHeadersIntegrationTest extends BaseHttpIntegrationTest {
     protected final CustomHeaders handler = testSetup(CustomHeaders.class).initHandler();

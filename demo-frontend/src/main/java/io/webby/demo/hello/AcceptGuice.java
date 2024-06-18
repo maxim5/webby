@@ -3,11 +3,11 @@ package io.webby.demo.hello;
 import io.netty.handler.codec.http.FullHttpResponse;
 import io.netty.handler.codec.http.HttpRequest;
 import io.netty.handler.codec.http.HttpResponseStatus;
-import io.webby.app.Settings;
-import io.webby.netty.response.HttpResponseFactory;
-import io.webby.url.annotate.GET;
-import io.webby.url.annotate.Json;
-import io.webby.url.annotate.POST;
+import io.spbx.webby.app.Settings;
+import io.spbx.webby.netty.response.HttpResponseFactory;
+import io.spbx.webby.url.annotate.GET;
+import io.spbx.webby.url.annotate.Json;
+import io.spbx.webby.url.annotate.POST;
 import org.jetbrains.annotations.NotNull;
 
 import java.nio.charset.Charset;

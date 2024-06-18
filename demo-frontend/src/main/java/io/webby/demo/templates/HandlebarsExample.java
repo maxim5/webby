@@ -8,10 +8,10 @@ import com.github.jknack.handlebars.context.MethodValueResolver;
 import com.github.jknack.handlebars.io.ClassPathTemplateLoader;
 import com.github.jknack.handlebars.io.TemplateLoader;
 import com.google.common.base.Suppliers;
-import io.webby.url.annotate.GET;
-import io.webby.url.annotate.Render;
-import io.webby.url.annotate.Serve;
-import io.webby.url.annotate.View;
+import io.spbx.webby.url.annotate.GET;
+import io.spbx.webby.url.annotate.Render;
+import io.spbx.webby.url.annotate.Serve;
+import io.spbx.webby.url.annotate.View;
 
 import java.io.IOException;
 import java.util.Map;

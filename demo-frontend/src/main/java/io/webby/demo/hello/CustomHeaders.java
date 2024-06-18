@@ -1,8 +1,8 @@
 package io.webby.demo.hello;
 
-import io.webby.url.annotate.GET;
-import io.webby.url.annotate.Header;
-import io.webby.url.annotate.Http;
+import io.spbx.webby.url.annotate.GET;
+import io.spbx.webby.url.annotate.Header;
+import io.spbx.webby.url.annotate.Http;
 
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;

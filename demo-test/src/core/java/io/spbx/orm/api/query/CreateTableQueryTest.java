@@ -2,9 +2,9 @@ package io.spbx.orm.api.query;
 
 import io.spbx.orm.api.Engine;
 import io.spbx.orm.api.TableMeta;
-import io.webby.auth.session.SessionTable;
-import io.webby.auth.user.UserTable;
-import io.webby.db.model.BlobKvTable;
+import io.spbx.webby.auth.session.SessionTable;
+import io.spbx.webby.auth.user.UserTable;
+import io.spbx.webby.db.model.BlobKvTable;
 import io.webby.demo.model.*;
 import org.jetbrains.annotations.NotNull;
 import org.junit.jupiter.api.Test;

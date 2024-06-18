@@ -8,10 +8,10 @@ import gg.jte.TemplateOutput;
 import gg.jte.output.StringOutput;
 import gg.jte.resolve.ResourceCodeResolver;
 import io.webby.demo.DevPaths;
-import io.webby.url.annotate.GET;
-import io.webby.url.annotate.Render;
-import io.webby.url.annotate.Serve;
-import io.webby.url.annotate.View;
+import io.spbx.webby.url.annotate.GET;
+import io.spbx.webby.url.annotate.Render;
+import io.spbx.webby.url.annotate.Serve;
+import io.spbx.webby.url.annotate.View;
 
 import java.nio.file.Path;
 import java.util.function.Supplier;

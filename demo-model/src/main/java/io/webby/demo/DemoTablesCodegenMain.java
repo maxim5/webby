@@ -4,9 +4,9 @@ import io.spbx.orm.arch.factory.ArchJavaRunner;
 import io.spbx.orm.arch.factory.ModelInput;
 import io.spbx.orm.arch.factory.PojoInput;
 import io.spbx.orm.arch.factory.RunInputs;
-import io.webby.auth.session.DefaultSession;
-import io.webby.auth.user.DefaultUser;
-import io.webby.db.model.BlobKv;
+import io.spbx.webby.auth.session.DefaultSession;
+import io.spbx.webby.auth.user.DefaultUser;
+import io.spbx.webby.db.model.BlobKv;
 import io.webby.demo.model.*;
 
 import java.util.List;

@@ -3,10 +3,10 @@ package io.webby.demo.templates;
 import com.fizzed.rocker.Rocker;
 import com.fizzed.rocker.RockerOutput;
 import com.fizzed.rocker.runtime.ArrayOfByteArraysOutput;
-import io.webby.url.annotate.GET;
-import io.webby.url.annotate.Render;
-import io.webby.url.annotate.Serve;
-import io.webby.url.annotate.View;
+import io.spbx.webby.url.annotate.GET;
+import io.spbx.webby.url.annotate.Render;
+import io.spbx.webby.url.annotate.Serve;
+import io.spbx.webby.url.annotate.View;
 import views.HelloRock;
 
 import java.io.InputStream;

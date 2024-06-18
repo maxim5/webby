@@ -7,11 +7,11 @@ import com.google.errorprone.annotations.CanIgnoreReturnValue;
 import com.google.errorprone.annotations.CheckReturnValue;
 import io.netty.handler.codec.http.HttpHeaders;
 import io.netty.handler.codec.http.HttpResponse;
-import io.webby.app.AppSettings;
-import io.webby.netty.HttpConst;
-import io.webby.perf.stats.Stat;
-import io.webby.testing.AssertResponse.HttpResponseSubject;
-import io.webby.testing.Testing;
+import io.spbx.webby.app.AppSettings;
+import io.spbx.webby.netty.HttpConst;
+import io.spbx.webby.perf.stats.Stat;
+import io.spbx.webby.testing.AssertResponse.HttpResponseSubject;
+import io.spbx.webby.testing.Testing;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 

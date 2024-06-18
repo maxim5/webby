@@ -1,10 +1,10 @@
 package io.webby.demo.templates;
 
 import io.netty.handler.codec.http.HttpResponse;
-import io.webby.app.AppSettings;
+import io.spbx.webby.app.AppSettings;
 import io.webby.demo.DevPaths;
-import io.webby.testing.BaseHttpIntegrationTest;
-import io.webby.testing.TestingModules;
+import io.spbx.webby.testing.BaseHttpIntegrationTest;
+import io.spbx.webby.testing.TestingModules;
 import org.jetbrains.annotations.NotNull;
 import org.junit.Test;
 import org.junit.experimental.categories.Category;
