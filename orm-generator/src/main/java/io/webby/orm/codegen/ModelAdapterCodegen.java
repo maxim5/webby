@@ -1,13 +1,13 @@
 package io.webby.orm.codegen;
 
 import com.google.common.collect.Streams;
-import io.webby.orm.adapter.JdbcAdapt;
-import io.webby.orm.adapter.JdbcArrayAdapter;
-import io.webby.orm.adapter.JdbcSingleValueAdapter;
-import io.webby.orm.api.ResultSetIterator;
+import io.spbx.orm.adapter.JdbcAdapt;
+import io.spbx.orm.adapter.JdbcArrayAdapter;
+import io.spbx.orm.adapter.JdbcSingleValueAdapter;
+import io.spbx.orm.api.ResultSetIterator;
+import io.spbx.util.collect.EasyMaps;
 import io.webby.orm.arch.model.*;
 import io.webby.orm.arch.util.Naming;
-import io.spbx.util.collect.EasyMaps;
 import org.jetbrains.annotations.NotNull;
 
 import java.sql.ResultSet;

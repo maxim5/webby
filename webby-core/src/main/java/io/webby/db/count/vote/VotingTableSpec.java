@@ -1,7 +1,7 @@
 package io.webby.db.count.vote;
 
-import io.webby.orm.api.TableMeta;
-import io.webby.orm.api.query.Column;
+import io.spbx.orm.api.TableMeta;
+import io.spbx.orm.api.query.Column;
 import org.jetbrains.annotations.NotNull;
 
 // FIX[minor]: find by annotation?

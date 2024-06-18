@@ -1,14 +1,14 @@
 package io.webby.orm.arch.model;
 
 import com.google.errorprone.annotations.Immutable;
-import io.webby.orm.api.ReadFollow;
+import io.spbx.orm.api.ReadFollow;
 import io.spbx.util.collect.ListBuilder;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.List;
 
-import static io.webby.orm.api.ReadFollow.FOLLOW_ALL;
-import static io.webby.orm.api.ReadFollow.NO_FOLLOW;
+import static io.spbx.orm.api.ReadFollow.FOLLOW_ALL;
+import static io.spbx.orm.api.ReadFollow.NO_FOLLOW;
 
 @Immutable
 public class ForeignTableField extends TableField {

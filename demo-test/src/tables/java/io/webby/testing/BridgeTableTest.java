@@ -1,7 +1,7 @@
 package io.webby.testing;
 
-import io.webby.orm.api.BaseTable;
-import io.webby.orm.api.BridgeTable;
+import io.spbx.orm.api.BaseTable;
+import io.spbx.orm.api.BridgeTable;
 import io.webby.testing.TestingTables.BridgeLeftIdSubject;
 import io.webby.testing.TestingTables.BridgeRightIdSubject;
 import io.spbx.util.base.Pair;

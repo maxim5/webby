@@ -1,9 +1,9 @@
 package io.webby.demo;
 
 import com.google.common.io.BaseEncoding;
+import io.spbx.orm.api.QueryRunner;
+import io.spbx.orm.api.debug.DebugSql;
 import io.webby.db.sql.SqlSettings;
-import io.webby.orm.api.QueryRunner;
-import io.webby.orm.api.debug.DebugSql;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 

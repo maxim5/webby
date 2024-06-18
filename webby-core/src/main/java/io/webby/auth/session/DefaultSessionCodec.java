@@ -1,10 +1,10 @@
 package io.webby.auth.session;
 
 import com.google.inject.Inject;
+import io.spbx.orm.api.ForeignInt;
 import io.webby.db.codec.Codec;
 import io.webby.db.codec.CodecSize;
 import io.webby.db.codec.standard.Instant64Codec;
-import io.webby.orm.api.ForeignInt;
 import org.jetbrains.annotations.NotNull;
 
 import java.io.IOException;

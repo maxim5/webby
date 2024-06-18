@@ -2,7 +2,7 @@ package io.webby.db.sql;
 
 import com.google.errorprone.annotations.CanIgnoreReturnValue;
 import com.google.errorprone.annotations.CheckReturnValue;
-import io.webby.orm.api.Engine;
+import io.spbx.orm.api.Engine;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import org.junit.jupiter.api.Test;

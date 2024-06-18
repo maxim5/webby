@@ -1,8 +1,8 @@
 package io.webby.orm.codegen;
 
-import io.webby.orm.api.Foreign;
-import io.webby.orm.api.ForeignObj;
-import io.webby.orm.api.ReadFollow;
+import io.spbx.orm.api.Foreign;
+import io.spbx.orm.api.ForeignObj;
+import io.spbx.orm.api.ReadFollow;
 import io.webby.orm.arch.model.*;
 import io.webby.orm.arch.util.Naming;
 import org.jetbrains.annotations.NotNull;
@@ -11,7 +11,7 @@ import java.util.Arrays;
 import java.util.Set;
 import java.util.stream.Stream;
 
-import static io.webby.orm.api.ReadFollow.*;
+import static io.spbx.orm.api.ReadFollow.*;
 import static io.webby.orm.codegen.Indent.INDENT1;
 import static io.webby.orm.codegen.Joining.COMMA_JOINER;
 

@@ -1,13 +1,13 @@
 package io.webby.orm.arch.factory;
 
-import io.webby.orm.adapter.lang.AtomicBooleanJdbcAdapter;
-import io.webby.orm.adapter.lang.AtomicIntegerJdbcAdapter;
-import io.webby.orm.adapter.lang.AtomicLongJdbcAdapter;
+import io.spbx.orm.adapter.lang.AtomicBooleanJdbcAdapter;
+import io.spbx.orm.adapter.lang.AtomicIntegerJdbcAdapter;
+import io.spbx.orm.adapter.lang.AtomicLongJdbcAdapter;
+import io.spbx.util.base.EasyWrappers.OptionalBool;
 import io.webby.orm.arch.model.Column;
 import io.webby.orm.arch.model.JdbcType;
 import io.webby.orm.arch.model.PojoArch;
 import io.webby.testing.orm.FakeModelAdaptersLocator;
-import io.spbx.util.base.EasyWrappers.OptionalBool;
 import org.junit.jupiter.api.Test;
 
 import java.awt.*;

@@ -1,8 +1,8 @@
 package io.webby.auth.session;
 
 import com.google.inject.Inject;
+import io.spbx.orm.api.TableLong;
 import io.webby.db.sql.TableManager;
-import io.webby.orm.api.TableLong;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 

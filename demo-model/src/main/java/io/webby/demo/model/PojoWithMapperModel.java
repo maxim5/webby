@@ -1,6 +1,6 @@
 package io.webby.demo.model;
 
-import io.webby.orm.api.annotate.Sql.Via;
+import io.spbx.orm.api.annotate.Sql.Via;
 import io.spbx.util.func.Reversible;
 import org.jetbrains.annotations.NotNull;
 

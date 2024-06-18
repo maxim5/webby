@@ -1,8 +1,8 @@
 package io.webby.testing;
 
-import io.webby.orm.api.BaseTable;
-import io.webby.orm.api.Engine;
-import io.webby.orm.api.TableMeta;
+import io.spbx.orm.api.BaseTable;
+import io.spbx.orm.api.Engine;
+import io.spbx.orm.api.TableMeta;
 import org.jetbrains.annotations.NotNull;
 import org.junit.jupiter.api.Test;
 

@@ -1,8 +1,8 @@
 package io.webby.testing.orm;
 
 import com.google.common.collect.ImmutableMap;
-import io.webby.orm.adapter.JdbcArrayAdapter;
-import io.webby.orm.adapter.chars.CharacterJdbcAdapter;
+import io.spbx.orm.adapter.JdbcArrayAdapter;
+import io.spbx.orm.adapter.chars.CharacterJdbcAdapter;
 import io.webby.orm.codegen.ModelAdaptersLocator;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;

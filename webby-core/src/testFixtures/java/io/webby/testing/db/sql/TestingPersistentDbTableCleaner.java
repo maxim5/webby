@@ -3,11 +3,11 @@ package io.webby.testing.db.sql;
 import com.google.common.eventbus.EventBus;
 import com.google.inject.Inject;
 import com.google.inject.Injector;
+import io.spbx.orm.api.TableMeta;
+import io.spbx.orm.api.query.DropTableQuery;
 import io.webby.app.Settings;
 import io.webby.db.sql.DDL;
 import io.webby.db.sql.TableManager;
-import io.webby.orm.api.TableMeta;
-import io.webby.orm.api.query.DropTableQuery;
 import org.jetbrains.annotations.NotNull;
 
 public class TestingPersistentDbTableCleaner {

@@ -1,10 +1,10 @@
 package io.webby.orm.codegen;
 
 import com.google.common.collect.ImmutableMap;
-import io.webby.orm.adapter.JdbcAdapt;
-import io.webby.orm.arch.util.Naming;
+import io.spbx.orm.adapter.JdbcAdapt;
 import io.spbx.util.classpath.ClassNamePredicate;
 import io.spbx.util.classpath.GuavaClasspathScanner;
+import io.webby.orm.arch.util.Naming;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 

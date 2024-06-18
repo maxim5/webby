@@ -3,11 +3,11 @@ package io.webby.db.sql;
 import com.google.inject.Inject;
 import com.zaxxer.hikari.HikariConfig;
 import com.zaxxer.hikari.HikariDataSource;
+import io.spbx.orm.api.Engine;
+import io.spbx.orm.api.HasEngine;
+import io.spbx.util.base.Unchecked;
 import io.webby.app.Settings;
 import io.webby.common.Lifetime;
-import io.webby.orm.api.Engine;
-import io.webby.orm.api.HasEngine;
-import io.spbx.util.base.Unchecked;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.VisibleForTesting;
 

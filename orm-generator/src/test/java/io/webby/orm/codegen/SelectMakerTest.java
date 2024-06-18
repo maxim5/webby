@@ -2,14 +2,14 @@ package io.webby.orm.codegen;
 
 import com.google.errorprone.annotations.CanIgnoreReturnValue;
 import com.google.errorprone.annotations.CheckReturnValue;
-import io.webby.orm.api.ForeignInt;
+import io.spbx.orm.api.ForeignInt;
 import io.webby.orm.arch.model.TableArch;
 import org.jetbrains.annotations.NotNull;
 import org.junit.jupiter.api.Test;
 
 import java.util.List;
 
-import static io.webby.orm.api.ReadFollow.*;
+import static io.spbx.orm.api.ReadFollow.*;
 import static io.webby.orm.arch.factory.TestingArch.buildTableArch;
 import static io.webby.orm.codegen.AssertSnippet.assertThatSql;
 

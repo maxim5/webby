@@ -1,6 +1,6 @@
 package io.webby.db.model;
 
-import io.webby.orm.api.annotate.Sql;
+import io.spbx.orm.api.annotate.Sql;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 

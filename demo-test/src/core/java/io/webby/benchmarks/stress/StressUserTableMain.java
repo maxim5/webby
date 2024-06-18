@@ -1,6 +1,7 @@
 package io.webby.benchmarks.stress;
 
 import com.google.inject.Injector;
+import io.spbx.orm.api.Connector;
 import io.webby.Webby;
 import io.webby.app.AppSettings;
 import io.webby.auth.session.DefaultSession;
@@ -10,7 +11,6 @@ import io.webby.auth.user.UserTable;
 import io.webby.benchmarks.stress.TableWorker.Init;
 import io.webby.db.sql.TableManager;
 import io.webby.db.sql.ThreadLocalConnector;
-import io.webby.orm.api.Connector;
 import io.webby.testing.Testing;
 import io.webby.testing.TestingModules;
 import io.webby.testing.TestingProps;

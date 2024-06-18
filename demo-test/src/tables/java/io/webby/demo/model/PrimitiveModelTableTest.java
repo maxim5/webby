@@ -1,10 +1,10 @@
 package io.webby.demo.model;
 
+import io.spbx.orm.api.Connector;
+import io.spbx.orm.api.query.CreateTableQuery;
+import io.spbx.orm.api.query.SelectWhere;
 import io.webby.demo.model.PrimitiveModel.PrimitiveDuo;
 import io.webby.demo.model.PrimitiveModel.PrimitiveTrio;
-import io.webby.orm.api.Connector;
-import io.webby.orm.api.query.CreateTableQuery;
-import io.webby.orm.api.query.SelectWhere;
 import io.webby.testing.SqlDbTableTest;
 import io.webby.testing.TableIntTest;
 import org.jetbrains.annotations.NotNull;

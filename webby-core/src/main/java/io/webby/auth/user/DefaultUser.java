@@ -1,7 +1,7 @@
 package io.webby.auth.user;
 
 import com.google.errorprone.annotations.Immutable;
-import io.webby.orm.api.annotate.Model;
+import io.spbx.orm.api.annotate.Model;
 import org.jetbrains.annotations.NotNull;
 
 import java.time.Instant;

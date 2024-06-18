@@ -1,8 +1,8 @@
 package io.webby.demo.model;
 
-import io.webby.orm.api.Connector;
-import io.webby.orm.api.Engine;
-import io.webby.orm.api.query.CreateTableQuery;
+import io.spbx.orm.api.Connector;
+import io.spbx.orm.api.Engine;
+import io.spbx.orm.api.query.CreateTableQuery;
 import io.webby.testing.PrimaryKeyTableTest;
 import io.webby.testing.SqlDbTableTest;
 import org.jetbrains.annotations.NotNull;

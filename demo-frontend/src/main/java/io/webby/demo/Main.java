@@ -1,6 +1,7 @@
 package io.webby.demo;
 
 import com.google.common.flogger.FluentLogger;
+import io.spbx.orm.api.Engine;
 import io.webby.Webby;
 import io.webby.app.AppSettings;
 import io.webby.db.kv.DbType;
@@ -8,7 +9,6 @@ import io.webby.db.kv.KeyValueSettings;
 import io.webby.db.sql.SqlSettings;
 import io.webby.demo.templates.JteExample;
 import io.webby.netty.dispatch.NettyBootstrap;
-import io.webby.orm.api.Engine;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.logging.Level;

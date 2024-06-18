@@ -2,7 +2,7 @@ package io.webby.orm.codegen;
 
 import com.google.errorprone.annotations.CanIgnoreReturnValue;
 import com.google.errorprone.annotations.CheckReturnValue;
-import io.webby.testing.orm.AssertCode;
+import io.spbx.orm.testing.AssertCode;
 import org.jetbrains.annotations.NotNull;
 import org.junit.jupiter.api.Test;
 

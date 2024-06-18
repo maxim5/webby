@@ -5,15 +5,15 @@ import com.carrotsearch.hppc.IntIntMap;
 import com.carrotsearch.hppc.cursors.IntIntCursor;
 import com.carrotsearch.hppc.procedures.IntIntProcedure;
 import com.google.common.flogger.FluentLogger;
-import io.webby.orm.api.BaseTable;
-import io.webby.orm.api.entity.EntityIntData;
-import io.webby.orm.api.query.*;
+import io.spbx.orm.api.BaseTable;
+import io.spbx.orm.api.entity.EntityIntData;
+import io.spbx.orm.api.query.*;
 import io.spbx.util.base.OneOf;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.List;
 
-import static io.webby.orm.api.query.Shortcuts.lookupBy;
+import static io.spbx.orm.api.query.Shortcuts.lookupBy;
 
 public class TableCountStorage implements IntCountStorage {
     private static final FluentLogger log = FluentLogger.forEnclosingClass();

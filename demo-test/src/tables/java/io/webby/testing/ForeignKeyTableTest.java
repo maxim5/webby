@@ -1,12 +1,12 @@
 package io.webby.testing;
 
-import io.webby.orm.api.TableObj;
+import io.spbx.orm.api.TableObj;
 import org.jetbrains.annotations.NotNull;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.ValueSource;
 
 import static com.google.common.truth.Truth.assertThat;
-import static io.webby.orm.api.ReadFollow.*;
+import static io.spbx.orm.api.ReadFollow.*;
 
 public interface ForeignKeyTableTest<K, E, T extends TableObj<K, E>> extends PrimaryKeyTableTest<K, E, T> {
     @ParameterizedTest(name = "version = {0}")

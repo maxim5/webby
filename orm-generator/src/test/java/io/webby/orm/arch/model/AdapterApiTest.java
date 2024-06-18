@@ -1,6 +1,6 @@
 package io.webby.orm.arch.model;
 
-import io.webby.orm.adapter.time.*;
+import io.spbx.orm.adapter.time.*;
 import org.junit.jupiter.api.Test;
 
 import java.util.List;

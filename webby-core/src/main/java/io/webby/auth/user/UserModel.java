@@ -1,7 +1,7 @@
 package io.webby.auth.user;
 
+import io.spbx.orm.api.ForeignInt;
 import io.webby.db.model.IntAutoIdModel;
-import io.webby.orm.api.ForeignInt;
 import org.jetbrains.annotations.NotNull;
 
 import java.time.Instant;

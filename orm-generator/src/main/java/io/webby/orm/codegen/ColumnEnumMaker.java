@@ -1,6 +1,6 @@
 package io.webby.orm.codegen;
 
-import io.webby.orm.api.query.TermType;
+import io.spbx.orm.api.query.TermType;
 import io.webby.orm.arch.model.PrefixedColumn;
 import org.jetbrains.annotations.NotNull;
 

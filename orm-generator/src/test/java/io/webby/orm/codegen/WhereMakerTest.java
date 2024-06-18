@@ -1,6 +1,6 @@
 package io.webby.orm.codegen;
 
-import io.webby.orm.api.annotate.Sql;
+import io.spbx.orm.api.annotate.Sql;
 import io.webby.orm.arch.model.TableArch;
 import org.junit.jupiter.api.Test;
 

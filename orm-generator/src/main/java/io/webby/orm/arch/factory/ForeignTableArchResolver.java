@@ -1,9 +1,9 @@
 package io.webby.orm.arch.factory;
 
-import io.webby.orm.api.Foreign;
-import io.webby.orm.api.ForeignInt;
-import io.webby.orm.api.ForeignLong;
-import io.webby.orm.api.ForeignObj;
+import io.spbx.orm.api.Foreign;
+import io.spbx.orm.api.ForeignInt;
+import io.spbx.orm.api.ForeignLong;
+import io.spbx.orm.api.ForeignObj;
 import io.webby.orm.arch.model.JdbcType;
 import io.webby.orm.arch.model.TableArch;
 import io.webby.orm.arch.util.AnnotationsAnalyzer;

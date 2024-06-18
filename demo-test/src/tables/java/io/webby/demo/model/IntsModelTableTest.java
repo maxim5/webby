@@ -1,16 +1,16 @@
 package io.webby.demo.model;
 
 import com.carrotsearch.hppc.IntArrayList;
-import io.webby.orm.api.Connector;
-import io.webby.orm.api.Engine;
-import io.webby.orm.api.entity.BatchEntityData;
-import io.webby.orm.api.entity.BatchEntityIntData;
-import io.webby.orm.api.entity.EntityData;
-import io.webby.orm.api.entity.EntityIntData;
-import io.webby.orm.api.query.Contextual;
-import io.webby.orm.api.query.CreateTableQuery;
-import io.webby.orm.api.query.TermType;
-import io.webby.orm.api.query.Where;
+import io.spbx.orm.api.Connector;
+import io.spbx.orm.api.Engine;
+import io.spbx.orm.api.entity.BatchEntityData;
+import io.spbx.orm.api.entity.BatchEntityIntData;
+import io.spbx.orm.api.entity.EntityData;
+import io.spbx.orm.api.entity.EntityIntData;
+import io.spbx.orm.api.query.Contextual;
+import io.spbx.orm.api.query.CreateTableQuery;
+import io.spbx.orm.api.query.TermType;
+import io.spbx.orm.api.query.Where;
 import io.webby.testing.BaseTableTest;
 import io.webby.testing.SqlDbTableTest;
 import org.jetbrains.annotations.NotNull;
@@ -21,10 +21,10 @@ import java.util.List;
 import java.util.Map;
 
 import static com.google.common.truth.Truth.assertThat;
+import static io.spbx.orm.api.query.Shortcuts.*;
 import static io.webby.demo.model.IntsModelTable.OwnColumn.*;
 import static io.webby.demo.model.IntsModelTable.newIntsModelBatch;
 import static io.webby.demo.model.IntsModelTable.newIntsModelData;
-import static io.webby.orm.api.query.Shortcuts.*;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 
 public class IntsModelTableTest

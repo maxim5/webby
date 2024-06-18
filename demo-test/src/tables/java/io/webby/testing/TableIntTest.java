@@ -1,11 +1,11 @@
 package io.webby.testing;
 
 import com.carrotsearch.hppc.IntArrayList;
+import io.spbx.orm.api.TableInt;
+import io.spbx.orm.api.query.CompareType;
+import io.spbx.orm.api.query.Shortcuts;
+import io.spbx.orm.api.query.Where;
 import io.webby.db.model.IntAutoIdModel;
-import io.webby.orm.api.TableInt;
-import io.webby.orm.api.query.CompareType;
-import io.webby.orm.api.query.Shortcuts;
-import io.webby.orm.api.query.Where;
 import org.jetbrains.annotations.NotNull;
 import org.junit.jupiter.api.Test;
 

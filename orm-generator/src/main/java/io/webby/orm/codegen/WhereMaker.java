@@ -1,7 +1,7 @@
 package io.webby.orm.codegen;
 
-import io.webby.orm.api.ReadFollow;
-import io.webby.orm.api.query.BoolOpType;
+import io.spbx.orm.api.ReadFollow;
+import io.spbx.orm.api.query.BoolOpType;
 import io.webby.orm.arch.model.PrefixedColumn;
 import io.webby.orm.arch.model.TableArch;
 import io.webby.orm.arch.model.TableField;

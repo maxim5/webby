@@ -1,7 +1,7 @@
 package io.webby.benchmarks.stress;
 
 import com.google.common.flogger.FluentLogger;
-import io.webby.orm.api.TableObj;
+import io.spbx.orm.api.TableObj;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.List;

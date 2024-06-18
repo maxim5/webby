@@ -1,13 +1,13 @@
 package io.webby.demo.model;
 
 import com.carrotsearch.hppc.IntArrayList;
-import io.webby.db.codec.standard.Instant96Codec;
-import io.webby.db.codec.standard.IntArrayListCodec;
-import io.webby.orm.adapter.BytesMapper;
-import io.webby.orm.api.annotate.Sql;
-import io.webby.orm.api.annotate.Sql.Via;
+import io.spbx.orm.adapter.BytesMapper;
+import io.spbx.orm.api.annotate.Sql;
+import io.spbx.orm.api.annotate.Sql.Via;
 import io.spbx.util.base.Pair;
 import io.spbx.util.func.Reversible;
+import io.webby.db.codec.standard.Instant96Codec;
+import io.webby.db.codec.standard.IntArrayListCodec;
 import org.jetbrains.annotations.NotNull;
 
 import java.time.Instant;

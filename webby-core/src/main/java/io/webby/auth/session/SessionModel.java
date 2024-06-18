@@ -1,9 +1,9 @@
 package io.webby.auth.session;
 
+import io.spbx.orm.api.ForeignInt;
+import io.spbx.orm.api.ForeignLong;
 import io.webby.auth.user.UserModel;
 import io.webby.db.model.LongAutoIdModel;
-import io.webby.orm.api.ForeignInt;
-import io.webby.orm.api.ForeignLong;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 

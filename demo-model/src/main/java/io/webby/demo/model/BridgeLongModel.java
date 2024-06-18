@@ -1,8 +1,8 @@
 package io.webby.demo.model;
 
+import io.spbx.orm.api.ForeignLong;
+import io.spbx.orm.api.annotate.ManyToMany;
 import io.webby.auth.session.DefaultSession;
-import io.webby.orm.api.ForeignLong;
-import io.webby.orm.api.annotate.ManyToMany;
 import org.jetbrains.annotations.NotNull;
 
 @ManyToMany

@@ -2,7 +2,7 @@ package io.webby.auth.session;
 
 import io.webby.auth.user.DefaultUser;
 import io.webby.netty.request.HttpRequestEx;
-import io.webby.orm.api.ForeignInt;
+import io.spbx.orm.api.ForeignInt;
 import io.webby.testing.HttpRequestBuilder;
 import io.webby.testing.Mocking;
 import io.webby.testing.SessionBuilder;

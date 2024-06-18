@@ -1,16 +1,16 @@
 package io.webby.demo.model;
 
+import io.spbx.orm.api.Connector;
+import io.spbx.orm.api.ForeignInt;
+import io.spbx.orm.api.ForeignLong;
+import io.spbx.orm.api.query.CreateTableQuery;
+import io.spbx.util.base.Pair;
 import io.webby.auth.session.DefaultSession;
 import io.webby.auth.session.SessionTable;
 import io.webby.auth.user.DefaultUser;
 import io.webby.auth.user.UserTable;
 import io.webby.db.model.LongAutoIdModel;
-import io.webby.orm.api.Connector;
-import io.webby.orm.api.ForeignInt;
-import io.webby.orm.api.ForeignLong;
-import io.webby.orm.api.query.CreateTableQuery;
 import io.webby.testing.*;
-import io.spbx.util.base.Pair;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.List;

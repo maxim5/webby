@@ -1,11 +1,11 @@
 package io.webby.demo.model;
 
+import io.spbx.orm.api.Connector;
+import io.spbx.orm.api.query.CreateTableQuery;
 import io.webby.demo.model.DeepNestedModel.A;
 import io.webby.demo.model.DeepNestedModel.B;
 import io.webby.demo.model.DeepNestedModel.C;
 import io.webby.demo.model.DeepNestedModel.D;
-import io.webby.orm.api.Connector;
-import io.webby.orm.api.query.CreateTableQuery;
 import io.webby.testing.SqlDbTableTest;
 import io.webby.testing.TableIntTest;
 import org.jetbrains.annotations.NotNull;

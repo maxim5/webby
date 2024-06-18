@@ -1,6 +1,6 @@
 package io.webby.auth.user;
 
-import io.webby.orm.api.ForeignInt;
+import io.spbx.orm.api.ForeignInt;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 

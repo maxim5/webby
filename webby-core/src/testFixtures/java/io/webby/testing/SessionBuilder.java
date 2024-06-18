@@ -1,8 +1,8 @@
 package io.webby.testing;
 
+import io.spbx.orm.api.ForeignInt;
 import io.webby.auth.session.DefaultSession;
 import io.webby.auth.user.UserModel;
-import io.webby.orm.api.ForeignInt;
 import org.jetbrains.annotations.NotNull;
 
 import java.time.Instant;

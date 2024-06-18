@@ -2,17 +2,17 @@ package io.webby.orm.arch.factory;
 
 import com.google.common.truth.Truth;
 import com.google.errorprone.annotations.CanIgnoreReturnValue;
-import io.webby.orm.adapter.lang.AtomicIntegerJdbcAdapter;
-import io.webby.orm.api.ForeignInt;
-import io.webby.orm.api.ForeignLong;
-import io.webby.orm.api.ForeignObj;
-import io.webby.orm.api.annotate.Model;
-import io.webby.orm.api.annotate.Sql;
+import io.spbx.orm.adapter.lang.AtomicIntegerJdbcAdapter;
+import io.spbx.orm.api.ForeignInt;
+import io.spbx.orm.api.ForeignLong;
+import io.spbx.orm.api.ForeignObj;
+import io.spbx.orm.api.annotate.Model;
+import io.spbx.orm.api.annotate.Sql;
+import io.spbx.util.base.EasyWrappers.OptionalBool;
+import io.spbx.util.base.Pair;
 import io.webby.orm.arch.InvalidSqlModelException;
 import io.webby.orm.arch.model.JdbcType;
 import io.webby.testing.orm.FakeModelAdaptersLocator;
-import io.spbx.util.base.EasyWrappers.OptionalBool;
-import io.spbx.util.base.Pair;
 import org.jetbrains.annotations.NotNull;
 import org.junit.jupiter.api.Test;
 
@@ -25,8 +25,8 @@ import java.util.Set;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.atomic.AtomicReference;
 
-import static io.webby.orm.api.annotate.Sql.Default;
-import static io.webby.orm.api.annotate.Sql.PK;
+import static io.spbx.orm.api.annotate.Sql.Default;
+import static io.spbx.orm.api.annotate.Sql.PK;
 import static io.webby.orm.arch.factory.TestingArch.FieldConstraints.*;
 import static io.webby.orm.arch.factory.TestingArch.TableFieldsStatus.*;
 import static io.webby.orm.arch.factory.TestingArch.assertThat;

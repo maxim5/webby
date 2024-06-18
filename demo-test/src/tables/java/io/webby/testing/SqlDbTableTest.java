@@ -1,9 +1,9 @@
 package io.webby.testing;
 
-import io.webby.orm.api.BaseTable;
-import io.webby.orm.api.Connector;
-import io.webby.orm.api.QueryRunner;
-import io.webby.orm.api.debug.DebugSql;
+import io.spbx.orm.api.BaseTable;
+import io.spbx.orm.api.Connector;
+import io.spbx.orm.api.QueryRunner;
+import io.spbx.orm.api.debug.DebugSql;
 import io.webby.testing.ext.SqlDbExtension;
 import org.jetbrains.annotations.NotNull;
 import org.junit.jupiter.api.BeforeEach;

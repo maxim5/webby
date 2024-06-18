@@ -3,10 +3,10 @@ package io.webby.orm.codegen;
 import com.google.common.truth.StringSubject;
 import com.google.common.truth.Truth;
 import com.google.errorprone.annotations.CheckReturnValue;
-import io.webby.testing.orm.AssertCode;
-import io.webby.testing.orm.AssertCode.JavaSubject;
-import io.webby.testing.orm.AssertSql;
-import io.webby.testing.orm.AssertSql.SqlSubject;
+import io.spbx.orm.testing.AssertCode;
+import io.spbx.orm.testing.AssertCode.JavaSubject;
+import io.spbx.orm.testing.AssertSql;
+import io.spbx.orm.testing.AssertSql.SqlSubject;
 import org.jetbrains.annotations.NotNull;
 
 class AssertSnippet {

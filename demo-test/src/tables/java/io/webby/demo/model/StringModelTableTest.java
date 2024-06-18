@@ -1,10 +1,10 @@
 package io.webby.demo.model;
 
 import com.google.common.primitives.Ints;
+import io.spbx.orm.api.Connector;
+import io.spbx.orm.api.query.CreateTableQuery;
+import io.spbx.orm.api.query.SelectWhere;
 import io.webby.demo.model.StringModel.StringDuo;
-import io.webby.orm.api.Connector;
-import io.webby.orm.api.query.CreateTableQuery;
-import io.webby.orm.api.query.SelectWhere;
 import io.webby.testing.MaliciousTableTest;
 import io.webby.testing.PrimaryKeyTableTest;
 import io.webby.testing.SqlDbTableTest;

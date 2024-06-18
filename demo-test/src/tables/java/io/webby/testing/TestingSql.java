@@ -1,6 +1,6 @@
 package io.webby.testing;
 
-import io.webby.orm.api.TableObj;
+import io.spbx.orm.api.TableObj;
 import org.jetbrains.annotations.NotNull;
 
 import static com.google.common.truth.Truth.assertThat;

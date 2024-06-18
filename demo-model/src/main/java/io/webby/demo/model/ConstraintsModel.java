@@ -1,6 +1,6 @@
 package io.webby.demo.model;
 
-import io.webby.orm.api.annotate.Sql;
+import io.spbx.orm.api.annotate.Sql;
 
 public record ConstraintsModel(@Sql(primary = true, name = "key_id") int keyId,
                                @Sql(unique = true, defaults = "0") int fprint,

@@ -5,10 +5,10 @@ import com.carrotsearch.hppc.IntHashSet;
 import com.carrotsearch.hppc.IntObjectHashMap;
 import com.carrotsearch.hppc.IntObjectMap;
 import com.google.errorprone.annotations.CanIgnoreReturnValue;
+import io.spbx.orm.api.query.Shortcuts;
+import io.spbx.orm.api.query.Where;
 import io.webby.demo.model.UserRateModel;
 import io.webby.demo.model.UserRateModelTable;
-import io.webby.orm.api.query.Shortcuts;
-import io.webby.orm.api.query.Where;
 import io.webby.testing.ext.FluentLoggingCapture;
 import io.webby.testing.ext.SqlDbExtension;
 import org.jetbrains.annotations.NotNull;
@@ -21,11 +21,11 @@ import java.util.Arrays;
 import java.util.List;
 
 import static com.google.common.truth.Truth.assertThat;
-import static io.webby.demo.model.UserRateModelTable.OwnColumn.*;
 import static io.spbx.util.testing.AssertHppc.assertArray;
 import static io.spbx.util.testing.AssertHppc.assertMap;
 import static io.spbx.util.testing.TestingHppc.newIntObjectMap;
 import static io.spbx.util.testing.TestingPrimitives.ints;
+import static io.webby.demo.model.UserRateModelTable.OwnColumn.*;
 
 @Tag("slow") @Tag("integration") @Tag("sql")
 public class TableVotingStorageIntegrationTest {

@@ -1,8 +1,8 @@
 package io.webby.db.sql;
 
 import com.google.errorprone.annotations.Immutable;
-import io.webby.orm.api.Engine;
-import io.webby.orm.api.HasEngine;
+import io.spbx.orm.api.Engine;
+import io.spbx.orm.api.HasEngine;
 import io.spbx.util.base.EasyStrings;
 import io.spbx.util.base.Unchecked;
 import org.jetbrains.annotations.NotNull;

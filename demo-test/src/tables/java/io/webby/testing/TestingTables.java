@@ -1,7 +1,7 @@
 package io.webby.testing;
 
 import com.google.errorprone.annotations.CanIgnoreReturnValue;
-import io.webby.orm.api.BridgeTable;
+import io.spbx.orm.api.BridgeTable;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.ArrayList;

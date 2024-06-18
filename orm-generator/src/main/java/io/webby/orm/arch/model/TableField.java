@@ -1,7 +1,7 @@
 package io.webby.orm.arch.model;
 
 import com.google.errorprone.annotations.Immutable;
-import io.webby.orm.api.ReadFollow;
+import io.spbx.orm.api.ReadFollow;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 

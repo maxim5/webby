@@ -1,8 +1,8 @@
 package io.webby.db.sql;
 
-import io.webby.orm.api.Connector;
-import io.webby.orm.api.Engine;
-import io.webby.orm.api.QueryRunner;
+import io.spbx.orm.api.Connector;
+import io.spbx.orm.api.Engine;
+import io.spbx.orm.api.QueryRunner;
 import io.spbx.util.base.Unchecked;
 import org.jetbrains.annotations.NotNull;
 

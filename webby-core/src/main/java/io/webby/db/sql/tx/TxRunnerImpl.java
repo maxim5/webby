@@ -1,7 +1,7 @@
 package io.webby.db.sql.tx;
 
 import com.google.inject.Inject;
-import io.webby.orm.api.Connector;
+import io.spbx.orm.api.Connector;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.function.Supplier;

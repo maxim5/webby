@@ -4,13 +4,13 @@ import com.google.common.collect.ImmutableSet;
 import com.google.common.collect.Iterables;
 import com.google.common.collect.Streams;
 import com.google.common.primitives.Primitives;
-import io.webby.orm.api.*;
-import io.webby.orm.api.entity.*;
-import io.webby.orm.api.query.*;
+import io.spbx.orm.api.*;
+import io.spbx.orm.api.entity.*;
+import io.spbx.orm.api.query.*;
+import io.spbx.util.collect.EasyMaps;
 import io.webby.orm.arch.model.Column;
 import io.webby.orm.arch.model.*;
 import io.webby.orm.arch.util.Naming;
-import io.spbx.util.collect.EasyMaps;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.Arrays;
@@ -149,7 +149,7 @@ public class ModelTableCodegen extends BaseCodegen {
             baseTableClasses().stream().map(FQN::of),
             Stream.of(
                 Connector.class, QueryRunner.class, QueryException.class, Engine.class, ReadFollow.class, DbAdmin.class,
-                Filter.class, Where.class, Args.class, io.webby.orm.api.query.Column.class, FullColumn.class, TermType.class,
+                Filter.class, Where.class, Args.class, io.spbx.orm.api.query.Column.class, FullColumn.class, TermType.class,
                 ResultSetIterator.class, TableMeta.class,
                 EntityData.class, EntityIntData.class, EntityLongData.class, EntityColumnMap.class,
                 BatchEntityData.class, BatchEntityIntData.class, BatchEntityLongData.class,

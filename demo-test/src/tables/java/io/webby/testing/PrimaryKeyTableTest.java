@@ -2,10 +2,10 @@ package io.webby.testing;
 
 import com.google.common.collect.Iterators;
 import com.google.common.collect.MoreCollectors;
-import io.spbx.util.testing.MoreTruth;
-import io.webby.orm.api.*;
-import io.webby.orm.api.query.*;
+import io.spbx.orm.api.*;
+import io.spbx.orm.api.query.*;
 import io.spbx.util.collect.ListBuilder;
+import io.spbx.util.testing.MoreTruth;
 import org.jetbrains.annotations.NotNull;
 import org.junit.jupiter.api.Test;
 

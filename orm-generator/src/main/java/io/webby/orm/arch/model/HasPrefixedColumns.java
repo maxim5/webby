@@ -1,6 +1,6 @@
 package io.webby.orm.arch.model;
 
-import io.webby.orm.api.ReadFollow;
+import io.spbx.orm.api.ReadFollow;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.List;

@@ -1,10 +1,10 @@
 package io.webby.demo.model;
 
-import io.webby.orm.api.Connector;
-import io.webby.orm.api.ForeignInt;
-import io.webby.orm.api.ForeignLong;
-import io.webby.orm.api.ForeignObj;
-import io.webby.orm.api.query.CreateTableQuery;
+import io.spbx.orm.api.Connector;
+import io.spbx.orm.api.ForeignInt;
+import io.spbx.orm.api.ForeignLong;
+import io.spbx.orm.api.ForeignObj;
+import io.spbx.orm.api.query.CreateTableQuery;
 import io.webby.testing.ForeignKeyTableTest;
 import io.webby.testing.SqlDbTableTest;
 import io.webby.testing.TableLongTest;
