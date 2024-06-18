@@ -8,10 +8,10 @@ import io.webby.orm.api.ForeignLong;
 import io.webby.orm.api.ForeignObj;
 import io.webby.orm.api.annotate.Sql;
 import io.webby.orm.arch.model.TableArch;
-import io.webby.util.base.EasyPrimitives.MutableBool;
-import io.webby.util.base.EasyPrimitives.MutableInt;
-import io.webby.util.base.EasyPrimitives.MutableLong;
-import io.webby.util.base.EasyPrimitives.OptionalBool;
+import io.webby.util.base.EasyWrappers.MutableBool;
+import io.webby.util.base.EasyWrappers.MutableInt;
+import io.webby.util.base.EasyWrappers.MutableLong;
+import io.webby.util.base.EasyWrappers.OptionalBool;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import org.junit.jupiter.api.Test;
@@ -118,9 +118,9 @@ public class ValuesArrayMakerTest {
                 null,
                 """)
             .matchesConvertValues("""
-                EasyPrimitives_MutableInt_JdbcAdapter.ADAPTER.fillArrayValues($param.i(), array, 0);
-                EasyPrimitives_MutableBool_JdbcAdapter.ADAPTER.fillArrayValues($param.bool(), array, 1);
-                EasyPrimitives_MutableLong_JdbcAdapter.ADAPTER.fillArrayValues($param.l(), array, 2);
+                EasyWrappers_MutableInt_JdbcAdapter.ADAPTER.fillArrayValues($param.i(), array, 0);
+                EasyWrappers_MutableBool_JdbcAdapter.ADAPTER.fillArrayValues($param.bool(), array, 1);
+                EasyWrappers_MutableLong_JdbcAdapter.ADAPTER.fillArrayValues($param.l(), array, 2);
                 PointJdbcAdapter.ADAPTER.fillArrayValues($param.point(), array, 3);
                 """);
     }
@@ -144,10 +144,10 @@ public class ValuesArrayMakerTest {
                 null,
                 """)
             .matchesConvertValues("""
-                EasyPrimitives_MutableInt_JdbcAdapter.ADAPTER.fillArrayValues($param.i(), array, 0);
+                EasyWrappers_MutableInt_JdbcAdapter.ADAPTER.fillArrayValues($param.i(), array, 0);
                 Optional.ofNullable($param.bool()).ifPresent(bool ->\
-                 EasyPrimitives_MutableBool_JdbcAdapter.ADAPTER.fillArrayValues(bool, array, 1));
-                EasyPrimitives_MutableLong_JdbcAdapter.ADAPTER.fillArrayValues($param.l(), array, 2);
+                 EasyWrappers_MutableBool_JdbcAdapter.ADAPTER.fillArrayValues(bool, array, 1));
+                EasyWrappers_MutableLong_JdbcAdapter.ADAPTER.fillArrayValues($param.l(), array, 2);
                 Optional.ofNullable($param.point()).ifPresent(point ->\
                  PointJdbcAdapter.ADAPTER.fillArrayValues(point, array, 3));
                 """);

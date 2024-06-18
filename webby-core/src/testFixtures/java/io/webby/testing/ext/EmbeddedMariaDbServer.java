@@ -58,9 +58,8 @@ public class EmbeddedMariaDbServer implements EmbeddedDb {
             } catch (ManagedProcessException e) {
                 return Unchecked.rethrow(e);
             }
-        }, (db, millis) -> {
-            log.at(Level.INFO).log("Started embedded MariaDb in %dms: %s", millis, Data.describe(db, dbName));
-        });
+        }).onDone((db, millis) -> log.at(Level.INFO).log("Started embedded MariaDb in %d ms: %s",
+                                                         millis, Data.describe(db, dbName)));
     }
 
     private record Data(@NotNull DB db, int port, @NotNull String dbName) {

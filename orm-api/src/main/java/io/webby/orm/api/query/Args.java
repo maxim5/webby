@@ -8,7 +8,7 @@ import com.google.common.collect.ImmutableMap;
 import com.google.common.flogger.FluentLogger;
 import com.google.errorprone.annotations.Immutable;
 import io.webby.orm.api.QueryRunner;
-import io.webby.util.base.EasyObjects;
+import io.webby.util.base.EasyNulls;
 import io.webby.util.collect.ImmutableArrayList;
 import io.webby.util.collect.ListBuilder;
 import io.webby.util.hppc.EasyHppc;
@@ -219,7 +219,7 @@ public final class Args {
         for (Object arg : internal) {
             ++index;
             if (arg instanceof UnresolvedArg unresolved) {
-                map = EasyObjects.firstNonNull(map, HashMap::new);
+                map = EasyNulls.firstNonNull(map, HashMap::new);
                 map.put(index, unresolved);
             }
         }

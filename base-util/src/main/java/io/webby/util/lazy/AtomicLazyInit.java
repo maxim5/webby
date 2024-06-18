@@ -1,5 +1,6 @@
 package io.webby.util.lazy;
 
+import com.google.errorprone.annotations.ThreadSafe;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
@@ -11,6 +12,7 @@ import static java.util.Objects.requireNonNull;
 /**
  * An implementation of {@link LazyInit} using an {@link AtomicReference}.
  */
+@ThreadSafe
 public class AtomicLazyInit<T> implements LazyInit<T> {
     protected final AtomicReference<T> ref;
 

@@ -9,11 +9,11 @@ import org.jetbrains.annotations.Nullable;
 
 import java.util.Map;
 
-import static io.webby.testing.TestingPrimitives.*;
+import static io.webby.testing.TestingHppc.*;
 import static io.webby.util.hppc.EasyHppc.toArrayList;
 import static io.webby.util.hppc.EasyHppc.toJavaMap;
 
-public class AssertPrimitives {
+public class AssertHppc {
     @CheckReturnValue
     public static @NotNull IntContainerSubject assertArray(@NotNull IntContainer container) {
         return new IntContainerSubject(container);

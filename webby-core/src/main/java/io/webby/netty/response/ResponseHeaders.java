@@ -3,7 +3,7 @@ package io.webby.netty.response;
 import com.google.inject.Inject;
 import io.webby.app.Settings;
 import io.webby.netty.HttpConst;
-import io.webby.util.collect.Pair;
+import io.webby.util.base.Pair;
 import org.jetbrains.annotations.NotNull;
 
 import java.nio.charset.Charset;

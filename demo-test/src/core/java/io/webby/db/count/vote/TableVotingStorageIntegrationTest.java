@@ -22,10 +22,10 @@ import java.util.List;
 
 import static com.google.common.truth.Truth.assertThat;
 import static io.webby.demo.model.UserRateModelTable.OwnColumn.*;
-import static io.webby.testing.AssertPrimitives.assertArray;
-import static io.webby.testing.AssertPrimitives.assertMap;
+import static io.webby.testing.AssertHppc.assertArray;
+import static io.webby.testing.AssertHppc.assertMap;
+import static io.webby.testing.TestingHppc.newIntObjectMap;
 import static io.webby.testing.TestingPrimitives.ints;
-import static io.webby.testing.TestingPrimitives.newIntObjectMap;
 
 @Tag("slow") @Tag("integration") @Tag("sql")
 public class TableVotingStorageIntegrationTest {

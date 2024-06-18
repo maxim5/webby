@@ -32,6 +32,8 @@ dependencies {
     core.implementation("org.openjdk.jmh:jmh-generator-annprocess:1.37")
 
     listOf(core, demo, tables).forEach {
+        it.implementation("org.junit.jupiter:junit-jupiter-api:5.10.2")
+        it.implementation("org.junit.jupiter:junit-jupiter-params:5.10.2")
         it.implementation(project(":demo-model"))
         it.implementation(project(":demo-frontend"))
         it.implementation(testFixtures(project))

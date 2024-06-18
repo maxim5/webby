@@ -1,7 +1,7 @@
 package io.webby.orm.arch.model;
 
 import com.google.errorprone.annotations.Immutable;
-import io.webby.util.collect.OneOf;
+import io.webby.util.base.OneOf;
 import io.webby.util.lazy.AtomicLazyInit;
 import io.webby.util.lazy.LazyInit;
 import org.jetbrains.annotations.NotNull;

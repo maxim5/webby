@@ -25,5 +25,12 @@ rocker {
     }
 }
 
+// Compile automatically on the first run. After that will require manual task execution.
+if (!file(rocker.configurations.named("demo").get().outputDir).exists()) {
+    tasks.compileJava {
+        dependsOn("compileDemoRocker")
+    }
+}
+
 sourceSets.main.get().java.srcDirs(listOf(rocker.configurations.named("demo").get().outputDir))
 sourceSets.main.get().java.srcDirs(listOf("$projectDir/build/generated/sources/orm"))

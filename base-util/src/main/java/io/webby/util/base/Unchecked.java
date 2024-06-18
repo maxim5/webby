@@ -11,36 +11,36 @@ import java.util.function.Consumer;
 import java.util.function.Function;
 import java.util.function.Supplier;
 
-public interface Unchecked {
+public class Unchecked {
     @CanIgnoreReturnValue
-    static <T> T rethrow(@NotNull Throwable exception) {
+    public static <T> T rethrow(@NotNull Throwable exception) {
         throw new RuntimeException(exception);
     }
 
     @CanIgnoreReturnValue
-    static <T> T rethrow(@NotNull String message, @NotNull Throwable exception) {
+    public static <T> T rethrow(@NotNull String message, @NotNull Throwable exception) {
         throw new RuntimeException(message, exception);
     }
 
     @CanIgnoreReturnValue
-    static <T> T rethrow(@NotNull IOException exception) {
+    public static <T> T rethrow(@NotNull IOException exception) {
         throw new UncheckedIOException(exception);
     }
 
     @CanIgnoreReturnValue
-    static <T> T rethrow(@NotNull String message, @NotNull IOException exception) {
+    public static <T> T rethrow(@NotNull String message, @NotNull IOException exception) {
         throw new UncheckedIOException(message, exception);
     }
 
     // Idea taken from
     // https://stackoverflow.com/questions/4519557/is-there-a-way-to-throw-an-exception-without-adding-the-throws-declaration
     @SuppressWarnings("unchecked")
-    static <T extends Throwable> void throwAny(Throwable exception) throws T {
+    public static <T extends Throwable> void throwAny(Throwable exception) throws T {
         throw (T) exception;
     }
 
-    interface Runnables {
-        static <E extends Throwable> @NotNull Runnable rethrow(@NotNull ThrowRunnable<E> consumer) {
+    public static class Runnables {
+        public static <E extends Throwable> @NotNull Runnable rethrow(@NotNull ThrowRunnable<E> consumer) {
             return () -> {
                 try {
                     consumer.run();
@@ -50,7 +50,7 @@ public interface Unchecked {
             };
         }
 
-        static <E extends Throwable> void runRethrow(@NotNull ThrowRunnable<E> action) {
+        public static <E extends Throwable> void runRethrow(@NotNull ThrowRunnable<E> action) {
             try {
                 action.run();
             } catch (Throwable e) {
@@ -59,8 +59,8 @@ public interface Unchecked {
         }
     }
 
-    interface Consumers {
-        static <T, E extends Throwable> @NotNull Consumer<T> rethrow(@NotNull ThrowConsumer<T, E> consumer) {
+    public static class Consumers {
+        public static <T, E extends Throwable> @NotNull Consumer<T> rethrow(@NotNull ThrowConsumer<T, E> consumer) {
             return value -> {
                 try {
                     consumer.accept(value);
@@ -70,7 +70,8 @@ public interface Unchecked {
             };
         }
 
-        static <T, U, E extends Throwable> @NotNull BiConsumer<T, U> rethrow(@NotNull ThrowBiConsumer<T, U, E> consumer) {
+        public static <T, U, E extends Throwable>
+                @NotNull BiConsumer<T, U> rethrow(@NotNull ThrowBiConsumer<T, U, E> consumer) {
             return (t, u) -> {
                 try {
                     consumer.accept(t, u);
@@ -81,8 +82,8 @@ public interface Unchecked {
         }
     }
 
-    interface Suppliers {
-        static <T, E extends Throwable> @NotNull Supplier<T> rethrow(@NotNull ThrowSupplier<T, E> supplier) {
+    public static class Suppliers {
+        public static <T, E extends Throwable> @NotNull Supplier<T> rethrow(@NotNull ThrowSupplier<T, E> supplier) {
             return () -> {
                 try {
                     return supplier.get();
@@ -92,7 +93,7 @@ public interface Unchecked {
             };
         }
 
-        static <T, E extends Throwable> T runRethrow(@NotNull ThrowSupplier<T, E> action) {
+        public static <T, E extends Throwable> T runRethrow(@NotNull ThrowSupplier<T, E> action) {
             try {
                 return action.get();
             } catch (Throwable e) {
@@ -101,11 +102,11 @@ public interface Unchecked {
         }
     }
 
-    interface Functions {
-        static <T, R, E extends Throwable> @NotNull Function<T, R> rethrow(@NotNull ThrowFunction<T, R, E> function) {
+    public static class Functions {
+        public static <T, R, E extends Throwable> @NotNull Function<T, R> rethrow(@NotNull ThrowFunction<T, R, E> func) {
             return value -> {
                 try {
-                    return function.apply(value);
+                    return func.apply(value);
                 } catch (Throwable e) {
                     return Unchecked.rethrow(e);
                 }
@@ -113,13 +114,13 @@ public interface Unchecked {
         }
     }
 
-    interface Guava {
+    public static class Guava {
         @SuppressWarnings("Guava")
-        @NotNull
-        static <T, R, E extends Throwable> com.google.common.base.Function<T, R> rethrow(@NotNull ThrowFunction<T, R, E> function) {
+        public static @NotNull <T, R, E extends Throwable>
+                com.google.common.base.Function<T, R> rethrow(@NotNull ThrowFunction<T, R, E> func) {
             return value -> {
                 try {
-                    return function.apply(value);
+                    return func.apply(value);
                 } catch (Throwable e) {
                     return Unchecked.rethrow(e);
                 }

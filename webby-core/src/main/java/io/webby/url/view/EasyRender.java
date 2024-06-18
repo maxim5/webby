@@ -10,7 +10,7 @@ import java.io.*;
 import java.util.Map;
 import java.util.function.Function;
 
-import static io.webby.util.io.EasyIO.Close.closeQuietly;
+import static io.webby.util.io.EasyIo.Close.closeQuietly;
 
 public class EasyRender {
     public static <E extends Throwable>

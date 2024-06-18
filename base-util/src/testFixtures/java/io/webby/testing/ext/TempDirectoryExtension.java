@@ -29,8 +29,16 @@ public class TempDirectoryExtension implements BeforeAllCallback, BeforeEachCall
         pathsToClean = cleanUp ? new ArrayList<>(1024) : List.of();
     }
 
-    public TempDirectoryExtension() {
-        this(true, false);
+    public static @NotNull TempDirectoryExtension withCleanup() {
+        return new TempDirectoryExtension(true, false);
+    }
+
+    public static @NotNull TempDirectoryExtension withoutCleanup() {
+        return new TempDirectoryExtension(false, false);
+    }
+
+    public static @NotNull TempDirectoryExtension withCleanupOnlySuccessful() {
+        return new TempDirectoryExtension(true, true);
     }
 
     @Override

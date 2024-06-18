@@ -11,8 +11,8 @@ import io.webby.orm.api.annotate.Sql;
 import io.webby.orm.arch.InvalidSqlModelException;
 import io.webby.orm.arch.model.JdbcType;
 import io.webby.testing.orm.FakeModelAdaptersLocator;
-import io.webby.util.base.EasyPrimitives.OptionalBool;
-import io.webby.util.collect.Pair;
+import io.webby.util.base.EasyWrappers.OptionalBool;
+import io.webby.util.base.Pair;
 import org.jetbrains.annotations.NotNull;
 import org.junit.jupiter.api.Test;
 

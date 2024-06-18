@@ -4,7 +4,7 @@ import com.google.common.collect.Lists;
 import io.webby.orm.api.debug.DebugSql;
 import io.webby.testing.ext.SqlDbExtension;
 import io.webby.testing.orm.AssertSql;
-import io.webby.util.collect.Pair;
+import io.webby.util.base.Pair;
 import org.jetbrains.annotations.NotNull;
 import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;

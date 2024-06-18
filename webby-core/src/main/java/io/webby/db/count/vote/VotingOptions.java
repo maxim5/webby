@@ -1,7 +1,7 @@
 package io.webby.db.count.vote;
 
 import io.webby.db.StorageType;
-import io.webby.util.collect.OneOf;
+import io.webby.util.base.OneOf;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 

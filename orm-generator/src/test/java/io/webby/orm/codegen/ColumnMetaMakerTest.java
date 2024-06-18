@@ -9,7 +9,7 @@ import io.webby.orm.api.annotate.Sql;
 import io.webby.orm.arch.model.Column;
 import io.webby.orm.arch.model.TableArch;
 import io.webby.orm.arch.model.TableField;
-import io.webby.util.collect.Pair;
+import io.webby.util.base.Pair;
 import org.jetbrains.annotations.NotNull;
 import org.junit.jupiter.api.Test;
 

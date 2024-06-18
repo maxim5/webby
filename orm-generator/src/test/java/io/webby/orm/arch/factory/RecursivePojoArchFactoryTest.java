@@ -7,7 +7,7 @@ import io.webby.orm.arch.model.Column;
 import io.webby.orm.arch.model.JdbcType;
 import io.webby.orm.arch.model.PojoArch;
 import io.webby.testing.orm.FakeModelAdaptersLocator;
-import io.webby.util.base.EasyPrimitives.OptionalBool;
+import io.webby.util.base.EasyWrappers.OptionalBool;
 import org.junit.jupiter.api.Test;
 
 import java.awt.*;

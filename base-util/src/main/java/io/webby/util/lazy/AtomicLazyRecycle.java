@@ -1,8 +1,10 @@
 package io.webby.util.lazy;
 
+import com.google.errorprone.annotations.ThreadSafe;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
+@ThreadSafe
 public class AtomicLazyRecycle<T> extends AtomicLazyInit<T> implements LazyRecycle<T> {
     protected AtomicLazyRecycle(@Nullable T initValue) {
         super(initValue);

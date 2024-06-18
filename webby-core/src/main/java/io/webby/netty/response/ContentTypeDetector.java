@@ -11,7 +11,7 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.List;
 
-import static io.webby.util.base.EasyObjects.*;
+import static io.webby.util.base.EasyNulls.*;
 
 public class ContentTypeDetector {
     private ContentTypeProvider contentTypeProvider;
@@ -22,11 +22,14 @@ public class ContentTypeDetector {
     }
 
     public @NotNull CharSequence guessContentType(@NotNull Path path) {
-        return firstNonNull(List.of(
-            () -> contentTypeProvider.getContentType(path),
-            () -> URLConnection.guessContentTypeFromName(path.toString()),
-            Unchecked.Suppliers.rethrow(() -> Files.probeContentType(path)),
-            Unchecked.Suppliers.rethrow(() -> ThirdPartyMimeTypeDetectors.detect(path.toFile()))
-        ), HttpConst.APPLICATION_OCTET_STREAM);
+        return firstNonNull(
+            List.of(
+                () -> contentTypeProvider.getContentType(path),
+                () -> URLConnection.guessContentTypeFromName(path.toString()),
+                Unchecked.Suppliers.rethrow(() -> Files.probeContentType(path)),
+                Unchecked.Suppliers.rethrow(() -> ThirdPartyMimeTypeDetectors.detect(path.toFile()))
+            ),
+            HttpConst.APPLICATION_OCTET_STREAM
+        );
     }
 }

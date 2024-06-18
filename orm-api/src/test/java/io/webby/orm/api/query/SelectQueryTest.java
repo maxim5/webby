@@ -2,7 +2,7 @@ package io.webby.orm.api.query;
 
 import com.google.errorprone.annotations.CheckReturnValue;
 import io.webby.orm.api.Engine;
-import io.webby.testing.AssertPrimitives;
+import io.webby.testing.AssertHppc;
 import io.webby.testing.ext.SqlDbExtension;
 import org.jetbrains.annotations.NotNull;
 import org.junit.jupiter.api.BeforeEach;
@@ -16,7 +16,7 @@ import static io.webby.orm.api.query.CompareType.*;
 import static io.webby.orm.api.query.Func.*;
 import static io.webby.orm.api.query.Shortcuts.*;
 import static io.webby.orm.testing.PersonTableData.*;
-import static io.webby.testing.AssertPrimitives.assertArray;
+import static io.webby.testing.AssertHppc.assertArray;
 import static io.webby.testing.TestingBasics.array;
 import static io.webby.testing.orm.AssertSql.UnitSubject;
 import static io.webby.testing.orm.AssertSql.assertRows;
@@ -368,7 +368,7 @@ public class SelectQueryTest {
             ORDER BY id DESC
             """);
         assertQuery(query).containsNoArgs();
-        AssertPrimitives.assertArray(SQL.runner().fetchIntColumn(query)).containsExactlyInOrder(4, 3, 2, 1);
+        AssertHppc.assertArray(SQL.runner().fetchIntColumn(query)).containsExactlyInOrder(4, 3, 2, 1);
     }
 
     @Test

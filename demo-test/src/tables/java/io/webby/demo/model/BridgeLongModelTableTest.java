@@ -10,7 +10,7 @@ import io.webby.testing.BridgeTableTest;
 import io.webby.testing.SessionBuilder;
 import io.webby.testing.SqlDbTableTest;
 import io.webby.testing.TestingSql;
-import io.webby.util.collect.Pair;
+import io.webby.util.base.Pair;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.List;

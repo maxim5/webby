@@ -7,9 +7,9 @@ import org.jetbrains.annotations.Nullable;
 import java.io.Closeable;
 import java.io.IOException;
 
-public interface EasyIO {
-    interface Close {
-        static void closeQuietly(@Nullable Closeable closeable) {
+public class EasyIo {
+    public static class Close {
+        public static void closeQuietly(@Nullable Closeable closeable) {
             try {
                 Closeables.close(closeable, true);
             } catch (IOException impossible) {
@@ -17,7 +17,7 @@ public interface EasyIO {
             }
         }
 
-        static void closeRethrow(@Nullable Closeable closeable) {
+        public static void closeRethrow(@Nullable Closeable closeable) {
             try {
                 Closeables.close(closeable, false);
             } catch (IOException e) {
@@ -25,7 +25,7 @@ public interface EasyIO {
             }
         }
 
-        static void closeQuietly(@Nullable AutoCloseable closeable) {
+        public static void closeQuietly(@Nullable AutoCloseable closeable) {
             try {
                 if (closeable != null) {
                     closeable.close();
@@ -34,7 +34,7 @@ public interface EasyIO {
             }
         }
 
-        static void closeRethrow(@Nullable AutoCloseable closeable) {
+        public static void closeRethrow(@Nullable AutoCloseable closeable) {
             try {
                 if (closeable != null) {
                     closeable.close();

@@ -38,8 +38,8 @@ public class LocalPortResolverTest {
     }
 
     private static @Nullable String tryResolvePort(@NotNull String url) {
-        return TimeIt.timeIt(() -> LocalPortResolver.tryResolvePort(url), (result, millis) -> {
-            log.at(Level.INFO).log("%s -> %dms", url, millis);
-        });
+        return TimeIt
+            .timeIt(() -> LocalPortResolver.tryResolvePort(url))
+            .onDone((__, millis) -> log.at(Level.INFO).log("%s -> %d ms", url, millis));
     }
 }

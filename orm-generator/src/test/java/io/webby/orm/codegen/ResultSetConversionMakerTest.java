@@ -6,10 +6,10 @@ import io.webby.orm.api.ForeignLong;
 import io.webby.orm.api.ForeignObj;
 import io.webby.orm.api.annotate.Sql;
 import io.webby.orm.arch.model.TableArch;
-import io.webby.util.base.EasyPrimitives.MutableBool;
-import io.webby.util.base.EasyPrimitives.MutableInt;
-import io.webby.util.base.EasyPrimitives.MutableLong;
-import io.webby.util.base.EasyPrimitives.OptionalBool;
+import io.webby.util.base.EasyWrappers.MutableBool;
+import io.webby.util.base.EasyWrappers.MutableInt;
+import io.webby.util.base.EasyWrappers.MutableLong;
+import io.webby.util.base.EasyWrappers.OptionalBool;
 import org.jetbrains.annotations.Nullable;
 import org.junit.jupiter.api.Test;
 
@@ -63,7 +63,7 @@ public class ResultSetConversionMakerTest {
         TableArch tableArch = buildTableArch(Enums.class);
         assertThatJava(new ResultSetConversionMaker("$resultSet", "$follow", "$index").make(tableArch)).matches("""
             Engine engine = Engine.values()[$resultSet.getInt(++$index)];
-            EasyPrimitives.OptionalBool bool = EasyPrimitives.OptionalBool.values()[$resultSet.getInt(++$index)];
+            EasyWrappers.OptionalBool bool = EasyWrappers.OptionalBool.values()[$resultSet.getInt(++$index)];
             """);
     }
 
@@ -83,9 +83,9 @@ public class ResultSetConversionMakerTest {
 
         TableArch tableArch = buildTableArch(Adapters.class);
         assertThatJava(new ResultSetConversionMaker("$resultSet", "$follow", "$index").make(tableArch)).matches("""
-            EasyPrimitives.MutableInt i = EasyPrimitives_MutableInt_JdbcAdapter.ADAPTER.createInstance($resultSet.getInt(++$index));
-            EasyPrimitives.MutableBool bool = EasyPrimitives_MutableBool_JdbcAdapter.ADAPTER.createInstance($resultSet.getBoolean(++$index));
-            EasyPrimitives.MutableLong l = EasyPrimitives_MutableLong_JdbcAdapter.ADAPTER.createInstance($resultSet.getLong(++$index));
+            EasyWrappers.MutableInt i = EasyWrappers_MutableInt_JdbcAdapter.ADAPTER.createInstance($resultSet.getInt(++$index));
+            EasyWrappers.MutableBool bool = EasyWrappers_MutableBool_JdbcAdapter.ADAPTER.createInstance($resultSet.getBoolean(++$index));
+            EasyWrappers.MutableLong l = EasyWrappers_MutableLong_JdbcAdapter.ADAPTER.createInstance($resultSet.getLong(++$index));
             Point point = PointJdbcAdapter.ADAPTER.createInstance($resultSet.getInt(++$index), $resultSet.getInt(++$index));
             """);
     }
@@ -99,9 +99,9 @@ public class ResultSetConversionMakerTest {
 
         TableArch tableArch = buildTableArch(Adapters.class);
         assertThatJava(new ResultSetConversionMaker("$resultSet", "$follow", "$index").make(tableArch)).matches("""
-            EasyPrimitives.MutableInt i = EasyPrimitives_MutableInt_JdbcAdapter.ADAPTER.createInstance($resultSet.getInt(++$index));
-            EasyPrimitives.MutableBool bool = EasyPrimitives_MutableBool_JdbcAdapter.ADAPTER.createInstance($resultSet.getBoolean(++$index));
-            EasyPrimitives.MutableLong l = EasyPrimitives_MutableLong_JdbcAdapter.ADAPTER.createInstance($resultSet.getLong(++$index));
+            EasyWrappers.MutableInt i = EasyWrappers_MutableInt_JdbcAdapter.ADAPTER.createInstance($resultSet.getInt(++$index));
+            EasyWrappers.MutableBool bool = EasyWrappers_MutableBool_JdbcAdapter.ADAPTER.createInstance($resultSet.getBoolean(++$index));
+            EasyWrappers.MutableLong l = EasyWrappers_MutableLong_JdbcAdapter.ADAPTER.createInstance($resultSet.getLong(++$index));
             Point point = PointJdbcAdapter.ADAPTER.createInstance($resultSet.getInt(++$index), $resultSet.getInt(++$index));
             """);
     }

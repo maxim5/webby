@@ -14,10 +14,12 @@ import java.util.stream.IntStream;
 import java.util.stream.Stream;
 
 import static com.google.common.truth.Truth.assertThat;
-import static io.webby.testing.AssertPrimitives.assertArray;
-import static io.webby.testing.AssertPrimitives.assertMap;
+import static io.webby.testing.AssertHppc.assertArray;
+import static io.webby.testing.AssertHppc.assertMap;
 import static io.webby.testing.TestingBasics.array;
-import static io.webby.testing.TestingPrimitives.*;
+import static io.webby.testing.TestingHppc.*;
+import static io.webby.testing.TestingPrimitives.ints;
+import static io.webby.testing.TestingPrimitives.longs;
 import static org.junit.jupiter.api.Assertions.fail;
 
 public class EasyHppcTest {

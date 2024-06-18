@@ -25,7 +25,7 @@ public class MockConsumer<T, E extends Throwable> implements Consumer<T>, ThrowC
     private final List<T> items = new ArrayList<>();
     private List<T> expected;
 
-    public MockConsumer() {
+    protected MockConsumer() {
         if (!Tracker.trackers.isEmpty()) {
             Tracker.trackers.peek().add(this);
         }
@@ -95,7 +95,7 @@ public class MockConsumer<T, E extends Throwable> implements Consumer<T>, ThrowC
         private static final Stack<Tracker> trackers = new Stack<>();
         private final List<MockConsumer<?, ?>> mocks = new ArrayList<>();
 
-        public Tracker() {
+        protected Tracker() {
             trackers.push(this);
         }
 

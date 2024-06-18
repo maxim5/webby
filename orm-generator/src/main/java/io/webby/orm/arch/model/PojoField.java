@@ -2,7 +2,7 @@ package io.webby.orm.arch.model;
 
 import com.google.common.collect.Streams;
 import com.google.errorprone.annotations.Immutable;
-import io.webby.util.collect.Pair;
+import io.webby.util.base.Pair;
 import io.webby.util.lazy.AtomicCacheCompute;
 import io.webby.util.lazy.CacheCompute;
 import org.jetbrains.annotations.NotNull;
@@ -15,7 +15,7 @@ public abstract class PojoField {
     protected final PojoParent parent;
     protected final ModelField field;
     protected final TypeSupport typeSupport;
-    private final CacheCompute<String> lazyNameRef = AtomicCacheCompute.createEmpty();
+    private final CacheCompute<String> nameCache = AtomicCacheCompute.createEmpty();
 
     protected PojoField(@NotNull PojoParent parent, @NotNull ModelField field, @NotNull TypeSupport typeSupport) {
         this.parent = parent;
@@ -36,7 +36,7 @@ public abstract class PojoField {
     }
 
     public @NotNull String fullSqlName() {
-        return lazyNameRef.getOrCompute(() -> {
+        return nameCache.getOrCompute(() -> {
             Pair<Optional<String>, List<String>> fullPath = fullSqlPath();
             return Streams.concat(fullPath.first().stream(), fullPath.second().stream()).collect(Collectors.joining("_"));
         });

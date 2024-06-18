@@ -2,7 +2,7 @@ package io.webby.db.kv.impl;
 
 import com.google.common.flogger.FluentLogger;
 import io.webby.db.kv.DbType;
-import io.webby.util.collect.Pair;
+import io.webby.util.base.Pair;
 import io.webby.util.classpath.EasyClasspath;
 import org.jetbrains.annotations.Nullable;
 

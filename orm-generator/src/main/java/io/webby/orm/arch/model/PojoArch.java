@@ -16,7 +16,7 @@ import static io.webby.orm.arch.model.JavaNameValidator.validateJavaIdentifier;
 public final class PojoArch implements HasColumns {
     private final @NotNull Class<?> pojoType;
     private final @NotNull ImmutableList<PojoField> fields;
-    private final CacheCompute<List<Column>> columnsRef = AtomicCacheCompute.createEmpty();
+    private final CacheCompute<List<Column>> columnsCache = AtomicCacheCompute.createEmpty();
 
     public PojoArch(@NotNull Class<?> pojoType, @NotNull ImmutableList<PojoField> fields) {
         this.pojoType = pojoType;
@@ -46,7 +46,7 @@ public final class PojoArch implements HasColumns {
 
     @Override
     public @NotNull List<Column> columns() {
-        return columnsRef.getOrCompute(() -> {
+        return columnsCache.getOrCompute(() -> {
             ArrayList<Column> result = new ArrayList<>();
             iterateAllFields(field -> {
                 if (field instanceof PojoFieldNative fieldNative) {

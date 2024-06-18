@@ -1,4 +1,4 @@
-package io.webby.util.collect;
+package io.webby.util.base;
 
 import com.google.common.base.Objects;
 import org.jetbrains.annotations.NotNull;

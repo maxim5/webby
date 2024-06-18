@@ -6,7 +6,7 @@ import io.webby.routekit.SimpleQueryParser;
 import io.webby.testing.Testing;
 import io.webby.url.annotate.GET;
 import io.webby.url.caller.Caller;
-import io.webby.util.collect.Pair;
+import io.webby.util.base.Pair;
 import io.webby.util.reflect.EasyMembers.Scope;
 import org.jetbrains.annotations.NotNull;
 import org.junit.jupiter.api.Test;

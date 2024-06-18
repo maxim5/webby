@@ -1,6 +1,6 @@
 package io.webby.demo.model;
 
-import com.google.common.base.MoreObjects;
+import io.webby.util.base.EasyNulls;
 
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
@@ -29,7 +29,7 @@ public record NullableModel(@Nullable String id,
 
     // To make equals() work regardless whether a `nested` is not set or not loaded from DB. This simplifies the tests.
     private static @Nonnull Nested notNull(@Nullable Nested value) {
-        return MoreObjects.firstNonNull(value, Nested.DEFAULT);
+        return EasyNulls.firstNonNull(value, Nested.DEFAULT);
     }
 
     record Nested(int id, @Nullable String s) {

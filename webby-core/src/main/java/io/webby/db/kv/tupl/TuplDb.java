@@ -6,7 +6,7 @@ import io.webby.db.codec.Codec;
 import io.webby.db.kv.KeyValueDb;
 import io.webby.db.kv.impl.ByteArrayDb;
 import io.webby.util.collect.EasyIterables;
-import io.webby.util.base.EasyPrimitives.MutableBool;
+import io.webby.util.base.EasyWrappers.MutableBool;
 import io.webby.util.base.Unchecked.Consumers;
 import io.webby.util.func.ThrowConsumer;
 import io.webby.util.func.ThrowFunction;

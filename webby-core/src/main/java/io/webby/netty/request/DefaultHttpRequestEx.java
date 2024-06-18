@@ -25,7 +25,7 @@ import java.util.Map;
 import static io.webby.util.base.EasyCast.castAny;
 
 public class DefaultHttpRequestEx extends DefaultFullHttpRequest implements MutableHttpRequestEx {
-    private final CacheCompute<QueryParams> params = AtomicCacheCompute.createEmpty();
+    private final CacheCompute<QueryParams> paramsCache = AtomicCacheCompute.createEmpty();
     private final Channel channel;
     private final Json json;
     private final Map<String, Constraint<?>> constraints;
@@ -86,7 +86,7 @@ public class DefaultHttpRequestEx extends DefaultFullHttpRequest implements Muta
 
     @Override
     public @NotNull QueryParams params() {
-        return params.getOrCompute(this::parseQuery);
+        return paramsCache.getOrCompute(this::parseQuery);
     }
 
     @Override

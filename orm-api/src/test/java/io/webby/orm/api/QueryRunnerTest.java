@@ -11,7 +11,7 @@ import io.webby.orm.api.query.*;
 import io.webby.testing.CalledOnce;
 import io.webby.testing.MoreTruth;
 import io.webby.util.collect.Array;
-import io.webby.util.collect.Pair;
+import io.webby.util.base.Pair;
 import io.webby.util.func.ThrowConsumer;
 import io.webby.util.func.ThrowFunction;
 import org.junit.jupiter.api.AfterEach;
@@ -26,7 +26,7 @@ import java.util.List;
 
 import static com.google.common.truth.Truth.assertThat;
 import static io.webby.orm.api.query.Shortcuts.var;
-import static io.webby.testing.AssertPrimitives.assertArray;
+import static io.webby.testing.AssertHppc.assertArray;
 import static io.webby.testing.TestingBasics.array;
 import static io.webby.testing.orm.MockingJdbc.assertThat;
 import static io.webby.testing.orm.MockingJdbc.mockConnection;

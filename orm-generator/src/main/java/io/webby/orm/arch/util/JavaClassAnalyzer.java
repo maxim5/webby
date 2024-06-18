@@ -21,7 +21,7 @@ import java.util.logging.Level;
 import java.util.stream.Collectors;
 
 import static io.webby.orm.arch.InvalidSqlModelException.failIf;
-import static io.webby.util.base.EasyObjects.firstNonNullIfExist;
+import static io.webby.util.base.EasyNulls.firstNonNullIfExist;
 import static io.webby.util.reflect.EasyMembers.isPrivate;
 import static io.webby.util.reflect.EasyMembers.isStatic;
 
@@ -140,15 +140,17 @@ public class JavaClassAnalyzer {
                               !isStatic(method))
             .collect(ImmutableMap.toImmutableMap(Method::getName, Function.identity()));
 
-        return firstNonNullIfExist(List.of(
-            () -> eligibleMethods.get(fieldName),
-            () -> eligibleMethods.get("%s%s".formatted(
-                fieldType == boolean.class ? "is" : "get",
-                Naming.camelLowerToUpper(fieldName))),
-            () -> eligibleMethods.values().stream().filter(method -> {
-                String name = method.getName().toLowerCase();
-                return name.startsWith("get") && name.contains(fieldName.toLowerCase());
-            }).collect(EasyIterables.getOnlyItemOrEmpty()).orElse(null)
-        ));
+        return firstNonNullIfExist(
+            List.of(
+                () -> eligibleMethods.get(fieldName),
+                () -> eligibleMethods.get("%s%s".formatted(
+                    fieldType == boolean.class ? "is" : "get",
+                    Naming.camelLowerToUpper(fieldName))),
+                () -> eligibleMethods.values().stream().filter(method -> {
+                    String name = method.getName().toLowerCase();
+                    return name.startsWith("get") && name.contains(fieldName.toLowerCase());
+                }).collect(EasyIterables.getOnlyItemOrEmpty()).orElse(null)
+            )
+        );
     }
 }

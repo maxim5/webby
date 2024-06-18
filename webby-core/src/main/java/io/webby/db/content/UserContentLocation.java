@@ -1,6 +1,6 @@
 package io.webby.db.content;
 
-import io.webby.util.collect.OneOf;
+import io.webby.util.base.OneOf;
 import org.jetbrains.annotations.NotNull;
 
 import java.net.URI;

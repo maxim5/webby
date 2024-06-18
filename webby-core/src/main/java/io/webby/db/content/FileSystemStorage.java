@@ -3,7 +3,7 @@ package io.webby.db.content;
 import com.google.common.flogger.FluentLogger;
 import com.google.inject.Inject;
 import io.webby.app.Settings;
-import io.webby.util.collect.OneOf;
+import io.webby.util.base.OneOf;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.VisibleForTesting;
 

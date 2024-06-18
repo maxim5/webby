@@ -3,43 +3,43 @@ package io.webby.util.time;
 import com.google.common.base.Stopwatch;
 import io.webby.util.func.ThrowRunnable;
 import io.webby.util.func.ThrowSupplier;
+import org.jetbrains.annotations.CheckReturnValue;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.concurrent.TimeUnit;
 import java.util.function.LongConsumer;
 import java.util.function.ObjLongConsumer;
-import java.util.function.Supplier;
 
+/**
+ * A helper utility for running the action and measuring elapsed time.
+ */
 public class TimeIt {
-    public static void timeIt(@NotNull Runnable runnable, @NotNull LongConsumer timeConsumer) {
+    @CheckReturnValue
+    public static <E extends Throwable> @NotNull MillisListener timeIt(@NotNull ThrowRunnable<E> runnable) throws E {
         Stopwatch stopwatch = Stopwatch.createStarted();
         runnable.run();
         long elapsedMillis = stopwatch.stop().elapsed(TimeUnit.MILLISECONDS);
-        timeConsumer.accept(elapsedMillis);
+        return timeConsumer -> timeConsumer.accept(elapsedMillis);
     }
 
-    public static <E extends Throwable> void timeItOrDie(@NotNull ThrowRunnable<E> runnable,
-                                                         @NotNull LongConsumer timeConsumer) throws E {
-        Stopwatch stopwatch = Stopwatch.createStarted();
-        runnable.run();
-        long elapsedMillis = stopwatch.stop().elapsed(TimeUnit.MILLISECONDS);
-        timeConsumer.accept(elapsedMillis);
-    }
-
-    public static <T> T timeIt(@NotNull Supplier<T> supplier, @NotNull ObjLongConsumer<T> timeConsumer) {
+    @CheckReturnValue
+    public static <T, E extends Throwable> @NotNull ObjMillisListener<T> timeIt(@NotNull ThrowSupplier<T, E> supplier) throws E {
         Stopwatch stopwatch = Stopwatch.createStarted();
         T result = supplier.get();
         long elapsedMillis = stopwatch.stop().elapsed(TimeUnit.MILLISECONDS);
-        timeConsumer.accept(result, elapsedMillis);
-        return result;
+        return timeConsumer -> {
+            timeConsumer.accept(result, elapsedMillis);
+            return result;
+        };
     }
 
-    public static <T, E extends Throwable> T timeItOrDie(@NotNull ThrowSupplier<T, E> supplier,
-                                                         @NotNull ObjLongConsumer<T> timeConsumer) throws E {
-        Stopwatch stopwatch = Stopwatch.createStarted();
-        T result = supplier.get();
-        long elapsedMillis = stopwatch.stop().elapsed(TimeUnit.MILLISECONDS);
-        timeConsumer.accept(result, elapsedMillis);
-        return result;
+    @FunctionalInterface
+    public interface MillisListener {
+        void onDone(@NotNull LongConsumer timeConsumer);
+    }
+
+    @FunctionalInterface
+    public interface ObjMillisListener<T> {
+        T onDone(@NotNull ObjLongConsumer<T> timeConsumer);
     }
 }

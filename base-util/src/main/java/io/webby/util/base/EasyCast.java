@@ -2,14 +2,14 @@ package io.webby.util.base;
 
 import java.util.Map;
 
-public interface EasyCast {
+public class EasyCast {
     @SuppressWarnings("unchecked")
-    static <K, V> Map<K, V> castMap(Map<?, ?> map) {
+    public static <K, V> Map<K, V> castMap(Map<?, ?> map) {
         return (Map<K, V>) map;
     }
 
     @SuppressWarnings("unchecked")
-    static <R, T> R castAny(T object) {
+    public static <R, T> R castAny(T object) {
         return (R) object;
     }
 }
