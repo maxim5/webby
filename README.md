@@ -62,14 +62,14 @@ Since Webby is in active development, the best way to add a Gradle dependency is
 ```groovy
 sourceControl {
     gitRepository('https://github.com/maxim5/webby.git') {
-        producesModule("io.webby:webby")
+        producesModule("io.spbx.webby:webby")
     }
 }
 ```
 
 - `build.gradle`
 ```groovy
-implementation ('io.webby:webby:0.8.0')
+implementation ('io.spbx.webby:webby:0.10.0')
 ```
 
 To start the web server locally:

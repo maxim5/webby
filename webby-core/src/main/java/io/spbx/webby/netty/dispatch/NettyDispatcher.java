@@ -40,7 +40,7 @@ import java.util.stream.Collectors;
 class NettyDispatcher extends ChannelInboundHandlerAdapter {
     private static final FluentLogger log = FluentLogger.forEnclosingClass();
 
-    private static final String PROTOCOL = "io.webby";
+    private static final String PROTOCOL = "io.spbx.webby";
 
     @Inject private NettyConst nc;
     @Inject private WebsocketRouter websocketRouter;
