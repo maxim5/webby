@@ -1,4 +1,4 @@
-package io.webby.auth;
+package io.spbx.webby.auth;
 
 import com.google.inject.Injector;
 import io.spbx.webby.app.AppSettings;

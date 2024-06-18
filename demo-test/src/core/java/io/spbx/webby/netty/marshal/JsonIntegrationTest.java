@@ -1,7 +1,7 @@
 package io.spbx.webby.netty.marshal;
 
-import io.webby.demo.hello.JsonCustom;
-import io.webby.demo.hello.SampleBean;
+import io.spbx.webby.demo.hello.JsonCustom;
+import io.spbx.webby.demo.hello.SampleBean;
 import io.spbx.webby.netty.marshal.MarshallerFactory.SupportedJsonLibrary;
 import io.spbx.webby.testing.SessionBuilder;
 import io.spbx.webby.testing.Testing;

@@ -1,12 +1,12 @@
 package io.spbx.webby.netty;
 
 import com.google.common.flogger.FluentLogger;
-import io.spbx.webby.app.AppSettings;
-import io.webby.demo.DevPaths;
-import io.webby.demo.Main;
-import io.spbx.webby.testing.OkRequests;
-import io.spbx.util.testing.TestingBasics;
 import io.spbx.util.func.ThrowConsumer;
+import io.spbx.util.testing.TestingBasics;
+import io.spbx.webby.app.AppSettings;
+import io.spbx.webby.demo.DevPaths;
+import io.spbx.webby.demo.Main;
+import io.spbx.webby.testing.OkRequests;
 import okhttp3.*;
 import okio.ByteString;
 import org.jetbrains.annotations.NotNull;
@@ -171,7 +171,7 @@ public class StandaloneNettyIntegrationTest {
 
     private static @NotNull AppSettings createSettingsForTest() {
         AppSettings settings = Main.localSettings();
-        settings.handlerFilter().setPackageOnly("io.webby.demo");
+        settings.handlerFilter().setPackageOnly("io.spbx.webby.demo");
         return settings;
     }
 }

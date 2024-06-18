@@ -18,7 +18,7 @@ import org.jetbrains.annotations.NotNull;
  * By default, the interceptors are enabled unconditionally, but the implementation may turn it off depending on
  * the server configuration.
  *
- * @see io.webby.netty.intercept.attr.Attributes
+ * @see io.spbx.webby.netty.intercept.attr.Attributes
  */
 public interface Interceptor {
     /**

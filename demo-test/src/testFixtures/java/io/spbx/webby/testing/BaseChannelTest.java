@@ -4,7 +4,7 @@ import com.google.inject.Injector;
 import io.netty.channel.embedded.EmbeddedChannel;
 import io.spbx.util.testing.TestingBytes;
 import io.spbx.webby.app.AppSettings;
-import io.webby.demo.DevPaths;
+import io.spbx.webby.demo.DevPaths;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.ArrayDeque;

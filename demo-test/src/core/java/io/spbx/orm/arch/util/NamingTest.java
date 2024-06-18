@@ -4,7 +4,7 @@ import io.spbx.webby.auth.session.DefaultSession;
 import io.spbx.webby.auth.session.SessionModel;
 import io.spbx.webby.auth.user.DefaultUser;
 import io.spbx.webby.auth.user.UserModel;
-import io.webby.demo.model.NestedModel;
+import io.spbx.webby.demo.model.NestedModel;
 import org.junit.jupiter.api.Test;
 
 import static com.google.common.truth.Truth.assertThat;

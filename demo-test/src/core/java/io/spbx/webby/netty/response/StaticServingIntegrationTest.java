@@ -1,12 +1,11 @@
 package io.spbx.webby.netty.response;
 
 import io.netty.handler.codec.http.HttpResponse;
+import io.spbx.webby.demo.hello.HelloWorld;
 import io.spbx.webby.netty.HttpConst;
-import io.spbx.webby.netty.response.StaticServing;
 import io.spbx.webby.testing.BaseHttpIntegrationTest;
 import io.spbx.webby.testing.HttpRequestBuilder;
 import io.spbx.webby.testing.Testing;
-import io.webby.demo.hello.HelloWorld;
 import org.jetbrains.annotations.NotNull;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
@@ -48,7 +47,7 @@ public class StaticServingIntegrationTest extends BaseHttpIntegrationTest {
     @ValueSource(booleans = {true, false})
     public void routing_integrates_with_hello_world_handler_default_prefix(boolean dynamicLookup) {
         testSetup(HelloWorld.class, settings -> {
-            settings.setProperty("testing.logging", "io.webby.url.impl.HandlerBinder=DEBUG");
+            settings.setProperty("testing.logging", "io.spbx.webby.url.impl.HandlerBinder=DEBUG");
             settings.setProperty("url.static.files.prefix", "/");
             settings.setProperty("url.static.files.dynamic.lookup", dynamicLookup);
         }).initHandler();
@@ -70,7 +69,7 @@ public class StaticServingIntegrationTest extends BaseHttpIntegrationTest {
     @ValueSource(booleans = {true, false})
     public void routing_integrates_with_hello_world_handler_custom_prefix(boolean dynamicLookup) {
         testSetup(HelloWorld.class, settings -> {
-            settings.setProperty("testing.logging", "io.webby.url.impl.HandlerBinder=DEBUG");
+            settings.setProperty("testing.logging", "io.spbx.webby.url.impl.HandlerBinder=DEBUG");
             settings.setProperty("url.static.files.prefix", "/foo/");
             settings.setProperty("url.static.files.dynamic.lookup", dynamicLookup);
         }).initHandler();

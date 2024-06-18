@@ -2,8 +2,8 @@ package io.spbx.webby.auth.user;
 
 import io.spbx.orm.api.Connector;
 import io.spbx.orm.api.query.CreateTableQuery;
-import io.webby.testing.SqlDbTableTest;
-import io.webby.testing.TableIntTest;
+import io.spbx.webby.testing.SqlDbTableTest;
+import io.spbx.webby.testing.TableIntTest;
 import org.jetbrains.annotations.NotNull;
 
 import java.time.Instant;

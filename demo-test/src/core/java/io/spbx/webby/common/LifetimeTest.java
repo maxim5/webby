@@ -2,8 +2,8 @@ package io.spbx.webby.common;
 
 import com.google.common.collect.Lists;
 import io.spbx.webby.app.AppSettings;
-import io.spbx.webby.db.managed.BackgroundCacheCleaner;
 import io.spbx.webby.db.kv.KeyValueSettings;
+import io.spbx.webby.db.managed.BackgroundCacheCleaner;
 import io.spbx.webby.db.sql.ConnectionPool;
 import io.spbx.webby.db.sql.SqlSettings;
 import io.spbx.webby.db.sql.TableManager;
@@ -25,7 +25,7 @@ public class LifetimeTest {
     @Test
     public void dependency_order() throws Throwable {
         AppSettings settings = Testing.defaultAppSettings();
-        settings.setProperty("testing.logging", "io.webby.common.Lifetime.Definition=DEBUG");
+        settings.setProperty("testing.logging", "io.spbx.webby.common.Lifetime.Definition=DEBUG");
         settings.modelFilter().setPackagesOf(Testing.CORE_MODELS);
         settings.storageSettings()
             .enableKeyValue(KeyValueSettings.of(KeyValueSettings.DEFAULT_TYPE))

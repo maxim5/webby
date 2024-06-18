@@ -5,7 +5,7 @@ import io.spbx.orm.api.TableMeta;
 import io.spbx.webby.auth.session.SessionTable;
 import io.spbx.webby.auth.user.UserTable;
 import io.spbx.webby.db.model.BlobKvTable;
-import io.webby.demo.model.*;
+import io.spbx.webby.demo.model.*;
 import org.jetbrains.annotations.NotNull;
 import org.junit.jupiter.api.Test;
 

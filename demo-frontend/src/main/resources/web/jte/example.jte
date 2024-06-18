@@ -1,4 +1,4 @@
-@import io.webby.demo.templates.JteExample.Page
+@import io.spbx.webby.demo.templates.JteExample.Page
 
 @param Page page
 

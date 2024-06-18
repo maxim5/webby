@@ -11,7 +11,7 @@ import io.spbx.orm.api.query.Where;
 import io.spbx.webby.db.StorageType;
 import io.spbx.webby.db.count.vote.*;
 import io.spbx.webby.db.sql.SqlSettings;
-import io.webby.demo.model.UserRateModelTable;
+import io.spbx.webby.demo.model.UserRateModelTable;
 import org.openjdk.jmh.annotations.*;
 import org.openjdk.jmh.infra.BenchmarkParams;
 import org.openjdk.jmh.runner.Runner;
@@ -24,7 +24,7 @@ import java.util.Random;
 import java.util.concurrent.TimeUnit;
 import java.util.stream.IntStream;
 
-import static io.webby.demo.model.UserRateModelTable.OwnColumn.*;
+import static io.spbx.webby.demo.model.UserRateModelTable.OwnColumn.*;
 
 @Fork(value = 1, warmups = 0)
 @BenchmarkMode(Mode.Throughput)

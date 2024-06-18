@@ -3,8 +3,8 @@ package io.spbx.webby.db.model;
 import com.google.common.primitives.Ints;
 import io.spbx.orm.api.Connector;
 import io.spbx.orm.api.query.CreateTableQuery;
-import io.webby.testing.PrimaryKeyTableTest;
-import io.webby.testing.SqlDbTableTest;
+import io.spbx.webby.testing.PrimaryKeyTableTest;
+import io.spbx.webby.testing.SqlDbTableTest;
 import org.jetbrains.annotations.NotNull;
 import org.junit.jupiter.api.Test;
 

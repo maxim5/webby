@@ -6,7 +6,7 @@ import com.google.common.eventbus.EventBus;
 import com.google.errorprone.annotations.CheckReturnValue;
 import io.spbx.webby.db.StorageType;
 import io.spbx.webby.db.kv.javamap.JavaMapDbFactory;
-import io.webby.demo.model.UserRateModelTable;
+import io.spbx.webby.demo.model.UserRateModelTable;
 import io.spbx.webby.testing.ext.SqlDbExtension;
 import io.spbx.util.base.OneOf;
 import org.jetbrains.annotations.NotNull;
@@ -16,8 +16,8 @@ import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.EnumSource;
 
 import static com.google.common.truth.Truth.assertThat;
-import static io.webby.demo.model.UserRateModelTable.OwnColumn.content_id;
-import static io.webby.demo.model.UserRateModelTable.OwnColumn.user_id;
+import static io.spbx.webby.demo.model.UserRateModelTable.OwnColumn.content_id;
+import static io.spbx.webby.demo.model.UserRateModelTable.OwnColumn.user_id;
 import static io.spbx.util.testing.AssertHppc.assertMap;
 import static io.spbx.util.testing.TestingHppc.newIntMap;
 

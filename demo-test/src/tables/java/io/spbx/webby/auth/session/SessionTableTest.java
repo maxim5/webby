@@ -3,13 +3,11 @@ package io.spbx.webby.auth.session;
 import io.spbx.orm.api.Connector;
 import io.spbx.orm.api.ForeignInt;
 import io.spbx.orm.api.query.CreateTableQuery;
-import io.spbx.webby.auth.session.DefaultSession;
-import io.spbx.webby.auth.session.SessionTable;
 import io.spbx.webby.auth.user.DefaultUser;
 import io.spbx.webby.auth.user.UserAccess;
 import io.spbx.webby.auth.user.UserTable;
-import io.webby.testing.SqlDbTableTest;
-import io.webby.testing.TableLongTest;
+import io.spbx.webby.testing.SqlDbTableTest;
+import io.spbx.webby.testing.TableLongTest;
 import org.jetbrains.annotations.NotNull;
 
 import java.time.Instant;

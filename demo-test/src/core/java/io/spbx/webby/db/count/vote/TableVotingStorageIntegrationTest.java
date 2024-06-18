@@ -7,8 +7,8 @@ import com.carrotsearch.hppc.IntObjectMap;
 import com.google.errorprone.annotations.CanIgnoreReturnValue;
 import io.spbx.orm.api.query.Shortcuts;
 import io.spbx.orm.api.query.Where;
-import io.webby.demo.model.UserRateModel;
-import io.webby.demo.model.UserRateModelTable;
+import io.spbx.webby.demo.model.UserRateModel;
+import io.spbx.webby.demo.model.UserRateModelTable;
 import io.spbx.webby.testing.ext.FluentLoggingCapture;
 import io.spbx.webby.testing.ext.SqlDbExtension;
 import org.jetbrains.annotations.NotNull;
@@ -25,7 +25,7 @@ import static io.spbx.util.testing.AssertHppc.assertArray;
 import static io.spbx.util.testing.AssertHppc.assertMap;
 import static io.spbx.util.testing.TestingHppc.newIntObjectMap;
 import static io.spbx.util.testing.TestingPrimitives.ints;
-import static io.webby.demo.model.UserRateModelTable.OwnColumn.*;
+import static io.spbx.webby.demo.model.UserRateModelTable.OwnColumn.*;
 
 @Tag("slow") @Tag("integration") @Tag("sql")
 public class TableVotingStorageIntegrationTest {

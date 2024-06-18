@@ -31,7 +31,7 @@ import javax.annotation.concurrent.ThreadSafe;
  * </ul>
  *
  * @see ManagedPersistent
- * @see io.webby.db.count.vote.VotingCounter
+ * @see io.spbx.webby.db.count.vote.VotingCounter
  */
 @ThreadSafe
 public interface IntCounter extends ManagedPersistent {
