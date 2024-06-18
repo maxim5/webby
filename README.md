@@ -1,6 +1,6 @@
 <h1 align="center">
   <br>
-  <img src="https://raw.githubusercontent.com/maxim5/webby/readme/.docs/spider-lucas.png" alt="Webby" width="600">
+  <img src="https://raw.githubusercontent.com/maxim5/webby/master/.docs/spider-lucas.png" alt="Webby" width="600">
   <br>
   Webby
   <br>
