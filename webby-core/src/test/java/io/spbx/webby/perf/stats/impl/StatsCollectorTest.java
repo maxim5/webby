@@ -1,7 +1,5 @@
 package io.spbx.webby.perf.stats.impl;
 
-import io.spbx.webby.perf.stats.impl.StatsCollector;
-import io.spbx.webby.perf.stats.impl.StatsRecord;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import org.junit.jupiter.api.Test;

@@ -1,13 +1,13 @@
 package io.spbx.webby.auth.user;
 
 import com.google.inject.Injector;
+import io.spbx.webby.auth.BaseCoreIntegrationTest;
 import io.spbx.webby.auth.session.SessionTable;
 import io.spbx.webby.netty.request.DefaultHttpRequestEx;
 import io.spbx.webby.testing.HttpRequestBuilder;
 import io.spbx.webby.testing.SessionBuilder;
 import io.spbx.webby.testing.UserBuilder;
 import io.spbx.webby.testing.ext.SqlDbExtension;
-import io.spbx.webby.auth.BaseCoreIntegrationTest;
 import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.extension.RegisterExtension;
 import org.junit.jupiter.params.ParameterizedTest;

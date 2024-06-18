@@ -15,7 +15,6 @@ import io.spbx.webby.url.annotate.FrameType;
 import io.spbx.webby.url.annotate.Marshal;
 import io.spbx.webby.ws.context.ClientFrameType;
 import io.spbx.webby.ws.context.EmptyContext;
-import io.spbx.webby.ws.convert.AcceptorsAwareFrameConverter;
 import io.spbx.webby.ws.convert.AcceptorsAwareFrameConverter.ConcreteFrameType;
 import io.spbx.webby.ws.convert.InFrameConverter.ParsedFrameConsumer;
 import io.spbx.webby.ws.impl.Acceptor;
@@ -29,12 +28,12 @@ import java.util.List;
 import java.util.concurrent.atomic.AtomicInteger;
 
 import static com.google.common.truth.Truth.assertThat;
+import static io.spbx.util.testing.TestingBytes.asByteBuf;
+import static io.spbx.util.testing.TestingBytes.asString;
 import static io.spbx.webby.testing.AssertFrame.assertBinaryFrame;
 import static io.spbx.webby.testing.AssertFrame.assertTextFrame;
 import static io.spbx.webby.testing.FakeFrames.binary;
 import static io.spbx.webby.testing.FakeFrames.text;
-import static io.spbx.util.testing.TestingBytes.asByteBuf;
-import static io.spbx.util.testing.TestingBytes.asString;
 import static io.spbx.webby.ws.convert.AcceptorsAwareFrameConverter.resolveFrameType;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 

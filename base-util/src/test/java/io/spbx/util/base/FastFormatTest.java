@@ -1,6 +1,5 @@
 package io.spbx.util.base;
 
-import io.spbx.util.base.FastFormat;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import org.junit.jupiter.api.Test;

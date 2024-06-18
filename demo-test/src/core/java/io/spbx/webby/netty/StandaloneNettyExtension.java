@@ -1,10 +1,10 @@
 package io.spbx.webby.netty;
 
 import com.google.common.flogger.FluentLogger;
+import io.spbx.util.testing.TestingBasics;
 import io.spbx.webby.Webby;
 import io.spbx.webby.app.AppSettings;
 import io.spbx.webby.netty.dispatch.NettyBootstrap;
-import io.spbx.util.testing.TestingBasics;
 import io.spbx.webby.testing.TestingModules;
 import org.jetbrains.annotations.NotNull;
 import org.junit.jupiter.api.extension.AfterAllCallback;

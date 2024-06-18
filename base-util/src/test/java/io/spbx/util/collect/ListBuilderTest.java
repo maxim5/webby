@@ -1,6 +1,5 @@
 package io.spbx.util.collect;
 
-import io.spbx.util.collect.ListBuilder;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import org.junit.jupiter.api.Test;

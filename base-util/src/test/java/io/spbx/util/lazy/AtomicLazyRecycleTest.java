@@ -1,6 +1,5 @@
 package io.spbx.util.lazy;
 
-import io.spbx.util.lazy.AtomicLazyRecycle;
 import org.junit.jupiter.api.Test;
 
 import static com.google.common.truth.Truth.assertThat;

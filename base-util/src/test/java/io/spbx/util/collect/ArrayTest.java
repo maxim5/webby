@@ -10,8 +10,8 @@ import java.util.Arrays;
 import java.util.List;
 
 import static com.google.common.truth.Truth.assertThat;
-import static io.spbx.util.testing.AssertBasics.assertPrivateFieldClass;
 import static io.spbx.util.base.EasyCast.castAny;
+import static io.spbx.util.testing.AssertBasics.assertPrivateFieldClass;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 
 @Tag("fast")

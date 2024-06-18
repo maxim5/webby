@@ -3,8 +3,8 @@ package io.spbx.webby.demo.websockets.lowlevel;
 import com.google.common.flogger.FluentLogger;
 import io.netty.handler.codec.http.websocketx.BinaryWebSocketFrame;
 import io.netty.handler.codec.http.websocketx.TextWebSocketFrame;
-import io.spbx.webby.url.annotate.Serve;
 import io.spbx.util.netty.EasyByteBuf;
+import io.spbx.webby.url.annotate.Serve;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.ArrayList;

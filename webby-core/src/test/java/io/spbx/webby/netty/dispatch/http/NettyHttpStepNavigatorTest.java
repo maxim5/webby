@@ -2,7 +2,6 @@ package io.spbx.webby.netty.dispatch.http;
 
 import com.google.inject.Injector;
 import io.spbx.webby.app.AppSettings;
-import io.spbx.webby.netty.dispatch.http.NettyHttpStepNavigator;
 import io.spbx.webby.testing.Testing;
 import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;

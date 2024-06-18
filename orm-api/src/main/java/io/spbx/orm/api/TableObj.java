@@ -4,7 +4,10 @@ import com.google.errorprone.annotations.CanIgnoreReturnValue;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
-import java.util.*;
+import java.util.Collection;
+import java.util.HashMap;
+import java.util.Map;
+import java.util.Optional;
 
 import static java.util.Objects.requireNonNull;
 

@@ -1,7 +1,5 @@
 package io.spbx.util.base;
 
-import io.spbx.util.base.CharArray;
-import io.spbx.util.base.MutableCharArray;
 import org.junit.jupiter.api.Test;
 
 import static com.google.common.truth.Truth.assertThat;

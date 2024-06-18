@@ -1,10 +1,10 @@
 package io.spbx.webby.demo.websockets.protocol;
 
 import com.google.inject.Inject;
-import io.spbx.webby.url.annotate.Serve;
-import io.spbx.webby.url.annotate.WebsocketProtocol;
 import io.spbx.webby.demo.websockets.protocol.ExampleMessages.StringMessage;
 import io.spbx.webby.netty.ws.sender.MessageSender;
+import io.spbx.webby.url.annotate.Serve;
+import io.spbx.webby.url.annotate.WebsocketProtocol;
 import io.spbx.webby.ws.context.RequestContext;
 import org.jetbrains.annotations.NotNull;
 

@@ -1,7 +1,6 @@
 package io.spbx.util.collect;
 
 import com.google.common.collect.ImmutableMap;
-import io.spbx.util.collect.EasyMaps;
 import org.junit.jupiter.api.Test;
 
 import static com.google.common.truth.Truth.assertThat;

@@ -1,7 +1,6 @@
 package io.spbx.webby.netty.intercept.attr;
 
 import io.spbx.webby.app.AppConfigException;
-import io.spbx.webby.netty.intercept.attr.AttributesValidator;
 import io.spbx.webby.testing.ext.FluentLoggingCapture;
 import org.apache.logging.log4j.Level;
 import org.junit.jupiter.api.Test;

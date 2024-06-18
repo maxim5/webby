@@ -4,7 +4,8 @@ import io.spbx.util.base.Unchecked;
 
 import java.util.Iterator;
 
-import static io.spbx.util.base.Unchecked.*;
+import static io.spbx.util.base.Unchecked.Runnables;
+import static io.spbx.util.base.Unchecked.Suppliers;
 
 /**
  * Same as {@link Iterator} but allows to throw check exceptions during iteration.

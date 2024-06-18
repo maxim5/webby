@@ -4,10 +4,10 @@ import com.carrotsearch.hppc.*;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
+import static io.spbx.util.base.EasyCast.castAny;
 import static io.spbx.util.testing.TestingBasics.array;
 import static io.spbx.util.testing.TestingPrimitives.ints;
 import static io.spbx.util.testing.TestingPrimitives.longs;
-import static io.spbx.util.base.EasyCast.castAny;
 import static java.util.Objects.requireNonNull;
 
 public class TestingHppc {

@@ -1,9 +1,9 @@
 package io.spbx.webby.demo.websockets.protocol;
 
-import io.spbx.webby.url.annotate.Serve;
-import io.spbx.webby.url.annotate.WebsocketProtocol;
 import io.spbx.webby.demo.websockets.protocol.ExampleMessages.PrimitiveMessage;
 import io.spbx.webby.demo.websockets.protocol.ExampleMessages.SimpleMessage;
+import io.spbx.webby.url.annotate.Serve;
+import io.spbx.webby.url.annotate.WebsocketProtocol;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.ArrayList;

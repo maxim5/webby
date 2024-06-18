@@ -1,13 +1,13 @@
 package io.spbx.webby.auth.session;
 
 import io.netty.handler.codec.http.cookie.DefaultCookie;
+import io.spbx.webby.auth.BaseCoreIntegrationTest;
 import io.spbx.webby.auth.user.DefaultUser;
 import io.spbx.webby.auth.user.UserTable;
 import io.spbx.webby.netty.request.HttpRequestEx;
 import io.spbx.webby.testing.HttpRequestBuilder;
 import io.spbx.webby.testing.UserBuilder;
 import io.spbx.webby.testing.ext.SqlDbExtension;
-import io.spbx.webby.auth.BaseCoreIntegrationTest;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.extension.RegisterExtension;

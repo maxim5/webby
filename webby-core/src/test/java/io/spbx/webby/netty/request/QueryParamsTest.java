@@ -1,7 +1,6 @@
 package io.spbx.webby.netty.request;
 
 import io.netty.handler.codec.http.QueryStringDecoder;
-import io.spbx.webby.netty.request.QueryParams;
 import io.spbx.webby.url.convert.Constraint;
 import io.spbx.webby.url.convert.ConversionError;
 import io.spbx.webby.url.convert.IntConverter;

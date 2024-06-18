@@ -9,9 +9,9 @@ import org.jetbrains.annotations.Nullable;
 
 import java.util.Map;
 
-import static io.spbx.util.testing.TestingHppc.*;
 import static io.spbx.util.hppc.EasyHppc.toArrayList;
 import static io.spbx.util.hppc.EasyHppc.toJavaMap;
+import static io.spbx.util.testing.TestingHppc.*;
 
 public class AssertHppc {
     @CheckReturnValue

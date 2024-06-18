@@ -79,7 +79,7 @@ public final class EasyLogs {
     }
 
     private static @Nullable Object callStatic(@NotNull String className, @NotNull String methodName, Object ... args) {
-        Method method = EasyMembers.findMethod(EasyClasspath.classForNameOrNull(className), EasyMembers.Scope.DECLARED,
+        Method method = findMethod(EasyClasspath.classForNameOrNull(className), EasyMembers.Scope.DECLARED,
                                    m -> m.getName().equals(methodName) && m.getParameterCount() == args.length);
         if (method != null) {
             try {

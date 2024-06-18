@@ -1,6 +1,5 @@
 package io.spbx.util.time;
 
-import io.spbx.util.time.NanoTimestamp;
 import org.jetbrains.annotations.NotNull;
 import org.junit.jupiter.api.Test;
 

@@ -1,6 +1,5 @@
 package io.spbx.webby.netty.response;
 
-import io.spbx.webby.netty.response.ContentTypeDetector;
 import io.spbx.webby.testing.Testing;
 import org.junit.jupiter.api.Test;
 

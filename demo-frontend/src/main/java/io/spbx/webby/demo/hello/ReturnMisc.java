@@ -5,7 +5,9 @@ import io.spbx.webby.url.annotate.GET;
 import io.spbx.webby.url.annotate.Serve;
 import org.jetbrains.annotations.NotNull;
 
-import java.io.*;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.Reader;
 
 @Serve
 public class ReturnMisc {

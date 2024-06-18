@@ -2,9 +2,9 @@ package io.spbx.webby.demo.hello;
 
 import io.netty.handler.codec.http.FullHttpRequest;
 import io.netty.handler.codec.http.HttpResponse;
+import io.spbx.util.testing.ext.HppcReflectionExtension;
 import io.spbx.webby.testing.BaseHttpIntegrationTest;
 import io.spbx.webby.testing.HttpRequestBuilder;
-import io.spbx.util.testing.ext.HppcReflectionExtension;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.RegisterExtension;
 

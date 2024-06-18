@@ -8,13 +8,13 @@ import com.google.common.eventbus.EventBus;
 import com.google.common.primitives.Ints;
 import com.google.errorprone.annotations.CheckReturnValue;
 import com.google.mu.util.stream.BiStream;
+import io.spbx.util.hppc.EasyHppc;
 import io.spbx.webby.db.DbReadyEvent;
 import io.spbx.webby.db.StorageType;
 import io.spbx.webby.db.count.StoreChangedEvent;
 import io.spbx.webby.db.kv.javamap.JavaMapDbFactory;
 import io.spbx.webby.demo.model.UserRateModelTable;
 import io.spbx.webby.testing.ext.SqlDbExtension;
-import io.spbx.util.hppc.EasyHppc;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import org.junit.jupiter.api.Tag;
@@ -29,12 +29,12 @@ import java.util.Random;
 import java.util.function.BiConsumer;
 
 import static com.google.common.truth.Truth.assertThat;
-import static io.spbx.webby.db.count.vote.Vote.none;
-import static io.spbx.webby.db.count.vote.Vote.votes;
-import static io.spbx.webby.demo.model.UserRateModelTable.OwnColumn.*;
 import static io.spbx.util.testing.AssertHppc.assertMap;
 import static io.spbx.util.testing.TestingHppc.newIntMap;
 import static io.spbx.util.testing.TestingHppc.newIntObjectMap;
+import static io.spbx.webby.db.count.vote.Vote.none;
+import static io.spbx.webby.db.count.vote.Vote.votes;
+import static io.spbx.webby.demo.model.UserRateModelTable.OwnColumn.*;
 import static java.util.Objects.requireNonNull;
 
 @Tag("sql")

@@ -2,12 +2,12 @@ package io.spbx.webby.demo.templates;
 
 import com.samskivert.mustache.Mustache;
 import com.samskivert.mustache.Template;
+import io.spbx.util.base.Unchecked;
 import io.spbx.webby.demo.DevPaths;
 import io.spbx.webby.url.annotate.GET;
 import io.spbx.webby.url.annotate.Render;
 import io.spbx.webby.url.annotate.Serve;
 import io.spbx.webby.url.annotate.View;
-import io.spbx.util.base.Unchecked;
 import org.jetbrains.annotations.NotNull;
 
 import java.io.FileNotFoundException;

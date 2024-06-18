@@ -1,9 +1,5 @@
 package io.spbx.webby.auth.user;
 
-import io.spbx.webby.auth.user.DefaultUser;
-import io.spbx.webby.auth.user.UserAccess;
-import io.spbx.webby.auth.user.UserData;
-import io.spbx.webby.auth.user.UserModel;
 import io.spbx.webby.testing.Mocking;
 import io.spbx.webby.testing.UserBuilder;
 import org.junit.jupiter.api.Test;

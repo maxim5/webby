@@ -1,12 +1,12 @@
 package io.spbx.webby.demo.templates;
 
 import com.google.common.base.Suppliers;
+import io.spbx.webby.demo.DevPaths;
 import io.spbx.webby.url.annotate.GET;
 import io.spbx.webby.url.annotate.Render;
 import io.spbx.webby.url.annotate.Serve;
 import io.spbx.webby.url.annotate.View;
 import io.spbx.webby.url.view.EasyRender;
-import io.spbx.webby.demo.DevPaths;
 import org.apache.velocity.Template;
 import org.apache.velocity.VelocityContext;
 import org.apache.velocity.app.VelocityEngine;

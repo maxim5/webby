@@ -2,7 +2,6 @@ package io.spbx.util.collect;
 
 import com.google.common.collect.Lists;
 import com.google.errorprone.annotations.CheckReturnValue;
-import io.spbx.util.collect.ImmutableArrayList;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import org.junit.jupiter.api.Test;

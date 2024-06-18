@@ -1,7 +1,5 @@
 package io.spbx.util.collect;
 
-import io.spbx.util.collect.RowListTabular;
-import io.spbx.util.collect.Tabular;
 import org.junit.jupiter.api.Test;
 
 import java.util.List;

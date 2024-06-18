@@ -1,6 +1,5 @@
 package io.spbx.orm.api;
 
-import io.spbx.orm.api.Foreign;
 import org.jetbrains.annotations.NotNull;
 import org.junit.jupiter.api.Test;
 

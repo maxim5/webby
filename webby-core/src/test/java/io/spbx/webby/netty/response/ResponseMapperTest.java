@@ -4,9 +4,8 @@ import io.netty.buffer.ByteBuf;
 import io.netty.buffer.Unpooled;
 import io.netty.handler.codec.http.HttpResponse;
 import io.spbx.util.base.CharArray;
-import io.spbx.webby.netty.response.ResponseMapper;
-import io.spbx.webby.testing.Testing;
 import io.spbx.util.testing.TestingBytes;
+import io.spbx.webby.testing.Testing;
 import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 
@@ -18,8 +17,8 @@ import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.function.Function;
 
 import static com.google.common.truth.Truth.assertThat;
-import static io.spbx.webby.testing.AssertResponse.streamContentOf;
 import static io.spbx.util.testing.TestingBytes.assertBytes;
+import static io.spbx.webby.testing.AssertResponse.streamContentOf;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertNull;
 

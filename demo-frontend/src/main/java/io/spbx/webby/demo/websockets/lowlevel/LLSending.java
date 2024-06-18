@@ -2,8 +2,8 @@ package io.spbx.webby.demo.websockets.lowlevel;
 
 import com.google.inject.Inject;
 import io.netty.handler.codec.http.websocketx.TextWebSocketFrame;
-import io.spbx.webby.url.annotate.Serve;
 import io.spbx.webby.netty.ws.sender.Sender;
+import io.spbx.webby.url.annotate.Serve;
 import org.jetbrains.annotations.NotNull;
 
 import static io.spbx.webby.netty.ws.sender.Sender.text;
