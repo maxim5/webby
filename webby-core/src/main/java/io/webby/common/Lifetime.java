@@ -2,7 +2,7 @@ package io.webby.common;
 
 import com.google.common.flogger.FluentLogger;
 import com.google.errorprone.annotations.CanIgnoreReturnValue;
-import io.webby.util.func.ThrowRunnable;
+import io.spbx.util.func.ThrowRunnable;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import org.jetbrains.annotations.VisibleForTesting;

@@ -4,7 +4,7 @@ import com.google.common.flogger.FluentLogger;
 import io.webby.Webby;
 import io.webby.app.AppSettings;
 import io.webby.netty.dispatch.NettyBootstrap;
-import io.webby.testing.TestingBasics;
+import io.spbx.util.testing.TestingBasics;
 import io.webby.testing.TestingModules;
 import org.jetbrains.annotations.NotNull;
 import org.junit.jupiter.api.extension.AfterAllCallback;

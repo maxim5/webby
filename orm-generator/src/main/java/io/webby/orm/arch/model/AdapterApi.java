@@ -3,9 +3,9 @@ package io.webby.orm.arch.model;
 import com.google.mu.util.stream.BiStream;
 import io.webby.orm.adapter.JdbcAdapt;
 import io.webby.orm.arch.util.Naming;
-import io.webby.util.base.EasyWrappers.MutableInt;
-import io.webby.util.base.OneOf;
-import io.webby.util.reflect.EasyAnnotations;
+import io.spbx.util.base.EasyWrappers.MutableInt;
+import io.spbx.util.base.OneOf;
+import io.spbx.util.reflect.EasyAnnotations;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import org.jetbrains.annotations.VisibleForTesting;
@@ -18,7 +18,7 @@ import java.util.List;
 import java.util.Optional;
 
 import static io.webby.orm.arch.InvalidSqlModelException.failIf;
-import static io.webby.util.reflect.EasyMembers.*;
+import static io.spbx.util.reflect.EasyMembers.*;
 
 public class AdapterApi implements ApiFormatter<AdapterApi.AdapterApiCallFormatter> {
     private static final String CREATE_INSTANCE = "createInstance";

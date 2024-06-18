@@ -6,7 +6,7 @@ import com.google.mu.util.stream.BiStream;
 import io.webby.db.managed.FlushMode;
 import io.webby.db.managed.HasCache;
 import io.webby.db.kv.KeyValueDb;
-import io.webby.util.collect.ListBuilder;
+import io.spbx.util.collect.ListBuilder;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import org.jetbrains.annotations.VisibleForTesting;

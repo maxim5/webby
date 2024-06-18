@@ -4,7 +4,7 @@ import io.webby.orm.api.BaseTable;
 import io.webby.orm.api.BridgeTable;
 import io.webby.testing.TestingTables.BridgeLeftIdSubject;
 import io.webby.testing.TestingTables.BridgeRightIdSubject;
-import io.webby.util.base.Pair;
+import io.spbx.util.base.Pair;
 import org.jetbrains.annotations.NotNull;
 import org.junit.jupiter.api.Test;
 

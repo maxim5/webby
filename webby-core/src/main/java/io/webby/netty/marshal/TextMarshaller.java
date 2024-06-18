@@ -1,11 +1,11 @@
 package io.webby.netty.marshal;
 
-import io.webby.util.func.Reversible;
+import io.spbx.util.func.Reversible;
 import org.jetbrains.annotations.NotNull;
 
 import java.io.*;
 
-import static io.webby.util.base.Unchecked.rethrow;
+import static io.spbx.util.base.Unchecked.rethrow;
 
 public interface TextMarshaller {
     void writeChars(@NotNull Writer writer, @NotNull Object instance) throws IOException;

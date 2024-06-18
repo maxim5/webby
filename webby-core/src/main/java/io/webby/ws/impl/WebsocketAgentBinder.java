@@ -47,7 +47,7 @@ import java.util.function.Function;
 import java.util.function.IntPredicate;
 import java.util.logging.Level;
 
-import static io.webby.util.base.EasyCast.castAny;
+import static io.spbx.util.base.EasyCast.castAny;
 import static io.webby.ws.WebsocketAgentConfigError.assure;
 import static io.webby.ws.WebsocketAgentConfigError.failIf;
 import static io.webby.ws.meta.FrameMetadata.MAX_ID_SIZE;

@@ -5,8 +5,8 @@ import io.webby.orm.api.BaseTable;
 import io.webby.orm.api.Engine;
 import io.webby.orm.api.TableMeta;
 import io.webby.orm.api.TableMeta.ColumnMeta;
-import io.webby.util.base.SimpleJoin;
-import io.webby.util.collect.EasyMaps;
+import io.spbx.util.base.SimpleJoin;
+import io.spbx.util.collect.EasyMaps;
 import org.jetbrains.annotations.NotNull;
 
 import java.sql.Date;

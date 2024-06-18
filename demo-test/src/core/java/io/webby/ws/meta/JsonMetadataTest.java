@@ -10,8 +10,8 @@ import org.junit.jupiter.params.provider.EnumSource;
 
 import static com.google.common.truth.Truth.assertThat;
 import static io.webby.testing.AssertJson.withJsonLibrary;
-import static io.webby.testing.TestingBytes.asByteBuf;
-import static io.webby.testing.TestingBytes.assertBytes;
+import static io.spbx.util.testing.TestingBytes.asByteBuf;
+import static io.spbx.util.testing.TestingBytes.assertBytes;
 import static io.webby.testing.ws.meta.AssertMeta.*;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 

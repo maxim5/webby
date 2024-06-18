@@ -2,7 +2,7 @@ package io.webby.db.codec;
 
 import io.webby.perf.stats.CodecStatsListener;
 import io.webby.perf.stats.Stat;
-import io.webby.util.base.EasyWrappers.MutableInt;
+import io.spbx.util.base.EasyWrappers.MutableInt;
 import org.jetbrains.annotations.NotNull;
 
 import java.io.IOException;

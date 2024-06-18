@@ -3,7 +3,7 @@ package io.webby.netty.response;
 import com.google.inject.Inject;
 import io.webby.common.InjectorHelper;
 import io.webby.netty.HttpConst;
-import io.webby.util.base.Unchecked;
+import io.spbx.util.base.Unchecked;
 import org.jetbrains.annotations.NotNull;
 
 import java.net.URLConnection;
@@ -11,7 +11,7 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.List;
 
-import static io.webby.util.base.EasyNulls.*;
+import static io.spbx.util.base.EasyNulls.*;
 
 public class ContentTypeDetector {
     private ContentTypeProvider contentTypeProvider;

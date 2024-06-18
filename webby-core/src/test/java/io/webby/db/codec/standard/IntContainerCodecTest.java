@@ -2,7 +2,7 @@ package io.webby.db.codec.standard;
 
 import com.carrotsearch.hppc.IntArrayList;
 import com.carrotsearch.hppc.IntHashSet;
-import io.webby.testing.ext.HppcBytecodeExtension;
+import io.spbx.util.testing.ext.HppcBytecodeExtension;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.RegisterExtension;
 

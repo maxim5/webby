@@ -2,7 +2,7 @@ package io.webby.url.impl;
 
 import io.netty.handler.codec.http.FullHttpRequest;
 import io.netty.handler.codec.http.HttpRequest;
-import io.webby.util.base.CharArray;
+import io.spbx.util.base.CharArray;
 import io.webby.netty.response.StaticServing;
 import io.webby.url.caller.Caller;
 import org.jetbrains.annotations.NotNull;

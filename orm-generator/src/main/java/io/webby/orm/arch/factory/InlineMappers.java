@@ -15,7 +15,7 @@ import java.util.concurrent.atomic.AtomicReference;
 import java.util.function.Function;
 import java.util.function.Predicate;
 
-import static io.webby.util.reflect.EasyGenerics.getGenericTypeArgumentsOfField;
+import static io.spbx.util.reflect.EasyGenerics.getGenericTypeArgumentsOfField;
 import static java.util.Objects.requireNonNull;
 
 class InlineMappers {

@@ -5,7 +5,7 @@ import com.carrotsearch.hppc.IntContainer;
 import io.webby.orm.api.QueryRunner;
 import io.webby.orm.api.query.Column;
 import io.webby.orm.api.query.Contextual;
-import io.webby.util.hppc.EasyHppc;
+import io.spbx.util.hppc.EasyHppc;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 

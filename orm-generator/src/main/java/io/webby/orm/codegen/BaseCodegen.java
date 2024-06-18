@@ -1,6 +1,6 @@
 package io.webby.orm.codegen;
 
-import io.webby.util.io.UncheckedAppendable;
+import io.spbx.util.io.UncheckedAppendable;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.Map;

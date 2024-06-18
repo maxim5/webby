@@ -7,9 +7,9 @@ import io.netty.buffer.Unpooled;
 import io.netty.handler.codec.http.FullHttpResponse;
 import io.netty.handler.codec.http.HttpResponse;
 import io.netty.handler.codec.http.HttpResponseStatus;
-import io.webby.util.base.CharArray;
+import io.spbx.util.base.CharArray;
 import io.webby.app.Settings;
-import io.webby.util.base.Unchecked;
+import io.spbx.util.base.Unchecked;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
@@ -22,9 +22,9 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.function.Function;
 
-import static io.webby.util.base.EasyCast.castAny;
-import static io.webby.util.io.EasyIo.Close.closeRethrow;
-import static io.webby.util.base.Unchecked.Functions.rethrow;
+import static io.spbx.util.base.EasyCast.castAny;
+import static io.spbx.util.io.EasyIo.Close.closeRethrow;
+import static io.spbx.util.base.Unchecked.Functions.rethrow;
 
 public class ResponseMapper {
     private final Map<Class<?>, Function<?, HttpResponse>> classMap = new HashMap<>();

@@ -13,9 +13,9 @@ import io.webby.orm.api.query.Args;
 import io.webby.orm.api.query.DataDefinitionQuery;
 import io.webby.orm.api.query.SelectQuery;
 import io.webby.orm.api.tx.InTransaction;
-import io.webby.util.func.ThrowConsumer;
-import io.webby.util.func.ThrowFunction;
-import io.webby.util.func.ThrowSupplier;
+import io.spbx.util.func.ThrowConsumer;
+import io.spbx.util.func.ThrowFunction;
+import io.spbx.util.func.ThrowSupplier;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 

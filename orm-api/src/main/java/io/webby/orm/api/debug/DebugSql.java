@@ -2,9 +2,9 @@ package io.webby.orm.api.debug;
 
 import com.google.common.collect.Lists;
 import io.webby.orm.api.ResultSetIterator;
-import io.webby.util.collect.ArrayTabular;
-import io.webby.util.collect.Tabular;
-import io.webby.util.collect.TabularFormatter;
+import io.spbx.util.collect.ArrayTabular;
+import io.spbx.util.collect.Tabular;
+import io.spbx.util.collect.TabularFormatter;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 

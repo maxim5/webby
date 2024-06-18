@@ -4,7 +4,7 @@ import com.google.inject.Inject;
 import io.webby.app.ClassFilter;
 import io.webby.app.Settings;
 import io.webby.orm.codegen.DefaultModelAdaptersLocator;
-import io.webby.util.classpath.ClasspathScanner;
+import io.spbx.util.classpath.ClasspathScanner;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.Set;

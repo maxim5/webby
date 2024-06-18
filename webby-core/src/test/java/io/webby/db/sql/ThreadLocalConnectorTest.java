@@ -1,7 +1,7 @@
 package io.webby.db.sql;
 
 import com.google.common.flogger.FluentLogger;
-import io.webby.testing.MoreTruth;
+import io.spbx.util.testing.MoreTruth;
 import io.webby.testing.db.sql.FakeConnectionPool;
 import io.webby.testing.db.sql.SimpleConnection;
 import org.jetbrains.annotations.NotNull;

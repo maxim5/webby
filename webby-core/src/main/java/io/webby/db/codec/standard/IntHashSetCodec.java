@@ -1,7 +1,7 @@
 package io.webby.db.codec.standard;
 
 import com.carrotsearch.hppc.IntHashSet;
-import io.webby.util.func.ThrowIntSupplier;
+import io.spbx.util.func.ThrowIntSupplier;
 import org.jetbrains.annotations.NotNull;
 
 import java.io.IOException;

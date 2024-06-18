@@ -6,8 +6,8 @@ import io.webby.routekit.SimpleQueryParser;
 import io.webby.testing.Testing;
 import io.webby.url.annotate.GET;
 import io.webby.url.caller.Caller;
-import io.webby.util.base.Pair;
-import io.webby.util.reflect.EasyMembers.Scope;
+import io.spbx.util.base.Pair;
+import io.spbx.util.reflect.EasyMembers.Scope;
 import org.jetbrains.annotations.NotNull;
 import org.junit.jupiter.api.Test;
 
@@ -19,7 +19,7 @@ import java.util.Set;
 import java.util.function.BiPredicate;
 
 import static com.google.common.truth.Truth.assertThat;
-import static io.webby.util.reflect.EasyMembers.findMethod;
+import static io.spbx.util.reflect.EasyMembers.findMethod;
 import static java.util.Objects.requireNonNull;
 
 public class HandlerBinderTest {

@@ -7,9 +7,9 @@ import com.google.inject.Inject;
 import io.webby.app.Settings;
 import io.webby.common.Lifetime;
 import io.webby.orm.api.*;
-import io.webby.util.classpath.ClasspathScanner;
-import io.webby.util.lazy.AtomicLazyRecycle;
-import io.webby.util.lazy.LazyRecycle;
+import io.spbx.util.classpath.ClasspathScanner;
+import io.spbx.util.lazy.AtomicLazyRecycle;
+import io.spbx.util.lazy.LazyRecycle;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import org.jetbrains.annotations.VisibleForTesting;
@@ -19,7 +19,7 @@ import java.util.Set;
 import java.util.function.Function;
 import java.util.logging.Level;
 
-import static io.webby.util.base.EasyCast.castAny;
+import static io.spbx.util.base.EasyCast.castAny;
 import static java.util.Objects.requireNonNull;
 
 public class TableManager implements HasEngine {

@@ -6,10 +6,10 @@ import io.webby.orm.api.ForeignLong;
 import io.webby.orm.api.ForeignObj;
 import io.webby.orm.api.annotate.Sql;
 import io.webby.orm.arch.model.TableArch;
-import io.webby.util.base.EasyWrappers.MutableBool;
-import io.webby.util.base.EasyWrappers.MutableInt;
-import io.webby.util.base.EasyWrappers.MutableLong;
-import io.webby.util.base.EasyWrappers.OptionalBool;
+import io.spbx.util.base.EasyWrappers.MutableBool;
+import io.spbx.util.base.EasyWrappers.MutableInt;
+import io.spbx.util.base.EasyWrappers.MutableLong;
+import io.spbx.util.base.EasyWrappers.OptionalBool;
 import org.jetbrains.annotations.Nullable;
 import org.junit.jupiter.api.Test;
 

@@ -20,7 +20,7 @@ import java.util.Collection;
 import java.util.List;
 
 import static io.webby.db.codec.standard.Codecs.*;
-import static io.webby.util.base.EasyCast.castAny;
+import static io.spbx.util.base.EasyCast.castAny;
 
 public class KeyEventStoreFactory {
     @Inject private Settings settings;

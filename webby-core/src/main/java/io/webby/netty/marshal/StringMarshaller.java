@@ -10,7 +10,7 @@ import java.io.Reader;
 import java.io.Writer;
 import java.nio.charset.Charset;
 
-import static io.webby.util.base.EasyCast.castAny;
+import static io.spbx.util.base.EasyCast.castAny;
 
 public record StringMarshaller(@NotNull Charset charset) implements Marshaller {
     @Inject

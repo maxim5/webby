@@ -6,8 +6,8 @@ import com.j256.simplemagic.ContentInfo;
 import com.j256.simplemagic.ContentInfoUtil;
 import eu.medsea.mimeutil.MimeType;
 import eu.medsea.mimeutil.MimeUtil2;
-import io.webby.util.classpath.EasyClasspath;
-import io.webby.util.func.ThrowFunction;
+import io.spbx.util.classpath.EasyClasspath;
+import io.spbx.util.func.ThrowFunction;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 

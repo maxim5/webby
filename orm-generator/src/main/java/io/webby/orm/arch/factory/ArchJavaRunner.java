@@ -8,7 +8,7 @@ import io.webby.orm.codegen.DefaultModelAdaptersLocator;
 import io.webby.orm.codegen.ModelAdapterCodegen;
 import io.webby.orm.codegen.ModelAdaptersLocator;
 import io.webby.orm.codegen.ModelTableCodegen;
-import io.webby.util.time.TimeIt;
+import io.spbx.util.time.TimeIt;
 import org.jetbrains.annotations.NotNull;
 
 import java.io.File;

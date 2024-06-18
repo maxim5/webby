@@ -4,7 +4,7 @@ import com.google.common.flogger.FluentLogger;
 import io.webby.perf.stats.RenderingStatsListener;
 import io.webby.perf.stats.Stat;
 import io.webby.url.HandlerConfigError;
-import io.webby.util.func.ThrowConsumer;
+import io.spbx.util.func.ThrowConsumer;
 import org.jetbrains.annotations.NotNull;
 
 import java.io.OutputStream;

@@ -4,6 +4,7 @@ import io.netty.buffer.Unpooled;
 import io.netty.handler.codec.http.websocketx.BinaryWebSocketFrame;
 import io.netty.handler.codec.http.websocketx.TextWebSocketFrame;
 import io.netty.handler.codec.http.websocketx.WebSocketFrame;
+import io.spbx.util.testing.TestingBytes;
 import io.webby.netty.ws.errors.ClientDeniedException;
 import org.jetbrains.annotations.NotNull;
 import org.junit.jupiter.api.function.Executable;

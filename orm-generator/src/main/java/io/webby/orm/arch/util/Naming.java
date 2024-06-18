@@ -1,7 +1,7 @@
 package io.webby.orm.arch.util;
 
 import com.google.common.base.CaseFormat;
-import io.webby.util.base.EasyStrings;
+import io.spbx.util.base.EasyStrings;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.VisibleForTesting;
 

@@ -1,7 +1,7 @@
 package io.webby.benchmarks.jmh;
 
 import com.google.common.base.Strings;
-import io.webby.util.base.FastFormat;
+import io.spbx.util.base.FastFormat;
 import org.openjdk.jmh.annotations.*;
 import org.openjdk.jmh.runner.Runner;
 import org.openjdk.jmh.runner.RunnerException;

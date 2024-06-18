@@ -7,7 +7,7 @@ import io.webby.orm.adapter.JdbcSingleValueAdapter;
 import io.webby.orm.api.ResultSetIterator;
 import io.webby.orm.arch.model.*;
 import io.webby.orm.arch.util.Naming;
-import io.webby.util.collect.EasyMaps;
+import io.spbx.util.collect.EasyMaps;
 import org.jetbrains.annotations.NotNull;
 
 import java.sql.ResultSet;

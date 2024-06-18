@@ -7,8 +7,8 @@ import io.netty.handler.codec.http.HttpResponse;
 import io.webby.app.Settings;
 import io.webby.netty.HttpConst;
 import io.webby.perf.stats.Stat;
-import io.webby.util.base.Pair;
-import io.webby.util.lazy.LazyBoolean;
+import io.spbx.util.base.Pair;
+import io.spbx.util.lazy.LazyBoolean;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.VisibleForTesting;
 

@@ -11,8 +11,8 @@ import io.netty.handler.stream.ChunkedStream;
 import io.webby.app.Settings;
 import io.webby.netty.HttpConst;
 import io.webby.netty.errors.*;
-import io.webby.util.io.EasyFiles;
-import io.webby.util.netty.EasyByteBuf;
+import io.spbx.util.io.EasyFiles;
+import io.spbx.util.netty.EasyByteBuf;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 

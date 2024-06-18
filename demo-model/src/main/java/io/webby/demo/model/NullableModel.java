@@ -1,6 +1,6 @@
 package io.webby.demo.model;
 
-import io.webby.util.base.EasyNulls;
+import io.spbx.util.base.EasyNulls;
 
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;

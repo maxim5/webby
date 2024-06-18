@@ -10,11 +10,12 @@ import io.netty.handler.codec.http.websocketx.BinaryWebSocketFrame;
 import io.netty.handler.codec.http.websocketx.TextWebSocketFrame;
 import io.netty.handler.codec.http.websocketx.WebSocketFrame;
 import io.netty.handler.codec.http.websocketx.WebSocketServerProtocolHandler.HandshakeComplete;
+import io.spbx.util.testing.TestingBytes;
 import io.webby.app.AppSettings;
 import io.webby.netty.dispatch.ws.NettyWebsocketHandler;
 import io.webby.url.annotate.FrameType;
 import io.webby.url.annotate.Marshal;
-import io.webby.util.base.Unchecked;
+import io.spbx.util.base.Unchecked;
 import io.webby.ws.context.ClientInfo;
 import io.webby.ws.impl.AgentEndpoint;
 import io.webby.ws.impl.WebsocketRouter;
@@ -27,7 +28,7 @@ import java.util.ArrayDeque;
 import java.util.Queue;
 import java.util.function.Consumer;
 
-import static io.webby.util.base.EasyCast.castAny;
+import static io.spbx.util.base.EasyCast.castAny;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 
 @Tag("integration")

@@ -1,7 +1,7 @@
 package io.webby.db.kv.chronicle;
 
 import io.webby.db.codec.Codec;
-import io.webby.util.base.Unchecked;
+import io.spbx.util.base.Unchecked;
 import net.openhft.chronicle.bytes.Bytes;
 import net.openhft.chronicle.hash.serialization.BytesReader;
 import net.openhft.chronicle.hash.serialization.BytesWriter;

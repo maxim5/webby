@@ -9,7 +9,7 @@ import org.jetbrains.annotations.Nullable;
 
 import java.util.concurrent.atomic.AtomicReference;
 
-import static io.webby.util.base.EasyCast.castAny;
+import static io.spbx.util.base.EasyCast.castAny;
 
 public class TestingModules {
     public static final Module PERSISTENT_DB_CLEANER_MODULE = singleton(TestingPersistentDbTableCleaner.class);

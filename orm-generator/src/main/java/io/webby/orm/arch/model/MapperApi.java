@@ -2,7 +2,7 @@ package io.webby.orm.arch.model;
 
 import io.webby.orm.arch.InvalidSqlModelException;
 import io.webby.orm.arch.util.Naming;
-import io.webby.util.func.Reversible;
+import io.spbx.util.func.Reversible;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
@@ -11,9 +11,9 @@ import java.lang.reflect.Type;
 import java.util.Optional;
 
 import static io.webby.orm.arch.InvalidSqlModelException.failIf;
-import static io.webby.util.reflect.EasyGenerics.getGenericTypeArgumentsOfInterface;
-import static io.webby.util.reflect.EasyGenerics.isWildcardType;
-import static io.webby.util.reflect.EasyMembers.*;
+import static io.spbx.util.reflect.EasyGenerics.getGenericTypeArgumentsOfInterface;
+import static io.spbx.util.reflect.EasyGenerics.isWildcardType;
+import static io.spbx.util.reflect.EasyMembers.*;
 import static java.util.Objects.requireNonNull;
 
 public class MapperApi implements ApiFormatter<MapperApi.MapperCallFormatter> {

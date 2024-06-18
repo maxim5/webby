@@ -8,8 +8,8 @@ import io.webby.testing.SqlDbTableTest;
 import org.jetbrains.annotations.NotNull;
 import org.junit.jupiter.api.Test;
 
-import static io.webby.testing.TestingBasics.array;
-import static io.webby.testing.TestingBytes.assertBytes;
+import static io.spbx.util.testing.TestingBasics.array;
+import static io.spbx.util.testing.TestingBytes.assertBytes;
 import static org.junit.jupiter.api.Assumptions.assumeTrue;
 
 public class BlobKvTableTest

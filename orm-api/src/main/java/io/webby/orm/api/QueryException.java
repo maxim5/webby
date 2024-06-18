@@ -3,7 +3,7 @@ package io.webby.orm.api;
 import com.carrotsearch.hppc.IntContainer;
 import com.carrotsearch.hppc.LongContainer;
 import io.webby.orm.api.query.Args;
-import io.webby.util.hppc.EasyHppc;
+import io.spbx.util.hppc.EasyHppc;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
@@ -12,7 +12,7 @@ import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
 
-import static io.webby.util.collect.EasyIterables.asList;
+import static io.spbx.util.collect.EasyIterables.asList;
 
 /**
  * An exception for errors during SQL query preparation, execution or result processing.

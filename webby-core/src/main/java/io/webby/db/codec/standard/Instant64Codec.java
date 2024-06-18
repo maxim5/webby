@@ -2,7 +2,7 @@ package io.webby.db.codec.standard;
 
 import io.webby.db.codec.Codec;
 import io.webby.db.codec.CodecSize;
-import io.webby.util.time.NanoTimestamp;
+import io.spbx.util.time.NanoTimestamp;
 import org.jetbrains.annotations.NotNull;
 
 import java.io.IOException;

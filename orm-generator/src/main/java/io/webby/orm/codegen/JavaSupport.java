@@ -1,6 +1,6 @@
 package io.webby.orm.codegen;
 
-import io.webby.util.guava.SourceCodeEscapers;
+import io.spbx.util.guava.SourceCodeEscapers;
 import org.jetbrains.annotations.NotNull;
 
 class JavaSupport {

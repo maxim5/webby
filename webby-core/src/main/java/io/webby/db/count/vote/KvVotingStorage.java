@@ -7,7 +7,7 @@ import com.carrotsearch.hppc.procedures.IntObjectProcedure;
 import io.webby.db.StorageType;
 import io.webby.db.count.StoreId;
 import io.webby.db.kv.KeyValueDb;
-import io.webby.util.hppc.EasyHppc;
+import io.spbx.util.hppc.EasyHppc;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 

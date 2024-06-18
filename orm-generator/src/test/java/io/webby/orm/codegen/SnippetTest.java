@@ -9,7 +9,7 @@ import org.junit.jupiter.api.Test;
 import java.util.List;
 import java.util.stream.Stream;
 
-import static io.webby.testing.TestingBasics.array;
+import static io.spbx.util.testing.TestingBasics.array;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 
 

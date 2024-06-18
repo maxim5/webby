@@ -3,7 +3,7 @@ package io.webby.ws.impl;
 import com.google.inject.Inject;
 import io.webby.app.Settings;
 import io.webby.url.annotate.Serve;
-import io.webby.util.classpath.ClasspathScanner;
+import io.spbx.util.classpath.ClasspathScanner;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.Set;

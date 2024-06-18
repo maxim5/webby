@@ -1,6 +1,6 @@
 package io.webby.routekit;
 
-import io.webby.util.base.CharArray;
+import io.spbx.util.base.CharArray;
 
 /**
  * Represents a unit of the URL that can be matched with the input.

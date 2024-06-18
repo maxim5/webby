@@ -2,6 +2,7 @@ package io.webby.testing;
 
 import com.google.inject.Injector;
 import io.netty.channel.embedded.EmbeddedChannel;
+import io.spbx.util.testing.TestingBytes;
 import io.webby.app.AppSettings;
 import io.webby.demo.DevPaths;
 import org.jetbrains.annotations.NotNull;

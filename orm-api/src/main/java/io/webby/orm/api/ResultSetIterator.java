@@ -1,9 +1,9 @@
 package io.webby.orm.api;
 
 import com.google.errorprone.annotations.MustBeClosed;
-import io.webby.util.base.Unchecked;
-import io.webby.util.base.Pair;
-import io.webby.util.func.ThrowFunction;
+import io.spbx.util.base.Unchecked;
+import io.spbx.util.base.Pair;
+import io.spbx.util.func.ThrowFunction;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
@@ -14,7 +14,7 @@ import java.sql.Statement;
 import java.util.Iterator;
 import java.util.concurrent.atomic.AtomicBoolean;
 
-import static io.webby.util.base.EasyCast.castAny;
+import static io.spbx.util.base.EasyCast.castAny;
 
 /**
  * An adapter that allows to iterate over the JDBC {@link ResultSet} via {@link Iterator}.

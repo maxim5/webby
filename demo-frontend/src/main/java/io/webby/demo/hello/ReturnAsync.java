@@ -12,7 +12,7 @@ import java.io.OutputStream;
 import java.util.concurrent.*;
 import java.util.function.Consumer;
 
-import static io.webby.util.base.Unchecked.Consumers.rethrow;
+import static io.spbx.util.base.Unchecked.Consumers.rethrow;
 
 @Singleton
 public class ReturnAsync {

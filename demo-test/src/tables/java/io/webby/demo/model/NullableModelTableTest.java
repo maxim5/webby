@@ -7,7 +7,7 @@ import io.webby.testing.PrimaryKeyTableTest;
 import io.webby.testing.SqlDbTableTest;
 import org.jetbrains.annotations.NotNull;
 
-import static io.webby.testing.TestingBasics.array;
+import static io.spbx.util.testing.TestingBasics.array;
 
 public class NullableModelTableTest
         extends SqlDbTableTest<NullableModel, NullableModelTable>

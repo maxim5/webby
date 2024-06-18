@@ -3,7 +3,7 @@ package io.webby.netty.request;
 import com.google.common.collect.ImmutableMap;
 import com.google.mu.util.stream.BiStream;
 import io.netty.handler.codec.http.QueryStringDecoder;
-import io.webby.util.base.CharArray;
+import io.spbx.util.base.CharArray;
 import io.webby.url.convert.Constraint;
 import io.webby.url.convert.ConversionError;
 import org.jetbrains.annotations.NotNull;
@@ -14,7 +14,7 @@ import java.util.Map;
 import java.util.Set;
 import java.util.stream.Stream;
 
-import static io.webby.util.base.EasyCast.castAny;
+import static io.spbx.util.base.EasyCast.castAny;
 import static java.util.Objects.requireNonNull;
 
 public class QueryParams {

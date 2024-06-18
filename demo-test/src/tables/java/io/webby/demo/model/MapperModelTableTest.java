@@ -5,7 +5,7 @@ import io.webby.orm.api.Connector;
 import io.webby.orm.api.query.CreateTableQuery;
 import io.webby.testing.SqlDbTableTest;
 import io.webby.testing.TableIntTest;
-import io.webby.util.base.Pair;
+import io.spbx.util.base.Pair;
 import org.jetbrains.annotations.NotNull;
 
 import java.time.Instant;

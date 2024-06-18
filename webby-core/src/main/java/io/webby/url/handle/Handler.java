@@ -1,6 +1,6 @@
 package io.webby.url.handle;
 
-import io.webby.util.base.CharArray;
+import io.spbx.util.base.CharArray;
 import io.webby.netty.request.HttpRequestEx;
 import org.jetbrains.annotations.NotNull;
 

@@ -16,7 +16,7 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.function.Supplier;
 
-import static io.webby.util.base.EasyCast.castAny;
+import static io.spbx.util.base.EasyCast.castAny;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 
 public class AssertSql {

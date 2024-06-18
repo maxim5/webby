@@ -7,7 +7,7 @@ import com.google.common.flogger.FluentLogger;
 import com.google.inject.Inject;
 import io.webby.app.Settings;
 import io.webby.common.InjectorHelper;
-import io.webby.util.func.ThrowConsumer;
+import io.spbx.util.func.ThrowConsumer;
 import org.jetbrains.annotations.NotNull;
 
 import java.io.File;

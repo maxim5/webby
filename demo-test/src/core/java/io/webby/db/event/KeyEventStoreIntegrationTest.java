@@ -16,7 +16,7 @@ import io.webby.testing.Testing;
 import io.webby.testing.TestingProps;
 import io.webby.testing.ext.EmbeddedRedisExtension;
 import io.webby.testing.ext.SqlDbExtension;
-import io.webby.testing.ext.TempDirectoryExtension;
+import io.spbx.util.testing.ext.TempDirectoryExtension;
 import org.jetbrains.annotations.NotNull;
 import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
@@ -29,7 +29,7 @@ import java.util.Arrays;
 import java.util.Collections;
 
 import static com.google.common.truth.Truth.assertThat;
-import static io.webby.testing.TestingBasics.array;
+import static io.spbx.util.testing.TestingBasics.array;
 
 @Tag("slow") @Tag("integration") @Tag("sql")
 public class KeyEventStoreIntegrationTest {

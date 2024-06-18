@@ -7,8 +7,8 @@ import io.netty.handler.codec.http.DefaultHttpRequest;
 import io.netty.handler.codec.http.FullHttpRequest;
 import io.netty.handler.codec.http.HttpRequest;
 import io.netty.util.AsciiString;
-import io.webby.util.base.CharArray;
-import io.webby.util.base.MutableCharArray;
+import io.spbx.util.base.CharArray;
+import io.spbx.util.base.MutableCharArray;
 import io.webby.netty.request.HttpRequestEx;
 import io.webby.testing.HttpRequestBuilder;
 import io.webby.testing.Testing;
@@ -35,7 +35,7 @@ import java.util.function.IntSupplier;
 import java.util.function.LongFunction;
 
 import static com.google.common.truth.Truth.assertThat;
-import static io.webby.util.collect.EasyMaps.asMap;
+import static io.spbx.util.collect.EasyMaps.asMap;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 
 @SuppressWarnings("unused")

@@ -1,6 +1,6 @@
 package io.webby.demo.hello;
 
-import io.webby.util.base.CharArray;
+import io.spbx.util.base.CharArray;
 import io.webby.url.annotate.GET;
 
 public class AcceptStrings {

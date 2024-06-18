@@ -28,10 +28,10 @@ import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 import static io.webby.testing.AssertJson.assertJsonValue;
-import static io.webby.testing.TestingBytes.*;
-import static io.webby.util.base.EasyCast.castAny;
-import static io.webby.util.base.Unchecked.Consumers;
-import static io.webby.util.base.Unchecked.Suppliers;
+import static io.spbx.util.testing.TestingBytes.*;
+import static io.spbx.util.base.EasyCast.castAny;
+import static io.spbx.util.base.Unchecked.Consumers;
+import static io.spbx.util.base.Unchecked.Suppliers;
 import static org.junit.jupiter.api.Assertions.fail;
 
 public class AssertResponse {

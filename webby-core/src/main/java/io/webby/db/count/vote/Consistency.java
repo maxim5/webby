@@ -6,8 +6,8 @@ import com.carrotsearch.hppc.IntObjectMap;
 import com.carrotsearch.hppc.cursors.IntCursor;
 import com.carrotsearch.hppc.cursors.IntObjectCursor;
 import com.google.common.flogger.FluentLogger;
-import io.webby.util.base.EasyNulls;
-import io.webby.util.hppc.EasyHppc;
+import io.spbx.util.base.EasyNulls;
+import io.spbx.util.hppc.EasyHppc;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 

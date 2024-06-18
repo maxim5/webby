@@ -3,7 +3,7 @@ package io.webby.perf.stats.impl;
 import com.google.gson.Gson;
 import io.webby.perf.stats.Stat;
 import io.webby.testing.Testing;
-import io.webby.testing.ext.HppcReflectionExtension;
+import io.spbx.util.testing.ext.HppcReflectionExtension;
 import org.jetbrains.annotations.NotNull;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.RegisterExtension;

@@ -10,7 +10,7 @@ import io.pebbletemplates.pebble.template.PebbleTemplate;
 import io.webby.app.Settings;
 import io.webby.common.InjectorHelper;
 import io.webby.url.HandlerConfigError;
-import io.webby.util.func.ThrowConsumer;
+import io.spbx.util.func.ThrowConsumer;
 import org.jetbrains.annotations.NotNull;
 
 import java.io.OutputStream;
@@ -21,7 +21,7 @@ import java.util.List;
 import java.util.logging.Level;
 
 import static io.webby.url.view.EasyRender.castMapOrFail;
-import static io.webby.util.base.EasyCast.castAny;
+import static io.spbx.util.base.EasyCast.castAny;
 
 public class PebbleRenderer implements Renderer<PebbleTemplate> {
     private static final FluentLogger log = FluentLogger.forEnclosingClass();

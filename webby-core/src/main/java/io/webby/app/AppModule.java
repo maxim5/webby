@@ -3,7 +3,7 @@ package io.webby.app;
 import com.google.common.eventbus.EventBus;
 import com.google.inject.AbstractModule;
 import io.webby.common.Lifetime;
-import io.webby.util.classpath.ClasspathScanner;
+import io.spbx.util.classpath.ClasspathScanner;
 import org.jetbrains.annotations.NotNull;
 
 import java.nio.charset.Charset;

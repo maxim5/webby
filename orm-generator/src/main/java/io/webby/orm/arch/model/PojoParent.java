@@ -1,9 +1,9 @@
 package io.webby.orm.arch.model;
 
 import com.google.errorprone.annotations.Immutable;
-import io.webby.util.base.OneOf;
-import io.webby.util.lazy.AtomicLazyInit;
-import io.webby.util.lazy.LazyInit;
+import io.spbx.util.base.OneOf;
+import io.spbx.util.lazy.AtomicLazyInit;
+import io.spbx.util.lazy.LazyInit;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.Optional;

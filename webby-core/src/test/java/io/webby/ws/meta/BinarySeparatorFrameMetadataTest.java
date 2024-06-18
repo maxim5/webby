@@ -4,7 +4,7 @@ import com.google.common.primitives.Longs;
 import org.junit.jupiter.api.Test;
 
 import static com.google.common.truth.Truth.assertThat;
-import static io.webby.testing.TestingBytes.*;
+import static io.spbx.util.testing.TestingBytes.*;
 import static io.webby.testing.ws.meta.AssertMeta.assertNotParsed;
 
 public class BinarySeparatorFrameMetadataTest {

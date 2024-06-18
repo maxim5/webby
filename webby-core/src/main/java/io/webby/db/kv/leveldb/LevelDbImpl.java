@@ -6,7 +6,7 @@ import com.google.mu.util.stream.BiStream;
 import io.webby.db.codec.Codec;
 import io.webby.db.kv.KeyValueDb;
 import io.webby.db.kv.impl.ByteArrayDb;
-import io.webby.util.base.Unchecked;
+import io.spbx.util.base.Unchecked;
 import org.iq80.leveldb.DB;
 import org.iq80.leveldb.DBIterator;
 import org.iq80.leveldb.WriteBatch;
@@ -21,8 +21,8 @@ import java.util.function.Function;
 import java.util.function.Predicate;
 import java.util.stream.Stream;
 
-import static io.webby.util.base.EasyWrappers.MutableInt;
-import static io.webby.util.io.EasyIo.Close.closeQuietly;
+import static io.spbx.util.base.EasyWrappers.MutableInt;
+import static io.spbx.util.io.EasyIo.Close.closeQuietly;
 
 public class LevelDbImpl<K, V> extends ByteArrayDb<K, V> implements KeyValueDb<K, V> {
     private final DB db;

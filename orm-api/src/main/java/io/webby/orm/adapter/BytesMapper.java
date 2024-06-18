@@ -1,12 +1,12 @@
 package io.webby.orm.adapter;
 
-import io.webby.util.base.Unchecked;
-import io.webby.util.func.Reversible;
+import io.spbx.util.base.Unchecked;
+import io.spbx.util.func.Reversible;
 import org.jetbrains.annotations.NotNull;
 
 import java.io.*;
 
-import static io.webby.util.base.EasyCast.castAny;
+import static io.spbx.util.base.EasyCast.castAny;
 
 public class BytesMapper<T> implements Reversible<byte[], T> {
     public static <T> @NotNull BytesMapper<T> newInstance() {

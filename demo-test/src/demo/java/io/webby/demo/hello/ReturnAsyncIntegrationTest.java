@@ -1,7 +1,7 @@
 package io.webby.demo.hello;
 
 import io.webby.testing.BaseHttpIntegrationTest;
-import io.webby.testing.TestingBasics;
+import io.spbx.util.testing.TestingBasics;
 import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
 

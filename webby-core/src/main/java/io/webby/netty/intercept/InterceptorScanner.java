@@ -7,7 +7,7 @@ import io.webby.app.ClassFilter;
 import io.webby.app.Packages;
 import io.webby.app.Settings;
 import io.webby.netty.intercept.attr.AttributeOwner;
-import io.webby.util.classpath.ClasspathScanner;
+import io.spbx.util.classpath.ClasspathScanner;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.Arrays;
@@ -15,7 +15,7 @@ import java.util.Comparator;
 import java.util.List;
 import java.util.stream.Stream;
 
-import static io.webby.util.base.EasyCast.castAny;
+import static io.spbx.util.base.EasyCast.castAny;
 
 public class InterceptorScanner {
     private static final ClassFilter DEFAULTS_FILTER = ClassFilter.of(

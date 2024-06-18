@@ -16,7 +16,7 @@ import java.nio.charset.Charset;
 import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
 
-import static io.webby.util.base.Unchecked.rethrow;
+import static io.spbx.util.base.Unchecked.rethrow;
 import static java.util.Objects.requireNonNull;
 
 public record DslJsonMarshaller(@NotNull DslJson<Object> json, @NotNull Charset charset) implements Json, Marshaller {

@@ -3,7 +3,7 @@ package io.webby.orm.api.debug;
 import com.google.errorprone.annotations.CanIgnoreReturnValue;
 import io.webby.orm.api.*;
 import io.webby.orm.api.query.SelectQuery;
-import io.webby.util.base.Unchecked;
+import io.spbx.util.base.Unchecked;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 

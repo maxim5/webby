@@ -1,5 +1,7 @@
 package io.webby.orm.api.annotate;
 
+import io.spbx.util.func.Reversible;
+
 import java.lang.annotation.ElementType;
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
@@ -42,7 +44,7 @@ public @interface Sql {
 
     /**
      * Indicates the mapper that should be used to convert this field.
-     * The mapper class must implement a {@link io.webby.util.func.Reversible} interface with
+     * The mapper class must implement a {@link Reversible} interface with
      * one argument matching the field class and the other argument matching a JDBC supported type.
      *
      * @see io.webby.orm.arch.model.JdbcType

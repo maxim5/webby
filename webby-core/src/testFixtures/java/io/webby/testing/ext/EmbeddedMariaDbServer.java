@@ -6,16 +6,16 @@ import ch.vorburger.mariadb4j.DBConfiguration;
 import ch.vorburger.mariadb4j.DBConfigurationBuilder;
 import com.google.common.flogger.FluentLogger;
 import io.webby.db.sql.SqlSettings;
-import io.webby.util.time.TimeIt;
-import io.webby.util.base.Unchecked;
-import io.webby.util.lazy.AtomicLazyInit;
-import io.webby.util.lazy.LazyInit;
+import io.spbx.util.time.TimeIt;
+import io.spbx.util.base.Unchecked;
+import io.spbx.util.lazy.AtomicLazyInit;
+import io.spbx.util.lazy.LazyInit;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.logging.Level;
 
-import static io.webby.util.base.EasyPrimitives.requirePositive;
+import static io.spbx.util.base.EasyPrimitives.requirePositive;
 import static java.util.Objects.requireNonNull;
 
 public class EmbeddedMariaDbServer implements EmbeddedDb {

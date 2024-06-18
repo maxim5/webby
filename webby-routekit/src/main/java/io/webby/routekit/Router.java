@@ -1,7 +1,7 @@
 package io.webby.routekit;
 
-import io.webby.util.base.CharArray;
-import io.webby.util.base.MutableCharArray;
+import io.spbx.util.base.CharArray;
+import io.spbx.util.base.MutableCharArray;
 
 import java.util.*;
 import java.util.logging.Level;

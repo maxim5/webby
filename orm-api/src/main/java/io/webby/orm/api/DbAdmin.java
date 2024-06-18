@@ -4,7 +4,7 @@ import com.google.common.flogger.FluentLogger;
 import com.google.common.flogger.LazyArgs;
 import com.google.errorprone.annotations.CanIgnoreReturnValue;
 import io.webby.orm.api.query.*;
-import io.webby.util.base.Unchecked;
+import io.spbx.util.base.Unchecked;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 

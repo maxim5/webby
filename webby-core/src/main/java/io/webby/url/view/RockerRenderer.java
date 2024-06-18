@@ -11,7 +11,7 @@ import com.fizzed.rocker.runtime.StringBuilderOutput;
 import com.google.inject.Inject;
 import io.webby.app.Settings;
 import io.webby.url.HandlerConfigError;
-import io.webby.util.func.ThrowConsumer;
+import io.spbx.util.func.ThrowConsumer;
 import org.jetbrains.annotations.NotNull;
 
 import java.io.OutputStream;

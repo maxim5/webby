@@ -14,7 +14,7 @@ import io.webby.db.count.StoreChangedEvent;
 import io.webby.db.kv.javamap.JavaMapDbFactory;
 import io.webby.demo.model.UserRateModelTable;
 import io.webby.testing.ext.SqlDbExtension;
-import io.webby.util.hppc.EasyHppc;
+import io.spbx.util.hppc.EasyHppc;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import org.junit.jupiter.api.Tag;
@@ -32,9 +32,9 @@ import static com.google.common.truth.Truth.assertThat;
 import static io.webby.db.count.vote.Vote.none;
 import static io.webby.db.count.vote.Vote.votes;
 import static io.webby.demo.model.UserRateModelTable.OwnColumn.*;
-import static io.webby.testing.AssertHppc.assertMap;
-import static io.webby.testing.TestingHppc.newIntMap;
-import static io.webby.testing.TestingHppc.newIntObjectMap;
+import static io.spbx.util.testing.AssertHppc.assertMap;
+import static io.spbx.util.testing.TestingHppc.newIntMap;
+import static io.spbx.util.testing.TestingHppc.newIntObjectMap;
 import static java.util.Objects.requireNonNull;
 
 @Tag("sql")

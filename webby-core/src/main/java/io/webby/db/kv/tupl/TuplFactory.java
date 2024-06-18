@@ -3,9 +3,9 @@ package io.webby.db.kv.tupl;
 import io.webby.db.codec.Codec;
 import io.webby.db.kv.DbOptions;
 import io.webby.db.kv.impl.BaseKeyValueFactory;
-import io.webby.util.base.Unchecked;
-import io.webby.util.lazy.AtomicCacheCompute;
-import io.webby.util.lazy.CacheCompute;
+import io.spbx.util.base.Unchecked;
+import io.spbx.util.lazy.AtomicCacheCompute;
+import io.spbx.util.lazy.CacheCompute;
 import org.cojen.tupl.*;
 import org.jetbrains.annotations.NotNull;
 
@@ -13,7 +13,7 @@ import java.io.IOException;
 import java.nio.file.Path;
 import java.util.concurrent.TimeUnit;
 
-import static io.webby.util.base.Unchecked.rethrow;
+import static io.spbx.util.base.Unchecked.rethrow;
 
 public class TuplFactory extends BaseKeyValueFactory {
     private final CacheCompute<Database> dbCache = AtomicCacheCompute.createEmpty();

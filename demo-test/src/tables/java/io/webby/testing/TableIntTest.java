@@ -14,9 +14,9 @@ import java.util.List;
 import java.util.Map;
 
 import static com.google.common.truth.Truth.assertThat;
-import static io.webby.testing.AssertHppc.assertArray;
-import static io.webby.testing.AssertHppc.assertMap;
-import static io.webby.testing.TestingBasics.array;
+import static io.spbx.util.testing.AssertHppc.assertArray;
+import static io.spbx.util.testing.AssertHppc.assertMap;
+import static io.spbx.util.testing.TestingBasics.array;
 import static org.junit.jupiter.api.Assertions.assertNotEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 

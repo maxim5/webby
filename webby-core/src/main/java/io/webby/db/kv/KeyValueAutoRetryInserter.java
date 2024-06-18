@@ -1,7 +1,7 @@
 package io.webby.db.kv;
 
 import com.google.common.flogger.FluentLogger;
-import io.webby.util.base.Pair;
+import io.spbx.util.base.Pair;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.function.Function;

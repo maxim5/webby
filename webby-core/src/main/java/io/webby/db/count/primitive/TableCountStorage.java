@@ -8,7 +8,7 @@ import com.google.common.flogger.FluentLogger;
 import io.webby.orm.api.BaseTable;
 import io.webby.orm.api.entity.EntityIntData;
 import io.webby.orm.api.query.*;
-import io.webby.util.base.OneOf;
+import io.spbx.util.base.OneOf;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.List;

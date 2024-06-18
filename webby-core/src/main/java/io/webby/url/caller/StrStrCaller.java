@@ -1,7 +1,7 @@
 package io.webby.url.caller;
 
 import io.netty.handler.codec.http.FullHttpRequest;
-import io.webby.util.base.CharArray;
+import io.spbx.util.base.CharArray;
 import io.webby.url.convert.Constraint;
 import org.jetbrains.annotations.NotNull;
 

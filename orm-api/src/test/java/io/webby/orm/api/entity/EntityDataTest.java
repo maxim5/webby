@@ -17,7 +17,7 @@ import java.util.Map;
 
 import static io.webby.orm.api.query.Shortcuts.*;
 import static io.webby.testing.orm.MockingJdbc.assertThat;
-import static io.webby.util.collect.EasyMaps.asMap;
+import static io.spbx.util.collect.EasyMaps.asMap;
 
 public class EntityDataTest {
     @ParameterizedTest

@@ -4,12 +4,12 @@ import com.google.common.eventbus.EventBus;
 import com.google.common.eventbus.Subscribe;
 import com.google.common.flogger.FluentLogger;
 import com.google.inject.Inject;
-import io.webby.util.classpath.ClassNamePredicate;
-import io.webby.util.classpath.ClassPredicate;
-import io.webby.util.classpath.ClasspathScanner;
-import io.webby.util.classpath.GuavaClasspathScanner;
-import io.webby.util.lazy.AtomicLazyRecycle;
-import io.webby.util.lazy.LazyRecycle;
+import io.spbx.util.classpath.ClassNamePredicate;
+import io.spbx.util.classpath.ClassPredicate;
+import io.spbx.util.classpath.ClasspathScanner;
+import io.spbx.util.classpath.GuavaClasspathScanner;
+import io.spbx.util.lazy.AtomicLazyRecycle;
+import io.spbx.util.lazy.LazyRecycle;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.VisibleForTesting;
 

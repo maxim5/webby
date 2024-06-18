@@ -6,7 +6,7 @@ import io.webby.orm.api.TableInt;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
-import static io.webby.util.base.EasyCast.castAny;
+import static io.spbx.util.base.EasyCast.castAny;
 
 public class SqlUserStore implements UserStore {
     protected final TableInt<UserModel> table;

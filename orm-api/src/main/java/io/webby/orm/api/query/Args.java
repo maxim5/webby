@@ -8,10 +8,10 @@ import com.google.common.collect.ImmutableMap;
 import com.google.common.flogger.FluentLogger;
 import com.google.errorprone.annotations.Immutable;
 import io.webby.orm.api.QueryRunner;
-import io.webby.util.base.EasyNulls;
-import io.webby.util.collect.ImmutableArrayList;
-import io.webby.util.collect.ListBuilder;
-import io.webby.util.hppc.EasyHppc;
+import io.spbx.util.base.EasyNulls;
+import io.spbx.util.collect.ImmutableArrayList;
+import io.spbx.util.collect.ListBuilder;
+import io.spbx.util.hppc.EasyHppc;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
@@ -22,7 +22,7 @@ import java.util.logging.Level;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
-import static io.webby.util.collect.ImmutableArrayList.toImmutableArrayList;
+import static io.spbx.util.collect.ImmutableArrayList.toImmutableArrayList;
 
 /**
  * Holds the ordered list of arguments to be applied to JDBC queries. The list corresponds to all <code>"?"</code>

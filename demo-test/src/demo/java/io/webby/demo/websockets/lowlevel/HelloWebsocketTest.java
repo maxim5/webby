@@ -8,7 +8,7 @@ import java.util.Queue;
 
 import static com.google.common.truth.Truth.assertThat;
 import static io.webby.testing.AssertFrame.assertFrames;
-import static io.webby.testing.TestingBytes.asByteBuf;
+import static io.spbx.util.testing.TestingBytes.asByteBuf;
 
 public class HelloWebsocketTest extends BaseWebsocketIntegrationTest {
     private final HelloWebsocket agent = testSetup(HelloWebsocket.class).initAgent();

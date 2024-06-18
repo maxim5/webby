@@ -15,7 +15,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 import static com.google.common.truth.Truth.assertThat;
-import static io.webby.testing.TestingBasics.array;
+import static io.spbx.util.testing.TestingBasics.array;
 
 public class StringModelTableTest extends SqlDbTableTest<StringModel, StringModelTable>
         implements PrimaryKeyTableTest<String, StringModel, StringModelTable>,

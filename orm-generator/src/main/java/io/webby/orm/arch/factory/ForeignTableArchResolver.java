@@ -8,7 +8,7 @@ import io.webby.orm.arch.model.JdbcType;
 import io.webby.orm.arch.model.TableArch;
 import io.webby.orm.arch.util.AnnotationsAnalyzer;
 import io.webby.orm.arch.util.JavaClassAnalyzer;
-import io.webby.util.base.Pair;
+import io.spbx.util.base.Pair;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
@@ -18,7 +18,7 @@ import java.util.Optional;
 
 import static io.webby.orm.arch.InvalidSqlModelException.assure;
 import static io.webby.orm.arch.InvalidSqlModelException.failIf;
-import static io.webby.util.reflect.EasyGenerics.getGenericTypeArgumentsOfField;
+import static io.spbx.util.reflect.EasyGenerics.getGenericTypeArgumentsOfField;
 import static java.util.Objects.requireNonNull;
 
 class ForeignTableArchResolver {

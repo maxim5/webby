@@ -32,8 +32,8 @@ import static io.webby.testing.AssertFrame.assertBinaryFrame;
 import static io.webby.testing.AssertFrame.assertTextFrame;
 import static io.webby.testing.FakeFrames.binary;
 import static io.webby.testing.FakeFrames.text;
-import static io.webby.testing.TestingBytes.asByteBuf;
-import static io.webby.testing.TestingBytes.asString;
+import static io.spbx.util.testing.TestingBytes.asByteBuf;
+import static io.spbx.util.testing.TestingBytes.asString;
 import static io.webby.ws.convert.AcceptorsAwareFrameConverter.resolveFrameType;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 

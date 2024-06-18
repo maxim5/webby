@@ -7,7 +7,7 @@ import com.linkedin.paldb.impl.StorageReader;
 import io.webby.db.codec.Codec;
 import io.webby.db.kv.KeyValueDb;
 import io.webby.db.kv.impl.ByteArrayDb;
-import io.webby.util.base.Unchecked;
+import io.spbx.util.base.Unchecked;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
@@ -24,7 +24,7 @@ import java.util.function.BiConsumer;
 import java.util.stream.Collectors;
 
 import static io.webby.db.kv.impl.KeyValueCommons.streamOf;
-import static io.webby.util.base.EasyCast.castAny;
+import static io.spbx.util.base.EasyCast.castAny;
 
 public class PalDbImpl<K, V> extends ByteArrayDb<K, V> implements KeyValueDb<K, V> {
     private final String path;

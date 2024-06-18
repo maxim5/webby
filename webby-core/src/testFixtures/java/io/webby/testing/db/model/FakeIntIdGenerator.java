@@ -2,7 +2,7 @@ package io.webby.testing.db.model;
 
 import com.carrotsearch.hppc.IntContainer;
 import io.webby.db.model.IntIdGenerator;
-import io.webby.util.hppc.EasyHppc;
+import io.spbx.util.hppc.EasyHppc;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.Iterator;

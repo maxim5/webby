@@ -5,11 +5,11 @@ import com.google.mu.util.stream.BiStream;
 import io.webby.db.codec.Codec;
 import io.webby.db.kv.KeyValueDb;
 import io.webby.db.kv.impl.ByteArrayDb;
-import io.webby.util.collect.EasyIterables;
-import io.webby.util.base.EasyWrappers.MutableBool;
-import io.webby.util.base.Unchecked.Consumers;
-import io.webby.util.func.ThrowConsumer;
-import io.webby.util.func.ThrowFunction;
+import io.spbx.util.collect.EasyIterables;
+import io.spbx.util.base.EasyWrappers.MutableBool;
+import io.spbx.util.base.Unchecked.Consumers;
+import io.spbx.util.func.ThrowConsumer;
+import io.spbx.util.func.ThrowFunction;
 import org.cojen.tupl.*;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
@@ -20,9 +20,9 @@ import java.util.function.BiConsumer;
 import java.util.function.Predicate;
 import java.util.stream.Stream;
 
-import static io.webby.util.base.Unchecked.Runnables.runRethrow;
-import static io.webby.util.base.Unchecked.Suppliers.runRethrow;
-import static io.webby.util.base.Unchecked.rethrow;
+import static io.spbx.util.base.Unchecked.Runnables.runRethrow;
+import static io.spbx.util.base.Unchecked.Suppliers.runRethrow;
+import static io.spbx.util.base.Unchecked.rethrow;
 
 public class TuplDb<K, V> extends ByteArrayDb<K, V> implements KeyValueDb<K, V> {
     private final Index index;

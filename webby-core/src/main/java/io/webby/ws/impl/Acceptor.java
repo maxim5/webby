@@ -11,7 +11,7 @@ import org.jetbrains.annotations.Nullable;
 import java.lang.reflect.Method;
 import java.util.logging.Level;
 
-import static io.webby.util.base.Unchecked.rethrow;
+import static io.spbx.util.base.Unchecked.rethrow;
 
 public record Acceptor(@NotNull ByteBuf id, @NotNull String version,
                        @NotNull Class<?> type, @NotNull Method method,

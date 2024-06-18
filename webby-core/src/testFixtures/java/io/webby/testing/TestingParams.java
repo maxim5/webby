@@ -6,7 +6,7 @@ import org.jetbrains.annotations.Nullable;
 
 import java.util.Arrays;
 
-import static io.webby.testing.TestingBytes.CHARSET;
+import static io.spbx.util.testing.TestingBytes.CHARSET;
 import static java.util.Objects.requireNonNull;
 
 public class TestingParams {

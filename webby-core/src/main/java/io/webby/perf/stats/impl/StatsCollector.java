@@ -9,7 +9,7 @@ import com.google.common.base.Stopwatch;
 import com.google.errorprone.annotations.CanIgnoreReturnValue;
 import io.webby.db.model.IntIdGenerator;
 import io.webby.perf.stats.Stat;
-import io.webby.util.hppc.EasyHppc;
+import io.spbx.util.hppc.EasyHppc;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 

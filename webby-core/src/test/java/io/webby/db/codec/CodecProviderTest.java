@@ -7,7 +7,7 @@ import io.webby.auth.user.DefaultUser;
 import io.webby.testing.SessionBuilder;
 import io.webby.testing.Testing;
 import io.webby.testing.UserBuilder;
-import io.webby.testing.ext.HppcBytecodeExtension;
+import io.spbx.util.testing.ext.HppcBytecodeExtension;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.RegisterExtension;
 

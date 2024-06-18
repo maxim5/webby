@@ -15,7 +15,7 @@ import java.util.Arrays;
 import java.util.List;
 
 import static com.google.common.truth.Truth.assertThat;
-import static io.webby.testing.MoreTruth.assertThat;
+import static io.spbx.util.testing.MoreTruth.assertThat;
 
 @Tag("sql")
 public abstract class SqlDbTableTest<E, T extends BaseTable<E>> implements BaseTableTest<E, T> {

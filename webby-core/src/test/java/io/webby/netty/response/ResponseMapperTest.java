@@ -3,9 +3,9 @@ package io.webby.netty.response;
 import io.netty.buffer.ByteBuf;
 import io.netty.buffer.Unpooled;
 import io.netty.handler.codec.http.HttpResponse;
-import io.webby.util.base.CharArray;
+import io.spbx.util.base.CharArray;
 import io.webby.testing.Testing;
-import io.webby.testing.TestingBytes;
+import io.spbx.util.testing.TestingBytes;
 import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 
@@ -18,7 +18,7 @@ import java.util.function.Function;
 
 import static com.google.common.truth.Truth.assertThat;
 import static io.webby.testing.AssertResponse.streamContentOf;
-import static io.webby.testing.TestingBytes.assertBytes;
+import static io.spbx.util.testing.TestingBytes.assertBytes;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertNull;
 

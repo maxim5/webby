@@ -5,7 +5,7 @@ import com.google.common.truth.Truth;
 import com.google.errorprone.annotations.CanIgnoreReturnValue;
 import com.google.errorprone.annotations.CheckReturnValue;
 import com.mockrunner.mock.jdbc.*;
-import io.webby.util.base.Unchecked;
+import io.spbx.util.base.Unchecked;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
@@ -15,8 +15,8 @@ import java.time.LocalTime;
 import java.time.format.DateTimeFormatter;
 import java.util.List;
 
-import static io.webby.testing.AssertBasics.getPrivateFieldValue;
-import static io.webby.util.base.EasyCast.castAny;
+import static io.spbx.util.testing.AssertBasics.getPrivateFieldValue;
+import static io.spbx.util.base.EasyCast.castAny;
 
 public class MockingJdbc {
     public static @NotNull String uniqueId() {

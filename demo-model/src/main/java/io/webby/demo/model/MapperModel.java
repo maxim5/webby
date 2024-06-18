@@ -6,8 +6,8 @@ import io.webby.db.codec.standard.IntArrayListCodec;
 import io.webby.orm.adapter.BytesMapper;
 import io.webby.orm.api.annotate.Sql;
 import io.webby.orm.api.annotate.Sql.Via;
-import io.webby.util.base.Pair;
-import io.webby.util.func.Reversible;
+import io.spbx.util.base.Pair;
+import io.spbx.util.func.Reversible;
 import org.jetbrains.annotations.NotNull;
 
 import java.time.Instant;

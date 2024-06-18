@@ -2,7 +2,7 @@ package io.webby.orm.codegen;
 
 import com.google.common.primitives.Primitives;
 import io.webby.orm.arch.model.TableField;
-import io.webby.util.func.ObjIntFunction;
+import io.spbx.util.func.ObjIntFunction;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.ArrayList;

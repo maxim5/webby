@@ -2,7 +2,7 @@ package io.webby.db.kv.impl;
 
 import com.google.common.collect.Streams;
 import io.webby.db.kv.KeyValueDb;
-import io.webby.util.func.Reversible;
+import io.spbx.util.func.Reversible;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 

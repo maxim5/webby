@@ -4,8 +4,8 @@ import com.carrotsearch.hppc.IntArrayList;
 import com.carrotsearch.hppc.LongArrayList;
 import com.google.errorprone.annotations.CanIgnoreReturnValue;
 import com.mockrunner.mock.jdbc.MockPreparedStatement;
-import io.webby.testing.TestingBasics;
-import io.webby.util.collect.ImmutableArrayList;
+import io.spbx.util.testing.TestingBasics;
+import io.spbx.util.collect.ImmutableArrayList;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import org.junit.jupiter.api.Test;
@@ -16,11 +16,11 @@ import java.util.Map;
 import java.util.stream.Collectors;
 
 import static com.google.common.truth.Truth.assertThat;
-import static io.webby.testing.AssertBasics.assertPrivateFieldClass;
-import static io.webby.testing.AssertBasics.getPrivateFieldValue;
+import static io.spbx.util.testing.AssertBasics.assertPrivateFieldClass;
+import static io.spbx.util.testing.AssertBasics.getPrivateFieldValue;
 import static io.webby.testing.orm.MockingJdbc.assertThat;
 import static io.webby.testing.orm.MockingJdbc.mockPreparedStatement;
-import static io.webby.util.base.Unchecked.Suppliers.runRethrow;
+import static io.spbx.util.base.Unchecked.Suppliers.runRethrow;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 
 public class ArgsTest {

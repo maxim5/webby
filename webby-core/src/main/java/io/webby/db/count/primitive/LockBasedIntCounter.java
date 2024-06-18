@@ -8,7 +8,7 @@ import com.google.common.eventbus.Subscribe;
 import io.webby.db.DbReadyEvent;
 import io.webby.db.managed.FlushMode;
 import io.webby.db.managed.HasCache;
-import io.webby.util.hppc.EasyHppc;
+import io.spbx.util.hppc.EasyHppc;
 import org.jetbrains.annotations.NotNull;
 
 import javax.annotation.concurrent.ThreadSafe;

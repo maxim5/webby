@@ -4,7 +4,7 @@ import io.netty.handler.codec.http.DefaultFullHttpRequest;
 import io.netty.handler.codec.http.DefaultHttpRequest;
 import io.netty.handler.codec.http.FullHttpRequest;
 import io.netty.handler.codec.http.HttpRequest;
-import io.webby.util.base.CharArray;
+import io.spbx.util.base.CharArray;
 import io.webby.netty.request.DefaultHttpRequestEx;
 import io.webby.netty.request.HttpRequestEx;
 import io.webby.url.annotate.GET;

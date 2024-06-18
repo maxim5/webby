@@ -22,7 +22,7 @@ import io.webby.netty.errors.ServeException;
 import io.webby.netty.request.QueryParams;
 import io.webby.netty.response.HttpResponseFactory;
 import io.webby.netty.ws.errors.ClientDeniedException;
-import io.webby.util.base.Pair;
+import io.spbx.util.base.Pair;
 import io.webby.ws.context.ClientFrameType;
 import io.webby.ws.context.ClientInfo;
 import io.webby.ws.impl.AgentEndpoint;

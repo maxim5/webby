@@ -20,8 +20,8 @@ import io.webby.db.kv.paldb.PalDbImpl;
 import io.webby.testing.*;
 import io.webby.testing.ext.EmbeddedRedisExtension;
 import io.webby.testing.ext.SqlDbExtension;
-import io.webby.testing.ext.TempDirectoryExtension;
-import io.webby.util.base.Pair;
+import io.spbx.util.testing.ext.TempDirectoryExtension;
+import io.spbx.util.base.Pair;
 import org.jetbrains.annotations.NotNull;
 import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
@@ -36,7 +36,7 @@ import java.util.Map;
 import java.util.stream.Stream;
 
 import static com.google.common.truth.Truth.assertThat;
-import static io.webby.testing.TestingBasics.array;
+import static io.spbx.util.testing.TestingBasics.array;
 
 @Tag("slow") @Tag("integration") @Tag("sql")
 public class KeyValueDbIntegrationTest {

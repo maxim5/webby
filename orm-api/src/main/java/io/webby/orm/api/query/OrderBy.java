@@ -2,7 +2,7 @@ package io.webby.orm.api.query;
 
 import com.google.common.collect.ImmutableList;
 import com.google.errorprone.annotations.Immutable;
-import io.webby.util.collect.ListBuilder;
+import io.spbx.util.collect.ListBuilder;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.Arrays;

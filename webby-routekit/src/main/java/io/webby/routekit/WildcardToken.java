@@ -1,6 +1,6 @@
 package io.webby.routekit;
 
-import io.webby.util.base.CharArray;
+import io.spbx.util.base.CharArray;
 
 /**
  * A wildcard variable matches everything until the end of the input.

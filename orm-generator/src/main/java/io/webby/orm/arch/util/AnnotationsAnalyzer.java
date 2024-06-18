@@ -3,7 +3,7 @@ package io.webby.orm.arch.util;
 import com.google.common.collect.ImmutableList;
 import io.webby.orm.api.annotate.Sql;
 import io.webby.orm.arch.factory.ModelInput;
-import io.webby.util.base.EasyStrings;
+import io.spbx.util.base.EasyStrings;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
@@ -14,7 +14,7 @@ import java.util.Optional;
 import java.util.concurrent.atomic.AtomicReference;
 
 import static io.webby.orm.arch.InvalidSqlModelException.failIf;
-import static io.webby.util.reflect.EasyAnnotations.getOptionalAnnotation;
+import static io.spbx.util.reflect.EasyAnnotations.getOptionalAnnotation;
 
 public class AnnotationsAnalyzer {
     private static final ImmutableList<Class<? extends Annotation>> NULLABLE_ANNOTATIONS = ImmutableList.of(

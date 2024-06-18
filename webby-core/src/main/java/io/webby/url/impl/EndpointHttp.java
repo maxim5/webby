@@ -1,6 +1,6 @@
 package io.webby.url.impl;
 
-import io.webby.util.base.Pair;
+import io.spbx.util.base.Pair;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.ArrayList;

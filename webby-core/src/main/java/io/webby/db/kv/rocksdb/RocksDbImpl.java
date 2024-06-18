@@ -7,11 +7,11 @@ import com.google.mu.util.stream.BiStream;
 import io.webby.db.codec.Codec;
 import io.webby.db.kv.KeyValueDb;
 import io.webby.db.kv.impl.ByteArrayDb;
-import io.webby.util.base.EasyWrappers.MutableInt;
-import io.webby.util.base.Unchecked.Consumers;
-import io.webby.util.func.ThrowConsumer;
-import io.webby.util.func.ThrowFunction;
-import io.webby.util.func.ThrowPredicate;
+import io.spbx.util.base.EasyWrappers.MutableInt;
+import io.spbx.util.base.Unchecked.Consumers;
+import io.spbx.util.func.ThrowConsumer;
+import io.spbx.util.func.ThrowFunction;
+import io.spbx.util.func.ThrowPredicate;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import org.rocksdb.*;
@@ -21,7 +21,7 @@ import java.util.function.BiConsumer;
 import java.util.function.Function;
 import java.util.stream.Stream;
 
-import static io.webby.util.base.Unchecked.rethrow;
+import static io.spbx.util.base.Unchecked.rethrow;
 
 public class RocksDbImpl<K, V> extends ByteArrayDb<K, V> implements KeyValueDb<K, V> {
     private static final FlushOptions FLUSH_OPTIONS = new FlushOptions();

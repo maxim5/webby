@@ -10,7 +10,7 @@ import io.webby.orm.api.query.*;
 import io.webby.orm.arch.model.Column;
 import io.webby.orm.arch.model.*;
 import io.webby.orm.arch.util.Naming;
-import io.webby.util.collect.EasyMaps;
+import io.spbx.util.collect.EasyMaps;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.Arrays;

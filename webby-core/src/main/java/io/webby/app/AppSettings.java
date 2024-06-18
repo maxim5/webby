@@ -14,7 +14,7 @@ import java.nio.charset.Charset;
 import java.nio.file.Path;
 import java.util.*;
 
-import static io.webby.util.base.EasyCast.castAny;
+import static io.spbx.util.base.EasyCast.castAny;
 
 public final class AppSettings implements Settings {
     private boolean devMode = true;

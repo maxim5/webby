@@ -1,8 +1,8 @@
 package io.webby.url.view;
 
 import io.webby.common.SystemProperties;
-import io.webby.util.base.EasyCast;
-import io.webby.util.func.ThrowConsumer;
+import io.spbx.util.base.EasyCast;
+import io.spbx.util.func.ThrowConsumer;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
@@ -10,7 +10,7 @@ import java.io.*;
 import java.util.Map;
 import java.util.function.Function;
 
-import static io.webby.util.io.EasyIo.Close.closeQuietly;
+import static io.spbx.util.io.EasyIo.Close.closeQuietly;
 
 public class EasyRender {
     public static <E extends Throwable>

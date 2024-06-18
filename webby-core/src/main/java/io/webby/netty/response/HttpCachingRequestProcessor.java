@@ -7,7 +7,7 @@ import io.netty.buffer.Unpooled;
 import io.netty.handler.codec.http.*;
 import io.webby.app.Settings;
 import io.webby.netty.HttpConst;
-import io.webby.util.io.EasyFiles;
+import io.spbx.util.io.EasyFiles;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 

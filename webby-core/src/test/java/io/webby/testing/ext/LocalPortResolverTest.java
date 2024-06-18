@@ -1,7 +1,7 @@
 package io.webby.testing.ext;
 
 import com.google.common.flogger.FluentLogger;
-import io.webby.util.time.TimeIt;
+import io.spbx.util.time.TimeIt;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import org.junit.jupiter.api.Tag;

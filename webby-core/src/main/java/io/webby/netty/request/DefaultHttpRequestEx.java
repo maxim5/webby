@@ -10,8 +10,8 @@ import io.webby.netty.HttpConst;
 import io.webby.netty.intercept.attr.Attributes;
 import io.webby.netty.marshal.Json;
 import io.webby.url.convert.Constraint;
-import io.webby.util.lazy.AtomicCacheCompute;
-import io.webby.util.lazy.CacheCompute;
+import io.spbx.util.lazy.AtomicCacheCompute;
+import io.spbx.util.lazy.CacheCompute;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
@@ -22,7 +22,7 @@ import java.nio.charset.Charset;
 import java.util.List;
 import java.util.Map;
 
-import static io.webby.util.base.EasyCast.castAny;
+import static io.spbx.util.base.EasyCast.castAny;
 
 public class DefaultHttpRequestEx extends DefaultFullHttpRequest implements MutableHttpRequestEx {
     private final CacheCompute<QueryParams> paramsCache = AtomicCacheCompute.createEmpty();

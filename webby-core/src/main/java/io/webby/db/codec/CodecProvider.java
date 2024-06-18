@@ -13,8 +13,8 @@ import io.webby.auth.user.DefaultUserCodec;
 import io.webby.db.codec.standard.IntArrayListCodec;
 import io.webby.db.codec.standard.IntHashSetCodec;
 import io.webby.perf.stats.impl.StatsManager;
-import io.webby.util.collect.EasyMaps;
-import io.webby.util.lazy.LazyBoolean;
+import io.spbx.util.collect.EasyMaps;
+import io.spbx.util.lazy.LazyBoolean;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
@@ -24,7 +24,7 @@ import java.io.OutputStream;
 import java.nio.charset.Charset;
 
 import static io.webby.db.codec.standard.Codecs.*;
-import static io.webby.util.base.EasyCast.castAny;
+import static io.spbx.util.base.EasyCast.castAny;
 
 // Scan for codecs
 public class CodecProvider {

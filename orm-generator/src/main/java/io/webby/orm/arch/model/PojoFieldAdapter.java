@@ -1,8 +1,8 @@
 package io.webby.orm.arch.model;
 
 import com.google.errorprone.annotations.Immutable;
-import io.webby.util.lazy.AtomicCacheCompute;
-import io.webby.util.lazy.CacheCompute;
+import io.spbx.util.lazy.AtomicCacheCompute;
+import io.spbx.util.lazy.CacheCompute;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.List;

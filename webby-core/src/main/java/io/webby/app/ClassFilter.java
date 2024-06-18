@@ -1,7 +1,7 @@
 package io.webby.app;
 
 import com.google.common.base.Strings;
-import io.webby.util.classpath.ClassNamePredicate;
+import io.spbx.util.classpath.ClassNamePredicate;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.List;

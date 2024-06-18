@@ -2,8 +2,8 @@ package io.webby.orm.arch.factory;
 
 import io.webby.orm.api.annotate.Model;
 import io.webby.orm.arch.util.Naming;
-import io.webby.util.base.EasyStrings;
-import io.webby.util.reflect.EasyAnnotations;
+import io.spbx.util.base.EasyStrings;
+import io.spbx.util.reflect.EasyAnnotations;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
@@ -11,7 +11,7 @@ import java.util.List;
 
 import static io.webby.orm.arch.model.JavaNameValidator.validateJavaIdentifier;
 import static io.webby.orm.arch.model.SqlNameValidator.validateSqlName;
-import static io.webby.util.base.EasyStrings.ofNonEmpty;
+import static io.spbx.util.base.EasyStrings.ofNonEmpty;
 
 public record ModelInput(@NotNull Class<?> modelClass,
                          @Nullable Class<?> modelInterface,

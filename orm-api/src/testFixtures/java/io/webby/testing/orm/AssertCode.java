@@ -4,12 +4,12 @@ import com.google.common.truth.StringSubject;
 import com.google.common.truth.Truth;
 import com.google.errorprone.annotations.CanIgnoreReturnValue;
 import com.google.errorprone.annotations.CheckReturnValue;
-import io.webby.testing.TestingBytes;
+import io.spbx.util.testing.TestingBytes;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.function.Function;
 
-import static io.webby.util.base.EasyCast.castAny;
+import static io.spbx.util.base.EasyCast.castAny;
 
 public class AssertCode {
     @CheckReturnValue

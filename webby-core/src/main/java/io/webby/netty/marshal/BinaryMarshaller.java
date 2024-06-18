@@ -4,13 +4,13 @@ import io.netty.buffer.ByteBuf;
 import io.netty.buffer.ByteBufInputStream;
 import io.netty.buffer.Unpooled;
 import io.webby.common.SystemProperties;
-import io.webby.util.func.Reversible;
+import io.spbx.util.func.Reversible;
 import org.jetbrains.annotations.NotNull;
 
 import java.io.*;
 import java.nio.ByteBuffer;
 
-import static io.webby.util.base.Unchecked.rethrow;
+import static io.spbx.util.base.Unchecked.rethrow;
 
 public interface BinaryMarshaller {
     void writeBytes(@NotNull OutputStream output, @NotNull Object instance) throws IOException;

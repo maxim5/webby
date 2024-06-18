@@ -1,5 +1,6 @@
 package io.webby.benchmarks.stress;
 
+import io.spbx.util.testing.TestingBasics;
 import io.webby.Webby;
 import io.webby.app.AppSettings;
 import io.webby.auth.session.DefaultSession;
@@ -19,7 +20,7 @@ import java.util.List;
 import static io.webby.benchmarks.stress.ConcurrentStressing.MEDIUM_WAIT;
 import static io.webby.benchmarks.stress.ConcurrentStressing.execWorkers;
 import static io.webby.testing.OkRequests.json;
-import static io.webby.util.base.Unchecked.Runnables.rethrow;
+import static io.spbx.util.base.Unchecked.Runnables.rethrow;
 
 public class StressNettyMain {
     private static final int PORT = 7000;

@@ -8,7 +8,7 @@ import io.webby.db.StorageType;
 import io.webby.db.kv.javamap.JavaMapDbFactory;
 import io.webby.demo.model.UserRateModelTable;
 import io.webby.testing.ext.SqlDbExtension;
-import io.webby.util.base.OneOf;
+import io.spbx.util.base.OneOf;
 import org.jetbrains.annotations.NotNull;
 import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.extension.RegisterExtension;
@@ -18,8 +18,8 @@ import org.junit.jupiter.params.provider.EnumSource;
 import static com.google.common.truth.Truth.assertThat;
 import static io.webby.demo.model.UserRateModelTable.OwnColumn.content_id;
 import static io.webby.demo.model.UserRateModelTable.OwnColumn.user_id;
-import static io.webby.testing.AssertHppc.assertMap;
-import static io.webby.testing.TestingHppc.newIntMap;
+import static io.spbx.util.testing.AssertHppc.assertMap;
+import static io.spbx.util.testing.TestingHppc.newIntMap;
 
 // FIX[minor]: more test cases (existing state, check group by count, flush)
 @Tag("integration") @Tag("sql")

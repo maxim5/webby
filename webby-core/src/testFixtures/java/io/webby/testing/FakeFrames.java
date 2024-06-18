@@ -5,7 +5,7 @@ import io.netty.handler.codec.http.websocketx.TextWebSocketFrame;
 import io.webby.netty.ws.sender.Sender;
 import org.jetbrains.annotations.NotNull;
 
-import static io.webby.testing.TestingBytes.asBytes;
+import static io.spbx.util.testing.TestingBytes.asBytes;
 
 public class FakeFrames {
     public static @NotNull TextWebSocketFrame text(@NotNull String data) {

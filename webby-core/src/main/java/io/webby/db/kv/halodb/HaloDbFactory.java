@@ -9,7 +9,7 @@ import org.jetbrains.annotations.NotNull;
 
 import java.nio.file.Path;
 
-import static io.webby.util.base.Unchecked.Suppliers.runRethrow;
+import static io.spbx.util.base.Unchecked.Suppliers.runRethrow;
 
 public class HaloDbFactory extends BaseKeyValueFactory {
     @Override

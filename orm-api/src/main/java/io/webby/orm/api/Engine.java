@@ -1,6 +1,6 @@
 package io.webby.orm.api;
 
-import io.webby.util.base.Unchecked;
+import io.spbx.util.base.Unchecked;
 import org.jetbrains.annotations.NotNull;
 
 import java.sql.Connection;

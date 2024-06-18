@@ -21,7 +21,7 @@ import java.util.function.Consumer;
 import java.util.function.LongConsumer;
 import java.util.logging.Level;
 
-import static io.webby.util.base.Unchecked.Suppliers.rethrow;
+import static io.spbx.util.base.Unchecked.Suppliers.rethrow;
 import static java.util.Objects.requireNonNull;
 
 public class ChronicleFactory extends BaseKeyValueFactory {

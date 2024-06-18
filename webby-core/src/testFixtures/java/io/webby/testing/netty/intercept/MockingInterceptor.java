@@ -8,7 +8,7 @@ import io.netty.handler.codec.http.HttpResponse;
 import io.webby.netty.errors.ServeException;
 import io.webby.netty.intercept.Interceptor;
 import io.webby.netty.request.MutableHttpRequestEx;
-import io.webby.testing.ForcedFailure;
+import io.spbx.util.testing.ForcedFailure;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.ArrayList;

@@ -1,6 +1,6 @@
 package io.webby.perf.stats;
 
-import io.webby.util.collect.EasyIterables;
+import io.spbx.util.collect.EasyIterables;
 import org.jetbrains.annotations.NotNull;
 
 import java.io.Closeable;

@@ -6,7 +6,7 @@ import org.junit.jupiter.api.Test;
 import java.util.Arrays;
 import java.util.List;
 
-import static io.webby.testing.MoreTruth.assertThat;
+import static io.spbx.util.testing.MoreTruth.assertThat;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 
 public class RouterBuilderTest {

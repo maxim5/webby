@@ -17,7 +17,7 @@ import org.jetbrains.annotations.NotNull;
 import java.util.Optional;
 import java.util.logging.Level;
 
-import static io.webby.util.base.EasyCast.castAny;
+import static io.spbx.util.base.EasyCast.castAny;
 
 public class OakFactory extends BaseKeyValueFactory {
     private static final FluentLogger log = FluentLogger.forEnclosingClass();

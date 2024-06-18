@@ -20,7 +20,7 @@ import java.util.Set;
 import java.util.concurrent.CompletableFuture;
 import java.util.stream.Collectors;
 
-import static io.webby.util.base.Unchecked.Suppliers.runRethrow;
+import static io.spbx.util.base.Unchecked.Suppliers.runRethrow;
 
 public class JetcdDb<K, V> extends ByteArrayDb<K, V> implements KeyValueDb<K, V> {
     private final KV kv;

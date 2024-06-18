@@ -12,7 +12,7 @@ import io.webby.app.AppLifetime;
 import io.webby.app.AppMaintenance;
 import io.webby.app.Settings;
 import io.webby.common.Lifetime;
-import io.webby.util.log.EasyLogs;
+import io.spbx.util.log.EasyLogs;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.logging.Level;

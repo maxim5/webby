@@ -9,8 +9,8 @@ import org.junit.jupiter.params.provider.ValueSource;
 
 import static com.google.common.truth.Truth.assertThat;
 import static io.webby.db.codec.standard.Codecs.*;
-import static io.webby.testing.TestingBytes.CHARSET;
-import static io.webby.testing.TestingBytes.assertBytes;
+import static io.spbx.util.testing.TestingBytes.CHARSET;
+import static io.spbx.util.testing.TestingBytes.assertBytes;
 import static io.webby.testing.TestingParams.paramToBytes;
 import static io.webby.testing.TestingParams.paramToString;
 

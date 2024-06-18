@@ -1,6 +1,6 @@
 package io.webby.routekit;
 
-import io.webby.util.base.CharArray;
+import io.spbx.util.base.CharArray;
 
 import java.util.List;
 import java.util.function.Consumer;

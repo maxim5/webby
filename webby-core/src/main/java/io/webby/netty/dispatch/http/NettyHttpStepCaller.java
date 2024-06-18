@@ -13,7 +13,7 @@ import io.webby.url.convert.ConversionError;
 import io.webby.url.impl.Endpoint;
 import io.webby.url.impl.EndpointOptions;
 import io.webby.url.impl.RouteEndpoint;
-import io.webby.util.func.ThrowBiFunction;
+import io.spbx.util.func.ThrowBiFunction;
 import org.jetbrains.annotations.NotNull;
 
 import java.lang.reflect.InvocationTargetException;

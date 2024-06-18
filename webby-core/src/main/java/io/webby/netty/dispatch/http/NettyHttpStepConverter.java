@@ -21,11 +21,11 @@ import io.webby.url.annotate.Marshal;
 import io.webby.url.impl.EndpointOptions;
 import io.webby.url.impl.EndpointView;
 import io.webby.url.view.Renderer;
-import io.webby.util.base.Unchecked.Consumers;
-import io.webby.util.base.Unchecked.Guava;
-import io.webby.util.base.Pair;
-import io.webby.util.func.ThrowConsumer;
-import io.webby.util.netty.EasyByteBuf;
+import io.spbx.util.base.Unchecked.Consumers;
+import io.spbx.util.base.Unchecked.Guava;
+import io.spbx.util.base.Pair;
+import io.spbx.util.func.ThrowConsumer;
+import io.spbx.util.netty.EasyByteBuf;
 import org.checkerframework.checker.nullness.qual.Nullable;
 import org.jetbrains.annotations.NotNull;
 
@@ -34,7 +34,7 @@ import java.util.concurrent.Future;
 import java.util.function.Consumer;
 import java.util.function.Function;
 
-import static io.webby.util.base.EasyCast.castAny;
+import static io.spbx.util.base.EasyCast.castAny;
 
 class NettyHttpStepConverter implements ChannelContextBound {
     @Inject private HttpResponseFactory responses;

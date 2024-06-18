@@ -3,7 +3,7 @@ package io.webby.db.event;
 import com.leansoft.bigqueue.IBigQueue;
 import io.webby.db.managed.FlushMode;
 import io.webby.db.codec.Codec;
-import io.webby.util.base.Unchecked;
+import io.spbx.util.base.Unchecked;
 import org.jetbrains.annotations.NotNull;
 
 import java.io.IOException;

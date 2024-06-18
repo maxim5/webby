@@ -3,7 +3,7 @@ package io.webby.db.kv.leveldb;
 import io.webby.db.codec.Codec;
 import io.webby.db.kv.DbOptions;
 import io.webby.db.kv.impl.BaseKeyValueFactory;
-import io.webby.util.base.Unchecked;
+import io.spbx.util.base.Unchecked;
 import org.iq80.leveldb.DB;
 import org.iq80.leveldb.DBFactory;
 import org.iq80.leveldb.Options;

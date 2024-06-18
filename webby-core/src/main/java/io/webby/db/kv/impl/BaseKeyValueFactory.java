@@ -8,7 +8,7 @@ import io.webby.db.codec.CodecProvider;
 import io.webby.db.kv.DbOptions;
 import io.webby.db.kv.KeyValueDb;
 import io.webby.perf.stats.impl.StatsManager;
-import io.webby.util.lazy.LazyBoolean;
+import io.spbx.util.lazy.LazyBoolean;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
@@ -17,9 +17,9 @@ import java.util.Map;
 import java.util.function.Supplier;
 
 import static io.webby.app.AppConfigException.assure;
-import static io.webby.util.base.EasyCast.castAny;
-import static io.webby.util.base.EasyNulls.firstNonNull;
-import static io.webby.util.base.EasyNulls.firstNonNullIfExist;
+import static io.spbx.util.base.EasyCast.castAny;
+import static io.spbx.util.base.EasyNulls.firstNonNull;
+import static io.spbx.util.base.EasyNulls.firstNonNullIfExist;
 
 public abstract class BaseKeyValueFactory implements InternalKeyValueFactory {
     protected final Map<String, KeyValueDb<?, ?>> cache = new HashMap<>();

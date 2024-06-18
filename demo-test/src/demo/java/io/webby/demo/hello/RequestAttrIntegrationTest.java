@@ -4,7 +4,7 @@ import io.netty.handler.codec.http.FullHttpRequest;
 import io.netty.handler.codec.http.HttpResponse;
 import io.webby.testing.BaseHttpIntegrationTest;
 import io.webby.testing.HttpRequestBuilder;
-import io.webby.testing.ext.HppcReflectionExtension;
+import io.spbx.util.testing.ext.HppcReflectionExtension;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.RegisterExtension;
 

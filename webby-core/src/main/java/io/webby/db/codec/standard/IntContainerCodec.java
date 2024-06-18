@@ -4,7 +4,7 @@ import com.carrotsearch.hppc.IntContainer;
 import com.carrotsearch.hppc.cursors.IntCursor;
 import io.webby.db.codec.Codec;
 import io.webby.db.codec.CodecSize;
-import io.webby.util.func.ThrowIntSupplier;
+import io.spbx.util.func.ThrowIntSupplier;
 import org.jetbrains.annotations.NotNull;
 
 import java.io.IOException;

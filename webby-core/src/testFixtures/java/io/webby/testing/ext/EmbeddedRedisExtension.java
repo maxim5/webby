@@ -1,7 +1,7 @@
 package io.webby.testing.ext;
 
 import com.google.common.flogger.FluentLogger;
-import io.webby.util.io.EasyNet;
+import io.spbx.util.io.EasyNet;
 import org.jetbrains.annotations.NotNull;
 import org.junit.jupiter.api.extension.AfterAllCallback;
 import org.junit.jupiter.api.extension.BeforeAllCallback;

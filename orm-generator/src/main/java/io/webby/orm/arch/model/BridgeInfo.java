@@ -2,7 +2,7 @@ package io.webby.orm.arch.model;
 
 import com.google.common.base.Strings;
 import io.webby.orm.api.annotate.ManyToMany;
-import io.webby.util.reflect.EasyAnnotations;
+import io.spbx.util.reflect.EasyAnnotations;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 

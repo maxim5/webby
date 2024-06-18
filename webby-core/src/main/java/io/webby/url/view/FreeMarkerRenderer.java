@@ -11,7 +11,7 @@ import freemarker.template.Version;
 import io.webby.app.Settings;
 import io.webby.common.InjectorHelper;
 import io.webby.url.HandlerConfigError;
-import io.webby.util.func.ThrowConsumer;
+import io.spbx.util.func.ThrowConsumer;
 import org.jetbrains.annotations.NotNull;
 
 import java.io.IOException;
@@ -21,7 +21,7 @@ import java.nio.file.Path;
 import java.time.Duration;
 import java.util.logging.Level;
 
-import static io.webby.util.base.Unchecked.Functions.rethrow;
+import static io.spbx.util.base.Unchecked.Functions.rethrow;
 
 public class FreeMarkerRenderer implements Renderer<Template> {
     private static final FluentLogger log = FluentLogger.forEnclosingClass();

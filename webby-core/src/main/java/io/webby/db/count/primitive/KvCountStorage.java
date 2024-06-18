@@ -3,7 +3,7 @@ package io.webby.db.count.primitive;
 import com.carrotsearch.hppc.IntIntMap;
 import com.carrotsearch.hppc.procedures.IntIntProcedure;
 import io.webby.db.kv.KeyValueDb;
-import io.webby.util.hppc.EasyHppc;
+import io.spbx.util.hppc.EasyHppc;
 import org.jetbrains.annotations.NotNull;
 
 public class KvCountStorage implements IntCountStorage {

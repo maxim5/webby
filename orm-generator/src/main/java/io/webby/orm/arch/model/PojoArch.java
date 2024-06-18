@@ -2,8 +2,8 @@ package io.webby.orm.arch.model;
 
 import com.google.common.collect.ImmutableList;
 import io.webby.orm.arch.util.Naming;
-import io.webby.util.lazy.AtomicCacheCompute;
-import io.webby.util.lazy.CacheCompute;
+import io.spbx.util.lazy.AtomicCacheCompute;
+import io.spbx.util.lazy.CacheCompute;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.ArrayList;

@@ -11,7 +11,7 @@ import java.nio.ByteBuffer;
 import java.util.Arrays;
 
 import static com.google.common.truth.Truth.assertThat;
-import static io.webby.testing.TestingBytes.assertBytes;
+import static io.spbx.util.testing.TestingBytes.assertBytes;
 
 public class AssertCodec {
     @CheckReturnValue

@@ -1,10 +1,10 @@
 package io.webby.orm.api.tx;
 
-import io.webby.util.base.Unchecked;
-import io.webby.util.func.ThrowConsumer;
-import io.webby.util.func.ThrowFunction;
-import io.webby.util.func.ThrowRunnable;
-import io.webby.util.func.ThrowSupplier;
+import io.spbx.util.base.Unchecked;
+import io.spbx.util.func.ThrowConsumer;
+import io.spbx.util.func.ThrowFunction;
+import io.spbx.util.func.ThrowRunnable;
+import io.spbx.util.func.ThrowSupplier;
 import org.jetbrains.annotations.NotNull;
 
 import java.sql.Connection;

@@ -1,7 +1,7 @@
 package io.webby.orm.arch.model;
 
 import com.google.errorprone.annotations.Immutable;
-import io.webby.util.collect.ImmutableArray;
+import io.spbx.util.collect.ImmutableArray;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import org.jetbrains.annotations.VisibleForTesting;

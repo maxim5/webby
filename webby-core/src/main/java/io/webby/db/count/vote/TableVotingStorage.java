@@ -13,7 +13,7 @@ import io.webby.orm.api.QueryException;
 import io.webby.orm.api.entity.BatchEntityIntData;
 import io.webby.orm.api.entity.EntityIntData;
 import io.webby.orm.api.query.*;
-import io.webby.util.hppc.EasyHppc;
+import io.spbx.util.hppc.EasyHppc;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 

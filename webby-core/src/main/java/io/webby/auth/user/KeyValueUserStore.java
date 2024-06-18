@@ -7,11 +7,11 @@ import io.webby.db.kv.KeyValueAutoRetryInserter;
 import io.webby.db.kv.KeyValueDb;
 import io.webby.db.kv.KeyValueFactory;
 import io.webby.db.model.IntIdGenerator;
-import io.webby.util.base.Pair;
+import io.spbx.util.base.Pair;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
-import static io.webby.util.base.EasyCast.castAny;
+import static io.spbx.util.base.EasyCast.castAny;
 
 public class KeyValueUserStore implements UserStore {
     protected final KeyValueDb<Integer, UserModel> db;

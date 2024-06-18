@@ -2,7 +2,7 @@ package io.webby.orm.arch.util;
 
 import com.google.errorprone.annotations.CanIgnoreReturnValue;
 import com.google.errorprone.annotations.CheckReturnValue;
-import io.webby.util.reflect.EasyMembers;
+import io.spbx.util.reflect.EasyMembers;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import org.junit.jupiter.api.Test;

@@ -4,7 +4,7 @@ import io.webby.orm.api.TableMeta.ConstraintStatus;
 import io.webby.orm.arch.model.Column;
 import io.webby.orm.arch.model.ForeignTableField;
 import io.webby.orm.arch.model.TableField;
-import io.webby.util.base.SimpleJoin;
+import io.spbx.util.base.SimpleJoin;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 

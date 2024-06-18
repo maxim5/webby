@@ -4,7 +4,7 @@ import com.google.common.flogger.FluentLogger;
 import io.netty.handler.codec.http.websocketx.BinaryWebSocketFrame;
 import io.netty.handler.codec.http.websocketx.TextWebSocketFrame;
 import io.webby.url.annotate.Serve;
-import io.webby.util.netty.EasyByteBuf;
+import io.spbx.util.netty.EasyByteBuf;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.ArrayList;

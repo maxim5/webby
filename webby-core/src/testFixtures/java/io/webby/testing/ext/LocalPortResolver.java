@@ -2,7 +2,7 @@ package io.webby.testing.ext;
 
 import com.google.common.flogger.FluentLogger;
 import io.webby.db.sql.SqlSettings;
-import io.webby.util.io.EasyNet;
+import io.spbx.util.io.EasyNet;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 

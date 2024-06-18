@@ -1,7 +1,7 @@
 package io.webby.benchmarks.stress;
 
 import com.google.common.flogger.FluentLogger;
-import io.webby.testing.TestingBasics;
+import io.spbx.util.testing.TestingBasics;
 import org.jetbrains.annotations.NotNull;
 
 import java.time.Instant;

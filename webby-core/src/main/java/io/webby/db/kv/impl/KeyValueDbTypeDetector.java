@@ -2,8 +2,8 @@ package io.webby.db.kv.impl;
 
 import com.google.common.flogger.FluentLogger;
 import io.webby.db.kv.DbType;
-import io.webby.util.base.Pair;
-import io.webby.util.classpath.EasyClasspath;
+import io.spbx.util.base.Pair;
+import io.spbx.util.classpath.EasyClasspath;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.List;

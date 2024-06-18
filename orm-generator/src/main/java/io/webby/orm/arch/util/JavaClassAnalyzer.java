@@ -4,8 +4,8 @@ import com.google.common.collect.ImmutableMap;
 import com.google.common.flogger.FluentLogger;
 import io.webby.orm.arch.InvalidSqlModelException;
 import io.webby.orm.arch.model.ModelField;
-import io.webby.util.collect.EasyIterables;
-import io.webby.util.reflect.EasyMembers;
+import io.spbx.util.collect.EasyIterables;
+import io.spbx.util.reflect.EasyMembers;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import org.jetbrains.annotations.VisibleForTesting;
@@ -21,9 +21,9 @@ import java.util.logging.Level;
 import java.util.stream.Collectors;
 
 import static io.webby.orm.arch.InvalidSqlModelException.failIf;
-import static io.webby.util.base.EasyNulls.firstNonNullIfExist;
-import static io.webby.util.reflect.EasyMembers.isPrivate;
-import static io.webby.util.reflect.EasyMembers.isStatic;
+import static io.spbx.util.base.EasyNulls.firstNonNullIfExist;
+import static io.spbx.util.reflect.EasyMembers.isPrivate;
+import static io.spbx.util.reflect.EasyMembers.isStatic;
 
 public class JavaClassAnalyzer {
     private static final FluentLogger log = FluentLogger.forEnclosingClass();

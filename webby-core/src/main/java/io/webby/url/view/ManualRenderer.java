@@ -3,13 +3,13 @@ package io.webby.url.view;
 import com.google.inject.Inject;
 import io.webby.app.Settings;
 import io.webby.url.annotate.Render;
-import io.webby.util.base.Unchecked;
+import io.spbx.util.base.Unchecked;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
-import static io.webby.util.base.EasyCast.castAny;
+import static io.spbx.util.base.EasyCast.castAny;
 
 public class ManualRenderer {
     @Inject private Settings settings;

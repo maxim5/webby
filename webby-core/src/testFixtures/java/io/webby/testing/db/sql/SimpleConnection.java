@@ -1,13 +1,14 @@
 package io.webby.testing.db.sql;
 
 import com.google.common.flogger.FluentLogger;
+import io.spbx.util.testing.db.sql.ConnectionAdapter;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.logging.Level;
 
-import static io.webby.testing.MoreTruth.assertThat;
+import static io.spbx.util.testing.MoreTruth.assertThat;
 
 public class SimpleConnection extends ConnectionAdapter {
     private static final FluentLogger log = FluentLogger.forEnclosingClass();

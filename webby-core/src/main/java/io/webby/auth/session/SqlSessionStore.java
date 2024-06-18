@@ -6,7 +6,7 @@ import io.webby.orm.api.TableLong;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
-import static io.webby.util.base.EasyCast.castAny;
+import static io.spbx.util.base.EasyCast.castAny;
 
 public class SqlSessionStore implements SessionStore {
     protected final TableLong<SessionModel> table;

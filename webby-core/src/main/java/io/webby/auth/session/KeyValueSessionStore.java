@@ -7,13 +7,13 @@ import io.webby.db.kv.KeyValueAutoRetryInserter;
 import io.webby.db.kv.KeyValueDb;
 import io.webby.db.kv.KeyValueFactory;
 import io.webby.db.model.LongIdGenerator;
-import io.webby.util.base.Pair;
+import io.spbx.util.base.Pair;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
 import java.security.SecureRandom;
 
-import static io.webby.util.base.EasyCast.castAny;
+import static io.spbx.util.base.EasyCast.castAny;
 
 public class KeyValueSessionStore implements SessionStore {
     protected final KeyValueDb<Long, SessionModel> db;

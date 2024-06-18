@@ -7,7 +7,7 @@ import io.webby.url.annotate.GET;
 import io.webby.url.annotate.Render;
 import io.webby.url.annotate.Serve;
 import io.webby.url.annotate.View;
-import io.webby.util.base.Unchecked;
+import io.spbx.util.base.Unchecked;
 import org.jetbrains.annotations.NotNull;
 
 import java.io.FileNotFoundException;

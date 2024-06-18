@@ -9,7 +9,7 @@ import io.webby.testing.HttpRequestBuilder;
 import io.webby.testing.SessionBuilder;
 import io.webby.testing.Testing;
 import io.webby.testing.UserBuilder;
-import io.webby.util.base.EasyWrappers.MutableInt;
+import io.spbx.util.base.EasyWrappers.MutableInt;
 import org.junit.jupiter.api.Test;
 
 import java.util.List;

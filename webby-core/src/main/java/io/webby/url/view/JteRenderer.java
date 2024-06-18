@@ -11,7 +11,7 @@ import gg.jte.runtime.Constants;
 import io.webby.app.Settings;
 import io.webby.common.InjectorHelper;
 import io.webby.common.SystemProperties;
-import io.webby.util.func.ThrowConsumer;
+import io.spbx.util.func.ThrowConsumer;
 import org.jetbrains.annotations.NotNull;
 
 import java.io.IOException;
@@ -22,7 +22,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.logging.Level;
 
-import static io.webby.util.base.EasyCast.castMap;
+import static io.spbx.util.base.EasyCast.castMap;
 
 public class JteRenderer implements Renderer<String> {
     private static final FluentLogger log = FluentLogger.forEnclosingClass();

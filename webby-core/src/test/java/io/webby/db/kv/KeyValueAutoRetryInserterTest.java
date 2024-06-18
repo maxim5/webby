@@ -2,12 +2,12 @@ package io.webby.db.kv;
 
 import io.webby.db.kv.javamap.JavaMapDbFactory;
 import io.webby.testing.db.model.FakeIntIdGenerator;
-import io.webby.util.base.Pair;
+import io.spbx.util.base.Pair;
 import org.jetbrains.annotations.NotNull;
 import org.junit.jupiter.api.Test;
 
 import static com.google.common.truth.Truth.assertThat;
-import static io.webby.util.collect.EasyMaps.asMap;
+import static io.spbx.util.collect.EasyMaps.asMap;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 
 
