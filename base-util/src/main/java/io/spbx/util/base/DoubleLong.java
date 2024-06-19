@@ -202,7 +202,7 @@ public final class DoubleLong extends Number implements Comparable<DoubleLong> {
     }
 
     public static @NotNull DoubleLong subtract(@NotNull DoubleLong lhs, @NotNull DoubleLong rhs) {
-        return from(lhs.toBigInteger().subtract(rhs.toBigInteger()));
+        return lhs.add(rhs.negate());
     }
 
     public @NotNull DoubleLong multiply(@NotNull DoubleLong other) {
@@ -224,6 +224,8 @@ public final class DoubleLong extends Number implements Comparable<DoubleLong> {
     public @NotNull DoubleLong negate() {
         return negate(this);
     }
+
+    // Logical ops
 
     public static @NotNull DoubleLong negate(@NotNull DoubleLong val) {
         return add(DoubleLong.fromBits(~val.high, ~val.low), ONE);

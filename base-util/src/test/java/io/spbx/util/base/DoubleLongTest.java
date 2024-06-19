@@ -231,6 +231,7 @@ public class DoubleLongTest {
                 .fitsIntoLongConsistency()
                 .compareMatchesBigInteger()
                 .addMatchesBigInteger()
+                .subtractMatchesBigInteger()
                 .negateMatchesBigInteger()
                 .logicOpsMatchesBigInteger()
                 .internalConstruction();
@@ -322,6 +323,20 @@ public class DoubleLongTest {
                 assertThat(DoubleLong.from(big).add(actual).toBigInteger()).isEqualTo(expected);
                 assertThat(DoubleLong.add(actual, DoubleLong.from(big)).toBigInteger()).isEqualTo(expected);
                 assertThat(DoubleLong.add(DoubleLong.from(big), actual).toBigInteger()).isEqualTo(expected);
+            }
+            return this;
+        }
+
+        public @NotNull DoubleLongSubject subtractMatchesBigInteger() {
+            for (BigInteger big : EDGE_CASE_BIG_INTEGERS) {
+                assertThat(actual.subtract(DoubleLong.from(big)).toBigInteger())
+                    .isEqualTo(fitInto128Bits(actual.toBigInteger().subtract(big)));
+                assertThat(DoubleLong.subtract(actual, DoubleLong.from(big)).toBigInteger())
+                    .isEqualTo(fitInto128Bits(actual.toBigInteger().subtract(big)));
+                assertThat(DoubleLong.from(big).subtract(actual).toBigInteger())
+                    .isEqualTo(fitInto128Bits(big.subtract(actual.toBigInteger())));
+                assertThat(DoubleLong.subtract(DoubleLong.from(big), actual).toBigInteger())
+                    .isEqualTo(fitInto128Bits(big.subtract(actual.toBigInteger())));
             }
             return this;
         }
