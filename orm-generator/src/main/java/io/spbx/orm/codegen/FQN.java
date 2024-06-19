@@ -4,13 +4,13 @@ import io.spbx.orm.arch.model.JavaNameHolder;
 import io.spbx.orm.arch.util.Naming;
 import org.jetbrains.annotations.NotNull;
 
-import static io.spbx.orm.arch.model.JavaNameValidator.validateJavaIdentifier;
+import static io.spbx.orm.arch.model.JavaNameValidator.validateJavaClassName;
 import static io.spbx.orm.arch.model.JavaNameValidator.validateJavaPackage;
 
 public record FQN(@NotNull String packageName, @NotNull String className) {
     public FQN {
-        validateJavaIdentifier(className);
         validateJavaPackage(packageName);
+        validateJavaClassName(className);
     }
 
     public static @NotNull FQN of(@NotNull Class<?> klass) {
