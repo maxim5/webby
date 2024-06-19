@@ -15,7 +15,7 @@ plugins {
 allprojects {
     apply(plugin = "idea")
 
-    group = "io.webby"
+    group = "io.spbx.webby"
     version = "0.11.0"
 
     idea {
