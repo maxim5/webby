@@ -21,7 +21,7 @@ public record FQN(@NotNull String packageName, @NotNull String className) {
         return new FQN(nameHolder.packageName(), nameHolder.javaName());
     }
 
-    public @NotNull String importName() {
+    public @NotNull String toImportName() {
         return "%s.%s".formatted(packageName, className);
     }
 }
