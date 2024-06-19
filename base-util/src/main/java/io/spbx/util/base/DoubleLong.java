@@ -4,6 +4,7 @@ import com.google.common.annotations.Beta;
 import com.google.common.base.Strings;
 import com.google.common.primitives.Bytes;
 import com.google.common.primitives.Longs;
+import com.google.common.primitives.UnsignedLong;
 import com.google.errorprone.annotations.Immutable;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.VisibleForTesting;
@@ -71,6 +72,10 @@ public final class DoubleLong extends Number implements Comparable<DoubleLong> {
         return fromBits(bytes);
     }
 
+    public static @NotNull DoubleLong from(@NotNull UnsignedLong value) {
+        return from(value.longValue());
+    }
+
     public static @NotNull DoubleLong from(@NotNull String value) {
         return from(new BigInteger(value));
     }
@@ -97,14 +102,12 @@ public final class DoubleLong extends Number implements Comparable<DoubleLong> {
         return low;
     }
 
+    // Optimize and add more utils:
+    // toByteArray(byte[] bytes)
+    // toByteArray(byte[] bytes, int from)
     public byte @NotNull [] toByteArray() {
         return Bytes.concat(Longs.toByteArray(high), Longs.toByteArray(low));
     }
-
-    // toByteArray(byte[] bytes)
-    // toByteArray(byte[] bytes, int from)
-    // toUnsignedLong
-    // fromUnsignedLong
 
     public long @NotNull [] toLongArray() {
         return new long[] { high, low };
@@ -118,6 +121,10 @@ public final class DoubleLong extends Number implements Comparable<DoubleLong> {
         return new BigInteger(toByteArray());
     }
 
+    public @NotNull UnsignedLong toUnsignedLong() {
+        return UnsignedLong.fromLongBits(low);
+    }
+
     // Comparison
 
     @Override
@@ -126,9 +133,13 @@ public final class DoubleLong extends Number implements Comparable<DoubleLong> {
     }
 
     public static int compare(@NotNull DoubleLong lhs, @NotNull DoubleLong rhs) {
-        int compare = Longs.compare(lhs.high, rhs.high);
-        if (compare != 0) return compare;
-        return Longs.compare(lhs.low, rhs.low);
+        int compareHigh = Longs.compare(lhs.high, rhs.high);
+        if (compareHigh != 0) {
+            return compareHigh;
+        }
+        boolean isSameSignLow = lhs.low >= 0 == rhs.low >= 0;
+        int compareLow = Longs.compare(lhs.low, rhs.low);
+        return isSameSignLow ? compareLow : -compareLow;
     }
 
     public int signum() {
@@ -158,7 +169,7 @@ public final class DoubleLong extends Number implements Comparable<DoubleLong> {
     }
 
     public boolean fitsIntoLong() {
-        return high == 0;
+        return (high == 0 && low >= 0) || (high == -1 && low < 0);
     }
 
     // Math and arithmetic
