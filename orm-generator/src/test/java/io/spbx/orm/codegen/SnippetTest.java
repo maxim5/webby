@@ -63,6 +63,14 @@ public class SnippetTest {
     }
 
     @Test
+    public void build_via_withFormattedMultiline() {
+        assertThat(new Snippet().withFormattedMultiline("%s", "foo")).containsLinesExactly("foo").isNotBlock();
+        assertThat(new Snippet().withFormattedMultiline("%s\n", "foo")).containsLinesExactly("foo").isBlock();
+        assertThat(new Snippet().withFormattedMultiline("%d\r\n%d", 1, 2)).containsLinesExactly("1", "2").isBlock();
+        assertThat(new Snippet().withFormattedMultiline("\n%d-%d", 1, 2)).containsLinesExactly("", "1-2").isBlock();
+    }
+
+    @Test
     public void build_via_withMultilines_block() {
         assertThat(new Snippet().withMultilines(List.of("foo\nbar"))).containsLinesExactly("foo", "bar").isBlock();
         assertThat(new Snippet().withMultilines(Stream.of("foo\nbar"))).containsLinesExactly("foo", "bar").isBlock();
@@ -95,6 +103,7 @@ public class SnippetTest {
         assertThrows(AssertionError.class, () -> new Snippet().withLine("\n"));
         assertThrows(AssertionError.class, () -> new Snippet().withLine("\r"));
         assertThrows(AssertionError.class, () -> new Snippet().withLine("foo\n\rbar"));
+        assertThrows(AssertionError.class, () -> new Snippet().withFormattedLine("foo\n\rbar"));
         assertThrows(AssertionError.class, () -> new Snippet().withLines(List.of("\n")));
         assertThrows(AssertionError.class, () -> new Snippet().withLines(Stream.of("\n")));
         assertThrows(AssertionError.class, () -> new Snippet().withLines(array("\n")));
