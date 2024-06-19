@@ -16,6 +16,8 @@ import java.util.Comparator;
 /**
  * Represents the signed 128-bit integer.
  * Preserves the semantics of {@link BigInteger} (e.g., two's compliment binary representation) but much more efficient.
+ *
+ * @link <a href="https://en.wikipedia.org/wiki/Two%27s_complement">Two's complement</a>
  */
 @Immutable
 @Beta
@@ -178,7 +180,17 @@ public final class DoubleLong extends Number implements Comparable<DoubleLong> {
     // Math and arithmetic
 
     public static @NotNull DoubleLong add(@NotNull DoubleLong lhs, @NotNull DoubleLong rhs) {
-        return from(lhs.toBigInteger().add(rhs.toBigInteger()));
+        long a = lhs.low;
+        long b = rhs.low;
+        long lowSum = a + b;
+        // Notes:
+        // - zero comparison calculates the sign bit: sign_bit(x) = "0" for x >= 0 and "1" for x < 0
+        // - should carry if the sum rolls over 2^64, not 2^63 (which is Long overflow)
+        // - if the sign_bit gets lots in a result (either `a` or `b`), there is a carry
+        // - if both operands had the sign bit, there is a carry
+        boolean carry = ((a & b) < 0) || ((a ^ b) < 0 & lowSum >= 0);
+        long highSum = lhs.high + rhs.high + (carry ? 1L : 0L);
+        return fromBits(highSum, lowSum);
     }
 
     public static @NotNull DoubleLong subtract(@NotNull DoubleLong lhs, @NotNull DoubleLong rhs) {

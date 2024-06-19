@@ -10,8 +10,7 @@ import org.junit.jupiter.api.Test;
 import java.math.BigInteger;
 
 import static com.google.common.truth.Truth.assertThat;
-import static io.spbx.util.testing.TestingPrimitives.fitsIntoLong;
-import static io.spbx.util.testing.TestingPrimitives.toBigInteger;
+import static io.spbx.util.testing.TestingPrimitives.*;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 
 @SuppressWarnings("EqualsWithItself")
@@ -230,7 +229,8 @@ public class DoubleLongTest {
                 .roundtripUnsignedLong()
                 .roundtripLong()
                 .fitsIntoLongConsistency()
-                .compareConsistency()
+                .compareMatchesBigInteger()
+                .addMatchesBigInteger()
                 .internalConstruction();
         }
 
@@ -305,10 +305,19 @@ public class DoubleLongTest {
             return this;
         }
 
-        public @NotNull DoubleLongSubject compareConsistency() {
+        public @NotNull DoubleLongSubject compareMatchesBigInteger() {
             for (BigInteger big : EDGE_CASE_BIG_INTEGERS) {
                 assertThat(actual.compareTo(DoubleLong.from(big))).isEqualTo(actual.toBigInteger().compareTo(big));
                 assertThat(DoubleLong.from(big).compareTo(actual)).isEqualTo(big.compareTo(actual.toBigInteger()));
+            }
+            return this;
+        }
+
+        public @NotNull DoubleLongSubject addMatchesBigInteger() {
+            for (BigInteger big : EDGE_CASE_BIG_INTEGERS) {
+                BigInteger expected = fitInto128Bits(actual.toBigInteger().add(big));
+                assertThat(DoubleLong.add(actual, DoubleLong.from(big)).toBigInteger()).isEqualTo(expected);
+                assertThat(DoubleLong.add(DoubleLong.from(big), actual).toBigInteger()).isEqualTo(expected);
             }
             return this;
         }
