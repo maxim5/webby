@@ -1,10 +1,12 @@
 package io.spbx.util.base;
 
+import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
 
 import static com.google.common.truth.Truth.assertThat;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 
+@Tag("fast")
 public class EasyPrimitivesTest {
     @Test
     public void firstNonNegative_of_two() {
@@ -56,11 +58,43 @@ public class EasyPrimitivesTest {
 
     @Test
     public void parseIntSafe_simple() {
+        assertThat(EasyPrimitives.parseIntSafe("0", -1)).isEqualTo(0);
         assertThat(EasyPrimitives.parseIntSafe("123", -1)).isEqualTo(123);
         assertThat(EasyPrimitives.parseIntSafe("-123", -1)).isEqualTo(-123);
-        assertThat(EasyPrimitives.parseIntSafe("0", -1)).isEqualTo(0);
-        assertThat(EasyPrimitives.parseIntSafe("0.0", -1)).isEqualTo(-1);
-        assertThat(EasyPrimitives.parseIntSafe("foo", -1)).isEqualTo(-1);
+
+        assertThat(EasyPrimitives.parseIntSafe("2147483647", -1)).isEqualTo(Integer.MAX_VALUE);
+        assertThat(EasyPrimitives.parseIntSafe("-2147483648", -1)).isEqualTo(Integer.MIN_VALUE);
+        assertThat(EasyPrimitives.parseIntSafe("2147483648", -1)).isEqualTo(-1);
+        assertThat(EasyPrimitives.parseIntSafe("-2147483649", -1)).isEqualTo(-1);
+
         assertThat(EasyPrimitives.parseIntSafe("", -1)).isEqualTo(-1);
+        assertThat(EasyPrimitives.parseIntSafe("0.", -1)).isEqualTo(-1);
+        assertThat(EasyPrimitives.parseIntSafe("0.0", -1)).isEqualTo(-1);
+        assertThat(EasyPrimitives.parseIntSafe("1e123", -1)).isEqualTo(-1);
+        assertThat(EasyPrimitives.parseIntSafe("foo", -1)).isEqualTo(-1);
+    }
+
+    @Test
+    public void parseLongSafe_simple() {
+        assertThat(EasyPrimitives.parseLongSafe("0", -1)).isEqualTo(0);
+        assertThat(EasyPrimitives.parseLongSafe("123", -1)).isEqualTo(123);
+        assertThat(EasyPrimitives.parseLongSafe("-123", -1)).isEqualTo(-123);
+
+        assertThat(EasyPrimitives.parseLongSafe("2147483647", -1)).isEqualTo(Integer.MAX_VALUE);
+        assertThat(EasyPrimitives.parseLongSafe("-2147483648", -1)).isEqualTo(Integer.MIN_VALUE);
+        assertThat(EasyPrimitives.parseLongSafe("2147483648", -1)).isEqualTo(2147483648L);
+        assertThat(EasyPrimitives.parseLongSafe("-2147483649", -1)).isEqualTo(-2147483649L);
+        assertThat(EasyPrimitives.parseLongSafe("9223372036854775807", -1)).isEqualTo(Long.MAX_VALUE);
+        assertThat(EasyPrimitives.parseLongSafe("9223372036854775807L", -1)).isEqualTo(-1);
+        assertThat(EasyPrimitives.parseLongSafe("9223372036854775808", -1)).isEqualTo(-1);
+        assertThat(EasyPrimitives.parseLongSafe("-9223372036854775808", -1)).isEqualTo(Long.MIN_VALUE);
+        assertThat(EasyPrimitives.parseLongSafe("-9223372036854775808L", -1)).isEqualTo(-1);
+        assertThat(EasyPrimitives.parseLongSafe("-9223372036854775809", -1)).isEqualTo(-1);
+
+        assertThat(EasyPrimitives.parseLongSafe("", -1)).isEqualTo(-1);
+        assertThat(EasyPrimitives.parseLongSafe("0.", -1)).isEqualTo(-1);
+        assertThat(EasyPrimitives.parseLongSafe("0.0", -1)).isEqualTo(-1);
+        assertThat(EasyPrimitives.parseLongSafe("1e123", -1)).isEqualTo(-1);
+        assertThat(EasyPrimitives.parseLongSafe("foo", -1)).isEqualTo(-1);
     }
 }
