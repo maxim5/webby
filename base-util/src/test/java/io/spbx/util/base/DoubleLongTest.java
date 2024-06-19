@@ -231,6 +231,7 @@ public class DoubleLongTest {
                 .fitsIntoLongConsistency()
                 .compareMatchesBigInteger()
                 .addMatchesBigInteger()
+                .negateMatchesBigInteger()
                 .internalConstruction();
         }
 
@@ -319,6 +320,12 @@ public class DoubleLongTest {
                 assertThat(DoubleLong.add(actual, DoubleLong.from(big)).toBigInteger()).isEqualTo(expected);
                 assertThat(DoubleLong.add(DoubleLong.from(big), actual).toBigInteger()).isEqualTo(expected);
             }
+            return this;
+        }
+
+        public @NotNull DoubleLongSubject negateMatchesBigInteger() {
+            BigInteger expected = fitInto128Bits(actual.toBigInteger().negate());
+            assertThat(DoubleLong.negate(actual).toBigInteger()).isEqualTo(expected);
             return this;
         }
 

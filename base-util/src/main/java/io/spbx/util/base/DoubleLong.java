@@ -205,6 +205,10 @@ public final class DoubleLong extends Number implements Comparable<DoubleLong> {
         return from(lhs.toBigInteger().divide(rhs.toBigInteger()));
     }
 
+    public static @NotNull DoubleLong negate(@NotNull DoubleLong val) {
+        return add(DoubleLong.fromBits(~val.high, ~val.low), ONE);
+    }
+
     public static @NotNull DoubleLong and(@NotNull DoubleLong lhs, @NotNull DoubleLong rhs) {
         return DoubleLong.fromBits(lhs.high & rhs.high, lhs.low & rhs.low);
     }
