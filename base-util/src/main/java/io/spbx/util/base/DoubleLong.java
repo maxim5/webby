@@ -15,6 +15,7 @@ import java.util.Comparator;
 
 /**
  * Represents the signed 128-bit integer.
+ * Preserves the semantics of {@link BigInteger} (e.g., two's compliment binary representation) but much more efficient.
  */
 @Immutable
 @Beta
@@ -76,18 +77,19 @@ public final class DoubleLong extends Number implements Comparable<DoubleLong> {
         return from(value.longValue());
     }
 
-    public static @NotNull DoubleLong from(@NotNull String value) {
-        return from(new BigInteger(value));
+    public static @NotNull DoubleLong from(@NotNull CharSequence value) {
+        return from(new BigInteger(value.toString()));
     }
 
-    public static @NotNull DoubleLong fromHex(@NotNull String value) {
-        return from(new BigInteger(value, 16));
+    public static @NotNull DoubleLong fromHex(@NotNull CharSequence value) {
+        return from(new BigInteger(value.toString(), 16));
     }
 
     public static @NotNull DoubleLong from(long value) {
         return value >= 0 ? fromBits(0, value) : fromBits(-1, value);
     }
 
+    @Beta
     public static @NotNull DoubleLong from(double value) {
         return from(toBigInteger(value));
     }
@@ -122,6 +124,7 @@ public final class DoubleLong extends Number implements Comparable<DoubleLong> {
     }
 
     public @NotNull UnsignedLong toUnsignedLong() {
+        assert fitsIntoLong() : "The value does not fit into `UnsignedLong`";
         return UnsignedLong.fromLongBits(low);
     }
 
