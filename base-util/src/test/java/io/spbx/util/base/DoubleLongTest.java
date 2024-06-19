@@ -232,6 +232,7 @@ public class DoubleLongTest {
                 .compareMatchesBigInteger()
                 .addMatchesBigInteger()
                 .negateMatchesBigInteger()
+                .logicOpsMatchesBigInteger()
                 .internalConstruction();
         }
 
@@ -330,6 +331,18 @@ public class DoubleLongTest {
             assertThat(actual.negate().toBigInteger()).isEqualTo(expected);
             assertThat(DoubleLong.negate(actual).toBigInteger()).isEqualTo(expected);
             return isEqualTo(actual.negate().negate());
+        }
+
+        public @NotNull DoubleLongSubject logicOpsMatchesBigInteger() {
+            for (BigInteger big : EDGE_CASE_BIG_INTEGERS) {
+                assertThat(actual.and(DoubleLong.from(big)).toBigInteger()).isEqualTo(actual.toBigInteger().and(big));
+                assertThat(DoubleLong.from(big).and(actual).toBigInteger()).isEqualTo(actual.toBigInteger().and(big));
+                assertThat(actual.or(DoubleLong.from(big)).toBigInteger()).isEqualTo(actual.toBigInteger().or(big));
+                assertThat(DoubleLong.from(big).or(actual).toBigInteger()).isEqualTo(actual.toBigInteger().or(big));
+                assertThat(actual.xor(DoubleLong.from(big)).toBigInteger()).isEqualTo(actual.toBigInteger().xor(big));
+                assertThat(DoubleLong.from(big).xor(actual).toBigInteger()).isEqualTo(actual.toBigInteger().xor(big));
+            }
+            return this;
         }
 
         public @NotNull DoubleLongSubject internalConstruction() {
