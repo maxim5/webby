@@ -16,7 +16,7 @@ import java.util.List;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
-public class ImportsCollector {
+class ImportsCollector {
     private static final ImmutableSet<String> IMPORTED_BY_STAR = ImmutableSet.of("java.lang", "java.sql", "java.util");
 
     private static final ImmutableList<Class<?>> DEFAULT_ORM_CLASSES = ImmutableList.of(
@@ -39,7 +39,7 @@ public class ImportsCollector {
         this.baseClass = baseClass;
     }
 
-    @NotNull List<String> imports() {
+    public @NotNull List<String> imports() {
         List<Class<?>> mappedTypes = table.fields().stream()
             .filter(TableField::isMapperSupportedType)
             .map(TableField::javaType)
