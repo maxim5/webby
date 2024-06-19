@@ -179,6 +179,10 @@ public final class DoubleLong extends Number implements Comparable<DoubleLong> {
 
     // Math and arithmetic
 
+    public @NotNull DoubleLong add(@NotNull DoubleLong other) {
+        return add(this, other);
+    }
+
     public static @NotNull DoubleLong add(@NotNull DoubleLong lhs, @NotNull DoubleLong rhs) {
         long a = lhs.low;
         long b = rhs.low;
@@ -193,28 +197,56 @@ public final class DoubleLong extends Number implements Comparable<DoubleLong> {
         return fromBits(highSum, lowSum);
     }
 
+    public @NotNull DoubleLong subtract(@NotNull DoubleLong other) {
+        return subtract(this, other);
+    }
+
     public static @NotNull DoubleLong subtract(@NotNull DoubleLong lhs, @NotNull DoubleLong rhs) {
         return from(lhs.toBigInteger().subtract(rhs.toBigInteger()));
+    }
+
+    public @NotNull DoubleLong multiply(@NotNull DoubleLong other) {
+        return multiply(this, other);
     }
 
     public static @NotNull DoubleLong multiply(@NotNull DoubleLong lhs, @NotNull DoubleLong rhs) {
         return from(lhs.toBigInteger().multiply(rhs.toBigInteger()));
     }
 
+    public @NotNull DoubleLong divide(@NotNull DoubleLong other) {
+        return divide(this, other);
+    }
+
     public static @NotNull DoubleLong divide(@NotNull DoubleLong lhs, @NotNull DoubleLong rhs) {
         return from(lhs.toBigInteger().divide(rhs.toBigInteger()));
+    }
+
+    public @NotNull DoubleLong negate() {
+        return negate(this);
     }
 
     public static @NotNull DoubleLong negate(@NotNull DoubleLong val) {
         return add(DoubleLong.fromBits(~val.high, ~val.low), ONE);
     }
 
+    public @NotNull DoubleLong and(@NotNull DoubleLong other) {
+        return and(this, other);
+    }
+
     public static @NotNull DoubleLong and(@NotNull DoubleLong lhs, @NotNull DoubleLong rhs) {
         return DoubleLong.fromBits(lhs.high & rhs.high, lhs.low & rhs.low);
     }
 
+    public @NotNull DoubleLong or(@NotNull DoubleLong other) {
+        return or(this, other);
+    }
+
     public static @NotNull DoubleLong or(@NotNull DoubleLong lhs, @NotNull DoubleLong rhs) {
         return DoubleLong.fromBits(lhs.high | rhs.high, lhs.low | rhs.low);
+    }
+
+    public @NotNull DoubleLong xor(@NotNull DoubleLong other) {
+        return xor(this, other);
     }
 
     public static @NotNull DoubleLong xor(@NotNull DoubleLong lhs, @NotNull DoubleLong rhs) {

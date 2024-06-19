@@ -317,6 +317,8 @@ public class DoubleLongTest {
         public @NotNull DoubleLongSubject addMatchesBigInteger() {
             for (BigInteger big : EDGE_CASE_BIG_INTEGERS) {
                 BigInteger expected = fitInto128Bits(actual.toBigInteger().add(big));
+                assertThat(actual.add(DoubleLong.from(big)).toBigInteger()).isEqualTo(expected);
+                assertThat(DoubleLong.from(big).add(actual).toBigInteger()).isEqualTo(expected);
                 assertThat(DoubleLong.add(actual, DoubleLong.from(big)).toBigInteger()).isEqualTo(expected);
                 assertThat(DoubleLong.add(DoubleLong.from(big), actual).toBigInteger()).isEqualTo(expected);
             }
@@ -325,8 +327,9 @@ public class DoubleLongTest {
 
         public @NotNull DoubleLongSubject negateMatchesBigInteger() {
             BigInteger expected = fitInto128Bits(actual.toBigInteger().negate());
+            assertThat(actual.negate().toBigInteger()).isEqualTo(expected);
             assertThat(DoubleLong.negate(actual).toBigInteger()).isEqualTo(expected);
-            return this;
+            return isEqualTo(actual.negate().negate());
         }
 
         public @NotNull DoubleLongSubject internalConstruction() {
