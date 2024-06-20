@@ -1,11 +1,13 @@
 package io.spbx.util.testing;
 
 import com.google.errorprone.annotations.CanIgnoreReturnValue;
+import io.spbx.util.collect.ListBuilder;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.Arrays;
 import java.util.BitSet;
+import java.util.List;
 import java.util.TreeSet;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
@@ -26,6 +28,24 @@ public class TestingBasics {
     @SafeVarargs
     public static <T> @NotNull TreeSet<T> sortedSetOf(@Nullable T @NotNull ... items) {
         return Stream.of(items).collect(Collectors.toCollection(TreeSet::new));
+    }
+
+    public static <E> @NotNull List<E> flatListOf(@Nullable Object @NotNull ... items) {
+        ListBuilder<E> builder = ListBuilder.builder(2 * items.length);
+        for (Object item : items) {
+            addRecursive(builder, item);
+        }
+        return builder.toList();
+    }
+
+    private static <T> void addRecursive(@NotNull ListBuilder<T> builder, @Nullable Object item) {
+        if (item instanceof Iterable<?> iterable) {
+            iterable.forEach(it -> addRecursive(builder, it));
+        } else if (item instanceof Stream<?> stream) {
+            stream.forEach(it -> addRecursive(builder, it));
+        } else {
+            builder.add(castAny(item));
+        }
     }
 
     @SafeVarargs
