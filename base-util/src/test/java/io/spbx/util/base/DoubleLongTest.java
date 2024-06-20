@@ -3,11 +3,20 @@ package io.spbx.util.base;
 import com.google.common.base.Strings;
 import com.google.common.primitives.UnsignedLong;
 import com.google.errorprone.annotations.CanIgnoreReturnValue;
+import io.spbx.util.testing.TestingBasics;
+import io.spbx.util.testing.TestingPrimitives;
 import org.jetbrains.annotations.CheckReturnValue;
 import org.jetbrains.annotations.NotNull;
+import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.MethodSource;
+import org.junit.jupiter.params.provider.ValueSource;
 
 import java.math.BigInteger;
+import java.util.List;
+import java.util.stream.IntStream;
+import java.util.stream.Stream;
 
 import static com.google.common.truth.Truth.assertThat;
 import static io.spbx.util.testing.TestingPrimitives.*;
@@ -15,103 +24,30 @@ import static org.junit.jupiter.api.Assertions.assertThrows;
 
 @SuppressWarnings("EqualsWithItself")
 public class DoubleLongTest {
-    private static final BigInteger[] EDGE_CASE_BIG_INTEGERS = new BigInteger[] {
-        BigInteger.ZERO,
-        BigInteger.ONE,
-        BigInteger.ONE.negate(),
-        BigInteger.valueOf(Long.MAX_VALUE),
-        BigInteger.valueOf(Long.MAX_VALUE).add(BigInteger.ONE),
-        BigInteger.valueOf(Long.MAX_VALUE).subtract(BigInteger.ONE),
-        BigInteger.valueOf(Long.MIN_VALUE),
-        BigInteger.valueOf(Long.MIN_VALUE).add(BigInteger.ONE),
-        BigInteger.valueOf(Long.MIN_VALUE).subtract(BigInteger.ONE),
-        BigInteger.ONE.shiftLeft(64),
-        BigInteger.ONE.shiftLeft(64).add(BigInteger.ONE),
-        BigInteger.ONE.shiftLeft(64).subtract(BigInteger.ONE),
-        BigInteger.ONE.shiftLeft(64).negate(),
-        BigInteger.ONE.shiftLeft(64).negate().add(BigInteger.ONE),
-        BigInteger.ONE.shiftLeft(64).negate().subtract(BigInteger.ONE),
-        BigInteger.ONE.shiftLeft(127).subtract(BigInteger.ONE),
-        BigInteger.ONE.shiftLeft(127).subtract(BigInteger.TWO),
-        BigInteger.ONE.shiftLeft(127).negate(),
-        BigInteger.ONE.shiftLeft(127).negate().add(BigInteger.ONE),
-    };
+    private static final List<Long> SIMPLE_MIN_MAX_VALUES = Stream.of(
+        Byte.MAX_VALUE, Byte.MIN_VALUE,
+        Short.MAX_VALUE, Short.MIN_VALUE,
+        Integer.MAX_VALUE, Integer.MIN_VALUE,
+        Long.MAX_VALUE, Long.MIN_VALUE
+    ).map(Number::longValue).toList();
 
-    @Test
-    public void construction_positive_numbers() {
-        assertConstruction("0");
-        assertConstruction("1");
-        assertConstruction("42");
-        assertConstruction("255");
-        assertConstruction("256");
+    private static final List<BigInteger> EDGE_CASE_BIG_INTEGERS = IntStream.range(0, 128)
+        .mapToObj(BigInteger.ONE::shiftLeft)
+        .flatMap(b -> Stream.of(b, b.subtract(BigInteger.ONE), b.negate(), b.negate().add(BigInteger.ONE)))
+        .map(TestingPrimitives::fitInto128Bits)
+        .sorted().distinct().toList();
 
-        assertConstruction("32767");
-        assertConstruction("32768");
-        assertConstruction("2147483647");
-        assertConstruction("2147483648");
-        assertConstruction("9223372036854775807");
-        assertConstruction("9223372036854775808");
+    private static final List<Long> EDGE_CASE_LONGS =
+        EDGE_CASE_BIG_INTEGERS.stream().map(BigInteger::longValue).sorted().distinct().toList();
 
-        assertConstruction("10000000000000000000000000");
-        assertConstruction("99999999999999999999999999");
-        assertConstruction("99405973409652309870353134");
-    }
-
-    @Test
-    public void construction_negative_numbers() {
-        assertConstruction("-1");
-        assertConstruction("-42");
-        assertConstruction("-255");
-        assertConstruction("-256");
-
-        assertConstruction("-32767");
-        assertConstruction("-32768");
-        assertConstruction("-2147483647");
-        assertConstruction("-2147483648");
-        assertConstruction("-9223372036854775807");
-        assertConstruction("-9223372036854775808");
-
-        assertConstruction("-10000000000000000000000000");
-        assertConstruction("-99999999999999999999999999");
-        assertConstruction("-99405973409652309870353134");
-    }
-
-    @Test
-    public void internal_consistency_trivial() {
-        assertThatDoubleLong(DoubleLong.ZERO).internalConsistency();
-        assertThatDoubleLong(DoubleLong.ONE).internalConsistency();
-        assertThatDoubleLong(DoubleLong.MAX_VALUE).internalConsistency();
-        assertThatDoubleLong(DoubleLong.MIN_VALUE).internalConsistency();
-    }
-
-    @Test
-    public void internal_consistency_long_numbers() {
-        assertThatDoubleLong(DoubleLong.from(Byte.MAX_VALUE)).internalConsistency();
-        assertThatDoubleLong(DoubleLong.from(Byte.MIN_VALUE)).internalConsistency();
-        assertThatDoubleLong(DoubleLong.from(Short.MAX_VALUE)).internalConsistency();
-        assertThatDoubleLong(DoubleLong.from(Short.MIN_VALUE)).internalConsistency();
-        assertThatDoubleLong(DoubleLong.from(Integer.MAX_VALUE)).internalConsistency();
-        assertThatDoubleLong(DoubleLong.from(Integer.MIN_VALUE)).internalConsistency();
-        assertThatDoubleLong(DoubleLong.from(Long.MAX_VALUE)).internalConsistency();
-        assertThatDoubleLong(DoubleLong.from(Long.MIN_VALUE)).internalConsistency();
-        assertThatDoubleLong(DoubleLong.from("9223372036854775808")).internalConsistency();
-        assertThatDoubleLong(DoubleLong.from("-9223372036854775809")).internalConsistency();
-    }
-
-    @Test
-    public void internal_consistency_big_numbers() {
-        assertThatDoubleLong(DoubleLong.from("7734245186249221")).internalConsistency();
-        assertThatDoubleLong(DoubleLong.from("14262866606244585389")).internalConsistency();
-        assertThatDoubleLong(DoubleLong.from("643060765953885798980471")).internalConsistency();
-        assertThatDoubleLong(DoubleLong.from("511502705152331397313213352309")).internalConsistency();
-        assertThatDoubleLong(DoubleLong.from("729607297303010430697493914704054547")).internalConsistency();
-
-        assertThatDoubleLong(DoubleLong.from("-7734245186249221")).internalConsistency();
-        assertThatDoubleLong(DoubleLong.from("-14262866606244585389")).internalConsistency();
-        assertThatDoubleLong(DoubleLong.from("-643060765953885798980471")).internalConsistency();
-        assertThatDoubleLong(DoubleLong.from("-511502705152331397313213352309")).internalConsistency();
-        assertThatDoubleLong(DoubleLong.from("-729607297303010430697493914704054547")).internalConsistency();
-    }
+    // From https://bigprimes.org/
+    private static final List<BigInteger> LARGE_PRIME_NUMBERS = Stream.of(
+        "7734245186249221",
+        "14262866606244585389",
+        "643060765953885798980471",
+        "511502705152331397313213352309",
+        "729607297303010430697493914704054547"
+    ).map(BigInteger::new).flatMap(b -> Stream.of(b, b.negate())).sorted().toList();
 
     @Test
     public void trivial_zero() {
@@ -122,6 +58,7 @@ public class DoubleLongTest {
         assertThat(DoubleLong.ZERO.intValue()).isEqualTo(0);
         assertThat(DoubleLong.ZERO.toString()).isEqualTo("0");
         assertThat(DoubleLong.ZERO.toBinaryString()).isEqualTo("0".repeat(128));
+        assertThat(DoubleLong.ZERO).isEqualTo(DoubleLong.from(0));
         assertThat(DoubleLong.ZERO.compareTo(DoubleLong.ZERO)).isEqualTo(0);
         assertThat(DoubleLong.ZERO.compareTo(DoubleLong.ONE)).isEqualTo(-1);
         assertThat(DoubleLong.ZERO.compareTo(DoubleLong.MIN_VALUE)).isEqualTo(1);
@@ -137,6 +74,7 @@ public class DoubleLongTest {
         assertThat(DoubleLong.ONE.intValue()).isEqualTo(1);
         assertThat(DoubleLong.ONE.toString()).isEqualTo("1");
         assertThat(DoubleLong.ONE.toBinaryString()).isEqualTo("0".repeat(127) + "1");
+        assertThat(DoubleLong.ONE).isEqualTo(DoubleLong.from(1));
         assertThat(DoubleLong.ONE.compareTo(DoubleLong.ZERO)).isEqualTo(1);
         assertThat(DoubleLong.ONE.compareTo(DoubleLong.ONE)).isEqualTo(0);
         assertThat(DoubleLong.ONE.compareTo(DoubleLong.MIN_VALUE)).isEqualTo(1);
@@ -176,7 +114,7 @@ public class DoubleLongTest {
     }
 
     @Test
-    public void trivial_bits() {
+    public void trivial_construction_from_bits_long() {
         assertThat(DoubleLong.fromBits(0, 0)).isEqualTo(DoubleLong.from(BigInteger.ZERO));
         assertThat(DoubleLong.fromBits(0, 1)).isEqualTo(DoubleLong.from(BigInteger.ONE));
         assertThat(DoubleLong.fromBits(0, -1)).isEqualTo(DoubleLong.from(BigInteger.ONE.shiftLeft(64).subtract(BigInteger.ONE)));
@@ -193,6 +131,60 @@ public class DoubleLongTest {
         assertThat(DoubleLong.fromBits(0, Long.MIN_VALUE)).isEqualTo(DoubleLong.from(BigInteger.valueOf(Long.MIN_VALUE).negate()));
     }
 
+    @ParameterizedTest
+    @ValueSource(strings = {
+        "0", "1", "2147483647", "2147483648", "9223372036854775807", "9223372036854775808",
+        "-1", "-2147483647", "-2147483648", "-9223372036854775807", "-9223372036854775808",
+    })
+    public void construction_simple(String num) {
+         assertConstruction(num);
+    }
+
+    @Test
+    public void construction_ultimate() {
+        for (BigInteger num : EDGE_CASE_BIG_INTEGERS) {
+            assertConstruction(num.toString());
+        }
+        for (BigInteger num : LARGE_PRIME_NUMBERS) {
+            assertConstruction(num.toString());
+        }
+    }
+
+    private static @NotNull List<DoubleLong> internal_consistency_simple() {
+        return TestingBasics.flatListOf(
+            DoubleLong.ZERO, DoubleLong.ONE,
+            DoubleLong.MIN_VALUE, DoubleLong.MAX_VALUE,
+            SIMPLE_MIN_MAX_VALUES.stream().map(DoubleLong::from)
+        );
+    }
+
+    @ParameterizedTest
+    @MethodSource
+    public void internal_consistency_simple(DoubleLong val) {
+        assertThatDoubleLong(val).internalConsistency();
+    }
+
+    @Tag("slow")
+    @Test
+    public void internal_consistency_ultimate() {
+        for (BigInteger num : EDGE_CASE_BIG_INTEGERS) {
+            assertThatDoubleLong(DoubleLong.from(num)).internalConsistency();
+        }
+        for (BigInteger num : LARGE_PRIME_NUMBERS) {
+            assertThatDoubleLong(DoubleLong.from(num)).internalConsistency();
+        }
+        for (long num : EDGE_CASE_LONGS) {
+            assertThatDoubleLong(DoubleLong.from(num)).internalConsistency();
+        }
+    }
+
+    private static final List<DoubleLong> FIT_INTO_LONG =
+        List.of(DoubleLong.ZERO, DoubleLong.ONE, DoubleLong.from(Long.MAX_VALUE), DoubleLong.from(Long.MIN_VALUE));
+    private static final List<DoubleLong> NOT_FIT_INTO_LONG = List.of(
+        DoubleLong.MAX_VALUE, DoubleLong.MIN_VALUE,
+        DoubleLong.from("9223372036854775808"), DoubleLong.from("-9223372036854775809")
+    );
+
     @Test
     public void trivial_fits_into_long() {
         assertThat(DoubleLong.ZERO.fitsIntoLong()).isTrue();
@@ -205,6 +197,8 @@ public class DoubleLongTest {
         assertThat(DoubleLong.from("9223372036854775808").fitsIntoLong()).isFalse();
         assertThat(DoubleLong.from("-9223372036854775809").fitsIntoLong()).isFalse();
     }
+
+    // Assertion utils
 
     @CheckReturnValue
     private @NotNull DoubleLongSubject assertThatDoubleLong(@NotNull DoubleLong actual) {
