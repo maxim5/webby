@@ -184,14 +184,14 @@ public final class DoubleLong extends Number implements Comparable<DoubleLong> {
     }
 
     public static @NotNull DoubleLong add(@NotNull DoubleLong lhs, @NotNull DoubleLong rhs) {
-        long a = lhs.low;
-        long b = rhs.low;
-        long lowSum = a + b;
         // Notes:
         // - zero comparison calculates the sign bit: sign_bit(x) = "0" for x >= 0 and "1" for x < 0
         // - should carry if the sum rolls over 2^64, not 2^63 (which is Long overflow)
         // - if the sign_bit gets lots in a result (either `a` or `b`), there is a carry
         // - if both operands had the sign bit, there is a carry
+        long a = lhs.low;
+        long b = rhs.low;
+        long lowSum = a + b;
         boolean carry = ((a & b) < 0) || ((a ^ b) < 0 & lowSum >= 0);
         long highSum = lhs.high + rhs.high + (carry ? 1L : 0L);
         return fromBits(highSum, lowSum);
@@ -210,7 +210,10 @@ public final class DoubleLong extends Number implements Comparable<DoubleLong> {
     }
 
     public static @NotNull DoubleLong multiply(@NotNull DoubleLong lhs, @NotNull DoubleLong rhs) {
-        return from(lhs.toBigInteger().multiply(rhs.toBigInteger()));
+        // https://stackoverflow.com/questions/18859207/high-bits-of-long-multiplication-in-java
+        long low = lhs.low * rhs.low;
+        long high = Math.unsignedMultiplyHigh(lhs.low, rhs.low) + lhs.high * rhs.low + lhs.low * rhs.high;
+        return fromBits(high, low);
     }
 
     public @NotNull DoubleLong divide(@NotNull DoubleLong other) {
@@ -225,11 +228,11 @@ public final class DoubleLong extends Number implements Comparable<DoubleLong> {
         return negate(this);
     }
 
-    // Logical ops
-
     public static @NotNull DoubleLong negate(@NotNull DoubleLong val) {
         return add(DoubleLong.fromBits(~val.high, ~val.low), ONE);
     }
+
+    // Logical ops
 
     public @NotNull DoubleLong and(@NotNull DoubleLong other) {
         return and(this, other);

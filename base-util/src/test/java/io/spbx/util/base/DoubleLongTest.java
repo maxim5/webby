@@ -198,6 +198,63 @@ public class DoubleLongTest {
         assertThat(DoubleLong.from("-9223372036854775809").fitsIntoLong()).isFalse();
     }
 
+    @Test
+    public void multiply_simple() {
+        assertThat(DoubleLong.ZERO.multiply(DoubleLong.ZERO)).isEqualTo(DoubleLong.ZERO);
+        assertThat(DoubleLong.ZERO.multiply(DoubleLong.ONE)).isEqualTo(DoubleLong.ZERO);
+        assertThat(DoubleLong.ONE.multiply(DoubleLong.ONE)).isEqualTo(DoubleLong.ONE);
+        assertThat(DoubleLong.ONE.multiply(DoubleLong.from(2))).isEqualTo(DoubleLong.from(2));
+        assertThat(DoubleLong.from(2).multiply(DoubleLong.from(2))).isEqualTo(DoubleLong.from(4));
+    }
+
+    @Test
+    public void multiple_positive() {
+        assertMultiplyMatchesBigInteger(
+            DoubleLong.fromBits(0, 1L << 36 + 1),
+            DoubleLong.fromBits(0, 1L << 36 + 2)
+        );
+        assertMultiplyMatchesBigInteger(
+            DoubleLong.fromBits(1 << 16, 1L << 24 + 1),
+            DoubleLong.fromBits(1 << 10, 1L << 18 + 2)
+        );
+        assertMultiplyMatchesBigInteger(
+            DoubleLong.fromBits(1L << 20 + 1, 1L << 30 + 1),
+            DoubleLong.fromBits(1L << 20 - 1, 1L << 18 - 1)
+        );
+        assertMultiplyMatchesBigInteger(
+            DoubleLong.fromBits(1L << 30 - 1, 1L << 24 - 1),
+            DoubleLong.fromBits(1L << 15 - 1, 1L << 12 - 1)
+        );
+
+        assertMultiplyMatchesBigInteger(DoubleLong.from(Integer.MAX_VALUE), DoubleLong.from(Integer.MAX_VALUE));
+        assertMultiplyMatchesBigInteger(DoubleLong.from(Long.MAX_VALUE), DoubleLong.from(Long.MAX_VALUE));
+    }
+
+    @Test
+    public void multiply_negative() {
+        assertMultiplyMatchesBigInteger(DoubleLong.from(-1), DoubleLong.from(1));
+        assertMultiplyMatchesBigInteger(DoubleLong.from(-1), DoubleLong.from(-1));
+        assertMultiplyMatchesBigInteger(DoubleLong.from(Integer.MAX_VALUE), DoubleLong.from(Integer.MIN_VALUE));
+        assertMultiplyMatchesBigInteger(DoubleLong.from(Integer.MIN_VALUE), DoubleLong.from(Integer.MIN_VALUE));
+        assertMultiplyMatchesBigInteger(DoubleLong.from(Long.MAX_VALUE), DoubleLong.from(Long.MIN_VALUE));
+        assertMultiplyMatchesBigInteger(DoubleLong.from(Long.MIN_VALUE), DoubleLong.from(Long.MIN_VALUE));
+    }
+
+    @Tag("slow")
+    @Test
+    public void multiply_ultimate() {
+        for (BigInteger a : EDGE_CASE_BIG_INTEGERS) {
+            for (BigInteger b : EDGE_CASE_BIG_INTEGERS) {
+                assertMultiplyMatchesBigInteger(DoubleLong.from(a), DoubleLong.from(b));
+            }
+        }
+    }
+
+    private static void assertMultiplyMatchesBigInteger(DoubleLong lhs, DoubleLong rhs) {
+        BigInteger expected = fitInto128Bits(lhs.toBigInteger().multiply(rhs.toBigInteger()));
+        assertThat(lhs.multiply(rhs).toBigInteger()).isEqualTo(expected);
+    }
+
     // Assertion utils
 
     @CheckReturnValue
