@@ -22,7 +22,10 @@ public class TestingPrimitives {
     public static @NotNull BigInteger fitInto128Bits(@NotNull BigInteger bigInteger) {
         BigInteger mod = BigInteger.ONE.shiftLeft(128);
         BigInteger max = BigInteger.ONE.shiftLeft(127);
-        BigInteger result = bigInteger.mod(mod);
+        BigInteger result =
+            bigInteger.compareTo(max) > 0 || bigInteger.compareTo(max.negate()) < 0 ?
+                bigInteger.mod(mod) :
+                bigInteger;
         return result.compareTo(max) >= 0 ? result.subtract(mod) : result;
     }
 
