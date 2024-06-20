@@ -3,6 +3,7 @@ package io.spbx.util.base;
 import com.google.common.base.Strings;
 import com.google.common.primitives.UnsignedLong;
 import com.google.errorprone.annotations.CanIgnoreReturnValue;
+import io.spbx.util.collect.ListBuilder;
 import io.spbx.util.testing.TestingBasics;
 import io.spbx.util.testing.TestingPrimitives;
 import org.jetbrains.annotations.CheckReturnValue;
@@ -142,10 +143,7 @@ public class DoubleLongTest {
 
     @Test
     public void construction_ultimate() {
-        for (BigInteger num : EDGE_CASE_BIG_INTEGERS) {
-            assertConstruction(num.toString());
-        }
-        for (BigInteger num : LARGE_PRIME_NUMBERS) {
+        for (BigInteger num : ListBuilder.concat(EDGE_CASE_BIG_INTEGERS, LARGE_PRIME_NUMBERS)) {
             assertConstruction(num.toString());
         }
     }
@@ -167,10 +165,7 @@ public class DoubleLongTest {
     @Tag("slow")
     @Test
     public void internal_consistency_ultimate() {
-        for (BigInteger num : EDGE_CASE_BIG_INTEGERS) {
-            assertThatDoubleLong(DoubleLong.from(num)).internalConsistency();
-        }
-        for (BigInteger num : LARGE_PRIME_NUMBERS) {
+        for (BigInteger num : ListBuilder.concat(EDGE_CASE_BIG_INTEGERS, LARGE_PRIME_NUMBERS)) {
             assertThatDoubleLong(DoubleLong.from(num)).internalConsistency();
         }
         for (long num : EDGE_CASE_LONGS) {
@@ -253,6 +248,15 @@ public class DoubleLongTest {
     private static void assertMultiplyMatchesBigInteger(DoubleLong lhs, DoubleLong rhs) {
         BigInteger expected = fitInto128Bits(lhs.toBigInteger().multiply(rhs.toBigInteger()));
         assertThat(lhs.multiply(rhs).toBigInteger()).isEqualTo(expected);
+    }
+
+    @Test
+    public void negate_ultimate() {
+        for (BigInteger num : ListBuilder.concat(EDGE_CASE_BIG_INTEGERS, LARGE_PRIME_NUMBERS)) {
+            BigInteger expected = fitInto128Bits(num.negate());
+            assertThat(DoubleLong.from(num).negate().toBigInteger()).isEqualTo(expected);
+            assertThat(DoubleLong.negate(DoubleLong.from(num)).toBigInteger()).isEqualTo(expected);
+        }
     }
 
     // Assertion utils

@@ -229,7 +229,8 @@ public final class DoubleLong extends Number implements Comparable<DoubleLong> {
     }
 
     public static @NotNull DoubleLong negate(@NotNull DoubleLong val) {
-        return add(DoubleLong.fromBits(~val.high, ~val.low), ONE);
+        // General formula: -X = ~X + 1. The "+1" can be further optimized because usually it only changes the `low`
+        return val.low == 0 ? DoubleLong.fromBits(~val.high + 1, 0) : DoubleLong.fromBits(~val.high, ~val.low + 1);
     }
 
     // Logical ops
