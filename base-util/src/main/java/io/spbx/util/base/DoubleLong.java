@@ -218,6 +218,8 @@ public final class DoubleLong extends Number implements Comparable<DoubleLong> {
         return from(this.toBigInteger().divide(that.toBigInteger()));
     }
 
+    // Note: `DoubleLong.MIN_VALUE.negate() == DoubleLong.MIN_VALUE`!
+    // https://stackoverflow.com/questions/5444611/math-abs-returns-wrong-value-for-integer-min-value
     public @NotNull DoubleLong negate() {
         // General formula: -X = ~X + 1. The "+1" can be further optimized because usually it only changes the `low`
         return low == 0 ? DoubleLong.fromBits(~high + 1, 0) : DoubleLong.fromBits(~high, ~low + 1);
