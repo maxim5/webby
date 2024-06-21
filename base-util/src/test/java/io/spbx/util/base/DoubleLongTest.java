@@ -255,7 +255,6 @@ public class DoubleLongTest {
         for (BigInteger num : ListBuilder.concat(EDGE_CASE_BIG_INTEGERS, LARGE_PRIME_NUMBERS)) {
             BigInteger expected = fitInto128Bits(num.negate());
             assertThat(DoubleLong.from(num).negate().toBigInteger()).isEqualTo(expected);
-            assertThat(DoubleLong.negate(DoubleLong.from(num)).toBigInteger()).isEqualTo(expected);
         }
     }
 
@@ -376,8 +375,6 @@ public class DoubleLongTest {
                 BigInteger expected = fitInto128Bits(actual.toBigInteger().add(big));
                 assertThat(actual.add(DoubleLong.from(big)).toBigInteger()).isEqualTo(expected);
                 assertThat(DoubleLong.from(big).add(actual).toBigInteger()).isEqualTo(expected);
-                assertThat(DoubleLong.add(actual, DoubleLong.from(big)).toBigInteger()).isEqualTo(expected);
-                assertThat(DoubleLong.add(DoubleLong.from(big), actual).toBigInteger()).isEqualTo(expected);
             }
             return this;
         }
@@ -386,11 +383,7 @@ public class DoubleLongTest {
             for (BigInteger big : EDGE_CASE_BIG_INTEGERS) {
                 assertThat(actual.subtract(DoubleLong.from(big)).toBigInteger())
                     .isEqualTo(fitInto128Bits(actual.toBigInteger().subtract(big)));
-                assertThat(DoubleLong.subtract(actual, DoubleLong.from(big)).toBigInteger())
-                    .isEqualTo(fitInto128Bits(actual.toBigInteger().subtract(big)));
                 assertThat(DoubleLong.from(big).subtract(actual).toBigInteger())
-                    .isEqualTo(fitInto128Bits(big.subtract(actual.toBigInteger())));
-                assertThat(DoubleLong.subtract(DoubleLong.from(big), actual).toBigInteger())
                     .isEqualTo(fitInto128Bits(big.subtract(actual.toBigInteger())));
             }
             return this;
@@ -399,7 +392,6 @@ public class DoubleLongTest {
         public @NotNull DoubleLongSubject negateMatchesBigInteger() {
             BigInteger expected = fitInto128Bits(actual.toBigInteger().negate());
             assertThat(actual.negate().toBigInteger()).isEqualTo(expected);
-            assertThat(DoubleLong.negate(actual).toBigInteger()).isEqualTo(expected);
             return isEqualTo(actual.negate().negate());
         }
 

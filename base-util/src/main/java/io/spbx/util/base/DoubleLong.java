@@ -179,84 +179,62 @@ public final class DoubleLong extends Number implements Comparable<DoubleLong> {
 
     // Math and arithmetic
 
-    public @NotNull DoubleLong add(@NotNull DoubleLong other) {
-        return add(this, other);
+    public @NotNull DoubleLong add(@NotNull DoubleLong that) {
+        return add(this.high, this.low, that.high, that.low);
     }
 
-    public static @NotNull DoubleLong add(@NotNull DoubleLong lhs, @NotNull DoubleLong rhs) {
+    private static @NotNull DoubleLong add(long hi1, long lo1, long hi2, long lo2) {
         // Notes:
         // - zero comparison calculates the sign bit: sign_bit(x) = "0" for x >= 0 and "1" for x < 0
         // - should carry if the sum rolls over 2^64, not 2^63 (which is Long overflow)
-        // - if the sign_bit gets lots in a result (either `a` or `b`), there is a carry
+        // - if the sign_bit gets lots in a result (either `lo1` or `lo2`), there is a carry
         // - if both operands had the sign bit, there is a carry
-        long a = lhs.low;
-        long b = rhs.low;
-        long lowSum = a + b;
-        boolean carry = ((a & b) < 0) || ((a ^ b) < 0 & lowSum >= 0);
-        long highSum = lhs.high + rhs.high + (carry ? 1L : 0L);
-        return fromBits(highSum, lowSum);
+        long lo_sum = lo1 + lo2;
+        boolean carry = ((lo1 & lo2) < 0) || ((lo1 ^ lo2) < 0 & lo_sum >= 0);
+        long hi_sum = hi1 + hi2 + (carry ? 1L : 0L);
+        return fromBits(hi_sum, lo_sum);
     }
 
-    public @NotNull DoubleLong subtract(@NotNull DoubleLong other) {
-        return subtract(this, other);
+    public @NotNull DoubleLong subtract(@NotNull DoubleLong that) {
+        return this.add(that.negate());
     }
 
-    public static @NotNull DoubleLong subtract(@NotNull DoubleLong lhs, @NotNull DoubleLong rhs) {
-        return lhs.add(rhs.negate());
+    public @NotNull DoubleLong multiply(@NotNull DoubleLong that) {
+        return multiply(this.high, this.low, that.high, that.low);
     }
 
-    public @NotNull DoubleLong multiply(@NotNull DoubleLong other) {
-        return multiply(this, other);
-    }
-
-    public static @NotNull DoubleLong multiply(@NotNull DoubleLong lhs, @NotNull DoubleLong rhs) {
+    private static @NotNull DoubleLong multiply(long hi1, long lo1, long hi2, long lo2) {
         // https://stackoverflow.com/questions/18859207/high-bits-of-long-multiplication-in-java
-        long low = lhs.low * rhs.low;
-        long high = Math.unsignedMultiplyHigh(lhs.low, rhs.low) + lhs.high * rhs.low + lhs.low * rhs.high;
+        long low = lo1 * lo2;
+        long high = Math.unsignedMultiplyHigh(lo1, lo2) + hi1 * lo2 + hi2 * lo1;
         return fromBits(high, low);
     }
 
-    public @NotNull DoubleLong divide(@NotNull DoubleLong other) {
-        return divide(this, other);
-    }
-
-    public static @NotNull DoubleLong divide(@NotNull DoubleLong lhs, @NotNull DoubleLong rhs) {
-        return from(lhs.toBigInteger().divide(rhs.toBigInteger()));
+    public @NotNull DoubleLong divide(@NotNull DoubleLong that) {
+        return from(this.toBigInteger().divide(that.toBigInteger()));
     }
 
     public @NotNull DoubleLong negate() {
-        return negate(this);
-    }
-
-    public static @NotNull DoubleLong negate(@NotNull DoubleLong val) {
         // General formula: -X = ~X + 1. The "+1" can be further optimized because usually it only changes the `low`
-        return val.low == 0 ? DoubleLong.fromBits(~val.high + 1, 0) : DoubleLong.fromBits(~val.high, ~val.low + 1);
+        return low == 0 ? DoubleLong.fromBits(~high + 1, 0) : DoubleLong.fromBits(~high, ~low + 1);
     }
 
     // Logical ops
 
-    public @NotNull DoubleLong and(@NotNull DoubleLong other) {
-        return and(this, other);
+    public @NotNull DoubleLong not() {
+        return DoubleLong.fromBits(~high, ~low);
     }
 
-    public static @NotNull DoubleLong and(@NotNull DoubleLong lhs, @NotNull DoubleLong rhs) {
-        return DoubleLong.fromBits(lhs.high & rhs.high, lhs.low & rhs.low);
+    public @NotNull DoubleLong and(@NotNull DoubleLong that) {
+        return DoubleLong.fromBits(this.high & that.high, this.low & that.low);
     }
 
-    public @NotNull DoubleLong or(@NotNull DoubleLong other) {
-        return or(this, other);
+    public @NotNull DoubleLong or(@NotNull DoubleLong that) {
+        return DoubleLong.fromBits(this.high | that.high, this.low | that.low);
     }
 
-    public static @NotNull DoubleLong or(@NotNull DoubleLong lhs, @NotNull DoubleLong rhs) {
-        return DoubleLong.fromBits(lhs.high | rhs.high, lhs.low | rhs.low);
-    }
-
-    public @NotNull DoubleLong xor(@NotNull DoubleLong other) {
-        return xor(this, other);
-    }
-
-    public static @NotNull DoubleLong xor(@NotNull DoubleLong lhs, @NotNull DoubleLong rhs) {
-        return DoubleLong.fromBits(lhs.high ^ rhs.high, lhs.low ^ rhs.low);
+    public @NotNull DoubleLong xor(@NotNull DoubleLong that) {
+        return DoubleLong.fromBits(this.high ^ that.high, this.low ^ that.low);
     }
 
     public static @NotNull DoubleLong max(@NotNull DoubleLong lhs, @NotNull DoubleLong rhs) {
