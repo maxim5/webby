@@ -196,7 +196,11 @@ public final class DoubleLong extends Number implements Comparable<DoubleLong> {
     }
 
     public @NotNull DoubleLong subtract(@NotNull DoubleLong that) {
-        return this.add(that.negate());
+        // The following code inlined:
+        //   this.add(that.negate());
+        return that.low == 0 ?
+            add(this.high, this.low, ~that.high + 1, 0) :
+            add(this.high, this.low, ~that.high, ~that.low + 1);
     }
 
     public @NotNull DoubleLong multiply(@NotNull DoubleLong that) {
@@ -236,6 +240,8 @@ public final class DoubleLong extends Number implements Comparable<DoubleLong> {
     public @NotNull DoubleLong xor(@NotNull DoubleLong that) {
         return DoubleLong.fromBits(this.high ^ that.high, this.low ^ that.low);
     }
+
+    // Other
 
     public static @NotNull DoubleLong max(@NotNull DoubleLong lhs, @NotNull DoubleLong rhs) {
         return compare(lhs, rhs) > 0 ? lhs : rhs;
