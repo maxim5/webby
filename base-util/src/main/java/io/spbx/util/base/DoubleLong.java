@@ -226,6 +226,14 @@ public final class DoubleLong extends Number implements Comparable<DoubleLong> {
 
     // Math and arithmetic
 
+    public @NotNull DoubleLong increment() {
+        return low == -1 ? DoubleLong.fromBits(high + 1, 0) : DoubleLong.fromBits(high, low + 1);
+    }
+
+    public @NotNull DoubleLong decrement() {
+        return low == 0 ? DoubleLong.fromBits(high - 1, -1) : DoubleLong.fromBits(high, low - 1);
+    }
+
     public @NotNull DoubleLong add(@NotNull DoubleLong that) {
         return add(this.high, this.low, that.high, that.low);
     }
@@ -268,7 +276,7 @@ public final class DoubleLong extends Number implements Comparable<DoubleLong> {
         DoubleLong b = that.abs();
         boolean sameSign = this.high < 0 == that.high < 0;
         if (a.high == Long.MIN_VALUE) {
-          return a.subtract(b).divide(b).add(ONE).flipSign(!sameSign);
+          return a.subtract(b).divide(b).increment().flipSign(!sameSign);
         } if (b.high == 0) {
             return divideLongUnsigned(a.high, a.low, b.low).flipSign(!sameSign);
         } else {
