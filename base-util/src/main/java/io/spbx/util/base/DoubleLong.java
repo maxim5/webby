@@ -83,8 +83,31 @@ public final class DoubleLong extends Number implements Comparable<DoubleLong> {
         return from(new BigInteger(value.toString()));
     }
 
-    public static @NotNull DoubleLong fromHex(@NotNull CharSequence value) {
-        return from(new BigInteger(value.toString(), 16));
+    public static @NotNull DoubleLong fromHex(@NotNull String value) {
+        boolean minus = value.startsWith("-");
+        int start = value.startsWith("-0x") ? 3 : value.startsWith("0x") ? 2 : value.startsWith("-") ? 1 : 0;
+        long high = 0, low = 0;
+        for (int i = value.length() - 1, bit = 0; i >= start; i--, bit++) {
+            char ch = value.charAt(i);
+            if (ch == '_') {
+                bit--;
+                continue;
+            }
+            long bitVal = parseHexChar(ch);
+            if (bit >= 16) {
+                high += bitVal << (bit - 16) * 4;
+            } else {
+                low += bitVal << bit * 4;
+            }
+        }
+        return minus ? fromBitsFlipSign(high, low) : fromBits(high, low);
+    }
+
+    private static long parseHexChar(char ch) {
+        if (ch >= '0' && ch <= '9') return (long) ch - '0';
+        if (ch >= 'a' && ch <= 'f') return (long) ch - 'a' + 10;
+        if (ch >= 'A' && ch <= 'F') return (long) ch - 'A' + 10;
+        throw new IllegalArgumentException("Invalid hex character found: " + ch);
     }
 
     public static @NotNull DoubleLong from(long value) {
@@ -221,6 +244,10 @@ public final class DoubleLong extends Number implements Comparable<DoubleLong> {
     // Note: `DoubleLong.MIN_VALUE.negate() == DoubleLong.MIN_VALUE`!
     // https://stackoverflow.com/questions/5444611/math-abs-returns-wrong-value-for-integer-min-value
     public @NotNull DoubleLong negate() {
+        return fromBitsFlipSign(high, low);
+    }
+
+    private static @NotNull DoubleLong fromBitsFlipSign(long high, long low) {
         // General formula: -X = ~X + 1. The "+1" can be further optimized because usually it only changes the `low`
         return low == 0 ? DoubleLong.fromBits(~high + 1, 0) : DoubleLong.fromBits(~high, ~low + 1);
     }
