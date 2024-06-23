@@ -257,8 +257,9 @@ public class DoubleLongTest {
     @Tag("slow")
     @Test
     public void multiply_ultimate() {
-        for (BigInteger a : EDGE_CASE_BIG_INTEGERS) {
-            for (BigInteger b : EDGE_CASE_BIG_INTEGERS) {
+        List<BigInteger> list = ListBuilder.concat(EDGE_CASE_BIG_INTEGERS, LARGE_PRIME_NUMBERS);
+        for (BigInteger a : list) {
+            for (BigInteger b : list) {
                 assertMultiplyMatchesBigInteger(DoubleLong.from(a), DoubleLong.from(b));
             }
         }
