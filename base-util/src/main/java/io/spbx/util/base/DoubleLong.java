@@ -257,9 +257,11 @@ public final class DoubleLong extends Number implements Comparable<DoubleLong> {
     public @NotNull DoubleLong subtract(@NotNull DoubleLong that) {
         // The following code inlined:
         //   this.add(that.negate());
-        return that.low == 0 ?
-            add(this.high, this.low, ~that.high + 1, 0) :
-            add(this.high, this.low, ~that.high, ~that.low + 1);
+        return subtract(this.high, this.low, that.high, that.low);
+    }
+
+    private static @NotNull DoubleLong subtract(long hi1, long lo1, long hi2, long lo2) {
+        return lo2 == 0 ? add(hi1, lo1, ~hi2 + 1, 0) : add(hi1, lo1, ~hi2, ~lo2 + 1);
     }
 
     public @NotNull DoubleLong subtract(long value) {
@@ -305,7 +307,7 @@ public final class DoubleLong extends Number implements Comparable<DoubleLong> {
             DoubleLong div = DoubleLong.ONE.shiftLeft(64 + n);
             DoubleLong multiply = DoubleLong.fromBits(0, num).shiftLeft(64 + n);
             if (multiply.compareTo(DoubleLong.fromBits(hi, lo)) <= 0) {
-                DoubleLong sub = DoubleLong.fromBits(hi, lo).subtract(multiply);
+                DoubleLong sub = subtract(hi, lo, multiply.high, multiply.low);
                 return divideLongUnsigned(sub.high, sub.low, num).add(div);
             }
             n--;
@@ -325,13 +327,12 @@ public final class DoubleLong extends Number implements Comparable<DoubleLong> {
         long div = Long.divideUnsigned(hi1, hi2);
         while (div > 0) {
             DoubleLong multiply = div == 1 ? DoubleLong.fromBits(hi2, lo2) : DoubleLong.multiply(0, div, hi2, lo2);
-            DoubleLong sub = fromBits(hi1, lo1).subtract(multiply);
+            DoubleLong sub = subtract(hi1, lo1, multiply.high, multiply.low);
             if (sub.high >= 0) {
                 return divideDoubleLongUnsigned(sub.high, sub.low, hi2, lo2).add(div);
             }
             div = div >> 1;
         }
-
         return ZERO;
     }
 
