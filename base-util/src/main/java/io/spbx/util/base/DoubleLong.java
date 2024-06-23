@@ -103,13 +103,6 @@ public final class DoubleLong extends Number implements Comparable<DoubleLong> {
         return minus ? fromBitsFlipSign(high, low) : fromBits(high, low);
     }
 
-    private static long parseHexChar(char ch) {
-        if (ch >= '0' && ch <= '9') return (long) ch - '0';
-        if (ch >= 'a' && ch <= 'f') return (long) ch - 'a' + 10;
-        if (ch >= 'A' && ch <= 'F') return (long) ch - 'A' + 10;
-        throw new IllegalArgumentException("Invalid hex character found: " + ch);
-    }
-
     public static @NotNull DoubleLong from(long value) {
         return value >= 0 ? fromBits(0, value) : fromBits(-1, value);
     }
@@ -170,8 +163,39 @@ public final class DoubleLong extends Number implements Comparable<DoubleLong> {
         return cmp != 0 ? cmp : Long.compareUnsigned(lhs.low, rhs.low);
     }
 
+    public static @NotNull DoubleLong max(@NotNull DoubleLong lhs, @NotNull DoubleLong rhs) {
+        return compare(lhs, rhs) > 0 ? lhs : rhs;
+    }
+
+    public static @NotNull DoubleLong min(@NotNull DoubleLong lhs, @NotNull DoubleLong rhs) {
+        return compare(lhs, rhs) < 0 ? lhs : rhs;
+    }
+
+    // Sign
+
     public int signum() {
         return high != 0 ? Long.signum(high) : low == 0 ? 0 : 1;
+    }
+
+    // Note: `DoubleLong.MIN_VALUE.negate() == DoubleLong.MIN_VALUE`!
+    // https://stackoverflow.com/questions/5444611/math-abs-returns-wrong-value-for-integer-min-value
+    public @NotNull DoubleLong negate() {
+        return fromBitsFlipSign(high, low);
+    }
+
+    private static @NotNull DoubleLong fromBitsFlipSign(long high, long low) {
+        // General formula: -X = ~X + 1. The "+1" can be further optimized because usually it only changes the `low`
+        return low == 0 ? DoubleLong.fromBits(~high + 1, 0) : DoubleLong.fromBits(~high, ~low + 1);
+    }
+
+    // Note: `DoubleLong.MIN_VALUE.abs() == DoubleLong.MIN_VALUE`!
+    // https://stackoverflow.com/questions/5444611/math-abs-returns-wrong-value-for-integer-min-value
+    public @NotNull DoubleLong abs() {
+        return high >= 0 ? this : this.negate();
+    }
+
+    private @NotNull DoubleLong flipSign(boolean flip) {
+        return flip ? this.negate() : this;
     }
 
     // `Number` conversions
@@ -295,27 +319,6 @@ public final class DoubleLong extends Number implements Comparable<DoubleLong> {
         return ZERO;
     }
 
-    private @NotNull DoubleLong flipSign(boolean flip) {
-        return flip ? negate() : this;
-    }
-
-    // Note: `DoubleLong.MIN_VALUE.negate() == DoubleLong.MIN_VALUE`!
-    // https://stackoverflow.com/questions/5444611/math-abs-returns-wrong-value-for-integer-min-value
-    public @NotNull DoubleLong negate() {
-        return fromBitsFlipSign(high, low);
-    }
-
-    private static @NotNull DoubleLong fromBitsFlipSign(long high, long low) {
-        // General formula: -X = ~X + 1. The "+1" can be further optimized because usually it only changes the `low`
-        return low == 0 ? DoubleLong.fromBits(~high + 1, 0) : DoubleLong.fromBits(~high, ~low + 1);
-    }
-
-    // Note: `DoubleLong.MIN_VALUE.abs() == DoubleLong.MIN_VALUE`!
-    // https://stackoverflow.com/questions/5444611/math-abs-returns-wrong-value-for-integer-min-value
-    public @NotNull DoubleLong abs() {
-        return high >= 0 ? this : this.negate();
-    }
-
     // Logical ops
 
     public @NotNull DoubleLong not() {
@@ -361,16 +364,6 @@ public final class DoubleLong extends Number implements Comparable<DoubleLong> {
             fromBits(0, high >>> (len - 64));
     }
 
-    // Other
-
-    public static @NotNull DoubleLong max(@NotNull DoubleLong lhs, @NotNull DoubleLong rhs) {
-        return compare(lhs, rhs) > 0 ? lhs : rhs;
-    }
-
-    public static @NotNull DoubleLong min(@NotNull DoubleLong lhs, @NotNull DoubleLong rhs) {
-        return compare(lhs, rhs) < 0 ? lhs : rhs;
-    }
-
     // `Object` methods
 
     @Override
@@ -382,6 +375,8 @@ public final class DoubleLong extends Number implements Comparable<DoubleLong> {
     public int hashCode() {
         return Long.hashCode(high) ^ Long.hashCode(low);
     }
+
+    // `String` representations
 
     @Override
     public @NotNull String toString() {
@@ -423,6 +418,13 @@ public final class DoubleLong extends Number implements Comparable<DoubleLong> {
     @VisibleForTesting
     static int toLowInt(long value) {
         return (int) value;
+    }
+
+    private static long parseHexChar(char ch) {
+        if (ch >= '0' && ch <= '9') return (long) ch - '0';
+        if (ch >= 'a' && ch <= 'f') return (long) ch - 'a' + 10;
+        if (ch >= 'A' && ch <= 'F') return (long) ch - 'A' + 10;
+        throw new IllegalArgumentException("Invalid hex character found: " + ch);
     }
 
     // https://stackoverflow.com/questions/8240704/resizing-a-byte-twos-complement-represented-integer
