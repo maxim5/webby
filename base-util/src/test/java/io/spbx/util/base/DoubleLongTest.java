@@ -17,6 +17,7 @@ import org.junit.jupiter.params.provider.ValueSource;
 import java.math.BigInteger;
 import java.util.List;
 import java.util.stream.IntStream;
+import java.util.stream.LongStream;
 import java.util.stream.Stream;
 
 import static com.google.common.truth.Truth.assertThat;
@@ -25,6 +26,8 @@ import static org.junit.jupiter.api.Assertions.assertThrows;
 
 @SuppressWarnings("EqualsWithItself")
 public class DoubleLongTest {
+    // The last one overflows, it's ok.
+    private static final long[] POW2 = LongStream.range(0, 64).map(n -> 1L << n).toArray();
     private static final List<Long> SIMPLE_MIN_MAX_VALUES = Stream.of(
         Byte.MAX_VALUE, Byte.MIN_VALUE,
         Short.MAX_VALUE, Short.MIN_VALUE,
@@ -144,7 +147,7 @@ public class DoubleLongTest {
         "-1", "-2147483647", "-2147483648", "-9223372036854775807", "-9223372036854775808",
     })
     public void construction_simple(String num) {
-         assertConstruction(num);
+        assertConstruction(num);
     }
 
     @Test
@@ -278,6 +281,74 @@ public class DoubleLongTest {
             BigInteger expected = fitInto128Bits(num.negate());
             assertThat(DoubleLong.from(num).negate().toBigInteger()).isEqualTo(expected);
         }
+    }
+
+    /** {@link DoubleLong#shiftLeft(int)} */
+
+    @Test
+    public void shiftLeft_simple() {
+        assertThat(DoubleLong.ONE.shiftLeft(5)).isEqualTo(DoubleLong.from(POW2[5]));
+        assertThat(DoubleLong.ONE.shiftLeft(4)).isEqualTo(DoubleLong.from(POW2[4]));
+        assertThat(DoubleLong.ONE.shiftLeft(2)).isEqualTo(DoubleLong.from(POW2[2]));
+        assertThat(DoubleLong.ONE.shiftLeft(1)).isEqualTo(DoubleLong.from(POW2[1]));
+        assertThat(DoubleLong.ONE.shiftLeft(0)).isEqualTo(DoubleLong.ONE);
+
+        assertThat(DoubleLong.fromBits(1,  1).shiftLeft(5)).isEqualTo(DoubleLong.fromBits(POW2[5], POW2[5]));
+        assertThat(DoubleLong.fromBits(0, -1).shiftLeft(5)).isEqualTo(DoubleLong.fromBits(POW2[5] - 1, -POW2[5]));
+        assertThat(DoubleLong.fromBits(0, -1).shiftLeft(8)).isEqualTo(DoubleLong.fromBits(POW2[8] - 1, -POW2[8]));
+        assertThat(DoubleLong.fromBits(0, -1).shiftLeft(20)).isEqualTo(DoubleLong.fromBits(POW2[20] - 1, -POW2[20]));
+        assertThat(DoubleLong.fromBits(0, -1).shiftLeft(60)).isEqualTo(DoubleLong.fromBits(POW2[60] - 1, -POW2[60]));
+        assertThat(DoubleLong.fromBits(0, -1).shiftLeft(63)).isEqualTo(DoubleLong.fromBits(POW2[63] - 1, -POW2[63]));
+    }
+
+    @Test
+    public void shiftLeft_ultimate() {
+        for (BigInteger bigInteger : EDGE_CASE_BIG_INTEGERS) {
+            assertShiftLeftMatchesBigInteger(bigInteger, 1);
+            assertShiftLeftMatchesBigInteger(bigInteger, 10);
+            assertShiftLeftMatchesBigInteger(bigInteger, 32);
+            assertShiftLeftMatchesBigInteger(bigInteger, 63);
+            assertShiftLeftMatchesBigInteger(bigInteger, 64);
+            assertShiftLeftMatchesBigInteger(bigInteger, 90);
+            assertShiftLeftMatchesBigInteger(bigInteger, 127);
+        }
+    }
+
+    private static void assertShiftLeftMatchesBigInteger(BigInteger num, int len) {
+        BigInteger expected = fitInto128Bits(num.shiftLeft(len));
+        assertThat(DoubleLong.from(num).shiftLeft(len).toBigInteger()).isEqualTo(expected);
+    }
+
+    /** {@link DoubleLong#shiftRight(int)} */
+
+    @Test
+    public void shiftRight_simple() {
+        assertThat(DoubleLong.ONE.shiftRight(0)).isEqualTo(DoubleLong.ONE);
+        assertThat(DoubleLong.ONE.shiftRight(1)).isEqualTo(DoubleLong.ZERO);
+
+        assertThat(DoubleLong.from(POW2[5]).shiftRight(4)).isEqualTo(DoubleLong.from(POW2[1]));
+        assertThat(DoubleLong.from(POW2[5]).shiftRight(5)).isEqualTo(DoubleLong.ONE);
+
+        assertThat(DoubleLong.fromBits(1, 1).shiftRight(1)).isEqualTo(DoubleLong.fromBits(0, POW2[63]));
+        assertThat(DoubleLong.fromBits(3, 3).shiftRight(1)).isEqualTo(DoubleLong.fromBits(1, POW2[63] + 1));
+    }
+
+    @Test
+    public void shiftRight_ultimate() {
+        for (BigInteger bigInteger : EDGE_CASE_BIG_INTEGERS) {
+            assertShiftRightMatchesBigInteger(bigInteger, 1);
+            assertShiftRightMatchesBigInteger(bigInteger, 10);
+            assertShiftRightMatchesBigInteger(bigInteger, 32);
+            assertShiftRightMatchesBigInteger(bigInteger, 63);
+            assertShiftRightMatchesBigInteger(bigInteger, 64);
+            assertShiftRightMatchesBigInteger(bigInteger, 90);
+            assertShiftRightMatchesBigInteger(bigInteger, 127);
+        }
+    }
+
+    private static void assertShiftRightMatchesBigInteger(BigInteger num, int len) {
+        BigInteger expected = fitInto128Bits(num.shiftRight(len));
+        assertThat(DoubleLong.from(num).shiftRight(len).toBigInteger()).isEqualTo(expected);
     }
 
     /** Assertion utils */

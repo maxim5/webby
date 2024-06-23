@@ -243,6 +243,33 @@ public final class DoubleLong extends Number implements Comparable<DoubleLong> {
         return DoubleLong.fromBits(this.high ^ that.high, this.low ^ that.low);
     }
 
+    public @NotNull DoubleLong shiftLeft(int len) {
+        if (len < 0) return shiftRight(-len);
+        if (len == 0) return this;
+        return len < 64 ?
+            fromBits((high << len) + (low >>> (64 - len)), low << len) :
+            fromBits(low << (len - 64), 0);
+    }
+
+    // signed version
+    public @NotNull DoubleLong shiftRight(int len) {
+        if (len < 0) return shiftLeft(len);
+        if (len == 0) return this;
+        return len < 64 ?
+            fromBits(high >> len, ((high & ((1L << len) - 1)) << (64 - len)) + (low >>> len)) :
+            high < 0 ?
+                fromBits(-1, high >> (len - 64)) :
+                fromBits(0, high >>> (len - 64));
+    }
+
+    public @NotNull DoubleLong shiftRightUnsigned(int len) {
+        if (len < 0) return shiftLeft(len);
+        if (len == 0) return this;
+        return len < 64 ?
+            fromBits(high >> len, ((high & ((1L << len) - 1)) << (64 - len)) + (low >>> len)) :
+            fromBits(0, high >>> (len - 64));
+    }
+
     // Other
 
     public static @NotNull DoubleLong max(@NotNull DoubleLong lhs, @NotNull DoubleLong rhs) {
