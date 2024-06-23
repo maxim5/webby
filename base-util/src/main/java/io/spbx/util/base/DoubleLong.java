@@ -238,6 +238,10 @@ public final class DoubleLong extends Number implements Comparable<DoubleLong> {
         return add(this.high, this.low, that.high, that.low);
     }
 
+    public @NotNull DoubleLong add(long value) {
+        return value >= 0 ? add(this.high, this.low, 0, value) : add(this.high, this.low, -1, value);
+    }
+
     private static @NotNull DoubleLong add(long hi1, long lo1, long hi2, long lo2) {
         // Notes:
         // - zero comparison calculates the sign bit: sign_bit(x) = "0" for x >= 0 and "1" for x < 0
@@ -256,6 +260,10 @@ public final class DoubleLong extends Number implements Comparable<DoubleLong> {
         return that.low == 0 ?
             add(this.high, this.low, ~that.high + 1, 0) :
             add(this.high, this.low, ~that.high, ~that.low + 1);
+    }
+
+    public @NotNull DoubleLong subtract(long value) {
+        return value == Long.MIN_VALUE ? subtract(from(value)) : add(-value);
     }
 
     public @NotNull DoubleLong multiply(@NotNull DoubleLong that) {
@@ -319,7 +327,7 @@ public final class DoubleLong extends Number implements Comparable<DoubleLong> {
             DoubleLong multiply = div == 1 ? DoubleLong.fromBits(hi2, lo2) : DoubleLong.multiply(0, div, hi2, lo2);
             DoubleLong sub = fromBits(hi1, lo1).subtract(multiply);
             if (sub.high >= 0) {
-                return divideDoubleLongUnsigned(sub.high, sub.low, hi2, lo2).add(from(div));
+                return divideDoubleLongUnsigned(sub.high, sub.low, hi2, lo2).add(div);
             }
             div = div >> 1;
         }
