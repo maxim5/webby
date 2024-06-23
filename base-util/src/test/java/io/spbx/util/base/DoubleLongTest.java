@@ -46,11 +46,15 @@ public class DoubleLongTest {
 
     // From https://bigprimes.org/
     private static final List<BigInteger> LARGE_PRIME_NUMBERS = Stream.of(
+        "477431785618589",
         "7734245186249221",
         "14262866606244585389",
         "643060765953885798980471",
+        "9789690428521166127696463099",
         "511502705152331397313213352309",
-        "729607297303010430697493914704054547"
+        "37010749720546680375917374542419",
+        "729607297303010430697493914704054547",
+        "19008080681165741144368765276016110223"
     ).map(BigInteger::new).flatMap(b -> Stream.of(b, b.negate())).sorted().toList();
 
     /** Constants */
@@ -263,6 +267,78 @@ public class DoubleLongTest {
     private static void assertMultiplyMatchesBigInteger(@NotNull DoubleLong lhs, @NotNull DoubleLong rhs) {
         BigInteger expected = fitInto128Bits(lhs.toBigInteger().multiply(rhs.toBigInteger()));
         assertThat(lhs.multiply(rhs).toBigInteger()).isEqualTo(expected);
+    }
+
+    /** {@link DoubleLong#divide(DoubleLong)} */
+
+    private static final List<BigInteger> SIMPLE_POSITIVE_INTEGERS = List.of(
+        BigInteger.ZERO,
+        BigInteger.ONE,
+        BigInteger.TWO,
+        BigInteger.TEN,
+        BigInteger.valueOf(20),
+        BigInteger.valueOf(Byte.MAX_VALUE),
+        BigInteger.valueOf(100_000_000),
+        BigInteger.valueOf(Integer.MAX_VALUE),
+        BigInteger.valueOf(Long.MAX_VALUE),
+        BigInteger.ONE.shiftLeft(20).subtract(BigInteger.ONE),
+        BigInteger.ONE.shiftLeft(36),
+        BigInteger.ONE.shiftLeft(48),
+        BigInteger.ONE.shiftLeft(36).add(BigInteger.ONE),
+        BigInteger.ONE.shiftLeft(36).subtract(BigInteger.ONE),
+        BigInteger.ONE.shiftLeft(61),
+        BigInteger.ONE.shiftLeft(63),
+        BigInteger.ONE.shiftLeft(63).subtract(BigInteger.ONE)
+    );
+    private static final List<BigInteger> SIMPLE_NEGATIVE_INTEGERS =
+        SIMPLE_POSITIVE_INTEGERS.stream().map(BigInteger::negate).toList();
+
+    @Test
+    public void divide_simple_positive_only() {
+        for (BigInteger a : SIMPLE_POSITIVE_INTEGERS) {
+            for (BigInteger b : SIMPLE_POSITIVE_INTEGERS) {
+                assertDivideMatchesBigInteger(DoubleLong.from(a), DoubleLong.from(b));
+            }
+        }
+    }
+
+    @Test
+    public void divide_simple_negative_only() {
+        for (BigInteger a : SIMPLE_POSITIVE_INTEGERS) {
+            for (BigInteger b : SIMPLE_POSITIVE_INTEGERS) {
+                assertDivideMatchesBigInteger(DoubleLong.from(a), DoubleLong.from(b));
+            }
+        }
+    }
+
+    @Test
+    public void divide_simple_positive_and_negative() {
+        List<BigInteger> list = ListBuilder.concat(SIMPLE_POSITIVE_INTEGERS, SIMPLE_NEGATIVE_INTEGERS);
+        for (BigInteger a : list) {
+            for (BigInteger b : list) {
+                assertDivideMatchesBigInteger(DoubleLong.from(a), DoubleLong.from(b));
+            }
+        }
+    }
+
+    @Tag("slow")
+    @Test
+    public void divide_ultimate() {
+        List<BigInteger> list = ListBuilder.concat(EDGE_CASE_BIG_INTEGERS, LARGE_PRIME_NUMBERS);
+        for (BigInteger a : list) {
+            for (BigInteger b : list) {
+                assertDivideMatchesBigInteger(DoubleLong.from(a), DoubleLong.from(b));
+            }
+        }
+    }
+
+    private static void assertDivideMatchesBigInteger(DoubleLong lhs, DoubleLong rhs) {
+        if (rhs.equals(DoubleLong.ZERO)) {
+            assertThrows(AssertionError.class, () -> lhs.divide(rhs));
+        } else {
+            BigInteger expected = fitInto128Bits(lhs.toBigInteger().divide(rhs.toBigInteger()));
+            assertThat(lhs.divide(rhs).toBigInteger()).isEqualTo(expected);
+        }
     }
 
     /** {@link DoubleLong#negate()} */

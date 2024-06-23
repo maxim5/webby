@@ -238,7 +238,65 @@ public final class DoubleLong extends Number implements Comparable<DoubleLong> {
     }
 
     public @NotNull DoubleLong divide(@NotNull DoubleLong that) {
-        return from(this.toBigInteger().divide(that.toBigInteger()));
+        assert that.high != 0 || that.low != 0 : "Division by zero: %s / 0".formatted(this);
+
+        DoubleLong a = this.abs();
+        DoubleLong b = that.abs();
+        boolean sameSign = this.high < 0 == that.high < 0;
+        if (a.high == Long.MIN_VALUE) {
+          return a.subtract(b).divide(b).add(ONE).flipSign(!sameSign);
+        } if (b.high == 0) {
+            return divideLongUnsigned(a.high, a.low, b.low).flipSign(!sameSign);
+        } else {
+            return divideDoubleLongUnsigned(a.high, a.low, b.high, b.low).flipSign(!sameSign);
+        }
+    }
+
+    private static @NotNull DoubleLong divideLongUnsigned(long hi, long lo, long num) {
+        if (num == 1) {
+            return fromBits(hi, lo);
+        }
+        if (hi == 0) {
+            return from(Long.divideUnsigned(lo, num));
+        }
+
+        int n = Long.numberOfLeadingZeros(num) - Long.numberOfLeadingZeros(hi);
+        while (true) {
+            DoubleLong div = DoubleLong.ONE.shiftLeft(64 + n);
+            DoubleLong multiply = DoubleLong.fromBits(0, num).shiftLeft(64 + n);
+            if (multiply.compareTo(DoubleLong.fromBits(hi, lo)) <= 0) {
+                DoubleLong sub = DoubleLong.fromBits(hi, lo).subtract(multiply);
+                return divideLongUnsigned(sub.high, sub.low, num).add(div);
+            }
+            n--;
+        }
+    }
+
+    private static @NotNull DoubleLong divideDoubleLongUnsigned(long hi1, long lo1, long hi2, long lo2) {
+        assert hi2 != 0 : "Internal error. The method must not be called, call divideLongUnsigned()";
+
+        if (Long.compareUnsigned(hi1, hi2) < 0) {
+            return ZERO;
+        }
+        if (Long.compareUnsigned(hi1, hi2) == 0) {
+            return Long.compareUnsigned(lo1, lo2) < 0 ? ZERO : ONE;
+        }
+
+        long div = Long.divideUnsigned(hi1, hi2);
+        while (div > 0) {
+            DoubleLong multiply = div == 1 ? DoubleLong.fromBits(hi2, lo2) : DoubleLong.multiply(0, div, hi2, lo2);
+            DoubleLong sub = fromBits(hi1, lo1).subtract(multiply);
+            if (sub.high >= 0) {
+                return divideDoubleLongUnsigned(sub.high, sub.low, hi2, lo2).add(from(div));
+            }
+            div = div >> 1;
+        }
+
+        return ZERO;
+    }
+
+    private @NotNull DoubleLong flipSign(boolean flip) {
+        return flip ? negate() : this;
     }
 
     // Note: `DoubleLong.MIN_VALUE.negate() == DoubleLong.MIN_VALUE`!
@@ -286,7 +344,7 @@ public final class DoubleLong extends Number implements Comparable<DoubleLong> {
 
     // signed version
     public @NotNull DoubleLong shiftRight(int len) {
-        if (len < 0) return shiftLeft(len);
+        if (len < 0) return shiftLeft(-len);
         if (len == 0) return this;
         return len < 64 ?
             fromBits(high >> len, ((high & ((1L << len) - 1)) << (64 - len)) + (low >>> len)) :
@@ -296,7 +354,7 @@ public final class DoubleLong extends Number implements Comparable<DoubleLong> {
     }
 
     public @NotNull DoubleLong shiftRightUnsigned(int len) {
-        if (len < 0) return shiftLeft(len);
+        if (len < 0) return shiftLeft(-len);
         if (len == 0) return this;
         return len < 64 ?
             fromBits(high >> len, ((high & ((1L << len) - 1)) << (64 - len)) + (low >>> len)) :
