@@ -305,8 +305,16 @@ public final class DoubleLong extends Number implements Comparable<DoubleLong> {
         return padded(Long.toBinaryString(high), Long.SIZE) + padded(Long.toBinaryString(low), Long.SIZE);
     }
 
+    public @NotNull String toBinaryStringReadable() {
+        return makeGroups(toBinaryString(), 32);
+    }
+
     public @NotNull String toHexString() {
         return padded(Long.toHexString(high), 2 * Long.BYTES) + padded(Long.toHexString(low), 2 * Long.BYTES);
+    }
+
+    public @NotNull String toHexStringReadable() {
+        return makeGroups(toHexString(), 4);
     }
 
     // Implementation details
@@ -350,5 +358,15 @@ public final class DoubleLong extends Number implements Comparable<DoubleLong> {
 
     private static @NotNull String padded(@NotNull String str, int size) {
         return Strings.padStart(str, size, '0');
+    }
+
+    private static @NotNull String makeGroups(@NotNull String str, int groupSize) {
+        int length = str.length();
+        StringBuilder builder = new StringBuilder(2 * length);
+        for (int i = 0; i < length; i += groupSize) {
+            builder.append(str, i, i + groupSize).append('_');
+        }
+        builder.setLength(builder.length() - 1);
+        return builder.toString();
     }
 }
