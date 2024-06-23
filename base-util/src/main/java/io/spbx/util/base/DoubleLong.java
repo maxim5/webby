@@ -225,6 +225,12 @@ public final class DoubleLong extends Number implements Comparable<DoubleLong> {
         return low == 0 ? DoubleLong.fromBits(~high + 1, 0) : DoubleLong.fromBits(~high, ~low + 1);
     }
 
+    // Note: `DoubleLong.MIN_VALUE.abs() == DoubleLong.MIN_VALUE`!
+    // https://stackoverflow.com/questions/5444611/math-abs-returns-wrong-value-for-integer-min-value
+    public @NotNull DoubleLong abs() {
+        return high >= 0 ? this : this.negate();
+    }
+
     // Logical ops
 
     public @NotNull DoubleLong not() {
