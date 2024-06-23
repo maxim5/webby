@@ -138,13 +138,13 @@ public final class DoubleLong extends Number implements Comparable<DoubleLong> {
     }
 
     public static int compare(@NotNull DoubleLong lhs, @NotNull DoubleLong rhs) {
-        int compareHigh = Longs.compare(lhs.high, rhs.high);
-        if (compareHigh != 0) {
-            return compareHigh;
-        }
-        boolean isSameSignLow = lhs.low >= 0 == rhs.low >= 0;
-        int compareLow = Longs.compare(lhs.low, rhs.low);
-        return isSameSignLow ? compareLow : -compareLow;
+        int cmp = Longs.compare(lhs.high, rhs.high);
+        return cmp != 0 ? cmp : Long.compareUnsigned(lhs.low, rhs.low);
+    }
+
+    public static int compareUnsigned(@NotNull DoubleLong lhs, @NotNull DoubleLong rhs) {
+        int cmp = Long.compareUnsigned(lhs.high, rhs.high);
+        return cmp != 0 ? cmp : Long.compareUnsigned(lhs.low, rhs.low);
     }
 
     public int signum() {
