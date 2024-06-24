@@ -13,6 +13,7 @@ import java.nio.ByteBuffer;
 
 import static io.spbx.util.base.EasyPrimitives.firstNonNegative;
 import static io.spbx.util.base.Unchecked.rethrow;
+import static io.spbx.webby.common.SystemProperties.SIZE_BYTES;
 
 // Aka Serializer
 public interface Codec<T> extends Reversible<byte[], T> {
@@ -27,7 +28,7 @@ public interface Codec<T> extends Reversible<byte[], T> {
     int writeTo(@NotNull OutputStream output, @NotNull T instance) throws IOException;
 
     default byte @NotNull [] writeToBytes(@NotNull T instance) {
-        int expectedSize = firstNonNegative(sizeOf(instance), size().numBytes(), SystemProperties.DEFAULT_SIZE_BYTES);
+        int expectedSize = firstNonNegative(sizeOf(instance), size().numBytes(), SystemProperties.live().getInt(SIZE_BYTES));
         try (ByteArrayOutputStream output = new ByteArrayOutputStream(expectedSize)) {
             writeTo(output, instance);
             return output.toByteArray();
@@ -37,7 +38,7 @@ public interface Codec<T> extends Reversible<byte[], T> {
     }
 
     default byte @NotNull [] writeToBytes(byte @NotNull [] prefix, @NotNull T instance) {
-        int expectedSize = firstNonNegative(sizeOf(instance), size().numBytes(), SystemProperties.DEFAULT_SIZE_BYTES);
+        int expectedSize = firstNonNegative(sizeOf(instance), size().numBytes(), SystemProperties.live().getInt(SIZE_BYTES));
         try (ByteArrayOutputStream output = new ByteArrayOutputStream(prefix.length + expectedSize)) {
             output.writeBytes(prefix);
             writeTo(output, instance);

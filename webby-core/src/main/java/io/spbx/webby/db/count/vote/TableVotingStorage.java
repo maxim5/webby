@@ -22,11 +22,11 @@ import java.util.function.Consumer;
 import java.util.logging.Level;
 
 import static io.spbx.orm.api.query.Shortcuts.*;
+import static io.spbx.webby.common.SystemProperties.SQL_MAX_PARAMS;
 import static io.spbx.webby.db.count.vote.Consistency.checkStorageConsistency;
 
 public class TableVotingStorage implements VotingStorage {
     private static final FluentLogger log = FluentLogger.forEnclosingClass();
-    private static final int CHUNK_SIZE = SystemProperties.DEFAULT_SQL_MAX_PARAMS;
 
     private final StoreId storeId;
     private final BaseTable<?> table;
@@ -68,7 +68,7 @@ public class TableVotingStorage implements VotingStorage {
     @Override
     public void loadBatch(@NotNull IntContainer keys, @NotNull IntObjectProcedure<@NotNull IntHashSet> consumer) {
         if (!keys.isEmpty()) {
-            EasyHppc.iterateChunks(keys, CHUNK_SIZE, chunk ->
+            EasyHppc.iterateChunks(keys, SystemProperties.live().getInt(SQL_MAX_PARAMS), chunk ->
                 loadQueryResults(builder -> builder.where(Where.of(isIn(keyColumn, makeIntVariables(chunk)))), consumer)
             );
         }

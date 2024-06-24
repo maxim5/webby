@@ -58,7 +58,7 @@ public class JteRenderer implements Renderer<String> {
 
     @Override
     public @NotNull String renderToString(@NotNull String template, @NotNull Object model) {
-        StringOutput output = new StringOutput(SystemProperties.DEFAULT_SIZE_CHARS);
+        StringOutput output = new StringOutput(SystemProperties.live().getInt(SystemProperties.SIZE_CHARS));
         if (model instanceof Map<?, ?> mapModel) {
             templateEngine.render(template, castMap(mapModel), output);
         } else {
