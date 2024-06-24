@@ -97,4 +97,25 @@ public class EasyPrimitivesTest {
         assertThat(EasyPrimitives.parseLongSafe("1e123", -1)).isEqualTo(-1);
         assertThat(EasyPrimitives.parseLongSafe("foo", -1)).isEqualTo(-1);
     }
+
+    @Test
+    public void parseBoolSafe_simple() {
+        assertThat(EasyPrimitives.parseBoolSafe("true", false)).isTrue();
+        assertThat(EasyPrimitives.parseBoolSafe("True", false)).isTrue();
+        assertThat(EasyPrimitives.parseBoolSafe("TRUE", false)).isTrue();
+
+        assertThat(EasyPrimitives.parseBoolSafe("false", true)).isFalse();
+        assertThat(EasyPrimitives.parseBoolSafe("False", true)).isFalse();
+        assertThat(EasyPrimitives.parseBoolSafe("FALSE", true)).isFalse();
+
+        assertThat(EasyPrimitives.parseBoolSafe("0")).isFalse();
+        assertThat(EasyPrimitives.parseBoolSafe("1")).isFalse();
+        assertThat(EasyPrimitives.parseBoolSafe("no")).isFalse();
+        assertThat(EasyPrimitives.parseBoolSafe("yes")).isFalse();
+
+        assertThat(EasyPrimitives.parseBoolSafe("0", true)).isTrue();
+        assertThat(EasyPrimitives.parseBoolSafe("1", false)).isFalse();
+        assertThat(EasyPrimitives.parseBoolSafe("no", true)).isTrue();
+        assertThat(EasyPrimitives.parseBoolSafe("yes", false)).isFalse();
+    }
 }

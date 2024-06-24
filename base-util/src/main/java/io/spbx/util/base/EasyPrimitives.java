@@ -70,4 +70,20 @@ public class EasyPrimitives {
     public static long parseLongSafe(@Nullable CharSequence val) {
         return parseLongSafe(val, 0);
     }
+
+    public static boolean parseBoolSafe(@Nullable String val, boolean def) {
+        if (val != null) {
+            if ("true".equalsIgnoreCase(val)) {
+                return true;
+            }
+            if ("false".equalsIgnoreCase(val)) {
+                return false;
+            }
+        }
+        return def;
+    }
+
+    public static boolean parseBoolSafe(@Nullable String val) {
+        return "true".equalsIgnoreCase(val);
+    }
 }
