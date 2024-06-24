@@ -15,6 +15,7 @@ import org.junit.jupiter.params.provider.MethodSource;
 import org.junit.jupiter.params.provider.ValueSource;
 
 import java.math.BigInteger;
+import java.util.Comparator;
 import java.util.List;
 import java.util.stream.IntStream;
 import java.util.stream.LongStream;
@@ -28,6 +29,7 @@ import static org.junit.jupiter.api.Assertions.assertThrows;
 public class DoubleLongTest {
     // The last one overflows, it's ok.
     private static final long[] POW2 = LongStream.range(0, 64).map(n -> 1L << n).toArray();
+
     private static final List<Long> SIMPLE_MIN_MAX_VALUES = Stream.of(
         Byte.MAX_VALUE, Byte.MIN_VALUE,
         Short.MAX_VALUE, Short.MIN_VALUE,
@@ -35,27 +37,38 @@ public class DoubleLongTest {
         Long.MAX_VALUE, Long.MIN_VALUE
     ).map(Number::longValue).toList();
 
+    // Test convenient comparator: first positive, then negative.
+    private static final Comparator<BigInteger> CMP = (lhs, rhs) ->
+        lhs.signum() >= 0 && rhs.signum() >= 0 ? lhs.compareTo(rhs) : -lhs.compareTo(rhs);
+
     private static final List<BigInteger> EDGE_CASE_BIG_INTEGERS = IntStream.range(0, 128)
         .mapToObj(BigInteger.ONE::shiftLeft)
         .flatMap(b -> Stream.of(b, b.subtract(BigInteger.ONE), b.negate(), b.negate().add(BigInteger.ONE)))
         .map(TestingPrimitives::fitInto128Bits)
-        .sorted().distinct().toList();
+        .sorted(CMP).distinct().toList();
 
     private static final List<Long> EDGE_CASE_LONGS =
-        EDGE_CASE_BIG_INTEGERS.stream().map(BigInteger::longValue).sorted().distinct().toList();
+        EDGE_CASE_BIG_INTEGERS.stream().map(BigInteger::longValue).distinct().toList();
 
     // From https://bigprimes.org/
     private static final List<BigInteger> LARGE_PRIME_NUMBERS = Stream.of(
         "477431785618589",
         "7734245186249221",
+        "313506233314930897",
         "14262866606244585389",
+        "9312117738832437088867",
         "643060765953885798980471",
+        "86177578550109096835627979",
         "9789690428521166127696463099",
         "511502705152331397313213352309",
         "37010749720546680375917374542419",
+        "9619122375485128076391017781203171",
         "729607297303010430697493914704054547",
-        "19008080681165741144368765276016110223"
-    ).map(BigInteger::new).flatMap(b -> Stream.of(b, b.negate())).sorted().toList();
+        "19008080681165741144368765276016110223",
+        "134729416280889832795054608867944616583"
+    ).map(BigInteger::new).flatMap(b -> Stream.of(b, b.negate())).sorted(CMP).toList();
+
+    private static final List<BigInteger> BIG_INTEGERS = ListBuilder.concat(EDGE_CASE_BIG_INTEGERS, LARGE_PRIME_NUMBERS);
 
     /** Constants */
 
@@ -156,7 +169,7 @@ public class DoubleLongTest {
 
     @Test
     public void construction_ultimate() {
-        for (BigInteger num : ListBuilder.concat(EDGE_CASE_BIG_INTEGERS, LARGE_PRIME_NUMBERS)) {
+        for (BigInteger num : BIG_INTEGERS) {
             assertConstruction(num.toString());
         }
     }
@@ -180,7 +193,7 @@ public class DoubleLongTest {
     @Tag("slow")
     @Test
     public void internal_consistency_ultimate() {
-        for (BigInteger num : ListBuilder.concat(EDGE_CASE_BIG_INTEGERS, LARGE_PRIME_NUMBERS)) {
+        for (BigInteger num : BIG_INTEGERS) {
             assertThatDoubleLong(DoubleLong.from(num)).internalConsistency();
         }
         for (long num : EDGE_CASE_LONGS) {
@@ -222,7 +235,7 @@ public class DoubleLongTest {
     }
 
     @Test
-    public void multiple_positive() {
+    public void multiply_positive() {
         assertMultiplyMatchesBigInteger(
             DoubleLong.fromBits(0, 1L << 36 + 1),
             DoubleLong.fromBits(0, 1L << 36 + 2)
@@ -257,9 +270,8 @@ public class DoubleLongTest {
     @Tag("slow")
     @Test
     public void multiply_ultimate() {
-        List<BigInteger> list = ListBuilder.concat(EDGE_CASE_BIG_INTEGERS, LARGE_PRIME_NUMBERS);
-        for (BigInteger a : list) {
-            for (BigInteger b : list) {
+        for (BigInteger a : BIG_INTEGERS) {
+            for (BigInteger b : BIG_INTEGERS) {
                 assertMultiplyMatchesBigInteger(DoubleLong.from(a), DoubleLong.from(b));
             }
         }
@@ -325,9 +337,8 @@ public class DoubleLongTest {
     @Tag("slow")
     @Test
     public void divide_ultimate() {
-        List<BigInteger> list = ListBuilder.concat(EDGE_CASE_BIG_INTEGERS, LARGE_PRIME_NUMBERS);
-        for (BigInteger a : list) {
-            for (BigInteger b : list) {
+        for (BigInteger a : BIG_INTEGERS) {
+            for (BigInteger b : BIG_INTEGERS) {
                 assertDivideMatchesBigInteger(DoubleLong.from(a), DoubleLong.from(b));
             }
         }
@@ -354,7 +365,7 @@ public class DoubleLongTest {
 
     @Test
     public void negate_ultimate() {
-        for (BigInteger num : ListBuilder.concat(EDGE_CASE_BIG_INTEGERS, LARGE_PRIME_NUMBERS)) {
+        for (BigInteger num : BIG_INTEGERS) {
             BigInteger expected = fitInto128Bits(num.negate());
             assertThat(DoubleLong.from(num).negate().toBigInteger()).isEqualTo(expected);
         }
@@ -380,7 +391,7 @@ public class DoubleLongTest {
 
     @Test
     public void shiftLeft_ultimate() {
-        for (BigInteger bigInteger : EDGE_CASE_BIG_INTEGERS) {
+        for (BigInteger bigInteger : BIG_INTEGERS) {
             assertShiftLeftMatchesBigInteger(bigInteger, 1);
             assertShiftLeftMatchesBigInteger(bigInteger, 10);
             assertShiftLeftMatchesBigInteger(bigInteger, 32);
@@ -412,7 +423,7 @@ public class DoubleLongTest {
 
     @Test
     public void shiftRight_ultimate() {
-        for (BigInteger bigInteger : EDGE_CASE_BIG_INTEGERS) {
+        for (BigInteger bigInteger : BIG_INTEGERS) {
             assertShiftRightMatchesBigInteger(bigInteger, 1);
             assertShiftRightMatchesBigInteger(bigInteger, 10);
             assertShiftRightMatchesBigInteger(bigInteger, 32);
@@ -533,7 +544,7 @@ public class DoubleLongTest {
         }
 
         public @NotNull DoubleLongSubject compareMatchesBigInteger() {
-            for (BigInteger big : EDGE_CASE_BIG_INTEGERS) {
+            for (BigInteger big : BIG_INTEGERS) {
                 assertThat(actual.compareTo(DoubleLong.from(big))).isEqualTo(actual.toBigInteger().compareTo(big));
                 assertThat(DoubleLong.from(big).compareTo(actual)).isEqualTo(big.compareTo(actual.toBigInteger()));
             }
@@ -541,7 +552,7 @@ public class DoubleLongTest {
         }
 
         public @NotNull DoubleLongSubject addMatchesBigInteger() {
-            for (BigInteger big : EDGE_CASE_BIG_INTEGERS) {
+            for (BigInteger big : BIG_INTEGERS) {
                 BigInteger expected = fitInto128Bits(actual.toBigInteger().add(big));
                 assertThat(actual.add(DoubleLong.from(big)).toBigInteger()).isEqualTo(expected);
                 assertThat(DoubleLong.from(big).add(actual).toBigInteger()).isEqualTo(expected);
@@ -550,7 +561,7 @@ public class DoubleLongTest {
         }
 
         public @NotNull DoubleLongSubject subtractMatchesBigInteger() {
-            for (BigInteger big : EDGE_CASE_BIG_INTEGERS) {
+            for (BigInteger big : BIG_INTEGERS) {
                 assertThat(actual.subtract(DoubleLong.from(big)).toBigInteger())
                     .isEqualTo(fitInto128Bits(actual.toBigInteger().subtract(big)));
                 assertThat(DoubleLong.from(big).subtract(actual).toBigInteger())
@@ -566,7 +577,7 @@ public class DoubleLongTest {
         }
 
         public @NotNull DoubleLongSubject logicOpsMatchesBigInteger() {
-            for (BigInteger big : EDGE_CASE_BIG_INTEGERS) {
+            for (BigInteger big : BIG_INTEGERS) {
                 assertThat(actual.and(DoubleLong.from(big)).toBigInteger()).isEqualTo(actual.toBigInteger().and(big));
                 assertThat(DoubleLong.from(big).and(actual).toBigInteger()).isEqualTo(actual.toBigInteger().and(big));
                 assertThat(actual.or(DoubleLong.from(big)).toBigInteger()).isEqualTo(actual.toBigInteger().or(big));
