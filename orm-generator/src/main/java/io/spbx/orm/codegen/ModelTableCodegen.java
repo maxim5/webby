@@ -1,13 +1,8 @@
 package io.spbx.orm.codegen;
 
-import com.google.common.collect.ImmutableSet;
 import com.google.common.collect.Iterables;
-import com.google.common.collect.Streams;
 import com.google.common.primitives.Primitives;
 import io.spbx.orm.api.*;
-import io.spbx.orm.api.entity.*;
-import io.spbx.orm.api.query.*;
-import io.spbx.orm.arch.model.Column;
 import io.spbx.orm.arch.model.*;
 import io.spbx.orm.arch.util.Naming;
 import io.spbx.util.collect.EasyMaps;
@@ -18,7 +13,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.stream.Collectors;
-import java.util.stream.Stream;
 
 import static io.spbx.orm.codegen.Indent.*;
 import static io.spbx.orm.codegen.JavaSupport.EMPTY_LINE;
@@ -28,16 +22,15 @@ import static java.util.Objects.requireNonNull;
 
 @SuppressWarnings("UnnecessaryStringEscape")
 public class ModelTableCodegen extends BaseCodegen {
-    private final ModelAdaptersLocator adaptersLocator;
+    private final ModelAdaptersLocator locator;
     private final TableArch table;
 
     private final Map<String, String> mainContext;
     private final Map<String, String> pkContext;
 
-    public ModelTableCodegen(@NotNull ModelAdaptersLocator adaptersLocator,
-                             @NotNull TableArch table, @NotNull Appendable writer) {
+    public ModelTableCodegen(@NotNull ModelAdaptersLocator locator, @NotNull TableArch table, @NotNull Appendable writer) {
         super(writer);
-        this.adaptersLocator = adaptersLocator;
+        this.locator = locator;
         this.table = table;
 
         this.mainContext = EasyMaps.asMap(
@@ -116,53 +109,7 @@ public class ModelTableCodegen extends BaseCodegen {
     }
 
     private void imports() {
-        List<Class<?>> mappedTypes = table.fields().stream()
-            .filter(TableField::isMapperSupportedType)
-            .map(TableField::javaType)
-            .collect(Collectors.toList());
-        List<Class<?>> mapperTypes = table.fields().stream()
-            .filter(TableField::isMapperSupportedType)
-            .flatMap(field -> field.mapperApiOrDie().importedClass().stream())
-            .toList();
-        List<Class<?>> adapterClasses = table.fields().stream()
-            .filter(TableField::isAdapterSupportType)
-            .map(TableField::javaType)
-            .collect(Collectors.toList());
-
-        List<Class<?>> foreignKeyClasses = table.hasForeignKeyField() ?
-            List.of(Foreign.class, ForeignInt.class, ForeignLong.class, ForeignObj.class) :
-            List.of();
-        /*List<Class<?>> foreignKeyClasses = table.foreignFields(ReadFollow.FOLLOW_ALL).stream()
-                .map(TableField::javaType)
-                .collect(Collectors.toList());*/
-        List<JavaNameHolder> foreignTableClasses = table.foreignFields(ReadFollow.FOLLOW_ALL).stream()
-            .map(ForeignTableField::getForeignTable)
-            .collect(Collectors.toList());
-        List<Class<?>> foreignModelClasses = table.isBridgeTable() ?
-            Stream.of(table.leftBridgeFieldOrDie(), table.rightBridgeFieldOrDie())
-                .map(ForeignTableField::getForeignTable)
-                .map(TableArch::modelClass)
-                .collect(Collectors.toList()) :
-            List.of();
-
-        List<String> classesToImport = Streams.concat(
-            baseTableClasses().stream().map(FQN::of),
-            Stream.of(
-                Connector.class, QueryRunner.class, QueryException.class, Engine.class, ReadFollow.class, DbAdmin.class,
-                Filter.class, Where.class, Args.class, io.spbx.orm.api.query.Column.class, FullColumn.class, TermType.class,
-                ResultSetIterator.class, TableMeta.class,
-                EntityData.class, EntityIntData.class, EntityLongData.class, EntityColumnMap.class,
-                BatchEntityData.class, BatchEntityIntData.class, BatchEntityLongData.class,
-                Contextual.class
-            ).map(FQN::of),
-            mappedTypes.stream().map(FQN::of),
-            mapperTypes.stream().map(FQN::of),
-            adapterClasses.stream().map(FQN::of),
-            adapterClasses.stream().map(adaptersLocator::locateAdapterFqn),
-            foreignKeyClasses.stream().map(FQN::of),
-            foreignTableClasses.stream().map(FQN::of),
-            foreignModelClasses.stream().map(FQN::of)
-        ).filter(fqn -> !isSkippable(fqn)).map(FQN::importName).sorted().distinct().toList();
+        List<String> classesToImport = new ImportsCollector(locator, table, pickBaseTableClass()).imports();
 
         Map<String, String> context = Map.of(
             "$package", table.packageName(),
@@ -184,14 +131,6 @@ public class ModelTableCodegen extends BaseCodegen {
         """, context);
     }
 
-    private static final ImmutableSet<String> IMPORTED_BY_STAR = ImmutableSet.of("java.lang", "java.sql", "java.util");
-
-    private boolean isSkippable(@NotNull FQN fqn) {
-        // BitSet is in both `java.util` and `hppc`.
-        return !fqn.className().equals("BitSet") &&
-            (fqn.packageName().equals(table.packageName()) || IMPORTED_BY_STAR.contains(fqn.packageName()));
-    }
-
     private void classDef() {
         Class<?> baseTableClass = pickBaseTableClass();
         Map<String, String> context = Map.of(
@@ -208,13 +147,6 @@ public class ModelTableCodegen extends BaseCodegen {
             appendCode(0, "public class $TableClass implements $BaseClass<$BaseGenerics> {",
                        EasyMaps.merge(context, mainContext, pkContext));
         }
-    }
-
-    private @NotNull List<Class<?>> baseTableClasses() {
-        if (table.isBridgeTable()) {
-            return List.of(pickBaseTableClass(), BridgeTable.class);
-        }
-        return List.of(pickBaseTableClass());
     }
 
     private @NotNull Class<?> pickBaseTableClass() {

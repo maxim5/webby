@@ -56,4 +56,18 @@ public class EasyPrimitives {
     public static int parseIntSafe(@Nullable CharSequence val) {
         return parseIntSafe(val, 0);
     }
+
+    @Pure
+    public static long parseLongSafe(@Nullable CharSequence val, long def) {
+        try {
+            return val != null ? Long.parseLong(val, 0, val.length(), 10) : def;
+        } catch (NumberFormatException ignore) {
+            return def;
+        }
+    }
+
+    @Pure
+    public static long parseLongSafe(@Nullable CharSequence val) {
+        return parseLongSafe(val, 0);
+    }
 }

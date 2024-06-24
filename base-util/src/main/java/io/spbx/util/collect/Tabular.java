@@ -11,6 +11,7 @@ import java.util.List;
  * The interface exposes read-only methods, so the implementations are expected to be immutable.
  *
  * @param <T> type of items
+ * @see com.google.common.collect.Table
  */
 public interface Tabular<T> {
     /**

@@ -57,7 +57,7 @@ public class ModelAdapterCodegen extends BaseCodegen {
             Stream.of(JdbcAdapt.class, getBaseClass()).map(FQN::of),
             Stream.of(ResultSetIterator.class, ResultSet.class, SQLException.class).map(FQN::of),
             getNestedAdapters().stream().map(FQN::of)
-        ).filter(fqn -> !isSkippablePackage(fqn.packageName())).map(FQN::importName).sorted().distinct().toList();
+        ).filter(fqn -> !isSkippablePackage(fqn.packageName())).map(FQN::toImportName).sorted().distinct().toList();
         Map<String, String> context = Map.of(
             "$package", adapter.packageName(),
             "$imports", classesToImport.stream().map("import %s;"::formatted).collect(LINE_JOINER)

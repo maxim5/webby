@@ -56,6 +56,8 @@ public class EasyIterables {
     /**
      * Returns a stream collector that extracts a single non-null item from the stream or otherwise empty.
      * Treats null items as if they didn't appear in the stream.
+     *
+     * @see com.google.common.collect.MoreCollectors#onlyElement
      */
     public static <E> @NotNull Collector<E, ?, Optional<E>> getOnlyItemOrEmpty() {
         return castAny(ONLY_ITEM_OR_EMPTY);

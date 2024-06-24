@@ -1,10 +1,10 @@
 package io.spbx.orm.arch.model;
 
+import com.google.common.base.Splitter;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.VisibleForTesting;
 
 import javax.lang.model.SourceVersion;
-import java.util.regex.Pattern;
 
 public class JavaNameValidator {
     public static @NotNull String validateJavaIdentifier(@NotNull String name) {
@@ -12,13 +12,15 @@ public class JavaNameValidator {
         return name;
     }
 
-    public static @NotNull String validateJavaPackage(@NotNull String name) {
-        assert isValidJavaPackage(name) : "Invalid java package: " + name;
+    public static @NotNull String validateJavaClassName(@NotNull String name) {
+        assert isValidJavaIdentifiersSeparatedByDots(name) : "Invalid java class name: " + name;
         return name;
     }
 
-    // https://stackoverflow.com/questions/29783092/regexp-to-match-java-package-name
-    private static final Pattern PACKAGE_PATTERN = Pattern.compile("^(?:\\w+|\\w+\\.\\w+)+$");
+    public static @NotNull String validateJavaPackage(@NotNull String name) {
+        assert isValidJavaIdentifiersSeparatedByDots(name) : "Invalid java package: " + name;
+        return name;
+    }
 
     @VisibleForTesting
     static boolean isValidJavaIdentifier(@NotNull String name) {
@@ -27,7 +29,9 @@ public class JavaNameValidator {
     }
 
     @VisibleForTesting
-    static boolean isValidJavaPackage(@NotNull String name) {
-        return PACKAGE_PATTERN.matcher(name).matches();
+    static boolean isValidJavaIdentifiersSeparatedByDots(@NotNull String name) {
+        // See also https://stackoverflow.com/questions/29783092/regexp-to-match-java-package-name
+        // Pattern.compile("^(?:\\w+|\\w+\\.\\w+)+$")
+        return Splitter.on('.').splitToStream(name).allMatch(JavaNameValidator::isValidJavaIdentifier);
     }
 }

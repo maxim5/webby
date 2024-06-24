@@ -7,7 +7,9 @@ import org.jetbrains.annotations.Nullable;
 import java.util.function.*;
 
 /**
- * Can hold an immutable pair of nullable objects, only one of which is set at a time.
+ * Holds an immutable pair of nullable objects, only one of which is set at a time.
+ *
+ * @see Pair
  */
 @Immutable
 public class OneOf<U, V> {
@@ -58,6 +60,10 @@ public class OneOf<U, V> {
 
     public @Nullable V second() {
         return second;
+    }
+
+    public @NotNull Pair<U, V> toPair() {
+        return Pair.of(first, second);
     }
 
     public <T, S> @NotNull OneOf<T, S> map(@NotNull Function<U, T> convertFirst, @NotNull Function<V, S> convertSecond) {

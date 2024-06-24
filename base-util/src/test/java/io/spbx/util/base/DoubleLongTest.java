@@ -1,92 +1,79 @@
 package io.spbx.util.base;
 
 import com.google.common.base.Strings;
+import com.google.common.primitives.UnsignedLong;
 import com.google.errorprone.annotations.CanIgnoreReturnValue;
+import io.spbx.util.collect.ListBuilder;
+import io.spbx.util.testing.TestingBasics;
+import io.spbx.util.testing.TestingPrimitives;
 import org.jetbrains.annotations.CheckReturnValue;
 import org.jetbrains.annotations.NotNull;
+import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.MethodSource;
+import org.junit.jupiter.params.provider.ValueSource;
 
 import java.math.BigInteger;
+import java.util.Comparator;
+import java.util.List;
+import java.util.stream.IntStream;
+import java.util.stream.LongStream;
+import java.util.stream.Stream;
 
 import static com.google.common.truth.Truth.assertThat;
-import static io.spbx.util.testing.TestingPrimitives.fitsIntoLong;
-import static io.spbx.util.testing.TestingPrimitives.toBigInteger;
+import static io.spbx.util.testing.TestingPrimitives.*;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 
+@SuppressWarnings("EqualsWithItself")
 public class DoubleLongTest {
-    @Test
-    public void construction_positive_numbers() {
-        assertConstruction("0");
-        assertConstruction("1");
-        assertConstruction("42");
-        assertConstruction("255");
-        assertConstruction("256");
+    // The last one overflows, it's ok.
+    private static final long[] POW2 = LongStream.range(0, 64).map(n -> 1L << n).toArray();
 
-        assertConstruction("32767");
-        assertConstruction("32768");
-        assertConstruction("2147483647");
-        assertConstruction("2147483648");
-        assertConstruction("9223372036854775807");
-        assertConstruction("9223372036854775808");
+    private static final List<Long> SIMPLE_MIN_MAX_VALUES = Stream.of(
+        Byte.MAX_VALUE, Byte.MIN_VALUE,
+        Short.MAX_VALUE, Short.MIN_VALUE,
+        Integer.MAX_VALUE, Integer.MIN_VALUE,
+        Long.MAX_VALUE, Long.MIN_VALUE
+    ).map(Number::longValue).toList();
 
-        assertConstruction("10000000000000000000000000");
-        assertConstruction("99999999999999999999999999");
-        assertConstruction("99405973409652309870353134");
-    }
+    // Test convenient comparator: first positive, then negative.
+    private static final Comparator<BigInteger> CMP = (lhs, rhs) ->
+        lhs.signum() >= 0 && rhs.signum() >= 0 ? lhs.compareTo(rhs) : -lhs.compareTo(rhs);
 
-    @Test
-    public void construction_negative_numbers() {
-        assertConstruction("-1");
-        assertConstruction("-42");
-        assertConstruction("-255");
-        assertConstruction("-256");
+    private static final List<BigInteger> EDGE_CASE_BIG_INTEGERS = IntStream.range(0, 128)
+        .mapToObj(BigInteger.ONE::shiftLeft)
+        .flatMap(b -> Stream.of(b, b.subtract(BigInteger.ONE), b.negate(), b.negate().add(BigInteger.ONE)))
+        .map(TestingPrimitives::fitInto128Bits)
+        .sorted(CMP).distinct().toList();
 
-        assertConstruction("-32767");
-        assertConstruction("-32768");
-        assertConstruction("-2147483647");
-        assertConstruction("-2147483648");
-        assertConstruction("-9223372036854775807");
-        assertConstruction("-9223372036854775808");
+    private static final List<Long> EDGE_CASE_LONGS =
+        EDGE_CASE_BIG_INTEGERS.stream().map(BigInteger::longValue).distinct().toList();
 
-        assertConstruction("-10000000000000000000000000");
-        assertConstruction("-99999999999999999999999999");
-        assertConstruction("-99405973409652309870353134");
-    }
+    // From https://bigprimes.org/
+    private static final List<BigInteger> LARGE_PRIME_NUMBERS = Stream.of(
+        "477431785618589",
+        "7734245186249221",
+        "313506233314930897",
+        "14262866606244585389",
+        "9312117738832437088867",
+        "643060765953885798980471",
+        "86177578550109096835627979",
+        "9789690428521166127696463099",
+        "511502705152331397313213352309",
+        "37010749720546680375917374542419",
+        "9619122375485128076391017781203171",
+        "729607297303010430697493914704054547",
+        "19008080681165741144368765276016110223",
+        "134729416280889832795054608867944616583"
+    ).map(BigInteger::new).flatMap(b -> Stream.of(b, b.negate())).sorted(CMP).toList();
 
-    @Test
-    public void internal_consistency_trivial() {
-        assertThatDoubleLong(DoubleLong.ZERO).internalConsistency();
-        assertThatDoubleLong(DoubleLong.ONE).internalConsistency();
-        assertThatDoubleLong(DoubleLong.MAX_VALUE).internalConsistency();
-        assertThatDoubleLong(DoubleLong.MIN_VALUE).internalConsistency();
-    }
+    private static final List<BigInteger> BIG_INTEGERS = ListBuilder.concat(EDGE_CASE_BIG_INTEGERS, LARGE_PRIME_NUMBERS);
+
+    /** Constants */
 
     @Test
-    public void internal_consistency_long_numbers() {
-        assertThatDoubleLong(DoubleLong.from(Byte.MAX_VALUE)).internalConsistency();
-        assertThatDoubleLong(DoubleLong.from(Byte.MIN_VALUE)).internalConsistency();
-        assertThatDoubleLong(DoubleLong.from(Short.MAX_VALUE)).internalConsistency();
-        assertThatDoubleLong(DoubleLong.from(Short.MIN_VALUE)).internalConsistency();
-        assertThatDoubleLong(DoubleLong.from(Integer.MAX_VALUE)).internalConsistency();
-        assertThatDoubleLong(DoubleLong.from(Integer.MIN_VALUE)).internalConsistency();
-        assertThatDoubleLong(DoubleLong.from(Long.MAX_VALUE)).internalConsistency();
-        assertThatDoubleLong(DoubleLong.from(Long.MIN_VALUE)).internalConsistency();
-    }
-
-    @Test
-    public void internal_consistency_big_numbers() {
-        assertThatDoubleLong(DoubleLong.from("14262866606244585389")).internalConsistency();
-        assertThatDoubleLong(DoubleLong.from("38271921788684024801")).internalConsistency();
-        assertThatDoubleLong(DoubleLong.from("511502705152331397313213352309")).internalConsistency();
-        assertThatDoubleLong(DoubleLong.from("840915912219908665770642669703")).internalConsistency();
-
-        assertThatDoubleLong(DoubleLong.from("-14262866606244585389")).internalConsistency();
-        assertThatDoubleLong(DoubleLong.from("-38271921788684024801")).internalConsistency();
-        assertThatDoubleLong(DoubleLong.from("-511502705152331397313213352309")).internalConsistency();
-        assertThatDoubleLong(DoubleLong.from("-840915912219908665770642669703")).internalConsistency();
-    }
-
-    @Test
-    public void trivial_zero() {
+    public void const_zero_trivial() {
         assertThat(DoubleLong.ZERO.highBits()).isEqualTo(0);
         assertThat(DoubleLong.ZERO.lowBits()).isEqualTo(0);
         assertThat(DoubleLong.ZERO.toBigInteger()).isEqualTo(BigInteger.ZERO);
@@ -94,10 +81,15 @@ public class DoubleLongTest {
         assertThat(DoubleLong.ZERO.intValue()).isEqualTo(0);
         assertThat(DoubleLong.ZERO.toString()).isEqualTo("0");
         assertThat(DoubleLong.ZERO.toBinaryString()).isEqualTo("0".repeat(128));
+        assertThat(DoubleLong.ZERO).isEqualTo(DoubleLong.from(0));
+        assertThat(DoubleLong.ZERO.compareTo(DoubleLong.ZERO)).isEqualTo(0);
+        assertThat(DoubleLong.ZERO.compareTo(DoubleLong.ONE)).isEqualTo(-1);
+        assertThat(DoubleLong.ZERO.compareTo(DoubleLong.MIN_VALUE)).isEqualTo(1);
+        assertThat(DoubleLong.ZERO.compareTo(DoubleLong.MAX_VALUE)).isEqualTo(-1);
     }
 
     @Test
-    public void trivial_one() {
+    public void const_one_trivial() {
         assertThat(DoubleLong.ONE.highBits()).isEqualTo(0);
         assertThat(DoubleLong.ONE.lowBits()).isEqualTo(1);
         assertThat(DoubleLong.ONE.toBigInteger()).isEqualTo(BigInteger.ONE);
@@ -105,10 +97,15 @@ public class DoubleLongTest {
         assertThat(DoubleLong.ONE.intValue()).isEqualTo(1);
         assertThat(DoubleLong.ONE.toString()).isEqualTo("1");
         assertThat(DoubleLong.ONE.toBinaryString()).isEqualTo("0".repeat(127) + "1");
+        assertThat(DoubleLong.ONE).isEqualTo(DoubleLong.from(1));
+        assertThat(DoubleLong.ONE.compareTo(DoubleLong.ZERO)).isEqualTo(1);
+        assertThat(DoubleLong.ONE.compareTo(DoubleLong.ONE)).isEqualTo(0);
+        assertThat(DoubleLong.ONE.compareTo(DoubleLong.MIN_VALUE)).isEqualTo(1);
+        assertThat(DoubleLong.ONE.compareTo(DoubleLong.MAX_VALUE)).isEqualTo(-1);
     }
 
     @Test
-    public void trivial_max_value() {
+    public void const_max_value_trivial() {
         BigInteger expected = BigInteger.ONE.shiftLeft(127).subtract(BigInteger.ONE);  // (1 << 127) - 1
         assertThat(DoubleLong.MAX_VALUE.highBits()).isEqualTo(Long.MAX_VALUE);
         assertThat(DoubleLong.MAX_VALUE.lowBits()).isEqualTo(-1);
@@ -117,10 +114,14 @@ public class DoubleLongTest {
         assertThat(DoubleLong.MAX_VALUE.intValue()).isEqualTo(expected.intValue());    // -1
         assertThat(DoubleLong.MAX_VALUE.toString()).isEqualTo(expected.toString());
         assertThat(DoubleLong.MAX_VALUE.toBinaryString()).isEqualTo("0" + "1".repeat(127));
+        assertThat(DoubleLong.MAX_VALUE.compareTo(DoubleLong.ZERO)).isEqualTo(1);
+        assertThat(DoubleLong.MAX_VALUE.compareTo(DoubleLong.ONE)).isEqualTo(1);
+        assertThat(DoubleLong.MAX_VALUE.compareTo(DoubleLong.MIN_VALUE)).isEqualTo(1);
+        assertThat(DoubleLong.MAX_VALUE.compareTo(DoubleLong.MAX_VALUE)).isEqualTo(0);
     }
 
     @Test
-    public void trivial_min_value() {
+    public void const_min_value_trivial() {
         BigInteger expected = BigInteger.ONE.shiftLeft(127).negate();  // -(1 << 127)
         assertThat(DoubleLong.MIN_VALUE.highBits()).isEqualTo(Long.MIN_VALUE);
         assertThat(DoubleLong.MIN_VALUE.lowBits()).isEqualTo(0);
@@ -129,7 +130,316 @@ public class DoubleLongTest {
         assertThat(DoubleLong.MIN_VALUE.intValue()).isEqualTo(expected.intValue());    // 0
         assertThat(DoubleLong.MIN_VALUE.toString()).isEqualTo(expected.toString());
         assertThat(DoubleLong.MIN_VALUE.toBinaryString()).isEqualTo("1" + "0".repeat(127));
+        assertThat(DoubleLong.MIN_VALUE.compareTo(DoubleLong.ZERO)).isEqualTo(-1);
+        assertThat(DoubleLong.MIN_VALUE.compareTo(DoubleLong.ONE)).isEqualTo(-1);
+        assertThat(DoubleLong.MIN_VALUE.compareTo(DoubleLong.MIN_VALUE)).isEqualTo(0);
+        assertThat(DoubleLong.MIN_VALUE.compareTo(DoubleLong.MAX_VALUE)).isEqualTo(-1);
     }
+
+    /** {@link DoubleLong#fromBits}} and {@link DoubleLong#from} */
+
+    @Test
+    public void construction_from_bits_long_trivial() {
+        assertThat(DoubleLong.fromBits(0, 0)).isEqualTo(DoubleLong.from(BigInteger.ZERO));
+        assertThat(DoubleLong.fromBits(0, 1)).isEqualTo(DoubleLong.from(BigInteger.ONE));
+        assertThat(DoubleLong.fromBits(0, -1)).isEqualTo(DoubleLong.from(BigInteger.ONE.shiftLeft(64).subtract(BigInteger.ONE)));
+
+        assertThat(DoubleLong.fromBits(1, 0)).isEqualTo(DoubleLong.from(BigInteger.ONE.shiftLeft(64)));
+        assertThat(DoubleLong.fromBits(1, 1)).isEqualTo(DoubleLong.from(BigInteger.ONE.shiftLeft(64).add(BigInteger.ONE)));
+        assertThat(DoubleLong.fromBits(1, -1)).isEqualTo(DoubleLong.from(BigInteger.ONE.shiftLeft(65).subtract(BigInteger.ONE)));
+
+        assertThat(DoubleLong.fromBits(-1, 0)).isEqualTo(DoubleLong.from(BigInteger.ONE.shiftLeft(64).negate()));
+        assertThat(DoubleLong.fromBits(-1, 1)).isEqualTo(DoubleLong.from(BigInteger.ONE.shiftLeft(64).negate().add(BigInteger.ONE)));
+        assertThat(DoubleLong.fromBits(-1, -1)).isEqualTo(DoubleLong.from(BigInteger.ONE.negate()));
+
+        assertThat(DoubleLong.fromBits(0, Long.MAX_VALUE)).isEqualTo(DoubleLong.from(BigInteger.valueOf(Long.MAX_VALUE)));
+        assertThat(DoubleLong.fromBits(0, Long.MIN_VALUE)).isEqualTo(DoubleLong.from(BigInteger.valueOf(Long.MIN_VALUE).negate()));
+        // assertThat(DoubleLong.fromBits(Long.MAX_VALUE, 0)).isEqualTo();
+        // assertThat(DoubleLong.fromBits(Long.MIN_VALUE, 0)).isEqualTo();
+    }
+
+    @ParameterizedTest
+    @ValueSource(strings = {
+        "0", "1", "2147483647", "2147483648", "9223372036854775807", "9223372036854775808",
+        "-1", "-2147483647", "-2147483648", "-9223372036854775807", "-9223372036854775808",
+    })
+    public void construction_simple(String num) {
+        assertConstruction(num);
+    }
+
+    @Test
+    public void construction_ultimate() {
+        for (BigInteger num : BIG_INTEGERS) {
+            assertConstruction(num.toString());
+        }
+    }
+
+    /** Internal Consistency */
+
+    @ParameterizedTest
+    @MethodSource
+    public void internal_consistency_simple(DoubleLong val) {
+        assertThatDoubleLong(val).internalConsistency();
+    }
+
+    private static @NotNull List<DoubleLong> internal_consistency_simple() {
+        return TestingBasics.flatListOf(
+            DoubleLong.ZERO, DoubleLong.ONE,
+            DoubleLong.MIN_VALUE, DoubleLong.MAX_VALUE,
+            SIMPLE_MIN_MAX_VALUES.stream().map(DoubleLong::from)
+        );
+    }
+
+    @Tag("slow")
+    @Test
+    public void internal_consistency_ultimate() {
+        for (BigInteger num : BIG_INTEGERS) {
+            assertThatDoubleLong(DoubleLong.from(num)).internalConsistency();
+        }
+        for (long num : EDGE_CASE_LONGS) {
+            assertThatDoubleLong(DoubleLong.from(num)).internalConsistency();
+        }
+    }
+
+    /** {@link DoubleLong#fitsIntoLong()} */
+
+    private static final List<DoubleLong> FIT_INTO_LONG =
+        List.of(DoubleLong.ZERO, DoubleLong.ONE, DoubleLong.from(Long.MAX_VALUE), DoubleLong.from(Long.MIN_VALUE));
+    private static final List<DoubleLong> NOT_FIT_INTO_LONG = List.of(
+        DoubleLong.MAX_VALUE, DoubleLong.MIN_VALUE,
+        DoubleLong.from("9223372036854775808"), DoubleLong.from("-9223372036854775809")
+    );
+
+    @Test
+    public void fitsIntoLong_simple() {
+        assertThat(DoubleLong.ZERO.fitsIntoLong()).isTrue();
+        assertThat(DoubleLong.ONE.fitsIntoLong()).isTrue();
+        assertThat(DoubleLong.from(Long.MAX_VALUE).fitsIntoLong()).isTrue();
+        assertThat(DoubleLong.from(Long.MIN_VALUE).fitsIntoLong()).isTrue();
+
+        assertThat(DoubleLong.MAX_VALUE.fitsIntoLong()).isFalse();
+        assertThat(DoubleLong.MIN_VALUE.fitsIntoLong()).isFalse();
+        assertThat(DoubleLong.from("9223372036854775808").fitsIntoLong()).isFalse();
+        assertThat(DoubleLong.from("-9223372036854775809").fitsIntoLong()).isFalse();
+    }
+
+    /** {@link DoubleLong#multiply(DoubleLong)} */
+
+    @Test
+    public void multiply_simple() {
+        assertThat(DoubleLong.ZERO.multiply(DoubleLong.ZERO)).isEqualTo(DoubleLong.ZERO);
+        assertThat(DoubleLong.ZERO.multiply(DoubleLong.ONE)).isEqualTo(DoubleLong.ZERO);
+        assertThat(DoubleLong.ONE.multiply(DoubleLong.ONE)).isEqualTo(DoubleLong.ONE);
+        assertThat(DoubleLong.ONE.multiply(DoubleLong.from(2))).isEqualTo(DoubleLong.from(2));
+        assertThat(DoubleLong.from(2).multiply(DoubleLong.from(2))).isEqualTo(DoubleLong.from(4));
+    }
+
+    @Test
+    public void multiply_positive() {
+        assertMultiplyMatchesBigInteger(
+            DoubleLong.fromBits(0, 1L << 36 + 1),
+            DoubleLong.fromBits(0, 1L << 36 + 2)
+        );
+        assertMultiplyMatchesBigInteger(
+            DoubleLong.fromBits(1 << 16, 1L << 24 + 1),
+            DoubleLong.fromBits(1 << 10, 1L << 18 + 2)
+        );
+        assertMultiplyMatchesBigInteger(
+            DoubleLong.fromBits(1L << 20 + 1, 1L << 30 + 1),
+            DoubleLong.fromBits(1L << 20 - 1, 1L << 18 - 1)
+        );
+        assertMultiplyMatchesBigInteger(
+            DoubleLong.fromBits(1L << 30 - 1, 1L << 24 - 1),
+            DoubleLong.fromBits(1L << 15 - 1, 1L << 12 - 1)
+        );
+
+        assertMultiplyMatchesBigInteger(DoubleLong.from(Integer.MAX_VALUE), DoubleLong.from(Integer.MAX_VALUE));
+        assertMultiplyMatchesBigInteger(DoubleLong.from(Long.MAX_VALUE), DoubleLong.from(Long.MAX_VALUE));
+    }
+
+    @Test
+    public void multiply_negative() {
+        assertMultiplyMatchesBigInteger(DoubleLong.from(-1), DoubleLong.from(1));
+        assertMultiplyMatchesBigInteger(DoubleLong.from(-1), DoubleLong.from(-1));
+        assertMultiplyMatchesBigInteger(DoubleLong.from(Integer.MAX_VALUE), DoubleLong.from(Integer.MIN_VALUE));
+        assertMultiplyMatchesBigInteger(DoubleLong.from(Integer.MIN_VALUE), DoubleLong.from(Integer.MIN_VALUE));
+        assertMultiplyMatchesBigInteger(DoubleLong.from(Long.MAX_VALUE), DoubleLong.from(Long.MIN_VALUE));
+        assertMultiplyMatchesBigInteger(DoubleLong.from(Long.MIN_VALUE), DoubleLong.from(Long.MIN_VALUE));
+    }
+
+    @Tag("slow")
+    @Test
+    public void multiply_ultimate() {
+        for (BigInteger a : BIG_INTEGERS) {
+            for (BigInteger b : BIG_INTEGERS) {
+                assertMultiplyMatchesBigInteger(DoubleLong.from(a), DoubleLong.from(b));
+            }
+        }
+    }
+
+    private static void assertMultiplyMatchesBigInteger(@NotNull DoubleLong lhs, @NotNull DoubleLong rhs) {
+        BigInteger expected = fitInto128Bits(lhs.toBigInteger().multiply(rhs.toBigInteger()));
+        assertThat(lhs.multiply(rhs).toBigInteger()).isEqualTo(expected);
+    }
+
+    /** {@link DoubleLong#divide(DoubleLong)} */
+
+    private static final List<BigInteger> SIMPLE_POSITIVE_INTEGERS = List.of(
+        BigInteger.ZERO,
+        BigInteger.ONE,
+        BigInteger.TWO,
+        BigInteger.TEN,
+        BigInteger.valueOf(20),
+        BigInteger.valueOf(Byte.MAX_VALUE),
+        BigInteger.valueOf(100_000_000),
+        BigInteger.valueOf(Integer.MAX_VALUE),
+        BigInteger.valueOf(Long.MAX_VALUE),
+        BigInteger.ONE.shiftLeft(20).subtract(BigInteger.ONE),
+        BigInteger.ONE.shiftLeft(36),
+        BigInteger.ONE.shiftLeft(48),
+        BigInteger.ONE.shiftLeft(36).add(BigInteger.ONE),
+        BigInteger.ONE.shiftLeft(36).subtract(BigInteger.ONE),
+        BigInteger.ONE.shiftLeft(61),
+        BigInteger.ONE.shiftLeft(63),
+        BigInteger.ONE.shiftLeft(63).subtract(BigInteger.ONE)
+    );
+    private static final List<BigInteger> SIMPLE_NEGATIVE_INTEGERS =
+        SIMPLE_POSITIVE_INTEGERS.stream().map(BigInteger::negate).toList();
+
+    @Test
+    public void divide_simple_positive_only() {
+        for (BigInteger a : SIMPLE_POSITIVE_INTEGERS) {
+            for (BigInteger b : SIMPLE_POSITIVE_INTEGERS) {
+                assertDivideMatchesBigInteger(DoubleLong.from(a), DoubleLong.from(b));
+            }
+        }
+    }
+
+    @Test
+    public void divide_simple_negative_only() {
+        for (BigInteger a : SIMPLE_POSITIVE_INTEGERS) {
+            for (BigInteger b : SIMPLE_POSITIVE_INTEGERS) {
+                assertDivideMatchesBigInteger(DoubleLong.from(a), DoubleLong.from(b));
+            }
+        }
+    }
+
+    @Test
+    public void divide_simple_positive_and_negative() {
+        List<BigInteger> list = ListBuilder.concat(SIMPLE_POSITIVE_INTEGERS, SIMPLE_NEGATIVE_INTEGERS);
+        for (BigInteger a : list) {
+            for (BigInteger b : list) {
+                assertDivideMatchesBigInteger(DoubleLong.from(a), DoubleLong.from(b));
+            }
+        }
+    }
+
+    @Tag("slow")
+    @Test
+    public void divide_ultimate() {
+        for (BigInteger a : BIG_INTEGERS) {
+            for (BigInteger b : BIG_INTEGERS) {
+                assertDivideMatchesBigInteger(DoubleLong.from(a), DoubleLong.from(b));
+            }
+        }
+    }
+
+    private static void assertDivideMatchesBigInteger(DoubleLong lhs, DoubleLong rhs) {
+        if (rhs.equals(DoubleLong.ZERO)) {
+            assertThrows(AssertionError.class, () -> lhs.divide(rhs));
+        } else {
+            BigInteger expected = fitInto128Bits(lhs.toBigInteger().divide(rhs.toBigInteger()));
+            assertThat(lhs.divide(rhs).toBigInteger()).isEqualTo(expected);
+        }
+    }
+
+    /** {@link DoubleLong#negate()} */
+
+    @Test
+    public void negate_simple() {
+        assertThat(DoubleLong.ZERO.negate()).isEqualTo(DoubleLong.ZERO);
+        assertThat(DoubleLong.ONE.negate()).isEqualTo(DoubleLong.from(-1));
+        assertThat(DoubleLong.MAX_VALUE.negate()).isEqualTo(DoubleLong.MIN_VALUE.add(DoubleLong.ONE));
+        assertThat(DoubleLong.MIN_VALUE.negate()).isEqualTo(DoubleLong.MIN_VALUE);  // Same!!!
+    }
+
+    @Test
+    public void negate_ultimate() {
+        for (BigInteger num : BIG_INTEGERS) {
+            BigInteger expected = fitInto128Bits(num.negate());
+            assertThat(DoubleLong.from(num).negate().toBigInteger()).isEqualTo(expected);
+        }
+    }
+
+    /** {@link DoubleLong#shiftLeft(int)} */
+
+    @Test
+    public void shiftLeft_simple() {
+        assertThat(DoubleLong.ONE.shiftLeft(5)).isEqualTo(DoubleLong.from(POW2[5]));
+        assertThat(DoubleLong.ONE.shiftLeft(4)).isEqualTo(DoubleLong.from(POW2[4]));
+        assertThat(DoubleLong.ONE.shiftLeft(2)).isEqualTo(DoubleLong.from(POW2[2]));
+        assertThat(DoubleLong.ONE.shiftLeft(1)).isEqualTo(DoubleLong.from(POW2[1]));
+        assertThat(DoubleLong.ONE.shiftLeft(0)).isEqualTo(DoubleLong.ONE);
+
+        assertThat(DoubleLong.fromBits(1,  1).shiftLeft(5)).isEqualTo(DoubleLong.fromBits(POW2[5], POW2[5]));
+        assertThat(DoubleLong.fromBits(0, -1).shiftLeft(5)).isEqualTo(DoubleLong.fromBits(POW2[5] - 1, -POW2[5]));
+        assertThat(DoubleLong.fromBits(0, -1).shiftLeft(8)).isEqualTo(DoubleLong.fromBits(POW2[8] - 1, -POW2[8]));
+        assertThat(DoubleLong.fromBits(0, -1).shiftLeft(20)).isEqualTo(DoubleLong.fromBits(POW2[20] - 1, -POW2[20]));
+        assertThat(DoubleLong.fromBits(0, -1).shiftLeft(60)).isEqualTo(DoubleLong.fromBits(POW2[60] - 1, -POW2[60]));
+        assertThat(DoubleLong.fromBits(0, -1).shiftLeft(63)).isEqualTo(DoubleLong.fromBits(POW2[63] - 1, -POW2[63]));
+    }
+
+    @Test
+    public void shiftLeft_ultimate() {
+        for (BigInteger bigInteger : BIG_INTEGERS) {
+            assertShiftLeftMatchesBigInteger(bigInteger, 1);
+            assertShiftLeftMatchesBigInteger(bigInteger, 10);
+            assertShiftLeftMatchesBigInteger(bigInteger, 32);
+            assertShiftLeftMatchesBigInteger(bigInteger, 63);
+            assertShiftLeftMatchesBigInteger(bigInteger, 64);
+            assertShiftLeftMatchesBigInteger(bigInteger, 90);
+            assertShiftLeftMatchesBigInteger(bigInteger, 127);
+        }
+    }
+
+    private static void assertShiftLeftMatchesBigInteger(BigInteger num, int len) {
+        BigInteger expected = fitInto128Bits(num.shiftLeft(len));
+        assertThat(DoubleLong.from(num).shiftLeft(len).toBigInteger()).isEqualTo(expected);
+    }
+
+    /** {@link DoubleLong#shiftRight(int)} */
+
+    @Test
+    public void shiftRight_simple() {
+        assertThat(DoubleLong.ONE.shiftRight(0)).isEqualTo(DoubleLong.ONE);
+        assertThat(DoubleLong.ONE.shiftRight(1)).isEqualTo(DoubleLong.ZERO);
+
+        assertThat(DoubleLong.from(POW2[5]).shiftRight(4)).isEqualTo(DoubleLong.from(POW2[1]));
+        assertThat(DoubleLong.from(POW2[5]).shiftRight(5)).isEqualTo(DoubleLong.ONE);
+
+        assertThat(DoubleLong.fromBits(1, 1).shiftRight(1)).isEqualTo(DoubleLong.fromBits(0, POW2[63]));
+        assertThat(DoubleLong.fromBits(3, 3).shiftRight(1)).isEqualTo(DoubleLong.fromBits(1, POW2[63] + 1));
+    }
+
+    @Test
+    public void shiftRight_ultimate() {
+        for (BigInteger bigInteger : BIG_INTEGERS) {
+            assertShiftRightMatchesBigInteger(bigInteger, 1);
+            assertShiftRightMatchesBigInteger(bigInteger, 10);
+            assertShiftRightMatchesBigInteger(bigInteger, 32);
+            assertShiftRightMatchesBigInteger(bigInteger, 63);
+            assertShiftRightMatchesBigInteger(bigInteger, 64);
+            assertShiftRightMatchesBigInteger(bigInteger, 90);
+            assertShiftRightMatchesBigInteger(bigInteger, 127);
+        }
+    }
+
+    private static void assertShiftRightMatchesBigInteger(BigInteger num, int len) {
+        BigInteger expected = fitInto128Bits(num.shiftRight(len));
+        assertThat(DoubleLong.from(num).shiftRight(len).toBigInteger()).isEqualTo(expected);
+    }
+
+    /** Assertion utils */
 
     @CheckReturnValue
     private @NotNull DoubleLongSubject assertThatDoubleLong(@NotNull DoubleLong actual) {
@@ -151,7 +461,14 @@ public class DoubleLongTest {
                 .roundtripLongArrayBits()
                 .roundtripString()
                 .roundtripBigInteger()
+                .roundtripUnsignedLong()
                 .roundtripLong()
+                .fitsIntoLongConsistency()
+                .compareMatchesBigInteger()
+                .addMatchesBigInteger()
+                .subtractMatchesBigInteger()
+                .negateMatchesBigInteger()
+                .logicOpsMatchesBigInteger()
                 .internalConstruction();
         }
 
@@ -190,16 +507,85 @@ public class DoubleLongTest {
             return isEqualTo(copy);
         }
 
+        private @NotNull DoubleLongSubject roundtripUnsignedLong() {
+            if (actual.fitsIntoLong()) {
+                UnsignedLong unsignedLong = actual.toUnsignedLong();
+                DoubleLong copy = DoubleLong.from(unsignedLong);
+                return isEqualTo(copy);
+            }
+            assertThrows(AssertionError.class, () -> actual.toUnsignedLong());
+            return this;
+        }
+
         public @NotNull DoubleLongSubject roundtripLong() {
-            String str = actual.toString();
-            try {
-                long parsed = Long.parseLong(str);
+            if (actual.fitsIntoLong()) {
+                long parsed = EasyPrimitives.parseLongSafe(actual.toString());
                 DoubleLong copy = DoubleLong.from(parsed);
                 return isEqualTo(copy);
-            } catch (NumberFormatException e) {
-                // Not applicable
-                return this;
             }
+            return this;
+        }
+
+        public @NotNull DoubleLongSubject fitsIntoLongConsistency() {
+            boolean isPositiveOrZero = actual.compareTo(DoubleLong.ZERO) >= 0;
+            try {
+                Long.parseLong(actual.toString());
+                assertThat(actual.fitsIntoLong()).isTrue();
+                assertThat(actual.highBits()).isEqualTo(isPositiveOrZero ? 0 : -1);
+                assertThat(actual.compareTo(DoubleLong.from(Long.MAX_VALUE))).isAnyOf(0, -1);
+                assertThat(actual.compareTo(DoubleLong.from(Long.MIN_VALUE))).isAnyOf(0, 1);
+            } catch (NumberFormatException e) {
+                assertThat(actual.fitsIntoLong()).isFalse();
+                assertThat(actual.compareTo(DoubleLong.from(Long.MAX_VALUE))).isEqualTo(isPositiveOrZero ? 1 : -1);
+                assertThat(actual.compareTo(DoubleLong.from(Long.MIN_VALUE))).isEqualTo(isPositiveOrZero ? 1 : -1);
+            }
+            assertThat(actual.fitsIntoLong()).isEqualTo(fitsIntoLong(actual.toBigInteger()));
+            return this;
+        }
+
+        public @NotNull DoubleLongSubject compareMatchesBigInteger() {
+            for (BigInteger big : BIG_INTEGERS) {
+                assertThat(actual.compareTo(DoubleLong.from(big))).isEqualTo(actual.toBigInteger().compareTo(big));
+                assertThat(DoubleLong.from(big).compareTo(actual)).isEqualTo(big.compareTo(actual.toBigInteger()));
+            }
+            return this;
+        }
+
+        public @NotNull DoubleLongSubject addMatchesBigInteger() {
+            for (BigInteger big : BIG_INTEGERS) {
+                BigInteger expected = fitInto128Bits(actual.toBigInteger().add(big));
+                assertThat(actual.add(DoubleLong.from(big)).toBigInteger()).isEqualTo(expected);
+                assertThat(DoubleLong.from(big).add(actual).toBigInteger()).isEqualTo(expected);
+            }
+            return this;
+        }
+
+        public @NotNull DoubleLongSubject subtractMatchesBigInteger() {
+            for (BigInteger big : BIG_INTEGERS) {
+                assertThat(actual.subtract(DoubleLong.from(big)).toBigInteger())
+                    .isEqualTo(fitInto128Bits(actual.toBigInteger().subtract(big)));
+                assertThat(DoubleLong.from(big).subtract(actual).toBigInteger())
+                    .isEqualTo(fitInto128Bits(big.subtract(actual.toBigInteger())));
+            }
+            return this;
+        }
+
+        public @NotNull DoubleLongSubject negateMatchesBigInteger() {
+            BigInteger expected = fitInto128Bits(actual.toBigInteger().negate());
+            assertThat(actual.negate().toBigInteger()).isEqualTo(expected);
+            return isEqualTo(actual.negate().negate());
+        }
+
+        public @NotNull DoubleLongSubject logicOpsMatchesBigInteger() {
+            for (BigInteger big : BIG_INTEGERS) {
+                assertThat(actual.and(DoubleLong.from(big)).toBigInteger()).isEqualTo(actual.toBigInteger().and(big));
+                assertThat(DoubleLong.from(big).and(actual).toBigInteger()).isEqualTo(actual.toBigInteger().and(big));
+                assertThat(actual.or(DoubleLong.from(big)).toBigInteger()).isEqualTo(actual.toBigInteger().or(big));
+                assertThat(DoubleLong.from(big).or(actual).toBigInteger()).isEqualTo(actual.toBigInteger().or(big));
+                assertThat(actual.xor(DoubleLong.from(big)).toBigInteger()).isEqualTo(actual.toBigInteger().xor(big));
+                assertThat(DoubleLong.from(big).xor(actual).toBigInteger()).isEqualTo(actual.toBigInteger().xor(big));
+            }
+            return this;
         }
 
         public @NotNull DoubleLongSubject internalConstruction() {

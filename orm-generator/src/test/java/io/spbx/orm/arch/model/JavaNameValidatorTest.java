@@ -4,7 +4,7 @@ import org.junit.jupiter.api.Test;
 
 import static com.google.common.truth.Truth.assertThat;
 import static io.spbx.orm.arch.model.JavaNameValidator.isValidJavaIdentifier;
-import static io.spbx.orm.arch.model.JavaNameValidator.isValidJavaPackage;
+import static io.spbx.orm.arch.model.JavaNameValidator.isValidJavaIdentifiersSeparatedByDots;
 
 public class JavaNameValidatorTest {
     @Test
@@ -139,13 +139,31 @@ public class JavaNameValidatorTest {
     }
 
     @Test
-    public void isValidJavaPackage_simple() {
-        assertThat(isValidJavaPackage("com")).isTrue();
-        assertThat(isValidJavaPackage("com.google")).isTrue();
-        assertThat(isValidJavaPackage("com.google.test")).isTrue();
-        assertThat(isValidJavaPackage(".")).isFalse();
-        assertThat(isValidJavaPackage(".com")).isFalse();
-        assertThat(isValidJavaPackage("com.")).isFalse();
-        assertThat(isValidJavaPackage("com..google")).isFalse();
+    public void isValidJavaIdentifiersSeparatedByDots_simple() {
+        assertThat(isValidJavaIdentifiersSeparatedByDots("com")).isTrue();
+        assertThat(isValidJavaIdentifiersSeparatedByDots("com.google")).isTrue();
+        assertThat(isValidJavaIdentifiersSeparatedByDots("com.google.test")).isTrue();
+
+        assertThat(isValidJavaIdentifiersSeparatedByDots("")).isFalse();
+        assertThat(isValidJavaIdentifiersSeparatedByDots(".")).isFalse();
+        assertThat(isValidJavaIdentifiersSeparatedByDots("..")).isFalse();
+        assertThat(isValidJavaIdentifiersSeparatedByDots(". .")).isFalse();
+
+        assertThat(isValidJavaIdentifiersSeparatedByDots(".com")).isFalse();
+        assertThat(isValidJavaIdentifiersSeparatedByDots("com.")).isFalse();
+        assertThat(isValidJavaIdentifiersSeparatedByDots("com..google")).isFalse();
+
+        assertThat(isValidJavaIdentifiersSeparatedByDots("123")).isFalse();
+        assertThat(isValidJavaIdentifiersSeparatedByDots("int")).isFalse();
+        assertThat(isValidJavaIdentifiersSeparatedByDots("com.char.google")).isFalse();
+        assertThat(isValidJavaIdentifiersSeparatedByDots("com.google.enum")).isFalse();
+        assertThat(isValidJavaIdentifiersSeparatedByDots("com.google.0test")).isFalse();
+
+        assertThat(isValidJavaIdentifiersSeparatedByDots("main")).isTrue();
+        assertThat(isValidJavaIdentifiersSeparatedByDots("Main")).isTrue();
+        assertThat(isValidJavaIdentifiersSeparatedByDots("MAIN")).isTrue();
+        assertThat(isValidJavaIdentifiersSeparatedByDots("Main123")).isTrue();
+        assertThat(isValidJavaIdentifiersSeparatedByDots("Main.Nested")).isTrue();
+        assertThat(isValidJavaIdentifiersSeparatedByDots("com.google.Main.Nested")).isTrue();
     }
 }

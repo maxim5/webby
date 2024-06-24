@@ -76,6 +76,10 @@ class Snippet {
         return withLines(multiline.lines()).withForceBlock(containsNewLineChars(multiline));
     }
 
+    public @NotNull Snippet withFormattedMultiline(@NotNull String multiline, @NotNull Object @NotNull ... args) {
+        return withMultiline(multiline.formatted(args));
+    }
+
     public @NotNull Snippet withMultilines(@NotNull Collection<String> multilines) {
         multilines.forEach(this::withMultiline);
         return this;
