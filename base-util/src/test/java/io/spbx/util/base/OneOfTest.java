@@ -28,6 +28,12 @@ public class OneOfTest {
     }
 
     @Test
+    public void oneOf_toPair() {
+        assertThat(OneOf.ofFirst(1).toPair()).isEqualTo(Pair.of(1, null));
+        assertThat(OneOf.ofSecond(2).toPair()).isEqualTo(Pair.of(null, 2));
+    }
+
+    @Test
     public void oneOf_map() {
         assertOneOf(OneOf.ofFirst(1).mapFirst(x -> -x), -1, null);
         assertOneOf(OneOf.ofFirst(1).map(x -> -x, String::valueOf), -1, null);

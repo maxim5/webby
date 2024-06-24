@@ -7,7 +7,9 @@ import java.util.Map;
 import java.util.function.*;
 
 /**
- * Can hold an immutable pair of nullable objects.
+ * Holds an immutable pair of nullable objects.
+ *
+ * @see OneOf
  */
 @Immutable
 public record Pair<U, V>(U first, V second) implements Map.Entry<U, V> {
