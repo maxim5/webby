@@ -164,8 +164,12 @@ public final class DoubleLong extends Number implements Comparable<DoubleLong> {
     }
 
     public static int compareUnsigned(@NotNull DoubleLong lhs, @NotNull DoubleLong rhs) {
-        int cmp = Long.compareUnsigned(lhs.high, rhs.high);
-        return cmp != 0 ? cmp : Long.compareUnsigned(lhs.low, rhs.low);
+        return compareUnsigned(lhs.high, lhs.low, rhs.high, rhs.low);
+    }
+
+    private static int compareUnsigned(long hi1, long lo1, long hi2, long lo2) {
+        int cmp = Long.compareUnsigned(hi1, hi2);
+        return cmp != 0 ? cmp : Long.compareUnsigned(lo1, lo2);
     }
 
     public static @NotNull DoubleLong max(@NotNull DoubleLong lhs, @NotNull DoubleLong rhs) {
@@ -293,13 +297,13 @@ public final class DoubleLong extends Number implements Comparable<DoubleLong> {
         if (a.high == Long.MIN_VALUE) {
           return a.subtract(b).divide(b).increment().flipSign(!sameSign);
         } if (b.high == 0) {
-            return divideLongUnsigned(a.high, a.low, b.low).flipSign(!sameSign);
+            return divide64BitUnsigned(a.high, a.low, b.low).flipSign(!sameSign);
         } else {
-            return divideDoubleLongUnsigned(a.high, a.low, b.high, b.low).flipSign(!sameSign);
+            return divide128BitUnsigned(a.high, a.low, b.high, b.low).flipSign(!sameSign);
         }
     }
 
-    private static @NotNull DoubleLong divideLongUnsigned(long hi, long lo, long num) {
+    private static @NotNull DoubleLong divide64BitUnsigned(long hi, long lo, long num) {
         if (num == 1) {
             return DoubleLong.fromBits(hi, lo);
         }
@@ -307,19 +311,21 @@ public final class DoubleLong extends Number implements Comparable<DoubleLong> {
             return DoubleLong.from(Long.divideUnsigned(lo, num));
         }
 
-        int n = Long.numberOfLeadingZeros(num) - Long.numberOfLeadingZeros(hi);
-        while (true) {
-            DoubleLong div = DoubleLong.ONE.shiftLeft(64 + n);
-            DoubleLong multiply = DoubleLong.fromBits(0, num).shiftLeft(64 + n);
-            if (compare(multiply.high, multiply.low, hi, lo) <= 0) {
+        int n = Long.numberOfLeadingZeros(num) - Long.numberOfLeadingZeros(hi) + 64;
+        while (n >= 0) {
+            DoubleLong div = DoubleLong.ONE.shiftLeft(n);
+            DoubleLong multiply = DoubleLong.fromBits(0, num).shiftLeft(n);
+            if (compareUnsigned(hi, lo, multiply.high, multiply.low) >= 0) {
                 DoubleLong sub = subtract(hi, lo, multiply.high, multiply.low);
-                return divideLongUnsigned(sub.high, sub.low, num).add(div);
+                return divide64BitUnsigned(sub.high, sub.low, num).add(div);
             }
             n--;
         }
+
+        throw new AssertionError("Internal error. Failed to divide %s / %s".formatted(DoubleLong.fromBits(hi, lo), num));
     }
 
-    private static @NotNull DoubleLong divideDoubleLongUnsigned(long hi1, long lo1, long hi2, long lo2) {
+    private static @NotNull DoubleLong divide128BitUnsigned(long hi1, long lo1, long hi2, long lo2) {
         assert hi2 != 0 : "Internal error. The method must not be called, call divideLongUnsigned()";
 
         if (Long.compareUnsigned(hi1, hi2) < 0) {
@@ -332,13 +338,14 @@ public final class DoubleLong extends Number implements Comparable<DoubleLong> {
         long div = Long.divideUnsigned(hi1, hi2);
         while (div > 0) {
             DoubleLong multiply = div == 1 ? DoubleLong.fromBits(hi2, lo2) : DoubleLong.multiply(0, div, hi2, lo2);
-            DoubleLong sub = subtract(hi1, lo1, multiply.high, multiply.low);
-            if (sub.high >= 0) {
-                return divideDoubleLongUnsigned(sub.high, sub.low, hi2, lo2).add(div);
+            if (compareUnsigned(hi1, lo1, multiply.high, multiply.low) >= 0) {
+                DoubleLong sub = subtract(hi1, lo1, multiply.high, multiply.low);
+                return divide128BitUnsigned(sub.high, sub.low, hi2, lo2).add(div);
             }
             div = div >> 1;
         }
-        return DoubleLong.ZERO;
+
+        throw new AssertionError("Internal error. Failed to divide %s / %s".formatted(fromBits(hi1, lo1), fromBits(hi2, lo2)));
     }
 
     // Logical ops

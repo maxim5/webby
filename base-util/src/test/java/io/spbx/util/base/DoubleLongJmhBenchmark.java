@@ -38,7 +38,7 @@ public class DoubleLongJmhBenchmark {
         }
     }
 
-    // @Benchmark
+    @Benchmark
     public void DoubleLong_divide_128(Blackhole blackhole) {
         for (DoubleLong x : DOUBLES_128) {
             for (DoubleLong y : DOUBLES_128) {
@@ -48,7 +48,7 @@ public class DoubleLongJmhBenchmark {
         }
     }
 
-    // @Benchmark
+    @Benchmark
     public void BigInteger_divide_64(Blackhole blackhole) {
         for (BigInteger x : BIGS_128) {
             for (BigInteger y : BIGS_64) {
@@ -58,7 +58,7 @@ public class DoubleLongJmhBenchmark {
         }
     }
 
-    // @Benchmark
+    @Benchmark
     public void BigInteger_divide_128(Blackhole blackhole) {
         for (BigInteger x : BIGS_128) {
             for (BigInteger y : BIGS_128) {
