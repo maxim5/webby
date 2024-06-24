@@ -14,6 +14,8 @@ dependencies {
 dependencies {
     testImplementation("com.google.truth:truth:1.4.2")
     testImplementation("com.google.inject:guice:7.0.0")  // testing generics
+    testImplementation("org.openjdk.jmh:jmh-core:1.37")
+    testImplementation("org.openjdk.jmh:jmh-generator-annprocess:1.37")
 }
 
 dependencies {
