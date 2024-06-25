@@ -36,7 +36,7 @@ public class MutableLiveProperties extends LiveProperties implements MutableProp
     }
 
     @Override
-    public @Nullable String setProperty(@NotNull String key, @NotNull String value) {
+    public @Nullable String setString(@NotNull String key, @NotNull String value) {
         return overwrites.put(key, value);
     }
 }

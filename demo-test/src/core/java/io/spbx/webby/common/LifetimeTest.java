@@ -26,7 +26,7 @@ public class LifetimeTest {
     @Test
     public void dependency_order() throws Throwable {
         AppSettings settings = Testing.defaultAppSettings();
-        settings.setProperty("testing.logging", "io.spbx.webby.common.Lifetime.Definition=DEBUG");
+        settings.setString("testing.logging", "io.spbx.webby.common.Lifetime.Definition=DEBUG");
         settings.modelFilter().setPackagesOf(Testing.CORE_MODELS);
         settings.storageSettings()
             .enableKeyValue(KeyValueSettings.of(KeyValueSettings.DEFAULT_TYPE))

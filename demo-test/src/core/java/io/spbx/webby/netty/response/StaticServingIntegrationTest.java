@@ -47,8 +47,8 @@ public class StaticServingIntegrationTest extends BaseHttpIntegrationTest {
     @ValueSource(booleans = {true, false})
     public void routing_integrates_with_hello_world_handler_default_prefix(boolean dynamicLookup) {
         testSetup(HelloWorld.class, settings -> {
-            settings.setProperty("testing.logging", "io.spbx.webby.url.impl.HandlerBinder=DEBUG");
-            settings.setProperty("url.static.files.prefix", "/");
+            settings.setString("testing.logging", "io.spbx.webby.url.impl.HandlerBinder=DEBUG");
+            settings.setString("url.static.files.prefix", "/");
             settings.setBool("url.static.files.dynamic.lookup", dynamicLookup);
         }).initHandler();
 
@@ -69,8 +69,8 @@ public class StaticServingIntegrationTest extends BaseHttpIntegrationTest {
     @ValueSource(booleans = {true, false})
     public void routing_integrates_with_hello_world_handler_custom_prefix(boolean dynamicLookup) {
         testSetup(HelloWorld.class, settings -> {
-            settings.setProperty("testing.logging", "io.spbx.webby.url.impl.HandlerBinder=DEBUG");
-            settings.setProperty("url.static.files.prefix", "/foo/");
+            settings.setString("testing.logging", "io.spbx.webby.url.impl.HandlerBinder=DEBUG");
+            settings.setString("url.static.files.prefix", "/foo/");
             settings.setBool("url.static.files.dynamic.lookup", dynamicLookup);
         }).initHandler();
 

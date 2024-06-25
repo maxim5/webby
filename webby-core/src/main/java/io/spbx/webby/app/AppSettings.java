@@ -79,11 +79,11 @@ public final class AppSettings implements Settings, MutablePropertyMap {
     }
 
     public void setCharset(@NotNull Charset charset) {
-        setProperty(CHARSET, charset.toString());
+        setString(CHARSET, charset.toString());
     }
 
     public void setSecurityKey(@NotNull String securityKey) {
-        setProperty(SECURITY_KEY, securityKey);
+        setString(SECURITY_KEY, securityKey);
     }
 
     public void setDefaultRender(@NotNull Render defaultRender) {
@@ -147,7 +147,7 @@ public final class AppSettings implements Settings, MutablePropertyMap {
     }
 
     public void setDefaultApiVersion(@NotNull String defaultApiVersion) {
-        setProperty(WS_API_VERSION, defaultApiVersion);
+        setString(WS_API_VERSION, defaultApiVersion);
     }
 
     @Override
@@ -161,7 +161,7 @@ public final class AppSettings implements Settings, MutablePropertyMap {
     }
 
     @Override
-    public @Nullable String setProperty(@NotNull String key, @NotNull String value) {
-        return properties.setProperty(key, value);
+    public @Nullable String setString(@NotNull String key, @NotNull String value) {
+        return properties.setString(key, value);
     }
 }
