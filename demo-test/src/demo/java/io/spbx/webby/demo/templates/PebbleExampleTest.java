@@ -20,7 +20,7 @@ import static io.spbx.webby.demo.templates.TestingRender.assertThat;
 public class PebbleExampleTest extends BaseHttpIntegrationTest {
     public PebbleExampleTest(@NotNull TestingRender.Config config) {
         Consumer<AppSettings> consumer = config.asSettingsUpdater().andThen(settings ->
-            settings.setViewPath(DevPaths.DEMO_WEB + "pebble")
+            settings.setViewPath(DevPaths.DEMO_WEB.resolve("pebble"))
         );
         testSetup(PebbleExample.class, consumer, TestingModules.instance(config)).initHandler();
     }

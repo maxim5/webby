@@ -22,7 +22,7 @@ import static io.spbx.webby.demo.templates.TestingRender.assertThat;
 public class JteExampleTest extends BaseHttpIntegrationTest {
     public JteExampleTest(@NotNull TestingRender.Config config) {
         Consumer<AppSettings> consumer = config.asSettingsUpdater().andThen(settings -> {
-            settings.setViewPath(DevPaths.DEMO_WEB + "jte");
+            settings.setViewPath(DevPaths.DEMO_WEB.resolve("jte"));
             settings.setProperty("jte.class.directory", JteExample.CLASS_DIR);
         });
         testSetup(JteExample.class, consumer, TestingModules.instance(config)).initHandler();

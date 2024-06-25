@@ -72,7 +72,7 @@ public class StandaloneNettyIntegrationTest {
 
     @Test
     public void upload_file() {
-        call(Ok.post("/upload/file", files(DevPaths.DEMO_WEB + "favicon.ico")), response -> {
+        call(Ok.post("/upload/file", files(DevPaths.DEMO_WEB.resolve("favicon.ico").toString())), response -> {
             assertClient(response).is200();
             assertClient(response).hasHeader("Content-Type", "text/html; charset=UTF-8");
             assertClient(response).hasBody("""

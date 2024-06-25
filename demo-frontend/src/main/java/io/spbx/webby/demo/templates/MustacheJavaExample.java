@@ -12,7 +12,6 @@ import io.spbx.webby.url.annotate.View;
 import io.spbx.webby.url.view.EasyRender;
 import org.jetbrains.annotations.NotNull;
 
-import java.nio.file.Paths;
 import java.util.List;
 import java.util.Map;
 import java.util.function.Supplier;
@@ -44,6 +43,6 @@ public class MustacheJavaExample {
 
     private static @NotNull Mustache getTemplate(@NotNull String name) {
         MustacheFactory factory = new DefaultMustacheFactory();
-        return factory.compile(Paths.get(DevPaths.DEMO_WEB, name).toUri().toString());
+        return factory.compile(DevPaths.DEMO_WEB.resolve(name).toUri().toString());
     }
 }

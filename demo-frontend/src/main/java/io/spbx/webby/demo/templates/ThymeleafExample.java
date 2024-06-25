@@ -37,7 +37,7 @@ public class ThymeleafExample {
         engine.setCacheManager(new StandardCacheManager());
         engine.setTemplateResolver(new FileTemplateResolver());
         IContext context = new Context(Locale.getDefault(), students);
-        TemplateSpec spec = new TemplateSpec("%s/%s".formatted(DevPaths.DEMO_WEB, template), TemplateMode.HTML);
+        TemplateSpec spec = new TemplateSpec(DevPaths.DEMO_WEB.resolve(template).toString(), TemplateMode.HTML);
         return engine.process(spec, context);
     }
 

@@ -7,6 +7,7 @@ import io.spbx.webby.app.AppSettings;
 import io.spbx.webby.demo.DevPaths;
 import org.jetbrains.annotations.NotNull;
 
+import java.nio.file.Path;
 import java.util.ArrayDeque;
 import java.util.Queue;
 import java.util.function.Consumer;
@@ -14,8 +15,8 @@ import java.util.function.Consumer;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 
 public class BaseChannelTest {
-    private static final String EXAMPLES_WEB_PATH = DevPaths.DEMO_WEB;
-    private static final String EXAMPLES_VIEW_PATH = DevPaths.DEMO_WEB;
+    private static final Path EXAMPLES_WEB_PATH = DevPaths.DEMO_WEB;
+    private static final Path EXAMPLES_VIEW_PATH = DevPaths.DEMO_WEB;
 
     protected Injector injector;
     protected EmbeddedChannel channel;
