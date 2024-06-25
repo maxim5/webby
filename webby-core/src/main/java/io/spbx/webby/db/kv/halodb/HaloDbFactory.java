@@ -29,18 +29,18 @@ public class HaloDbFactory extends BaseKeyValueFactory {
     }
 
     private @NotNull HaloDBOptions getHaloOptions() {
-        int maxFileSize = settings.getIntProperty("db.halodb.data.max.file.size.bytes", 1 << 20);
-        int maxTombstoneFileSize = settings.getIntProperty("db.halodb.tombstone.max.file.size.bytes", 64 << 20);
-        int buildIndexThreads = settings.getIntProperty("db.halodb.build.index.threads", 1);
-        int flushDataSizeBytes = settings.getIntProperty("db.halodb.data.flush.threshold.bytes", 10 << 20);
-        double compactionThresholdPerFile = settings.getDoubleProperty("db.halodb.data.compaction.threshold", 0.75);
-        int compactionJobRate = settings.getIntProperty("db.halodb.compaction.job.rate.bytes", 1 << 20);
-        int numberOfRecords = settings.getIntProperty("db.halodb.records.number", 1_000_000);
-        boolean cleanUpTombstones = settings.getBoolProperty("db.halodb.tombstone.cleanup.during.open.enabled", true);
-        boolean cleanUpInMemoryIndex = settings.getBoolProperty("db.halodb.memory.cleanup.on.close.enabled", false);
-        boolean useMemoryPool = settings.getBoolProperty("db.halodb.memory.pool.enabled", false);
-        int memoryPoolChunkSize = settings.getIntProperty("db.halodb.memory.pool.chunk.size.bytes", 16 << 20);
-        int fixedKeySize = settings.getIntProperty("db.halodb.memory.pool.fixed.key.size", 127);
+        int maxFileSize = settings.getInt("db.halodb.data.max.file.size.bytes", 1 << 20);
+        int maxTombstoneFileSize = settings.getInt("db.halodb.tombstone.max.file.size.bytes", 64 << 20);
+        int buildIndexThreads = settings.getInt("db.halodb.build.index.threads", 1);
+        int flushDataSizeBytes = settings.getInt("db.halodb.data.flush.threshold.bytes", 10 << 20);
+        double compactionThresholdPerFile = settings.getDouble("db.halodb.data.compaction.threshold", 0.75);
+        int compactionJobRate = settings.getInt("db.halodb.compaction.job.rate.bytes", 1 << 20);
+        int numberOfRecords = settings.getInt("db.halodb.records.number", 1_000_000);
+        boolean cleanUpTombstones = settings.getBool("db.halodb.tombstone.cleanup.during.open.enabled", true);
+        boolean cleanUpInMemoryIndex = settings.getBool("db.halodb.memory.cleanup.on.close.enabled", false);
+        boolean useMemoryPool = settings.getBool("db.halodb.memory.pool.enabled", false);
+        int memoryPoolChunkSize = settings.getInt("db.halodb.memory.pool.chunk.size.bytes", 16 << 20);
+        int fixedKeySize = settings.getInt("db.halodb.memory.pool.fixed.key.size", 127);
 
         HaloDBOptions options = new HaloDBOptions();
         options.setMaxFileSize(maxFileSize);

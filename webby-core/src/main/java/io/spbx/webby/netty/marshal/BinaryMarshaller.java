@@ -4,20 +4,20 @@ import io.netty.buffer.ByteBuf;
 import io.netty.buffer.ByteBufInputStream;
 import io.netty.buffer.Unpooled;
 import io.spbx.util.func.Reversible;
-import io.spbx.webby.common.SystemProperties;
+import io.spbx.webby.app.AppSettings;
 import org.jetbrains.annotations.NotNull;
 
 import java.io.*;
 import java.nio.ByteBuffer;
 
 import static io.spbx.util.base.Unchecked.rethrow;
-import static io.spbx.webby.common.SystemProperties.SIZE_BYTES;
+import static io.spbx.webby.app.Settings.SIZE_BYTES;
 
 public interface BinaryMarshaller {
     void writeBytes(@NotNull OutputStream output, @NotNull Object instance) throws IOException;
 
     default byte @NotNull [] writeBytes(@NotNull Object instance) {
-        try (ByteArrayOutputStream output = new ByteArrayOutputStream(SystemProperties.live().getInt(SIZE_BYTES))) {
+        try (ByteArrayOutputStream output = new ByteArrayOutputStream(AppSettings.live().getInt(SIZE_BYTES))) {
             writeBytes(output, instance);
             return output.toByteArray();
         } catch (IOException impossible) {

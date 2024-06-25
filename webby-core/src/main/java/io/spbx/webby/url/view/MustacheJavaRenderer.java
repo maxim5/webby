@@ -75,7 +75,7 @@ public class MustacheJavaRenderer implements Renderer<Mustache> {
 
     private @NotNull MustacheFactory createDefault() {
         List<Path> viewPaths = settings.viewPaths();
-        int recursionLimit = settings.getIntProperty("mustache-java.recursion.limit", 100);
+        int recursionLimit = settings.getInt("mustache-java.recursion.limit", 100);
 
         File fileRoot = viewPaths.stream().map(Path::toFile).findFirst().orElseThrow();
         if (viewPaths.size() > 1) {

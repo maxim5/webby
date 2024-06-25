@@ -28,7 +28,7 @@ public class Main {
     }
 
     public static @NotNull AppSettings localSettings() {
-        AppSettings settings = new AppSettings();
+        AppSettings settings = AppSettings.fromProperties(DevPaths.DEMO_RESOURCES + "app.properties");
         settings.setDevMode(true);
         settings.setSecurityKey("12345678901234567890123456789012");
         settings.setWebPath(DevPaths.DEMO_WEB);

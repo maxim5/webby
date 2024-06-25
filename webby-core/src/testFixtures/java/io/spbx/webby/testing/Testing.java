@@ -37,7 +37,7 @@ public class Testing {
     public static final List<Class<?>> CORE_MODELS = List.of(DefaultSession.class, DefaultUser.class, BlobKv.class);
 
     public static @NotNull AppSettings defaultAppSettings() {
-        AppSettings settings = new AppSettings();
+        AppSettings settings = AppSettings.inMemoryForDevOnly();
         settings.setDevMode(true);
         settings.setCharset(TestingBytes.CHARSET);
         settings.setSecurityKey("12345678901234567890123456789012");
@@ -89,7 +89,7 @@ public class Testing {
     }
 
     private static void setLogLevelsFromSettings(@NotNull AppSettings settings) {
-        String logging = settings.getProperty("testing.logging");
+        String logging = settings.getOrNull("testing.logging");
         if (logging == null) {
             Configurator.setAllLevels(LogManager.ROOT_LOGGER_NAME, Level.WARN);
         } else if (logging.contains("=")) {

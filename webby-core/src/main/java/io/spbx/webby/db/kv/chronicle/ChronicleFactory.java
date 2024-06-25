@@ -31,12 +31,12 @@ public class ChronicleFactory extends BaseKeyValueFactory {
     public @NotNull <K, V> ChronicleDb<K, V> getInternalDb(@NotNull DbOptions<K, V> options) {
         return cacheIfAbsent(options, rethrow(() -> {
             Path storagePath = settings.storageSettings().keyValueSettingsOrDie().path();
-            String filename = settings.getProperty("db.chronicle.filename.pattern", "chronicle-%s.data");
-            boolean putReturnsNull = settings.getBoolProperty("db.chronicle.put.return.null", false);
-            boolean removeReturnsNull = settings.getBoolProperty("db.chronicle.remove.return.null", false);
-            boolean skipExitHook = settings.getBoolProperty("db.chronicle.skip.exit.hook", true);
-            int replicationId = settings.getIntProperty("db.chronicle.replication.identifier", -1);
-            long defaultSize = settings.getLongProperty("db.chronicle.default.size", 1 << 20);
+            String filename = settings.get("db.chronicle.filename.pattern", "chronicle-%s.data");
+            boolean putReturnsNull = settings.getBool("db.chronicle.put.return.null", false);
+            boolean removeReturnsNull = settings.getBool("db.chronicle.remove.return.null", false);
+            boolean skipExitHook = settings.getBool("db.chronicle.skip.exit.hook", true);
+            int replicationId = settings.getInt("db.chronicle.replication.identifier", -1);
+            long defaultSize = settings.getLong("db.chronicle.default.size", 1 << 20);
 
             ChronicleMapBuilder<K, V> builder = ChronicleMap.of(options.key(), options.value())
                     .entries(defaultSize)

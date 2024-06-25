@@ -85,11 +85,11 @@ public class FreeMarkerRenderer implements Renderer<Template> {
             .toArray(TemplateLoader[]::new);
         TemplateLoader templateLoader = loaders.length == 1 ? loaders[0] : new MultiTemplateLoader(loaders);
 
-        Version version = new Version(settings.getProperty("freemarker.version", Configuration.getVersion()));
+        Version version = new Version(settings.get("freemarker.version", Configuration.getVersion().toString()));
 
         Duration reloadDelay = settings.isHotReload() ?
-            Duration.ofMillis(settings.getIntProperty("freemarker.dev.reload.millis", 100)) :
-            Duration.ofDays(settings.getIntProperty("freemarker.prod.reload.days", 365));
+            Duration.ofMillis(settings.getInt("freemarker.dev.reload.millis", 100)) :
+            Duration.ofDays(settings.getInt("freemarker.prod.reload.days", 365));
 
         Configuration configuration = new Configuration(version);
         configuration.setTemplateLoader(templateLoader);

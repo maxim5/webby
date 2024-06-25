@@ -2,7 +2,7 @@ package io.spbx.webby.url.view;
 
 import io.spbx.util.base.EasyCast;
 import io.spbx.util.func.ThrowConsumer;
-import io.spbx.webby.common.SystemProperties;
+import io.spbx.webby.app.AppSettings;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
@@ -11,13 +11,13 @@ import java.util.Map;
 import java.util.function.Function;
 
 import static io.spbx.util.io.EasyIo.Close.closeQuietly;
-import static io.spbx.webby.common.SystemProperties.SIZE_BYTES;
-import static io.spbx.webby.common.SystemProperties.SIZE_CHARS;
+import static io.spbx.webby.app.Settings.SIZE_BYTES;
+import static io.spbx.webby.app.Settings.SIZE_CHARS;
 
 public class EasyRender {
     public static <E extends Throwable>
             @NotNull String writeToString(@NotNull ThrowConsumer<Writer, E> consumer) throws E {
-        return writeToString(consumer, SystemProperties.live().getInt(SIZE_CHARS));
+        return writeToString(consumer, AppSettings.live().getInt(SIZE_CHARS));
     }
 
     public static <E extends Throwable>
@@ -29,7 +29,7 @@ public class EasyRender {
 
     public static <E extends Throwable>
             byte @NotNull [] writeToBytes(@NotNull ThrowConsumer<Writer, E> consumer) throws E {
-        return writeToBytes(consumer, SystemProperties.live().getInt(SIZE_BYTES));
+        return writeToBytes(consumer, AppSettings.live().getInt(SIZE_BYTES));
     }
 
     public static <E extends Throwable>
@@ -43,7 +43,7 @@ public class EasyRender {
 
     public static <E extends Throwable>
             byte @NotNull [] outputToBytes(@NotNull ThrowConsumer<OutputStream, E> consumer) throws E {
-        return outputToBytes(consumer, SystemProperties.live().getInt(SIZE_CHARS));
+        return outputToBytes(consumer, AppSettings.live().getInt(SIZE_CHARS));
     }
 
     public static <E extends Throwable>

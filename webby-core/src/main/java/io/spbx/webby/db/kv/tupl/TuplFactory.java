@@ -40,21 +40,21 @@ public class TuplFactory extends BaseKeyValueFactory {
 
     private @NotNull DatabaseConfig getDatabaseConfig() {
         Path storagePath = settings.storageSettings().keyValueSettingsOrDie().path();
-        String filename = settings.getProperty("db.tupl.filename", "tupl.data");
-        long cacheMinSize = settings.getLongProperty("db.tupl.cache.min.bytes", 1 << 16);
-        long cacheMaxSize = settings.getLongProperty("db.tupl.cache.max.bytes", 10 << 20);
-        DurabilityMode durabilityMode = settings.getEnumProperty("db.tupl.durability.mode", DurabilityMode.NO_SYNC);
-        LockUpgradeRule lockUpgradeRule = settings.getEnumProperty("db.tupl.lock.upgrade.rule", LockUpgradeRule.STRICT);
-        int lockTimeoutMillis = settings.getIntProperty("db.tupl.lock.timeout.millis", 1000);
-        long checkpointRateMillis = settings.getIntProperty("db.tupl.checkpoint.rate.millis", 1000);
-        long checkpointThresholdBytes = settings.getLongProperty("db.tupl.checkpoint.size.threshold.bytes", 100 << 20);
-        int checkpointMaxThreads = settings.getIntProperty("db.tupl.checkpoint.max.threads", 1);
-        boolean syncWrites = settings.getBoolProperty("db.tupl.sync.writes.enabled", false);
-        boolean readOnly = settings.getBoolProperty("db.tupl.read.only.enabled", false);
-        int pageSizeBytes = settings.getIntProperty("db.tupl.page.size.bytes", 4096);
-        boolean directPageAccess = settings.getBoolProperty("db.tupl.direct.page.access.enabled", true);
-        boolean cachePriming = settings.getBoolProperty("db.tupl.cache.priming", false);
-        boolean cleanShutdown = settings.getBoolProperty("db.tupl.clean.shutdown", false);
+        String filename = settings.get("db.tupl.filename", "tupl.data");
+        long cacheMinSize = settings.getLong("db.tupl.cache.min.bytes", 1 << 16);
+        long cacheMaxSize = settings.getLong("db.tupl.cache.max.bytes", 10 << 20);
+        DurabilityMode durabilityMode = settings.getEnum("db.tupl.durability.mode", DurabilityMode.NO_SYNC);
+        LockUpgradeRule lockUpgradeRule = settings.getEnum("db.tupl.lock.upgrade.rule", LockUpgradeRule.STRICT);
+        int lockTimeoutMillis = settings.getInt("db.tupl.lock.timeout.millis", 1000);
+        long checkpointRateMillis = settings.getInt("db.tupl.checkpoint.rate.millis", 1000);
+        long checkpointThresholdBytes = settings.getLong("db.tupl.checkpoint.size.threshold.bytes", 100 << 20);
+        int checkpointMaxThreads = settings.getInt("db.tupl.checkpoint.max.threads", 1);
+        boolean syncWrites = settings.getBool("db.tupl.sync.writes.enabled", false);
+        boolean readOnly = settings.getBool("db.tupl.read.only.enabled", false);
+        int pageSizeBytes = settings.getInt("db.tupl.page.size.bytes", 4096);
+        boolean directPageAccess = settings.getBool("db.tupl.direct.page.access.enabled", true);
+        boolean cachePriming = settings.getBool("db.tupl.cache.priming", false);
+        boolean cleanShutdown = settings.getBool("db.tupl.clean.shutdown", false);
 
         assert cacheMinSize <= cacheMaxSize : "Invalid TUPL cache settings: %d vs %d".formatted(cacheMinSize, cacheMaxSize);
 

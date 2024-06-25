@@ -76,7 +76,7 @@ public class ThymeleafRenderer implements Renderer<String> {
     }
 
     private @NotNull IContext toContext(@NotNull Object model) {
-        Locale locale = settings.getOptionalProperty("thymeleaf.context.locale.language")
+        Locale locale = settings.getOptional("thymeleaf.context.locale.language")
             .map(Locale::forLanguageTag)
             .orElse(Locale.getDefault());
         Map<String, Object> variables = castMapOrFail(model, obj -> new RenderException(
@@ -86,17 +86,17 @@ public class ThymeleafRenderer implements Renderer<String> {
     }
 
     private @NotNull TemplateSpec toTemplateSpec(@NotNull String template) {
-        TemplateMode mode = TemplateMode.parse(settings.getProperty("thymeleaf.template.mode", "html"));
+        TemplateMode mode = TemplateMode.parse(settings.get("thymeleaf.template.mode", "html"));
         return new TemplateSpec(template, mode);
     }
 
     private @NotNull TemplateEngine createDefault() {
         List<Path> viewPaths = settings.viewPaths();
         boolean hotReload = settings.isHotReload();
-        int expressionCacheMaxSize = settings.getIntProperty("thymeleaf.cache.expression.max.size",
-                                                             StandardCacheManager.DEFAULT_EXPRESSION_CACHE_MAX_SIZE);
-        int templateCacheMaxSize = settings.getIntProperty("thymeleaf.cache.template.max.size",
-                                                           StandardCacheManager.DEFAULT_TEMPLATE_CACHE_MAX_SIZE);
+        int expressionCacheMaxSize = settings.getInt("thymeleaf.cache.expression.max.size",
+                                                     StandardCacheManager.DEFAULT_EXPRESSION_CACHE_MAX_SIZE);
+        int templateCacheMaxSize = settings.getInt("thymeleaf.cache.template.max.size",
+                                                   StandardCacheManager.DEFAULT_TEMPLATE_CACHE_MAX_SIZE);
 
         TemplateEngine engine = new TemplateEngine();
         viewPaths.forEach(path -> {

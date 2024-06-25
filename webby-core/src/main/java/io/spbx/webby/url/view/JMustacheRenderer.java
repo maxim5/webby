@@ -69,10 +69,10 @@ public class JMustacheRenderer implements Renderer<Template> {
 
     private @NotNull Mustache.Compiler createDefault() {
         List<Path> viewPaths = settings.viewPaths();
-        boolean escapeHtml = settings.getBoolProperty("jmustache.escape.html.enabled", true);
-        boolean standardsMode = settings.getBoolProperty("jmustache.standards.mode.enabled", false);
-        boolean emptyStringIsFalse = settings.getBoolProperty("jmustache.empty.string.is.false.enabled", false);
-        boolean zeroIsFalse = settings.getBoolProperty("jmustache.zero.is.false.enabled", false);
+        boolean escapeHtml = settings.getBool("jmustache.escape.html.enabled", true);
+        boolean standardsMode = settings.getBool("jmustache.standards.mode.enabled", false);
+        boolean emptyStringIsFalse = settings.getBool("jmustache.empty.string.is.false.enabled", false);
+        boolean zeroIsFalse = settings.getBool("jmustache.zero.is.false.enabled", false);
 
         Path viewPath = viewPaths.stream().findFirst().orElseThrow();
         if (viewPaths.size() > 1) {

@@ -1,22 +1,28 @@
 package io.spbx.webby.app;
 
-import com.google.errorprone.annotations.CanIgnoreReturnValue;
+import com.google.inject.Inject;
+import io.spbx.util.props.MutableLiveProperties;
+import io.spbx.util.props.MutablePropertyMap;
+import io.spbx.util.props.PropertyMap;
+import io.spbx.webby.common.Lifetime;
 import io.spbx.webby.routekit.QueryParser;
 import io.spbx.webby.routekit.SimpleQueryParser;
 import io.spbx.webby.url.annotate.FrameType;
 import io.spbx.webby.url.annotate.Marshal;
 import io.spbx.webby.url.annotate.Render;
+import org.jetbrains.annotations.CheckReturnValue;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
-import java.io.File;
 import java.nio.charset.Charset;
 import java.nio.file.Path;
-import java.util.*;
+import java.util.Arrays;
+import java.util.List;
+import java.util.concurrent.atomic.AtomicReference;
 
-import static io.spbx.util.base.EasyCast.castAny;
+import static java.util.Objects.requireNonNull;
 
-public final class AppSettings implements Settings {
+public final class AppSettings implements Settings, MutablePropertyMap {
     private boolean devMode = true;
     private boolean hotReload = true;
     private boolean hotReloadDefault = true;
@@ -49,7 +55,40 @@ public final class AppSettings implements Settings {
 
     private final StorageSettings storageSettings = new StorageSettings(this);
 
-    private final Map<String, String> properties = new HashMap<>();
+    private static final AtomicReference<PropertyMap> liveRef = new AtomicReference<>();
+    private final MutableLiveProperties properties;
+
+    private AppSettings(@NotNull MutableLiveProperties properties) {
+        this.properties = properties;
+    }
+
+    public static @NotNull AppSettings inMemoryForDevOnly() {
+        return new AppSettings(MutableLiveProperties.idle(Path.of("%in-memory-for-dev-only%")));
+    }
+
+    public static @NotNull AppSettings fromProperties(@NotNull Path path) {
+        return new AppSettings(MutableLiveProperties.running(path));
+    }
+
+    public static @NotNull AppSettings fromProperties(@NotNull String path) {
+        return fromProperties(Path.of(path));
+    }
+
+    public static @NotNull AppSettings fromProperties() {
+        return fromProperties(DEFAULT_APP_PROPERTIES);
+    }
+
+    @Inject
+    private void init(@NotNull Lifetime lifetime) {
+        liveRef.set(properties);
+        lifetime.onTerminate(() -> liveRef.set(null));
+        lifetime.onTerminate(properties);
+    }
+
+    @CheckReturnValue
+    public static @NotNull PropertyMap live() {
+        return requireNonNull(liveRef.get(), "LiveProperties are not initialized yet");
+    }
 
     @Override
     public boolean isDevMode() {
@@ -268,130 +307,13 @@ public final class AppSettings implements Settings {
         return storageSettings;
     }
 
-    @CanIgnoreReturnValue
+    @Override
+    public @Nullable String getOrNull(@NotNull String key) {
+        return properties.getOrNull(key);
+    }
+
+    @Override
     public @Nullable String setProperty(@NotNull String key, @NotNull String value) {
-        return properties.put(key, value);
-    }
-
-    @CanIgnoreReturnValue
-    public @Nullable String setProperty(@NotNull String key, long value) {
-        return properties.put(key, Long.toString(value));
-    }
-
-    @CanIgnoreReturnValue
-    public @Nullable String setProperty(@NotNull String key, int value) {
-        return properties.put(key, Integer.toString(value));
-    }
-
-    @CanIgnoreReturnValue
-    public @Nullable String setProperty(@NotNull String key, boolean value) {
-        return properties.put(key, Boolean.toString(value));
-    }
-
-    @CanIgnoreReturnValue
-    public <T extends Enum<T>> @Nullable String setProperty(@NotNull String key, @NotNull T value) {
-        return properties.put(key, value.name());
-    }
-
-    @CanIgnoreReturnValue
-    public @Nullable String setProperty(@NotNull String key, @NotNull Object value) {
-        return properties.put(key, value.toString());
-    }
-
-    @Override
-    public @Nullable String getProperty(@NotNull String key) {
-        return properties.get(key);
-    }
-
-    @Override
-    public @NotNull String getProperty(@NotNull String key, @NotNull String def) {
-        return properties.getOrDefault(key, def);
-    }
-
-    @Override
-    public @NotNull String getProperty(@NotNull String key, @NotNull Object def) {
-        String property = properties.get(key);
-        return property != null ? property : def.toString();
-    }
-
-    @Override
-    public int getIntProperty(@NotNull String key, int def) {
-        try {
-            String property = getProperty(key);
-            return property != null ? Integer.parseInt(property) : def;
-        } catch (NumberFormatException ignore) {
-            return def;
-        }
-    }
-
-    @Override
-    public long getLongProperty(@NotNull String key, long def) {
-        try {
-            String property = getProperty(key);
-            return property != null ? Long.parseLong(property) : def;
-        } catch (NumberFormatException ignore) {
-            return def;
-        }
-    }
-
-    @Override
-    public byte getByteProperty(@NotNull String key, int def) {
-        return (byte) getIntProperty(key, def);
-    }
-
-    @Override
-    public float getFloatProperty(@NotNull String key, float def) {
-        try {
-            String property = getProperty(key);
-            return property != null ? Float.parseFloat(property) : def;
-        } catch (NumberFormatException ignore) {
-            return def;
-        }
-    }
-
-    @Override
-    public double getDoubleProperty(@NotNull String key, double def) {
-        try {
-            String property = getProperty(key);
-            return property != null ? Double.parseDouble(property) : def;
-        } catch (NumberFormatException ignore) {
-            return def;
-        }
-    }
-
-    @Override
-    public boolean getBoolProperty(@NotNull String key) {
-        return getBoolProperty(key, false);
-    }
-
-    @Override
-    public boolean getBoolProperty(@NotNull String key, boolean def) {
-        String property = getProperty(key);
-        return property != null ? Boolean.parseBoolean(property) : def;
-    }
-
-    @Override
-    public <T extends Enum<T>> @NotNull T getEnumProperty(@NotNull String key, @NotNull T def) {
-        String property = getProperty(key);
-        if (property == null) {
-            return def;
-        }
-
-        Class<T> enumClass = castAny(def.getClass());
-        T[] enumConstants = enumClass.getEnumConstants();
-        Optional<T> exactMatch = Arrays.stream(enumConstants).filter(v -> v.name().equals(key)).findFirst();
-        if (exactMatch.isPresent()) {
-            return exactMatch.get();
-        }
-        Optional<T> closeMatch = Arrays.stream(enumConstants).filter(v -> v.name().equalsIgnoreCase(key)).findFirst();
-        return closeMatch.orElse(def);
-    }
-
-    @Override
-    public @NotNull List<Path> getViewPaths(@NotNull String key) {
-        String property = getProperty(key);
-        return property != null ?
-                Arrays.stream(property.split(File.pathSeparator)).map(Path::of).toList() :
-                viewPaths();
+        return properties.setProperty(key, value);
     }
 }

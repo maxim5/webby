@@ -70,8 +70,8 @@ public class HandlerBinder {
             .timeIt(() -> processBindings(bindings, parser, setupConsumer))
             .onDone(millis -> log.at(Level.FINE).log("Endpoints mapped to urls in %d ms", millis));
 
-        String staticFilesUrlPrefix = settings.getProperty("url.static.files.prefix", "/");
-        boolean staticFilesDynamicLookup = settings.getBoolProperty("url.static.files.dynamic.lookup", settings.isDevMode());
+        String staticFilesUrlPrefix = settings.get("url.static.files.prefix", "/");
+        boolean staticFilesDynamicLookup = settings.getBool("url.static.files.dynamic.lookup", settings.isDevMode());
         try {
             if (staticFilesDynamicLookup) {
                 TimeIt.timeIt(() ->
@@ -94,7 +94,7 @@ public class HandlerBinder {
             throw new UrlConfigError("Failed to add static files to URL router", e);
         }
 
-        String userContentUrlPrefix = settings.getProperty("url.user.content.prefix", "/content/");
+        String userContentUrlPrefix = settings.get("url.user.content.prefix", "/content/");
         String url = UrlFix.joinWithSlash(userContentUrlPrefix, "{*path}");
         RouteEndpoint endpoint = new DynamicServingRouteEndpoint(userContentUrlPrefix, "", userContentServing);
         setupConsumer.accept(url, endpoint);

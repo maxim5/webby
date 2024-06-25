@@ -244,13 +244,13 @@ public class WebsocketAgentBinder {
 
         if (metaClass == TextSeparatorFrameMetadata.class) {
             return new TextSeparatorFrameMetadata(
-                settings.getByteProperty("ws.metadata.text.separator", TextSeparatorFrameMetadata.DEFAULT_SEPARATOR),
+                settings.getByte("ws.metadata.text.separator", TextSeparatorFrameMetadata.DEFAULT_SEPARATOR),
                 maxIdLength
             );
         }
         if (metaClass == BinarySeparatorFrameMetadata.class) {
             return new BinarySeparatorFrameMetadata(
-                settings.getByteProperty("ws.metadata.binary.separator", BinarySeparatorFrameMetadata.DEFAULT_SEPARATOR),
+                settings.getByte("ws.metadata.binary.separator", BinarySeparatorFrameMetadata.DEFAULT_SEPARATOR),
                 maxIdLength
             );
         }

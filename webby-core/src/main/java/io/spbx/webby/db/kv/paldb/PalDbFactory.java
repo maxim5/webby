@@ -20,7 +20,7 @@ public class PalDbFactory extends BaseKeyValueFactory {
     public @NotNull <K, V> PalDbImpl<K, V> getInternalDb(@NotNull DbOptions<K, V> options) {
         return cacheIfAbsent(options, () -> {
             Path storagePath = settings.storageSettings().keyValueSettingsOrDie().path();
-            String filename = settings.getProperty("db.paldb.filename.pattern", "paldb-%s");
+            String filename = settings.get("db.paldb.filename.pattern", "paldb-%s");
 
             String path = storagePath.resolve(formatFileName(filename, options.name())).toString();
             Codec<K> keyCodec = keyCodecOrDie(options);

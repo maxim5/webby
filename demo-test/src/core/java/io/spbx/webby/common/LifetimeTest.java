@@ -1,6 +1,7 @@
 package io.spbx.webby.common;
 
 import com.google.common.collect.Lists;
+import io.spbx.util.props.MutableLiveProperties;
 import io.spbx.webby.app.AppSettings;
 import io.spbx.webby.db.kv.KeyValueSettings;
 import io.spbx.webby.db.managed.BackgroundCacheCleaner;
@@ -36,6 +37,8 @@ public class LifetimeTest {
         lifetimeMock.terminate();
 
         List<Class<?>> expected = List.of(
+            AppSettings.class,
+            MutableLiveProperties.class,
             ConnectionPool.class,
             TableManager.class,
             BackgroundCacheCleaner.class

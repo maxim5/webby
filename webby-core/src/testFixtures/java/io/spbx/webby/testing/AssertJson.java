@@ -70,7 +70,7 @@ public class AssertJson {
     }
 
     public static @NotNull SupportedJsonLibrary getJsonLibrary() {
-        String property = Testing.Internals.settings().getProperty("json.library");
+        String property = Testing.Internals.settings().getOrNull("json.library");
         return Arrays.stream(SupportedJsonLibrary.values()).filter(val -> val.slug.equals(property)).findAny().orElseThrow();
     }
 }
