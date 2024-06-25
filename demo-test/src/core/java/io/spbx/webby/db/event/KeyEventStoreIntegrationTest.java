@@ -9,6 +9,7 @@ import io.spbx.orm.api.Engine;
 import io.spbx.util.testing.ext.TempDirectoryExtension;
 import io.spbx.webby.app.AppLifetime;
 import io.spbx.webby.app.AppSettings;
+import io.spbx.webby.app.Settings.Toggle;
 import io.spbx.webby.common.Lifetime;
 import io.spbx.webby.db.kv.DbType;
 import io.spbx.webby.db.kv.KeyValueSettings;
@@ -51,7 +52,7 @@ public class KeyEventStoreIntegrationTest {
     }
 
     @ParameterizedTest
-    @ValueSource(ints = {1, 10})
+    @ValueSource(ints = { 1, 10 })
     public void simple_append_and_flush(int batchSize) {
         KeyEventStoreFactory factory = setup(batchSize).getInstance(KeyEventStoreFactory.class);
 
@@ -86,7 +87,7 @@ public class KeyEventStoreIntegrationTest {
     }
 
     @ParameterizedTest
-    @ValueSource(ints = {1, 10})
+    @ValueSource(ints = { 1, 10 })
     public void simple_append_one_key_and_flush(int batchSize) {
         KeyEventStoreFactory factory = setup(batchSize).getInstance(KeyEventStoreFactory.class);
 
@@ -198,7 +199,7 @@ public class KeyEventStoreIntegrationTest {
 
     private static @NotNull Injector setup(int batchSize) {
         AppSettings settings = Testing.defaultAppSettings();
-        settings.setProperty("db.event.store.flush.batch.size", batchSize);
+        settings.setInt("db.event.store.flush.batch.size", batchSize);
         return Testing.testStartup(settings);
     }
 
@@ -210,12 +211,12 @@ public class KeyEventStoreIntegrationTest {
         settings.storageSettings()
             .enableKeyValue(KeyValueSettings.of(dbType, TEMP_DIRECTORY.getCurrentTempDir()))
             .enableSql(SQL.settings());
-        settings.setProfileMode(false);  // not testing TrackingDbAdapter by default
+        settings.setProfileMode(Toggle.DISABLED);  // not testing TrackingDbAdapter by default
 
-        settings.setProperty("db.event.store.flush.batch.size", 1);
-        settings.setProperty("db.event.store.average.size", 80);
+        settings.setInt("db.event.store.flush.batch.size", 1);
+        settings.setInt("db.event.store.average.size", 80);
 
-        settings.setProperty("db.redis.port", REDIS.port());
+        settings.setInt("db.redis.port", REDIS.port());
         return Testing.testStartup(settings, SQL::setupTestData, SQL.combinedTestingModule());
     }
 

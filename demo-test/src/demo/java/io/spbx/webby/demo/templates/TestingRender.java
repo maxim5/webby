@@ -8,6 +8,7 @@ import com.google.errorprone.annotations.CheckReturnValue;
 import io.netty.handler.codec.http.HttpHeaders;
 import io.netty.handler.codec.http.HttpResponse;
 import io.spbx.webby.app.AppSettings;
+import io.spbx.webby.app.Settings.Toggle;
 import io.spbx.webby.netty.HttpConst;
 import io.spbx.webby.perf.stats.Stat;
 import io.spbx.webby.testing.AssertResponse.HttpResponseSubject;
@@ -25,7 +26,7 @@ public class TestingRender {
 
         public @NotNull Consumer<AppSettings> asSettingsUpdater() {
             return settings -> {
-                settings.setProfileMode(this == Config.BytesStatsEnabled);
+                settings.setProfileMode(Toggle.from(this == Config.BytesStatsEnabled));
                 settings.setStreamingEnabled(this == Config.StreamingEnabled);
             };
         }

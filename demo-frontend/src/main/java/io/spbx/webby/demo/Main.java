@@ -4,6 +4,7 @@ import com.google.common.flogger.FluentLogger;
 import io.spbx.orm.api.Engine;
 import io.spbx.webby.Webby;
 import io.spbx.webby.app.AppSettings;
+import io.spbx.webby.app.Settings.RunMode;
 import io.spbx.webby.db.kv.DbType;
 import io.spbx.webby.db.kv.KeyValueSettings;
 import io.spbx.webby.db.sql.SqlSettings;
@@ -29,16 +30,16 @@ public class Main {
 
     public static @NotNull AppSettings localSettings() {
         AppSettings settings = AppSettings.fromProperties(DevPaths.DEMO_RESOURCES.resolve("app.properties"));
-        settings.setDevMode(true);
+        settings.setRunMode(RunMode.DEV);
         settings.setSecurityKey("12345678901234567890123456789012");
         settings.setWebPath(DevPaths.DEMO_WEB);
         settings.setViewPath(DevPaths.DEMO_WEB);
         settings.setUserContentPath(DevPaths.DEMO_HOME.resolve(".data/userdata"));
         settings.modelFilter().setPackageOnly("io.spbx.webby");  // because this class is in `io.spbx.webby.demo`
-        settings.setProperty("jte.class.directory", JteExample.CLASS_DIR);
-        settings.setProperty("jte.view.paths", DevPaths.DEMO_WEB.resolve("jte"));
-        settings.setProperty("pebble.view.paths", DevPaths.DEMO_WEB.resolve("pebble"));
-        settings.setProperty("db.mapdb.checksum.enabled", false);
+        settings.setPath("jte.class.directory", JteExample.CLASS_DIR);
+        settings.setPath("jte.view.paths", DevPaths.DEMO_WEB.resolve("jte"));
+        settings.setPath("pebble.view.paths", DevPaths.DEMO_WEB.resolve("pebble"));
+        settings.setBool("db.mapdb.checksum.enabled", false);
         settings.storageSettings()
             .enableKeyValue(KeyValueSettings.of(DbType.MAP_DB, DevPaths.DEMO_HOME.resolve(".data/mapdb")))
             .enableSql(SqlSettings.inMemoryNotForProduction(Engine.H2));

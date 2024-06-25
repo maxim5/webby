@@ -82,7 +82,7 @@ public class JteRenderer implements Renderer<String> {
     }
 
     private @NotNull TemplateEngine createDefault() {
-        List<Path> paths = settings.getViewPaths("jte.view.paths");
+        List<Path> paths = settings.viewPaths("jte.view.paths");
         Path classDir = Path.of(settings.get("jte.class.directory", "build"));
         ContentType contentType = settings.getBoolOrFalse("jte.output.plain") ? ContentType.Plain : ContentType.Html;
         ClassLoader classLoader = Thread.currentThread().getContextClassLoader();

@@ -21,8 +21,8 @@ public abstract class BaseCoreIntegrationTest {
 
     protected static @NotNull Injector startup(@NotNull Scenario scenario, @NotNull SqlSettings sqlSettings) {
         AppSettings settings = Testing.defaultAppSettings();
-        settings.setProperty("user.id.generator.random.enabled", scenario.isRandomIdsEnabled());
-        settings.setProperty("session.id.generator.random.enabled", scenario.isRandomIdsEnabled());
+        settings.setBool("user.id.generator.random.enabled", scenario.isRandomIdsEnabled());
+        settings.setBool("session.id.generator.random.enabled", scenario.isRandomIdsEnabled());
         settings.modelFilter().setCommonPackageOf(Testing.AUTH_MODELS);
         switch (scenario) {
             case SQL ->

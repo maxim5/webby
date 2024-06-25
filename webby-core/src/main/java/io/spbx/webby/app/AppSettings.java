@@ -16,47 +16,19 @@ import org.jetbrains.annotations.Nullable;
 
 import java.nio.charset.Charset;
 import java.nio.file.Path;
-import java.util.Arrays;
-import java.util.List;
 import java.util.concurrent.atomic.AtomicReference;
 
 import static java.util.Objects.requireNonNull;
 
 public final class AppSettings implements Settings, MutablePropertyMap {
-    private boolean devMode = true;
-    private boolean hotReload = true;
-    private boolean hotReloadDefault = true;
-    private boolean profileMode = true;
-    private boolean profileModeDefault = true;
-    private boolean safeMode = true;
-    private boolean safeModeDefault = true;
-    private boolean streamingEnabled = false;
-
-    private byte[] securityKey = new byte[0];
-
-    private Path webPath = Path.of("web");
-    private List<Path> viewPaths = List.of(Path.of("web"));
-    private Path userContentPath = Path.of("usercontent");
-
-    private Charset charset = Charset.defaultCharset();
+    private static final AtomicReference<PropertyMap> liveRef = new AtomicReference<>();
+    private final MutableLiveProperties properties;
 
     private final ClassFilter modelFilter = ClassFilter.empty();
     private final ClassFilter handlerFilter = ClassFilter.empty();
     private final ClassFilter interceptorFilter = ClassFilter.empty();
-
     private QueryParser urlParser = SimpleQueryParser.DEFAULT;
-
-    private String defaultApiVersion = "1.0";
-    private Marshal defaultRequestContentMarshal = Marshal.JSON;
-    private Marshal defaultResponseContentMarshal = Marshal.AS_STRING;
-    private Marshal defaultFrameContentMarshal = Marshal.JSON;
-    private Render defaultRender = Render.JTE;
-    private FrameType defaultFrameType = FrameType.FROM_CLIENT;
-
     private final StorageSettings storageSettings = new StorageSettings(this);
-
-    private static final AtomicReference<PropertyMap> liveRef = new AtomicReference<>();
-    private final MutableLiveProperties properties;
 
     private AppSettings(@NotNull MutableLiveProperties properties) {
         this.properties = properties;
@@ -90,138 +62,56 @@ public final class AppSettings implements Settings, MutablePropertyMap {
         return requireNonNull(liveRef.get(), "LiveProperties are not initialized yet");
     }
 
-    @Override
-    public boolean isDevMode() {
-        return devMode;
+    public void setRunMode(@NotNull RunMode runMode) {
+        setEnum(RUN_MODE, runMode);
     }
 
-    @Override
-    public boolean isProdMode() {
-        return !devMode;
+    public void setHotReload(@NotNull Toggle hotReload) {
+        setEnum(HOT_RELOAD, hotReload);
     }
 
-    public void setDevMode(boolean devMode) {
-        this.devMode = devMode;
+    public void setProfileMode(@NotNull Toggle profileMode) {
+        setEnum(PROFILE_MODE, profileMode);
     }
 
-    @Override
-    public boolean isHotReload() {
-        return hotReload;
-    }
-
-    public boolean isHotReloadDefault() {
-        return hotReloadDefault;
-    }
-
-    public void setHotReload(boolean hotReload) {
-        this.hotReload = hotReload;
-        this.hotReloadDefault = false;
-    }
-
-    @Override
-    public boolean isProfileMode() {
-        return profileMode;
-    }
-
-    public void setProfileMode(boolean profileMode) {
-        this.profileMode = profileMode;
-        this.profileModeDefault = false;
-    }
-
-    public boolean isProfileModeDefault() {
-        return profileModeDefault;
-    }
-
-    @Override
-    public boolean isSafeMode() {
-        return safeMode;
-    }
-
-    public boolean isSafeModeDefault() {
-        return safeModeDefault;
-    }
-
-    public void setSafeMode(boolean safeMode) {
-        this.safeMode = safeMode;
-        this.safeModeDefault = false;
-    }
-
-    @Override
-    public boolean isStreamingEnabled() {
-        return streamingEnabled;
-    }
-
-    public void setStreamingEnabled(boolean streamingEnabled) {
-        this.streamingEnabled = streamingEnabled;
-    }
-
-    @Override
-    public byte @NotNull [] securityKey() {
-        return securityKey;
-    }
-
-    public void setSecurityKey(@NotNull String securityKey) {
-        this.securityKey = securityKey.getBytes(charset);
-    }
-
-    public void setSecurityKey(byte[] securityKey) {
-        this.securityKey = securityKey;
-    }
-
-    @Override
-    public @NotNull Path webPath() {
-        return webPath;
-    }
-
-    public void setWebPath(@NotNull Path webPath) {
-        this.webPath = webPath;
-    }
-
-    public void setWebPath(@NotNull String webPath) {
-        this.webPath = Path.of(webPath);
-    }
-
-    @Override
-    public @NotNull List<Path> viewPaths() {
-        return viewPaths;
-    }
-
-    public void setViewPath(@NotNull String viewPath) {
-        this.viewPaths = List.of(Path.of(viewPath));
-    }
-
-    public void setViewPaths(@NotNull String @NotNull ... viewPaths) {
-        this.viewPaths = Arrays.stream(viewPaths).map(Path::of).toList();
-    }
-
-    public void setViewPath(@NotNull Path viewPath) {
-        this.viewPaths = List.of(viewPath);
-    }
-
-    public void setViewPaths(@NotNull Path @NotNull ... viewPaths) {
-        this.viewPaths = List.of(viewPaths);
-    }
-
-    @Override
-    public @NotNull Path userContentPath() {
-        return userContentPath;
-    }
-
-    public void setUserContentPath(@NotNull Path userContentPath) {
-        this.userContentPath = userContentPath;
-    }
-
-    public void setUserContentPath(@NotNull String userContentPath) {
-        this.userContentPath = Path.of(userContentPath);
-    }
-
-    @Override
-    public @NotNull Charset charset() {
-        return charset;
+    public void setSafeMode(@NotNull Toggle safeMode) {
+        setEnum(SAFE_MODE, safeMode);
     }
 
     public void setCharset(@NotNull Charset charset) {
-        this.charset = charset;
+        setProperty(CHARSET, charset.toString());
+    }
+
+    public void setSecurityKey(@NotNull String securityKey) {
+        setProperty(SECURITY_KEY, securityKey);
+    }
+
+    public void setDefaultRender(@NotNull Render defaultRender) {
+        setEnum(RENDER.key(), defaultRender);
+    }
+
+    public void setWebPath(@NotNull Path webPath) {
+        setPath(WEB_PATH, webPath);
+    }
+
+    public void setViewPath(@NotNull Path viewPath) {
+        setPath(VIEW_PATHS, viewPath);
+    }
+
+    public void setStreamingEnabled(boolean streamingEnabled) {
+        setBool(HTTP_STREAMING, streamingEnabled);
+    }
+
+    public void setDefaultRequestContentMarshal(@NotNull Marshal marshal) {
+        setEnum(HTTP_REQUEST_MARSHAL, marshal);
+    }
+
+    public void setDefaultResponseContentMarshal(@NotNull Marshal marshal) {
+        setEnum(HTTP_RESPONSE_MARSHAL, marshal);
+    }
+
+    public void setUserContentPath(@NotNull Path userContentPath) {
+        setPath(USER_CONTENT, userContentPath);
     }
 
     @Override
@@ -248,58 +138,16 @@ public final class AppSettings implements Settings, MutablePropertyMap {
         this.urlParser = urlParser;
     }
 
-    @Override
-    public @NotNull String defaultApiVersion() {
-        return defaultApiVersion;
-    }
-
-    public void setDefaultApiVersion(@NotNull String defaultApiVersion) {
-        this.defaultApiVersion = defaultApiVersion;
-    }
-
-    @Override
-    public @NotNull Marshal defaultRequestContentMarshal() {
-        return defaultRequestContentMarshal;
-    }
-
-    public void setDefaultRequestContentMarshal(@NotNull Marshal marshal) {
-        this.defaultRequestContentMarshal = marshal;
-    }
-
-    @Override
-    public @NotNull Marshal defaultResponseContentMarshal() {
-        return defaultResponseContentMarshal;
-    }
-
-    public void setDefaultResponseContentMarshal(@NotNull Marshal marshal) {
-        this.defaultResponseContentMarshal = marshal;
-    }
-
-    @Override
-    public @NotNull Marshal defaultFrameContentMarshal() {
-        return defaultFrameContentMarshal;
+    public void setDefaultFrameType(@NotNull FrameType frameType) {
+        setEnum(WS_FRAME_TYPE, frameType);
     }
 
     public void setDefaultFrameContentMarshal(@NotNull Marshal marshal) {
-        this.defaultFrameContentMarshal = marshal;
+        setEnum(WS_FRAME_MARSHAL, marshal);
     }
 
-    @Override
-    public @NotNull Render defaultRender() {
-        return defaultRender;
-    }
-
-    public void setDefaultRender(@NotNull Render defaultRender) {
-        this.defaultRender = defaultRender;
-    }
-
-    @Override
-    public @NotNull FrameType defaultFrameType() {
-        return defaultFrameType;
-    }
-
-    public void setDefaultFrameType(@NotNull FrameType frameType) {
-        this.defaultFrameType = frameType;
+    public void setDefaultApiVersion(@NotNull String defaultApiVersion) {
+        setProperty(WS_API_VERSION, defaultApiVersion);
     }
 
     @Override

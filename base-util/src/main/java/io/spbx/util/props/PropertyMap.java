@@ -20,6 +20,7 @@ public interface PropertyMap {
     @Nullable String getOrNull(@NotNull String key);
     default @Nullable String getOrDie(@NotNull String key) { return requireNonNull(getOrNull(key)); }
     default @NotNull Optional<String> getOptional(@NotNull String key) { return Optional.ofNullable(getOrNull(key)); }
+    default @NotNull Optional<String> getOptional(@NotNull Property property) { return getOptional(property.key()); }
     default @NotNull String get(@NotNull String key, @NotNull String def) { return firstNonNull(getOrNull(key), def); }
     default @NotNull String get(@NotNull Property property) { return get(property.key(), property.def()); }
 
@@ -54,23 +55,29 @@ public interface PropertyMap {
     default float getFloat(@NotNull String key, float def) { return parseFloatSafe(getOrNull(key), def); }
     default float getFloat(@NotNull FloatProperty property) { return getFloat(property.key(), property.def()); }
 
-    default <T extends Enum<T>> @NotNull T getEnum(@NotNull String key, @NotNull T def) {
-        String property = getOrNull(key);
-        if (property == null) {
-            return def;
-        }
-        Class<T> enumClass = castAny(def.getClass());
-        T[] enumConstants = enumClass.getEnumConstants();
-        Optional<T> exactMatch = Arrays.stream(enumConstants).filter(v -> v.name().equals(property)).findFirst();
-        if (exactMatch.isPresent()) {
-            return exactMatch.get();
-        }
-        Optional<T> closeMatch = Arrays.stream(enumConstants).filter(v -> v.name().equalsIgnoreCase(property)).findFirst();
-        return closeMatch.orElse(def);
+    default @Nullable Path getPathOrNull(@NotNull String key) { return getOptionalPath(key).orElse(null); }
+    default @Nullable Path getPathOrDie(@NotNull String key) { return requireNonNull(getPathOrNull(key)); }
+    default @NotNull Optional<Path> getOptionalPath(@NotNull String key) { return getOptional(key).map(Path::of); }
+    default @NotNull Optional<Path> getOptionalPath(@NotNull PathProperty prop) { return getOptionalPath(prop.key()); }
+    default @NotNull Path getPath(@NotNull String key, @NotNull Path def) { return firstNonNull(getPathOrNull(key), def); }
+    default @NotNull Path getPath(@NotNull PathProperty property) { return getPath(property.key(), property.def()); }
+
+    default @NotNull List<Path> getPaths(@NotNull String key) { return getPaths(key, List.of()); }
+    default @NotNull List<Path> getPaths(@NotNull PathProperty property) {
+        return getPaths(property.key(), List.of(property.def()));
+    }
+    default @NotNull List<Path> getPaths(@NotNull String key, @NotNull List<Path> def) {
+        return getOptionalPaths(key).orElse(def);
+    }
+    default @NotNull Optional<List<Path>> getOptionalPaths(@NotNull String key) {
+        return getOptional(key).map(PropertyMap::toPaths);
     }
 
-    static @NotNull List<Path> toPaths(@NotNull String value) {
-        return Arrays.stream(value.split(File.pathSeparator)).map(Path::of).toList();
+    default <T extends Enum<T>> @NotNull T getEnum(@NotNull String key, @NotNull T def) {
+        return getOptional(key).map(property -> toEnum(property, def)).orElse(def);
+    }
+    default <T extends Enum<T>> @NotNull T getEnum(@NotNull EnumProperty<T> property) {
+        return getEnum(property.key(), property.def());
     }
 
     record Property(@NotNull String key, @NotNull String def) {
@@ -106,5 +113,32 @@ public interface PropertyMap {
     record FloatProperty(@NotNull String key, float def) {
         public static @NotNull FloatProperty of(@NotNull String key, float def) { return new FloatProperty(key, def); }
         public static @NotNull FloatProperty of(@NotNull String key) { return of(key, 0.0f); }
+    }
+
+    record PathProperty(@NotNull String key, @NotNull Path def) {
+        public static @NotNull PathProperty of(@NotNull String key, @NotNull Path def) {
+            return new PathProperty(key, def);
+        }
+    }
+
+    record EnumProperty<T extends Enum<T>>(@NotNull String key, @NotNull T def) {
+        public static <T extends Enum<T>> @NotNull EnumProperty<T> of(@NotNull String key, @NotNull T def) {
+            return new EnumProperty<>(key, def);
+        }
+    }
+
+    private static @NotNull List<Path> toPaths(@NotNull String property) {
+        return Arrays.stream(property.split(File.pathSeparator)).map(Path::of).toList();
+    }
+
+    private static <T extends Enum<T>> @NotNull T toEnum(@NotNull String property, @NotNull T def) {
+        Class<T> enumClass = castAny(def.getClass());
+        T[] enumConstants = enumClass.getEnumConstants();
+        Optional<T> exactMatch = Arrays.stream(enumConstants).filter(v -> v.name().equals(property)).findFirst();
+        if (exactMatch.isPresent()) {
+            return exactMatch.get();
+        }
+        Optional<T> closeMatch = Arrays.stream(enumConstants).filter(v -> v.name().equalsIgnoreCase(property)).findFirst();
+        return closeMatch.orElse(def);
     }
 }

@@ -49,7 +49,7 @@ public class StaticServingIntegrationTest extends BaseHttpIntegrationTest {
         testSetup(HelloWorld.class, settings -> {
             settings.setProperty("testing.logging", "io.spbx.webby.url.impl.HandlerBinder=DEBUG");
             settings.setProperty("url.static.files.prefix", "/");
-            settings.setProperty("url.static.files.dynamic.lookup", dynamicLookup);
+            settings.setBool("url.static.files.dynamic.lookup", dynamicLookup);
         }).initHandler();
 
         assertThat(get("/")).is200().hasContent("Hello World!");
@@ -71,7 +71,7 @@ public class StaticServingIntegrationTest extends BaseHttpIntegrationTest {
         testSetup(HelloWorld.class, settings -> {
             settings.setProperty("testing.logging", "io.spbx.webby.url.impl.HandlerBinder=DEBUG");
             settings.setProperty("url.static.files.prefix", "/foo/");
-            settings.setProperty("url.static.files.dynamic.lookup", dynamicLookup);
+            settings.setBool("url.static.files.dynamic.lookup", dynamicLookup);
         }).initHandler();
 
         assertThat(get("/")).is200().hasContent("Hello World!");

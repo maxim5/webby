@@ -78,7 +78,7 @@ public class PebbleRenderer implements Renderer<PebbleTemplate> {
 
     private @NotNull PebbleEngine createDefault() {
         Charset charset = settings.charset();
-        List<Path> viewPaths = settings.getViewPaths("pebble.view.paths");
+        List<Path> viewPaths = settings.viewPaths("pebble.view.paths");
         String suffix = settings.getOrNull("pebble.filename.suffix");
         boolean cache = settings.isHotReload() ?
             settings.getBool("pebble.dev.cache.enabled", false) :

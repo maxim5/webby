@@ -9,6 +9,7 @@ import io.spbx.webby.Webby;
 import io.spbx.webby.app.AppClasspathScanner;
 import io.spbx.webby.app.AppLifetime;
 import io.spbx.webby.app.AppSettings;
+import io.spbx.webby.app.Settings.RunMode;
 import io.spbx.webby.auth.session.DefaultSession;
 import io.spbx.webby.auth.user.DefaultUser;
 import io.spbx.webby.db.model.BlobKv;
@@ -22,6 +23,7 @@ import org.jetbrains.annotations.Nullable;
 
 import java.io.*;
 import java.nio.charset.Charset;
+import java.nio.file.Path;
 import java.util.List;
 import java.util.Locale;
 import java.util.function.Consumer;
@@ -29,16 +31,16 @@ import java.util.function.Consumer;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 
 public class Testing {
-    public static final String DEFAULT_WEB_PATH = ".";
-    public static final String DEFAULT_VIEW_PATH = ".";
-    public static final String DEFAULT_USER_CONTENT_PATH = ".";
+    public static final Path DEFAULT_WEB_PATH = Path.of(".");
+    public static final Path DEFAULT_VIEW_PATH = Path.of(".");
+    public static final Path DEFAULT_USER_CONTENT_PATH = Path.of(".");
 
     public static final List<Class<?>> AUTH_MODELS = List.of(DefaultSession.class, DefaultUser.class);
     public static final List<Class<?>> CORE_MODELS = List.of(DefaultSession.class, DefaultUser.class, BlobKv.class);
 
     public static @NotNull AppSettings defaultAppSettings() {
         AppSettings settings = AppSettings.inMemoryForDevOnly();
-        settings.setDevMode(true);
+        settings.setRunMode(RunMode.DEV);
         settings.setCharset(TestingBytes.CHARSET);
         settings.setSecurityKey("12345678901234567890123456789012");
         settings.setWebPath(DEFAULT_WEB_PATH);

@@ -179,32 +179,20 @@ public class Webby {
     }
 
     private static void validateHotReload(@NotNull AppSettings settings) {
-        if (settings.isHotReloadDefault()) {
-            settings.setHotReload(settings.isDevMode());
-        } else {
-            if (settings.isHotReload() && settings.isProdMode()) {
-                log.at(Level.WARNING).log("Configured hot reload in production");
-            }
+        if (settings.isHotReload() && settings.isProdMode()) {
+            log.at(Level.WARNING).log("Configured hot reload in production");
         }
     }
 
     private static void validateProfileMode(@NotNull AppSettings settings) {
-        if (settings.isProfileModeDefault()) {
-            settings.setProfileMode(settings.isDevMode());
-        } else {
-            if (settings.isProfileMode() && settings.isProdMode()) {
-                log.at(Level.WARNING).log("Configured profile mode in production");
-            }
+        if (settings.isProfileMode() && settings.isProdMode()) {
+            log.at(Level.WARNING).log("Configured profile mode in production");
         }
     }
 
     private static void validateSafeMode(@NotNull AppSettings settings) {
-        if (settings.isSafeModeDefault()) {
-            settings.setSafeMode(settings.isDevMode());
-        } else {
-            if (settings.isSafeMode() && settings.isProdMode()) {
-                log.at(Level.WARNING).log("Configured safe mode in production");
-            }
+        if (settings.isSafeMode() && settings.isProdMode()) {
+            log.at(Level.WARNING).log("Configured safe mode in production");
         }
     }
 
