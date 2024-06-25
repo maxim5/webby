@@ -60,6 +60,7 @@ public final class AppSettings implements Settings, MutablePropertyMap {
 
     private AppSettings(@NotNull MutableLiveProperties properties) {
         this.properties = properties;
+        liveRef.set(properties);
     }
 
     public static @NotNull AppSettings inMemoryForDevOnly() {
@@ -80,7 +81,6 @@ public final class AppSettings implements Settings, MutablePropertyMap {
 
     @Inject
     private void init(@NotNull Lifetime lifetime) {
-        liveRef.set(properties);
         lifetime.onTerminate(() -> liveRef.set(null));
         lifetime.onTerminate(properties);
     }
