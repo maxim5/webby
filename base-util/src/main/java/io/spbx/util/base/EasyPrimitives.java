@@ -71,6 +71,20 @@ public class EasyPrimitives {
         return parseLongSafe(val, 0);
     }
 
+    @Pure
+    public static byte parseByteSafe(@Nullable String val, byte def) {
+        try {
+            return val != null ? Byte.parseByte(val, 10) : def;
+        } catch (NumberFormatException ignore) {
+            return def;
+        }
+    }
+
+    @Pure
+    public static byte parseByteSafe(@Nullable String val) {
+        return parseByteSafe(val, (byte) 0);
+    }
+
     public static boolean parseBoolSafe(@Nullable String val, boolean def) {
         if (val != null) {
             if ("true".equalsIgnoreCase(val)) {
@@ -85,5 +99,33 @@ public class EasyPrimitives {
 
     public static boolean parseBoolSafe(@Nullable String val) {
         return "true".equalsIgnoreCase(val);
+    }
+
+    @Pure
+    public static double parseDoubleSafe(@Nullable String val, double def) {
+        try {
+            return val != null ? Double.parseDouble(val) : def;
+        } catch (NumberFormatException ignore) {
+            return def;
+        }
+    }
+
+    @Pure
+    public static double parseDoubleSafe(@Nullable String val) {
+        return parseDoubleSafe(val, 0.0);
+    }
+
+    @Pure
+    public static float parseFloatSafe(@Nullable String val, float def) {
+        try {
+            return val != null ? Float.parseFloat(val) : def;
+        } catch (NumberFormatException ignore) {
+            return def;
+        }
+    }
+
+    @Pure
+    public static float parseFloatSafe(@Nullable String val) {
+        return parseFloatSafe(val, 0.0f);
     }
 }
