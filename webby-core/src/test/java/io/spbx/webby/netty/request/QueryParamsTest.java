@@ -191,27 +191,27 @@ public class QueryParamsTest {
         assertThat(params.query()).isEqualTo("x=1&y=true&z=false&w=foo");
         assertParams(params, Map.of("x", List.of("1"), "y", List.of("true"), "z", List.of("false"), "w", List.of("foo")));
 
-        assertThat(params.getBool("x")).isFalse();
+        assertThat(params.getBoolOrFalse("x")).isFalse();
         assertThat(params.getBool("x", false)).isFalse();
-        assertThat(params.getBool("x", true)).isFalse();
-        assertThat(params.getBoolOrTrue("x")).isFalse();
+        assertThat(params.getBool("x", true)).isTrue();
+        assertThat(params.getBoolOrTrue("x")).isTrue();
 
-        assertThat(params.getBool("y")).isTrue();
+        assertThat(params.getBoolOrFalse("y")).isTrue();
         assertThat(params.getBool("y", false)).isTrue();
         assertThat(params.getBool("y", true)).isTrue();
         assertThat(params.getBoolOrTrue("y")).isTrue();
 
-        assertThat(params.getBool("z")).isFalse();
+        assertThat(params.getBoolOrFalse("z")).isFalse();
         assertThat(params.getBool("z", true)).isFalse();
         assertThat(params.getBool("z", true)).isFalse();
         assertThat(params.getBoolOrTrue("z")).isFalse();
 
-        assertThat(params.getBool("w")).isFalse();
+        assertThat(params.getBoolOrFalse("w")).isFalse();
         assertThat(params.getBool("w", false)).isFalse();
-        assertThat(params.getBool("w", true)).isFalse();
-        assertThat(params.getBoolOrTrue("w")).isFalse();
+        assertThat(params.getBool("w", true)).isTrue();
+        assertThat(params.getBoolOrTrue("w")).isTrue();
 
-        assertThat(params.getBool("foobar")).isFalse();
+        assertThat(params.getBoolOrFalse("foobar")).isFalse();
         assertThat(params.getBool("foobar", false)).isFalse();
         assertThat(params.getBool("foobar", true)).isTrue();
         assertThat(params.getBoolOrTrue("foobar")).isTrue();
