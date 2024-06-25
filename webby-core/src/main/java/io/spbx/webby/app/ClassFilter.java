@@ -4,23 +4,25 @@ import com.google.common.base.Strings;
 import io.spbx.util.classpath.ClassNamePredicate;
 import org.jetbrains.annotations.NotNull;
 
+import javax.annotation.concurrent.Immutable;
 import java.util.List;
 import java.util.Set;
 import java.util.stream.Collectors;
 
+@Immutable
 public final class ClassFilter implements ClassNamePredicate {
     private static final ClassNamePredicate EXCLUDE_IMPLEMENTATION_PACKAGES =
             (pkg, __) -> !pkg.startsWith(Packages.RENDER_IMPL) &&
                          !pkg.startsWith(Packages.DB_KV_IMPL + ".") &&  // the dot means subpackages
                          !pkg.startsWith(Packages.DB_SQL_IMPL);
 
-    private ClassNamePredicate predicate;
+    private final ClassNamePredicate predicate;
 
-    ClassFilter() {
+    private ClassFilter() {
         this.predicate = null;
     }
 
-    ClassFilter(@NotNull ClassNamePredicate predicate) {
+    private ClassFilter(@NotNull ClassNamePredicate predicate) {
         this.predicate = predicate.and(EXCLUDE_IMPLEMENTATION_PACKAGES);
     }
 
@@ -30,6 +32,38 @@ public final class ClassFilter implements ClassNamePredicate {
 
     public static @NotNull ClassFilter of(@NotNull ClassNamePredicate filter) {
         return new ClassFilter(filter);
+    }
+
+    public static @NotNull ClassFilter ofWholeClasspath() {
+        return of(EXCLUDE_IMPLEMENTATION_PACKAGES);
+    }
+
+    public static @NotNull ClassFilter ofPackageOnly(@NotNull String packageName) {
+        return of(allInPackage(packageName));
+    }
+
+    public static @NotNull ClassFilter ofSingleClassOnly(@NotNull Class<?> klass) {
+        return of(onlyClass(klass));
+    }
+
+    public static @NotNull ClassFilter ofPackagesOf(@NotNull List<Class<?>> classes) {
+        return of(packagesOf(classes));
+    }
+
+    public static @NotNull ClassFilter ofPackagesOf(@NotNull Class<?> @NotNull ... classes) {
+        return ofPackagesOf(List.of(classes));
+    }
+
+    public static @NotNull ClassFilter ofCommonPackageOf(@NotNull List<Class<?>> classes) {
+        return ofPackageOnly(getCommonPackage(classes));
+    }
+
+    public static @NotNull ClassFilter ofCommonPackageOf(@NotNull Class<?> @NotNull... classes) {
+        return ofCommonPackageOf(List.of(classes));
+    }
+
+    public static @NotNull ClassFilter none() {
+        return of((packageName, simpleClassName) -> false);
     }
 
     @Override
@@ -43,42 +77,6 @@ public final class ClassFilter implements ClassNamePredicate {
 
     public boolean isSet() {
         return predicate != null;
-    }
-
-    public void setPredicate(@NotNull ClassNamePredicate predicate) {
-        this.predicate = predicate.and(EXCLUDE_IMPLEMENTATION_PACKAGES);
-    }
-
-    public void setWholeClasspath() {
-        this.predicate = EXCLUDE_IMPLEMENTATION_PACKAGES;
-    }
-
-    public void setPackageOnly(@NotNull String packageName) {
-        setPredicate(allInPackage(packageName));
-    }
-
-    public void setSingleClassOnly(@NotNull Class<?> klass) {
-        setPredicate(onlyClass(klass));
-    }
-
-    public void setPackagesOf(@NotNull List<Class<?>> classes) {
-        setPredicate(packagesOf(classes));
-    }
-
-    public void setPackagesOf(@NotNull Class<?> @NotNull ... classes) {
-        setPackagesOf(List.of(classes));
-    }
-
-    public void setCommonPackageOf(@NotNull List<Class<?>> classes) {
-        setPackageOnly(getCommonPackage(classes));
-    }
-
-    public void setCommonPackageOf(@NotNull Class<?> @NotNull... classes) {
-        setCommonPackageOf(List.of(classes));
-    }
-
-    public void setPredicateUnsafe(@NotNull ClassNamePredicate predicate) {
-        this.predicate = predicate;
     }
 
     public static @NotNull ClassFilter matchingAnyOf(@NotNull ClassFilter first, @NotNull ClassFilter second) {

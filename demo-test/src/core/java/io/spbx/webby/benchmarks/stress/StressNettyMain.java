@@ -3,6 +3,7 @@ package io.spbx.webby.benchmarks.stress;
 import io.spbx.util.testing.TestingBasics;
 import io.spbx.webby.Webby;
 import io.spbx.webby.app.AppSettings;
+import io.spbx.webby.app.ClassFilter;
 import io.spbx.webby.app.Settings.Toggle;
 import io.spbx.webby.auth.session.DefaultSession;
 import io.spbx.webby.auth.user.DefaultUser;
@@ -46,8 +47,8 @@ public class StressNettyMain {
 
     private static @NotNull Closeable bootstrapServer() {
         AppSettings settings = Main.localSettings();
-        settings.modelFilter().setCommonPackageOf(DefaultUser.class, DefaultSession.class);
-        settings.handlerFilter().setPackageOnly("io.spbx.webby.demo");
+        settings.setModelFilter(ClassFilter.ofCommonPackageOf(DefaultUser.class, DefaultSession.class));
+        settings.setHandlerFilter(ClassFilter.ofPackageOnly("io.spbx.webby.demo"));
         settings.storageSettings()
             .enableKeyValue(TestingStorage.KEY_VALUE_DEFAULT)
             .enableSql(TestingProps.propsSqlSettings());

@@ -4,6 +4,7 @@ import com.google.common.flogger.FluentLogger;
 import io.spbx.orm.api.Engine;
 import io.spbx.webby.Webby;
 import io.spbx.webby.app.AppSettings;
+import io.spbx.webby.app.ClassFilter;
 import io.spbx.webby.app.Settings.RunMode;
 import io.spbx.webby.db.kv.DbType;
 import io.spbx.webby.db.kv.KeyValueSettings;
@@ -35,7 +36,7 @@ public class Main {
         settings.setWebPath(DevPaths.DEMO_WEB);
         settings.setViewPath(DevPaths.DEMO_WEB);
         settings.setUserContentPath(DevPaths.DEMO_HOME.resolve(".data/userdata"));
-        settings.modelFilter().setPackageOnly("io.spbx.webby");  // because this class is in `io.spbx.webby.demo`
+        settings.setModelFilter(ClassFilter.ofPackageOnly("io.spbx.webby"));  // because this class is in `io.spbx.webby.demo`
         settings.setPath("jte.class.directory", JteExample.CLASS_DIR);
         settings.setPath("jte.view.paths", DevPaths.DEMO_WEB.resolve("jte"));
         settings.setPath("pebble.view.paths", DevPaths.DEMO_WEB.resolve("pebble"));

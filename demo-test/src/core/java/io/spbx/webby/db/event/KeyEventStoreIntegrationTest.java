@@ -9,6 +9,7 @@ import io.spbx.orm.api.Engine;
 import io.spbx.util.testing.ext.TempDirectoryExtension;
 import io.spbx.webby.app.AppLifetime;
 import io.spbx.webby.app.AppSettings;
+import io.spbx.webby.app.ClassFilter;
 import io.spbx.webby.app.Settings.Toggle;
 import io.spbx.webby.common.Lifetime;
 import io.spbx.webby.db.kv.DbType;
@@ -207,7 +208,7 @@ public class KeyEventStoreIntegrationTest {
         TestingProps.assumePropIfSet("test.kv.only_type", dbType.name());
 
         AppSettings settings = Testing.defaultAppSettings();
-        settings.modelFilter().setPackagesOf(Testing.CORE_MODELS);
+        settings.setModelFilter(ClassFilter.ofPackagesOf(Testing.CORE_MODELS));
         settings.storageSettings()
             .enableKeyValue(KeyValueSettings.of(dbType, TEMP_DIRECTORY.getCurrentTempDir()))
             .enableSql(SQL.settings());

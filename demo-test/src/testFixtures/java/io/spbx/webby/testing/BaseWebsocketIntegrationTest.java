@@ -13,6 +13,7 @@ import io.netty.handler.codec.http.websocketx.WebSocketServerProtocolHandler.Han
 import io.spbx.util.base.Unchecked;
 import io.spbx.util.testing.TestingBytes;
 import io.spbx.webby.app.AppSettings;
+import io.spbx.webby.app.ClassFilter;
 import io.spbx.webby.netty.dispatch.ws.NettyWebsocketHandler;
 import io.spbx.webby.url.annotate.FrameType;
 import io.spbx.webby.url.annotate.Marshal;
@@ -41,10 +42,10 @@ public class BaseWebsocketIntegrationTest extends BaseChannelTest {
                                                        @NotNull Consumer<AppSettings> consumer,
                                                        @NotNull Module... modules) {
         Injector injector = Testing.testStartup(
-                DEFAULT_SETTINGS
-                        .andThen(settings -> settings.handlerFilter().setSingleClassOnly(klass))
-                        .andThen(consumer),
-                modules
+            DEFAULT_SETTINGS
+                .andThen(settings -> settings.setHandlerFilter(ClassFilter.ofSingleClassOnly(klass)))
+                .andThen(consumer),
+            modules
         );
         return new WebsocketSetup<>(injector, klass);
     }

@@ -2,6 +2,7 @@ package io.spbx.webby.auth;
 
 import com.google.inject.Injector;
 import io.spbx.webby.app.AppSettings;
+import io.spbx.webby.app.ClassFilter;
 import io.spbx.webby.auth.session.SessionStore;
 import io.spbx.webby.auth.user.UserStore;
 import io.spbx.webby.db.sql.SqlSettings;
@@ -23,7 +24,7 @@ public abstract class BaseCoreIntegrationTest {
         AppSettings settings = Testing.defaultAppSettings();
         settings.setBool("user.id.generator.random.enabled", scenario.isRandomIdsEnabled());
         settings.setBool("session.id.generator.random.enabled", scenario.isRandomIdsEnabled());
-        settings.modelFilter().setCommonPackageOf(Testing.AUTH_MODELS);
+        settings.setModelFilter(ClassFilter.ofCommonPackageOf(Testing.AUTH_MODELS));
         switch (scenario) {
             case SQL ->
                 settings.storageSettings().enableSql(sqlSettings);

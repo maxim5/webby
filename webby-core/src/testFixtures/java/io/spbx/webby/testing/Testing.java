@@ -9,6 +9,7 @@ import io.spbx.webby.Webby;
 import io.spbx.webby.app.AppClasspathScanner;
 import io.spbx.webby.app.AppLifetime;
 import io.spbx.webby.app.AppSettings;
+import io.spbx.webby.app.ClassFilter;
 import io.spbx.webby.app.Settings.RunMode;
 import io.spbx.webby.auth.session.DefaultSession;
 import io.spbx.webby.auth.user.DefaultUser;
@@ -46,9 +47,9 @@ public class Testing {
         settings.setWebPath(DEFAULT_WEB_PATH);
         settings.setViewPath(DEFAULT_VIEW_PATH);
         settings.setUserContentPath(DEFAULT_USER_CONTENT_PATH);
-        settings.modelFilter().setPredicateUnsafe((pkg, cls) -> false);
-        settings.handlerFilter().setPredicateUnsafe((pkg, cls) -> false);
-        settings.interceptorFilter().setPredicateUnsafe((pkg, cls) -> false);
+        settings.setModelFilter(ClassFilter.none());
+        settings.setHandlerFilter(ClassFilter.none());
+        settings.setInterceptorFilter(ClassFilter.none());
         settings.storageSettings()
             .disableKeyValue()
             .disableSql();

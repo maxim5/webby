@@ -4,6 +4,7 @@ import com.google.inject.Injector;
 import io.spbx.orm.api.Connector;
 import io.spbx.webby.Webby;
 import io.spbx.webby.app.AppSettings;
+import io.spbx.webby.app.ClassFilter;
 import io.spbx.webby.auth.session.DefaultSession;
 import io.spbx.webby.auth.user.DefaultUser;
 import io.spbx.webby.auth.user.UserAccess;
@@ -52,7 +53,7 @@ public class StressUserTableMain {
 
     private static @NotNull Connector initConnector() {
         AppSettings settings = Testing.defaultAppSettings();
-        settings.modelFilter().setCommonPackageOf(DefaultUser.class, DefaultSession.class);
+        settings.setModelFilter(ClassFilter.ofCommonPackageOf(DefaultUser.class, DefaultSession.class));
         settings.storageSettings().enableSql(TestingProps.propsSqlSettings());
         settings.setInt("db.sql.connection.expiration.millis", 10_000);
         Injector injector = Webby.getReady(settings, TestingModules.PERSISTENT_DB_CLEANER_MODULE);

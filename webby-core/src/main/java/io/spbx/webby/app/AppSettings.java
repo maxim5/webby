@@ -24,9 +24,9 @@ public final class AppSettings implements Settings, MutablePropertyMap {
     private static final AtomicReference<PropertyMap> liveRef = new AtomicReference<>();
     private final MutableLiveProperties properties;
 
-    private final ClassFilter modelFilter = ClassFilter.empty();
-    private final ClassFilter handlerFilter = ClassFilter.empty();
-    private final ClassFilter interceptorFilter = ClassFilter.empty();
+    private ClassFilter modelFilter = ClassFilter.empty();
+    private ClassFilter handlerFilter = ClassFilter.empty();
+    private ClassFilter interceptorFilter = ClassFilter.empty();
     private QueryParser urlParser = SimpleQueryParser.DEFAULT;
     private final StorageSettings storageSettings = new StorageSettings(this);
 
@@ -119,14 +119,26 @@ public final class AppSettings implements Settings, MutablePropertyMap {
         return modelFilter;
     }
 
+    public void setModelFilter(@NotNull ClassFilter filter) {
+        modelFilter = filter;
+    }
+
     @Override
     public @NotNull ClassFilter handlerFilter() {
         return handlerFilter;
     }
 
+    public void setHandlerFilter(@NotNull ClassFilter filter) {
+        handlerFilter = filter;
+    }
+
     @Override
     public @NotNull ClassFilter interceptorFilter() {
         return interceptorFilter;
+    }
+
+    public void setInterceptorFilter(@NotNull ClassFilter filter) {
+        interceptorFilter = filter;
     }
 
     @Override

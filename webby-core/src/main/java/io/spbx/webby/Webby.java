@@ -78,9 +78,9 @@ public class Webby {
         validateSafeMode(settings);
         validateStorageSettings(settings, settings.storageSettings());
 
-        validateFilter(settings.modelFilter(), "models");
-        validateFilter(settings.handlerFilter(), "handlers");
-        validateFilter(settings.interceptorFilter(), "interceptors");
+        settings.setModelFilter(validateFilter(settings.modelFilter(), "models"));
+        settings.setHandlerFilter(validateFilter(settings.handlerFilter(), "handlers"));
+        settings.setInterceptorFilter(validateFilter(settings.interceptorFilter(), "interceptors"));
     }
 
     private static void validateStorageSettings(@NotNull Settings settings, @NotNull StorageSettings storageSettings) {
@@ -196,7 +196,7 @@ public class Webby {
         }
     }
 
-    private static void validateFilter(@NotNull ClassFilter classFilter, @NotNull String filterName) {
+    private static @NotNull ClassFilter validateFilter(@NotNull ClassFilter classFilter, @NotNull String filterName) {
         if (!classFilter.isSet()) {
             String className = getCallerClassName();
             if (className != null) {
@@ -204,19 +204,19 @@ public class Webby {
                 int dot = className.lastIndexOf('.');
                 if (dot > 0) {
                     String packageName = className.substring(0, dot);
-                    classFilter.setPackageOnly(packageName);
                     log.at(Level.INFO).log("Using package `%s` for classpath scanning [%s]", packageName, filterName);
-                    return;
+                    return ClassFilter.ofPackageOnly(packageName);
                 }
             }
 
-            classFilter.setWholeClasspath();
             log.at(Level.WARNING).log(
                 "Failed to determine enclosing package for classpath scanning [%s]. " +
                 "Using the whole classpath. This may cause noticeable delays and errors in loading classes.",
                 filterName
             );
+            return ClassFilter.ofWholeClasspath();
         }
+        return classFilter;
     }
 
     private static @Nullable String getCallerClassName() {
