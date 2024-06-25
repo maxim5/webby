@@ -42,7 +42,7 @@ public class Main {
         settings.setBool("db.mapdb.checksum.enabled", false);
         settings.storageSettings()
             .enableKeyValue(KeyValueSettings.of(DbType.MAP_DB, DevPaths.DEMO_HOME.resolve(".data/mapdb")))
-            .enableSql(SqlSettings.inMemoryNotForProduction(Engine.H2));
+            .enableSql(SqlSettings.inMemoryForDevOnly(Engine.H2));
         return settings;
     }
 }

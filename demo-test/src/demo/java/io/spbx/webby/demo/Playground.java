@@ -19,7 +19,7 @@ public class Playground {
     }
 
     private static void runMysql() throws SQLException {
-        try (Connection connection = SqlSettings.connectNotForProduction(SqlSettings.MYSQL_TEST)) {
+        try (Connection connection = SqlSettings.connectForDevOnly(SqlSettings.MYSQL_TEST)) {
             QueryRepl main = new QueryRepl(connection);
 
             main.update("DROP TABLE IF EXISTS userx");
@@ -60,7 +60,7 @@ public class Playground {
     }
 
     private static void runSqlite() throws SQLException {
-        try (Connection connection = SqlSettings.connectNotForProduction(SqlSettings.SQLITE_IN_MEMORY)) {
+        try (Connection connection = SqlSettings.connectForDevOnly(SqlSettings.SQLITE_IN_MEMORY)) {
             QueryRepl main = new QueryRepl(connection);
 //            sqliteTextForBlobPk(main);
             // sqliteJoins(main);
@@ -70,7 +70,7 @@ public class Playground {
     }
 
     private static void runH2() throws SQLException {
-        try (Connection connection = SqlSettings.connectNotForProduction(SqlSettings.H2_IN_MEMORY)) {
+        try (Connection connection = SqlSettings.connectForDevOnly(SqlSettings.H2_IN_MEMORY)) {
             QueryRepl main = new QueryRepl(connection);
 
             main.update("CREATE TABLE blobx (blob_id VARCHAR PRIMARY KEY, blob_value BLOB)");

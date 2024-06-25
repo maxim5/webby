@@ -30,7 +30,7 @@ public class TestingProps {
             Engine engine = Engine.fromJdbcType(engineValue.toLowerCase());
             assert engine != Engine.Unknown : "Failed to detect SQL engine: " + engineValue;
             log.at(Level.INFO).log("[SQL] Detected engine: %s", engine);
-            return SqlSettings.inMemoryNotForProduction(engine);
+            return SqlSettings.inMemoryForDevOnly(engine);
         }
         String url = System.getProperty("test.sql.url");
         if (url != null) {

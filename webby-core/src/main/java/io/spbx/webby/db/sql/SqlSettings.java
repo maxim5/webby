@@ -88,7 +88,7 @@ public record SqlSettings(@NotNull String url, @Nullable String user, @Nullable 
         return URI.create(uri);
     }
 
-    public static @NotNull SqlSettings inMemoryNotForProduction(@NotNull Engine engine) {
+    public static @NotNull SqlSettings inMemoryForDevOnly(@NotNull Engine engine) {
         return switch (engine) {
             case H2 -> H2_IN_MEMORY;
             case SQLite -> SQLITE_IN_MEMORY;
@@ -97,7 +97,7 @@ public record SqlSettings(@NotNull String url, @Nullable String user, @Nullable 
         };
     }
 
-    public static @NotNull Connection connectNotForProduction(@NotNull SqlSettings settings) {
+    public static @NotNull Connection connectForDevOnly(@NotNull SqlSettings settings) {
         try {
             if (settings.user != null) {
                 return DriverManager.getConnection(settings.url, settings.user, settings.password);

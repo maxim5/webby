@@ -120,7 +120,7 @@ public class SqlDbExtension implements BeforeAllCallback, AfterAllCallback,
         }
 
         private static @NotNull Connection connect(@NotNull SqlSettings settings) {
-            Connection connection = SqlSettings.connectNotForProduction(settings);
+            Connection connection = SqlSettings.connectForDevOnly(settings);
             log.at(Level.FINE).log("[SQL] Connection opened: %s", settings.url());
             return connection;
         }
