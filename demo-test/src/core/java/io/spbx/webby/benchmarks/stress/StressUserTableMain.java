@@ -53,7 +53,7 @@ public class StressUserTableMain {
 
     private static @NotNull Connector initConnector() {
         AppSettings settings = Testing.defaultAppSettings();
-        settings.setModelFilter(ClassFilter.ofCommonPackageOf(DefaultUser.class, DefaultSession.class));
+        settings.setModelFilter(ClassFilter.ofMostCommonPackageTree(DefaultUser.class, DefaultSession.class));
         settings.storageSettings().enableSql(TestingProps.propsSqlSettings());
         settings.setInt("db.sql.connection.expiration.millis", 10_000);
         Injector injector = Webby.getReady(settings, TestingModules.PERSISTENT_DB_CLEANER_MODULE);

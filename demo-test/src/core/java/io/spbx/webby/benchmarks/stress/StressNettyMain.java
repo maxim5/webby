@@ -47,8 +47,8 @@ public class StressNettyMain {
 
     private static @NotNull Closeable bootstrapServer() {
         AppSettings settings = Main.localSettings();
-        settings.setModelFilter(ClassFilter.ofCommonPackageOf(DefaultUser.class, DefaultSession.class));
-        settings.setHandlerFilter(ClassFilter.ofPackageOnly("io.spbx.webby.demo"));
+        settings.setModelFilter(ClassFilter.ofMostCommonPackageTree(DefaultUser.class, DefaultSession.class));
+        settings.setHandlerFilter(ClassFilter.ofPackageTree("io.spbx.webby.demo"));
         settings.storageSettings()
             .enableKeyValue(TestingStorage.KEY_VALUE_DEFAULT)
             .enableSql(TestingProps.propsSqlSettings());

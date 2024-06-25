@@ -208,7 +208,7 @@ public class KeyEventStoreIntegrationTest {
         TestingProps.assumePropIfSet("test.kv.only_type", dbType.name());
 
         AppSettings settings = Testing.defaultAppSettings();
-        settings.setModelFilter(ClassFilter.ofPackagesOf(Testing.CORE_MODELS));
+        settings.setModelFilter(ClassFilter.ofSelectedPackagesOnly(Testing.CORE_MODELS));
         settings.storageSettings()
             .enableKeyValue(KeyValueSettings.of(dbType, TEMP_DIRECTORY.getCurrentTempDir()))
             .enableSql(SQL.settings());

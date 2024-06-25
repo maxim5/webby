@@ -172,7 +172,7 @@ public class StandaloneNettyIntegrationTest {
 
     private static @NotNull AppSettings createSettingsForTest() {
         AppSettings settings = Main.localSettings();
-        settings.setHandlerFilter(ClassFilter.ofPackageOnly("io.spbx.webby.demo"));
+        settings.setHandlerFilter(ClassFilter.ofPackageTree("io.spbx.webby.demo"));
         return settings;
     }
 }

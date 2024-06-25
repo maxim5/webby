@@ -36,7 +36,7 @@ public class Main {
         settings.setWebPath(DevPaths.DEMO_WEB);
         settings.setViewPath(DevPaths.DEMO_WEB);
         settings.setUserContentPath(DevPaths.DEMO_HOME.resolve(".data/userdata"));
-        settings.setModelFilter(ClassFilter.ofPackageOnly("io.spbx.webby"));  // because this class is in `io.spbx.webby.demo`
+        settings.setModelFilter(ClassFilter.ofPackageTree("io.spbx.webby"));  // because this class is in `io.spbx.webby.demo`
         settings.setPath("jte.class.directory", JteExample.CLASS_DIR);
         settings.setPath("jte.view.paths", DevPaths.DEMO_WEB.resolve("jte"));
         settings.setPath("pebble.view.paths", DevPaths.DEMO_WEB.resolve("pebble"));

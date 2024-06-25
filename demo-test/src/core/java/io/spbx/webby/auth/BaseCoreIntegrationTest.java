@@ -24,7 +24,7 @@ public abstract class BaseCoreIntegrationTest {
         AppSettings settings = Testing.defaultAppSettings();
         settings.setBool("user.id.generator.random.enabled", scenario.isRandomIdsEnabled());
         settings.setBool("session.id.generator.random.enabled", scenario.isRandomIdsEnabled());
-        settings.setModelFilter(ClassFilter.ofCommonPackageOf(Testing.AUTH_MODELS));
+        settings.setModelFilter(ClassFilter.ofMostCommonPackageTree(Testing.AUTH_MODELS));
         switch (scenario) {
             case SQL ->
                 settings.storageSettings().enableSql(sqlSettings);

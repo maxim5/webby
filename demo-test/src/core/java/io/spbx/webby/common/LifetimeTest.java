@@ -28,7 +28,7 @@ public class LifetimeTest {
     public void dependency_order() throws Throwable {
         AppSettings settings = Testing.defaultAppSettings();
         settings.setString("testing.logging", "io.spbx.webby.common.Lifetime.Definition=DEBUG");
-        settings.setModelFilter(ClassFilter.ofPackagesOf(Testing.CORE_MODELS));
+        settings.setModelFilter(ClassFilter.ofSelectedPackagesOnly(Testing.CORE_MODELS));
         settings.storageSettings()
             .enableKeyValue(KeyValueSettings.of(KeyValueSettings.DEFAULT_TYPE))
             .enableSql(SqlSettings.SQLITE_IN_MEMORY);

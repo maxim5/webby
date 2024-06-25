@@ -5,8 +5,8 @@ import io.spbx.util.classpath.ClassNamePredicate;
 import org.jetbrains.annotations.NotNull;
 
 import javax.annotation.concurrent.Immutable;
+import java.util.Collection;
 import java.util.List;
-import java.util.Set;
 import java.util.stream.Collectors;
 
 @Immutable
@@ -15,6 +15,8 @@ public final class ClassFilter implements ClassNamePredicate {
             (pkg, __) -> !pkg.startsWith(Packages.RENDER_IMPL) &&
                          !pkg.startsWith(Packages.DB_KV_IMPL + ".") &&  // the dot means subpackages
                          !pkg.startsWith(Packages.DB_SQL_IMPL);
+    private static final @NotNull ClassFilter NONE = of((packageName, simpleClassName) -> false);
+    private static final @NotNull ClassFilter ALL = of((packageName, simpleClassName) -> true);
 
     private final ClassNamePredicate predicate;
 
@@ -35,35 +37,39 @@ public final class ClassFilter implements ClassNamePredicate {
     }
 
     public static @NotNull ClassFilter ofWholeClasspath() {
-        return of(EXCLUDE_IMPLEMENTATION_PACKAGES);
-    }
-
-    public static @NotNull ClassFilter ofPackageOnly(@NotNull String packageName) {
-        return of(allInPackage(packageName));
-    }
-
-    public static @NotNull ClassFilter ofSingleClassOnly(@NotNull Class<?> klass) {
-        return of(onlyClass(klass));
-    }
-
-    public static @NotNull ClassFilter ofPackagesOf(@NotNull List<Class<?>> classes) {
-        return of(packagesOf(classes));
-    }
-
-    public static @NotNull ClassFilter ofPackagesOf(@NotNull Class<?> @NotNull ... classes) {
-        return ofPackagesOf(List.of(classes));
-    }
-
-    public static @NotNull ClassFilter ofCommonPackageOf(@NotNull List<Class<?>> classes) {
-        return ofPackageOnly(getCommonPackage(classes));
-    }
-
-    public static @NotNull ClassFilter ofCommonPackageOf(@NotNull Class<?> @NotNull... classes) {
-        return ofCommonPackageOf(List.of(classes));
+        return ALL;
     }
 
     public static @NotNull ClassFilter none() {
-        return of((packageName, simpleClassName) -> false);
+        return NONE;
+    }
+
+    public static @NotNull ClassFilter ofPackageTree(@NotNull String packageName) {
+        return of((pkg, cls) -> pkg.startsWith(packageName));
+    }
+
+    public static @NotNull ClassFilter ofSingleClassOnly(@NotNull Class<?> klass) {
+        return of((pkg, cls) -> pkg.equals(klass.getPackageName()) && cls.equals(klass.getSimpleName()));
+    }
+
+    public static @NotNull ClassFilter ofSelectedPackagesOnly(@NotNull List<Class<?>> classes) {
+        return ofSelectedPackagesOnly(classes.stream().map(Class::getPackageName).collect(Collectors.toSet()));
+    }
+
+    public static @NotNull ClassFilter ofSelectedPackagesOnly(@NotNull Class<?> @NotNull ... classes) {
+        return ofSelectedPackagesOnly(List.of(classes));
+    }
+
+    public static @NotNull ClassFilter ofSelectedPackagesOnly(@NotNull Collection<String> packages) {
+        return of((pkg, cls) -> packages.contains(pkg));
+    }
+
+    public static @NotNull ClassFilter ofMostCommonPackageTree(@NotNull List<Class<?>> classes) {
+        return ofPackageTree(classes.stream().map(Class::getPackageName).reduce(Strings::commonPrefix).orElse(""));
+    }
+
+    public static @NotNull ClassFilter ofMostCommonPackageTree(@NotNull Class<?> @NotNull... classes) {
+        return ofMostCommonPackageTree(List.of(classes));
     }
 
     @Override
@@ -85,22 +91,5 @@ public final class ClassFilter implements ClassNamePredicate {
 
     public static @NotNull ClassFilter matchingAllOf(@NotNull ClassFilter first, @NotNull ClassFilter second) {
         return new ClassFilter(first.predicateOrDefault().and(second.predicateOrDefault()));
-    }
-
-    private static @NotNull ClassNamePredicate onlyClass(@NotNull Class<?> klass) {
-        return (pkg, cls) -> pkg.equals(klass.getPackageName()) && cls.equals(klass.getSimpleName());
-    }
-
-    private static @NotNull ClassNamePredicate packagesOf(@NotNull List<Class<?>> classes) {
-        Set<String> packages = classes.stream().map(Class::getPackageName).collect(Collectors.toSet());
-        return (pkg, cls) -> packages.contains(pkg);
-    }
-
-    private static @NotNull ClassNamePredicate allInPackage(@NotNull String packageName) {
-        return (pkg, cls) -> pkg.startsWith(packageName);
-    }
-
-    private static @NotNull String getCommonPackage(@NotNull List<Class<?>> classes) {
-        return classes.stream().map(Class::getPackageName).reduce(Strings::commonPrefix).orElse("");
     }
 }

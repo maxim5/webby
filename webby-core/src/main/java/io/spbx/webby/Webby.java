@@ -205,7 +205,7 @@ public class Webby {
                 if (dot > 0) {
                     String packageName = className.substring(0, dot);
                     log.at(Level.INFO).log("Using package `%s` for classpath scanning [%s]", packageName, filterName);
-                    return ClassFilter.ofPackageOnly(packageName);
+                    return ClassFilter.ofPackageTree(packageName);
                 }
             }
 
