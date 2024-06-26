@@ -22,14 +22,10 @@ import java.nio.ByteBuffer;
 import java.nio.charset.Charset;
 import java.nio.charset.StandardCharsets;
 import java.util.*;
-import java.util.function.BiPredicate;
-import java.util.function.Consumer;
-import java.util.function.Function;
-import java.util.function.Predicate;
+import java.util.function.*;
 import java.util.stream.Collector;
 import java.util.stream.Collectors;
 
-import static io.spbx.webby.app.ClassFilterStringConverter.PropertyParser.ParsedPredicate.parseFrom;
 import static java.util.Objects.requireNonNull;
 
 @Beta
@@ -121,27 +117,84 @@ final class ClassFilterStringConverter implements Reversible<ClassFilter, String
     static class PropertyParser {
         private final CharArray input;
 
-        PropertyParser(@NotNull String input, int start, int len) {
-            this.input = new CharArray(input, start, start + len);
+        PropertyParser(@NotNull CharArray input) {
+            this.input = input;
         }
 
         PropertyParser(@NotNull String input) {
-            this(input, 0, input.length());
+            this(new CharArray(input));
         }
 
-        @NotNull ClassFilter parse() {
-            return parseTerm(input);
+        @Nullable ClassFilter parse() {
+            return input.isEmpty() ? null : parseExpression();
         }
 
-        static @NotNull ClassFilter parseTerm(@NotNull CharArray input) {
+        @NotNull ClassFilter parseExpression() {
+            int start = -1;
+            int balance = 0;
+            int total = 0;
+            boolean neg = false;
+            InfixOp infixOp = null;
+            ClassFilter current = null;
+            for (int i = 0; i < input.length(); i++) {
+                int ch = input.at(i);
+                if (ch == '(' || ch == ')') {
+                    total++;
+                    balance += ch == '(' ? 1 : -1;
+                    IllegalArgumentExceptions.failIf(balance < 0, "Invalid expression: %s", input);
+                    if (balance == 0 && ch == ')') {
+                        assert input.at(start) == '(' && input.at(i) == ')';
+
+                        PropertyParser parser = new PropertyParser(input.substring(start + 1, i));
+                        ClassFilter filter = total > 2 ? parser.parseExpression() : parser.parseTerm();
+                        if (neg) {
+                            filter = ClassFilter.of(filter.predicate().negate());
+                        }
+
+                        current = infixOp != null ?
+                            infixOp.func.apply(requireNonNull(current), filter) :
+                            filter;
+
+                        infixOp = switch (input.at(i + 1)) {
+                            case '&' -> InfixOp.AND;
+                            case '|' -> InfixOp.OR;
+                            case '^' -> InfixOp.XOR;
+                            case -1 -> null;
+                            default -> IllegalArgumentExceptions.fail("Unexpected value: %s", input.at(i + 1));
+                        };
+                    } else if (balance == 1 && ch == '(') {
+                        start = i;
+                        neg = input.at(i - 1) == '!';
+                    }
+                }
+            }
+            if (total == 0) {
+                return parseTerm();
+            }
+            return requireNonNull(current, () -> "Failed to parse empty input: `%s`".formatted(input));
+        }
+
+        enum InfixOp {
+            AND(ClassFilter::matchingAllOf),
+            OR(ClassFilter::matchingAnyOf),
+            XOR((first, second) -> ClassFilter.of(first.predicate().xor(second.predicate())));
+
+            private final BiFunction<ClassFilter, ClassFilter, ClassFilter> func;
+
+            InfixOp(BiFunction<ClassFilter, ClassFilter, ClassFilter> func) {
+                this.func = func;
+            }
+        }
+
+        @NotNull ClassFilter parseTerm() {
             ClassFilter known = KNOWN_FILTERS.get(input);
             if (known != null) {
                 return known;
             }
 
-            Collector<RuleSet, ?, Map<Op, RuleSet>> toMap = Collectors.toMap(RuleSet::op, Function.identity());
-            Map<Op, RuleSet> pkgRules = Arrays.stream(Op.values()).map(op -> RuleSet.of(Kind.PACKAGE, op)).collect(toMap);
-            Map<Op, RuleSet> clsRules = Arrays.stream(Op.values()).map(op -> RuleSet.of(Kind.CLASS, op)).collect(toMap);
+            Collector<RuleSet, ?, Map<Cmp, RuleSet>> toMap = Collectors.toMap(RuleSet::cmp, Function.identity());
+            Map<Cmp, RuleSet> pkgRules = Arrays.stream(Cmp.values()).map(cmp -> RuleSet.of(Kind.PACKAGE, cmp)).collect(toMap);
+            Map<Cmp, RuleSet> clsRules = Arrays.stream(Cmp.values()).map(cmp -> RuleSet.of(Kind.CLASS, cmp)).collect(toMap);
 
             input.split(',', array ->
                 parsePredicate(array, Map.of(Kind.CLASS, clsRules, Kind.PACKAGE, pkgRules))
@@ -154,7 +207,7 @@ final class ClassFilterStringConverter implements Reversible<ClassFilter, String
 
         private static @NotNull Predicate<String> buildMatcher(@NotNull Collection<RuleSet> rules) {
             Predicate<String>[] predicates = ListBuilder.of(rules)
-                .map(ruleSet -> buildPredicate(ruleSet.rules, ruleSet.op.matchSingle, ruleSet.op.matchBatch))
+                .map(ruleSet -> buildPredicate(ruleSet.rules, ruleSet.cmp.matchSingle, ruleSet.cmp.matchBatch))
                 .withoutNulls()
                 .toNativeArray(Predicate[]::new);
 
@@ -187,38 +240,38 @@ final class ClassFilterStringConverter implements Reversible<ClassFilter, String
             return str -> batch.test(list, str);
         }
 
-        static void parsePredicate(@NotNull CharArray input, @NotNull Map<Kind, Map<Op, RuleSet>> rules) {
-            ParsedPredicate parsed = parseFrom(input);
-            RuleSet ruleSet = requireNonNull(rules.get(parsed.kind()).get(parsed.op()),
+        static void parsePredicate(@NotNull CharArray input, @NotNull Map<Kind, Map<Cmp, RuleSet>> rules) {
+            ParsedPredicate parsed = ParsedPredicate.parseFrom(input);
+            RuleSet ruleSet = requireNonNull(rules.get(parsed.kind()).get(parsed.cmp()),
                                              () -> "Internal error: Missing rule set for: " + parsed);
             assert ruleSet.matches(parsed);
             ruleSet.accept(parsed.value());
         }
 
-        record ParsedPredicate(@NotNull Kind kind, @NotNull Op op, @NotNull CharArray value) {
+        record ParsedPredicate(@NotNull Kind kind, @NotNull Cmp cmp, @NotNull CharArray value) {
             static @NotNull ParsedPredicate parseFrom(@NotNull CharArray input) {
                 int j = input.indexOf('=');
                 assert j > 0 : "Invalid predicate: " + input;
                 int i = input.at(j - 1) == '~' ? j - 1 : j;
 
                 CharArray kind_ = input.substring(0, i);
-                CharArray op_ = input.substring(i, j + 1);
+                CharArray cmp_ = input.substring(i, j + 1);
                 MutableCharArray value_ = input.substringFrom(j + 1).mutableCopy();
 
                 Kind kind = Kind.parseFrom(kind_);
-                Op op = Op.parseAndTrimValue(op_, value_);
+                Cmp cmp = Cmp.parseAndTrimValue(cmp_, value_);
                 CharArray value = value_.immutable();
-                return new ParsedPredicate(kind, op, value);
+                return new ParsedPredicate(kind, cmp, value);
             }
         }
 
-        record RuleSet(@NotNull Kind kind, @NotNull Op op, @NotNull List<String> rules) implements Consumer<CharArray> {
-            static @NotNull RuleSet of(@NotNull Kind kind, @NotNull Op op) {
-                return new RuleSet(kind, op, new ArrayList<>());
+        record RuleSet(@NotNull Kind kind, @NotNull Cmp cmp, @NotNull List<String> rules) implements Consumer<CharArray> {
+            static @NotNull RuleSet of(@NotNull Kind kind, @NotNull Cmp cmp) {
+                return new RuleSet(kind, cmp, new ArrayList<>());
             }
 
             boolean matches(@NotNull ParsedPredicate predicate) {
-                return kind == predicate.kind && op == predicate.op;
+                return kind == predicate.kind && cmp == predicate.cmp;
             }
 
             @Override
@@ -238,7 +291,7 @@ final class ClassFilterStringConverter implements Reversible<ClassFilter, String
             }
         }
 
-        enum Op {
+        enum Cmp {
             EQUALS(String::equals, List::contains),
             STARTS_WITH(String::startsWith, (list, str) -> list.stream().anyMatch(str::startsWith)),
             ENDS_WITH(String::endsWith, (list, str) -> list.stream().anyMatch(str::endsWith)),
@@ -247,17 +300,17 @@ final class ClassFilterStringConverter implements Reversible<ClassFilter, String
             private final BiPredicate<String, String> matchSingle;
             private final BiPredicate<List<String>, String> matchBatch;
 
-            Op(@NotNull BiPredicate<String, String> matchSingle, @NotNull BiPredicate<List<String>, String> matchBatch) {
+            Cmp(@NotNull BiPredicate<String, String> matchSingle, @NotNull BiPredicate<List<String>, String> matchBatch) {
                 this.matchSingle = matchSingle;
                 this.matchBatch = matchBatch;
             }
 
-            static @NotNull Op parseAndTrimValue(@NotNull CharArray op, @NotNull MutableCharArray val) {
-                if (op.contentEquals('=')) {
+            static @NotNull Cmp parseAndTrimValue(@NotNull CharArray cmp, @NotNull MutableCharArray val) {
+                if (cmp.contentEquals('=')) {
                     return EQUALS;
                 }
 
-                assert op.contentEquals("~=") : "Invalid operation: " + op;
+                assert cmp.contentEquals("~=") : "Invalid comparison operator: " + cmp;
                 boolean starts = val.startsWith('*');
                 boolean ends = val.endsWith('*');
                 if (starts && ends) {
@@ -271,7 +324,7 @@ final class ClassFilterStringConverter implements Reversible<ClassFilter, String
                     val.offsetEnd(1);
                     return STARTS_WITH;
                 } else {
-                    throw IllegalArgumentExceptions.form("Invalid contains operation for the value: %s", val);
+                    throw IllegalArgumentExceptions.form("Expected at least one `*` in the value: %s", val);
                 }
             }
         }

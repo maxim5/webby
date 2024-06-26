@@ -17,21 +17,25 @@ public interface ClassNamePredicate extends BiPredicate<String, String>, Seriali
     @Override
     boolean test(@NotNull String packageName, @NotNull String simpleClassName);
 
-    @NotNull
-    @Override
-    default ClassNamePredicate and(@NotNull BiPredicate<? super String, ? super String> other) {
-        return (packageName, simpleClassName) -> test(packageName, simpleClassName) &&
-                                                 other.test(packageName, simpleClassName);
-    }
-
     @Override
     default @NotNull ClassNamePredicate negate() {
         return (packageName, simpleClassName) -> !test(packageName, simpleClassName);
     }
 
     @Override
+    default @NotNull ClassNamePredicate and(@NotNull BiPredicate<? super String, ? super String> other) {
+        return (packageName, simpleClassName) -> test(packageName, simpleClassName) &&
+                                                 other.test(packageName, simpleClassName);
+    }
+
+    @Override
     default @NotNull ClassNamePredicate or(@NotNull BiPredicate<? super String, ? super String> other) {
         return (packageName, simpleClassName) -> test(packageName, simpleClassName) ||
+                                                 other.test(packageName, simpleClassName);
+    }
+
+    default @NotNull ClassNamePredicate xor(@NotNull BiPredicate<? super String, ? super String> other) {
+        return (packageName, simpleClassName) -> test(packageName, simpleClassName) ^
                                                  other.test(packageName, simpleClassName);
     }
 }
