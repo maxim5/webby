@@ -14,6 +14,14 @@ public class TestingPrimitives {
         return values;
     }
 
+    public static byte[] bytes(int... values) {
+        byte[] bytes = new byte[values.length];
+        for (int i = 0; i < values.length; i++) {
+            bytes[i] = (byte) values[i];
+        }
+        return bytes;
+    }
+
     public static boolean fitsIntoLong(@NotNull BigInteger bigInteger) {
         return BigInteger.valueOf(Long.MAX_VALUE).compareTo(bigInteger) >= 0 &&
                BigInteger.valueOf(Long.MIN_VALUE).compareTo(bigInteger) <= 0;

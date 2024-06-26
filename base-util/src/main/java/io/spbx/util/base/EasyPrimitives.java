@@ -1,9 +1,13 @@
 package io.spbx.util.base;
 
 import org.checkerframework.dataflow.qual.Pure;
+import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
+import java.io.ByteArrayOutputStream;
+import java.io.IOException;
 import java.util.Arrays;
+import java.util.stream.Collector;
 
 public class EasyPrimitives {
     @Pure
@@ -127,5 +131,17 @@ public class EasyPrimitives {
     @Pure
     public static float parseFloatSafe(@Nullable String val) {
         return parseFloatSafe(val, 0.0f);
+    }
+
+    public static @NotNull Collector<Integer, ?, byte[]> toByteArray() {
+        // https://stackoverflow.com/questions/44708532/how-to-map-and-collect-primitive-return-type-using-java-8-stream
+        return Collector.of(ByteArrayOutputStream::new, ByteArrayOutputStream::write, (baos1, baos2) -> {
+            try {
+                baos2.writeTo(baos1);
+                return baos1;
+            } catch (IOException e) {
+                return Unchecked.rethrow(e);
+            }
+        }, ByteArrayOutputStream::toByteArray);
     }
 }

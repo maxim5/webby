@@ -3,7 +3,11 @@ package io.spbx.util.base;
 import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
 
+import java.util.stream.IntStream;
+import java.util.stream.Stream;
+
 import static com.google.common.truth.Truth.assertThat;
+import static io.spbx.util.testing.TestingPrimitives.bytes;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 
 @Tag("fast")
@@ -174,5 +178,15 @@ public class EasyPrimitivesTest {
 
         assertThat(EasyPrimitives.parseFloatSafe("", -1)).isEqualTo(-1f);
         assertThat(EasyPrimitives.parseFloatSafe("foo", -1)).isEqualTo(-1f);
+    }
+
+    @Test
+    public void toByteArray_simple() {
+        assertThat(Stream.<Integer>of().collect(EasyPrimitives.toByteArray())).isEmpty();
+        assertThat(Stream.of(1).collect(EasyPrimitives.toByteArray())).isEqualTo(bytes(1));
+        assertThat(Stream.of(1, 2).collect(EasyPrimitives.toByteArray())).isEqualTo(bytes(1, 2));
+        assertThat(IntStream.of().boxed().collect(EasyPrimitives.toByteArray())).isEmpty();
+        assertThat(IntStream.of(1).boxed().collect(EasyPrimitives.toByteArray())).isEqualTo(bytes(1));
+        assertThat(IntStream.of(1, 2).boxed().collect(EasyPrimitives.toByteArray())).isEqualTo(bytes(1, 2));
     }
 }
