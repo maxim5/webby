@@ -109,6 +109,70 @@ public class ListBuilderTest {
     }
 
     @Test
+    public void builder_of_varargs() {
+        assertBuilder(ListBuilder.<Integer>of());
+        assertBuilder(ListBuilder.of(1), 1);
+        assertBuilder(ListBuilder.of(1, 2), 1, 2);
+        assertBuilder(ListBuilder.of(1, 2, null), 1, 2, null);
+        assertBuilder(ListBuilder.of(null, null, null, 0), null, null, null, 0);
+    }
+
+    @Test
+    public void builder_of_list() {
+        assertBuilder(ListBuilder.of(List.<Integer>of()));
+        assertBuilder(ListBuilder.of(List.of(1)), 1);
+        assertBuilder(ListBuilder.of(List.of(1, 2)), 1, 2);
+    }
+
+    @Test
+    public void builder_map() {
+        assertBuilder(ListBuilder.<Long>of().map(Long::intValue));
+        assertBuilder(ListBuilder.of(1L).map(Long::intValue), 1);
+        assertBuilder(ListBuilder.of(1L, 2L).map(Long::intValue), 1, 2);
+        assertThrows(NullPointerException.class, () -> ListBuilder.of(1L, 2L, null).map(Long::intValue));
+    }
+
+    @Test
+    public void builder_mapSafe() {
+        assertBuilder(ListBuilder.<Long>of().mapSafe(Long::intValue));
+        assertBuilder(ListBuilder.of(1L).mapSafe(Long::intValue), 1);
+        assertBuilder(ListBuilder.of(1L, 2L).mapSafe(Long::intValue), 1, 2);
+        assertBuilder(ListBuilder.of(1L, 2L, null).mapSafe(Long::intValue), 1, 2, null);
+        assertBuilder(ListBuilder.of(null, null, null, 0L).mapSafe(Long::intValue), null, null, null, 0);
+    }
+
+    @Test
+    public void builder_excludeIf() {
+        assertBuilder(ListBuilder.<Integer>of().excludeIf(x -> x < 0));
+        assertBuilder(ListBuilder.of(0).excludeIf(x -> x < 0), 0);
+        assertBuilder(ListBuilder.of(1).excludeIf(x -> x < 0), 1);
+        assertBuilder(ListBuilder.of(1, 0, -1, 2).excludeIf(x -> x < 0), 1, 0, 2);
+        assertBuilder(ListBuilder.of(-1, -2).excludeIf(x -> x < 0));
+        assertThrows(NullPointerException.class, () -> ListBuilder.of(1, null).excludeIf(x -> x < 0));
+    }
+
+    @Test
+    public void builder_excludeIfSafe() {
+        assertBuilder(ListBuilder.<Integer>of().excludeIfSafe(x -> x < 0));
+        assertBuilder(ListBuilder.of(0).excludeIfSafe(x -> x < 0), 0);
+        assertBuilder(ListBuilder.of(1).excludeIfSafe(x -> x < 0), 1);
+        assertBuilder(ListBuilder.of(1, null).excludeIfSafe(x -> x < 0), 1, null);
+        assertBuilder(ListBuilder.of(1, 0, -1, 2).excludeIfSafe(x -> x < 0), 1, 0, 2);
+        assertBuilder(ListBuilder.of(-1, -2).excludeIfSafe(x -> x < 0));
+        assertBuilder(ListBuilder.of(null, null, -1, -2).excludeIfSafe(x -> x < 0), null, null);
+    }
+
+    @Test
+    public void builder_of_withoutNulls() {
+        assertBuilder(ListBuilder.<Integer>of().withoutNulls());
+        assertBuilder(ListBuilder.of(1).withoutNulls(), 1);
+        assertBuilder(ListBuilder.of(1, 2).withoutNulls(), 1, 2);
+        assertBuilder(ListBuilder.of(1, 2, null).withoutNulls(), 1, 2);
+        assertBuilder(ListBuilder.of(null, null, null, 0).withoutNulls(), 0);
+        assertBuilder(ListBuilder.of((Integer) null).withoutNulls());
+    }
+
+    @Test
     public void builder_combine() {
         ListBuilder<Integer> builder = ListBuilder.<Integer>builder().addAll(1, 2)
             .combine(ListBuilder.<Integer>builder().addAll(3));
@@ -182,5 +246,7 @@ public class ListBuilderTest {
         assertThat(builder.toArrayList()).containsExactlyElementsIn(expected).inOrder();
         assertThat(builder.toImmutableArray()).containsExactlyElementsIn(expected).inOrder();
         assertThat(builder.toImmutableArrayList()).containsExactlyElementsIn(expected).inOrder();
+        // FIX[debt]: A quick hack. Refactor to subjects.
+        assertThat(builder.toNativeArray(value -> (T[]) new Integer[value])).asList().containsExactly(expected);
     }
 }

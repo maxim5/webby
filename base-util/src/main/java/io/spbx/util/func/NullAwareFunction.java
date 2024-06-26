@@ -42,4 +42,16 @@ public interface NullAwareFunction<U, V> extends Function<U, V> {
     default @Nullable V apply(@Nullable U u) {
         return u != null ? applyNotNull(u) : null;
     }
+
+    /**
+     * Converts a simple non-null {@link Function} into a {@link NullAwareFunction}.
+     * A wrapped function would be safely accept nullable inputs and pass them through.
+     * Note that this means the output of {@link #apply(Object)} is becoming nullable too.
+     *
+     * @param function the non-null function to wrap
+     * @return the null-aware function
+     */
+    static <U, V> @NotNull NullAwareFunction<U, V> wrap(@NotNull Function<U, V> function) {
+        return function::apply;
+    }
 }
