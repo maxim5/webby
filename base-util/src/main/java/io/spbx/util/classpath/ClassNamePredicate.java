@@ -2,6 +2,7 @@ package io.spbx.util.classpath;
 
 import org.jetbrains.annotations.NotNull;
 
+import java.io.Serializable;
 import java.util.function.BiPredicate;
 
 /**
@@ -10,7 +11,7 @@ import java.util.function.BiPredicate;
  * @see ClasspathScanner
  */
 @FunctionalInterface
-public interface ClassNamePredicate extends BiPredicate<String, String> {
+public interface ClassNamePredicate extends BiPredicate<String, String>, Serializable {
     ClassNamePredicate ALLOW_ALL = (packageName, simpleClassName) -> true;
 
     @Override
