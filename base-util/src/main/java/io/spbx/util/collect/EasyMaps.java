@@ -30,6 +30,11 @@ public class EasyMaps {
     }
 
     @Pure
+    public static <K, V> @NotNull ImmutableMap<V, K> inverseMap(@NotNull Map<K, V> map) {
+        return map.entrySet().stream().collect(ImmutableMap.toImmutableMap(Map.Entry::getValue, Map.Entry::getKey));
+    }
+
+    @Pure
     public static <K, V> @NotNull ImmutableMap<K, V> immutableOf(@NotNull K k1, @NotNull V v1, @NotNull Object @NotNull ... items) {
         assert items.length % 2 == 0 : "Invalid number of items: %d".formatted(items.length);
         ImmutableMap.Builder<K, V> builder = ImmutableMap.builderWithExpectedSize(1 + items.length >> 1);
