@@ -3,7 +3,10 @@ package io.spbx.util.base;
 import org.jetbrains.annotations.NotNull;
 
 import java.nio.CharBuffer;
+import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.List;
+import java.util.function.Consumer;
 import java.util.function.IntConsumer;
 import java.util.stream.IntStream;
 
@@ -12,7 +15,7 @@ import java.util.stream.IntStream;
  * <p>
  * `CharArray` owns the encapsulated char array, but, by default, is immutable (see also {@link MutableCharArray}).
  */
-public class CharArray implements CharSequence {
+public class CharArray implements CharSequence, Comparable<CharArray> {
     protected final char[] chars;
     protected int start;
     protected int end;
@@ -108,7 +111,10 @@ public class CharArray implements CharSequence {
     }
 
     public CharArray substring(int start, int end) {
-        assert start >= 0 : "Start index can't be negative: %d".formatted(start);
+        start = start >= 0 ? start : start + length();  // allows negative from the end (-1 is `length()-1`)
+        end = end >= 0 ? end : end + length();          // allows negative from the end (-1 is `length()-1`)
+        assert start >= 0 && start <= length() : "Start index is out of range: %d in `%s`".formatted(start, this);
+        assert end >= 0 && end <= length() : "End index is out of range: %d in `%s`".formatted(end, this);
         assert start <= end : "Start index can't be larger than end index: %d >= %d".formatted(start, end);
         return new CharArray(chars, this.start + start, this.start + end);
     }
@@ -268,6 +274,26 @@ public class CharArray implements CharSequence {
         return indexOfAny(ch1, ch2) >= 0;
     }
 
+    public void split(char ch, Consumer<CharArray> callback) {
+        int start = 0;
+        while (true) {
+            int end = indexOf(ch, start);
+            if (end == -1) {
+                callback.accept(substringFrom(start));
+                return;
+            } else {
+                callback.accept(substring(start, end));
+                start = end + 1;
+            }
+        }
+    }
+
+    public List<CharArray> split(char ch) {
+        List<CharArray> list = new ArrayList<>();
+        split(ch, list::add);
+        return list;
+    }
+
     // Returns the length of the common prefix
     public int commonPrefix(CharArray array) {
         int index = Arrays.mismatch(chars, start, end, array.chars, array.start, array.end);
@@ -326,6 +352,15 @@ public class CharArray implements CharSequence {
     }
 
     @Override
+    public int compareTo(@NotNull CharArray other) {
+        return Arrays.compare(chars, start, end, other.chars, other.start, other.end);
+    }
+
+    public int compareTo(@NotNull CharSequence str) {
+        return CharSequence.compare(this, str);
+    }
+
+    @Override
     public @NotNull String toString() {
         return new String(chars, start, end - start);
     }
@@ -333,6 +368,14 @@ public class CharArray implements CharSequence {
     @Override
     public boolean equals(Object o) {
         return this == o || o instanceof CharArray that && Arrays.equals(chars, start, end, that.chars, that.start, that.end);
+    }
+
+    public boolean contentEquals(char ch) {
+        return length() == 1 && at(0) == ch;
+    }
+
+    public boolean contentEquals(String str) {
+        return str.contentEquals(this);
     }
 
     @Override

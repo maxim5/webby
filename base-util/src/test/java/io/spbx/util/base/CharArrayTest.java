@@ -247,6 +247,21 @@ public class CharArrayTest {
     }
 
     @Test
+    public void split_by_char() {
+        assertThat(new CharArray("").split('.')).containsExactly(new CharArray(""));
+        assertThat(new CharArray(".").split('.')).containsExactly(new CharArray(""), new CharArray(""));
+        assertThat(new CharArray("..").split('.')).containsExactly(new CharArray(""), new CharArray(""), new CharArray(""));
+        assertThat(new CharArray("a.").split('.')).containsExactly(new CharArray("a"), new CharArray(""));
+        assertThat(new CharArray("a.b").split('.')).containsExactly(new CharArray("a"), new CharArray("b"));
+        assertThat(new CharArray("a..b").split('.')).containsExactly(new CharArray("a"), new CharArray(""), new CharArray("b"));
+        assertThat(new CharArray("ab").split('.')).containsExactly(new CharArray("ab"));
+        assertThat(new CharArray("ab.").split('.')).containsExactly(new CharArray("ab"), new CharArray(""));
+        assertThat(new CharArray(".ab").split('.')).containsExactly(new CharArray(""), new CharArray("ab"));
+        assertThat(new CharArray("ab.cd").split('.')).containsExactly(new CharArray("ab"), new CharArray("cd"));
+        assertThat(new CharArray("a.b.c").split('.')).containsExactly(new CharArray("a"), new CharArray("b"), new CharArray("c"));
+    }
+
+    @Test
     public void commonPrefix() {
         assertThat(new CharArray("foo").commonPrefix("bar")).isEqualTo(0);
         assertThat(new CharArray("bar").commonPrefix("baz")).isEqualTo(2);
@@ -399,6 +414,40 @@ public class CharArrayTest {
     }
 
     @Test
+    public void substring_valid() {
+        assertThat(new CharArray("foobar").substring(0, 3)).isEqualTo(new CharArray("foo"));
+        assertThat(new CharArray("foobar").substring(3, 6)).isEqualTo(new CharArray("bar"));
+        assertThat(new CharArray("foobar").substring(0, 1)).isEqualTo(new CharArray("f"));
+        assertThat(new CharArray("foobar").substring(1, 1)).isEqualTo(new CharArray(""));
+        assertThat(new CharArray("foobar").substring(5, 6)).isEqualTo(new CharArray("r"));
+        assertThat(new CharArray("foobar").substring(6, 6)).isEqualTo(new CharArray(""));
+
+        assertThat(new CharArray("foobar").substring(0, -1)).isEqualTo(new CharArray("fooba"));
+        assertThat(new CharArray("foobar").substring(0, -2)).isEqualTo(new CharArray("foob"));
+        assertThat(new CharArray("foobar").substring(0, -3)).isEqualTo(new CharArray("foo"));
+        assertThat(new CharArray("foobar").substring(-3, 6)).isEqualTo(new CharArray("bar"));
+        assertThat(new CharArray("foobar").substring(-3, -1)).isEqualTo(new CharArray("ba"));
+        assertThat(new CharArray("foobar").substring(-3, -2)).isEqualTo(new CharArray("b"));
+        assertThat(new CharArray("foobar").substring(-3, -3)).isEqualTo(new CharArray(""));
+
+        assertThat(new CharArray("foobar").substring(0, 1)).isEqualTo(new CharArray("f"));
+        assertThat(new CharArray("foobar").substring(0, 0)).isEqualTo(new CharArray(""));
+        assertThat(new CharArray("foobar").substring(1, 1)).isEqualTo(new CharArray(""));
+        assertThat(new CharArray("foobar").substring(0, -6)).isEqualTo(new CharArray(""));
+        assertThat(new CharArray("foobar").substring(1, -5)).isEqualTo(new CharArray(""));
+    }
+
+    @Test
+    public void substring_invalid() {
+        assertThrows(AssertionError.class, () -> new CharArray("foobar").substring(0, 7));
+        assertThrows(AssertionError.class, () -> new CharArray("foobar").substring(7, 7));
+        assertThrows(AssertionError.class, () -> new CharArray("foobar").substring(7, 8));
+        assertThrows(AssertionError.class, () -> new CharArray("foobar").substring(0, -10));
+        assertThrows(AssertionError.class, () -> new CharArray("foobar").substring(-10, 6));
+        assertThrows(AssertionError.class, () -> new CharArray("foobar").substring(1, 0));
+    }
+
+    @Test
     public void join_same_buffer() {
         CharArray array = new CharArray("foobar");
         CharArray foo = array.substringUntil(3);
@@ -522,5 +571,61 @@ public class CharArrayTest {
     public void codepoints_of_subbuffer() {
         int[] array = new CharArray("foobar", 1, 3).codePoints().toArray();
         assertThat(array).isEqualTo(new int[] { 111, 111 });
+    }
+
+    @Test
+    public void compareTo_array_simple() {
+        assertThat(new CharArray("foo").compareTo(new CharArray("bar"))).isAtLeast(1);
+        assertThat(new CharArray("foo").compareTo(new CharArray("foo"))).isEqualTo(0);
+        assertThat(new CharArray("bar").compareTo(new CharArray("foo"))).isAtMost(-1);
+        assertThat(new CharArray("foobar").compareTo(new CharArray("foo"))).isAtLeast(1);
+        assertThat(new CharArray("foo").compareTo(new CharArray("foobar"))).isAtMost(-1);
+    }
+
+    @Test
+    public void compareTo_array_empty() {
+        assertThat(new CharArray("").compareTo(new CharArray(""))).isEqualTo(0);
+        assertThat(new CharArray("foo").compareTo(new CharArray(""))).isAtLeast(1);
+        assertThat(new CharArray("").compareTo(new CharArray("foo"))).isAtMost(-1);
+    }
+
+    @Test
+    public void compareTo_string_simple() {
+        assertThat(new CharArray("foo").compareTo("bar")).isAtLeast(1);
+        assertThat(new CharArray("foo").compareTo("foo")).isEqualTo(0);
+        assertThat(new CharArray("bar").compareTo("foo")).isAtMost(-1);
+        assertThat(new CharArray("foobar").compareTo("foo")).isAtLeast(1);
+        assertThat(new CharArray("foo").compareTo("foobar")).isAtMost(-1);
+    }
+
+    @Test
+    public void compareTo_string_empty() {
+        assertThat(new CharArray("").compareTo("")).isEqualTo(0);
+        assertThat(new CharArray("foo").compareTo("")).isAtLeast(1);
+        assertThat(new CharArray("").compareTo("foo")).isAtMost(-1);
+    }
+
+    @Test
+    public void contentEquals_char() {
+        assertThat(new CharArray("").contentEquals('a')).isFalse();
+        assertThat(new CharArray("a").contentEquals('a')).isTrue();
+        assertThat(new CharArray("ab").contentEquals('a')).isFalse();
+        assertThat(new CharArray("b").contentEquals('a')).isFalse();
+    }
+
+    @Test
+    public void contentEquals_string() {
+        assertThat(new CharArray("").contentEquals("")).isTrue();
+        assertThat(new CharArray("").contentEquals("foo")).isFalse();
+
+        assertThat(new CharArray("a").contentEquals("")).isFalse();
+        assertThat(new CharArray("a").contentEquals("a")).isTrue();
+        assertThat(new CharArray("a").contentEquals("A")).isFalse();
+        assertThat(new CharArray("a").contentEquals("foo")).isFalse();
+
+        assertThat(new CharArray("foo").contentEquals("")).isFalse();
+        assertThat(new CharArray("foo").contentEquals("a")).isFalse();
+        assertThat(new CharArray("foo").contentEquals("foo")).isTrue();
+        assertThat(new CharArray("foo").contentEquals("Foo")).isFalse();
     }
 }

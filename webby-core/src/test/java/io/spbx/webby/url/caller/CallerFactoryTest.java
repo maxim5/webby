@@ -395,7 +395,7 @@ public class CallerFactoryTest {
     private static Map<String, CharArray> vars(Object @NotNull ... items) {
         List<CharSequence> list = Streams.mapWithIndex(
             Arrays.stream(items),
-            (item, i) -> (i % 2 == 0) ? item.toString() : new CharArray(item.toString())
+            (item, i) -> (i % 2 == 0) ? (CharSequence) item.toString() : new CharArray(item.toString())
         ).toList();
         return asMap(list);
     }
