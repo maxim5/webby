@@ -24,9 +24,9 @@ public final class AppSettings implements Settings, MutablePropertyMap {
     private static final AtomicReference<PropertyMap> liveRef = new AtomicReference<>();
     private final MutableLiveProperties properties;
 
-    private ClassFilter modelFilter = ClassFilter.empty();
-    private ClassFilter handlerFilter = ClassFilter.empty();
-    private ClassFilter interceptorFilter = ClassFilter.empty();
+    private ClassFilter modelFilter = ClassFilter.DEFAULT;
+    private ClassFilter handlerFilter = ClassFilter.DEFAULT;
+    private ClassFilter interceptorFilter = ClassFilter.DEFAULT;
     private QueryParser urlParser = SimpleQueryParser.DEFAULT;
     private final StorageSettings storageSettings = new StorageSettings(this);
 

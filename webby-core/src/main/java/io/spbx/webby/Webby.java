@@ -197,7 +197,7 @@ public class Webby {
     }
 
     private static @NotNull ClassFilter validateFilter(@NotNull ClassFilter classFilter, @NotNull String filterName) {
-        if (!classFilter.isSet()) {
+        if (classFilter.isDefault()) {
             String className = getCallerClassName();
             if (className != null) {
                 log.at(Level.FINER).log("Caller class name: %s", className);
