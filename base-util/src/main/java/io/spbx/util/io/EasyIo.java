@@ -36,6 +36,10 @@ public class EasyIo {
         }
     }
 
+    public static int base64LengthNoPadding(int len) {
+        return (len * 4 + 2) / 3;
+    }
+
     public static class Close {
         public static void closeQuietly(@Nullable Closeable closeable) {
             try {
