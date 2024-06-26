@@ -6,6 +6,30 @@ import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
 public class EasyExceptions {
+    public static class AssertionErrors {
+        public static void assure(boolean cond, @NotNull String message, @Nullable Object @NotNull ... args) {
+            if (!cond) {
+                AssertionErrors.fail(message, args);
+            }
+        }
+
+        public static void failIf(boolean cond, @NotNull String message, @Nullable Object @NotNull ... args) {
+            if (cond) {
+                AssertionErrors.fail(message, args);
+            }
+        }
+
+        @CanIgnoreReturnValue
+        public static <R> R fail(@NotNull String message, @Nullable Object @NotNull ... args) {
+            throw AssertionErrors.form(message, args);
+        }
+
+        @CheckReturnValue
+        public static @NotNull AssertionError form(@NotNull String message, @Nullable Object @NotNull ... args) {
+            return new AssertionError(message.formatted(args));
+        }
+    }
+
     public static class IllegalArgumentExceptions {
         public static void assure(boolean cond, @NotNull String message, @Nullable Object @NotNull ... args) {
             if (!cond) {
