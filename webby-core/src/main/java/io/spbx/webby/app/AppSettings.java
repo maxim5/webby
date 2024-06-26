@@ -18,15 +18,16 @@ import java.nio.charset.Charset;
 import java.nio.file.Path;
 import java.util.concurrent.atomic.AtomicReference;
 
+import static io.spbx.webby.app.ClassFilterStringConverter.TO_CLASS_FILTER;
 import static java.util.Objects.requireNonNull;
 
 public final class AppSettings implements Settings, MutablePropertyMap {
     private static final AtomicReference<PropertyMap> liveRef = new AtomicReference<>();
     private final MutableLiveProperties properties;
 
-    private ClassFilter modelFilter = ClassFilter.DEFAULT;
-    private ClassFilter handlerFilter = ClassFilter.DEFAULT;
-    private ClassFilter interceptorFilter = ClassFilter.DEFAULT;
+    private ClassFilter modelFilter = getOptional(MODEL_FILTER).map(TO_CLASS_FILTER).orElse(ClassFilter.DEFAULT);
+    private ClassFilter handlerFilter = getOptional(HANDLER_FILTER).map(TO_CLASS_FILTER).orElse(ClassFilter.DEFAULT);
+    private ClassFilter interceptorFilter = getOptional(INTERCEPTOR_FILTER).map(TO_CLASS_FILTER).orElse(ClassFilter.DEFAULT);
     private QueryParser urlParser = SimpleQueryParser.DEFAULT;
     private final StorageSettings storageSettings = new StorageSettings(this);
 

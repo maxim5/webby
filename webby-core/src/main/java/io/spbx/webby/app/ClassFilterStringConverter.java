@@ -34,7 +34,8 @@ import static java.util.Objects.requireNonNull;
 
 @Beta
 final class ClassFilterStringConverter implements Reversible<ClassFilter, String> {
-    public static final ClassFilterStringConverter INSTANCE = new ClassFilterStringConverter();
+    public static final Reversible<ClassFilter, String> TO_STRING = new ClassFilterStringConverter();
+    public static final Reversible<String, ClassFilter> TO_CLASS_FILTER = TO_STRING.reverse();
 
     private static final Charset CHARSET = StandardCharsets.US_ASCII;
     private static final String BASE64_PREFIX = "base64:";

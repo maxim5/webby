@@ -51,8 +51,8 @@ public class ClassFilterStringConverterTest {
     }
 
     private static void assertFilterRoundtrip(@NotNull ClassFilter input) {
-        String forward = ClassFilterStringConverter.INSTANCE.forward(input);
-        ClassFilter backward = ClassFilterStringConverter.INSTANCE.backward(forward);
+        String forward = ClassFilterStringConverter.TO_STRING.forward(input);
+        ClassFilter backward = ClassFilterStringConverter.TO_STRING.backward(forward);
         assertThat(matchTree(backward)).isEqualTo(matchTree(input));
     }
 

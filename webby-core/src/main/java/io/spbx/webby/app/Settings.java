@@ -11,7 +11,7 @@ import java.nio.charset.Charset;
 import java.nio.file.Path;
 import java.util.List;
 
-public interface Settings extends SettingsFilters, PropertyMap {
+public interface Settings extends PropertyMap {
     Path DEFAULT_APP_PROPERTIES = Path.of("app.properties");
 
     EnumProperty<RunMode> RUN_MODE = EnumProperty.of("webby.mode", RunMode.DEV);
@@ -32,6 +32,10 @@ public interface Settings extends SettingsFilters, PropertyMap {
     EnumProperty<FrameType> WS_FRAME_TYPE = EnumProperty.of("webby.ws.frame.type", FrameType.FROM_CLIENT);
     EnumProperty<Marshal> WS_FRAME_MARSHAL = EnumProperty.of("webby.ws.frame.marshal", Marshal.JSON);
     Property WS_API_VERSION = Property.of("webby.ws.api.version", "1.0");
+
+    Property MODEL_FILTER = Property.of("webby.classpath.model.filter", "default");
+    Property HANDLER_FILTER = Property.of("webby.classpath.handler.filter", "default");
+    Property INTERCEPTOR_FILTER = Property.of("webby.classpath.interceptor.filter", "default");
 
     IntProperty SIZE_BYTES = IntProperty.of("webby.byte.stream.size", 1024);
     IntProperty SIZE_CHARS = IntProperty.of("webby.char.stream.size", 1024);
@@ -65,6 +69,10 @@ public interface Settings extends SettingsFilters, PropertyMap {
     default @NotNull FrameType defaultFrameType() { return getEnum(WS_FRAME_TYPE); }
     default @NotNull Marshal defaultFrameContentMarshal() { return getEnum(WS_FRAME_MARSHAL); }
     default @NotNull String defaultApiVersion() { return get(WS_API_VERSION); }
+
+    @NotNull ClassFilter modelFilter();
+    @NotNull ClassFilter handlerFilter();
+    @NotNull ClassFilter interceptorFilter();
 
     @NotNull QueryParser urlParser();
     @NotNull StorageSettings storageSettings();
