@@ -79,7 +79,7 @@ public class AdapterApi implements ApiFormatter<AdapterApi.AdapterApiCallFormatt
             return canonicalName;
         }
 
-        Field staticField = findField(klass, field -> isPublicStatic(field) && field.getType().isAssignableFrom(klass));
+        Field staticField = findPublicStaticInstance(klass);
         if (staticField != null) {
             return "%s.%s".formatted(canonicalName, staticField.getName());
         }
