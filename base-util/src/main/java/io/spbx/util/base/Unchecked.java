@@ -35,7 +35,8 @@ public class Unchecked {
     // Idea taken from
     // https://stackoverflow.com/questions/4519557/is-there-a-way-to-throw-an-exception-without-adding-the-throws-declaration
     @SuppressWarnings("unchecked")
-    public static <T extends Throwable> void throwAny(Throwable exception) throws T {
+    @CanIgnoreReturnValue
+    public static <T extends Throwable, R> R throwAny(Throwable exception) throws T {
         throw (T) exception;
     }
 
