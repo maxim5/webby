@@ -209,9 +209,11 @@ public class KeyEventStoreIntegrationTest {
 
         AppSettings settings = Testing.defaultAppSettings();
         settings.setModelFilter(ClassFilter.ofSelectedPackagesOnly(Testing.CORE_MODELS));
-        settings.storageSettings()
-            .enableKeyValue(KeyValueSettings.of(dbType, TEMP_DIRECTORY.getCurrentTempDir()))
-            .enableSql(SQL.settings());
+        settings.updateStorageSettings(
+            storage -> storage
+                .withKeyValue(KeyValueSettings.of(dbType, TEMP_DIRECTORY.getCurrentTempDir()))
+                .enableSql(SQL.settings())
+        );
         settings.setProfileMode(Toggle.DISABLED);  // not testing TrackingDbAdapter by default
 
         settings.setInt("db.event.store.flush.batch.size", 1);

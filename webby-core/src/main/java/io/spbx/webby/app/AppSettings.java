@@ -4,6 +4,7 @@ import com.google.inject.Inject;
 import io.spbx.util.props.MutableLiveProperties;
 import io.spbx.util.props.MutablePropertyMap;
 import io.spbx.util.props.PropertyMap;
+import io.spbx.util.reflect.EasyMembers;
 import io.spbx.webby.common.Lifetime;
 import io.spbx.webby.routekit.QueryParser;
 import io.spbx.webby.routekit.SimpleQueryParser;
@@ -17,6 +18,7 @@ import org.jetbrains.annotations.Nullable;
 import java.nio.charset.Charset;
 import java.nio.file.Path;
 import java.util.concurrent.atomic.AtomicReference;
+import java.util.function.Function;
 
 import static io.spbx.webby.app.ClassFilterStringConverter.TO_CLASS_FILTER;
 import static java.util.Objects.requireNonNull;
@@ -25,15 +27,21 @@ public final class AppSettings implements Settings, MutablePropertyMap {
     private static final AtomicReference<PropertyMap> liveRef = new AtomicReference<>();
     private final MutableLiveProperties properties;
 
-    private ClassFilter modelFilter = getOptional(MODEL_FILTER).map(TO_CLASS_FILTER).orElse(ClassFilter.DEFAULT);
-    private ClassFilter handlerFilter = getOptional(HANDLER_FILTER).map(TO_CLASS_FILTER).orElse(ClassFilter.DEFAULT);
-    private ClassFilter interceptorFilter = getOptional(INTERCEPTOR_FILTER).map(TO_CLASS_FILTER).orElse(ClassFilter.DEFAULT);
-    private QueryParser urlParser = SimpleQueryParser.DEFAULT;
-    private final StorageSettings storageSettings = new StorageSettings(this);
+    private ClassFilter modelFilter;
+    private ClassFilter handlerFilter;
+    private ClassFilter interceptorFilter;
+    private QueryParser urlParser;
+    private StorageSettings storageSettings;
 
     private AppSettings(@NotNull MutableLiveProperties properties) {
         this.properties = properties;
         liveRef.set(properties);
+
+        modelFilter = getOptional(MODEL_FILTER).map(TO_CLASS_FILTER).orElse(ClassFilter.DEFAULT);
+        handlerFilter = getOptional(HANDLER_FILTER).map(TO_CLASS_FILTER).orElse(ClassFilter.DEFAULT);
+        interceptorFilter = getOptional(INTERCEPTOR_FILTER).map(TO_CLASS_FILTER).orElse(ClassFilter.DEFAULT);
+        urlParser = getOptional(URL_QUERY_PARSER).map(EasyMembers::<QueryParser>newInstanceOrNull).orElse(SimpleQueryParser.DEFAULT);
+        storageSettings = StorageSettings.fromProperties(properties);
     }
 
     public static @NotNull AppSettings inMemoryForDevOnly() {
@@ -166,6 +174,14 @@ public final class AppSettings implements Settings, MutablePropertyMap {
     @Override
     public @NotNull StorageSettings storageSettings() {
         return storageSettings;
+    }
+
+    public void setStorageSettings(@NotNull StorageSettings storageSettings) {
+        this.storageSettings = storageSettings;
+    }
+
+    public void updateStorageSettings(@NotNull Function<StorageSettings, StorageSettings> updater) {
+        setStorageSettings(updater.apply(storageSettings));
     }
 
     @Override

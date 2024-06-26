@@ -41,9 +41,11 @@ public class Main {
         settings.setPath("jte.view.paths", DevPaths.DEMO_WEB.resolve("jte"));
         settings.setPath("pebble.view.paths", DevPaths.DEMO_WEB.resolve("pebble"));
         settings.setBool("db.mapdb.checksum.enabled", false);
-        settings.storageSettings()
-            .enableKeyValue(KeyValueSettings.of(DbType.MAP_DB, DevPaths.DEMO_HOME.resolve(".data/mapdb")))
-            .enableSql(SqlSettings.inMemoryForDevOnly(Engine.H2));
+        settings.updateStorageSettings(
+            storage -> storage
+                .withKeyValue(KeyValueSettings.of(DbType.MAP_DB, DevPaths.DEMO_HOME.resolve(".data/mapdb")))
+                .enableSql(SqlSettings.inMemoryForDevOnly(Engine.H2))
+        );
         return settings;
     }
 }

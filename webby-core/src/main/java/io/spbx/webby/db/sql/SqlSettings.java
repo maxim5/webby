@@ -5,6 +5,8 @@ import io.spbx.orm.api.Engine;
 import io.spbx.orm.api.HasEngine;
 import io.spbx.util.base.EasyStrings;
 import io.spbx.util.base.Unchecked;
+import io.spbx.util.props.PropertyMap;
+import io.spbx.webby.app.Settings;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
@@ -32,6 +34,13 @@ public record SqlSettings(@NotNull String url, @Nullable String user, @Nullable 
 
     public SqlSettings(@NotNull String url) {
         this(url, null, null);
+    }
+
+    public static @Nullable SqlSettings fromProperties(@NotNull PropertyMap properties) {
+        String url = properties.getOrNull(Settings.SQL_URL);
+        String user = properties.getOrNull(Settings.SQL_USER);
+        String password = properties.getOrNull(Settings.SQL_PASSWORD);
+        return url != null ? new SqlSettings(url, user, password) : null;
     }
 
     @Override

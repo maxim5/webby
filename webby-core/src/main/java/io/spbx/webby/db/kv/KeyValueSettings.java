@@ -1,27 +1,33 @@
 package io.spbx.webby.db.kv;
 
+import io.spbx.util.props.PropertyMap;
+import io.spbx.webby.app.Settings;
 import org.jetbrains.annotations.NotNull;
 
 import java.nio.file.Path;
 
 public record KeyValueSettings(@NotNull DbType type, @NotNull Path path) {
-    public static final DbType DEFAULT_TYPE = DbType.JAVA_MAP;
-    public static final KeyValueSettings AUTO_DETECT = new KeyValueSettings(DEFAULT_TYPE, Path.of("storage"));
-    private static final Path EMPTY_PATH = Path.of("");
+    public static final KeyValueSettings DEFAULTS = new KeyValueSettings(Settings.KV_TYPE.def(), Settings.KV_STORAGE_PATH.def());
+
+    public static @NotNull KeyValueSettings fromProperties(@NotNull PropertyMap properties) {
+        DbType dbType = properties.getEnum(Settings.KV_TYPE);
+        Path path = properties.getPath(Settings.KV_STORAGE_PATH);
+        return of(dbType, path);
+    }
 
     public static @NotNull KeyValueSettings of(@NotNull DbType type, @NotNull Path path) {
         return new KeyValueSettings(type, path);
     }
 
-    public static @NotNull KeyValueSettings of(@NotNull DbType type, @NotNull String path) {
-        return of(type, Path.of(path));
-    }
-
-    public static @NotNull KeyValueSettings of(@NotNull DbType type) {
-        return of(type, EMPTY_PATH);
-    }
-
     public @NotNull KeyValueSettings with(@NotNull DbType type) {
-        return of(type, this.path);
+        return of(type, path);
+    }
+
+    public @NotNull KeyValueSettings with(@NotNull Path path) {
+        return of(type, path);
+    }
+
+    public boolean isDefaults() {
+        return equals(DEFAULTS);
     }
 }

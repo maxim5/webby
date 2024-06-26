@@ -76,39 +76,40 @@ public class Webby {
         validateHotReload(settings);
         validateProfileMode(settings);
         validateSafeMode(settings);
-        validateStorageSettings(settings, settings.storageSettings());
+        validateStorageSettings(settings);
 
         settings.setModelFilter(validateFilter(settings.modelFilter(), "models"));
         settings.setHandlerFilter(validateFilter(settings.handlerFilter(), "handlers"));
         settings.setInterceptorFilter(validateFilter(settings.interceptorFilter(), "interceptors"));
     }
 
-    private static void validateStorageSettings(@NotNull Settings settings, @NotNull StorageSettings storageSettings) {
-        new StorageValidator(settings, storageSettings).validate();
+    private static void validateStorageSettings(@NotNull AppSettings settings) {
+        new StorageValidator(settings).validate();
     }
 
-    private record StorageValidator(@NotNull Settings settings, @NotNull StorageSettings storageSettings) {
+    private record StorageValidator(@NotNull AppSettings settings) {
         public void validate() {
-            if (storageSettings.isKeyValueEnabled()) {
+            if (storageSettings().isKeyValueEnabled()) {
                 validateKeyValues();
             }
         }
 
         private void validateKeyValues() {
-            if (kvSettings() == KeyValueSettings.AUTO_DETECT) {
-                failIf(settings.isProdMode(), "Auto-detect can't be used in production. Set the storage type explicitly");
+            if (kvSettings().isDefaults()) {
+                failIf(settings.isProdMode(),
+                       "Default key-value settings can't be used in production. Set the storage type explicitly");
                 DbType autoDbType = KeyValueDbTypeDetector.autoDetectDbTypeFromClasspath();
                 if (autoDbType != null) {
                     updateKvType(autoDbType);
-                    log.at(Level.WARNING).log("Key-value storage auto-detect configured, " +
-                                              "using type from classpath: %s", currentType());
-                } else if (storageSettings.isSqlEnabled()) {
+                    log.at(Level.WARNING).log(
+                        "Key-value storage auto-detect configured, using type from classpath: %s", currentType());
+                } else if (storageSettings().isSqlEnabled()) {
                     updateKvType(DbType.SQL_DB);
                     log.at(Level.WARNING).log("Key-value storage auto-detect configured. Using %s", currentType());
                 } else {
-                    updateKvType(KeyValueSettings.DEFAULT_TYPE);
-                    log.at(Level.WARNING).log("Key-value storage auto-detect configured, " +
-                                              "using default: %s", currentType());
+                    updateKvType(KeyValueSettings.DEFAULTS.type());
+                    log.at(Level.WARNING).log(
+                        "Key-value storage auto-detect configured, using default: %s", currentType());
                 }
             }
 
@@ -122,15 +123,19 @@ public class Webby {
                 validateDirectory(kvSettings().path(), "storage path", settings.isDevMode());
             }
 
-            if (currentType() == DbType.SQL_DB && !storageSettings.isSqlEnabled()) {
-                log.at(Level.WARNING).log("SQL disabled. Ignoring the configured type: %s. " +
-                                          "Using default instead", currentType());
-                updateKvType(KeyValueSettings.DEFAULT_TYPE);
+            if (currentType() == DbType.SQL_DB && !storageSettings().isSqlEnabled()) {
+                log.at(Level.WARNING).log(
+                    "SQL disabled. Ignoring the configured type: %s. Using default instead", currentType());
+                updateKvType(KeyValueSettings.DEFAULTS.type());
             }
         }
 
+        private @NotNull StorageSettings storageSettings() {
+            return settings.storageSettings();
+        }
+
         private @NotNull KeyValueSettings kvSettings() {
-            return storageSettings.keyValueSettingsOrDie();
+            return storageSettings().keyValueSettingsOrDie();
         }
 
         private @NotNull DbType currentType() {
@@ -138,8 +143,8 @@ public class Webby {
         }
 
         private void updateKvType(@NotNull DbType type) {
-            if (storageSettings.isKeyValueEnabled()) {
-                storageSettings.enableKeyValue(storageSettings.keyValueSettingsOrDie().with(type));
+            if (storageSettings().isKeyValueEnabled()) {
+                settings.updateStorageSettings(storage -> storage.withKeyValue(storage.keyValueSettingsOrDie().with(type)));
             }
         }
     }

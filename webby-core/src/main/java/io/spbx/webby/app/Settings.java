@@ -1,6 +1,7 @@
 package io.spbx.webby.app;
 
 import io.spbx.util.props.PropertyMap;
+import io.spbx.webby.db.kv.DbType;
 import io.spbx.webby.routekit.QueryParser;
 import io.spbx.webby.url.annotate.FrameType;
 import io.spbx.webby.url.annotate.Marshal;
@@ -21,6 +22,14 @@ public interface Settings extends PropertyMap {
     Property CHARSET = Property.of("webby.charset", Charset.defaultCharset().toString());
     Property SECURITY_KEY = Property.of("webby.security.key", "");
 
+    EnumProperty<DbType> KV_TYPE = EnumProperty.of("webby.kv.type", DbType.JAVA_MAP);
+    PathProperty KV_STORAGE_PATH = PathProperty.of("webby.kv.path", Path.of("storage"));
+
+    Property SQL_URL = Property.of("webby.sql.url", "");
+    Property SQL_USER = Property.of("webby.sql.user", "");
+    Property SQL_PASSWORD = Property.of("webby.sql.password", "");
+
+    Property URL_QUERY_PARSER = Property.of("webby.url.query.parser", "");
     EnumProperty<Render> RENDER = EnumProperty.of("webby.render", Render.JTE);
     PathProperty WEB_PATH = PathProperty.of("webby.web.path", Path.of("web"));
     PathProperty VIEW_PATHS = PathProperty.of("webby.view.paths", Path.of("web"));

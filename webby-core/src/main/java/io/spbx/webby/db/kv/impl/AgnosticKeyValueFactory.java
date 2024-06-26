@@ -47,7 +47,7 @@ public class AgnosticKeyValueFactory implements KeyValueFactory {
     }
 
     private static @NotNull DbType getDbType(@NotNull StorageSettings storage) {
-        return storage.isKeyValueEnabled() ? storage.keyValueSettingsOrDie().type() : KeyValueSettings.DEFAULT_TYPE;
+        return storage.isKeyValueEnabled() ? storage.keyValueSettingsOrDie().type() : KeyValueSettings.DEFAULTS.type();
     }
 
     private @NotNull InternalKeyValueFactory pickFactory(@NotNull DbType type) {

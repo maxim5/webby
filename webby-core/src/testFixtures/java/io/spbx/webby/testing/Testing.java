@@ -50,9 +50,7 @@ public class Testing {
         settings.setModelFilter(ClassFilter.none());
         settings.setHandlerFilter(ClassFilter.none());
         settings.setInterceptorFilter(ClassFilter.none());
-        settings.storageSettings()
-            .disableKeyValue()
-            .disableSql();
+        settings.updateStorageSettings(storage -> storage.disableKeyValue().disableSql());
         return settings;
     }
 

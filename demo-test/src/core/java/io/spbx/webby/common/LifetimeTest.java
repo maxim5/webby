@@ -4,13 +4,13 @@ import com.google.common.collect.Lists;
 import io.spbx.util.props.MutableLiveProperties;
 import io.spbx.webby.app.AppSettings;
 import io.spbx.webby.app.ClassFilter;
-import io.spbx.webby.db.kv.KeyValueSettings;
 import io.spbx.webby.db.managed.BackgroundCacheCleaner;
 import io.spbx.webby.db.sql.ConnectionPool;
 import io.spbx.webby.db.sql.SqlSettings;
 import io.spbx.webby.db.sql.TableManager;
 import io.spbx.webby.testing.Testing;
 import io.spbx.webby.testing.TestingModules;
+import io.spbx.webby.testing.TestingStorage;
 import org.jetbrains.annotations.NotNull;
 import org.junit.jupiter.api.Test;
 import org.mockito.Mockito;
@@ -29,9 +29,11 @@ public class LifetimeTest {
         AppSettings settings = Testing.defaultAppSettings();
         settings.setString("testing.logging", "io.spbx.webby.common.Lifetime.Definition=DEBUG");
         settings.setModelFilter(ClassFilter.ofSelectedPackagesOnly(Testing.CORE_MODELS));
-        settings.storageSettings()
-            .enableKeyValue(KeyValueSettings.of(KeyValueSettings.DEFAULT_TYPE))
-            .enableSql(SqlSettings.SQLITE_IN_MEMORY);
+        settings.updateStorageSettings(
+            storage -> storage
+                .withKeyValue(TestingStorage.KEY_VALUE_DEFAULT)
+                .enableSql(SqlSettings.SQLITE_IN_MEMORY)
+        );
 
         Lifetime.Definition lifetimeMock = mockLifetime();
         Testing.testStartup(settings, TestingModules.instance(Lifetime.class, lifetimeMock));

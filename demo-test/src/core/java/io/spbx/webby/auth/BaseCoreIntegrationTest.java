@@ -27,9 +27,9 @@ public abstract class BaseCoreIntegrationTest {
         settings.setModelFilter(ClassFilter.ofMostCommonPackageTree(Testing.AUTH_MODELS));
         switch (scenario) {
             case SQL ->
-                settings.storageSettings().enableSql(sqlSettings);
+                settings.updateStorageSettings(storage -> storage.enableSql(sqlSettings));
             case KEY_VALUE_RANDOM_ID, KEY_VALUE_AUTO_ID ->
-                settings.storageSettings().enableKeyValue(TestingStorage.KEY_VALUE_DEFAULT);
+                settings.updateStorageSettings(storage -> storage.withKeyValue(TestingStorage.KEY_VALUE_DEFAULT));
         }
         return Testing.testStartup(settings);
     }

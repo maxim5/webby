@@ -49,9 +49,11 @@ public class StressNettyMain {
         AppSettings settings = Main.localSettings();
         settings.setModelFilter(ClassFilter.ofMostCommonPackageTree(DefaultUser.class, DefaultSession.class));
         settings.setHandlerFilter(ClassFilter.ofPackageTree("io.spbx.webby.demo"));
-        settings.storageSettings()
-            .enableKeyValue(TestingStorage.KEY_VALUE_DEFAULT)
-            .enableSql(TestingProps.propsSqlSettings());
+        settings.updateStorageSettings(
+            storage -> storage
+                .withKeyValue(TestingStorage.KEY_VALUE_DEFAULT)
+                .enableSql(TestingProps.propsSqlSettings())
+        );
         settings.setProfileMode(Toggle.DISABLED);
         settings.setInt("db.sql.connection.expiration.millis", 10_000);
         // H2 default max connections = 10!

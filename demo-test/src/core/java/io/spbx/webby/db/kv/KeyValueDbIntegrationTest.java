@@ -428,8 +428,9 @@ public class KeyValueDbIntegrationTest {
 
         AppSettings settings = Testing.defaultAppSettings();
         settings.setModelFilter(ClassFilter.ofSelectedPackagesOnly(Testing.CORE_MODELS));
-        settings.storageSettings()
-            .enableKeyValue(KeyValueSettings.of(dbType, TEMP_DIRECTORY.getCurrentTempDir()));
+        settings.updateStorageSettings(
+            storage -> storage.withKeyValue(KeyValueSettings.of(dbType, TEMP_DIRECTORY.getCurrentTempDir()))
+        );
         settings.setProfileMode(Toggle.DISABLED);  // not testing TrackingDbAdapter by default
 
         settings.setInt("db.chronicle.default.size", 64);
@@ -443,7 +444,7 @@ public class KeyValueDbIntegrationTest {
         settings.setInt("db.redis.port", REDIS.port());
 
         if (dbType == DbType.SQL_DB) {
-            settings.storageSettings().enableSql(SQL.settings());
+            settings.updateStorageSettings(storage -> storage.enableSql(SQL.settings()));
             return Testing.testStartup(settings, SQL::setupTestData, SQL.combinedTestingModule());
         }
 
