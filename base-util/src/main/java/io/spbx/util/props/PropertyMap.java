@@ -18,7 +18,9 @@ import static java.util.Objects.requireNonNull;
 @CheckReturnValue
 public interface PropertyMap {
     @Nullable String getOrNull(@NotNull String key);
+    default @Nullable String getOrNull(@NotNull Property property) { return getOrNull(property.key()); }
     default @Nullable String getOrDie(@NotNull String key) { return requireNonNull(getOrNull(key)); }
+    default @Nullable String getOrDie(@NotNull Property property) { return getOrDie(property.key()); }
     default @NotNull Optional<String> getOptional(@NotNull String key) { return Optional.ofNullable(getOrNull(key)); }
     default @NotNull Optional<String> getOptional(@NotNull Property property) { return getOptional(property.key()); }
     default @NotNull String get(@NotNull String key, @NotNull String def) { return firstNonNull(getOrNull(key), def); }
