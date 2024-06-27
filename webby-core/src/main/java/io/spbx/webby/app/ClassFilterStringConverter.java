@@ -324,7 +324,7 @@ final class ClassFilterStringConverter implements Reversible<ClassFilter, String
                     val.offsetEnd(1);
                     return STARTS_WITH;
                 } else {
-                    throw IllegalArgumentExceptions.form("Expected at least one `*` in the value: %s", val);
+                    throw IllegalArgumentExceptions.format("Expected at least one `*` in the value: %s", val);
                 }
             }
         }

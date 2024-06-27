@@ -3,6 +3,7 @@ package io.spbx.webby.db.sql;
 import com.google.errorprone.annotations.Immutable;
 import io.spbx.orm.api.Engine;
 import io.spbx.orm.api.HasEngine;
+import io.spbx.util.base.EasyExceptions.IllegalArgumentExceptions;
 import io.spbx.util.base.EasyStrings;
 import io.spbx.util.base.Unchecked;
 import io.spbx.util.props.PropertyMap;
@@ -102,7 +103,7 @@ public record SqlSettings(@NotNull String url, @Nullable String user, @Nullable 
             case H2 -> H2_IN_MEMORY;
             case SQLite -> SQLITE_IN_MEMORY;
             case MariaDB -> MARIA_IN_MEMORY;
-            default -> throw new IllegalArgumentException("In-memory not supported for DB engine: " + engine);
+            default -> IllegalArgumentExceptions.fail("In-memory not supported for DB engine: %s", engine);
         };
     }
 

@@ -6,6 +6,7 @@ import com.google.common.primitives.Bytes;
 import com.google.common.primitives.Longs;
 import com.google.common.primitives.UnsignedLong;
 import com.google.errorprone.annotations.Immutable;
+import io.spbx.util.base.EasyExceptions.IllegalArgumentExceptions;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.VisibleForTesting;
 
@@ -453,7 +454,7 @@ public final class DoubleLong extends Number implements Comparable<DoubleLong> {
         if (ch >= '0' && ch <= '9') return (long) ch - '0';
         if (ch >= 'a' && ch <= 'f') return (long) ch - 'a' + 10;
         if (ch >= 'A' && ch <= 'F') return (long) ch - 'A' + 10;
-        throw new IllegalArgumentException("Invalid hex character found: " + ch);
+        throw IllegalArgumentExceptions.format("Invalid hex character found: %s", ch);
     }
 
     // https://stackoverflow.com/questions/8240704/resizing-a-byte-twos-complement-represented-integer

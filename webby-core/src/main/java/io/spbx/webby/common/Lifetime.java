@@ -2,6 +2,7 @@ package io.spbx.webby.common;
 
 import com.google.common.flogger.FluentLogger;
 import com.google.errorprone.annotations.CanIgnoreReturnValue;
+import io.spbx.util.base.EasyExceptions.IllegalArgumentExceptions;
 import io.spbx.util.func.ThrowRunnable;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
@@ -70,9 +71,7 @@ public abstract class Lifetime {
 
         @Override
         protected void attach(@NotNull Lifetime.Definition child) {
-            if (child == Eternal) {
-                throw new IllegalArgumentException("Eternal lifetime can't be attached");
-            }
+            IllegalArgumentExceptions.failIf(child == Eternal, "Eternal lifetime can't be attached");
             tryToAdd(child);
         }
 

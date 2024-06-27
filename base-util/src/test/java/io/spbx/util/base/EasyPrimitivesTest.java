@@ -48,8 +48,8 @@ public class EasyPrimitivesTest {
     public void requirePositive_simple() {
         assertThat(EasyPrimitives.requirePositive(1)).isEqualTo(1);
         assertThat(EasyPrimitives.requirePositive(Integer.MAX_VALUE)).isEqualTo(Integer.MAX_VALUE);
-        assertThrows(AssertionError.class, () -> EasyPrimitives.requirePositive(0));
-        assertThrows(AssertionError.class, () -> EasyPrimitives.requirePositive(-1));
+        assertThrows(IllegalArgumentException.class, () -> EasyPrimitives.requirePositive(0));
+        assertThrows(IllegalArgumentException.class, () -> EasyPrimitives.requirePositive(-1));
     }
 
     @Test
@@ -57,7 +57,7 @@ public class EasyPrimitivesTest {
         assertThat(EasyPrimitives.requireNonNegative(0)).isEqualTo(0);
         assertThat(EasyPrimitives.requireNonNegative(1)).isEqualTo(1);
         assertThat(EasyPrimitives.requireNonNegative(Integer.MAX_VALUE)).isEqualTo(Integer.MAX_VALUE);
-        assertThrows(AssertionError.class, () -> EasyPrimitives.requirePositive(-1));
+        assertThrows(IllegalArgumentException.class, () -> EasyPrimitives.requirePositive(-1));
     }
 
     @Test

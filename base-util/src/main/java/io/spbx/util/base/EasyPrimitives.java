@@ -1,5 +1,6 @@
 package io.spbx.util.base;
 
+import io.spbx.util.base.EasyExceptions.IllegalArgumentExceptions;
 import org.checkerframework.dataflow.qual.Pure;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
@@ -14,7 +15,7 @@ public class EasyPrimitives {
     public static int firstNonNegative(int a, int b) {
         if (a >= 0) return a;
         if (b >= 0) return b;
-        throw new IllegalArgumentException("All numbers are negative: %d, %d".formatted(a, b));
+        throw IllegalArgumentExceptions.format("All numbers are negative: %d, %d", a, b);
     }
 
     @Pure
@@ -22,7 +23,7 @@ public class EasyPrimitives {
         if (a >= 0) return a;
         if (b >= 0) return b;
         if (c >= 0) return c;
-        throw new IllegalArgumentException("All numbers are negative: %d, %d, %d".formatted(a, b, c));
+        throw IllegalArgumentExceptions.format("All numbers are negative: %d, %d, %d", a, b, c);
     }
 
     @Pure
@@ -32,18 +33,18 @@ public class EasyPrimitives {
                 return num;
             }
         }
-        throw new IllegalArgumentException("All numbers are negative: %s".formatted(Arrays.toString(nums)));
+        throw IllegalArgumentExceptions.format("All numbers are negative: %s", Arrays.toString(nums));
     }
 
     @Pure
     public static int requirePositive(int val) {
-        assert val > 0 : "Value must be positive: " + val;
+        IllegalArgumentExceptions.assure(val > 0, "Value must be positive: %s", val);
         return val;
     }
 
     @Pure
     public static int requireNonNegative(int val) {
-        assert val >= 0 : "Value must be non-negative: " + val;
+        IllegalArgumentExceptions.assure(val >= 0, "Value must be non-negative: %s", val);
         return val;
     }
 

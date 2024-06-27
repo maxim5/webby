@@ -1,5 +1,6 @@
 package io.spbx.webby.db.count.vote;
 
+import io.spbx.util.base.EasyExceptions.IllegalArgumentExceptions;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.Arrays;
@@ -24,7 +25,7 @@ record Vote(int key, int val) {
         } else if (obj instanceof Vote vote) {
             return vote;
         }
-        throw new IllegalArgumentException("Unrecognized object: " + obj);
+        throw IllegalArgumentExceptions.format("Unrecognized object: %s", obj);
     }
 
     public static @NotNull List<Vote> votes(@NotNull Object @NotNull ... array) {

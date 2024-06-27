@@ -21,11 +21,11 @@ public class EasyExceptions {
 
         @CanIgnoreReturnValue
         public static <R> R fail(@NotNull String message, @Nullable Object @NotNull ... args) {
-            throw AssertionErrors.form(message, args);
+            throw AssertionErrors.format(message, args);
         }
 
         @CheckReturnValue
-        public static @NotNull AssertionError form(@NotNull String message, @Nullable Object @NotNull ... args) {
+        public static @NotNull AssertionError format(@NotNull String message, @Nullable Object @NotNull ... args) {
             return new AssertionError(message.formatted(args));
         }
     }
@@ -45,11 +45,11 @@ public class EasyExceptions {
 
         @CanIgnoreReturnValue
         public static <R> R fail(@NotNull String message, @Nullable Object @NotNull ... args) {
-            throw IllegalArgumentExceptions.form(message, args);
+            throw IllegalArgumentExceptions.format(message, args);
         }
 
         @CheckReturnValue
-        public static @NotNull IllegalArgumentException form(@NotNull String message, @Nullable Object @NotNull ... args) {
+        public static @NotNull IllegalArgumentException format(@NotNull String message, @Nullable Object @NotNull ... args) {
             return new IllegalArgumentException(message.formatted(args));
         }
     }
@@ -69,11 +69,11 @@ public class EasyExceptions {
 
         @CanIgnoreReturnValue
         public static <R> R fail(@NotNull String message, @Nullable Object @NotNull ... args) {
-            throw IllegalStateExceptions.form(message, args);
+            throw IllegalStateExceptions.format(message, args);
         }
 
         @CheckReturnValue
-        public static @NotNull IllegalStateException form(@NotNull String message, @Nullable Object @NotNull ... args) {
+        public static @NotNull IllegalStateException format(@NotNull String message, @Nullable Object @NotNull ... args) {
             return new IllegalStateException(message.formatted(args));
         }
     }
