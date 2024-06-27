@@ -2,6 +2,7 @@ package io.spbx.orm.arch.model;
 
 import com.google.common.collect.ImmutableList;
 import io.spbx.orm.arch.util.Naming;
+import io.spbx.util.base.EasyExceptions.IllegalStateExceptions;
 import io.spbx.util.lazy.AtomicCacheCompute;
 import io.spbx.util.lazy.CacheCompute;
 import org.jetbrains.annotations.NotNull;
@@ -58,7 +59,7 @@ public final class PojoArch implements HasColumns {
                 } else if (field instanceof PojoFieldNested ignore) {
                     // no columns for this field (nested to be processed later)
                 } else {
-                    throw new IllegalStateException("Internal error. Unrecognized field: " + field);
+                    throw IllegalStateExceptions.format("Internal error. Unrecognized field: %s", field);
                 }
             });
             return result;
