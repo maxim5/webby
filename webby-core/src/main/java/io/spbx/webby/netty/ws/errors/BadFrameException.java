@@ -20,4 +20,16 @@ public class BadFrameException extends WebsocketError {
     public BadFrameException(@Nullable Throwable cause, @Nullable String replyError) {
         super(FrameConst.StatusCodes.BAD_FRAME, cause, replyError);
     }
+
+    public static void assure(boolean cond, @NotNull String message, @Nullable Object @NotNull ... args) {
+        if (!cond) {
+            throw new BadFrameException(message, args);
+        }
+    }
+
+    public static void failIf(boolean cond, @NotNull String message, @Nullable Object @NotNull ... args) {
+        if (cond) {
+            throw new BadFrameException(message, args);
+        }
+    }
 }

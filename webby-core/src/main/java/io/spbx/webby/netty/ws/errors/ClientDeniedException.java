@@ -20,4 +20,16 @@ public class ClientDeniedException extends WebsocketError {
     public ClientDeniedException(@Nullable Throwable cause, @Nullable String replyError) {
         super(FrameConst.StatusCodes.CLIENT_DENIED, cause, replyError);
     }
+
+    public static void assure(boolean cond, @NotNull String message, @Nullable Object @NotNull ... args) {
+        if (!cond) {
+            throw new ClientDeniedException(message, args);
+        }
+    }
+
+    public static void failIf(boolean cond, @NotNull String message, @Nullable Object @NotNull ... args) {
+        if (cond) {
+            throw new ClientDeniedException(message, args);
+        }
+    }
 }
