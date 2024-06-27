@@ -1,5 +1,6 @@
 package io.spbx.webby.testing;
 
+import com.google.errorprone.annotations.CanIgnoreReturnValue;
 import com.google.inject.Injector;
 import com.google.inject.Module;
 import com.google.inject.util.Modules;
@@ -38,6 +39,12 @@ public class Testing {
 
     public static final List<Class<?>> AUTH_MODELS = List.of(DefaultSession.class, DefaultUser.class);
     public static final List<Class<?>> CORE_MODELS = List.of(DefaultSession.class, DefaultUser.class, BlobKv.class);
+
+    // Without Guice
+    @CanIgnoreReturnValue
+    public static @NotNull AppSettings setupLite() {
+        return defaultAppSettings();
+    }
 
     public static @NotNull AppSettings defaultAppSettings() {
         AppSettings settings = AppSettings.inMemoryForDevOnly();

@@ -153,16 +153,13 @@ public class SqlDbExtension implements BeforeAllCallback, AfterAllCallback,
 
     private @NotNull ConnectionPool singleConnectionPool() {
         return new ConnectionPool() {
-            @Override
-            public @NotNull Connection getConnection() {
+            @Override public @NotNull Connection getConnection() {
                 return connection();
             }
-            @Override
-            public @NotNull Engine engine() {
+            @Override public @NotNull Engine engine() {
                 return settings().engine();
             }
-            @Override
-            public boolean isRunning() {
+            @Override public boolean isRunning() {
                 return true;
             }
         };
