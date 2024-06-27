@@ -83,27 +83,38 @@ public class ClassFilterStringConverterTest {
 
     @Test
     public void term_simple_starts_with() {
-        assertInput("pkg~=*").asTerm().matchesAll();
-        assertInput("pkg~=x.y*").asTerm().matchesFiles("x.y#Xy", "x.y.z#Util", "x.y.z#Util$1");
-        assertInput("cls~=Util*").asTerm().matchesFiles("a.b.c#Util", "x.y.z#Util", "x.y.z#Util$1");
-        assertInput("cls~=Main*").asTerm().matchesFiles("a.b.c#Main", "a.b.c#Main$1");
+        assertInput("pkg=*").asTerm().matchesAll();
+        assertInput("pkg=x.y*").asTerm().matchesFiles("x.y#Xy", "x.y.z#Util", "x.y.z#Util$1");
+        assertInput("cls=Util*").asTerm().matchesFiles("a.b.c#Util", "x.y.z#Util", "x.y.z#Util$1");
+        assertInput("cls=Main*").asTerm().matchesFiles("a.b.c#Main", "a.b.c#Main$1");
     }
 
     @Test
     public void term_simple_ends_with() {
-        assertInput("pkg~=*y").asTerm().matchesFiles("x.y#Xy");
-        assertInput("pkg~=*z").asTerm().matchesFiles("x.y.z#Util", "x.y.z#Util$1");
-        assertInput("cls~=*$1").asTerm().matchesFiles("a.b.c#Main$1", "x.y.z#Util$1");
-        assertInput("cls~=*l").asTerm().matchesFiles("a.b.c#Util", "x.y.z#Util", "#TopLevel");
-        assertInput("cls~=*$3").asTerm().matchesNothing();
+        assertInput("pkg=*y").asTerm().matchesFiles("x.y#Xy");
+        assertInput("pkg=*z").asTerm().matchesFiles("x.y.z#Util", "x.y.z#Util$1");
+        assertInput("cls=*$1").asTerm().matchesFiles("a.b.c#Main$1", "x.y.z#Util$1");
+        assertInput("cls=*l").asTerm().matchesFiles("a.b.c#Util", "x.y.z#Util", "#TopLevel");
+        assertInput("cls=*$3").asTerm().matchesNothing();
     }
 
     @Test
     public void term_simple_contains() {
-        assertInput("pkg~=*ab*").asTerm().matchesFiles("a.b.ab#Bbb");
-        assertInput("pkg~=*y.*").asTerm().matchesFiles("x.y.z#Util", "x.y.z#Util$1");
-        assertInput("cls~=*in*").asTerm().matchesFiles("a.b.c#Main", "a.b.c#Main$1");
-        assertInput("cls~=*$*").asTerm().matchesFiles("a.b.c#Main$1", "foo.bar.nest#SmallTest.Nested$2", "x.y.z#Util$1");
+        assertInput("pkg=*ab*").asTerm().matchesFiles("a.b.ab#Bbb");
+        assertInput("pkg=*y.*").asTerm().matchesFiles("x.y.z#Util", "x.y.z#Util$1");
+        assertInput("cls=*in*").asTerm().matchesFiles("a.b.c#Main", "a.b.c#Main$1");
+        assertInput("cls=*$*").asTerm().matchesFiles("a.b.c#Main$1", "foo.bar.nest#SmallTest.Nested$2", "x.y.z#Util$1");
+    }
+
+    @Test
+    public void term_simple_wildcard() {
+        assertInput("pkg=a.?.c").asTerm().matchesFiles("a.b.c#Main", "a.b.c#Main$1", "a.b.c#Util");
+        assertInput("pkg=x??").asTerm().matchesFiles("x.y#Xy");
+        assertInput("pkg=?").asTerm().matchesFiles("a#Module");
+        assertInput("pkg=a*b").asTerm().matchesFiles("a.b.ab#Bbb");
+        assertInput("cls=*$?").asTerm().matchesFiles("a.b.c#Main$1", "foo.bar.nest#SmallTest.Nested$2", "x.y.z#Util$1");
+        assertInput("cls=??????").asTerm().matchesFiles("a.b.c#Main$1", "a#Module", "x.y.z#Util$1");
+        assertInput("cls=*a*e*Test").asTerm().matchesFiles("foo.bar#ValueTest");
     }
 
     @Test
@@ -111,10 +122,10 @@ public class ClassFilterStringConverterTest {
         assertInput("pkg=x.y,pkg=x.y.z").asTerm().matchesFiles("x.y#Xy", "x.y.z#Util", "x.y.z#Util$1");
         assertInput("pkg=a,pkg=a.bc,pkg=b").asTerm().matchesFiles("a#Module", "a.bc#Ccc");
         assertInput("cls=Main,cls=Util").asTerm().matchesFiles("a.b.c#Main", "a.b.c#Util", "x.y.z#Util");
-        assertInput("pkg~=a*,cls=Util").asTerm().matchesFiles("a.b.c#Util");
-        assertInput("pkg~=a*,pkg~=x*,cls=Util").asTerm().matchesFiles("a.b.c#Util", "x.y.z#Util");
-        assertInput("pkg~=a*,cls~=*$*").asTerm().matchesFiles("a.b.c#Main$1");
-        assertInput("pkg~=*b*,cls~=*$*").asTerm().matchesFiles("a.b.c#Main$1", "foo.bar.nest#SmallTest.Nested$2");
+        assertInput("pkg=a*,cls=Util").asTerm().matchesFiles("a.b.c#Util");
+        assertInput("pkg=a*,pkg=x*,cls=Util").asTerm().matchesFiles("a.b.c#Util", "x.y.z#Util");
+        assertInput("pkg=a*,cls=*$*").asTerm().matchesFiles("a.b.c#Main$1");
+        assertInput("pkg=*b*,cls=*$*").asTerm().matchesFiles("a.b.c#Main$1", "foo.bar.nest#SmallTest.Nested$2");
     }
 
     @Test
@@ -137,15 +148,15 @@ public class ClassFilterStringConverterTest {
         assertInput("(pkg=a.b.c)|(cls=Main)").asExpr().matchesFiles("a.b.c#Main", "a.b.c#Main$1", "a.b.c#Util");
         assertInput("(pkg=abc)|(cls=Main)").asExpr().matchesFiles("a.b.c#Main");
         assertInput("(pkg=a.b.c)|(cls=No)").asExpr().matchesFiles("a.b.c#Main", "a.b.c#Main$1", "a.b.c#Util");
-        assertInput("(pkg~=a.b.*)|(pkg=)").asExpr().isEquivalentTo((pkg, cls) -> pkg.startsWith("a.b.") || pkg.isEmpty());
+        assertInput("(pkg=a.b.*)|(pkg=)").asExpr().isEquivalentTo((pkg, cls) -> pkg.startsWith("a.b.") || pkg.isEmpty());
     }
 
     @Test
     public void expr_simple_boolean_not() {
-        assertInput("!(pkg~=*.*)").asExpr().isEquivalentTo((pkg, cls) -> !pkg.contains("."));
-        assertInput("!(pkg~=*bar*)").asExpr().isEquivalentTo((pkg, cls) -> !pkg.contains("bar"));
+        assertInput("!(pkg=*.*)").asExpr().isEquivalentTo((pkg, cls) -> !pkg.contains("."));
+        assertInput("!(pkg=*bar*)").asExpr().isEquivalentTo((pkg, cls) -> !pkg.contains("bar"));
         assertInput("!(cls=Main)").asExpr().isEquivalentTo((pkg, cls) -> !cls.equals("Main"));
-        assertInput("!(cls~=*Test)").asExpr().isEquivalentTo((pkg, cls) -> !cls.endsWith("Test"));
+        assertInput("!(cls=*Test)").asExpr().isEquivalentTo((pkg, cls) -> !cls.endsWith("Test"));
     }
 
     @CheckReturnValue

@@ -11,6 +11,7 @@ import io.spbx.util.collect.EasyMaps;
 import io.spbx.util.collect.ListBuilder;
 import io.spbx.util.func.Reversible;
 import io.spbx.util.io.EasyIo;
+import jodd.util.Wildcard;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import org.jetbrains.annotations.VisibleForTesting;
@@ -250,16 +251,14 @@ final class ClassFilterStringConverter implements Reversible<ClassFilter, String
 
         record ParsedPredicate(@NotNull Kind kind, @NotNull Cmp cmp, @NotNull CharArray value) {
             static @NotNull ParsedPredicate parseFrom(@NotNull CharArray input) {
-                int j = input.indexOf('=');
-                assert j > 0 : "Invalid predicate: " + input;
-                int i = input.at(j - 1) == '~' ? j - 1 : j;
+                int i = input.indexOf('=');
+                IllegalArgumentExceptions.assure(i > 0, "Invalid predicate: %s", input);
 
                 CharArray kind_ = input.substring(0, i);
-                CharArray cmp_ = input.substring(i, j + 1);
-                MutableCharArray value_ = input.substringFrom(j + 1).mutableCopy();
+                MutableCharArray value_ = input.substringFrom(i + 1).mutableCopy();
 
                 Kind kind = Kind.parseFrom(kind_);
-                Cmp cmp = Cmp.parseAndTrimValue(cmp_, value_);
+                Cmp cmp = Cmp.parseAndTrimValue(value_);
                 CharArray value = value_.immutable();
                 return new ParsedPredicate(kind, cmp, value);
             }
@@ -295,7 +294,8 @@ final class ClassFilterStringConverter implements Reversible<ClassFilter, String
             EQUALS(String::equals, List::contains),
             STARTS_WITH(String::startsWith, (list, str) -> list.stream().anyMatch(str::startsWith)),
             ENDS_WITH(String::endsWith, (list, str) -> list.stream().anyMatch(str::endsWith)),
-            CONTAINS(String::contains, (list, str) -> list.stream().anyMatch(str::contains));
+            CONTAINS(String::contains, (list, str) -> list.stream().anyMatch(str::contains)),
+            WILDCARD_MATCH(Wildcard::match, (list, str) -> list.stream().anyMatch(pattern -> Wildcard.match(str, pattern)));
 
             private final BiPredicate<String, String> matchSingle;
             private final BiPredicate<List<String>, String> matchBatch;
@@ -305,15 +305,15 @@ final class ClassFilterStringConverter implements Reversible<ClassFilter, String
                 this.matchBatch = matchBatch;
             }
 
-            static @NotNull Cmp parseAndTrimValue(@NotNull CharArray cmp, @NotNull MutableCharArray val) {
-                if (cmp.contentEquals('=')) {
-                    return EQUALS;
-                }
-
-                assert cmp.contentEquals("~=") : "Invalid comparison operator: " + cmp;
+            static @NotNull Cmp parseAndTrimValue(@NotNull MutableCharArray val) {
                 boolean starts = val.startsWith('*');
                 boolean ends = val.endsWith('*');
-                if (starts && ends) {
+                boolean inside = val.length() > 2 && val.substring(1, -1).contains('*');
+                boolean question = val.contains('?');
+                boolean wildcard = inside || question;
+                if (wildcard) {
+                    return WILDCARD_MATCH;
+                } else if (starts && ends) {
                     val.offsetPrefix('*');
                     val.offsetSuffix('*');
                     return CONTAINS;
@@ -324,7 +324,7 @@ final class ClassFilterStringConverter implements Reversible<ClassFilter, String
                     val.offsetEnd(1);
                     return STARTS_WITH;
                 } else {
-                    throw IllegalArgumentExceptions.format("Expected at least one `*` in the value: %s", val);
+                    return EQUALS;
                 }
             }
         }
