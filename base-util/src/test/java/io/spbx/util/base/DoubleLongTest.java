@@ -5,7 +5,7 @@ import com.google.common.primitives.UnsignedLong;
 import com.google.errorprone.annotations.CanIgnoreReturnValue;
 import io.spbx.util.collect.ListBuilder;
 import io.spbx.util.testing.TestingBasics;
-import io.spbx.util.testing.TestingPrimitives;
+import io.spbx.util.testing.TestingBigIntegers;
 import org.jetbrains.annotations.CheckReturnValue;
 import org.jetbrains.annotations.NotNull;
 import org.junit.jupiter.api.Tag;
@@ -22,7 +22,7 @@ import java.util.stream.LongStream;
 import java.util.stream.Stream;
 
 import static com.google.common.truth.Truth.assertThat;
-import static io.spbx.util.testing.TestingPrimitives.*;
+import static io.spbx.util.testing.TestingBigIntegers.*;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 
 @SuppressWarnings("EqualsWithItself")
@@ -42,9 +42,9 @@ public class DoubleLongTest {
         lhs.signum() >= 0 && rhs.signum() >= 0 ? lhs.compareTo(rhs) : -lhs.compareTo(rhs);
 
     private static final List<BigInteger> EDGE_CASE_BIG_INTEGERS = IntStream.range(0, 128)
-        .mapToObj(BigInteger.ONE::shiftLeft)
-        .flatMap(b -> Stream.of(b, b.subtract(BigInteger.ONE), b.negate(), b.negate().add(BigInteger.ONE)))
-        .map(TestingPrimitives::fitIntoSigned128Bits)
+        .mapToObj($1::shiftLeft)
+        .flatMap(b -> Stream.of(b, b.subtract($1), b.negate(), b.negate().add($1)))
+        .map(TestingBigIntegers::fitIntoSigned128Bits)
         .sorted(CMP).distinct().toList();
 
     private static final List<Long> EDGE_CASE_LONGS =
@@ -76,7 +76,7 @@ public class DoubleLongTest {
     public void const_zero_trivial() {
         assertThat(DoubleLong.ZERO.highBits()).isEqualTo(0);
         assertThat(DoubleLong.ZERO.lowBits()).isEqualTo(0);
-        assertThat(DoubleLong.ZERO.toBigInteger()).isEqualTo(BigInteger.ZERO);
+        assertThat(DoubleLong.ZERO.toBigInteger()).isEqualTo($0);
         assertThat(DoubleLong.ZERO.longValue()).isEqualTo(0);
         assertThat(DoubleLong.ZERO.intValue()).isEqualTo(0);
         assertThat(DoubleLong.ZERO.toString()).isEqualTo("0");
@@ -92,7 +92,7 @@ public class DoubleLongTest {
     public void const_one_trivial() {
         assertThat(DoubleLong.ONE.highBits()).isEqualTo(0);
         assertThat(DoubleLong.ONE.lowBits()).isEqualTo(1);
-        assertThat(DoubleLong.ONE.toBigInteger()).isEqualTo(BigInteger.ONE);
+        assertThat(DoubleLong.ONE.toBigInteger()).isEqualTo($1);
         assertThat(DoubleLong.ONE.longValue()).isEqualTo(1);
         assertThat(DoubleLong.ONE.intValue()).isEqualTo(1);
         assertThat(DoubleLong.ONE.toString()).isEqualTo("1");
@@ -106,7 +106,7 @@ public class DoubleLongTest {
 
     @Test
     public void const_max_value_trivial() {
-        BigInteger expected = BigInteger.ONE.shiftLeft(127).subtract(BigInteger.ONE);  // (1 << 127) - 1
+        BigInteger expected = INT128_MAX;  // (1 << 127) - 1
         assertThat(DoubleLong.MAX_VALUE.highBits()).isEqualTo(Long.MAX_VALUE);
         assertThat(DoubleLong.MAX_VALUE.lowBits()).isEqualTo(-1);
         assertThat(DoubleLong.MAX_VALUE.toBigInteger()).isEqualTo(expected);
@@ -122,7 +122,7 @@ public class DoubleLongTest {
 
     @Test
     public void const_min_value_trivial() {
-        BigInteger expected = BigInteger.ONE.shiftLeft(127).negate();  // -(1 << 127)
+        BigInteger expected = INT128_MIN;  // -(1 << 127)
         assertThat(DoubleLong.MIN_VALUE.highBits()).isEqualTo(Long.MIN_VALUE);
         assertThat(DoubleLong.MIN_VALUE.lowBits()).isEqualTo(0);
         assertThat(DoubleLong.MIN_VALUE.toBigInteger()).isEqualTo(expected);
@@ -140,22 +140,22 @@ public class DoubleLongTest {
 
     @Test
     public void construction_from_bits_long_trivial() {
-        assertThat(DoubleLong.fromBits(0, 0)).isEqualTo(DoubleLong.from(BigInteger.ZERO));
-        assertThat(DoubleLong.fromBits(0, 1)).isEqualTo(DoubleLong.from(BigInteger.ONE));
-        assertThat(DoubleLong.fromBits(0, -1)).isEqualTo(DoubleLong.from(BigInteger.ONE.shiftLeft(64).subtract(BigInteger.ONE)));
+        assertThat(DoubleLong.fromBits(0, 0)).isEqualTo(DoubleLong.from($0));
+        assertThat(DoubleLong.fromBits(0, 1)).isEqualTo(DoubleLong.from($1));
+        assertThat(DoubleLong.fromBits(0, -1)).isEqualTo(DoubleLong.from(UINT64_MAX));
 
-        assertThat(DoubleLong.fromBits(1, 0)).isEqualTo(DoubleLong.from(BigInteger.ONE.shiftLeft(64)));
-        assertThat(DoubleLong.fromBits(1, 1)).isEqualTo(DoubleLong.from(BigInteger.ONE.shiftLeft(64).add(BigInteger.ONE)));
-        assertThat(DoubleLong.fromBits(1, -1)).isEqualTo(DoubleLong.from(BigInteger.ONE.shiftLeft(65).subtract(BigInteger.ONE)));
+        assertThat(DoubleLong.fromBits(1, 0)).isEqualTo(DoubleLong.from($2_64));
+        assertThat(DoubleLong.fromBits(1, 1)).isEqualTo(DoubleLong.from($2_64.add($1)));
+        assertThat(DoubleLong.fromBits(1, -1)).isEqualTo(DoubleLong.from($2_65.subtract($1)));
 
-        assertThat(DoubleLong.fromBits(-1, 0)).isEqualTo(DoubleLong.from(BigInteger.ONE.shiftLeft(64).negate()));
-        assertThat(DoubleLong.fromBits(-1, 1)).isEqualTo(DoubleLong.from(BigInteger.ONE.shiftLeft(64).negate().add(BigInteger.ONE)));
-        assertThat(DoubleLong.fromBits(-1, -1)).isEqualTo(DoubleLong.from(BigInteger.ONE.negate()));
+        assertThat(DoubleLong.fromBits(-1, 0)).isEqualTo(DoubleLong.from($2_64.negate()));
+        assertThat(DoubleLong.fromBits(-1, 1)).isEqualTo(DoubleLong.from($2_64.negate().add($1)));
+        assertThat(DoubleLong.fromBits(-1, -1)).isEqualTo(DoubleLong.from($1.negate()));
 
-        assertThat(DoubleLong.fromBits(0, Long.MAX_VALUE)).isEqualTo(DoubleLong.from(BigInteger.valueOf(Long.MAX_VALUE)));
-        assertThat(DoubleLong.fromBits(0, Long.MIN_VALUE)).isEqualTo(DoubleLong.from(BigInteger.valueOf(Long.MIN_VALUE).negate()));
-        assertThat(DoubleLong.fromBits(Long.MAX_VALUE, 0)).isEqualTo(DoubleLong.ONE.shiftLeft(127).subtract(DoubleLong.ONE.shiftLeft(64)));
-        assertThat(DoubleLong.fromBits(Long.MIN_VALUE, 0)).isEqualTo(DoubleLong.ONE.negate().shiftLeft(127));
+        assertThat(DoubleLong.fromBits(0, Long.MAX_VALUE)).isEqualTo(DoubleLong.from(INT64_MAX));
+        assertThat(DoubleLong.fromBits(0, Long.MIN_VALUE)).isEqualTo(DoubleLong.from(INT64_MIN.negate()));
+        assertThat(DoubleLong.fromBits(Long.MAX_VALUE, 0)).isEqualTo(DoubleLong.from($2_127.subtract($2_64)));
+        assertThat(DoubleLong.fromBits(Long.MIN_VALUE, 0)).isEqualTo(DoubleLong.from(INT128_MIN));
     }
 
     @ParameterizedTest
@@ -238,7 +238,7 @@ public class DoubleLongTest {
     @Test
     public void increment_ultimate() {
         for (BigInteger num : BIG_INTEGERS) {
-            BigInteger expected = fitIntoSigned128Bits(num.add(BigInteger.ONE));
+            BigInteger expected = fitIntoSigned128Bits(num.add($1));
             assertThat(DoubleLong.from(num).increment()).isEqualTo(DoubleLong.from(expected));
         }
     }
@@ -254,7 +254,7 @@ public class DoubleLongTest {
     @Test
     public void decrement_ultimate() {
         for (BigInteger num : BIG_INTEGERS) {
-            BigInteger expected = fitIntoSigned128Bits(num.subtract(BigInteger.ONE));
+            BigInteger expected = fitIntoSigned128Bits(num.subtract($1));
             assertThat(DoubleLong.from(num).decrement()).isEqualTo(DoubleLong.from(expected));
         }
     }
@@ -342,24 +342,16 @@ public class DoubleLongTest {
 
     /** {@link DoubleLong#divide(DoubleLong)} */
 
+    private static final BigInteger $2_20 = $(1L << 20);                            // (1 << 20)
+    private static final BigInteger $2_36 = $(1L << 36);                            // (1 << 36)
+    private static final BigInteger $2_48 = $(1L << 48);                            // (1 << 48)
+    private static final BigInteger $2_61 = $(1L << 61);                            // (1 << 61)
+    private static final BigInteger $2_62 = $(1L << 62);                            // (1 << 62)
+    private static final BigInteger $2_65 = $1.shiftLeft(65);                       // (1 << 65)
     private static final List<BigInteger> SIMPLE_POSITIVE_INTEGERS = List.of(
-        BigInteger.ZERO,
-        BigInteger.ONE,
-        BigInteger.TWO,
-        BigInteger.TEN,
-        BigInteger.valueOf(20),
-        BigInteger.valueOf(Byte.MAX_VALUE),
-        BigInteger.valueOf(100_000_000),
-        BigInteger.valueOf(Integer.MAX_VALUE),
-        BigInteger.valueOf(Long.MAX_VALUE),
-        BigInteger.ONE.shiftLeft(20).subtract(BigInteger.ONE),
-        BigInteger.ONE.shiftLeft(36),
-        BigInteger.ONE.shiftLeft(48),
-        BigInteger.ONE.shiftLeft(36).add(BigInteger.ONE),
-        BigInteger.ONE.shiftLeft(36).subtract(BigInteger.ONE),
-        BigInteger.ONE.shiftLeft(61),
-        BigInteger.ONE.shiftLeft(63),
-        BigInteger.ONE.shiftLeft(63).subtract(BigInteger.ONE)
+        $0, $1, $2, $10, $(20), $(100_000), $(100_000_000),
+        INT8_MAX, INT16_MAX, INT32_MAX, INT64_MAX, UINT8_MAX, UINT16_MAX, UINT32_MAX,
+        $2_20.subtract($1), $2_36, $2_36.add($1), $2_36.subtract($1), $2_48, $2_61, $2_62, $2_63
     );
     private static final List<BigInteger> SIMPLE_NEGATIVE_INTEGERS =
         SIMPLE_POSITIVE_INTEGERS.stream().map(BigInteger::negate).toList();
@@ -719,7 +711,7 @@ public class DoubleLongTest {
         assertThat(value.toString(8)).isEqualTo(bigInteger.toString(8));
         assertThat(value.toString(16)).isEqualTo(bigInteger.toString(16));
 
-        if (bigInteger.compareTo(BigInteger.ZERO) >= 0) {
+        if (bigInteger.compareTo($0) >= 0) {
             assertThat(value.toBinaryString()).isEqualTo(Strings.padStart(bigInteger.toString(2), 128, '0'));
             assertThat(value.toHexString()).isEqualTo(Strings.padStart(bigInteger.toString(16), 32, '0'));
         }
@@ -762,7 +754,7 @@ public class DoubleLongTest {
         assertThat(value.doubleValue()).isEqualTo(num);
 
         assertThat(value.toString()).isEqualTo(String.valueOf((long) num));
-        assertThat(value.toBigInteger()).isEqualTo(BigInteger.valueOf((long) num));
+        assertThat(value.toBigInteger()).isEqualTo($((long) num));
     }
 
     private static void assertConstructionFromLongBits(long high, long low) {
