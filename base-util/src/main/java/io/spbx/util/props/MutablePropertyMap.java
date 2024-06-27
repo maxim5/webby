@@ -6,6 +6,8 @@ import org.jetbrains.annotations.Nullable;
 
 import java.nio.file.Path;
 
+import static io.spbx.util.base.EasyNulls.firstNonNullIfExist;
+
 @CanIgnoreReturnValue
 public interface MutablePropertyMap extends PropertyMap {
     @Nullable String setString(@NotNull String key, @NotNull String val);
@@ -37,5 +39,19 @@ public interface MutablePropertyMap extends PropertyMap {
     }
     default <T extends Enum<T>> @Nullable String setEnum(@NotNull EnumProperty<T> prop, @NotNull T val) {
         return setEnum(prop.key(), val);
+    }
+
+    @Override
+    default @NotNull MutablePropertyMap chainedWith(@NotNull PropertyMap backup) {
+        return new MutablePropertyMap() {
+            @Override
+            public @Nullable String setString(@NotNull String key, @NotNull String val) {
+                return MutablePropertyMap.this.setString(key, val);
+            }
+            @Override
+            public @Nullable String getOrNull(@NotNull String key) {
+                return firstNonNullIfExist(MutablePropertyMap.this.getOrNull(key), () -> backup.getOrNull(key));
+            }
+        };
     }
 }

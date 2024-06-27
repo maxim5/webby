@@ -12,11 +12,16 @@ import java.util.Optional;
 
 import static io.spbx.util.base.EasyCast.castAny;
 import static io.spbx.util.base.EasyNulls.firstNonNull;
+import static io.spbx.util.base.EasyNulls.firstNonNullIfExist;
 import static io.spbx.util.base.EasyPrimitives.*;
 import static java.util.Objects.requireNonNull;
 
 @CheckReturnValue
 public interface PropertyMap {
+    static @NotNull PropertyMap system() {
+        return System::getProperty;
+    }
+
     @Nullable String getOrNull(@NotNull String key);
     default @Nullable String getOrNull(@NotNull Property property) { return getOrNull(property.key()); }
     default @Nullable String getOrDie(@NotNull String key) { return requireNonNull(getOrNull(key)); }
@@ -80,6 +85,10 @@ public interface PropertyMap {
     }
     default <T extends Enum<T>> @NotNull T getEnum(@NotNull EnumProperty<T> property) {
         return getEnum(property.key(), property.def());
+    }
+
+    default @NotNull PropertyMap chainedWith(@NotNull PropertyMap backup) {
+        return key -> firstNonNullIfExist(this.getOrNull(key), () -> backup.getOrNull(key));
     }
 
     record Property(@NotNull String key, @NotNull String def) {
