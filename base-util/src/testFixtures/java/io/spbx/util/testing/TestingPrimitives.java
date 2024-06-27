@@ -22,12 +22,17 @@ public class TestingPrimitives {
         return bytes;
     }
 
-    public static boolean fitsIntoLong(@NotNull BigInteger bigInteger) {
+    public static boolean isFitsIntoSignedLong(@NotNull BigInteger bigInteger) {
         return BigInteger.valueOf(Long.MAX_VALUE).compareTo(bigInteger) >= 0 &&
                BigInteger.valueOf(Long.MIN_VALUE).compareTo(bigInteger) <= 0;
     }
 
-    public static @NotNull BigInteger fitInto128Bits(@NotNull BigInteger bigInteger) {
+    public static boolean isFitsIntoSigned128Bit(@NotNull BigInteger bigInteger) {
+        return BigInteger.ONE.shiftLeft(127).compareTo(bigInteger) > 0 &&
+               BigInteger.ONE.shiftLeft(127).negate().compareTo(bigInteger) <= 0;
+    }
+
+    public static @NotNull BigInteger fitIntoSigned128Bits(@NotNull BigInteger bigInteger) {
         BigInteger mod = BigInteger.ONE.shiftLeft(128);
         BigInteger max = BigInteger.ONE.shiftLeft(127);
         BigInteger result =

@@ -44,7 +44,7 @@ public class DoubleLongTest {
     private static final List<BigInteger> EDGE_CASE_BIG_INTEGERS = IntStream.range(0, 128)
         .mapToObj(BigInteger.ONE::shiftLeft)
         .flatMap(b -> Stream.of(b, b.subtract(BigInteger.ONE), b.negate(), b.negate().add(BigInteger.ONE)))
-        .map(TestingPrimitives::fitInto128Bits)
+        .map(TestingPrimitives::fitIntoSigned128Bits)
         .sorted(CMP).distinct().toList();
 
     private static final List<Long> EDGE_CASE_LONGS =
@@ -304,7 +304,7 @@ public class DoubleLongTest {
     }
 
     private static void assertMultiplyMatchesBigInteger(@NotNull DoubleLong lhs, @NotNull DoubleLong rhs) {
-        BigInteger expected = fitInto128Bits(lhs.toBigInteger().multiply(rhs.toBigInteger()));
+        BigInteger expected = fitIntoSigned128Bits(lhs.toBigInteger().multiply(rhs.toBigInteger()));
         assertThat(lhs.multiply(rhs).toBigInteger()).isEqualTo(expected);
     }
 
@@ -374,7 +374,7 @@ public class DoubleLongTest {
         if (rhs.equals(DoubleLong.ZERO)) {
             assertThrows(AssertionError.class, () -> lhs.divide(rhs));
         } else {
-            BigInteger expected = fitInto128Bits(lhs.toBigInteger().divide(rhs.toBigInteger()));
+            BigInteger expected = fitIntoSigned128Bits(lhs.toBigInteger().divide(rhs.toBigInteger()));
             assertThat(lhs.divide(rhs).toBigInteger()).isEqualTo(expected);
         }
     }
@@ -392,7 +392,7 @@ public class DoubleLongTest {
     @Test
     public void negate_ultimate() {
         for (BigInteger num : BIG_INTEGERS) {
-            BigInteger expected = fitInto128Bits(num.negate());
+            BigInteger expected = fitIntoSigned128Bits(num.negate());
             assertThat(DoubleLong.from(num).negate().toBigInteger()).isEqualTo(expected);
         }
     }
@@ -429,7 +429,7 @@ public class DoubleLongTest {
     }
 
     private static void assertShiftLeftMatchesBigInteger(BigInteger num, int len) {
-        BigInteger expected = fitInto128Bits(num.shiftLeft(len));
+        BigInteger expected = fitIntoSigned128Bits(num.shiftLeft(len));
         assertThat(DoubleLong.from(num).shiftLeft(len).toBigInteger()).isEqualTo(expected);
     }
 
@@ -461,7 +461,7 @@ public class DoubleLongTest {
     }
 
     private static void assertShiftRightMatchesBigInteger(BigInteger num, int len) {
-        BigInteger expected = fitInto128Bits(num.shiftRight(len));
+        BigInteger expected = fitIntoSigned128Bits(num.shiftRight(len));
         assertThat(DoubleLong.from(num).shiftRight(len).toBigInteger()).isEqualTo(expected);
     }
 
@@ -565,7 +565,7 @@ public class DoubleLongTest {
                 assertThat(actual.compareTo(DoubleLong.from(Long.MAX_VALUE))).isEqualTo(isPositiveOrZero ? 1 : -1);
                 assertThat(actual.compareTo(DoubleLong.from(Long.MIN_VALUE))).isEqualTo(isPositiveOrZero ? 1 : -1);
             }
-            assertThat(actual.fitsIntoLong()).isEqualTo(fitsIntoLong(actual.toBigInteger()));
+            assertThat(actual.fitsIntoLong()).isEqualTo(isFitsIntoSignedLong(actual.toBigInteger()));
             return this;
         }
 
@@ -579,7 +579,7 @@ public class DoubleLongTest {
 
         public @NotNull DoubleLongSubject addMatchesBigInteger() {
             for (BigInteger big : BIG_INTEGERS) {
-                BigInteger expected = fitInto128Bits(actual.toBigInteger().add(big));
+                BigInteger expected = fitIntoSigned128Bits(actual.toBigInteger().add(big));
                 assertThat(actual.add(DoubleLong.from(big)).toBigInteger()).isEqualTo(expected);
                 assertThat(DoubleLong.from(big).add(actual).toBigInteger()).isEqualTo(expected);
             }
@@ -589,15 +589,15 @@ public class DoubleLongTest {
         public @NotNull DoubleLongSubject subtractMatchesBigInteger() {
             for (BigInteger big : BIG_INTEGERS) {
                 assertThat(actual.subtract(DoubleLong.from(big)).toBigInteger())
-                    .isEqualTo(fitInto128Bits(actual.toBigInteger().subtract(big)));
+                    .isEqualTo(fitIntoSigned128Bits(actual.toBigInteger().subtract(big)));
                 assertThat(DoubleLong.from(big).subtract(actual).toBigInteger())
-                    .isEqualTo(fitInto128Bits(big.subtract(actual.toBigInteger())));
+                    .isEqualTo(fitIntoSigned128Bits(big.subtract(actual.toBigInteger())));
             }
             return this;
         }
 
         public @NotNull DoubleLongSubject negateMatchesBigInteger() {
-            BigInteger expected = fitInto128Bits(actual.toBigInteger().negate());
+            BigInteger expected = fitIntoSigned128Bits(actual.toBigInteger().negate());
             assertThat(actual.negate().toBigInteger()).isEqualTo(expected);
             return isEqualTo(actual.negate().negate());
         }
@@ -644,7 +644,7 @@ public class DoubleLongTest {
         assertConstructionFromBigInteger(bigInteger);
         assertConstructionFromHexString(bigInteger.toString(16));
 
-        if (fitsIntoLong(bigInteger)) {
+        if (isFitsIntoSignedLong(bigInteger)) {
             long num = Long.parseLong(str);
             assertConstructionFromLong(num);
             assertConstructionFromLongBits(0, num);
