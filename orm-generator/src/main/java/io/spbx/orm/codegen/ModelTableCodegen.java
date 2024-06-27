@@ -354,7 +354,7 @@ public class ModelTableCodegen extends BaseCodegen {
         assert field.isPrimaryKey() : "Primary key field expected: " + field;
         return switch (field.typeSupport()) {
             case NATIVE -> paramName;
-            case FOREIGN_KEY -> AssertionErrors.fail("Primary key and foreign key field: " + field);
+            case FOREIGN_KEY -> AssertionErrors.fail("Primary key and foreign key field: %s", field);
             case MAPPER_API -> field.mapperApiOrDie().expr().fieldToJdbc(paramName);
             case ADAPTER_API -> {
                 if (field.isSingleColumn()) {
