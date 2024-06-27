@@ -81,6 +81,7 @@ public class DoubleLongTest {
         assertThat(DoubleLong.ZERO.intValue()).isEqualTo(0);
         assertThat(DoubleLong.ZERO.toString()).isEqualTo("0");
         assertThat(DoubleLong.ZERO.toBinaryString()).isEqualTo("0".repeat(128));
+        assertThat(DoubleLong.ZERO.toHexString()).isEqualTo("0".repeat(32));
         assertThat(DoubleLong.ZERO).isEqualTo(DoubleLong.from(0));
         assertThat(DoubleLong.ZERO.compareTo(DoubleLong.ZERO)).isEqualTo(0);
         assertThat(DoubleLong.ZERO.compareTo(DoubleLong.ONE)).isEqualTo(-1);
@@ -97,6 +98,7 @@ public class DoubleLongTest {
         assertThat(DoubleLong.ONE.intValue()).isEqualTo(1);
         assertThat(DoubleLong.ONE.toString()).isEqualTo("1");
         assertThat(DoubleLong.ONE.toBinaryString()).isEqualTo("0".repeat(127) + "1");
+        assertThat(DoubleLong.ONE.toHexString()).isEqualTo("0".repeat(31) + "1");
         assertThat(DoubleLong.ONE).isEqualTo(DoubleLong.from(1));
         assertThat(DoubleLong.ONE.compareTo(DoubleLong.ZERO)).isEqualTo(1);
         assertThat(DoubleLong.ONE.compareTo(DoubleLong.ONE)).isEqualTo(0);
@@ -114,6 +116,7 @@ public class DoubleLongTest {
         assertThat(DoubleLong.MAX_VALUE.intValue()).isEqualTo(expected.intValue());    // -1
         assertThat(DoubleLong.MAX_VALUE.toString()).isEqualTo(expected.toString());
         assertThat(DoubleLong.MAX_VALUE.toBinaryString()).isEqualTo("0" + "1".repeat(127));
+        assertThat(DoubleLong.MAX_VALUE.toHexString()).isEqualTo("7" + "f".repeat(31));
         assertThat(DoubleLong.MAX_VALUE.compareTo(DoubleLong.ZERO)).isEqualTo(1);
         assertThat(DoubleLong.MAX_VALUE.compareTo(DoubleLong.ONE)).isEqualTo(1);
         assertThat(DoubleLong.MAX_VALUE.compareTo(DoubleLong.MIN_VALUE)).isEqualTo(1);
@@ -130,6 +133,7 @@ public class DoubleLongTest {
         assertThat(DoubleLong.MIN_VALUE.intValue()).isEqualTo(expected.intValue());    // 0
         assertThat(DoubleLong.MIN_VALUE.toString()).isEqualTo(expected.toString());
         assertThat(DoubleLong.MIN_VALUE.toBinaryString()).isEqualTo("1" + "0".repeat(127));
+        assertThat(DoubleLong.MIN_VALUE.toHexString()).isEqualTo("8" + "0".repeat(31));
         assertThat(DoubleLong.MIN_VALUE.compareTo(DoubleLong.ZERO)).isEqualTo(-1);
         assertThat(DoubleLong.MIN_VALUE.compareTo(DoubleLong.ONE)).isEqualTo(-1);
         assertThat(DoubleLong.MIN_VALUE.compareTo(DoubleLong.MIN_VALUE)).isEqualTo(0);
@@ -279,6 +283,13 @@ public class DoubleLongTest {
         assertThat(DoubleLong.MIN_VALUE.fitsIntoLong()).isFalse();
         assertThat(DoubleLong.from("9223372036854775808").fitsIntoLong()).isFalse();
         assertThat(DoubleLong.from("-9223372036854775809").fitsIntoLong()).isFalse();
+    }
+
+    @Test
+    public void fitsIntoLong_ultimate() {
+        for (BigInteger num : BIG_INTEGERS) {
+            assertThat(DoubleLong.from(num).fitsIntoLong()).isEqualTo(isFitsIntoSignedLong(num));
+        }
     }
 
     /** {@link DoubleLong#multiply(DoubleLong)} */

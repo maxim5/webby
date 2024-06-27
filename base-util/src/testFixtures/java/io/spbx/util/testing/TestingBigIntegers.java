@@ -39,6 +39,10 @@ public class TestingBigIntegers {
         return BigInteger.valueOf(value);
     }
 
+    public static @NotNull BigInteger $(@NotNull String s) {
+        return new BigInteger(s);
+    }
+
     public static boolean isFitsIntoSignedLong(@NotNull BigInteger bigInteger) {
         return INT64_MAX.compareTo(bigInteger) >= 0 && INT64_MIN.compareTo(bigInteger) <= 0;
     }
@@ -52,7 +56,7 @@ public class TestingBigIntegers {
             bigInteger.compareTo(INT128_MAX) > 0 || bigInteger.compareTo(INT128_MIN) < 0 ?
                 bigInteger.mod($2_128) :
                 bigInteger;
-        return result.compareTo($2_127) >= 0 ? result.subtract($2_128) : result;
+        return result.compareTo(INT128_MAX) > 0 ? result.subtract($2_128) : result;
     }
 
     public static @NotNull BigInteger toBigInteger(long highBits, long lowBits) {
