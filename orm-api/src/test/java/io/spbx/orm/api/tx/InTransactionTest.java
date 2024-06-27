@@ -91,11 +91,11 @@ public class InTransactionTest {
 
         AssertionError exception = assertThrows(AssertionError.class, () ->
             tx.run(runner -> {
-                Unchecked.throwAny(new AssertionError("Fail"));
+                Unchecked.throwAny(new AssertionError("Oops"));
             })
         );
 
-        assertThat(exception).hasMessageThat().isEqualTo("Fail");
+        assertThat(exception).hasMessageThat().isEqualTo("Oops");
         assertThat(mockedConnection).hasAutocommit(true).wasCommitted(0).wasRolledBack(1);
     }
 

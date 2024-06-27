@@ -19,7 +19,7 @@ public class RendererFactory {
     @Inject private StatsManager statsManager;
 
     private final LazyBoolean isTrackingRenderingOn = new LazyBoolean(() ->
-        settings.isProfileMode() && settings.getBoolProperty("perf.track.render.enabled", true)
+        settings.isProfileMode() && settings.getBool("perf.track.render.enabled", true)
     );
 
     public @NotNull Renderer<?> getRenderer(@NotNull Render render, @NotNull String viewName) {

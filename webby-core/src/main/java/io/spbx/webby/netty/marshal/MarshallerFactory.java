@@ -7,8 +7,8 @@ import com.google.inject.Provider;
 import io.spbx.util.base.Pair;
 import io.spbx.util.classpath.EasyClasspath;
 import io.spbx.util.collect.EasyMaps;
+import io.spbx.util.props.PropertyMap;
 import io.spbx.webby.app.AppConfigException;
-import io.spbx.webby.app.Settings;
 import io.spbx.webby.common.InjectorHelper;
 import io.spbx.webby.url.annotate.Marshal;
 import org.jetbrains.annotations.NotNull;
@@ -51,12 +51,12 @@ public class MarshallerFactory implements Provider<Json> {
     @Inject private InjectorHelper helper;
 
     @Inject
-    public MarshallerFactory(@NotNull Settings settings) {
-        jsonMarshallerClass = pickJsonMarshaller(settings);
+    public MarshallerFactory(@NotNull PropertyMap properties) {
+        jsonMarshallerClass = pickJsonMarshaller(properties);
     }
 
-    private static @NotNull Class<? extends Json> pickJsonMarshaller(@NotNull Settings settings) {
-        String property = settings.getProperty("json.library");
+    private static @NotNull Class<? extends Json> pickJsonMarshaller(@NotNull PropertyMap properties) {
+        String property = properties.getOrNull("json.library");
         Pair<String, Class<? extends Json>> pair = SUPPORTED_JSON.get(property);
         if (property != null && pair == null) {
             log.at(Level.CONFIG).log("Unrecognized json library. Available: %s", SUPPORTED_JSON.keySet());

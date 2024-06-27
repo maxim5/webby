@@ -11,7 +11,7 @@ import io.spbx.orm.api.entity.BatchEntityIntData;
 import io.spbx.orm.api.entity.EntityIntData;
 import io.spbx.orm.api.query.*;
 import io.spbx.util.hppc.EasyHppc;
-import io.spbx.webby.common.SystemProperties;
+import io.spbx.webby.app.AppSettings;
 import io.spbx.webby.db.StorageType;
 import io.spbx.webby.db.count.StoreId;
 import org.jetbrains.annotations.NotNull;
@@ -22,11 +22,11 @@ import java.util.function.Consumer;
 import java.util.logging.Level;
 
 import static io.spbx.orm.api.query.Shortcuts.*;
+import static io.spbx.webby.app.Settings.SQL_MAX_PARAMS;
 import static io.spbx.webby.db.count.vote.Consistency.checkStorageConsistency;
 
 public class TableVotingStorage implements VotingStorage {
     private static final FluentLogger log = FluentLogger.forEnclosingClass();
-    private static final int CHUNK_SIZE = SystemProperties.DEFAULT_SQL_MAX_PARAMS;
 
     private final StoreId storeId;
     private final BaseTable<?> table;
@@ -68,7 +68,7 @@ public class TableVotingStorage implements VotingStorage {
     @Override
     public void loadBatch(@NotNull IntContainer keys, @NotNull IntObjectProcedure<@NotNull IntHashSet> consumer) {
         if (!keys.isEmpty()) {
-            EasyHppc.iterateChunks(keys, CHUNK_SIZE, chunk ->
+            EasyHppc.iterateChunks(keys, AppSettings.live().getInt(SQL_MAX_PARAMS), chunk ->
                 loadQueryResults(builder -> builder.where(Where.of(isIn(keyColumn, makeIntVariables(chunk)))), consumer)
             );
         }

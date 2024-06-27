@@ -46,12 +46,12 @@ public class TrimouExample {
 
     private static @NotNull Mustache getTemplate(@NotNull String name) {
         MustacheEngine engine = MustacheEngineBuilder.newBuilder()
-                .setProperty(EngineConfigurationKey.SKIP_VALUE_ESCAPING, true)  // Disable HTML escaping
-                .setProperty(CombinedIndexResolver.ENABLED_KEY, false)  // Disable useless resolver
-                .addTemplateLocator(new FileSystemTemplateLocator(1, DevPaths.DEMO_WEB, "trimou"))
-                .registerHelpers(HelpersBuilder.extra().build())
-                // .addGlobalData("footer", "© 2014 Trimou team")
-                .build();
+            .setProperty(EngineConfigurationKey.SKIP_VALUE_ESCAPING, true)  // Disable HTML escaping
+            .setProperty(CombinedIndexResolver.ENABLED_KEY, false)  // Disable useless resolver
+            .addTemplateLocator(new FileSystemTemplateLocator(1, DevPaths.DEMO_WEB.toString(), "trimou"))
+            .registerHelpers(HelpersBuilder.extra().build())
+            // .addGlobalData("footer", "© 2014 Trimou team")
+            .build();
         return engine.getMustache(name);
     }
 }

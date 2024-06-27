@@ -4,6 +4,7 @@ import com.google.common.flogger.FluentLogger;
 import io.spbx.util.func.ThrowConsumer;
 import io.spbx.util.testing.TestingBasics;
 import io.spbx.webby.app.AppSettings;
+import io.spbx.webby.app.ClassFilter;
 import io.spbx.webby.demo.DevPaths;
 import io.spbx.webby.demo.Main;
 import io.spbx.webby.testing.OkRequests;
@@ -72,7 +73,7 @@ public class StandaloneNettyIntegrationTest {
 
     @Test
     public void upload_file() {
-        call(Ok.post("/upload/file", files(DevPaths.DEMO_WEB + "favicon.ico")), response -> {
+        call(Ok.post("/upload/file", files(DevPaths.DEMO_WEB.resolve("favicon.ico").toString())), response -> {
             assertClient(response).is200();
             assertClient(response).hasHeader("Content-Type", "text/html; charset=UTF-8");
             assertClient(response).hasBody("""
@@ -171,7 +172,7 @@ public class StandaloneNettyIntegrationTest {
 
     private static @NotNull AppSettings createSettingsForTest() {
         AppSettings settings = Main.localSettings();
-        settings.handlerFilter().setPackageOnly("io.spbx.webby.demo");
+        settings.setHandlerFilter(ClassFilter.ofPackageTree("io.spbx.webby.demo"));
         return settings;
     }
 }

@@ -29,7 +29,7 @@ public class StatsSummary {
     public StatsSummary(@NotNull Settings settings, @NotNull StatsCollector stats) {
         this.stats = stats;
         this.isRecordsSummaryEnabled = new LazyBoolean(() ->
-            settings.getBoolProperty("perf.track.summary.records.enabled", false)
+            settings.getBool("perf.track.summary.records.enabled", false)
         );
         this.logLevel = settings.isDevMode() ? Level.INFO : Level.FINE;
     }

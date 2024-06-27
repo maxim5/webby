@@ -52,11 +52,11 @@ public class MapDbFactory extends BaseKeyValueFactory {
     private @NotNull DB createDefaultMapDB(@NotNull Settings settings) {
         // Consider options: hash or tree
         Path storagePath = settings.storageSettings().keyValueSettingsOrDie().path();
-        String filename = settings.getProperty("db.mapdb.filename", "mapdb.data");
-        boolean checksumEnabled = settings.getBoolProperty("db.mapdb.checksum.enabled", true);
-        boolean concurrencyEnabled = settings.getBoolProperty("db.mapdb.concurrency.enabled", true);
-        boolean transactionsEnabled = settings.getBoolProperty("db.mapdb.transactions.enabled", false);
-        long allocateStartSize = settings.getLongProperty("db.mapdb.start.size", 0);
+        String filename = settings.get("db.mapdb.filename", "mapdb.data");
+        boolean checksumEnabled = settings.getBool("db.mapdb.checksum.enabled", true);
+        boolean concurrencyEnabled = settings.getBool("db.mapdb.concurrency.enabled", true);
+        boolean transactionsEnabled = settings.getBool("db.mapdb.transactions.enabled", false);
+        long allocateStartSize = settings.getLong("db.mapdb.start.size", 0);
 
         DBMaker.Maker maker = DBMaker.fileDB(storagePath.resolve(filename).toFile());
         if (!checksumEnabled) {
@@ -74,22 +74,22 @@ public class MapDbFactory extends BaseKeyValueFactory {
 
     // More settings: choose default for string, etc?
     private static final ImmutableMap<Class<?>, Serializer<?>> OUT_OF_BOX =
-            ImmutableMap.<Class<?>, Serializer<?>>builder()
-                    .put(String.class, Serializer.STRING)
-                    .put(Byte.class, Serializer.BYTE)
-                    .put(byte[].class, Serializer.BYTE_ARRAY)
-                    .put(Character.class, Serializer.CHAR)
-                    .put(char[].class, Serializer.CHAR_ARRAY)
-                    .put(Integer.class, Serializer.INTEGER)
-                    .put(int[].class, Serializer.INT_ARRAY)
-                    .put(Long.class, Serializer.LONG)
-                    .put(long[].class, Serializer.LONG_ARRAY)
-                    .put(Float.class, Serializer.FLOAT)
-                    .put(float[].class, Serializer.FLOAT_ARRAY)
-                    .put(Double.class, Serializer.DOUBLE)
-                    .put(double[].class, Serializer.DOUBLE_ARRAY)
-                    .put(Boolean.class, Serializer.BOOLEAN)
-                    .put(Date.class, Serializer.DATE)
+        ImmutableMap.<Class<?>, Serializer<?>>builder()
+            .put(String.class, Serializer.STRING)
+            .put(Byte.class, Serializer.BYTE)
+            .put(byte[].class, Serializer.BYTE_ARRAY)
+            .put(Character.class, Serializer.CHAR)
+            .put(char[].class, Serializer.CHAR_ARRAY)
+            .put(Integer.class, Serializer.INTEGER)
+            .put(int[].class, Serializer.INT_ARRAY)
+            .put(Long.class, Serializer.LONG)
+            .put(long[].class, Serializer.LONG_ARRAY)
+            .put(Float.class, Serializer.FLOAT)
+            .put(float[].class, Serializer.FLOAT_ARRAY)
+            .put(Double.class, Serializer.DOUBLE)
+            .put(double[].class, Serializer.DOUBLE_ARRAY)
+            .put(Boolean.class, Serializer.BOOLEAN)
+            .put(Date.class, Serializer.DATE)
             .build();
 
     // More flexibility:

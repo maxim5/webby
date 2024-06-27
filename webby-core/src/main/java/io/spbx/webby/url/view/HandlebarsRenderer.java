@@ -78,7 +78,7 @@ public class HandlebarsRenderer implements Renderer<Template> {
     }
 
     private @NotNull Handlebars createDefault() {
-        String suffix = settings.getProperty("handlebars.filename.suffix", TemplateLoader.DEFAULT_SUFFIX);
+        String suffix = settings.get("handlebars.filename.suffix", TemplateLoader.DEFAULT_SUFFIX);
         TemplateLoader[] loaders = settings.viewPaths()
             .stream()
             .map(Path::toFile)
@@ -86,7 +86,7 @@ public class HandlebarsRenderer implements Renderer<Template> {
             .toArray(TemplateLoader[]::new);
         TemplateLoader templateLoader = loaders.length == 1 ? loaders[0] : new CompositeTemplateLoader(loaders);
 
-        String type = settings.getProperty("handlebars.cache.type", "HighConcurrency");
+        String type = settings.get("handlebars.cache.type", "HighConcurrency");
         TemplateCache cache = switch (type) {
             case "HighConcurrency" -> new HighConcurrencyTemplateCache();
             case "ConcurrentMap" -> new ConcurrentMapTemplateCache();

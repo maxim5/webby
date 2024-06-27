@@ -2,6 +2,7 @@ package io.spbx.util.classpath;
 
 import org.jetbrains.annotations.NotNull;
 
+import java.io.Serializable;
 import java.util.function.BiPredicate;
 
 /**
@@ -10,18 +11,11 @@ import java.util.function.BiPredicate;
  * @see ClasspathScanner
  */
 @FunctionalInterface
-public interface ClassNamePredicate extends BiPredicate<String, String> {
+public interface ClassNamePredicate extends BiPredicate<String, String>, Serializable {
     ClassNamePredicate ALLOW_ALL = (packageName, simpleClassName) -> true;
 
     @Override
     boolean test(@NotNull String packageName, @NotNull String simpleClassName);
-
-    @NotNull
-    @Override
-    default ClassNamePredicate and(@NotNull BiPredicate<? super String, ? super String> other) {
-        return (packageName, simpleClassName) -> test(packageName, simpleClassName) &&
-                                                 other.test(packageName, simpleClassName);
-    }
 
     @Override
     default @NotNull ClassNamePredicate negate() {
@@ -29,8 +23,19 @@ public interface ClassNamePredicate extends BiPredicate<String, String> {
     }
 
     @Override
+    default @NotNull ClassNamePredicate and(@NotNull BiPredicate<? super String, ? super String> other) {
+        return (packageName, simpleClassName) -> test(packageName, simpleClassName) &&
+                                                 other.test(packageName, simpleClassName);
+    }
+
+    @Override
     default @NotNull ClassNamePredicate or(@NotNull BiPredicate<? super String, ? super String> other) {
         return (packageName, simpleClassName) -> test(packageName, simpleClassName) ||
+                                                 other.test(packageName, simpleClassName);
+    }
+
+    default @NotNull ClassNamePredicate xor(@NotNull BiPredicate<? super String, ? super String> other) {
+        return (packageName, simpleClassName) -> test(packageName, simpleClassName) ^
                                                  other.test(packageName, simpleClassName);
     }
 }

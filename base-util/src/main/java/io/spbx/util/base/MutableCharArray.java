@@ -50,6 +50,11 @@ public class MutableCharArray extends CharArray {
     }
 
     public MutableCharArray mutableSubstring(int start, int end) {
+        start = start >= 0 ? start : start + length();  // allows negative from the end (-1 is `length()-1`)
+        end = end >= 0 ? end : end + length();          // allows negative from the end (-1 is `length()-1`)
+        assert start >= 0 && start <= length() : "Start index is out of range: %d in `%s`".formatted(start, this);
+        assert end >= 0 && end <= length() : "End index is out of range: %d in `%s`".formatted(end, this);
+        assert start <= end : "Start index can't be larger than end index: %d >= %d".formatted(start, end);
         return new MutableCharArray(chars, this.start + start, this.start + end);
     }
 

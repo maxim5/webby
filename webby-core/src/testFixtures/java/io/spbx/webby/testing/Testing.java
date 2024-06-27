@@ -1,5 +1,6 @@
 package io.spbx.webby.testing;
 
+import com.google.errorprone.annotations.CanIgnoreReturnValue;
 import com.google.inject.Injector;
 import com.google.inject.Module;
 import com.google.inject.util.Modules;
@@ -9,6 +10,8 @@ import io.spbx.webby.Webby;
 import io.spbx.webby.app.AppClasspathScanner;
 import io.spbx.webby.app.AppLifetime;
 import io.spbx.webby.app.AppSettings;
+import io.spbx.webby.app.ClassFilter;
+import io.spbx.webby.app.Settings.RunMode;
 import io.spbx.webby.auth.session.DefaultSession;
 import io.spbx.webby.auth.user.DefaultUser;
 import io.spbx.webby.db.model.BlobKv;
@@ -22,6 +25,7 @@ import org.jetbrains.annotations.Nullable;
 
 import java.io.*;
 import java.nio.charset.Charset;
+import java.nio.file.Path;
 import java.util.List;
 import java.util.Locale;
 import java.util.function.Consumer;
@@ -29,27 +33,31 @@ import java.util.function.Consumer;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 
 public class Testing {
-    public static final String DEFAULT_WEB_PATH = ".";
-    public static final String DEFAULT_VIEW_PATH = ".";
-    public static final String DEFAULT_USER_CONTENT_PATH = ".";
+    public static final Path DEFAULT_WEB_PATH = Path.of(".");
+    public static final Path DEFAULT_VIEW_PATH = Path.of(".");
+    public static final Path DEFAULT_USER_CONTENT_PATH = Path.of(".");
 
     public static final List<Class<?>> AUTH_MODELS = List.of(DefaultSession.class, DefaultUser.class);
     public static final List<Class<?>> CORE_MODELS = List.of(DefaultSession.class, DefaultUser.class, BlobKv.class);
 
+    // Without Guice
+    @CanIgnoreReturnValue
+    public static @NotNull AppSettings setupLite() {
+        return defaultAppSettings();
+    }
+
     public static @NotNull AppSettings defaultAppSettings() {
-        AppSettings settings = new AppSettings();
-        settings.setDevMode(true);
+        AppSettings settings = AppSettings.inMemoryForDevOnly();
+        settings.setRunMode(RunMode.DEV);
         settings.setCharset(TestingBytes.CHARSET);
         settings.setSecurityKey("12345678901234567890123456789012");
         settings.setWebPath(DEFAULT_WEB_PATH);
         settings.setViewPath(DEFAULT_VIEW_PATH);
         settings.setUserContentPath(DEFAULT_USER_CONTENT_PATH);
-        settings.modelFilter().setPredicateUnsafe((pkg, cls) -> false);
-        settings.handlerFilter().setPredicateUnsafe((pkg, cls) -> false);
-        settings.interceptorFilter().setPredicateUnsafe((pkg, cls) -> false);
-        settings.storageSettings()
-            .disableKeyValue()
-            .disableSql();
+        settings.setModelFilter(ClassFilter.none());
+        settings.setHandlerFilter(ClassFilter.none());
+        settings.setInterceptorFilter(ClassFilter.none());
+        settings.updateStorageSettings(storage -> storage.disableKeyValue().disableSql());
         return settings;
     }
 
@@ -89,7 +97,7 @@ public class Testing {
     }
 
     private static void setLogLevelsFromSettings(@NotNull AppSettings settings) {
-        String logging = settings.getProperty("testing.logging");
+        String logging = settings.getOrNull("testing.logging");
         if (logging == null) {
             Configurator.setAllLevels(LogManager.ROOT_LOGGER_NAME, Level.WARN);
         } else if (logging.contains("=")) {

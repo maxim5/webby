@@ -5,6 +5,7 @@ import io.spbx.orm.api.BaseTable;
 import io.spbx.orm.api.Engine;
 import io.spbx.orm.api.TableMeta;
 import io.spbx.orm.api.TableMeta.ColumnMeta;
+import io.spbx.util.base.EasyExceptions.IllegalArgumentExceptions;
 import io.spbx.util.base.SimpleJoin;
 import io.spbx.util.collect.EasyMaps;
 import org.jetbrains.annotations.NotNull;
@@ -143,7 +144,7 @@ public class CreateTableQuery extends Unit implements DataDefinitionQuery {
                 case SQLite -> new SqliteSchemaSupport();
                 case MySQL, MariaDB -> new MySqlSchemaSupport();
                 case H2 -> new H2SchemaSupport();
-                default -> throw new IllegalArgumentException("Engine not supported for table creation: " + engine);
+                default -> IllegalArgumentExceptions.fail("Engine not supported for table creation: %s", engine);
             };
         }
     }

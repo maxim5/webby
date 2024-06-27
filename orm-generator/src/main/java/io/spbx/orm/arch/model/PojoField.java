@@ -2,6 +2,7 @@ package io.spbx.orm.arch.model;
 
 import com.google.common.collect.Streams;
 import com.google.errorprone.annotations.Immutable;
+import io.spbx.util.base.EasyExceptions.IllegalStateExceptions;
 import io.spbx.util.base.Pair;
 import io.spbx.util.lazy.AtomicCacheCompute;
 import io.spbx.util.lazy.CacheCompute;
@@ -63,11 +64,11 @@ public abstract class PojoField {
     }
 
     public @NotNull MapperApi mapperApiOrDie() {
-        throw new IllegalStateException("Internal error. Field does not have a mapper: " + this);
+        throw IllegalStateExceptions.format("Internal error. Field does not have a mapper: %s", this);
     }
 
     public @NotNull AdapterApi adapterApiOrDie() {
-        throw new IllegalStateException("Internal error. Field does not have an adapter: " + this);
+        throw IllegalStateExceptions.format("Internal error. Field does not have an adapter: %s", this);
     }
 
     public abstract @NotNull PojoField reattachedTo(@NotNull PojoParent parent);
@@ -75,7 +76,7 @@ public abstract class PojoField {
     @Override
     public boolean equals(Object obj) {
         return obj instanceof PojoField that && Objects.equals(this.parent, that.parent) &&
-            Objects.equals(this.field, that.field) && Objects.equals(this.typeSupport, that.typeSupport);
+               Objects.equals(this.field, that.field) && Objects.equals(this.typeSupport, that.typeSupport);
     }
 
     @Override

@@ -74,8 +74,8 @@ public class TrimouRenderer implements Renderer<Mustache> {
     private @NotNull MustacheEngine createDefault() {
         List<Path> viewPaths = settings.viewPaths();
         boolean hotReload = settings.isHotReload();
-        boolean skipValueEscaping = settings.getBoolProperty("trimou.skip.value.escaping");  // Disable HTML escaping
-        boolean resolverEnabled = settings.getBoolProperty("trimou.combined.index.resolver.enabled");
+        boolean skipValueEscaping = settings.getBoolOrFalse("trimou.skip.value.escaping");  // Disable HTML escaping
+        boolean resolverEnabled = settings.getBoolOrFalse("trimou.combined.index.resolver.enabled");
 
         MustacheEngineBuilder builder = MustacheEngineBuilder.newBuilder()
             .setProperty(EngineConfigurationKey.TEMPLATE_CACHE_ENABLED, !hotReload)

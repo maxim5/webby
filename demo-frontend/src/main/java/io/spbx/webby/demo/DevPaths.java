@@ -6,16 +6,17 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 
 public class DevPaths {
-    public static final String PROJECT_HOME = locateProjectHome();
-    public static final String DEMO_HOME = PROJECT_HOME + "demo-frontend/";
-    public static final String DEMO_RESOURCES = DEMO_HOME + "src/main/resources/";
-    public static final String DEMO_WEB = DEMO_RESOURCES + "web/";
+    public static final Path PROJECT_HOME = locateProjectHome();
+    public static final Path DEMO_HOME = PROJECT_HOME.resolve("demo-frontend");
+    public static final Path DEMO_RESOURCES = DEMO_HOME.resolve("src/main/resources");
+    public static final Path DEMO_WEB = DEMO_RESOURCES.resolve("web");
 
-    private static @NotNull String locateProjectHome() {
-        Path workingDir = Path.of(".").toAbsolutePath();
+    private static @NotNull Path locateProjectHome() {
+        Path currentPath = Path.of(".").toAbsolutePath();
+        Path workingDir = currentPath;
         while (workingDir != null && !Files.exists(workingDir.resolve(".infra"))) {
             workingDir = workingDir.getParent();
         }
-        return (workingDir != null ? workingDir.toString() : ".") + "/";
+        return workingDir != null ? workingDir : currentPath;
     }
 }

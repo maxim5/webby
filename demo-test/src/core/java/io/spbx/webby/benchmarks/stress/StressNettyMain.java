@@ -3,6 +3,8 @@ package io.spbx.webby.benchmarks.stress;
 import io.spbx.util.testing.TestingBasics;
 import io.spbx.webby.Webby;
 import io.spbx.webby.app.AppSettings;
+import io.spbx.webby.app.ClassFilter;
+import io.spbx.webby.app.Settings.Toggle;
 import io.spbx.webby.auth.session.DefaultSession;
 import io.spbx.webby.auth.user.DefaultUser;
 import io.spbx.webby.demo.Main;
@@ -45,16 +47,18 @@ public class StressNettyMain {
 
     private static @NotNull Closeable bootstrapServer() {
         AppSettings settings = Main.localSettings();
-        settings.modelFilter().setCommonPackageOf(DefaultUser.class, DefaultSession.class);
-        settings.handlerFilter().setPackageOnly("io.spbx.webby.demo");
-        settings.storageSettings()
-                .enableKeyValue(TestingStorage.KEY_VALUE_DEFAULT)
-                .enableSql(TestingProps.propsSqlSettings());
-        settings.setProfileMode(false);
-        settings.setProperty("db.sql.connection.expiration.millis", 10_000);
+        settings.setModelFilter(ClassFilter.ofMostCommonPackageTree(DefaultUser.class, DefaultSession.class));
+        settings.setHandlerFilter(ClassFilter.ofPackageTree("io.spbx.webby.demo"));
+        settings.updateStorageSettings(
+            storage -> storage
+                .withKeyValue(TestingStorage.KEY_VALUE_DEFAULT)
+                .enableSql(TestingProps.testSqlSettings())
+        );
+        settings.setProfileMode(Toggle.DISABLED);
+        settings.setInt("db.sql.connection.expiration.millis", 10_000);
         // H2 default max connections = 10!
         // https://stackoverflow.com/questions/27836756/maximum-number-of-connections-possible-with-h2-in-server-mode
-        // settings.setProperty("netty.worker.group.threads", 8);
+        // settings.setInt("netty.worker.group.threads", 8);
         NettyBootstrap bootstrap = Webby.nettyBootstrap(settings, TestingModules.PERSISTENT_DB_CLEANER_MODULE);
 
         Thread server = new Thread(rethrow(() -> {

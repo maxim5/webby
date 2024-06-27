@@ -2,7 +2,7 @@ package io.spbx.webby.db.event;
 
 import com.google.common.collect.ImmutableList;
 import com.google.inject.Inject;
-import io.spbx.webby.app.Settings;
+import io.spbx.util.props.PropertyMap;
 import io.spbx.webby.common.Lifetime;
 import io.spbx.webby.db.codec.Codec;
 import io.spbx.webby.db.codec.CodecProvider;
@@ -23,17 +23,17 @@ import static io.spbx.util.base.EasyCast.castAny;
 import static io.spbx.webby.db.codec.standard.Codecs.*;
 
 public class KeyEventStoreFactory {
-    @Inject private Settings settings;
+    @Inject private PropertyMap properties;
     @Inject private CodecProvider provider;
     @Inject private KeyValueFactory factory;
     @Inject private Lifetime lifetime;
     @Inject private BackgroundCacheCleaner cacheCleaner;
 
     public <K, E> @NotNull KeyEventStore<K, E> getEventStore(@NotNull EventStoreOptions<K, E> options) {
-        int cacheSizeSoftLimit = settings.getIntProperty("db.event.store.cache.size.soft.limit", 1 << 16);
-        int cacheSizeHardLimit = settings.getIntProperty("db.event.store.cache.size.hard.limit", 1 << 17);
-        int flushBatchSize = settings.getIntProperty("db.event.store.flush.batch.size", 64);
-        int averageSizePerKey = settings.getIntProperty("db.event.store.average.size", 10);
+        int cacheSizeSoftLimit = properties.getInt("db.event.store.cache.size.soft.limit", 1 << 16);
+        int cacheSizeHardLimit = properties.getInt("db.event.store.cache.size.hard.limit", 1 << 17);
+        int flushBatchSize = properties.getInt("db.event.store.flush.batch.size", 64);
+        int averageSizePerKey = properties.getInt("db.event.store.average.size", 10);
 
         Codec<List<E>> codec = getListCodec(options.value(), averageSizePerKey);
         KeyValueDb<K, List<E>> db = factory.getDb(

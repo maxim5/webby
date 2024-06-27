@@ -30,7 +30,7 @@ public abstract class BaseKeyValueFactory implements InternalKeyValueFactory {
     @Inject protected Lifetime lifetime;
 
     private final LazyBoolean isTrackingKeyValuesOn = new LazyBoolean(() ->
-        settings.isProfileMode() && settings.getBoolProperty("perf.track.db.kv.enabled", true)
+        settings.isProfileMode() && settings.getBool("perf.track.db.kv.enabled", true)
     );
 
     @Override

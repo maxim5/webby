@@ -3,11 +3,16 @@ package io.spbx.util.collect;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.Streams;
 import com.google.errorprone.annotations.CanIgnoreReturnValue;
+import io.spbx.util.func.NullAwareFunction;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import org.jetbrains.annotations.VisibleForTesting;
 
 import java.util.*;
+import java.util.function.Function;
+import java.util.function.IntFunction;
+import java.util.function.Predicate;
+import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 /**
@@ -15,14 +20,18 @@ import java.util.stream.Stream;
  */
 @CanIgnoreReturnValue
 public class ListBuilder<T> {
-    private final List<T> list;
+    private final ArrayList<T> list;
+
+    private ListBuilder(@NotNull ArrayList<T> list) {
+        this.list = list;
+    }
 
     public ListBuilder() {
-        list = new ArrayList<>();
+        this(new ArrayList<>());
     }
 
     public ListBuilder(int size) {
-        list = new ArrayList<>(size);
+        this(new ArrayList<>(size));
     }
 
     public static <T> @NotNull ListBuilder<T> builder() {
@@ -31,6 +40,15 @@ public class ListBuilder<T> {
 
     public static <T> @NotNull ListBuilder<T> builder(int size) {
         return new ListBuilder<>(size);
+    }
+
+    @SafeVarargs
+    public static <T> @NotNull ListBuilder<T> of(@Nullable T @NotNull ... items) {
+        return ListBuilder.<T>builder(items.length).addAll(items);
+    }
+
+    public static <T> @NotNull ListBuilder<T> of(@NotNull Iterable<? extends T> items) {
+        return ListBuilder.<T>builder(items instanceof Collection<?> collection ? collection.size() : 8).addAll(items);
     }
 
     public @NotNull ListBuilder<T> add(@Nullable T item) {
@@ -63,6 +81,29 @@ public class ListBuilder<T> {
         list.add(item1);
         list.add(item2);
         return this;
+    }
+
+    public <U> @NotNull ListBuilder<U> map(@NotNull Function<T, U> func) {
+        ArrayList<U> arrayList = list.stream().map(func).collect(Collectors.toCollection(ArrayList::new));
+        return new ListBuilder<>(arrayList);
+    }
+
+    public <U> @NotNull ListBuilder<U> mapSafe(@NotNull Function<T, U> func) {
+        return map(NullAwareFunction.wrap(func));
+    }
+
+    public @NotNull ListBuilder<T> excludeIf(@NotNull Predicate<T> predicate) {
+        list.removeIf(predicate);
+        return this;
+    }
+
+    public @NotNull ListBuilder<T> excludeIfSafe(@NotNull Predicate<T> predicate) {
+        list.removeIf(t -> t != null && predicate.test(t));
+        return this;
+    }
+
+    public @NotNull ListBuilder<T> withoutNulls() {
+        return excludeIf(Objects::isNull);
     }
 
     /*package*/ @NotNull ListBuilder<T> combine(@NotNull ListBuilder<T> builder) {
@@ -100,6 +141,11 @@ public class ListBuilder<T> {
     // allows nulls
     public @NotNull ImmutableArray<T> toImmutableArray() {
         return ImmutableArray.<T>builder().addAll(list).toArray();
+    }
+
+    // allows nulls
+    public @Nullable T @NotNull [] toNativeArray(@NotNull IntFunction<T[]> generator) {
+        return list.toArray(generator);
     }
 
     public static <E> @NotNull List<E> concat(@NotNull Iterable<E> first, @NotNull Iterable<E> second) {

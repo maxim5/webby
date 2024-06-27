@@ -3,6 +3,8 @@ package io.spbx.util.collect;
 import com.google.common.collect.ImmutableMap;
 import org.junit.jupiter.api.Test;
 
+import java.util.Map;
+
 import static com.google.common.truth.Truth.assertThat;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 
@@ -22,6 +24,18 @@ public class EasyMapsTest {
         assertThrows(AssertionError.class, () -> EasyMaps.asMap("foo"));
         assertThrows(AssertionError.class, () -> EasyMaps.asMap("foo", "bar", "baz"));
         assertThrows(AssertionError.class, () -> EasyMaps.asMap("foo", "bar", "foo", "bar"));
+    }
+
+    @Test
+    public void inverseMap_simple() {
+        assertThat(EasyMaps.inverseMap(Map.of())).isEmpty();
+        assertThat(EasyMaps.inverseMap(Map.of("foo", "bar"))).containsExactly("bar", "foo");
+        assertThat(EasyMaps.inverseMap(Map.of("foo", "bar", "bar", "baz"))).containsExactly("bar", "foo", "baz", "bar");
+    }
+
+    @Test
+    public void inverseMap_invalid() {
+        assertThrows(IllegalArgumentException.class, () -> EasyMaps.inverseMap(Map.of("foo", "bar", "baz", "bar")));
     }
 
     @Test

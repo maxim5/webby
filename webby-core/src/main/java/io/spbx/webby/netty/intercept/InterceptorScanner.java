@@ -32,7 +32,7 @@ public class InterceptorScanner {
             .getDerivedClasses(settings.interceptorFilter(), Interceptor.class)
             .stream();
 
-        boolean includeDefaultInterceptors = settings.getBoolProperty("interceptors.default.always.include", true);
+        boolean includeDefaultInterceptors = settings.getBool("interceptors.default.always.include", true);
         if (includeDefaultInterceptors) {
             Stream<Class<?>> defaults = scanner
                 .timed("default Interceptor")

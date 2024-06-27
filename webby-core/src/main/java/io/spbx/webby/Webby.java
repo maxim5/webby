@@ -76,39 +76,40 @@ public class Webby {
         validateHotReload(settings);
         validateProfileMode(settings);
         validateSafeMode(settings);
-        validateStorageSettings(settings, settings.storageSettings());
+        validateStorageSettings(settings);
 
-        validateFilter(settings.modelFilter(), "models");
-        validateFilter(settings.handlerFilter(), "handlers");
-        validateFilter(settings.interceptorFilter(), "interceptors");
+        settings.setModelFilter(validateFilter(settings.modelFilter(), "models"));
+        settings.setHandlerFilter(validateFilter(settings.handlerFilter(), "handlers"));
+        settings.setInterceptorFilter(validateFilter(settings.interceptorFilter(), "interceptors"));
     }
 
-    private static void validateStorageSettings(@NotNull Settings settings, @NotNull StorageSettings storageSettings) {
-        new StorageValidator(settings, storageSettings).validate();
+    private static void validateStorageSettings(@NotNull AppSettings settings) {
+        new StorageValidator(settings).validate();
     }
 
-    private record StorageValidator(@NotNull Settings settings, @NotNull StorageSettings storageSettings) {
+    private record StorageValidator(@NotNull AppSettings settings) {
         public void validate() {
-            if (storageSettings.isKeyValueEnabled()) {
+            if (storageSettings().isKeyValueEnabled()) {
                 validateKeyValues();
             }
         }
 
         private void validateKeyValues() {
-            if (kvSettings() == KeyValueSettings.AUTO_DETECT) {
-                failIf(settings.isProdMode(), "Auto-detect can't be used in production. Set the storage type explicitly");
+            if (kvSettings().isDefaults()) {
+                failIf(settings.isProdMode(),
+                       "Default key-value settings can't be used in production. Set the storage type explicitly");
                 DbType autoDbType = KeyValueDbTypeDetector.autoDetectDbTypeFromClasspath();
                 if (autoDbType != null) {
                     updateKvType(autoDbType);
-                    log.at(Level.WARNING).log("Key-value storage auto-detect configured, " +
-                                              "using type from classpath: %s", currentType());
-                } else if (storageSettings.isSqlEnabled()) {
+                    log.at(Level.WARNING).log(
+                        "Key-value storage auto-detect configured, using type from classpath: %s", currentType());
+                } else if (storageSettings().isSqlEnabled()) {
                     updateKvType(DbType.SQL_DB);
                     log.at(Level.WARNING).log("Key-value storage auto-detect configured. Using %s", currentType());
                 } else {
-                    updateKvType(KeyValueSettings.DEFAULT_TYPE);
-                    log.at(Level.WARNING).log("Key-value storage auto-detect configured, " +
-                                              "using default: %s", currentType());
+                    updateKvType(KeyValueSettings.DEFAULTS.type());
+                    log.at(Level.WARNING).log(
+                        "Key-value storage auto-detect configured, using default: %s", currentType());
                 }
             }
 
@@ -122,15 +123,19 @@ public class Webby {
                 validateDirectory(kvSettings().path(), "storage path", settings.isDevMode());
             }
 
-            if (currentType() == DbType.SQL_DB && !storageSettings.isSqlEnabled()) {
-                log.at(Level.WARNING).log("SQL disabled. Ignoring the configured type: %s. " +
-                                          "Using default instead", currentType());
-                updateKvType(KeyValueSettings.DEFAULT_TYPE);
+            if (currentType() == DbType.SQL_DB && !storageSettings().isSqlEnabled()) {
+                log.at(Level.WARNING).log(
+                    "SQL disabled. Ignoring the configured type: %s. Using default instead", currentType());
+                updateKvType(KeyValueSettings.DEFAULTS.type());
             }
         }
 
+        private @NotNull StorageSettings storageSettings() {
+            return settings.storageSettings();
+        }
+
         private @NotNull KeyValueSettings kvSettings() {
-            return storageSettings.keyValueSettingsOrDie();
+            return storageSettings().keyValueSettingsOrDie();
         }
 
         private @NotNull DbType currentType() {
@@ -138,8 +143,8 @@ public class Webby {
         }
 
         private void updateKvType(@NotNull DbType type) {
-            if (storageSettings.isKeyValueEnabled()) {
-                storageSettings.enableKeyValue(storageSettings.keyValueSettingsOrDie().with(type));
+            if (storageSettings().isKeyValueEnabled()) {
+                settings.updateStorageSettings(storage -> storage.withKeyValue(storage.keyValueSettingsOrDie().with(type)));
             }
         }
     }
@@ -179,56 +184,44 @@ public class Webby {
     }
 
     private static void validateHotReload(@NotNull AppSettings settings) {
-        if (settings.isHotReloadDefault()) {
-            settings.setHotReload(settings.isDevMode());
-        } else {
-            if (settings.isHotReload() && settings.isProdMode()) {
-                log.at(Level.WARNING).log("Configured hot reload in production");
-            }
+        if (settings.isHotReload() && settings.isProdMode()) {
+            log.at(Level.WARNING).log("Configured hot reload in production");
         }
     }
 
     private static void validateProfileMode(@NotNull AppSettings settings) {
-        if (settings.isProfileModeDefault()) {
-            settings.setProfileMode(settings.isDevMode());
-        } else {
-            if (settings.isProfileMode() && settings.isProdMode()) {
-                log.at(Level.WARNING).log("Configured profile mode in production");
-            }
+        if (settings.isProfileMode() && settings.isProdMode()) {
+            log.at(Level.WARNING).log("Configured profile mode in production");
         }
     }
 
     private static void validateSafeMode(@NotNull AppSettings settings) {
-        if (settings.isSafeModeDefault()) {
-            settings.setSafeMode(settings.isDevMode());
-        } else {
-            if (settings.isSafeMode() && settings.isProdMode()) {
-                log.at(Level.WARNING).log("Configured safe mode in production");
-            }
+        if (settings.isSafeMode() && settings.isProdMode()) {
+            log.at(Level.WARNING).log("Configured safe mode in production");
         }
     }
 
-    private static void validateFilter(@NotNull ClassFilter classFilter, @NotNull String filterName) {
-        if (!classFilter.isSet()) {
+    private static @NotNull ClassFilter validateFilter(@NotNull ClassFilter classFilter, @NotNull String filterName) {
+        if (classFilter.isDefault()) {
             String className = getCallerClassName();
             if (className != null) {
                 log.at(Level.FINER).log("Caller class name: %s", className);
                 int dot = className.lastIndexOf('.');
                 if (dot > 0) {
                     String packageName = className.substring(0, dot);
-                    classFilter.setPackageOnly(packageName);
                     log.at(Level.INFO).log("Using package `%s` for classpath scanning [%s]", packageName, filterName);
-                    return;
+                    return ClassFilter.ofPackageTree(packageName);
                 }
             }
 
-            classFilter.setWholeClasspath();
             log.at(Level.WARNING).log(
                 "Failed to determine enclosing package for classpath scanning [%s]. " +
                 "Using the whole classpath. This may cause noticeable delays and errors in loading classes.",
                 filterName
             );
+            return ClassFilter.ofWholeClasspath();
         }
+        return classFilter;
     }
 
     private static @Nullable String getCallerClassName() {

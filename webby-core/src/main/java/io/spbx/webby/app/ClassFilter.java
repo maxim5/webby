@@ -4,105 +4,87 @@ import com.google.common.base.Strings;
 import io.spbx.util.classpath.ClassNamePredicate;
 import org.jetbrains.annotations.NotNull;
 
+import javax.annotation.concurrent.Immutable;
+import java.util.Collection;
 import java.util.List;
-import java.util.Set;
 import java.util.stream.Collectors;
 
+@Immutable
 public final class ClassFilter implements ClassNamePredicate {
     private static final ClassNamePredicate EXCLUDE_IMPLEMENTATION_PACKAGES =
             (pkg, __) -> !pkg.startsWith(Packages.RENDER_IMPL) &&
                          !pkg.startsWith(Packages.DB_KV_IMPL + ".") &&  // the dot means subpackages
                          !pkg.startsWith(Packages.DB_SQL_IMPL);
 
-    private ClassNamePredicate predicate;
+    static final @NotNull ClassFilter ALL = of((packageName, simpleClassName) -> true);
+    static final @NotNull ClassFilter NONE = of((packageName, simpleClassName) -> false);
+    static final @NotNull ClassFilter DEFAULT = of(EXCLUDE_IMPLEMENTATION_PACKAGES);
 
-    ClassFilter() {
-        this.predicate = null;
-    }
+    private final ClassNamePredicate predicate;
 
-    ClassFilter(@NotNull ClassNamePredicate predicate) {
-        this.predicate = predicate.and(EXCLUDE_IMPLEMENTATION_PACKAGES);
-    }
-
-    public static @NotNull ClassFilter empty() {
-        return new ClassFilter();
+    private ClassFilter(@NotNull ClassNamePredicate predicate) {
+        this.predicate = predicate;
     }
 
     public static @NotNull ClassFilter of(@NotNull ClassNamePredicate filter) {
         return new ClassFilter(filter);
     }
 
-    @Override
-    public boolean test(@NotNull String packageName, @NotNull String simpleClassName) {
-        return predicateOrDefault().test(packageName, simpleClassName);
+    public static @NotNull ClassFilter ofWholeClasspath() {
+        return ALL;
     }
 
-    public @NotNull ClassNamePredicate predicateOrDefault() {
-        return predicate != null ? predicate : EXCLUDE_IMPLEMENTATION_PACKAGES;
+    public static @NotNull ClassFilter none() {
+        return NONE;
     }
 
-    public boolean isSet() {
-        return predicate != null;
+    public static @NotNull ClassFilter ofPackageTree(@NotNull String packageName) {
+        return of((pkg, cls) -> pkg.startsWith(packageName));
     }
 
-    public void setPredicate(@NotNull ClassNamePredicate predicate) {
-        this.predicate = predicate.and(EXCLUDE_IMPLEMENTATION_PACKAGES);
+    public static @NotNull ClassFilter ofSingleClassOnly(@NotNull Class<?> klass) {
+        return of((pkg, cls) -> pkg.equals(klass.getPackageName()) && cls.equals(klass.getSimpleName()));
     }
 
-    public void setWholeClasspath() {
-        this.predicate = EXCLUDE_IMPLEMENTATION_PACKAGES;
+    public static @NotNull ClassFilter ofSelectedPackagesOnly(@NotNull Collection<String> packages) {
+        return of((pkg, cls) -> packages.contains(pkg));
     }
 
-    public void setPackageOnly(@NotNull String packageName) {
-        setPredicate(allInPackage(packageName));
+    public static @NotNull ClassFilter ofSelectedPackagesOnly(@NotNull List<Class<?>> classes) {
+        return ofSelectedPackagesOnly(classes.stream().map(Class::getPackageName).collect(Collectors.toSet()));
     }
 
-    public void setSingleClassOnly(@NotNull Class<?> klass) {
-        setPredicate(onlyClass(klass));
+    public static @NotNull ClassFilter ofSelectedPackagesOnly(@NotNull Class<?> @NotNull ... classes) {
+        return ofSelectedPackagesOnly(List.of(classes));
     }
 
-    public void setPackagesOf(@NotNull List<Class<?>> classes) {
-        setPredicate(packagesOf(classes));
+    public static @NotNull ClassFilter ofMostCommonPackageTree(@NotNull List<Class<?>> classes) {
+        return ofPackageTree(classes.stream().map(Class::getPackageName).reduce(Strings::commonPrefix).orElse(""));
     }
 
-    public void setPackagesOf(@NotNull Class<?> @NotNull ... classes) {
-        setPackagesOf(List.of(classes));
-    }
-
-    public void setCommonPackageOf(@NotNull List<Class<?>> classes) {
-        setPackageOnly(getCommonPackage(classes));
-    }
-
-    public void setCommonPackageOf(@NotNull Class<?> @NotNull... classes) {
-        setCommonPackageOf(List.of(classes));
-    }
-
-    public void setPredicateUnsafe(@NotNull ClassNamePredicate predicate) {
-        this.predicate = predicate;
+    public static @NotNull ClassFilter ofMostCommonPackageTree(@NotNull Class<?> @NotNull... classes) {
+        return ofMostCommonPackageTree(List.of(classes));
     }
 
     public static @NotNull ClassFilter matchingAnyOf(@NotNull ClassFilter first, @NotNull ClassFilter second) {
-        return new ClassFilter(first.predicateOrDefault().or(second.predicateOrDefault()));
+        return new ClassFilter(first.predicate.or(second.predicate));
     }
 
     public static @NotNull ClassFilter matchingAllOf(@NotNull ClassFilter first, @NotNull ClassFilter second) {
-        return new ClassFilter(first.predicateOrDefault().and(second.predicateOrDefault()));
+        return new ClassFilter(first.predicate.and(second.predicate));
     }
 
-    private static @NotNull ClassNamePredicate onlyClass(@NotNull Class<?> klass) {
-        return (pkg, cls) -> pkg.equals(klass.getPackageName()) && cls.equals(klass.getSimpleName());
+    public @NotNull ClassNamePredicate predicate() {
+        return predicate;
     }
 
-    private static @NotNull ClassNamePredicate packagesOf(@NotNull List<Class<?>> classes) {
-        Set<String> packages = classes.stream().map(Class::getPackageName).collect(Collectors.toSet());
-        return (pkg, cls) -> packages.contains(pkg);
+    public boolean isDefault() {
+        return this == DEFAULT;
     }
 
-    private static @NotNull ClassNamePredicate allInPackage(@NotNull String packageName) {
-        return (pkg, cls) -> pkg.startsWith(packageName);
-    }
-
-    private static @NotNull String getCommonPackage(@NotNull List<Class<?>> classes) {
-        return classes.stream().map(Class::getPackageName).reduce(Strings::commonPrefix).orElse("");
+    @Override
+    public boolean test(@NotNull String packageName, @NotNull String simpleClassName) {
+        return predicate.test(packageName, simpleClassName) &&
+               EXCLUDE_IMPLEMENTATION_PACKAGES.test(packageName, simpleClassName);
     }
 }

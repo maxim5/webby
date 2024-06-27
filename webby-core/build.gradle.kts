@@ -57,4 +57,5 @@ dependencies {
     testImplementation("com.google.jimfs:jimfs:1.3.0")
     testImplementation("com.j256.simplemagic:simplemagic:1.17")
     testImplementation("eu.medsea.mimeutil:mime-util:2.1.3")
+    testImplementation("org.jodd:jodd-json:6.0.3")
 }

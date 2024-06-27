@@ -52,7 +52,7 @@ public class SqlDbExtension implements BeforeAllCallback, AfterAllCallback,
     }
 
     public static @NotNull SqlDbExtension fromProperties() {
-        return from(TestingProps.propsSqlSettings());
+        return from(TestingProps.testSqlSettings());
     }
 
     public @NotNull SqlDbExtension withSavepoints() {
@@ -120,7 +120,7 @@ public class SqlDbExtension implements BeforeAllCallback, AfterAllCallback,
         }
 
         private static @NotNull Connection connect(@NotNull SqlSettings settings) {
-            Connection connection = SqlSettings.connectNotForProduction(settings);
+            Connection connection = SqlSettings.connectForDevOnly(settings);
             log.at(Level.FINE).log("[SQL] Connection opened: %s", settings.url());
             return connection;
         }
@@ -153,16 +153,13 @@ public class SqlDbExtension implements BeforeAllCallback, AfterAllCallback,
 
     private @NotNull ConnectionPool singleConnectionPool() {
         return new ConnectionPool() {
-            @Override
-            public @NotNull Connection getConnection() {
+            @Override public @NotNull Connection getConnection() {
                 return connection();
             }
-            @Override
-            public @NotNull Engine engine() {
+            @Override public @NotNull Engine engine() {
                 return settings().engine();
             }
-            @Override
-            public boolean isRunning() {
+            @Override public boolean isRunning() {
                 return true;
             }
         };

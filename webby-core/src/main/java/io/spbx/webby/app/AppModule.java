@@ -3,6 +3,7 @@ package io.spbx.webby.app;
 import com.google.common.eventbus.EventBus;
 import com.google.inject.AbstractModule;
 import io.spbx.util.classpath.ClasspathScanner;
+import io.spbx.util.props.PropertyMap;
 import io.spbx.webby.common.Lifetime;
 import org.jetbrains.annotations.NotNull;
 
@@ -19,6 +20,7 @@ public class AppModule extends AbstractModule {
         bind(AppSettings.class).toInstance(settings);
         bind(Settings.class).toInstance(settings);
         bind(Charset.class).toInstance(settings.charset());
+        bind(PropertyMap.class).toProvider(AppSettings::live);
         bind(AppLifetime.class).asEagerSingleton();
         bind(AppMaintenance.class).asEagerSingleton();
         bind(Lifetime.class).toProvider(AppLifetime.class);

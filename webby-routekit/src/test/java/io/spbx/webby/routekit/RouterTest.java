@@ -1,6 +1,7 @@
 package io.spbx.webby.routekit;
 
 import io.spbx.util.base.CharArray;
+import io.spbx.util.base.EasyExceptions.IllegalArgumentExceptions;
 import io.spbx.util.base.MutableCharArray;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
@@ -525,7 +526,7 @@ public class RouterTest {
                 .collect(Collectors.toMap(
                     split -> split[0],
                     split -> new CharArray(split[1]),
-                    (val1, val2) -> {throw new IllegalStateException("Duplicate values: " + val1 + " " + val2);},
+                    (val1, val2) -> IllegalArgumentExceptions.fail("Duplicate values: %s and %s", val1, val2),
                     LinkedHashMap::new)
                 );
             return makeMatch(tag, map);

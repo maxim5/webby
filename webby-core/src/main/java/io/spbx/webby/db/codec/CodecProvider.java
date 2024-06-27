@@ -49,7 +49,7 @@ public class CodecProvider {
     }
 
     private final LazyBoolean isTrackingCodecOn = new LazyBoolean(() ->
-        settings.isProfileMode() && settings.getBoolProperty("perf.track.codec.enabled", true)
+        settings.isProfileMode() && settings.getBool("perf.track.codec.enabled", true)
     );
 
     public <T> @Nullable Codec<T> getCodecOrNull(@NotNull Class<T> klass) {

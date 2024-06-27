@@ -14,7 +14,7 @@ import org.jetbrains.annotations.Nullable;
  * Where <code>T1</code>, <code>T2</code>, etc. are all JDBC values necessary for the entity. The number of values
  * must match the length of an array from {@link #toNewValuesArray(Object)}.
  * <p>
- * Finally, the adapter is expected to expose a public final static instance, usually called <code>ADAPTER</code>.
+ * Finally, the adapter is expected to expose a public static final instance, usually called <code>ADAPTER</code>.
  * It's not mandatory, but recommended for efficiency reasons.
  *
  * @param <E> the entity type

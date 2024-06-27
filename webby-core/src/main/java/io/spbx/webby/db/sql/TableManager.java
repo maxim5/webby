@@ -38,7 +38,7 @@ public class TableManager implements HasEngine {
         assert settings.storageSettings().isSqlEnabled() : "SQL storage is disabled";
         assert pool.isRunning() : "Invalid pool state: %s".formatted(pool);
 
-        connector = new ThreadLocalConnector(pool, settings.getLongProperty("db.sql.connection.expiration.millis", 30_000));
+        connector = new ThreadLocalConnector(pool, settings.getLong("db.sql.connection.expiration.millis", 30_000));
         engine = pool.engine();
 
         Set<Class<?>> tableClasses = scanner.timed("BaseTable").getDerivedClasses(settings.modelFilter(), BaseTable.class);

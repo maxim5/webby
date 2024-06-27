@@ -45,7 +45,7 @@ public class NettyHttpStepNavigatorTest {
     @Test
     public void extractPath_trailingSlash() {
         AppSettings appSettings = injector.getInstance(AppSettings.class);
-        appSettings.setProperty("netty.url.trailing.slash.ignore", true);
+        appSettings.setBool("netty.url.trailing.slash.ignore", true);
 
         assertThat(handler.extractPath("a").toString()).isEqualTo("a");
         assertThat(handler.extractPath("foo").toString()).isEqualTo("foo");

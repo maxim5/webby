@@ -5,6 +5,7 @@ import io.spbx.orm.api.Connector;
 import io.spbx.orm.api.QueryRunner;
 import io.spbx.orm.api.debug.DebugSql;
 import io.spbx.webby.testing.ext.SqlDbExtension;
+import io.spbx.webby.testing.ext.TestingGuiceExtension;
 import org.jetbrains.annotations.NotNull;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Tag;
@@ -19,6 +20,7 @@ import static io.spbx.util.testing.MoreTruth.assertThat;
 
 @Tag("sql")
 public abstract class SqlDbTableTest<E, T extends BaseTable<E>> implements BaseTableTest<E, T> {
+    @RegisterExtension private static final TestingGuiceExtension GUICE = TestingGuiceExtension.lite();
     @RegisterExtension private static final SqlDbExtension SQL = SqlDbExtension.fromProperties().withSavepoints();
 
     protected T table;

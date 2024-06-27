@@ -38,16 +38,16 @@ public class LmdbJavaDbFactory extends BaseKeyValueFactory {
 
     private @NotNull Env<ByteBuffer> createDefaultEnv(@NotNull Settings settings) {
         Path storagePath = settings.storageSettings().keyValueSettingsOrDie().path();
-        long maxMapSize = settings.getLongProperty("db.lmdb-java.max.map.size.bytes", 64 << 20);
-        int maxMapsNum = settings.getIntProperty("db.lmdb-java.max.maps.num", 32);
+        long maxMapSize = settings.getLong("db.lmdb-java.max.map.size.bytes", 64 << 20);
+        int maxMapsNum = settings.getInt("db.lmdb-java.max.maps.num", 32);
 
         return Env.create()
-                // LMDB also needs to know how large our DB might be. Over-estimating is OK.
-                .setMapSize(maxMapSize)
-                // LMDB also needs to know how many DBs (Dbi) we want to store in this Env.
-                .setMaxDbs(maxMapsNum)
-                // The same path can be concurrently opened and used in different processes,
-                // but do not open the same path twice in the same process at the same time.
-                .open(storagePath.toFile());
+            // LMDB also needs to know how large our DB might be. Over-estimating is OK.
+            .setMapSize(maxMapSize)
+            // LMDB also needs to know how many DBs (Dbi) we want to store in this Env.
+            .setMaxDbs(maxMapsNum)
+            // The same path can be concurrently opened and used in different processes,
+            // but do not open the same path twice in the same process at the same time.
+            .open(storagePath.toFile());
     }
 }

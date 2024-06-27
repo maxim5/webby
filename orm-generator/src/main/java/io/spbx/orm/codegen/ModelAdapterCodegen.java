@@ -7,6 +7,7 @@ import io.spbx.orm.adapter.JdbcSingleValueAdapter;
 import io.spbx.orm.api.ResultSetIterator;
 import io.spbx.orm.arch.model.*;
 import io.spbx.orm.arch.util.Naming;
+import io.spbx.util.base.EasyExceptions.IllegalStateExceptions;
 import io.spbx.util.collect.EasyMaps;
 import org.jetbrains.annotations.NotNull;
 
@@ -164,7 +165,7 @@ public class ModelAdapterCodegen extends BaseCodegen {
                 String params = fieldAdapter.columns().stream().map(Column::sqlName).collect(COMMA_JOINER);
                 builder.append(fieldAdapter.adapterApiOrDie().expr().createInstance(params));
             } else {
-                throw new IllegalStateException("Internal error. Unrecognized field: " + field);
+                IllegalStateExceptions.fail("Internal error. Unrecognized field: %s", field);
             }
             builder.append(", ");
         }

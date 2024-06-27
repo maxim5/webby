@@ -11,6 +11,7 @@ import io.spbx.webby.demo.model.UserRateModel;
 import io.spbx.webby.demo.model.UserRateModelTable;
 import io.spbx.webby.testing.ext.FluentLoggingCapture;
 import io.spbx.webby.testing.ext.SqlDbExtension;
+import io.spbx.webby.testing.ext.TestingGuiceExtension;
 import org.jetbrains.annotations.NotNull;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Tag;
@@ -29,8 +30,9 @@ import static io.spbx.webby.demo.model.UserRateModelTable.OwnColumn.*;
 
 @Tag("slow") @Tag("integration") @Tag("sql")
 public class TableVotingStorageIntegrationTest {
-    @RegisterExtension static final SqlDbExtension SQL = SqlDbExtension.fromProperties().withManualCleanup(UserRateModelTable.META);
-    @RegisterExtension static final FluentLoggingCapture LOGGING = new FluentLoggingCapture(Consistency.class);
+    @RegisterExtension private static final TestingGuiceExtension GUICE = TestingGuiceExtension.lite();
+    @RegisterExtension private static final SqlDbExtension SQL = SqlDbExtension.fromProperties().withManualCleanup(UserRateModelTable.META);
+    @RegisterExtension private static final FluentLoggingCapture LOGGING = new FluentLoggingCapture(Consistency.class);
 
     private static final int A = 1000;
     private static final int B = 2000;

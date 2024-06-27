@@ -74,7 +74,7 @@ class NettyHttpStepNavigator implements ChannelContextBound {
     @NotNull CharArray extractPath(@NotNull String uri) {
         MutableCharArray path = new MutableCharArray(uri);
         path.offsetEnd(path.length() - path.indexOfAny('?', '#', 0, path.length()));
-        if (settings.getBoolProperty("netty.url.trailing.slash.ignore") && path.length() > 1) {
+        if (settings.getBoolOrFalse("netty.url.trailing.slash.ignore") && path.length() > 1) {
             path.offsetSuffix('/');
         }
         return path;

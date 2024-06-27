@@ -1,6 +1,8 @@
 package io.spbx.util.testing;
 
+import com.google.errorprone.annotations.CanIgnoreReturnValue;
 import io.spbx.util.base.Unchecked;
+import io.spbx.util.func.Reversible;
 import org.jetbrains.annotations.NotNull;
 import org.junit.platform.commons.util.ReflectionUtils;
 
@@ -10,6 +12,14 @@ import java.util.List;
 import static com.google.common.truth.Truth.assertThat;
 
 public class AssertBasics {
+    @CanIgnoreReturnValue
+    public static <U, V> @NotNull U assertReversibleRoundtrip(@NotNull Reversible<U, V> reversible, @NotNull U input) {
+        V forward = reversible.forward(input);
+        U backward = reversible.backward(forward);
+        assertThat(backward).isEqualTo(input);
+        return backward;
+    }
+
     public static <T> void assertPrivateFieldValue(@NotNull T object, @NotNull String name, @NotNull Object expected) {
         assertThat(getPrivateFieldValue(object, name)).isEqualTo(expected);
     }

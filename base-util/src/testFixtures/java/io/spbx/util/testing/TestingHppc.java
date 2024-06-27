@@ -1,6 +1,7 @@
 package io.spbx.util.testing;
 
 import com.carrotsearch.hppc.*;
+import io.spbx.util.base.EasyExceptions.IllegalArgumentExceptions;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
@@ -128,6 +129,6 @@ public class TestingHppc {
         if (obj instanceof IntContainer container) {
             return new IntHashSet(container);
         }
-        throw new IllegalArgumentException("Unrecognized object: " + obj);
+        throw IllegalArgumentExceptions.format("Unrecognized object: %s", obj);
     }
 }

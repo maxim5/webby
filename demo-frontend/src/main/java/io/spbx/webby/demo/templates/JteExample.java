@@ -20,7 +20,7 @@ import java.util.function.Supplier;
 // JTE: must be public
 public class JteExample {
     private static final Supplier<TemplateEngine> templateEngine = Suppliers.memoize(JteExample::create);
-    public static final String CLASS_DIR = DevPaths.DEMO_HOME + "build/generated/jte/examples/java";
+    public static final Path CLASS_DIR = DevPaths.DEMO_HOME.resolve("build/generated/jte/examples/java");
 
     @GET(url = "/templates/jte/hello")
     @View(template = "example.jte")
@@ -41,6 +41,6 @@ public class JteExample {
 
     private static TemplateEngine create() {
         CodeResolver codeResolver = new ResourceCodeResolver("web/jte");
-        return TemplateEngine.create(codeResolver, Path.of(CLASS_DIR), ContentType.Html);
+        return TemplateEngine.create(codeResolver, CLASS_DIR, ContentType.Html);
     }
 }

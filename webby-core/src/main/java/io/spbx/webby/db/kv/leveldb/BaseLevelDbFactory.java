@@ -24,17 +24,17 @@ public abstract class BaseLevelDbFactory extends BaseKeyValueFactory {
     public @NotNull <K, V> LevelDbImpl<K, V> getInternalDb(@NotNull DbOptions<K, V> options) {
         return cacheIfAbsent(options, () -> {
             Path storagePath = settings.storageSettings().keyValueSettingsOrDie().path();
-            String filename = settings.getProperty("db.leveldb.filename.pattern", "leveldb-%s");
-            boolean createIfMissing = settings.getBoolProperty("db.leveldb.create.if.missing", true);
-            boolean paranoidChecks = settings.getBoolProperty("db.leveldb.paranoid.checks", false);
+            String filename = settings.get("db.leveldb.filename.pattern", "leveldb-%s");
+            boolean createIfMissing = settings.getBool("db.leveldb.create.if.missing", true);
+            boolean paranoidChecks = settings.getBool("db.leveldb.paranoid.checks", false);
 
             File destination = storagePath.resolve(formatFileName(filename, options.name())).toFile();
             Codec<K> keyCodec = keyCodecOrDie(options);
             Codec<V> valueCodec = valueCodecOrDie(options);
             try {
                 DB db = dbFactory.open(destination, new Options()
-                        .createIfMissing(createIfMissing)
-                        .paranoidChecks(paranoidChecks));
+                    .createIfMissing(createIfMissing)
+                    .paranoidChecks(paranoidChecks));
                 return new LevelDbImpl<>(db, keyCodec, valueCodec);
             } catch (IOException e) {
                 return Unchecked.rethrow(e);

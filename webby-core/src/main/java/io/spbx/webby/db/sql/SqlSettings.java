@@ -3,8 +3,11 @@ package io.spbx.webby.db.sql;
 import com.google.errorprone.annotations.Immutable;
 import io.spbx.orm.api.Engine;
 import io.spbx.orm.api.HasEngine;
+import io.spbx.util.base.EasyExceptions.IllegalArgumentExceptions;
 import io.spbx.util.base.EasyStrings;
 import io.spbx.util.base.Unchecked;
+import io.spbx.util.props.PropertyMap;
+import io.spbx.webby.app.Settings;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
@@ -32,6 +35,13 @@ public record SqlSettings(@NotNull String url, @Nullable String user, @Nullable 
 
     public SqlSettings(@NotNull String url) {
         this(url, null, null);
+    }
+
+    public static @Nullable SqlSettings fromProperties(@NotNull PropertyMap properties) {
+        String url = properties.getOrNull(Settings.SQL_URL);
+        String user = properties.getOrNull(Settings.SQL_USER);
+        String password = properties.getOrNull(Settings.SQL_PASSWORD);
+        return url != null ? new SqlSettings(url, user, password) : null;
     }
 
     @Override
@@ -88,16 +98,16 @@ public record SqlSettings(@NotNull String url, @Nullable String user, @Nullable 
         return URI.create(uri);
     }
 
-    public static @NotNull SqlSettings inMemoryNotForProduction(@NotNull Engine engine) {
+    public static @NotNull SqlSettings inMemoryForDevOnly(@NotNull Engine engine) {
         return switch (engine) {
             case H2 -> H2_IN_MEMORY;
             case SQLite -> SQLITE_IN_MEMORY;
             case MariaDB -> MARIA_IN_MEMORY;
-            default -> throw new IllegalArgumentException("In-memory not supported for DB engine: " + engine);
+            default -> IllegalArgumentExceptions.fail("In-memory not supported for DB engine: %s", engine);
         };
     }
 
-    public static @NotNull Connection connectNotForProduction(@NotNull SqlSettings settings) {
+    public static @NotNull Connection connectForDevOnly(@NotNull SqlSettings settings) {
         try {
             if (settings.user != null) {
                 return DriverManager.getConnection(settings.url, settings.user, settings.password);

@@ -49,15 +49,18 @@ public class MutableCharArrayTest {
     }
 
     @Test
-    public void substring() {
+    public void mutableSubstring() {
         MutableCharArray array = new MutableCharArray("foobar");
 
         assertThat(array.substring(0, 3) instanceof MutableCharArray).isFalse();
         assertThat(array.substring(3, 6) instanceof MutableCharArray).isFalse();
+        assertThat(array.substring(3, -1) instanceof MutableCharArray).isFalse();
 
         assertThat(array.mutableSubstring(0, 3)).isEqualTo(array.substring(0, 3));
         assertThat(array.mutableSubstring(1, 4)).isEqualTo(array.substring(1, 4));
         assertThat(array.mutableSubstring(3, 6)).isEqualTo(array.substring(3, 6));
+        assertThat(array.mutableSubstring(0, -1)).isEqualTo(array.substring(0, -1));
+        assertThat(array.mutableSubstring(-2, -1)).isEqualTo(array.substring(-2, -1));
     }
 
     @Test

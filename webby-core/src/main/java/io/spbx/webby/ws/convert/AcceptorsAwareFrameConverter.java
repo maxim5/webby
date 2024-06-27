@@ -51,15 +51,13 @@ public final class AcceptorsAwareFrameConverter implements FrameConverter<Object
     static @NotNull ConcreteFrameType resolveFrameType(@NotNull ClientFrameType clientType, @NotNull FrameType supportedType) {
         return switch (supportedType) {
             case TEXT_ONLY -> {
-                if (clientType != ClientFrameType.TEXT && clientType != ClientFrameType.ANY) {
-                    throw new ClientDeniedException("Unsupported type: client=%s supported=%s", clientType, supportedType);
-                }
+                ClientDeniedException.failIf(clientType != ClientFrameType.TEXT && clientType != ClientFrameType.ANY,
+                                             "Unsupported type: client=%s supported=%s", clientType, supportedType);
                 yield ConcreteFrameType.TEXT;
             }
             case BINARY_ONLY -> {
-                if (clientType != ClientFrameType.BINARY && clientType != ClientFrameType.ANY) {
-                    throw new ClientDeniedException("Unsupported type: client=%s supported=%s", clientType, supportedType);
-                }
+                ClientDeniedException.failIf(clientType != ClientFrameType.BINARY && clientType != ClientFrameType.ANY,
+                                             "Unsupported type: client=%s supported=%s", clientType, supportedType);
                 yield ConcreteFrameType.BINARY;
             }
             case FROM_CLIENT ->
@@ -76,22 +74,16 @@ public final class AcceptorsAwareFrameConverter implements FrameConverter<Object
     @Override
     public void toMessage(@NotNull WebSocketFrame frame, @NotNull ParsedFrameConsumer<Object> success) {
         assert concreteFrameType != null : "Converter is not initialized";
-        if (concreteFrameType == ConcreteFrameType.TEXT && !(frame instanceof TextWebSocketFrame)) {
-            throw new BadFrameException("Unsupported frame received: %s, expected text", frame.getClass());
-        }
-        if (concreteFrameType == ConcreteFrameType.BINARY && !(frame instanceof BinaryWebSocketFrame)) {
-            throw new BadFrameException("Unsupported frame received: %s, expected binary", frame.getClass());
-        }
+        BadFrameException.failIf(concreteFrameType == ConcreteFrameType.TEXT && !(frame instanceof TextWebSocketFrame),
+                                 "Unsupported frame received: %s, expected text", frame.getClass());
+        BadFrameException.failIf(concreteFrameType == ConcreteFrameType.BINARY && !(frame instanceof BinaryWebSocketFrame),
+                                 "Unsupported frame received: %s, expected binary", frame.getClass());
 
         ByteBuf frameContent = Unpooled.wrappedBuffer(frame.content());
         metadata.parse(frameContent, (acceptorId, requestId, content) -> {
-            if (acceptorId == null) {
-                throw new BadFrameException("Failed to parse acceptor id");
-            }
+            BadFrameException.failIf(acceptorId == null, "Failed to parse acceptor id");
             Acceptor acceptor = acceptors.get(acceptorId);
-            if (acceptor == null) {
-                throw new BadFrameException("Acceptor not found: %s", acceptorId);    // not readable!
-            }
+            BadFrameException.failIf(acceptor == null, "Acceptor not found: %s", acceptorId);    // not readable!
 
             RequestContext context = new RequestContext(requestId, frame, clientInfo);
             if (acceptor.acceptsFrame()) {
@@ -127,7 +119,7 @@ public final class AcceptorsAwareFrameConverter implements FrameConverter<Object
     @Override
     public String toString() {
         return "AcceptorsAwareFrameConverter[marshaller=%s, metadata=%s, acceptors=%s, frameType=%s]"
-                .formatted(marshaller, metadata, acceptors, supportedType);
+            .formatted(marshaller, metadata, acceptors, supportedType);
     }
 
     @VisibleForTesting

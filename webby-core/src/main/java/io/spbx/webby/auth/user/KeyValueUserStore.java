@@ -2,7 +2,7 @@ package io.spbx.webby.auth.user;
 
 import com.google.inject.Inject;
 import io.spbx.util.base.Pair;
-import io.spbx.webby.app.Settings;
+import io.spbx.util.props.PropertyMap;
 import io.spbx.webby.db.kv.DbOptions;
 import io.spbx.webby.db.kv.KeyValueAutoRetryInserter;
 import io.spbx.webby.db.kv.KeyValueDb;
@@ -18,11 +18,11 @@ public class KeyValueUserStore implements UserStore {
     protected final KeyValueAutoRetryInserter<Integer, UserModel> inserter;
 
     @Inject
-    public KeyValueUserStore(@NotNull Settings settings,
+    public KeyValueUserStore(@NotNull PropertyMap properties,
                              @NotNull Class<? extends UserModel> userClass,
                              @NotNull KeyValueFactory dbFactory) {
-        boolean randomIds = settings.getBoolProperty("user.id.generator.random.enabled", true);
-        int maxAttempts = settings.getIntProperty("user.id.generator.max.attempts", 5);
+        boolean randomIds = properties.getBool("user.id.generator.random.enabled", true);
+        int maxAttempts = properties.getInt("user.id.generator.max.attempts", 5);
         db = castAny(dbFactory.getDb(DbOptions.of(UserModel.DB_NAME, Integer.class, userClass)));
         IntIdGenerator generator = randomIds ?
             IntIdGenerator.positiveRandom(null) :

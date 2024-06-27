@@ -15,7 +15,6 @@ import java.nio.CharBuffer;
 import java.nio.channels.Channels;
 import java.nio.channels.ReadableByteChannel;
 import java.nio.charset.Charset;
-import java.nio.file.Path;
 
 @Serve
 public class ReturnValue {
@@ -66,6 +65,6 @@ public class ReturnValue {
 
     @GET(url = "/r/file/{path}")
     public File file(String path) {
-        return Path.of(DevPaths.PROJECT_HOME).resolve(path).toFile();
+        return DevPaths.PROJECT_HOME.resolve(path).toFile();
     }
 }

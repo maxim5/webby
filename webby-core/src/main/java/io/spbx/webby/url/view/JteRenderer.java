@@ -9,9 +9,9 @@ import gg.jte.output.Utf8ByteOutput;
 import gg.jte.resolve.DirectoryCodeResolver;
 import gg.jte.runtime.Constants;
 import io.spbx.util.func.ThrowConsumer;
+import io.spbx.webby.app.AppSettings;
 import io.spbx.webby.app.Settings;
 import io.spbx.webby.common.InjectorHelper;
-import io.spbx.webby.common.SystemProperties;
 import org.jetbrains.annotations.NotNull;
 
 import java.io.IOException;
@@ -58,7 +58,7 @@ public class JteRenderer implements Renderer<String> {
 
     @Override
     public @NotNull String renderToString(@NotNull String template, @NotNull Object model) {
-        StringOutput output = new StringOutput(SystemProperties.DEFAULT_SIZE_CHARS);
+        StringOutput output = new StringOutput(AppSettings.live().getInt(Settings.SIZE_CHARS));
         if (model instanceof Map<?, ?> mapModel) {
             templateEngine.render(template, castMap(mapModel), output);
         } else {
@@ -82,14 +82,14 @@ public class JteRenderer implements Renderer<String> {
     }
 
     private @NotNull TemplateEngine createDefault() {
-        List<Path> paths = settings.getViewPaths("jte.view.paths");
-        Path classDir = Path.of(settings.getProperty("jte.class.directory", "build"));
-        ContentType contentType = settings.getBoolProperty("jte.output.plain") ? ContentType.Plain : ContentType.Html;
+        List<Path> paths = settings.viewPaths("jte.view.paths");
+        Path classDir = Path.of(settings.get("jte.class.directory", "build"));
+        ContentType contentType = settings.getBoolOrFalse("jte.output.plain") ? ContentType.Plain : ContentType.Html;
         ClassLoader classLoader = Thread.currentThread().getContextClassLoader();
-        String packageName = settings.getProperty("jte.output.package", Constants.PACKAGE_NAME_ON_DEMAND);
+        String packageName = settings.get("jte.output.package", Constants.PACKAGE_NAME_ON_DEMAND);
         boolean isUtf8 = settings.charset().equals(StandardCharsets.UTF_8);
-        boolean isUtf8Byte = settings.getBoolProperty("jte.output.utf8byte.enabled", isUtf8);
-        boolean precompile = settings.getBoolProperty("jte.class.precompile.enabled", settings.isProdMode());
+        boolean isUtf8Byte = settings.getBool("jte.output.utf8byte.enabled", isUtf8);
+        boolean precompile = settings.getBool("jte.class.precompile.enabled", settings.isProdMode());
 
         DirectoryCodeResolver codeResolver = paths.stream()
             .map(DirectoryCodeResolver::new)

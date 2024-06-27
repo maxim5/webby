@@ -6,6 +6,7 @@ import io.netty.buffer.ByteBuf;
 import io.netty.buffer.ByteBufHolder;
 import io.netty.buffer.DuplicatedByteBuf;
 import io.netty.buffer.Unpooled;
+import io.spbx.util.base.EasyExceptions.IllegalStateExceptions;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
@@ -101,7 +102,7 @@ public class TestingBytes {
     public static @NotNull ByteBuf asReadable(@Nullable ByteBuf buf) {
         ByteBuf byteBuf = buf == null ? Unpooled.EMPTY_BUFFER : buf;
         return switch (READABILITY_MODE) {
-            case ORIGINAL -> throw new IllegalStateException("Readability mode is off: %s".formatted(READABILITY_MODE));
+            case ORIGINAL -> IllegalStateExceptions.fail("Readability mode is off: %s", READABILITY_MODE);
             case HUMAN_READABLE -> byteBuf instanceof HumanReadableByteBuf ? byteBuf : new HumanReadableByteBuf(byteBuf);
             case BYTE_DETAILS -> byteBuf instanceof ByteDetailsReadableByteBuf ? byteBuf : new ByteDetailsReadableByteBuf(byteBuf);
         };

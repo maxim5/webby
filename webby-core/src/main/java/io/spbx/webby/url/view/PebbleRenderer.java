@@ -78,11 +78,11 @@ public class PebbleRenderer implements Renderer<PebbleTemplate> {
 
     private @NotNull PebbleEngine createDefault() {
         Charset charset = settings.charset();
-        List<Path> viewPaths = settings.getViewPaths("pebble.view.paths");
-        String suffix = settings.getProperty("pebble.filename.suffix");
+        List<Path> viewPaths = settings.viewPaths("pebble.view.paths");
+        String suffix = settings.getOrNull("pebble.filename.suffix");
         boolean cache = settings.isHotReload() ?
-            settings.getBoolProperty("pebble.dev.cache.enabled", false) :
-            settings.getBoolProperty("pebble.prod.cache.enabled", true);
+            settings.getBool("pebble.dev.cache.enabled", false) :
+            settings.getBool("pebble.prod.cache.enabled", true);
 
         List<FileLoader> loaders = viewPaths.stream()
             .map(path -> {

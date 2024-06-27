@@ -17,10 +17,10 @@ public class SwayDbFactory extends BaseKeyValueFactory {
     public @NotNull <K, V> SwayDb<K, V> getInternalDb(@NotNull DbOptions<K, V> options) {
         return cacheIfAbsent(options, () -> {
             Path storagePath = settings.storageSettings().keyValueSettingsOrDie().path();
-            String filename = settings.getProperty("db.swaydb.filename.pattern", "swaydb-%s");
-            int mapSize = settings.getIntProperty("db.swaydb.init.map.size.bytes", 4 << 20);
-            int minSegmentSize = settings.getIntProperty("db.swaydb.segment.size.bytes", 2 << 20);
-            int checkpointSize = settings.getIntProperty("db.swaydb.appendix.flush.checkpoint.size.bytes", 2 << 20);
+            String filename = settings.get("db.swaydb.filename.pattern", "swaydb-%s");
+            int mapSize = settings.getInt("db.swaydb.init.map.size.bytes", 4 << 20);
+            int minSegmentSize = settings.getInt("db.swaydb.segment.size.bytes", 2 << 20);
+            int checkpointSize = settings.getInt("db.swaydb.appendix.flush.checkpoint.size.bytes", 2 << 20);
 
             Path path = storagePath.resolve(formatFileName(filename, options.name()));
             Codec<K> keyCodec = keyCodecOrDie(options);

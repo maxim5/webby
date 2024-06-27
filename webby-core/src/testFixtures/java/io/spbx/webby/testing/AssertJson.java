@@ -66,11 +66,11 @@ public class AssertJson {
     }
 
     public static @NotNull Consumer<AppSettings> withJsonLibrary(@NotNull SupportedJsonLibrary library) {
-        return settings -> settings.setProperty("json.library", library.slug);
+        return settings -> settings.setString("json.library", library.slug);
     }
 
     public static @NotNull SupportedJsonLibrary getJsonLibrary() {
-        String property = Testing.Internals.settings().getProperty("json.library");
+        String property = Testing.Internals.settings().getOrNull("json.library");
         return Arrays.stream(SupportedJsonLibrary.values()).filter(val -> val.slug.equals(property)).findAny().orElseThrow();
     }
 }

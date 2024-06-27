@@ -7,6 +7,8 @@ import com.google.inject.Injector;
 import io.spbx.util.base.Pair;
 import io.spbx.util.testing.ext.TempDirectoryExtension;
 import io.spbx.webby.app.AppSettings;
+import io.spbx.webby.app.ClassFilter;
+import io.spbx.webby.app.Settings.Toggle;
 import io.spbx.webby.auth.session.DefaultSession;
 import io.spbx.webby.auth.session.SessionManager;
 import io.spbx.webby.auth.user.DefaultUser;
@@ -425,23 +427,24 @@ public class KeyValueDbIntegrationTest {
         TestingProps.assumePropIfSet("test.kv.only_type", dbType.name());
 
         AppSettings settings = Testing.defaultAppSettings();
-        settings.modelFilter().setPackagesOf(Testing.CORE_MODELS);
-        settings.storageSettings()
-            .enableKeyValue(KeyValueSettings.of(dbType, TEMP_DIRECTORY.getCurrentTempDir()));
-        settings.setProfileMode(false);  // not testing TrackingDbAdapter by default
+        settings.setModelFilter(ClassFilter.ofSelectedPackagesOnly(Testing.CORE_MODELS));
+        settings.updateStorageSettings(
+            storage -> storage.withKeyValue(KeyValueSettings.of(dbType, TEMP_DIRECTORY.getCurrentTempDir()))
+        );
+        settings.setProfileMode(Toggle.DISABLED);  // not testing TrackingDbAdapter by default
 
-        settings.setProperty("db.chronicle.default.size", 64);
-        settings.setProperty("db.lmdb-java.max.map.size.bytes", 64 << 10);
-        settings.setProperty("db.lmdb-jni.max.map.size.bytes", 64 << 10);
+        settings.setInt("db.chronicle.default.size", 64);
+        settings.setInt("db.lmdb-java.max.map.size.bytes", 64 << 10);
+        settings.setInt("db.lmdb-jni.max.map.size.bytes", 64 << 10);
 
-        settings.setProperty("db.swaydb.init.map.size.bytes", 64 << 10);
-        settings.setProperty("db.swaydb.segment.size.bytes", 64 << 10);
-        settings.setProperty("db.swaydb.appendix.flush.checkpoint.size.bytes", 1 << 10);
+        settings.setInt("db.swaydb.init.map.size.bytes", 64 << 10);
+        settings.setInt("db.swaydb.segment.size.bytes", 64 << 10);
+        settings.setInt("db.swaydb.appendix.flush.checkpoint.size.bytes", 1 << 10);
 
-        settings.setProperty("db.redis.port", REDIS.port());
+        settings.setInt("db.redis.port", REDIS.port());
 
         if (dbType == DbType.SQL_DB) {
-            settings.storageSettings().enableSql(SQL.settings());
+            settings.updateStorageSettings(storage -> storage.enableSql(SQL.settings()));
             return Testing.testStartup(settings, SQL::setupTestData, SQL.combinedTestingModule());
         }
 

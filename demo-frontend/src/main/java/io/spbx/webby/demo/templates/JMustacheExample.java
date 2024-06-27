@@ -10,8 +10,9 @@ import io.spbx.webby.url.annotate.Serve;
 import io.spbx.webby.url.annotate.View;
 import org.jetbrains.annotations.NotNull;
 
-import java.io.FileNotFoundException;
-import java.io.FileReader;
+import java.io.IOException;
+import java.io.Reader;
+import java.nio.file.Files;
 import java.util.List;
 import java.util.function.Supplier;
 
@@ -36,8 +37,8 @@ public class JMustacheExample {
     // JMustache: can be private
     private record Person(String name, int age) {}
 
-    private static @NotNull Template getTemplate(@NotNull String name) throws FileNotFoundException {
-        FileReader reader = new FileReader("%s/%s".formatted(DevPaths.DEMO_WEB, name));
+    private static @NotNull Template getTemplate(@NotNull String name) throws IOException {
+        Reader reader = Files.newBufferedReader(DevPaths.DEMO_WEB.resolve(name));
         return Mustache.compiler().compile(reader);
     }
 }

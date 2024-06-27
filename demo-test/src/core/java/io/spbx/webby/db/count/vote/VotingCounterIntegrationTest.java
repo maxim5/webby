@@ -15,6 +15,7 @@ import io.spbx.webby.db.count.StoreChangedEvent;
 import io.spbx.webby.db.kv.javamap.JavaMapDbFactory;
 import io.spbx.webby.demo.model.UserRateModelTable;
 import io.spbx.webby.testing.ext.SqlDbExtension;
+import io.spbx.webby.testing.ext.TestingGuiceExtension;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import org.junit.jupiter.api.Tag;
@@ -39,7 +40,8 @@ import static java.util.Objects.requireNonNull;
 
 @Tag("sql")
 public class VotingCounterIntegrationTest {
-    @RegisterExtension static final SqlDbExtension SQL = SqlDbExtension.fromProperties().withManualCleanup(UserRateModelTable.META);
+    @RegisterExtension private static final TestingGuiceExtension GUICE = TestingGuiceExtension.lite();
+    @RegisterExtension private static final SqlDbExtension SQL = SqlDbExtension.fromProperties().withManualCleanup(UserRateModelTable.META);
 
     private static final int A = 1000;
     private static final int B = 2000;

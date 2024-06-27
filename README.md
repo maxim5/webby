@@ -77,7 +77,7 @@ To start the web server locally:
 ```java
 public class Main {
     public static void main(String[] args) throws Exception {
-        AppSettings settings = new AppSettings();
+        AppSettings settings = AppSettings.fromProperties("app.properties");
         settings.setWebPath("src/main/resources/web/");
 
         Webby.nettyBootstrap(settings).runLocally(8080);

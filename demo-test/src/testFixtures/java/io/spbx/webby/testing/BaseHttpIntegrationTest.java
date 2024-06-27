@@ -10,6 +10,7 @@ import io.netty.handler.codec.http.HttpResponse;
 import io.netty.handler.stream.ChunkedWriteHandler;
 import io.spbx.util.testing.TestingBasics;
 import io.spbx.webby.app.AppSettings;
+import io.spbx.webby.app.ClassFilter;
 import io.spbx.webby.netty.dispatch.http.NettyHttpHandler;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
@@ -29,8 +30,8 @@ public abstract class BaseHttpIntegrationTest extends BaseChannelTest {
                                                   @NotNull Module... modules) {
         Injector injector = Testing.testStartup(
             DEFAULT_SETTINGS
-                        .andThen(settings -> settings.handlerFilter().setSingleClassOnly(klass))
-                        .andThen(consumer),
+                .andThen(settings -> settings.setHandlerFilter(ClassFilter.ofSingleClassOnly(klass)))
+                .andThen(consumer),
             // Make sure the initialized handler will be the same instance in tests as in endpoints
             TestingBasics.appendVarArg(TestingModules.singleton(klass), modules)
         );
@@ -94,8 +95,8 @@ public abstract class BaseHttpIntegrationTest extends BaseChannelTest {
 
         Queue<HttpObject> outbound = readAllOutbound(channel);
         return outbound.size() == 1 ?
-                (HttpResponse) outbound.poll() :
-                CompositeHttpResponse.fromObjects(outbound);
+            (HttpResponse) outbound.poll() :
+            CompositeHttpResponse.fromObjects(outbound);
     }
 
     // Will not be necessary if it's possible to close streaming without closing the channel.

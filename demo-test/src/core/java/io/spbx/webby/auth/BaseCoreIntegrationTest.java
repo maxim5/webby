@@ -2,6 +2,7 @@ package io.spbx.webby.auth;
 
 import com.google.inject.Injector;
 import io.spbx.webby.app.AppSettings;
+import io.spbx.webby.app.ClassFilter;
 import io.spbx.webby.auth.session.SessionStore;
 import io.spbx.webby.auth.user.UserStore;
 import io.spbx.webby.db.sql.SqlSettings;
@@ -21,14 +22,14 @@ public abstract class BaseCoreIntegrationTest {
 
     protected static @NotNull Injector startup(@NotNull Scenario scenario, @NotNull SqlSettings sqlSettings) {
         AppSettings settings = Testing.defaultAppSettings();
-        settings.setProperty("user.id.generator.random.enabled", scenario.isRandomIdsEnabled());
-        settings.setProperty("session.id.generator.random.enabled", scenario.isRandomIdsEnabled());
-        settings.modelFilter().setCommonPackageOf(Testing.AUTH_MODELS);
+        settings.setBool("user.id.generator.random.enabled", scenario.isRandomIdsEnabled());
+        settings.setBool("session.id.generator.random.enabled", scenario.isRandomIdsEnabled());
+        settings.setModelFilter(ClassFilter.ofMostCommonPackageTree(Testing.AUTH_MODELS));
         switch (scenario) {
             case SQL ->
-                settings.storageSettings().enableSql(sqlSettings);
+                settings.updateStorageSettings(storage -> storage.enableSql(sqlSettings));
             case KEY_VALUE_RANDOM_ID, KEY_VALUE_AUTO_ID ->
-                settings.storageSettings().enableKeyValue(TestingStorage.KEY_VALUE_DEFAULT);
+                settings.updateStorageSettings(storage -> storage.withKeyValue(TestingStorage.KEY_VALUE_DEFAULT));
         }
         return Testing.testStartup(settings);
     }
