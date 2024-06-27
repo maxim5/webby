@@ -22,6 +22,7 @@ import static io.spbx.util.base.Unchecked.Suppliers.runRethrow;
 import static io.spbx.util.testing.AssertBasics.assertPrivateFieldClass;
 import static io.spbx.util.testing.AssertBasics.getPrivateFieldValue;
 import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.junit.jupiter.api.Assertions.fail;
 
 public class ArgsTest {
     private static final Object NULL = null;
@@ -348,7 +349,7 @@ public class ArgsTest {
                 case "INTS" -> IntArrayList.class;
                 case "LONGS" -> LongArrayList.class;
                 case "GENERIC_LIST" -> ImmutableArrayList.class;
-                default -> throw new AssertionError("Unexpected args.type: " + type);
+                default -> fail("Unexpected args.type: " + type);
             };
             assertInternalType(expectedClass);
             return this;

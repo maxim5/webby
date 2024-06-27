@@ -6,6 +6,7 @@ import com.google.common.primitives.Bytes;
 import com.google.common.primitives.Longs;
 import com.google.common.primitives.UnsignedLong;
 import com.google.errorprone.annotations.Immutable;
+import io.spbx.util.base.EasyExceptions.AssertionErrors;
 import io.spbx.util.base.EasyExceptions.IllegalArgumentExceptions;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.VisibleForTesting;
@@ -323,7 +324,7 @@ public final class DoubleLong extends Number implements Comparable<DoubleLong> {
             n--;
         }
 
-        throw new AssertionError("Internal error. Failed to divide %s / %s".formatted(DoubleLong.fromBits(hi, lo), num));
+        throw AssertionErrors.format("Internal error. Failed to divide %s / %s", DoubleLong.fromBits(hi, lo), num);
     }
 
     private static @NotNull DoubleLong divide128BitUnsigned(long hi1, long lo1, long hi2, long lo2) {
@@ -346,7 +347,7 @@ public final class DoubleLong extends Number implements Comparable<DoubleLong> {
             div = div >> 1;
         }
 
-        throw new AssertionError("Internal error. Failed to divide %s / %s".formatted(fromBits(hi1, lo1), fromBits(hi2, lo2)));
+        throw AssertionErrors.format("Internal error. Failed to divide %s / %s", fromBits(hi1, lo1), fromBits(hi2, lo2));
     }
 
     // Logical ops

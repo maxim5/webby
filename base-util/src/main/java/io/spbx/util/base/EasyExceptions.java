@@ -7,18 +7,6 @@ import org.jetbrains.annotations.Nullable;
 
 public class EasyExceptions {
     public static class AssertionErrors {
-        public static void assure(boolean cond, @NotNull String message, @Nullable Object @NotNull ... args) {
-            if (!cond) {
-                AssertionErrors.fail(message, args);
-            }
-        }
-
-        public static void failIf(boolean cond, @NotNull String message, @Nullable Object @NotNull ... args) {
-            if (cond) {
-                AssertionErrors.fail(message, args);
-            }
-        }
-
         @CanIgnoreReturnValue
         public static <R> R fail(@NotNull String message, @Nullable Object @NotNull ... args) {
             throw AssertionErrors.format(message, args);
