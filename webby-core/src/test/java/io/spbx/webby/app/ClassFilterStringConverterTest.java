@@ -1,6 +1,7 @@
 package io.spbx.webby.app;
 
-import com.google.common.base.MoreObjects;
+import com.google.errorprone.annotations.CanIgnoreReturnValue;
+import com.google.errorprone.annotations.CheckReturnValue;
 import io.spbx.util.base.EasyPrimitives;
 import io.spbx.util.base.Pair;
 import io.spbx.webby.app.ClassFilterStringConverter.PropertyParser;
@@ -14,6 +15,7 @@ import java.nio.charset.StandardCharsets;
 import java.util.List;
 import java.util.stream.IntStream;
 
+import static com.google.common.base.MoreObjects.firstNonNull;
 import static com.google.common.truth.Truth.assertThat;
 import static io.spbx.util.testing.AssertBasics.assertReversibleRoundtrip;
 
@@ -53,7 +55,7 @@ public class ClassFilterStringConverterTest {
     private static void assertFilterRoundtrip(@NotNull ClassFilter input) {
         String forward = ClassFilterStringConverter.TO_STRING.forward(input);
         ClassFilter backward = ClassFilterStringConverter.TO_STRING.backward(forward);
-        assertThat(matchFiles(backward)).isEqualTo(matchFiles(input));
+        assertFilter(backward).isEquivalentTo(input);
     }
 
     @ParameterizedTest
@@ -84,89 +86,125 @@ public class ClassFilterStringConverterTest {
     }
 
     @Test
-    public void parseTerm_defaults() {
-        assertThat(matchFiles(parseTerm("all"))).containsExactlyElementsIn(CLASSPATH);
-        assertThat(matchFiles(parseTerm("none"))).isEmpty();
-        assertThat(matchFiles(parseTerm("default"))).containsExactlyElementsIn(CLASSPATH);
+    public void term_defaults() {
+        assertInput("all").asTerm().matchesAll();
+        assertInput("none").asTerm().matchesNothing();
+        assertInput("default").asTerm().matchesAll();
     }
 
     @Test
-    public void parseTerm_simple_equals() {
-        assertThat(matchFiles(parseTerm("pkg="))).containsExactly("#TopLevel");
-        assertThat(matchFiles(parseTerm("pkg=x.y"))).containsExactly("x.y#Xy");
-        assertThat(matchFiles(parseTerm("cls=Xy"))).containsExactly("x.y#Xy");
-        assertThat(matchFiles(parseTerm("cls=Util"))).containsExactly("a.b.c#Util", "x.y.z#Util");
+    public void term_simple_equals() {
+        assertInput("pkg=").asTerm().matchesFiles("#TopLevel");
+        assertInput("pkg=x.y").asTerm().matchesFiles("x.y#Xy");
+        assertInput("cls=Xy").asTerm().matchesFiles("x.y#Xy");
+        assertInput("cls=Util").asTerm().matchesFiles("a.b.c#Util", "x.y.z#Util");
     }
 
     @Test
-    public void parseTerm_simple_starts_with() {
-        assertThat(matchFiles(parseTerm("pkg~=*"))).containsExactlyElementsIn(CLASSPATH);
-        assertThat(matchFiles(parseTerm("pkg~=x.y*"))).containsExactly("x.y#Xy", "x.y.z#Util", "x.y.z#Util$1");
-        assertThat(matchFiles(parseTerm("cls~=Util*"))).containsExactly("a.b.c#Util", "x.y.z#Util", "x.y.z#Util$1");
-        assertThat(matchFiles(parseTerm("cls~=Main*"))).containsExactly("a.b.c#Main", "a.b.c#Main$1");
+    public void term_simple_starts_with() {
+        assertInput("pkg~=*").asTerm().matchesAll();
+        assertInput("pkg~=x.y*").asTerm().matchesFiles("x.y#Xy", "x.y.z#Util", "x.y.z#Util$1");
+        assertInput("cls~=Util*").asTerm().matchesFiles("a.b.c#Util", "x.y.z#Util", "x.y.z#Util$1");
+        assertInput("cls~=Main*").asTerm().matchesFiles("a.b.c#Main", "a.b.c#Main$1");
     }
 
     @Test
-    public void parseTerm_simple_ends_with() {
-        assertThat(matchFiles(parseTerm("pkg~=*y"))).containsExactly("x.y#Xy");
-        assertThat(matchFiles(parseTerm("pkg~=*z"))).containsExactly("x.y.z#Util", "x.y.z#Util$1");
-        assertThat(matchFiles(parseTerm("cls~=*$1"))).containsExactly("a.b.c#Main$1", "x.y.z#Util$1");
-        assertThat(matchFiles(parseTerm("cls~=*l"))).containsExactly("a.b.c#Util", "x.y.z#Util", "#TopLevel");
-        assertThat(matchFiles(parseTerm("cls~=*$3"))).isEmpty();
+    public void term_simple_ends_with() {
+        assertInput("pkg~=*y").asTerm().matchesFiles("x.y#Xy");
+        assertInput("pkg~=*z").asTerm().matchesFiles("x.y.z#Util", "x.y.z#Util$1");
+        assertInput("cls~=*$1").asTerm().matchesFiles("a.b.c#Main$1", "x.y.z#Util$1");
+        assertInput("cls~=*l").asTerm().matchesFiles("a.b.c#Util", "x.y.z#Util", "#TopLevel");
+        assertInput("cls~=*$3").asTerm().matchesNothing();
     }
 
     @Test
-    public void parseTerm_simple_contains() {
-        assertThat(matchFiles(parseTerm("pkg~=*ab*"))).containsExactly("a.b.ab#Bbb");
-        assertThat(matchFiles(parseTerm("pkg~=*y.*"))).containsExactly("x.y.z#Util", "x.y.z#Util$1");
-        assertThat(matchFiles(parseTerm("cls~=*in*"))).containsExactly("a.b.c#Main", "a.b.c#Main$1");
-        assertThat(matchFiles(parseTerm("cls~=*$*")))
-            .containsExactly("a.b.c#Main$1", "foo.bar.nest#SmallTest.Nested$2", "x.y.z#Util$1");
+    public void term_simple_contains() {
+        assertInput("pkg~=*ab*").asTerm().matchesFiles("a.b.ab#Bbb");
+        assertInput("pkg~=*y.*").asTerm().matchesFiles("x.y.z#Util", "x.y.z#Util$1");
+        assertInput("cls~=*in*").asTerm().matchesFiles("a.b.c#Main", "a.b.c#Main$1");
+        assertInput("cls~=*$*").asTerm().matchesFiles("a.b.c#Main$1", "foo.bar.nest#SmallTest.Nested$2", "x.y.z#Util$1");
     }
 
     @Test
-    public void parseTerm_joint_rules() {
-        assertThat(matchFiles(parseTerm("pkg=x.y,pkg=x.y.z"))).containsExactly("x.y#Xy", "x.y.z#Util", "x.y.z#Util$1");
-        assertThat(matchFiles(parseTerm("pkg=a,pkg=a.bc,pkg=b"))).containsExactly("a#Module", "a.bc#Ccc");
-        assertThat(matchFiles(parseTerm("cls=Main,cls=Util"))).containsExactly("a.b.c#Main", "a.b.c#Util", "x.y.z#Util");
-        assertThat(matchFiles(parseTerm("pkg~=a*,cls=Util"))).containsExactly("a.b.c#Util");
-        assertThat(matchFiles(parseTerm("pkg~=a*,pkg~=x*,cls=Util"))).containsExactly("a.b.c#Util", "x.y.z#Util");
-        assertThat(matchFiles(parseTerm("pkg~=a*,cls~=*$*"))).containsExactly("a.b.c#Main$1");
-        assertThat(matchFiles(parseTerm("pkg~=*b*,cls~=*$*")))
-            .containsExactly("a.b.c#Main$1", "foo.bar.nest#SmallTest.Nested$2");
+    public void term_joint_rules() {
+        assertInput("pkg=x.y,pkg=x.y.z").asTerm().matchesFiles("x.y#Xy", "x.y.z#Util", "x.y.z#Util$1");
+        assertInput("pkg=a,pkg=a.bc,pkg=b").asTerm().matchesFiles("a#Module", "a.bc#Ccc");
+        assertInput("cls=Main,cls=Util").asTerm().matchesFiles("a.b.c#Main", "a.b.c#Util", "x.y.z#Util");
+        assertInput("pkg~=a*,cls=Util").asTerm().matchesFiles("a.b.c#Util");
+        assertInput("pkg~=a*,pkg~=x*,cls=Util").asTerm().matchesFiles("a.b.c#Util", "x.y.z#Util");
+        assertInput("pkg~=a*,cls~=*$*").asTerm().matchesFiles("a.b.c#Main$1");
+        assertInput("pkg~=*b*,cls~=*$*").asTerm().matchesFiles("a.b.c#Main$1", "foo.bar.nest#SmallTest.Nested$2");
     }
 
     @Test
-    public void parse_simple() {
-        assertThat(matchFiles(parse("pkg=a.bc"))).containsExactly("a.bc#Ccc");
-        assertThat(matchFiles(parse("(pkg=a.bc)"))).containsExactly("a.bc#Ccc");
-        assertThat(matchFiles(parse("((pkg=a.bc))"))).containsExactly("a.bc#Ccc");
-        assertThat(matchFiles(parse("(((pkg=a.bc)))"))).containsExactly("a.bc#Ccc");
+    public void expr_simple() {
+        assertInput("pkg=a.bc").asExpr().matchesFiles("a.bc#Ccc");
+        assertInput("(pkg=a.bc)").asExpr().matchesFiles("a.bc#Ccc");
+        assertInput("((pkg=a.bc))").asExpr().matchesFiles("a.bc#Ccc");
+        assertInput("(((pkg=a.bc)))").asExpr().matchesFiles("a.bc#Ccc");
 
-        assertThat(matchFiles(parse("(pkg=a.b.c)&(cls=Util)"))).containsExactly("a.b.c#Util");
-        assertThat(matchFiles(parse("((pkg=a.b.c)&(cls=Util))"))).containsExactly("a.b.c#Util");
-        assertThat(matchFiles(parse("(((pkg=a.b.c))&((cls=Util)))"))).containsExactly("a.b.c#Util");
+        assertInput("(pkg=a.b.c)&(cls=Util)").asExpr().matchesFiles("a.b.c#Util");
+        assertInput("((pkg=a.b.c)&(cls=Util))").asExpr().matchesFiles("a.b.c#Util");
+        assertInput("(((pkg=a.b.c))&((cls=Util)))").asExpr().matchesFiles("a.b.c#Util");
 
-        assertThat(matchFiles(parse("(pkg=a.b.c)|(cls=Main)"))).containsExactly("a.b.c#Main", "a.b.c#Main$1", "a.b.c#Util");
-        assertThat(matchFiles(parse("(pkg=abc)|(cls=Main)"))).containsExactly("a.b.c#Main");
-        assertThat(matchFiles(parse("(pkg=a.b.c)|(cls=No)"))).containsExactly("a.b.c#Main", "a.b.c#Main$1", "a.b.c#Util");
+        assertInput("(pkg=a.b.c)|(cls=Main)").asExpr().matchesFiles("a.b.c#Main", "a.b.c#Main$1", "a.b.c#Util");
+        assertInput("(pkg=abc)|(cls=Main)").asExpr().matchesFiles("a.b.c#Main");
+        assertInput("(pkg=a.b.c)|(cls=No)").asExpr().matchesFiles("a.b.c#Main", "a.b.c#Main$1", "a.b.c#Util");
 
-        assertThat(matchFiles(parse("!(pkg~=*.*)"))).containsExactly("a#Module", "#TopLevel");
+        assertInput("!(pkg~=*.*)").asExpr().matchesFiles("a#Module", "#TopLevel");
     }
 
-    private static @NotNull ClassFilter parse(@NotNull String input) {
-        return MoreObjects.firstNonNull(new PropertyParser(input).parse(), ClassFilter.DEFAULT);
+    @CheckReturnValue
+    private static @NotNull InputSubject assertInput(@NotNull String input) {
+        return new InputSubject(input);
     }
 
-    private static @NotNull ClassFilter parseTerm(@NotNull String input) {
-        return new PropertyParser(input).parseTerm();
+    @CheckReturnValue
+    private static @NotNull FilterSubject assertFilter(@NotNull ClassFilter filter) {
+        return new FilterSubject(filter);
     }
 
-    private static @NotNull List<String> matchFiles(@NotNull ClassFilter filter) {
-        return CLASSPATH.stream().filter(fullName -> {
-            assert fullName.contains("#") : "Forgot the separator in the test data. Expected `#`, found: " + fullName;
-            Pair<String, String> pair = Pair.of(fullName.split("#"));
-            return filter.test(pair.first(), pair.second());
-        }).toList();
+    @CanIgnoreReturnValue
+    private record InputSubject(@NotNull String input) {
+        public @NotNull FilterSubject asExpr() {
+            ClassFilter filter = firstNonNull(new PropertyParser(input).parse(), ClassFilter.DEFAULT);
+            return assertFilter(filter);
+        }
+
+        public @NotNull FilterSubject asTerm() {
+            ClassFilter filter = new PropertyParser(input).parseTerm();
+            return assertFilter(filter);
+        }
+    }
+
+    @CanIgnoreReturnValue
+    private record FilterSubject(@NotNull ClassFilter filter) {
+        public @NotNull FilterSubject isEquivalentTo(@NotNull ClassFilter other) {
+            assertThat(matchFiles(filter)).isEqualTo(matchFiles(other));
+            return this;
+        }
+
+        public @NotNull FilterSubject matchesFiles(@NotNull String @NotNull ... files) {
+           assertThat(matchFiles(filter)).containsExactlyElementsIn(files);
+           return this;
+        }
+
+        public @NotNull FilterSubject matchesAll() {
+            assertThat(matchFiles(filter)).containsAtLeastElementsIn(CLASSPATH);
+            return this;
+        }
+
+        public @NotNull FilterSubject matchesNothing() {
+            assertThat(matchFiles(filter)).isEmpty();
+            return this;
+        }
+
+        private static @NotNull List<String> matchFiles(@NotNull ClassFilter filter) {
+            return CLASSPATH.stream().filter(fullName -> {
+                assert fullName.contains("#") : "Forgot the separator in the test data. Expected `#`, found: " + fullName;
+                Pair<String, String> pair = Pair.of(fullName.split("#"));
+                return filter.test(pair.first(), pair.second());
+            }).toList();
+        }
     }
 }
