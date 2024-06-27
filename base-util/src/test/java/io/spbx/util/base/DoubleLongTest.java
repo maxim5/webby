@@ -227,6 +227,38 @@ public class DoubleLongTest {
         }
     }
 
+    /** {@link DoubleLong#increment()} */
+
+    @ParameterizedTest
+    @ValueSource(longs = { 0, 1, -1, Integer.MAX_VALUE, Integer.MIN_VALUE, Long.MIN_VALUE, Long.MAX_VALUE - 1 })
+    public void increment_simple_long(long num) {
+        assertThat(DoubleLong.from(num).increment()).isEqualTo(DoubleLong.from(num + 1));
+    }
+
+    @Test
+    public void increment_ultimate() {
+        for (BigInteger num : BIG_INTEGERS) {
+            BigInteger expected = fitIntoSigned128Bits(num.add(BigInteger.ONE));
+            assertThat(DoubleLong.from(num).increment()).isEqualTo(DoubleLong.from(expected));
+        }
+    }
+
+    /** {@link DoubleLong#decrement()} */
+
+    @ParameterizedTest
+    @ValueSource(longs = { 0, 1, -1, Integer.MAX_VALUE, Integer.MIN_VALUE, Long.MIN_VALUE + 1, Long.MAX_VALUE })
+    public void decrement_simple_long(long num) {
+        assertThat(DoubleLong.from(num).decrement()).isEqualTo(DoubleLong.from(num - 1));
+    }
+
+    @Test
+    public void decrement_ultimate() {
+        for (BigInteger num : BIG_INTEGERS) {
+            BigInteger expected = fitIntoSigned128Bits(num.subtract(BigInteger.ONE));
+            assertThat(DoubleLong.from(num).decrement()).isEqualTo(DoubleLong.from(expected));
+        }
+    }
+
     /** {@link DoubleLong#fitsIntoLong()} */
 
     private static final List<DoubleLong> FIT_INTO_LONG =
