@@ -18,10 +18,6 @@ import static java.util.Objects.requireNonNull;
 
 @CheckReturnValue
 public interface PropertyMap {
-    static @NotNull PropertyMap system() {
-        return System::getProperty;
-    }
-
     @Nullable String getOrNull(@NotNull String key);
     default @Nullable String getOrNull(@NotNull Property property) { return getOrNull(property.key()); }
     default @Nullable String getOrDie(@NotNull String key) { return requireNonNull(getOrNull(key)); }
@@ -85,6 +81,10 @@ public interface PropertyMap {
     }
     default <T extends Enum<T>> @NotNull T getEnum(@NotNull EnumProperty<T> property) {
         return getEnum(property.key(), property.def());
+    }
+
+    static @NotNull PropertyMap system() {
+        return System::getProperty;
     }
 
     default @NotNull PropertyMap chainedWith(@NotNull PropertyMap backup) {

@@ -41,6 +41,12 @@ public class EasyIo {
     }
 
     public static class Close {
+        public static final Closeable EMPTY = () -> {};
+
+        public static @NotNull Closeable asCloseable(@Nullable Object obj) {
+            return obj instanceof Closeable closeable ? closeable : EMPTY;
+        }
+
         public static void closeQuietly(@Nullable Closeable closeable) {
             try {
                 Closeables.close(closeable, true);

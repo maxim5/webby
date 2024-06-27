@@ -41,15 +41,24 @@ public interface MutablePropertyMap extends PropertyMap {
         return setEnum(prop.key(), val);
     }
 
+    static @NotNull MutablePropertyMap system() {
+        return new MutablePropertyMap() {
+            @Override public @Nullable String getOrNull(@NotNull String key) {
+                return System.getProperty(key);
+            }
+            @Override public @Nullable String setString(@NotNull String key, @NotNull String val) {
+                return System.setProperty(key, val);
+            }
+        };
+    }
+
     @Override
     default @NotNull MutablePropertyMap chainedWith(@NotNull PropertyMap backup) {
         return new MutablePropertyMap() {
-            @Override
-            public @Nullable String setString(@NotNull String key, @NotNull String val) {
+            @Override public @Nullable String setString(@NotNull String key, @NotNull String val) {
                 return MutablePropertyMap.this.setString(key, val);
             }
-            @Override
-            public @Nullable String getOrNull(@NotNull String key) {
+            @Override public @Nullable String getOrNull(@NotNull String key) {
                 return firstNonNullIfExist(MutablePropertyMap.this.getOrNull(key), () -> backup.getOrNull(key));
             }
         };

@@ -1,6 +1,8 @@
 package io.spbx.webby.app;
 
 import com.google.inject.Inject;
+import io.spbx.util.io.EasyIo;
+import io.spbx.util.props.InMemoryProperties;
 import io.spbx.util.props.MutableLiveProperties;
 import io.spbx.util.props.MutablePropertyMap;
 import io.spbx.util.props.PropertyMap;
@@ -25,7 +27,7 @@ import static java.util.Objects.requireNonNull;
 
 public final class AppSettings implements Settings, MutablePropertyMap {
     private static final AtomicReference<PropertyMap> liveRef = new AtomicReference<>();
-    private final MutableLiveProperties properties;
+    private final MutablePropertyMap properties;
 
     private ClassFilter modelFilter;
     private ClassFilter handlerFilter;
@@ -33,7 +35,7 @@ public final class AppSettings implements Settings, MutablePropertyMap {
     private QueryParser urlParser;
     private StorageSettings storageSettings;
 
-    private AppSettings(@NotNull MutableLiveProperties properties) {
+    private AppSettings(@NotNull MutablePropertyMap properties) {
         this.properties = properties;
         liveRef.set(properties);
 
@@ -45,7 +47,7 @@ public final class AppSettings implements Settings, MutablePropertyMap {
     }
 
     public static @NotNull AppSettings inMemoryForDevOnly() {
-        return new AppSettings(MutableLiveProperties.idle(Path.of("%in-memory-for-dev-only%")));
+        return new AppSettings(new InMemoryProperties().chainedWith(PropertyMap.system()));
     }
 
     public static @NotNull AppSettings fromProperties(@NotNull Path path) {
@@ -63,7 +65,7 @@ public final class AppSettings implements Settings, MutablePropertyMap {
     @Inject
     private void init(@NotNull Lifetime lifetime) {
         lifetime.onTerminate(() -> liveRef.set(null));
-        lifetime.onTerminate(properties);
+        lifetime.onTerminate(EasyIo.Close.asCloseable(properties));
     }
 
     @CheckReturnValue
