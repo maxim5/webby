@@ -136,7 +136,7 @@ public class DoubleLongTest {
         assertThat(DoubleLong.MIN_VALUE.compareTo(DoubleLong.MAX_VALUE)).isEqualTo(-1);
     }
 
-    /** {@link DoubleLong#fromBits}} and {@link DoubleLong#from} */
+    /** {@link DoubleLong#fromBits}}, {@link DoubleLong#from}, {@link DoubleLong#fromHex} */
 
     @Test
     public void construction_from_bits_long_trivial() {
@@ -154,8 +154,8 @@ public class DoubleLongTest {
 
         assertThat(DoubleLong.fromBits(0, Long.MAX_VALUE)).isEqualTo(DoubleLong.from(BigInteger.valueOf(Long.MAX_VALUE)));
         assertThat(DoubleLong.fromBits(0, Long.MIN_VALUE)).isEqualTo(DoubleLong.from(BigInteger.valueOf(Long.MIN_VALUE).negate()));
-        // assertThat(DoubleLong.fromBits(Long.MAX_VALUE, 0)).isEqualTo();
-        // assertThat(DoubleLong.fromBits(Long.MIN_VALUE, 0)).isEqualTo();
+        assertThat(DoubleLong.fromBits(Long.MAX_VALUE, 0)).isEqualTo(DoubleLong.ONE.shiftLeft(127).subtract(DoubleLong.ONE.shiftLeft(64)));
+        assertThat(DoubleLong.fromBits(Long.MIN_VALUE, 0)).isEqualTo(DoubleLong.ONE.negate().shiftLeft(127));
     }
 
     @ParameterizedTest
@@ -163,14 +163,40 @@ public class DoubleLongTest {
         "0", "1", "2147483647", "2147483648", "9223372036854775807", "9223372036854775808",
         "-1", "-2147483647", "-2147483648", "-9223372036854775807", "-9223372036854775808",
     })
-    public void construction_simple(String num) {
+    public void construction_from_string_simple(String num) {
         assertConstruction(num);
     }
 
     @Test
-    public void construction_ultimate() {
+    public void construction_from_string_ultimate() {
         for (BigInteger num : BIG_INTEGERS) {
             assertConstruction(num.toString());
+        }
+    }
+
+    @ParameterizedTest
+    @ValueSource(strings = {
+        "0", "1", "10", "ff", "7f", "aaa", "abcd", "ffff_ffff"
+    })
+    public void construction_from_hex_simple_long(String hex) {
+        long num = Long.parseLong(hex.replaceAll("_", ""), 16);
+        DoubleLong expected = DoubleLong.from(num);
+
+        assertThat(DoubleLong.fromHex(hex)).isEqualTo(expected);
+        assertThat(DoubleLong.fromHex(hex.toUpperCase())).isEqualTo(expected);
+        assertThat(DoubleLong.fromHex("0x" + hex)).isEqualTo(expected);
+        assertThat(DoubleLong.fromHex("0x0000" + hex)).isEqualTo(expected);
+
+        assertThat(DoubleLong.fromHex("-" + hex)).isEqualTo(expected.negate());
+        assertThat(DoubleLong.fromHex("-" + hex.toUpperCase())).isEqualTo(expected.negate());
+        assertThat(DoubleLong.fromHex("-0x" + hex)).isEqualTo(expected.negate());
+        assertThat(DoubleLong.fromHex("-0x0000" + hex)).isEqualTo(expected.negate());
+    }
+
+    @Test
+    public void construction_from_hex_ultimate() {
+        for (BigInteger num : BIG_INTEGERS) {
+            assertThat(DoubleLong.fromHex(num.toString(16))).isEqualTo(DoubleLong.from(num));
         }
     }
 
