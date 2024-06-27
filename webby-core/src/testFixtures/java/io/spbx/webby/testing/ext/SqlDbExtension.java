@@ -52,7 +52,7 @@ public class SqlDbExtension implements BeforeAllCallback, AfterAllCallback,
     }
 
     public static @NotNull SqlDbExtension fromProperties() {
-        return from(TestingProps.propsSqlSettings());
+        return from(TestingProps.testSqlSettings());
     }
 
     public @NotNull SqlDbExtension withSavepoints() {

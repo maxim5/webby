@@ -52,7 +52,7 @@ public class StressNettyMain {
         settings.updateStorageSettings(
             storage -> storage
                 .withKeyValue(TestingStorage.KEY_VALUE_DEFAULT)
-                .enableSql(TestingProps.propsSqlSettings())
+                .enableSql(TestingProps.testSqlSettings())
         );
         settings.setProfileMode(Toggle.DISABLED);
         settings.setInt("db.sql.connection.expiration.millis", 10_000);

@@ -2,6 +2,7 @@ package io.spbx.webby.testing;
 
 import com.google.common.flogger.FluentLogger;
 import io.spbx.orm.api.Engine;
+import io.spbx.util.props.PropertyMap;
 import io.spbx.webby.db.sql.SqlSettings;
 import org.jetbrains.annotations.NotNull;
 
@@ -24,15 +25,15 @@ public class TestingProps {
                    value == null || condition.test(value));
     }
 
-    public static @NotNull SqlSettings propsSqlSettings() {
-        String engineValue = System.getProperty("test.sql.engine");
+    public static @NotNull SqlSettings testSqlSettingsFromProperties(@NotNull PropertyMap map) {
+        String engineValue = map.getOrNull("test.sql.engine");
         if (engineValue != null) {
             Engine engine = Engine.fromJdbcType(engineValue.toLowerCase());
             assert engine != Engine.Unknown : "Failed to detect SQL engine: " + engineValue;
             log.at(Level.INFO).log("[SQL] Detected engine: %s", engine);
             return SqlSettings.inMemoryForDevOnly(engine);
         }
-        String url = System.getProperty("test.sql.url");
+        String url = map.getOrNull("test.sql.url");
         if (url != null) {
             Engine engine = SqlSettings.parseEngineFromUrl(url);
             assert engine != Engine.Unknown : "Failed to detect SQL engine: " + url;
@@ -41,5 +42,9 @@ public class TestingProps {
         }
         log.at(Level.INFO).log("[SQL] Test SQL properties not found. Using default SQLite in memory");
         return SqlSettings.SQLITE_IN_MEMORY;
+    }
+
+    public static @NotNull SqlSettings testSqlSettings() {
+        return testSqlSettingsFromProperties(PropertyMap.system());
     }
 }
