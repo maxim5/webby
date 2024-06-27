@@ -4,6 +4,7 @@ import com.google.errorprone.annotations.CanIgnoreReturnValue;
 import com.google.errorprone.annotations.CheckReturnValue;
 import io.spbx.util.base.EasyPrimitives;
 import io.spbx.util.base.Pair;
+import io.spbx.util.classpath.ClassNamePredicate;
 import io.spbx.webby.app.ClassFilterStringConverter.PropertyParser;
 import org.jetbrains.annotations.NotNull;
 import org.junit.jupiter.api.Test;
@@ -39,7 +40,7 @@ public class ClassFilterStringConverterTest {
     );
 
     @Test
-    public void filter_roundtrip() {
+    public void class_filter_conversion_roundtrip() {
         assertFilterRoundtrip(ClassFilter.ALL);
         assertFilterRoundtrip(ClassFilter.NONE);
         assertFilterRoundtrip(ClassFilter.DEFAULT);
@@ -50,12 +51,6 @@ public class ClassFilterStringConverterTest {
         assertFilterRoundtrip(ClassFilter.of((pkg, cls) -> cls.endsWith("l")));
         assertFilterRoundtrip(ClassFilter.of((pkg, cls) -> pkg.startsWith("a.") && cls.endsWith("$1")));
         assertFilterRoundtrip(ClassFilter.of((pkg, cls) -> pkg.startsWith("a.") || cls.endsWith("$1")));
-    }
-
-    private static void assertFilterRoundtrip(@NotNull ClassFilter input) {
-        String forward = ClassFilterStringConverter.TO_STRING.forward(input);
-        ClassFilter backward = ClassFilterStringConverter.TO_STRING.backward(forward);
-        assertFilter(backward).isEquivalentTo(input);
     }
 
     @ParameterizedTest
@@ -69,20 +64,6 @@ public class ClassFilterStringConverterTest {
     public void base64_roundtrip_all_bytes() {
         byte[] bytes = IntStream.range(Byte.MIN_VALUE, Byte.MAX_VALUE + 1).boxed().collect(EasyPrimitives.toByteArray());
         assertBase64Roundtrip(bytes, ":", StandardCharsets.US_ASCII);
-    }
-
-    private static void assertBase64Roundtrip(@NotNull String expected, @NotNull String prefix, @NotNull Charset charset) {
-        byte[] decoded = assertBase64Roundtrip(expected.getBytes(charset), prefix, charset);
-        String actual = new String(decoded, charset);
-        assertThat(actual).isEqualTo(expected);
-    }
-
-    private static byte[] assertBase64Roundtrip(byte @NotNull [] expected, @NotNull String prefix, @NotNull Charset charset) {
-        String encoded = ClassFilterStringConverter.encodeBase64(expected, prefix, charset);
-        byte[] decoded = ClassFilterStringConverter.decodeBase64(encoded, prefix, charset);
-        assertThat(decoded).isEqualTo(expected);
-        assertReversibleRoundtrip(ClassFilterStringConverter.BASE64_CONVERTER, expected);
-        return decoded;
     }
 
     @Test
@@ -137,21 +118,34 @@ public class ClassFilterStringConverterTest {
     }
 
     @Test
-    public void expr_simple() {
+    public void expr_simple_brackets() {
         assertInput("pkg=a.bc").asExpr().matchesFiles("a.bc#Ccc");
         assertInput("(pkg=a.bc)").asExpr().matchesFiles("a.bc#Ccc");
         assertInput("((pkg=a.bc))").asExpr().matchesFiles("a.bc#Ccc");
         assertInput("(((pkg=a.bc)))").asExpr().matchesFiles("a.bc#Ccc");
+    }
 
+    @Test
+    public void expr_simple_boolean_and() {
         assertInput("(pkg=a.b.c)&(cls=Util)").asExpr().matchesFiles("a.b.c#Util");
         assertInput("((pkg=a.b.c)&(cls=Util))").asExpr().matchesFiles("a.b.c#Util");
         assertInput("(((pkg=a.b.c))&((cls=Util)))").asExpr().matchesFiles("a.b.c#Util");
+    }
 
+    @Test
+    public void expr_simple_boolean_or() {
         assertInput("(pkg=a.b.c)|(cls=Main)").asExpr().matchesFiles("a.b.c#Main", "a.b.c#Main$1", "a.b.c#Util");
         assertInput("(pkg=abc)|(cls=Main)").asExpr().matchesFiles("a.b.c#Main");
         assertInput("(pkg=a.b.c)|(cls=No)").asExpr().matchesFiles("a.b.c#Main", "a.b.c#Main$1", "a.b.c#Util");
+        assertInput("(pkg~=a.b.*)|(pkg=)").asExpr().isEquivalentTo((pkg, cls) -> pkg.startsWith("a.b.") || pkg.isEmpty());
+    }
 
-        assertInput("!(pkg~=*.*)").asExpr().matchesFiles("a#Module", "#TopLevel");
+    @Test
+    public void expr_simple_boolean_not() {
+        assertInput("!(pkg~=*.*)").asExpr().isEquivalentTo((pkg, cls) -> !pkg.contains("."));
+        assertInput("!(pkg~=*bar*)").asExpr().isEquivalentTo((pkg, cls) -> !pkg.contains("bar"));
+        assertInput("!(cls=Main)").asExpr().isEquivalentTo((pkg, cls) -> !cls.equals("Main"));
+        assertInput("!(cls~=*Test)").asExpr().isEquivalentTo((pkg, cls) -> !cls.endsWith("Test"));
     }
 
     @CheckReturnValue
@@ -184,6 +178,10 @@ public class ClassFilterStringConverterTest {
             return this;
         }
 
+        public @NotNull FilterSubject isEquivalentTo(@NotNull ClassNamePredicate predicate) {
+            return isEquivalentTo(ClassFilter.of(predicate));
+        }
+
         public @NotNull FilterSubject matchesFiles(@NotNull String @NotNull ... files) {
            assertThat(matchFiles(filter)).containsExactlyElementsIn(files);
            return this;
@@ -206,5 +204,25 @@ public class ClassFilterStringConverterTest {
                 return filter.test(pair.first(), pair.second());
             }).toList();
         }
+    }
+
+    private static void assertFilterRoundtrip(@NotNull ClassFilter input) {
+        String forward = ClassFilterStringConverter.TO_STRING.forward(input);
+        ClassFilter backward = ClassFilterStringConverter.TO_STRING.backward(forward);
+        assertFilter(backward).isEquivalentTo(input);
+    }
+
+    private static void assertBase64Roundtrip(@NotNull String expected, @NotNull String prefix, @NotNull Charset charset) {
+        byte[] decoded = assertBase64Roundtrip(expected.getBytes(charset), prefix, charset);
+        String actual = new String(decoded, charset);
+        assertThat(actual).isEqualTo(expected);
+    }
+
+    private static byte[] assertBase64Roundtrip(byte @NotNull [] expected, @NotNull String prefix, @NotNull Charset charset) {
+        String encoded = ClassFilterStringConverter.encodeBase64(expected, prefix, charset);
+        byte[] decoded = ClassFilterStringConverter.decodeBase64(encoded, prefix, charset);
+        assertThat(decoded).isEqualTo(expected);
+        assertReversibleRoundtrip(ClassFilterStringConverter.BASE64_CONVERTER, expected);
+        return decoded;
     }
 }
