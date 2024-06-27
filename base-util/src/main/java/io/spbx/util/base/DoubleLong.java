@@ -50,6 +50,8 @@ public final class DoubleLong extends Number implements Comparable<DoubleLong> {
         this.low = low;
     }
 
+    /* Construction */
+
     public static @NotNull DoubleLong fromBits(long highBits, long lowBits) {
         return new DoubleLong(highBits, lowBits);
     }
@@ -115,7 +117,7 @@ public final class DoubleLong extends Number implements Comparable<DoubleLong> {
         return from(toBigInteger(value));
     }
 
-    // Bit-level conversions
+    /* Bit-level conversions */
 
     public long highBits() {
         return high;
@@ -149,7 +151,7 @@ public final class DoubleLong extends Number implements Comparable<DoubleLong> {
         return UnsignedLong.fromLongBits(low);
     }
 
-    // Comparison
+    /* Comparison */
 
     @Override
     public int compareTo(@NotNull DoubleLong that) {
@@ -182,7 +184,7 @@ public final class DoubleLong extends Number implements Comparable<DoubleLong> {
         return compare(lhs, rhs) < 0 ? lhs : rhs;
     }
 
-    // Sign
+    /* Sign */
 
     public int signum() {
         return high != 0 ? Long.signum(high) : low == 0 ? 0 : 1;
@@ -209,7 +211,7 @@ public final class DoubleLong extends Number implements Comparable<DoubleLong> {
         return flip ? this.negate() : this;
     }
 
-    // `Number` conversions
+    /* `Number` conversions */
 
     @Override
     public int intValue() {
@@ -235,7 +237,7 @@ public final class DoubleLong extends Number implements Comparable<DoubleLong> {
         return (high == 0 && low >= 0) || (high == -1 && low < 0);
     }
 
-    // Math and arithmetic
+    /* Math and arithmetic */
 
     public @NotNull DoubleLong increment() {
         return low == -1 ? DoubleLong.fromBits(high + 1, 0) : DoubleLong.fromBits(high, low + 1);
@@ -350,7 +352,7 @@ public final class DoubleLong extends Number implements Comparable<DoubleLong> {
         throw AssertionErrors.format("Internal error. Failed to divide %s / %s", fromBits(hi1, lo1), fromBits(hi2, lo2));
     }
 
-    // Logical ops
+    /* Logical ops */
 
     public @NotNull DoubleLong not() {
         return DoubleLong.fromBits(~high, ~low);
@@ -387,6 +389,7 @@ public final class DoubleLong extends Number implements Comparable<DoubleLong> {
                 fromBits(0, high >>> (len - 64));
     }
 
+    // unsigned version
     public @NotNull DoubleLong shiftRightUnsigned(int len) {
         if (len < 0) return shiftLeft(-len);
         if (len == 0) return this;
@@ -395,11 +398,15 @@ public final class DoubleLong extends Number implements Comparable<DoubleLong> {
             fromBits(0, high >>> (len - 64));
     }
 
-    // `Object` methods
+    /* `Object` methods */
 
     @Override
     public boolean equals(Object object) {
         return object instanceof DoubleLong that && high == that.high && low == that.low;
+    }
+
+    public boolean equals(long value) {
+        return low == value && high == (value >= 0 ? 0 : -1);
     }
 
     @Override
@@ -407,7 +414,7 @@ public final class DoubleLong extends Number implements Comparable<DoubleLong> {
         return Long.hashCode(high) ^ Long.hashCode(low);
     }
 
-    // `String` representations
+    /* `String` representations */
 
     @Override
     public @NotNull String toString() {
@@ -434,7 +441,7 @@ public final class DoubleLong extends Number implements Comparable<DoubleLong> {
         return makeGroups(toHexString(), 4);
     }
 
-    // Implementation details
+    /* Implementation details */
 
     @VisibleForTesting
     static long intsToLong(int high, int low) {

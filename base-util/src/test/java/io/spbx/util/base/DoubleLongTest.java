@@ -703,6 +703,8 @@ public class DoubleLongTest {
         assertThat(value.floatValue()).isEqualTo((float) num);
         assertThat(value.doubleValue()).isEqualTo((double) num);
 
+        assertThat(value.equals(num)).isTrue();
+        assertThat(value.equals(~num)).isFalse();
         assertThat(value.toString()).isEqualTo(String.valueOf(num));
         assertThat(value.toBigInteger()).isEqualTo(new BigInteger(String.valueOf(num)));
 
