@@ -79,10 +79,12 @@ public class CharArray implements CharSequence, Comparable<CharArray> {
     @Override
     public char charAt(int index) {
         assert index >= 0 : "Index can't be negative: %d".formatted(index);
+        assert index < length() : "Index is out of bounds: %d".formatted(index);
         return chars[start + index];
     }
 
     public int at(int index) {
+        index = index >= 0 ? index : index + length();  // allows negative from the end (-1 is `length()-1`)
         return index >= 0 && index < length() ? chars[start + index] : -1;
     }
 

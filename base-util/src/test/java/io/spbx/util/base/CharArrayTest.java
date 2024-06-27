@@ -72,6 +72,42 @@ public class CharArrayTest {
     }
 
     @Test
+    public void char_at() {
+        CharArray array = new CharArray("foobar");
+
+        assertThat(array.charAt(0)).isEqualTo('f');
+        assertThat(array.charAt(1)).isEqualTo('o');
+        assertThat(array.charAt(2)).isEqualTo('o');
+        assertThat(array.charAt(3)).isEqualTo('b');
+        assertThat(array.charAt(4)).isEqualTo('a');
+        assertThat(array.charAt(5)).isEqualTo('r');
+        assertThrows(AssertionError.class, () -> array.charAt(-1));
+        assertThrows(AssertionError.class, () -> array.charAt(6));
+    }
+
+    @Test
+    public void at() {
+        CharArray array = new CharArray("foobar");
+
+        assertThat(array.at(0)).isEqualTo('f');
+        assertThat(array.at(1)).isEqualTo('o');
+        assertThat(array.at(2)).isEqualTo('o');
+        assertThat(array.at(3)).isEqualTo('b');
+        assertThat(array.at(4)).isEqualTo('a');
+        assertThat(array.at(5)).isEqualTo('r');
+        assertThat(array.at(6)).isEqualTo(-1);
+        assertThat(array.at(-1)).isEqualTo('r');
+        assertThat(array.at(-2)).isEqualTo('a');
+        assertThat(array.at(-3)).isEqualTo('b');
+        assertThat(array.at(-4)).isEqualTo('o');
+        assertThat(array.at(-5)).isEqualTo('o');
+        assertThat(array.at(-6)).isEqualTo('f');
+        assertThat(array.at(-7)).isEqualTo(-1);
+        assertThat(array.at(+100)).isEqualTo(-1);
+        assertThat(array.at(-100)).isEqualTo(-1);
+    }
+
+    @Test
     public void indexOf() {
         CharArray array = new CharArray("foo-bar-baz");
 
