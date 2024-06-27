@@ -298,6 +298,45 @@ public class CharArrayTest {
     }
 
     @Test
+    public void trim_by_predicate() {
+        assertThat(new CharArray("").trimStart(Character::isDigit)).isEqualTo(new CharArray(""));
+        assertThat(new CharArray("").trimStart(Character::isDigit)).isEqualTo(new CharArray(""));
+        assertThat(new CharArray("").trimStart(Character::isDigit)).isEqualTo(new CharArray(""));
+
+        assertThat(new CharArray("foobar").trimStart(Character::isDigit)).isEqualTo(new CharArray("foobar"));
+        assertThat(new CharArray("foobar").trimEnd(Character::isDigit)).isEqualTo(new CharArray("foobar"));
+        assertThat(new CharArray("foobar").trim(Character::isDigit)).isEqualTo(new CharArray("foobar"));
+
+        assertThat(new CharArray("123foobar456").trimStart(Character::isDigit)).isEqualTo(new CharArray("foobar456"));
+        assertThat(new CharArray("123foobar456").trimEnd(Character::isDigit)).isEqualTo(new CharArray("123foobar"));
+        assertThat(new CharArray("123foobar456").trim(Character::isDigit)).isEqualTo(new CharArray("foobar"));
+
+        assertThat(new CharArray("123").trimStart(Character::isDigit)).isEqualTo(new CharArray(""));
+        assertThat(new CharArray("123").trimStart(Character::isDigit)).isEqualTo(new CharArray(""));
+        assertThat(new CharArray("123").trimStart(Character::isDigit)).isEqualTo(new CharArray(""));
+    }
+
+    @Test
+    public void trim_char() {
+        assertThat(new CharArray("").trim('a')).isEqualTo(new CharArray(""));
+        assertThat(new CharArray("bbb").trim('a')).isEqualTo(new CharArray("bbb"));
+        assertThat(new CharArray("abba").trim('a')).isEqualTo(new CharArray("bb"));
+        assertThat(new CharArray("baba").trim('a')).isEqualTo(new CharArray("bab"));
+        assertThat(new CharArray("aba").trim('a')).isEqualTo(new CharArray("b"));
+        assertThat(new CharArray("a-a-a").trim('a')).isEqualTo(new CharArray("-a-"));
+        assertThat(new CharArray("aaa").trim('a')).isEqualTo(new CharArray(""));
+    }
+
+    @Test
+    public void trim_spaces() {
+        assertThat(new CharArray("").trim()).isEqualTo(new CharArray(""));
+        assertThat(new CharArray(" ").trim()).isEqualTo(new CharArray(""));
+        assertThat(new CharArray("    ").trim()).isEqualTo(new CharArray(""));
+        assertThat(new CharArray("  \t\n\r").trim()).isEqualTo(new CharArray(""));
+        assertThat(new CharArray("\nfoo bar  \t\t").trim()).isEqualTo(new CharArray("foo bar"));
+    }
+
+    @Test
     public void commonPrefix() {
         assertThat(new CharArray("foo").commonPrefix("bar")).isEqualTo(0);
         assertThat(new CharArray("bar").commonPrefix("baz")).isEqualTo(2);

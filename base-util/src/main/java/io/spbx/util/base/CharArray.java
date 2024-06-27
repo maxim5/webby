@@ -8,6 +8,7 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.function.Consumer;
 import java.util.function.IntConsumer;
+import java.util.function.IntPredicate;
 import java.util.stream.IntStream;
 
 /**
@@ -128,12 +129,12 @@ public class CharArray implements CharSequence, Comparable<CharArray> {
 
     public boolean startsWith(CharArray prefix) {
         return length() >= prefix.length() &&
-                Arrays.equals(chars, start, start + prefix.length(), prefix.chars, prefix.start, prefix.end);
+               Arrays.equals(chars, start, start + prefix.length(), prefix.chars, prefix.start, prefix.end);
     }
 
     public boolean endsWith(CharArray suffix) {
         return length() >= suffix.length() &&
-                Arrays.equals(chars, end - suffix.length(), end, suffix.chars, suffix.start, suffix.end);
+               Arrays.equals(chars, end - suffix.length(), end, suffix.chars, suffix.start, suffix.end);
     }
 
     public boolean startsWith(char ch) {
@@ -294,6 +295,35 @@ public class CharArray implements CharSequence, Comparable<CharArray> {
         List<CharArray> list = new ArrayList<>();
         split(ch, list::add);
         return list;
+    }
+
+    public CharArray trimStart(IntPredicate check) {
+        int i = start;
+        while (i < end && check.test(chars[i])) {
+            ++i;
+        }
+        return i == start ? this : new CharArray(chars, i, end);
+    }
+
+    public CharArray trimEnd(IntPredicate check) {
+        int i = end - 1;
+        while (i >= start && check.test(chars[i])) {
+            --i;
+        }
+        ++i;
+        return i == end ? this : new CharArray(chars, start, i);
+    }
+
+    public CharArray trim(IntPredicate check) {
+        return trimStart(check).trimEnd(check);
+    }
+
+    public CharArray trim(char ch) {
+        return trim(value -> value == ch);
+    }
+
+    public CharArray trim() {
+        return trim(Character::isWhitespace);
     }
 
     // Returns the length of the common prefix
