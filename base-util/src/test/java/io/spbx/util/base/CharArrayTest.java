@@ -703,4 +703,18 @@ public class CharArrayTest {
         assertThat(new CharArray("foo").contentEquals("foo")).isTrue();
         assertThat(new CharArray("foo").contentEquals("Foo")).isFalse();
     }
+
+    @Test
+    public void equalsIgnoreCase() {
+        assertThat(new CharArray("foo").equalsIgnoreCase("foo")).isTrue();
+        assertThat(new CharArray("foo").equalsIgnoreCase("FOO")).isTrue();
+        assertThat(new CharArray("foo").equalsIgnoreCase("FoO")).isTrue();
+
+        assertThat(new CharArray("foo").equalsIgnoreCase("foo.")).isFalse();
+        assertThat(new CharArray("foo").equalsIgnoreCase("fooo")).isFalse();
+        assertThat(new CharArray("foo").equalsIgnoreCase("bar")).isFalse();
+        assertThat(new CharArray("foo").equalsIgnoreCase("oo")).isFalse();
+        assertThat(new CharArray("foo").equalsIgnoreCase("fof")).isFalse();
+        assertThat(new CharArray("foo").equalsIgnoreCase("")).isFalse();
+    }
 }

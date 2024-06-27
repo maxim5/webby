@@ -402,6 +402,18 @@ public class CharArray implements CharSequence, Comparable<CharArray> {
         return this == o || o instanceof CharArray that && Arrays.equals(chars, start, end, that.chars, that.start, that.end);
     }
 
+    public boolean equalsIgnoreCase(CharSequence str) {
+        if (length() != str.length()) {
+            return false;
+        }
+        for (int i = 0, len = length(); i < len; ++i) {
+            if (Character.toLowerCase(charAt(i)) != Character.toLowerCase(str.charAt(i))) {
+                return false;
+            }
+        }
+        return true;
+    }
+
     public boolean contentEquals(char ch) {
         return length() == 1 && at(0) == ch;
     }
