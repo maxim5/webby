@@ -48,7 +48,7 @@ public class ListBuilder<T> {
     }
 
     public static <T> @NotNull ListBuilder<T> of(@NotNull Iterable<? extends T> items) {
-        return ListBuilder.<T>builder(items instanceof Collection<?> collection ? collection.size() : 8).addAll(items);
+        return ListBuilder.<T>builder(EasyIterables.sizeOf(items, 8)).addAll(items);
     }
 
     public @NotNull ListBuilder<T> add(@Nullable T item) {

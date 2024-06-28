@@ -24,6 +24,10 @@ public class EasyIterables {
         );
     }
 
+    public static <E> int sizeOf(@NotNull Iterable<E> items, int def) {
+        return items instanceof Collection<?> collection ? collection.size() : def;
+    }
+
     public static <E> long estimateSize(@NotNull Iterable<E> items, int def) {
         return items instanceof Collection<?> collection
             ? collection.size()
