@@ -5,27 +5,40 @@ import com.google.errorprone.annotations.CheckReturnValue;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
+@CheckReturnValue
 public class EasyExceptions {
-    @CheckReturnValue
     public static @NotNull AssertionError newAssertionError(@NotNull String message, @Nullable Object @NotNull ... args) {
         return new AssertionError(message.formatted(args));
     }
 
-    @CheckReturnValue
+    public static @NotNull AssertionError newAssertionError(@NotNull String message) {
+        return new AssertionError(message);
+    }
+
     public static @NotNull InternalError newInternalError(@NotNull String message, @Nullable Object @NotNull ... args) {
         return new InternalError(message.formatted(args));
     }
 
-    @CheckReturnValue
+    public static @NotNull InternalError newInternalError(@NotNull String message) {
+        return new InternalError(message);
+    }
+
     public static @NotNull IllegalArgumentException newIllegalArgumentException(@NotNull String message,
                                                                                 @Nullable Object @NotNull ... args) {
         return new IllegalArgumentException(message.formatted(args));
     }
 
-    @CheckReturnValue
+    public static @NotNull IllegalArgumentException newIllegalArgumentException(@NotNull String message) {
+        return new IllegalArgumentException(message);
+    }
+
     public static @NotNull IllegalStateException newIllegalStateException(@NotNull String message,
                                                                           @Nullable Object @NotNull ... args) {
         return new IllegalStateException(message.formatted(args));
+    }
+
+    public static @NotNull IllegalStateException newIllegalStateException(@NotNull String message) {
+        return new IllegalStateException(message);
     }
 
     public static class AssertionErrors {
