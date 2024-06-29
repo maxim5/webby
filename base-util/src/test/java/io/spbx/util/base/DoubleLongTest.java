@@ -5,7 +5,6 @@ import com.google.common.primitives.UnsignedLong;
 import com.google.errorprone.annotations.CanIgnoreReturnValue;
 import io.spbx.util.collect.ListBuilder;
 import io.spbx.util.testing.TestingBasics;
-import io.spbx.util.testing.TestingBigIntegers;
 import org.jetbrains.annotations.CheckReturnValue;
 import org.jetbrains.annotations.NotNull;
 import org.junit.jupiter.api.Tag;
@@ -44,7 +43,7 @@ public class DoubleLongTest {
     private static final List<BigInteger> EDGE_CASE_BIG_INTEGERS = IntStream.range(0, 128)
         .mapToObj($1::shiftLeft)
         .flatMap(b -> Stream.of(b, b.subtract($1), b.negate(), b.negate().add($1)))
-        .map(TestingBigIntegers::fitIntoSigned128Bits)
+        .map(RANGE_INT128::fitIn)
         .sorted(CMP).distinct().toList();
 
     private static final List<Long> EDGE_CASE_LONGS =
@@ -180,7 +179,7 @@ public class DoubleLongTest {
 
     @ParameterizedTest
     @ValueSource(strings = {
-        "0", "1", "10", "ff", "7f", "aaa", "abcd", "ffff_ffff"
+        "0", "1", "10", "ff", "7f", "aaa", "abcd", "ffff_ffff", "0_0_0_0", "____0"
     })
     public void construction_from_hex_simple_long(String hex) {
         long num = Long.parseLong(hex.replaceAll("_", ""), 16);
@@ -242,7 +241,7 @@ public class DoubleLongTest {
     @Test
     public void increment_ultimate() {
         for (BigInteger num : BIG_INTEGERS) {
-            BigInteger expected = fitIntoSigned128Bits(num.add($1));
+            BigInteger expected = RANGE_INT128.fitIn(num.add($1));
             assertThat(DoubleLong.from(num).increment()).isEqualTo(DoubleLong.from(expected));
         }
     }
@@ -258,7 +257,7 @@ public class DoubleLongTest {
     @Test
     public void decrement_ultimate() {
         for (BigInteger num : BIG_INTEGERS) {
-            BigInteger expected = fitIntoSigned128Bits(num.subtract($1));
+            BigInteger expected = RANGE_INT128.fitIn(num.subtract($1));
             assertThat(DoubleLong.from(num).decrement()).isEqualTo(DoubleLong.from(expected));
         }
     }
@@ -288,7 +287,7 @@ public class DoubleLongTest {
     @Test
     public void fitsIntoLong_ultimate() {
         for (BigInteger num : BIG_INTEGERS) {
-            assertThat(DoubleLong.from(num).fitsIntoLong()).isEqualTo(isFitsIntoSignedLong(num));
+            assertThat(DoubleLong.from(num).fitsIntoLong()).isEqualTo(RANGE_INT64.contains(num));
         }
     }
 
@@ -305,25 +304,18 @@ public class DoubleLongTest {
 
     @Test
     public void multiply_positive() {
-        assertMultiplyMatchesBigInteger(
-            DoubleLong.fromBits(0, 1L << 36 + 1),
-            DoubleLong.fromBits(0, 1L << 36 + 2)
-        );
-        assertMultiplyMatchesBigInteger(
-            DoubleLong.fromBits(1 << 16, 1L << 24 + 1),
-            DoubleLong.fromBits(1 << 10, 1L << 18 + 2)
-        );
-        assertMultiplyMatchesBigInteger(
-            DoubleLong.fromBits(1L << 20 + 1, 1L << 30 + 1),
-            DoubleLong.fromBits(1L << 20 - 1, 1L << 18 - 1)
-        );
-        assertMultiplyMatchesBigInteger(
-            DoubleLong.fromBits(1L << 30 - 1, 1L << 24 - 1),
-            DoubleLong.fromBits(1L << 15 - 1, 1L << 12 - 1)
-        );
-
-        assertMultiplyMatchesBigInteger(DoubleLong.from(Integer.MAX_VALUE), DoubleLong.from(Integer.MAX_VALUE));
-        assertMultiplyMatchesBigInteger(DoubleLong.from(Long.MAX_VALUE), DoubleLong.from(Long.MAX_VALUE));
+        assertMultiplyMatchesBigInteger(DoubleLong.fromBits(0, POW2[36] + 1),
+                                        DoubleLong.fromBits(0, POW2[36] + 2));
+        assertMultiplyMatchesBigInteger(DoubleLong.fromBits(POW2[16], POW2[24] + 1),
+                                        DoubleLong.fromBits(POW2[10], POW2[18] + 2));
+        assertMultiplyMatchesBigInteger(DoubleLong.fromBits(POW2[20] + 1, POW2[30] + 1),
+                                        DoubleLong.fromBits(POW2[20] - 1, POW2[18] - 1));
+        assertMultiplyMatchesBigInteger(DoubleLong.fromBits(POW2[30] - 1, POW2[24] - 1),
+                                        DoubleLong.fromBits(POW2[15] - 1, POW2[12] - 1));
+        assertMultiplyMatchesBigInteger(DoubleLong.from(Integer.MAX_VALUE),
+                                        DoubleLong.from(Integer.MAX_VALUE));
+        assertMultiplyMatchesBigInteger(DoubleLong.from(Long.MAX_VALUE),
+                                        DoubleLong.from(Long.MAX_VALUE));
     }
 
     @Test
@@ -347,18 +339,19 @@ public class DoubleLongTest {
     }
 
     private static void assertMultiplyMatchesBigInteger(@NotNull DoubleLong lhs, @NotNull DoubleLong rhs) {
-        BigInteger expected = fitIntoSigned128Bits(lhs.toBigInteger().multiply(rhs.toBigInteger()));
+        BigInteger expected = RANGE_INT128.fitIn(lhs.toBigInteger().multiply(rhs.toBigInteger()));
         assertThat(lhs.multiply(rhs).toBigInteger()).isEqualTo(expected);
     }
 
     /** {@link DoubleLong#divide(DoubleLong)} */
 
-    private static final BigInteger $2_20 = $(1L << 20);                            // (1 << 20)
-    private static final BigInteger $2_36 = $(1L << 36);                            // (1 << 36)
-    private static final BigInteger $2_48 = $(1L << 48);                            // (1 << 48)
-    private static final BigInteger $2_61 = $(1L << 61);                            // (1 << 61)
-    private static final BigInteger $2_62 = $(1L << 62);                            // (1 << 62)
-    private static final BigInteger $2_65 = $1.shiftLeft(65);                       // (1 << 65)
+    private static final BigInteger $2_20 = $pow2(20);              // (1 << 20)
+    private static final BigInteger $2_36 = $pow2(36);              // (1 << 36)
+    private static final BigInteger $2_48 = $pow2(48);              // (1 << 48)
+    private static final BigInteger $2_61 = $pow2(61);              // (1 << 61)
+    private static final BigInteger $2_62 = $pow2(62);              // (1 << 62)
+    private static final BigInteger $2_65 = $pow2(65);              // (1 << 65)
+
     private static final List<BigInteger> SIMPLE_POSITIVE_INTEGERS = List.of(
         $0, $1, $2, $10, $(20), $(100_000), $(100_000_000),
         INT8_MAX, INT16_MAX, INT32_MAX, INT64_MAX, UINT8_MAX, UINT16_MAX, UINT32_MAX,
@@ -409,7 +402,7 @@ public class DoubleLongTest {
         if (rhs.equals(DoubleLong.ZERO)) {
             assertThrows(AssertionError.class, () -> lhs.divide(rhs));
         } else {
-            BigInteger expected = fitIntoSigned128Bits(lhs.toBigInteger().divide(rhs.toBigInteger()));
+            BigInteger expected = RANGE_INT128.fitIn(lhs.toBigInteger().divide(rhs.toBigInteger()));
             assertThat(lhs.divide(rhs).toBigInteger()).isEqualTo(expected);
         }
     }
@@ -427,7 +420,7 @@ public class DoubleLongTest {
     @Test
     public void negate_ultimate() {
         for (BigInteger num : BIG_INTEGERS) {
-            BigInteger expected = fitIntoSigned128Bits(num.negate());
+            BigInteger expected = RANGE_INT128.fitIn(num.negate());
             assertThat(DoubleLong.from(num).negate().toBigInteger()).isEqualTo(expected);
         }
     }
@@ -464,7 +457,7 @@ public class DoubleLongTest {
     }
 
     private static void assertShiftLeftMatchesBigInteger(BigInteger num, int len) {
-        BigInteger expected = fitIntoSigned128Bits(num.shiftLeft(len));
+        BigInteger expected = RANGE_INT128.fitIn(num.shiftLeft(len));
         assertThat(DoubleLong.from(num).shiftLeft(len).toBigInteger()).isEqualTo(expected);
     }
 
@@ -496,7 +489,7 @@ public class DoubleLongTest {
     }
 
     private static void assertShiftRightMatchesBigInteger(BigInteger num, int len) {
-        BigInteger expected = fitIntoSigned128Bits(num.shiftRight(len));
+        BigInteger expected = RANGE_INT128.fitIn(num.shiftRight(len));
         assertThat(DoubleLong.from(num).shiftRight(len).toBigInteger()).isEqualTo(expected);
     }
 
@@ -600,7 +593,7 @@ public class DoubleLongTest {
                 assertThat(actual.compareTo(DoubleLong.from(Long.MAX_VALUE))).isEqualTo(isPositiveOrZero ? 1 : -1);
                 assertThat(actual.compareTo(DoubleLong.from(Long.MIN_VALUE))).isEqualTo(isPositiveOrZero ? 1 : -1);
             }
-            assertThat(actual.fitsIntoLong()).isEqualTo(isFitsIntoSignedLong(actual.toBigInteger()));
+            assertThat(actual.fitsIntoLong()).isEqualTo(RANGE_INT64.contains(actual.toBigInteger()));
             return this;
         }
 
@@ -614,7 +607,7 @@ public class DoubleLongTest {
 
         public @NotNull DoubleLongSubject addMatchesBigInteger() {
             for (BigInteger big : BIG_INTEGERS) {
-                BigInteger expected = fitIntoSigned128Bits(actual.toBigInteger().add(big));
+                BigInteger expected = RANGE_INT128.fitIn(actual.toBigInteger().add(big));
                 assertThat(actual.add(DoubleLong.from(big)).toBigInteger()).isEqualTo(expected);
                 assertThat(DoubleLong.from(big).add(actual).toBigInteger()).isEqualTo(expected);
             }
@@ -624,15 +617,15 @@ public class DoubleLongTest {
         public @NotNull DoubleLongSubject subtractMatchesBigInteger() {
             for (BigInteger big : BIG_INTEGERS) {
                 assertThat(actual.subtract(DoubleLong.from(big)).toBigInteger())
-                    .isEqualTo(fitIntoSigned128Bits(actual.toBigInteger().subtract(big)));
+                    .isEqualTo(RANGE_INT128.fitIn(actual.toBigInteger().subtract(big)));
                 assertThat(DoubleLong.from(big).subtract(actual).toBigInteger())
-                    .isEqualTo(fitIntoSigned128Bits(big.subtract(actual.toBigInteger())));
+                    .isEqualTo(RANGE_INT128.fitIn(big.subtract(actual.toBigInteger())));
             }
             return this;
         }
 
         public @NotNull DoubleLongSubject negateMatchesBigInteger() {
-            BigInteger expected = fitIntoSigned128Bits(actual.toBigInteger().negate());
+            BigInteger expected = RANGE_INT128.fitIn(actual.toBigInteger().negate());
             assertThat(actual.negate().toBigInteger()).isEqualTo(expected);
             return isEqualTo(actual.negate().negate());
         }
@@ -679,7 +672,7 @@ public class DoubleLongTest {
         assertConstructionFromBigInteger(bigInteger);
         assertConstructionFromHexString(bigInteger.toString(16));
 
-        if (isFitsIntoSignedLong(bigInteger)) {
+        if (RANGE_INT64.contains(bigInteger)) {
             long num = Long.parseLong(str);
             assertConstructionFromLong(num);
             assertConstructionFromLongBits(0, num);
