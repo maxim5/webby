@@ -10,7 +10,7 @@ import org.jetbrains.annotations.NotNull;
 import java.util.*;
 import java.util.stream.Collectors;
 
-import static io.spbx.util.base.EasyExceptions.newIllegalStateException;
+import static io.spbx.util.base.EasyExceptions.newInternalError;
 
 @Immutable
 public abstract class PojoField {
@@ -65,11 +65,11 @@ public abstract class PojoField {
     }
 
     public @NotNull MapperApi mapperApiOrDie() {
-        throw newIllegalStateException("Internal error. Field does not have a mapper: %s", this);
+        throw newInternalError("This field does not have a mapper: %s", this);
     }
 
     public @NotNull AdapterApi adapterApiOrDie() {
-        throw newIllegalStateException("Internal error. Field does not have an adapter: %s", this);
+        throw newInternalError("This field does not have an adapter: %s", this);
     }
 
     public abstract @NotNull PojoField reattachedTo(@NotNull PojoParent parent);
