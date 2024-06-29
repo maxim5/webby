@@ -1,7 +1,6 @@
 package io.spbx.util.testing;
 
 import com.google.common.collect.Range;
-import com.google.common.primitives.UnsignedLong;
 import org.jetbrains.annotations.NotNull;
 
 import java.math.BigInteger;
@@ -59,10 +58,6 @@ public class TestingBigIntegers {
         return $1.shiftLeft(n);
     }
 
-    public static @NotNull BigInteger toBigInteger(long highBits, long lowBits) {
-        return $(highBits).shiftLeft(64).add(UnsignedLong.fromLongBits(lowBits).bigIntegerValue());
-    }
-    
     public record BigRange(@NotNull Range<BigInteger> range) {
         public static @NotNull BigRange rangeOf(@NotNull BigInteger fromInclusive, @NotNull BigInteger toInclusive) {
             return new BigRange(Range.closed(fromInclusive, toInclusive));

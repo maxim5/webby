@@ -816,7 +816,7 @@ public class Int128Test {
 
         assertThat(value.longValue()).isEqualTo(low);
         assertThat(value.intValue()).isEqualTo((int) low);
-        assertThat(value.toBigInteger()).isEqualTo(toBigInteger(high, low));
+        assertThat(value.toBigInteger()).isEqualTo(bitsToBigInteger(high, low));
     }
 
     private static void assertConstructionFromLongArrayBits(long[] longs) {
@@ -826,6 +826,10 @@ public class Int128Test {
 
         assertThat(value.longValue()).isEqualTo(longs[1]);
         assertThat(value.intValue()).isEqualTo((int) longs[1]);
-        assertThat(value.toBigInteger()).isEqualTo(toBigInteger(longs[0], longs[1]));
+        assertThat(value.toBigInteger()).isEqualTo(bitsToBigInteger(longs[0], longs[1]));
+    }
+
+    private static @NotNull BigInteger bitsToBigInteger(long highBits, long lowBits) {
+        return $(highBits).shiftLeft(64).add(UnsignedLong.fromLongBits(lowBits).bigIntegerValue());
     }
 }
