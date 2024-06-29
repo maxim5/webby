@@ -42,35 +42,29 @@ public class EasyExceptions {
         return new IllegalStateException(message);
     }
 
+    // Usage:
+    // assert runOnlyInDev(...);
     public static <E extends Throwable> boolean runOnlyInDev(@NotNull ThrowRunnable<E> runnable) {
         Unchecked.Runnables.runRethrow(runnable);
         return true;
     }
 
-    public static class AssertionErrors {
-        @CanIgnoreReturnValue
-        public static <R> R fail(@NotNull String message, @Nullable Object @NotNull ... args) {
-            throw newAssertionError(message, args);
-        }
-    }
-
     public static class InternalErrors {
         public static void assure(boolean cond, @NotNull String message, @Nullable Object @NotNull ... args) {
             if (!cond) {
-                InternalErrors.fail(message, args);
+                throw newInternalError(message, args);
             }
         }
 
-        public static <T> @NotNull T assureNotNull(@Nullable T value, @NotNull String message,
+        public static <T> @NotNull T assureNonNull(@Nullable T value, @NotNull String message,
                                                    @Nullable Object @NotNull ... args) {
             failIf(value == null, message, args);
-            assert value != null : "Impossible";
             return value;
         }
 
         public static void failIf(boolean cond, @NotNull String message, @Nullable Object @NotNull ... args) {
             if (cond) {
-                InternalErrors.fail(message, args);
+                throw newInternalError(message, args);
             }
         }
 

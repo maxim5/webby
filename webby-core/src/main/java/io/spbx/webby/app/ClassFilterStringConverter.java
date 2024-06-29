@@ -246,7 +246,7 @@ final class ClassFilterStringConverter implements Reversible<ClassFilter, String
         static void parsePredicate(@NotNull CharArray input, @NotNull Map<Kind, Map<Cmp, RuleSet>> rules) {
             ParsedPredicate parsed = ParsedPredicate.parseFrom(input);
             RuleSet ruleSet =
-                InternalErrors.assureNotNull(rules.get(parsed.kind).get(parsed.cmp), "Missing rule set: %s", parsed);
+                InternalErrors.assureNonNull(rules.get(parsed.kind).get(parsed.cmp), "Missing rule set: %s", parsed);
             assert ruleSet.matches(parsed);
             ruleSet.accept(parsed.value());
         }
