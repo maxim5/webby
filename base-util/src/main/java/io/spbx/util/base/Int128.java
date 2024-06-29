@@ -13,8 +13,7 @@ import java.math.BigInteger;
 import java.util.Arrays;
 import java.util.Comparator;
 
-import static io.spbx.util.base.EasyExceptions.newAssertionError;
-import static io.spbx.util.base.EasyExceptions.newIllegalArgumentException;
+import static io.spbx.util.base.EasyExceptions.*;
 
 /**
  * Represents the signed 128-bit integer or double {@link Long} value.
@@ -329,11 +328,11 @@ public final class Int128 extends Number implements Comparable<Int128> {
             n--;
         }
 
-        throw newAssertionError("Internal error. Failed to divide %s / %s", Int128.fromBits(hi, lo), num);
+        throw newInternalError("Failed to divide %s / %s", Int128.fromBits(hi, lo), num);
     }
 
     private static @NotNull Int128 divide128BitUnsigned(long hi1, long lo1, long hi2, long lo2) {
-        assert hi2 != 0 : "Internal error. The method must not be called, call divideLongUnsigned()";
+        InternalErrors.failIf(hi2 == 0, "The method must not be called, call divide64BitUnsigned()");
 
         if (Long.compareUnsigned(hi1, hi2) < 0) {
             return Int128.ZERO;
@@ -352,7 +351,7 @@ public final class Int128 extends Number implements Comparable<Int128> {
             div = div >> 1;
         }
 
-        throw newAssertionError("Internal error. Failed to divide %s / %s", fromBits(hi1, lo1), fromBits(hi2, lo2));
+        throw newInternalError("Failed to divide %s / %s", fromBits(hi1, lo1), fromBits(hi2, lo2));
     }
 
     /* Logical ops */
