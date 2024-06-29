@@ -35,7 +35,8 @@ public class EasyMaps {
     }
 
     @Pure
-    public static <K, V> @NotNull ImmutableMap<K, V> immutableOf(@NotNull K k1, @NotNull V v1, @NotNull Object @NotNull ... items) {
+    public static <K, V> @NotNull ImmutableMap<K, V> immutableOf(@NotNull K k1, @NotNull V v1,
+                                                                 @NotNull Object @NotNull ... items) {
         assert items.length % 2 == 0 : "Invalid number of items: %d".formatted(items.length);
         ImmutableMap.Builder<K, V> builder = ImmutableMap.builderWithExpectedSize(1 + items.length >> 1);
         builder.put(k1, v1);
@@ -63,8 +64,7 @@ public class EasyMaps {
     }
 
     @Pure
-    public static <K, V> @NotNull ImmutableMap<K, V> mergeToImmutable(@NotNull Map<K, V> map1,
-                                                                      @NotNull Map<K, V> map2) {
+    public static <K, V> @NotNull ImmutableMap<K, V> mergeToImmutable(@NotNull Map<K, V> map1, @NotNull Map<K, V> map2) {
         return ImmutableMap.<K, V>builder().putAll(map1).putAll(map2).build();
     }
 
