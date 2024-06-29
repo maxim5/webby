@@ -45,6 +45,8 @@ public class Unchecked {
             return () -> {
                 try {
                     consumer.run();
+                } catch (RuntimeException | Error e) {
+                    throw e;
                 } catch (Throwable e) {
                     Unchecked.rethrow(e);
                 }
@@ -54,6 +56,8 @@ public class Unchecked {
         public static <E extends Throwable> void runRethrow(@NotNull ThrowRunnable<E> action) {
             try {
                 action.run();
+            } catch (RuntimeException | Error e) {
+                throw e;
             } catch (Throwable e) {
                 Unchecked.rethrow(e);
             }
@@ -65,6 +69,8 @@ public class Unchecked {
             return value -> {
                 try {
                     consumer.accept(value);
+                } catch (RuntimeException | Error e) {
+                    throw e;
                 } catch (Throwable e) {
                     Unchecked.rethrow(e);
                 }
@@ -76,6 +82,8 @@ public class Unchecked {
             return (t, u) -> {
                 try {
                     consumer.accept(t, u);
+                } catch (RuntimeException | Error e) {
+                    throw e;
                 } catch (Throwable e) {
                     Unchecked.rethrow(e);
                 }
@@ -88,6 +96,8 @@ public class Unchecked {
             return () -> {
                 try {
                     return supplier.get();
+                } catch (RuntimeException | Error e) {
+                    throw e;
                 } catch (Throwable e) {
                     return Unchecked.rethrow(e);
                 }
@@ -97,6 +107,8 @@ public class Unchecked {
         public static <T, E extends Throwable> T runRethrow(@NotNull ThrowSupplier<T, E> action) {
             try {
                 return action.get();
+            } catch (RuntimeException | Error e) {
+                throw e;
             } catch (Throwable e) {
                 return Unchecked.rethrow(e);
             }
@@ -108,6 +120,8 @@ public class Unchecked {
             return value -> {
                 try {
                     return func.apply(value);
+                } catch (RuntimeException | Error e) {
+                    throw e;
                 } catch (Throwable e) {
                     return Unchecked.rethrow(e);
                 }
@@ -122,6 +136,8 @@ public class Unchecked {
             return value -> {
                 try {
                     return func.apply(value);
+                } catch (RuntimeException | Error e) {
+                    throw e;
                 } catch (Throwable e) {
                     return Unchecked.rethrow(e);
                 }

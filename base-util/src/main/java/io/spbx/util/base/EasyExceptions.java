@@ -2,6 +2,7 @@ package io.spbx.util.base;
 
 import com.google.errorprone.annotations.CanIgnoreReturnValue;
 import com.google.errorprone.annotations.CheckReturnValue;
+import io.spbx.util.func.ThrowRunnable;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
@@ -39,6 +40,11 @@ public class EasyExceptions {
 
     public static @NotNull IllegalStateException newIllegalStateException(@NotNull String message) {
         return new IllegalStateException(message);
+    }
+
+    public static <E extends Throwable> boolean runOnlyInDev(@NotNull ThrowRunnable<E> runnable) {
+        Unchecked.Runnables.runRethrow(runnable);
+        return true;
     }
 
     public static class AssertionErrors {
