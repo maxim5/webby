@@ -400,6 +400,28 @@ public final class Int128 extends Number implements Comparable<Int128> {
             fromBits(0, high >>> (len - 64));
     }
 
+    /* Bits */
+
+    public int bitAt(int pos) {
+        assert pos >= 0 && pos < BITS : "Incorrect bit address: " + pos;
+        return (int) (pos < 64 ? (low >> pos) & 1 : (high >> (pos - 64)) & 1);
+    }
+
+    public @NotNull Int128 setBitAt(int pos) {
+        assert pos >= 0 && pos < BITS : "Incorrect bit address: " + pos;
+        return pos < 64 ? new Int128(high, low | (1L << pos)) : new Int128(high | (1L << (pos - 64)), low);
+    }
+
+    public @NotNull Int128 clearBitAt(int pos) {
+        assert pos >= 0 && pos < BITS : "Incorrect bit address: " + pos;
+        return new Int128(pos < 64 ? high : high & ~(1L << (pos - 64)), pos < 64 ? low & ~(1L << pos) : low);
+    }
+
+    public @NotNull Int128 flipBitAt(int pos) {
+        assert pos >= 0 && pos < BITS : "Incorrect bit address: " + pos;
+        return new Int128(pos < 64 ? high : high ^ (1L << (pos - 64)), pos < 64 ? low ^ (1L << pos) : low);
+    }
+
     /* `Object` methods */
 
     @Override

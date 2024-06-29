@@ -493,6 +493,54 @@ public class Int128Test {
         assertThat(Int128.from(num).shiftRight(len).toBigInteger()).isEqualTo(expected);
     }
 
+    /** {@link Int128#bitAt}, {@link Int128#setBitAt}, {@link Int128#clearBitAt}, {@link Int128#flipBitAt} */
+
+    @Test
+    public void bits_simple() {
+        assertThat(Int128.fromBits(0, 0x0f).bitAt(0)).isEqualTo(1);
+        assertThat(Int128.fromBits(0, 0x0f).bitAt(1)).isEqualTo(1);
+        assertThat(Int128.fromBits(0, 0x0f).bitAt(3)).isEqualTo(1);
+        assertThat(Int128.fromBits(0, 0x0f).bitAt(4)).isEqualTo(0);
+        assertThat(Int128.fromBits(-1, -100).bitAt(0)).isEqualTo(0);
+        assertThat(Int128.fromBits(-1, -100).bitAt(1)).isEqualTo(0);
+        assertThat(Int128.fromBits(-1, -100).bitAt(2)).isEqualTo(1);
+        assertThat(Int128.fromBits(-1, -100).bitAt(6)).isEqualTo(0);
+
+        assertThat(Int128.fromBits(0, 0).setBitAt(0)).isEqualTo(Int128.fromBits(0, 1));
+        assertThat(Int128.fromBits(0, 0).setBitAt(1)).isEqualTo(Int128.fromBits(0, 2));
+        assertThat(Int128.fromBits(0, 0).setBitAt(2)).isEqualTo(Int128.fromBits(0, 4));
+        assertThat(Int128.fromBits(0, 0).setBitAt(5)).isEqualTo(Int128.fromBits(0, 32));
+        assertThat(Int128.fromBits(0, 100).setBitAt(0)).isEqualTo(Int128.fromBits(0, 101));
+        assertThat(Int128.fromBits(0, 100).setBitAt(1)).isEqualTo(Int128.fromBits(0, 102));
+        assertThat(Int128.fromBits(0, 100).setBitAt(4)).isEqualTo(Int128.fromBits(0, 116));
+        assertThat(Int128.fromBits(0, 100).setBitAt(5)).isEqualTo(Int128.fromBits(0, 100));
+        assertThat(Int128.fromBits(-1, -100).setBitAt(0)).isEqualTo(Int128.fromBits(-1, -99));
+        assertThat(Int128.fromBits(-1, -100).setBitAt(1)).isEqualTo(Int128.fromBits(-1, -98));
+        assertThat(Int128.fromBits(-1, -100).setBitAt(2)).isEqualTo(Int128.fromBits(-1, -100));
+        assertThat(Int128.fromBits(-1, -100).setBitAt(6)).isEqualTo(Int128.fromBits(-1, -36));
+    }
+
+    @Test
+    public void bits_ultimate() {
+        for (BigInteger num : BIG_INTEGERS) {
+            Int128 value = Int128.from(num);
+            for (int i = 0; i < Int128.BITS; i++) {
+                assertThat(value.bitAt(i)).isEqualTo(num.testBit(i) ? 1 : 0);
+                if (i < Int128.BITS - 1) {
+                    assertThat(value.setBitAt(i).toBigInteger()).isEqualTo(num.setBit(i));
+                    assertThat(value.clearBitAt(i).toBigInteger()).isEqualTo(num.clearBit(i));
+                    assertThat(value.flipBitAt(i).toBigInteger()).isEqualTo(num.flipBit(i));
+                } else {
+                    Int128 pow127 = Int128.fromBits(POW2[63], 0);
+                    boolean bit = value.bitAt(i) == 1;
+                    assertThat(value.setBitAt(i)).isEqualTo(bit ? value : value.add(pow127));
+                    assertThat(value.clearBitAt(i)).isEqualTo(bit ? value.subtract(pow127) : value);
+                    assertThat(value.flipBitAt(i)).isEqualTo(bit ? value.subtract(pow127) : value.add(pow127));
+                }
+            }
+        }
+    }
+
     /** Assertion utils */
 
     @CheckReturnValue
