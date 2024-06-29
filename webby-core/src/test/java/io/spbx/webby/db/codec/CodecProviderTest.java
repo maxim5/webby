@@ -2,6 +2,7 @@ package io.spbx.webby.db.codec;
 
 import com.carrotsearch.hppc.IntArrayList;
 import com.carrotsearch.hppc.IntHashSet;
+import io.spbx.util.base.Int128;
 import io.spbx.util.testing.ext.HppcBytecodeExtension;
 import io.spbx.webby.auth.session.DefaultSession;
 import io.spbx.webby.auth.user.DefaultUser;
@@ -22,6 +23,7 @@ public class CodecProviderTest {
     public void codecs_roundtrip() throws Exception {
         assertCodec(provider.getCodecOrDie(Integer.class)).roundtrip(0);
         assertCodec(provider.getCodecOrDie(Long.class)).roundtrip(0L);
+        assertCodec(provider.getCodecOrDie(Int128.class)).roundtrip(Int128.ZERO);
         assertCodec(provider.getCodecOrDie(String.class)).roundtrip("");
         assertCodec(provider.getCodecOrDie(String.class)).roundtrip("foo");
         assertCodec(provider.getCodecOrDie(IntArrayList.class)).roundtrip(IntArrayList.from(1, 2, 3));
