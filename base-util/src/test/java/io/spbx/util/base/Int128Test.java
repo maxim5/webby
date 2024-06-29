@@ -25,7 +25,7 @@ import static io.spbx.util.testing.TestingBigIntegers.*;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 
 @SuppressWarnings("EqualsWithItself")
-public class DoubleLongTest {
+public class Int128Test {
     // The last one overflows, it's ok.
     private static final long[] POW2 = LongStream.range(0, 64).map(n -> 1L << n).toArray();
 
@@ -73,92 +73,92 @@ public class DoubleLongTest {
 
     @Test
     public void const_zero_trivial() {
-        assertThat(DoubleLong.ZERO.highBits()).isEqualTo(0);
-        assertThat(DoubleLong.ZERO.lowBits()).isEqualTo(0);
-        assertThat(DoubleLong.ZERO.toBigInteger()).isEqualTo($0);
-        assertThat(DoubleLong.ZERO.longValue()).isEqualTo(0);
-        assertThat(DoubleLong.ZERO.intValue()).isEqualTo(0);
-        assertThat(DoubleLong.ZERO.toString()).isEqualTo("0");
-        assertThat(DoubleLong.ZERO.toBinaryString()).isEqualTo("0".repeat(128));
-        assertThat(DoubleLong.ZERO.toHexString()).isEqualTo("0".repeat(32));
-        assertThat(DoubleLong.ZERO).isEqualTo(DoubleLong.from(0));
-        assertThat(DoubleLong.ZERO.compareTo(DoubleLong.ZERO)).isEqualTo(0);
-        assertThat(DoubleLong.ZERO.compareTo(DoubleLong.ONE)).isEqualTo(-1);
-        assertThat(DoubleLong.ZERO.compareTo(DoubleLong.MIN_VALUE)).isEqualTo(1);
-        assertThat(DoubleLong.ZERO.compareTo(DoubleLong.MAX_VALUE)).isEqualTo(-1);
+        assertThat(Int128.ZERO.highBits()).isEqualTo(0);
+        assertThat(Int128.ZERO.lowBits()).isEqualTo(0);
+        assertThat(Int128.ZERO.toBigInteger()).isEqualTo($0);
+        assertThat(Int128.ZERO.longValue()).isEqualTo(0);
+        assertThat(Int128.ZERO.intValue()).isEqualTo(0);
+        assertThat(Int128.ZERO.toString()).isEqualTo("0");
+        assertThat(Int128.ZERO.toBinaryString()).isEqualTo("0".repeat(128));
+        assertThat(Int128.ZERO.toHexString()).isEqualTo("0".repeat(32));
+        assertThat(Int128.ZERO).isEqualTo(Int128.from(0));
+        assertThat(Int128.ZERO.compareTo(Int128.ZERO)).isEqualTo(0);
+        assertThat(Int128.ZERO.compareTo(Int128.ONE)).isEqualTo(-1);
+        assertThat(Int128.ZERO.compareTo(Int128.MIN_VALUE)).isEqualTo(1);
+        assertThat(Int128.ZERO.compareTo(Int128.MAX_VALUE)).isEqualTo(-1);
     }
 
     @Test
     public void const_one_trivial() {
-        assertThat(DoubleLong.ONE.highBits()).isEqualTo(0);
-        assertThat(DoubleLong.ONE.lowBits()).isEqualTo(1);
-        assertThat(DoubleLong.ONE.toBigInteger()).isEqualTo($1);
-        assertThat(DoubleLong.ONE.longValue()).isEqualTo(1);
-        assertThat(DoubleLong.ONE.intValue()).isEqualTo(1);
-        assertThat(DoubleLong.ONE.toString()).isEqualTo("1");
-        assertThat(DoubleLong.ONE.toBinaryString()).isEqualTo("0".repeat(127) + "1");
-        assertThat(DoubleLong.ONE.toHexString()).isEqualTo("0".repeat(31) + "1");
-        assertThat(DoubleLong.ONE).isEqualTo(DoubleLong.from(1));
-        assertThat(DoubleLong.ONE.compareTo(DoubleLong.ZERO)).isEqualTo(1);
-        assertThat(DoubleLong.ONE.compareTo(DoubleLong.ONE)).isEqualTo(0);
-        assertThat(DoubleLong.ONE.compareTo(DoubleLong.MIN_VALUE)).isEqualTo(1);
-        assertThat(DoubleLong.ONE.compareTo(DoubleLong.MAX_VALUE)).isEqualTo(-1);
+        assertThat(Int128.ONE.highBits()).isEqualTo(0);
+        assertThat(Int128.ONE.lowBits()).isEqualTo(1);
+        assertThat(Int128.ONE.toBigInteger()).isEqualTo($1);
+        assertThat(Int128.ONE.longValue()).isEqualTo(1);
+        assertThat(Int128.ONE.intValue()).isEqualTo(1);
+        assertThat(Int128.ONE.toString()).isEqualTo("1");
+        assertThat(Int128.ONE.toBinaryString()).isEqualTo("0".repeat(127) + "1");
+        assertThat(Int128.ONE.toHexString()).isEqualTo("0".repeat(31) + "1");
+        assertThat(Int128.ONE).isEqualTo(Int128.from(1));
+        assertThat(Int128.ONE.compareTo(Int128.ZERO)).isEqualTo(1);
+        assertThat(Int128.ONE.compareTo(Int128.ONE)).isEqualTo(0);
+        assertThat(Int128.ONE.compareTo(Int128.MIN_VALUE)).isEqualTo(1);
+        assertThat(Int128.ONE.compareTo(Int128.MAX_VALUE)).isEqualTo(-1);
     }
 
     @Test
     public void const_max_value_trivial() {
         BigInteger expected = INT128_MAX;  // (1 << 127) - 1
-        assertThat(DoubleLong.MAX_VALUE.highBits()).isEqualTo(Long.MAX_VALUE);
-        assertThat(DoubleLong.MAX_VALUE.lowBits()).isEqualTo(-1);
-        assertThat(DoubleLong.MAX_VALUE.toBigInteger()).isEqualTo(expected);
-        assertThat(DoubleLong.MAX_VALUE.longValue()).isEqualTo(expected.longValue());  // -1
-        assertThat(DoubleLong.MAX_VALUE.intValue()).isEqualTo(expected.intValue());    // -1
-        assertThat(DoubleLong.MAX_VALUE.toString()).isEqualTo(expected.toString());
-        assertThat(DoubleLong.MAX_VALUE.toBinaryString()).isEqualTo("0" + "1".repeat(127));
-        assertThat(DoubleLong.MAX_VALUE.toHexString()).isEqualTo("7" + "f".repeat(31));
-        assertThat(DoubleLong.MAX_VALUE.compareTo(DoubleLong.ZERO)).isEqualTo(1);
-        assertThat(DoubleLong.MAX_VALUE.compareTo(DoubleLong.ONE)).isEqualTo(1);
-        assertThat(DoubleLong.MAX_VALUE.compareTo(DoubleLong.MIN_VALUE)).isEqualTo(1);
-        assertThat(DoubleLong.MAX_VALUE.compareTo(DoubleLong.MAX_VALUE)).isEqualTo(0);
+        assertThat(Int128.MAX_VALUE.highBits()).isEqualTo(Long.MAX_VALUE);
+        assertThat(Int128.MAX_VALUE.lowBits()).isEqualTo(-1);
+        assertThat(Int128.MAX_VALUE.toBigInteger()).isEqualTo(expected);
+        assertThat(Int128.MAX_VALUE.longValue()).isEqualTo(expected.longValue());  // -1
+        assertThat(Int128.MAX_VALUE.intValue()).isEqualTo(expected.intValue());    // -1
+        assertThat(Int128.MAX_VALUE.toString()).isEqualTo(expected.toString());
+        assertThat(Int128.MAX_VALUE.toBinaryString()).isEqualTo("0" + "1".repeat(127));
+        assertThat(Int128.MAX_VALUE.toHexString()).isEqualTo("7" + "f".repeat(31));
+        assertThat(Int128.MAX_VALUE.compareTo(Int128.ZERO)).isEqualTo(1);
+        assertThat(Int128.MAX_VALUE.compareTo(Int128.ONE)).isEqualTo(1);
+        assertThat(Int128.MAX_VALUE.compareTo(Int128.MIN_VALUE)).isEqualTo(1);
+        assertThat(Int128.MAX_VALUE.compareTo(Int128.MAX_VALUE)).isEqualTo(0);
     }
 
     @Test
     public void const_min_value_trivial() {
         BigInteger expected = INT128_MIN;  // -(1 << 127)
-        assertThat(DoubleLong.MIN_VALUE.highBits()).isEqualTo(Long.MIN_VALUE);
-        assertThat(DoubleLong.MIN_VALUE.lowBits()).isEqualTo(0);
-        assertThat(DoubleLong.MIN_VALUE.toBigInteger()).isEqualTo(expected);
-        assertThat(DoubleLong.MIN_VALUE.longValue()).isEqualTo(expected.longValue());  // 0
-        assertThat(DoubleLong.MIN_VALUE.intValue()).isEqualTo(expected.intValue());    // 0
-        assertThat(DoubleLong.MIN_VALUE.toString()).isEqualTo(expected.toString());
-        assertThat(DoubleLong.MIN_VALUE.toBinaryString()).isEqualTo("1" + "0".repeat(127));
-        assertThat(DoubleLong.MIN_VALUE.toHexString()).isEqualTo("8" + "0".repeat(31));
-        assertThat(DoubleLong.MIN_VALUE.compareTo(DoubleLong.ZERO)).isEqualTo(-1);
-        assertThat(DoubleLong.MIN_VALUE.compareTo(DoubleLong.ONE)).isEqualTo(-1);
-        assertThat(DoubleLong.MIN_VALUE.compareTo(DoubleLong.MIN_VALUE)).isEqualTo(0);
-        assertThat(DoubleLong.MIN_VALUE.compareTo(DoubleLong.MAX_VALUE)).isEqualTo(-1);
+        assertThat(Int128.MIN_VALUE.highBits()).isEqualTo(Long.MIN_VALUE);
+        assertThat(Int128.MIN_VALUE.lowBits()).isEqualTo(0);
+        assertThat(Int128.MIN_VALUE.toBigInteger()).isEqualTo(expected);
+        assertThat(Int128.MIN_VALUE.longValue()).isEqualTo(expected.longValue());  // 0
+        assertThat(Int128.MIN_VALUE.intValue()).isEqualTo(expected.intValue());    // 0
+        assertThat(Int128.MIN_VALUE.toString()).isEqualTo(expected.toString());
+        assertThat(Int128.MIN_VALUE.toBinaryString()).isEqualTo("1" + "0".repeat(127));
+        assertThat(Int128.MIN_VALUE.toHexString()).isEqualTo("8" + "0".repeat(31));
+        assertThat(Int128.MIN_VALUE.compareTo(Int128.ZERO)).isEqualTo(-1);
+        assertThat(Int128.MIN_VALUE.compareTo(Int128.ONE)).isEqualTo(-1);
+        assertThat(Int128.MIN_VALUE.compareTo(Int128.MIN_VALUE)).isEqualTo(0);
+        assertThat(Int128.MIN_VALUE.compareTo(Int128.MAX_VALUE)).isEqualTo(-1);
     }
 
-    /** {@link DoubleLong#fromBits}}, {@link DoubleLong#from}, {@link DoubleLong#fromHex} */
+    /** {@link Int128#fromBits}}, {@link Int128#from}, {@link Int128#fromHex} */
 
     @Test
     public void construction_from_bits_long_trivial() {
-        assertThat(DoubleLong.fromBits(0, 0)).isEqualTo(DoubleLong.from($0));
-        assertThat(DoubleLong.fromBits(0, 1)).isEqualTo(DoubleLong.from($1));
-        assertThat(DoubleLong.fromBits(0, -1)).isEqualTo(DoubleLong.from(UINT64_MAX));
+        assertThat(Int128.fromBits(0, 0)).isEqualTo(Int128.from($0));
+        assertThat(Int128.fromBits(0, 1)).isEqualTo(Int128.from($1));
+        assertThat(Int128.fromBits(0, -1)).isEqualTo(Int128.from(UINT64_MAX));
 
-        assertThat(DoubleLong.fromBits(1, 0)).isEqualTo(DoubleLong.from($2_64));
-        assertThat(DoubleLong.fromBits(1, 1)).isEqualTo(DoubleLong.from($2_64.add($1)));
-        assertThat(DoubleLong.fromBits(1, -1)).isEqualTo(DoubleLong.from($2_65.subtract($1)));
+        assertThat(Int128.fromBits(1, 0)).isEqualTo(Int128.from($2_64));
+        assertThat(Int128.fromBits(1, 1)).isEqualTo(Int128.from($2_64.add($1)));
+        assertThat(Int128.fromBits(1, -1)).isEqualTo(Int128.from($2_65.subtract($1)));
 
-        assertThat(DoubleLong.fromBits(-1, 0)).isEqualTo(DoubleLong.from($2_64.negate()));
-        assertThat(DoubleLong.fromBits(-1, 1)).isEqualTo(DoubleLong.from($2_64.negate().add($1)));
-        assertThat(DoubleLong.fromBits(-1, -1)).isEqualTo(DoubleLong.from($1.negate()));
+        assertThat(Int128.fromBits(-1, 0)).isEqualTo(Int128.from($2_64.negate()));
+        assertThat(Int128.fromBits(-1, 1)).isEqualTo(Int128.from($2_64.negate().add($1)));
+        assertThat(Int128.fromBits(-1, -1)).isEqualTo(Int128.from($1.negate()));
 
-        assertThat(DoubleLong.fromBits(0, Long.MAX_VALUE)).isEqualTo(DoubleLong.from(INT64_MAX));
-        assertThat(DoubleLong.fromBits(0, Long.MIN_VALUE)).isEqualTo(DoubleLong.from(INT64_MIN.negate()));
-        assertThat(DoubleLong.fromBits(Long.MAX_VALUE, 0)).isEqualTo(DoubleLong.from($2_127.subtract($2_64)));
-        assertThat(DoubleLong.fromBits(Long.MIN_VALUE, 0)).isEqualTo(DoubleLong.from(INT128_MIN));
+        assertThat(Int128.fromBits(0, Long.MAX_VALUE)).isEqualTo(Int128.from(INT64_MAX));
+        assertThat(Int128.fromBits(0, Long.MIN_VALUE)).isEqualTo(Int128.from(INT64_MIN.negate()));
+        assertThat(Int128.fromBits(Long.MAX_VALUE, 0)).isEqualTo(Int128.from($2_127.subtract($2_64)));
+        assertThat(Int128.fromBits(Long.MIN_VALUE, 0)).isEqualTo(Int128.from(INT128_MIN));
     }
 
     @ParameterizedTest
@@ -183,23 +183,23 @@ public class DoubleLongTest {
     })
     public void construction_from_hex_simple_long(String hex) {
         long num = Long.parseLong(hex.replaceAll("_", ""), 16);
-        DoubleLong expected = DoubleLong.from(num);
+        Int128 expected = Int128.from(num);
 
-        assertThat(DoubleLong.fromHex(hex)).isEqualTo(expected);
-        assertThat(DoubleLong.fromHex(hex.toUpperCase())).isEqualTo(expected);
-        assertThat(DoubleLong.fromHex("0x" + hex)).isEqualTo(expected);
-        assertThat(DoubleLong.fromHex("0x0000" + hex)).isEqualTo(expected);
+        assertThat(Int128.fromHex(hex)).isEqualTo(expected);
+        assertThat(Int128.fromHex(hex.toUpperCase())).isEqualTo(expected);
+        assertThat(Int128.fromHex("0x" + hex)).isEqualTo(expected);
+        assertThat(Int128.fromHex("0x0000" + hex)).isEqualTo(expected);
 
-        assertThat(DoubleLong.fromHex("-" + hex)).isEqualTo(expected.negate());
-        assertThat(DoubleLong.fromHex("-" + hex.toUpperCase())).isEqualTo(expected.negate());
-        assertThat(DoubleLong.fromHex("-0x" + hex)).isEqualTo(expected.negate());
-        assertThat(DoubleLong.fromHex("-0x0000" + hex)).isEqualTo(expected.negate());
+        assertThat(Int128.fromHex("-" + hex)).isEqualTo(expected.negate());
+        assertThat(Int128.fromHex("-" + hex.toUpperCase())).isEqualTo(expected.negate());
+        assertThat(Int128.fromHex("-0x" + hex)).isEqualTo(expected.negate());
+        assertThat(Int128.fromHex("-0x0000" + hex)).isEqualTo(expected.negate());
     }
 
     @Test
     public void construction_from_hex_ultimate() {
         for (BigInteger num : BIG_INTEGERS) {
-            assertThat(DoubleLong.fromHex(num.toString(16))).isEqualTo(DoubleLong.from(num));
+            assertThat(Int128.fromHex(num.toString(16))).isEqualTo(Int128.from(num));
         }
     }
 
@@ -207,15 +207,15 @@ public class DoubleLongTest {
 
     @ParameterizedTest
     @MethodSource
-    public void internal_consistency_simple(DoubleLong val) {
+    public void internal_consistency_simple(Int128 val) {
         assertThatDoubleLong(val).internalConsistency();
     }
 
-    private static @NotNull List<DoubleLong> internal_consistency_simple() {
+    private static @NotNull List<Int128> internal_consistency_simple() {
         return TestingBasics.flatListOf(
-            DoubleLong.ZERO, DoubleLong.ONE,
-            DoubleLong.MIN_VALUE, DoubleLong.MAX_VALUE,
-            SIMPLE_MIN_MAX_VALUES.stream().map(DoubleLong::from)
+            Int128.ZERO, Int128.ONE,
+            Int128.MIN_VALUE, Int128.MAX_VALUE,
+            SIMPLE_MIN_MAX_VALUES.stream().map(Int128::from)
         );
     }
 
@@ -223,109 +223,109 @@ public class DoubleLongTest {
     @Test
     public void internal_consistency_ultimate() {
         for (BigInteger num : BIG_INTEGERS) {
-            assertThatDoubleLong(DoubleLong.from(num)).internalConsistency();
+            assertThatDoubleLong(Int128.from(num)).internalConsistency();
         }
         for (long num : EDGE_CASE_LONGS) {
-            assertThatDoubleLong(DoubleLong.from(num)).internalConsistency();
+            assertThatDoubleLong(Int128.from(num)).internalConsistency();
         }
     }
 
-    /** {@link DoubleLong#increment()} */
+    /** {@link Int128#increment()} */
 
     @ParameterizedTest
     @ValueSource(longs = { 0, 1, -1, Integer.MAX_VALUE, Integer.MIN_VALUE, Long.MIN_VALUE, Long.MAX_VALUE - 1 })
     public void increment_simple_long(long num) {
-        assertThat(DoubleLong.from(num).increment()).isEqualTo(DoubleLong.from(num + 1));
+        assertThat(Int128.from(num).increment()).isEqualTo(Int128.from(num + 1));
     }
 
     @Test
     public void increment_ultimate() {
         for (BigInteger num : BIG_INTEGERS) {
             BigInteger expected = RANGE_INT128.fitIn(num.add($1));
-            assertThat(DoubleLong.from(num).increment()).isEqualTo(DoubleLong.from(expected));
+            assertThat(Int128.from(num).increment()).isEqualTo(Int128.from(expected));
         }
     }
 
-    /** {@link DoubleLong#decrement()} */
+    /** {@link Int128#decrement()} */
 
     @ParameterizedTest
     @ValueSource(longs = { 0, 1, -1, Integer.MAX_VALUE, Integer.MIN_VALUE, Long.MIN_VALUE + 1, Long.MAX_VALUE })
     public void decrement_simple_long(long num) {
-        assertThat(DoubleLong.from(num).decrement()).isEqualTo(DoubleLong.from(num - 1));
+        assertThat(Int128.from(num).decrement()).isEqualTo(Int128.from(num - 1));
     }
 
     @Test
     public void decrement_ultimate() {
         for (BigInteger num : BIG_INTEGERS) {
             BigInteger expected = RANGE_INT128.fitIn(num.subtract($1));
-            assertThat(DoubleLong.from(num).decrement()).isEqualTo(DoubleLong.from(expected));
+            assertThat(Int128.from(num).decrement()).isEqualTo(Int128.from(expected));
         }
     }
 
-    /** {@link DoubleLong#fitsIntoLong()} */
+    /** {@link Int128#is64Bit()} */
 
-    private static final List<DoubleLong> FIT_INTO_LONG =
-        List.of(DoubleLong.ZERO, DoubleLong.ONE, DoubleLong.from(Long.MAX_VALUE), DoubleLong.from(Long.MIN_VALUE));
-    private static final List<DoubleLong> NOT_FIT_INTO_LONG = List.of(
-        DoubleLong.MAX_VALUE, DoubleLong.MIN_VALUE,
-        DoubleLong.from("9223372036854775808"), DoubleLong.from("-9223372036854775809")
+    private static final List<Int128> FIT_INTO_LONG =
+        List.of(Int128.ZERO, Int128.ONE, Int128.from(Long.MAX_VALUE), Int128.from(Long.MIN_VALUE));
+    private static final List<Int128> NOT_FIT_INTO_LONG = List.of(
+        Int128.MAX_VALUE, Int128.MIN_VALUE,
+        Int128.from("9223372036854775808"), Int128.from("-9223372036854775809")
     );
 
     @Test
-    public void fitsIntoLong_simple() {
-        assertThat(DoubleLong.ZERO.fitsIntoLong()).isTrue();
-        assertThat(DoubleLong.ONE.fitsIntoLong()).isTrue();
-        assertThat(DoubleLong.from(Long.MAX_VALUE).fitsIntoLong()).isTrue();
-        assertThat(DoubleLong.from(Long.MIN_VALUE).fitsIntoLong()).isTrue();
+    public void is64Bit_simple() {
+        assertThat(Int128.ZERO.is64Bit()).isTrue();
+        assertThat(Int128.ONE.is64Bit()).isTrue();
+        assertThat(Int128.from(Long.MAX_VALUE).is64Bit()).isTrue();
+        assertThat(Int128.from(Long.MIN_VALUE).is64Bit()).isTrue();
 
-        assertThat(DoubleLong.MAX_VALUE.fitsIntoLong()).isFalse();
-        assertThat(DoubleLong.MIN_VALUE.fitsIntoLong()).isFalse();
-        assertThat(DoubleLong.from("9223372036854775808").fitsIntoLong()).isFalse();
-        assertThat(DoubleLong.from("-9223372036854775809").fitsIntoLong()).isFalse();
+        assertThat(Int128.MAX_VALUE.is64Bit()).isFalse();
+        assertThat(Int128.MIN_VALUE.is64Bit()).isFalse();
+        assertThat(Int128.from("9223372036854775808").is64Bit()).isFalse();
+        assertThat(Int128.from("-9223372036854775809").is64Bit()).isFalse();
     }
 
     @Test
-    public void fitsIntoLong_ultimate() {
+    public void is64Bit_ultimate() {
         for (BigInteger num : BIG_INTEGERS) {
-            assertThat(DoubleLong.from(num).fitsIntoLong()).isEqualTo(RANGE_INT64.contains(num));
+            assertThat(Int128.from(num).is64Bit()).isEqualTo(RANGE_INT64.contains(num));
         }
     }
 
-    /** {@link DoubleLong#multiply(DoubleLong)} */
+    /** {@link Int128#multiply(Int128)} */
 
     @Test
     public void multiply_simple() {
-        assertThat(DoubleLong.ZERO.multiply(DoubleLong.ZERO)).isEqualTo(DoubleLong.ZERO);
-        assertThat(DoubleLong.ZERO.multiply(DoubleLong.ONE)).isEqualTo(DoubleLong.ZERO);
-        assertThat(DoubleLong.ONE.multiply(DoubleLong.ONE)).isEqualTo(DoubleLong.ONE);
-        assertThat(DoubleLong.ONE.multiply(DoubleLong.from(2))).isEqualTo(DoubleLong.from(2));
-        assertThat(DoubleLong.from(2).multiply(DoubleLong.from(2))).isEqualTo(DoubleLong.from(4));
+        assertThat(Int128.ZERO.multiply(Int128.ZERO)).isEqualTo(Int128.ZERO);
+        assertThat(Int128.ZERO.multiply(Int128.ONE)).isEqualTo(Int128.ZERO);
+        assertThat(Int128.ONE.multiply(Int128.ONE)).isEqualTo(Int128.ONE);
+        assertThat(Int128.ONE.multiply(Int128.from(2))).isEqualTo(Int128.from(2));
+        assertThat(Int128.from(2).multiply(Int128.from(2))).isEqualTo(Int128.from(4));
     }
 
     @Test
     public void multiply_positive() {
-        assertMultiplyMatchesBigInteger(DoubleLong.fromBits(0, POW2[36] + 1),
-                                        DoubleLong.fromBits(0, POW2[36] + 2));
-        assertMultiplyMatchesBigInteger(DoubleLong.fromBits(POW2[16], POW2[24] + 1),
-                                        DoubleLong.fromBits(POW2[10], POW2[18] + 2));
-        assertMultiplyMatchesBigInteger(DoubleLong.fromBits(POW2[20] + 1, POW2[30] + 1),
-                                        DoubleLong.fromBits(POW2[20] - 1, POW2[18] - 1));
-        assertMultiplyMatchesBigInteger(DoubleLong.fromBits(POW2[30] - 1, POW2[24] - 1),
-                                        DoubleLong.fromBits(POW2[15] - 1, POW2[12] - 1));
-        assertMultiplyMatchesBigInteger(DoubleLong.from(Integer.MAX_VALUE),
-                                        DoubleLong.from(Integer.MAX_VALUE));
-        assertMultiplyMatchesBigInteger(DoubleLong.from(Long.MAX_VALUE),
-                                        DoubleLong.from(Long.MAX_VALUE));
+        assertMultiplyMatchesBigInteger(Int128.fromBits(0, POW2[36] + 1),
+                                        Int128.fromBits(0, POW2[36] + 2));
+        assertMultiplyMatchesBigInteger(Int128.fromBits(POW2[16], POW2[24] + 1),
+                                        Int128.fromBits(POW2[10], POW2[18] + 2));
+        assertMultiplyMatchesBigInteger(Int128.fromBits(POW2[20] + 1, POW2[30] + 1),
+                                        Int128.fromBits(POW2[20] - 1, POW2[18] - 1));
+        assertMultiplyMatchesBigInteger(Int128.fromBits(POW2[30] - 1, POW2[24] - 1),
+                                        Int128.fromBits(POW2[15] - 1, POW2[12] - 1));
+        assertMultiplyMatchesBigInteger(Int128.from(Integer.MAX_VALUE),
+                                        Int128.from(Integer.MAX_VALUE));
+        assertMultiplyMatchesBigInteger(Int128.from(Long.MAX_VALUE),
+                                        Int128.from(Long.MAX_VALUE));
     }
 
     @Test
     public void multiply_negative() {
-        assertMultiplyMatchesBigInteger(DoubleLong.from(-1), DoubleLong.from(1));
-        assertMultiplyMatchesBigInteger(DoubleLong.from(-1), DoubleLong.from(-1));
-        assertMultiplyMatchesBigInteger(DoubleLong.from(Integer.MAX_VALUE), DoubleLong.from(Integer.MIN_VALUE));
-        assertMultiplyMatchesBigInteger(DoubleLong.from(Integer.MIN_VALUE), DoubleLong.from(Integer.MIN_VALUE));
-        assertMultiplyMatchesBigInteger(DoubleLong.from(Long.MAX_VALUE), DoubleLong.from(Long.MIN_VALUE));
-        assertMultiplyMatchesBigInteger(DoubleLong.from(Long.MIN_VALUE), DoubleLong.from(Long.MIN_VALUE));
+        assertMultiplyMatchesBigInteger(Int128.from(-1), Int128.from(1));
+        assertMultiplyMatchesBigInteger(Int128.from(-1), Int128.from(-1));
+        assertMultiplyMatchesBigInteger(Int128.from(Integer.MAX_VALUE), Int128.from(Integer.MIN_VALUE));
+        assertMultiplyMatchesBigInteger(Int128.from(Integer.MIN_VALUE), Int128.from(Integer.MIN_VALUE));
+        assertMultiplyMatchesBigInteger(Int128.from(Long.MAX_VALUE), Int128.from(Long.MIN_VALUE));
+        assertMultiplyMatchesBigInteger(Int128.from(Long.MIN_VALUE), Int128.from(Long.MIN_VALUE));
     }
 
     @Tag("slow")
@@ -333,17 +333,17 @@ public class DoubleLongTest {
     public void multiply_ultimate() {
         for (BigInteger a : BIG_INTEGERS) {
             for (BigInteger b : BIG_INTEGERS) {
-                assertMultiplyMatchesBigInteger(DoubleLong.from(a), DoubleLong.from(b));
+                assertMultiplyMatchesBigInteger(Int128.from(a), Int128.from(b));
             }
         }
     }
 
-    private static void assertMultiplyMatchesBigInteger(@NotNull DoubleLong lhs, @NotNull DoubleLong rhs) {
+    private static void assertMultiplyMatchesBigInteger(@NotNull Int128 lhs, @NotNull Int128 rhs) {
         BigInteger expected = RANGE_INT128.fitIn(lhs.toBigInteger().multiply(rhs.toBigInteger()));
         assertThat(lhs.multiply(rhs).toBigInteger()).isEqualTo(expected);
     }
 
-    /** {@link DoubleLong#divide(DoubleLong)} */
+    /** {@link Int128#divide(Int128)} */
 
     private static final BigInteger $2_20 = $pow2(20);              // (1 << 20)
     private static final BigInteger $2_36 = $pow2(36);              // (1 << 36)
@@ -364,7 +364,7 @@ public class DoubleLongTest {
     public void divide_simple_positive_only() {
         for (BigInteger a : SIMPLE_POSITIVE_INTEGERS) {
             for (BigInteger b : SIMPLE_POSITIVE_INTEGERS) {
-                assertDivideMatchesBigInteger(DoubleLong.from(a), DoubleLong.from(b));
+                assertDivideMatchesBigInteger(Int128.from(a), Int128.from(b));
             }
         }
     }
@@ -373,7 +373,7 @@ public class DoubleLongTest {
     public void divide_simple_negative_only() {
         for (BigInteger a : SIMPLE_POSITIVE_INTEGERS) {
             for (BigInteger b : SIMPLE_POSITIVE_INTEGERS) {
-                assertDivideMatchesBigInteger(DoubleLong.from(a), DoubleLong.from(b));
+                assertDivideMatchesBigInteger(Int128.from(a), Int128.from(b));
             }
         }
     }
@@ -383,7 +383,7 @@ public class DoubleLongTest {
         List<BigInteger> list = ListBuilder.concat(SIMPLE_POSITIVE_INTEGERS, SIMPLE_NEGATIVE_INTEGERS);
         for (BigInteger a : list) {
             for (BigInteger b : list) {
-                assertDivideMatchesBigInteger(DoubleLong.from(a), DoubleLong.from(b));
+                assertDivideMatchesBigInteger(Int128.from(a), Int128.from(b));
             }
         }
     }
@@ -393,13 +393,13 @@ public class DoubleLongTest {
     public void divide_ultimate() {
         for (BigInteger a : BIG_INTEGERS) {
             for (BigInteger b : BIG_INTEGERS) {
-                assertDivideMatchesBigInteger(DoubleLong.from(a), DoubleLong.from(b));
+                assertDivideMatchesBigInteger(Int128.from(a), Int128.from(b));
             }
         }
     }
 
-    private static void assertDivideMatchesBigInteger(DoubleLong lhs, DoubleLong rhs) {
-        if (rhs.equals(DoubleLong.ZERO)) {
+    private static void assertDivideMatchesBigInteger(Int128 lhs, Int128 rhs) {
+        if (rhs.equals(Int128.ZERO)) {
             assertThrows(AssertionError.class, () -> lhs.divide(rhs));
         } else {
             BigInteger expected = RANGE_INT128.fitIn(lhs.toBigInteger().divide(rhs.toBigInteger()));
@@ -407,40 +407,40 @@ public class DoubleLongTest {
         }
     }
 
-    /** {@link DoubleLong#negate()} */
+    /** {@link Int128#negate()} */
 
     @Test
     public void negate_simple() {
-        assertThat(DoubleLong.ZERO.negate()).isEqualTo(DoubleLong.ZERO);
-        assertThat(DoubleLong.ONE.negate()).isEqualTo(DoubleLong.from(-1));
-        assertThat(DoubleLong.MAX_VALUE.negate()).isEqualTo(DoubleLong.MIN_VALUE.add(DoubleLong.ONE));
-        assertThat(DoubleLong.MIN_VALUE.negate()).isEqualTo(DoubleLong.MIN_VALUE);  // Same!!!
+        assertThat(Int128.ZERO.negate()).isEqualTo(Int128.ZERO);
+        assertThat(Int128.ONE.negate()).isEqualTo(Int128.from(-1));
+        assertThat(Int128.MAX_VALUE.negate()).isEqualTo(Int128.MIN_VALUE.add(Int128.ONE));
+        assertThat(Int128.MIN_VALUE.negate()).isEqualTo(Int128.MIN_VALUE);  // Same!!!
     }
 
     @Test
     public void negate_ultimate() {
         for (BigInteger num : BIG_INTEGERS) {
             BigInteger expected = RANGE_INT128.fitIn(num.negate());
-            assertThat(DoubleLong.from(num).negate().toBigInteger()).isEqualTo(expected);
+            assertThat(Int128.from(num).negate().toBigInteger()).isEqualTo(expected);
         }
     }
 
-    /** {@link DoubleLong#shiftLeft(int)} */
+    /** {@link Int128#shiftLeft(int)} */
 
     @Test
     public void shiftLeft_simple() {
-        assertThat(DoubleLong.ONE.shiftLeft(5)).isEqualTo(DoubleLong.from(POW2[5]));
-        assertThat(DoubleLong.ONE.shiftLeft(4)).isEqualTo(DoubleLong.from(POW2[4]));
-        assertThat(DoubleLong.ONE.shiftLeft(2)).isEqualTo(DoubleLong.from(POW2[2]));
-        assertThat(DoubleLong.ONE.shiftLeft(1)).isEqualTo(DoubleLong.from(POW2[1]));
-        assertThat(DoubleLong.ONE.shiftLeft(0)).isEqualTo(DoubleLong.ONE);
+        assertThat(Int128.ONE.shiftLeft(5)).isEqualTo(Int128.from(POW2[5]));
+        assertThat(Int128.ONE.shiftLeft(4)).isEqualTo(Int128.from(POW2[4]));
+        assertThat(Int128.ONE.shiftLeft(2)).isEqualTo(Int128.from(POW2[2]));
+        assertThat(Int128.ONE.shiftLeft(1)).isEqualTo(Int128.from(POW2[1]));
+        assertThat(Int128.ONE.shiftLeft(0)).isEqualTo(Int128.ONE);
 
-        assertThat(DoubleLong.fromBits(1,  1).shiftLeft(5)).isEqualTo(DoubleLong.fromBits(POW2[5], POW2[5]));
-        assertThat(DoubleLong.fromBits(0, -1).shiftLeft(5)).isEqualTo(DoubleLong.fromBits(POW2[5] - 1, -POW2[5]));
-        assertThat(DoubleLong.fromBits(0, -1).shiftLeft(8)).isEqualTo(DoubleLong.fromBits(POW2[8] - 1, -POW2[8]));
-        assertThat(DoubleLong.fromBits(0, -1).shiftLeft(20)).isEqualTo(DoubleLong.fromBits(POW2[20] - 1, -POW2[20]));
-        assertThat(DoubleLong.fromBits(0, -1).shiftLeft(60)).isEqualTo(DoubleLong.fromBits(POW2[60] - 1, -POW2[60]));
-        assertThat(DoubleLong.fromBits(0, -1).shiftLeft(63)).isEqualTo(DoubleLong.fromBits(POW2[63] - 1, -POW2[63]));
+        assertThat(Int128.fromBits(1, 1).shiftLeft(5)).isEqualTo(Int128.fromBits(POW2[5], POW2[5]));
+        assertThat(Int128.fromBits(0, -1).shiftLeft(5)).isEqualTo(Int128.fromBits(POW2[5] - 1, -POW2[5]));
+        assertThat(Int128.fromBits(0, -1).shiftLeft(8)).isEqualTo(Int128.fromBits(POW2[8] - 1, -POW2[8]));
+        assertThat(Int128.fromBits(0, -1).shiftLeft(20)).isEqualTo(Int128.fromBits(POW2[20] - 1, -POW2[20]));
+        assertThat(Int128.fromBits(0, -1).shiftLeft(60)).isEqualTo(Int128.fromBits(POW2[60] - 1, -POW2[60]));
+        assertThat(Int128.fromBits(0, -1).shiftLeft(63)).isEqualTo(Int128.fromBits(POW2[63] - 1, -POW2[63]));
     }
 
     @Test
@@ -458,21 +458,21 @@ public class DoubleLongTest {
 
     private static void assertShiftLeftMatchesBigInteger(BigInteger num, int len) {
         BigInteger expected = RANGE_INT128.fitIn(num.shiftLeft(len));
-        assertThat(DoubleLong.from(num).shiftLeft(len).toBigInteger()).isEqualTo(expected);
+        assertThat(Int128.from(num).shiftLeft(len).toBigInteger()).isEqualTo(expected);
     }
 
-    /** {@link DoubleLong#shiftRight(int)} */
+    /** {@link Int128#shiftRight(int)} */
 
     @Test
     public void shiftRight_simple() {
-        assertThat(DoubleLong.ONE.shiftRight(0)).isEqualTo(DoubleLong.ONE);
-        assertThat(DoubleLong.ONE.shiftRight(1)).isEqualTo(DoubleLong.ZERO);
+        assertThat(Int128.ONE.shiftRight(0)).isEqualTo(Int128.ONE);
+        assertThat(Int128.ONE.shiftRight(1)).isEqualTo(Int128.ZERO);
 
-        assertThat(DoubleLong.from(POW2[5]).shiftRight(4)).isEqualTo(DoubleLong.from(POW2[1]));
-        assertThat(DoubleLong.from(POW2[5]).shiftRight(5)).isEqualTo(DoubleLong.ONE);
+        assertThat(Int128.from(POW2[5]).shiftRight(4)).isEqualTo(Int128.from(POW2[1]));
+        assertThat(Int128.from(POW2[5]).shiftRight(5)).isEqualTo(Int128.ONE);
 
-        assertThat(DoubleLong.fromBits(1, 1).shiftRight(1)).isEqualTo(DoubleLong.fromBits(0, POW2[63]));
-        assertThat(DoubleLong.fromBits(3, 3).shiftRight(1)).isEqualTo(DoubleLong.fromBits(1, POW2[63] + 1));
+        assertThat(Int128.fromBits(1, 1).shiftRight(1)).isEqualTo(Int128.fromBits(0, POW2[63]));
+        assertThat(Int128.fromBits(3, 3).shiftRight(1)).isEqualTo(Int128.fromBits(1, POW2[63] + 1));
     }
 
     @Test
@@ -490,19 +490,19 @@ public class DoubleLongTest {
 
     private static void assertShiftRightMatchesBigInteger(BigInteger num, int len) {
         BigInteger expected = RANGE_INT128.fitIn(num.shiftRight(len));
-        assertThat(DoubleLong.from(num).shiftRight(len).toBigInteger()).isEqualTo(expected);
+        assertThat(Int128.from(num).shiftRight(len).toBigInteger()).isEqualTo(expected);
     }
 
     /** Assertion utils */
 
     @CheckReturnValue
-    private @NotNull DoubleLongSubject assertThatDoubleLong(@NotNull DoubleLong actual) {
+    private @NotNull DoubleLongSubject assertThatDoubleLong(@NotNull Int128 actual) {
         return new DoubleLongSubject(actual);
     }
 
     @CanIgnoreReturnValue
-    private record DoubleLongSubject(@NotNull DoubleLong actual) {
-        public @NotNull DoubleLongSubject isEqualTo(@NotNull DoubleLong other) {
+    private record DoubleLongSubject(@NotNull Int128 actual) {
+        public @NotNull DoubleLongSubject isEqualTo(@NotNull Int128 other) {
             assertEquality(actual, other);
             return this;
         }
@@ -527,44 +527,44 @@ public class DoubleLongTest {
         }
 
         public @NotNull DoubleLongSubject roundtripLongBits() {
-            DoubleLong copy = DoubleLong.fromBits(actual.highBits(), actual.lowBits());
+            Int128 copy = Int128.fromBits(actual.highBits(), actual.lowBits());
             return isEqualTo(copy);
         }
 
         public @NotNull DoubleLongSubject roundtripByteArrayBits() {
             byte[] bytes = actual.toByteArray();
-            DoubleLong copy = DoubleLong.fromBits(bytes);
+            Int128 copy = Int128.fromBits(bytes);
             return isEqualTo(copy);
         }
 
         public @NotNull DoubleLongSubject roundtripIntArrayBits() {
             int[] ints = actual.toIntArray();
-            DoubleLong copy = DoubleLong.fromBits(ints);
+            Int128 copy = Int128.fromBits(ints);
             return isEqualTo(copy);
         }
 
         public @NotNull DoubleLongSubject roundtripLongArrayBits() {
             long[] longs = actual.toLongArray();
-            DoubleLong copy = DoubleLong.fromBits(longs);
+            Int128 copy = Int128.fromBits(longs);
             return isEqualTo(copy);
         }
 
         public @NotNull DoubleLongSubject roundtripString() {
             String str = actual.toString();
-            DoubleLong copy = DoubleLong.from(str);
+            Int128 copy = Int128.from(str);
             return isEqualTo(copy);
         }
 
         public @NotNull DoubleLongSubject roundtripBigInteger() {
             BigInteger bigInteger = actual.toBigInteger();
-            DoubleLong copy = DoubleLong.from(bigInteger);
+            Int128 copy = Int128.from(bigInteger);
             return isEqualTo(copy);
         }
 
         private @NotNull DoubleLongSubject roundtripUnsignedLong() {
-            if (actual.fitsIntoLong()) {
+            if (actual.is64Bit()) {
                 UnsignedLong unsignedLong = actual.toUnsignedLong();
-                DoubleLong copy = DoubleLong.from(unsignedLong);
+                Int128 copy = Int128.from(unsignedLong);
                 return isEqualTo(copy);
             }
             assertThrows(AssertionError.class, () -> actual.toUnsignedLong());
@@ -572,35 +572,35 @@ public class DoubleLongTest {
         }
 
         public @NotNull DoubleLongSubject roundtripLong() {
-            if (actual.fitsIntoLong()) {
+            if (actual.is64Bit()) {
                 long parsed = EasyPrimitives.parseLongSafe(actual.toString());
-                DoubleLong copy = DoubleLong.from(parsed);
+                Int128 copy = Int128.from(parsed);
                 return isEqualTo(copy);
             }
             return this;
         }
 
         public @NotNull DoubleLongSubject fitsIntoLongConsistency() {
-            boolean isPositiveOrZero = actual.compareTo(DoubleLong.ZERO) >= 0;
+            boolean isPositiveOrZero = actual.compareTo(Int128.ZERO) >= 0;
             try {
                 Long.parseLong(actual.toString());
-                assertThat(actual.fitsIntoLong()).isTrue();
+                assertThat(actual.is64Bit()).isTrue();
                 assertThat(actual.highBits()).isEqualTo(isPositiveOrZero ? 0 : -1);
-                assertThat(actual.compareTo(DoubleLong.from(Long.MAX_VALUE))).isAnyOf(0, -1);
-                assertThat(actual.compareTo(DoubleLong.from(Long.MIN_VALUE))).isAnyOf(0, 1);
+                assertThat(actual.compareTo(Int128.from(Long.MAX_VALUE))).isAnyOf(0, -1);
+                assertThat(actual.compareTo(Int128.from(Long.MIN_VALUE))).isAnyOf(0, 1);
             } catch (NumberFormatException e) {
-                assertThat(actual.fitsIntoLong()).isFalse();
-                assertThat(actual.compareTo(DoubleLong.from(Long.MAX_VALUE))).isEqualTo(isPositiveOrZero ? 1 : -1);
-                assertThat(actual.compareTo(DoubleLong.from(Long.MIN_VALUE))).isEqualTo(isPositiveOrZero ? 1 : -1);
+                assertThat(actual.is64Bit()).isFalse();
+                assertThat(actual.compareTo(Int128.from(Long.MAX_VALUE))).isEqualTo(isPositiveOrZero ? 1 : -1);
+                assertThat(actual.compareTo(Int128.from(Long.MIN_VALUE))).isEqualTo(isPositiveOrZero ? 1 : -1);
             }
-            assertThat(actual.fitsIntoLong()).isEqualTo(RANGE_INT64.contains(actual.toBigInteger()));
+            assertThat(actual.is64Bit()).isEqualTo(RANGE_INT64.contains(actual.toBigInteger()));
             return this;
         }
 
         public @NotNull DoubleLongSubject compareMatchesBigInteger() {
             for (BigInteger big : BIG_INTEGERS) {
-                assertThat(actual.compareTo(DoubleLong.from(big))).isEqualTo(actual.toBigInteger().compareTo(big));
-                assertThat(DoubleLong.from(big).compareTo(actual)).isEqualTo(big.compareTo(actual.toBigInteger()));
+                assertThat(actual.compareTo(Int128.from(big))).isEqualTo(actual.toBigInteger().compareTo(big));
+                assertThat(Int128.from(big).compareTo(actual)).isEqualTo(big.compareTo(actual.toBigInteger()));
             }
             return this;
         }
@@ -608,17 +608,17 @@ public class DoubleLongTest {
         public @NotNull DoubleLongSubject addMatchesBigInteger() {
             for (BigInteger big : BIG_INTEGERS) {
                 BigInteger expected = RANGE_INT128.fitIn(actual.toBigInteger().add(big));
-                assertThat(actual.add(DoubleLong.from(big)).toBigInteger()).isEqualTo(expected);
-                assertThat(DoubleLong.from(big).add(actual).toBigInteger()).isEqualTo(expected);
+                assertThat(actual.add(Int128.from(big)).toBigInteger()).isEqualTo(expected);
+                assertThat(Int128.from(big).add(actual).toBigInteger()).isEqualTo(expected);
             }
             return this;
         }
 
         public @NotNull DoubleLongSubject subtractMatchesBigInteger() {
             for (BigInteger big : BIG_INTEGERS) {
-                assertThat(actual.subtract(DoubleLong.from(big)).toBigInteger())
+                assertThat(actual.subtract(Int128.from(big)).toBigInteger())
                     .isEqualTo(RANGE_INT128.fitIn(actual.toBigInteger().subtract(big)));
-                assertThat(DoubleLong.from(big).subtract(actual).toBigInteger())
+                assertThat(Int128.from(big).subtract(actual).toBigInteger())
                     .isEqualTo(RANGE_INT128.fitIn(big.subtract(actual.toBigInteger())));
             }
             return this;
@@ -632,12 +632,12 @@ public class DoubleLongTest {
 
         public @NotNull DoubleLongSubject logicOpsMatchesBigInteger() {
             for (BigInteger big : BIG_INTEGERS) {
-                assertThat(actual.and(DoubleLong.from(big)).toBigInteger()).isEqualTo(actual.toBigInteger().and(big));
-                assertThat(DoubleLong.from(big).and(actual).toBigInteger()).isEqualTo(actual.toBigInteger().and(big));
-                assertThat(actual.or(DoubleLong.from(big)).toBigInteger()).isEqualTo(actual.toBigInteger().or(big));
-                assertThat(DoubleLong.from(big).or(actual).toBigInteger()).isEqualTo(actual.toBigInteger().or(big));
-                assertThat(actual.xor(DoubleLong.from(big)).toBigInteger()).isEqualTo(actual.toBigInteger().xor(big));
-                assertThat(DoubleLong.from(big).xor(actual).toBigInteger()).isEqualTo(actual.toBigInteger().xor(big));
+                assertThat(actual.and(Int128.from(big)).toBigInteger()).isEqualTo(actual.toBigInteger().and(big));
+                assertThat(Int128.from(big).and(actual).toBigInteger()).isEqualTo(actual.toBigInteger().and(big));
+                assertThat(actual.or(Int128.from(big)).toBigInteger()).isEqualTo(actual.toBigInteger().or(big));
+                assertThat(Int128.from(big).or(actual).toBigInteger()).isEqualTo(actual.toBigInteger().or(big));
+                assertThat(actual.xor(Int128.from(big)).toBigInteger()).isEqualTo(actual.toBigInteger().xor(big));
+                assertThat(Int128.from(big).xor(actual).toBigInteger()).isEqualTo(actual.toBigInteger().xor(big));
             }
             return this;
         }
@@ -648,7 +648,7 @@ public class DoubleLongTest {
         }
     }
 
-    private static void assertEquality(@NotNull DoubleLong lhs, @NotNull DoubleLong rhs) {
+    private static void assertEquality(@NotNull Int128 lhs, @NotNull Int128 rhs) {
         assertThat(lhs.highBits()).isEqualTo(rhs.highBits());
         assertThat(lhs.lowBits()).isEqualTo(rhs.lowBits());
 
@@ -659,10 +659,10 @@ public class DoubleLongTest {
 
         assertThat(lhs.compareTo(rhs)).isEqualTo(0);
         assertThat(rhs.compareTo(lhs)).isEqualTo(0);
-        assertThat(DoubleLong.compare(lhs, rhs)).isEqualTo(0);
-        assertThat(DoubleLong.compare(rhs, lhs)).isEqualTo(0);
-        assertThat(DoubleLong.COMPARATOR.compare(lhs, rhs)).isEqualTo(0);
-        assertThat(DoubleLong.COMPARATOR.compare(rhs, lhs)).isEqualTo(0);
+        assertThat(Int128.compare(lhs, rhs)).isEqualTo(0);
+        assertThat(Int128.compare(rhs, lhs)).isEqualTo(0);
+        assertThat(Int128.COMPARATOR.compare(lhs, rhs)).isEqualTo(0);
+        assertThat(Int128.COMPARATOR.compare(rhs, lhs)).isEqualTo(0);
     }
 
     private static void assertConstruction(@NotNull String str) {
@@ -686,19 +686,19 @@ public class DoubleLongTest {
     }
 
     private static void assertConstructionFromString(@NotNull String str) {
-        DoubleLong value = DoubleLong.from(str);
+        Int128 value = Int128.from(str);
         assertThat(value.toString()).isEqualTo(str);
         assertThat(value.toBigInteger()).isEqualTo(new BigInteger(str));
     }
 
     private static void assertConstructionFromHexString(@NotNull String hex) {
-        DoubleLong value = DoubleLong.fromHex(hex);
+        Int128 value = Int128.fromHex(hex);
         assertThat(value.toBigInteger()).isEqualTo(new BigInteger(hex, 16));
         // hex string?
     }
 
     private static void assertConstructionFromBigInteger(@NotNull BigInteger bigInteger) {
-        DoubleLong value = DoubleLong.from(bigInteger);
+        Int128 value = Int128.from(bigInteger);
 
         assertThat(value.toBigInteger()).isEqualTo(bigInteger);
         assertThat(value.signum()).isEqualTo(bigInteger.signum());
@@ -722,7 +722,7 @@ public class DoubleLongTest {
     }
 
     private static void assertConstructionFromLong(long num) {
-        DoubleLong value = DoubleLong.from(num);
+        Int128 value = Int128.from(num);
 
         assertThat(value.longValue()).isEqualTo(num);
         assertThat(value.intValue()).isEqualTo((int) num);
@@ -748,7 +748,7 @@ public class DoubleLongTest {
     }
 
     private static void assertConstructionFromDouble(double num) {
-        DoubleLong value = DoubleLong.from(num);
+        Int128 value = Int128.from(num);
 
         assertThat(value.longValue()).isEqualTo((long) num);
         assertThat(value.intValue()).isEqualTo((int) num);
@@ -762,7 +762,7 @@ public class DoubleLongTest {
     }
 
     private static void assertConstructionFromLongBits(long high, long low) {
-        DoubleLong value = DoubleLong.fromBits(high, low);
+        Int128 value = Int128.fromBits(high, low);
         assertThat(value.highBits()).isEqualTo(high);
         assertThat(value.lowBits()).isEqualTo(low);
 
@@ -772,7 +772,7 @@ public class DoubleLongTest {
     }
 
     private static void assertConstructionFromLongArrayBits(long[] longs) {
-        DoubleLong value = DoubleLong.fromBits(longs);
+        Int128 value = Int128.fromBits(longs);
         assertThat(value.highBits()).isEqualTo(longs[0]);
         assertThat(value.lowBits()).isEqualTo(longs[1]);
 

@@ -17,15 +17,17 @@ import static io.spbx.util.base.EasyExceptions.newAssertionError;
 import static io.spbx.util.base.EasyExceptions.newIllegalArgumentException;
 
 /**
- * Represents the signed 128-bit integer.
- * Preserves the semantics of {@link BigInteger} (e.g., two's compliment binary representation) but much more efficient.
+ * Represents the signed 128-bit integer or double {@link Long} value.
+ * Preserves the semantics of {@link BigInteger} (e.g., two's compliment binary representation).
+ * Is much more efficient both in terms of memory (stores two {@code long}s) and operations speed.
  *
+ * @see Long
+ * @see BigInteger
  * @link <a href="https://en.wikipedia.org/wiki/Two%27s_complement">Two's complement</a>
  */
 @Immutable
-@Beta
-// FIX[perf]: optimize conversions avoiding extra array/BigInteger alloc (arithmetic, toString)
-public final class DoubleLong extends Number implements Comparable<DoubleLong> {
+@Beta // FIX[perf]: optimize conversions avoiding extra array/BigInteger alloc (arithmetic, toString)
+public final class Int128 extends Number implements Comparable<Int128> {
     /**
      * The number of bytes required to represent the value.
      */
@@ -35,61 +37,61 @@ public final class DoubleLong extends Number implements Comparable<DoubleLong> {
      */
     public static final int BITS = BYTES * Byte.SIZE;
 
-    public static final DoubleLong ZERO = fromBits(0, 0);
-    public static final DoubleLong ONE = fromBits(0, 1);
-    public static final DoubleLong MAX_VALUE = fromBits(0x7fff_ffff_ffff_ffffL, 0xffff_ffff_ffff_ffffL);
-    public static final DoubleLong MIN_VALUE = fromBits(0x8000_0000_0000_0000L, 0x0000_0000_0000_0000L);
+    public static final Int128 ZERO = fromBits(0, 0);
+    public static final Int128 ONE = fromBits(0, 1);
+    public static final Int128 MAX_VALUE = fromBits(0x7fff_ffff_ffff_ffffL, 0xffff_ffff_ffff_ffffL);
+    public static final Int128 MIN_VALUE = fromBits(0x8000_0000_0000_0000L, 0x0000_0000_0000_0000L);
 
-    public static final Comparator<DoubleLong> COMPARATOR = DoubleLong::compare;
-    public static final Comparator<DoubleLong> COMPARATOR_UNSIGNED = DoubleLong::compareUnsigned;
+    public static final Comparator<Int128> COMPARATOR = Int128::compare;
+    public static final Comparator<Int128> COMPARATOR_UNSIGNED = Int128::compareUnsigned;
 
     private final long high;
     private final long low;
 
-    private DoubleLong(long high, long low) {
+    private Int128(long high, long low) {
         this.high = high;
         this.low = low;
     }
 
     /* Construction */
 
-    public static @NotNull DoubleLong fromBits(long highBits, long lowBits) {
-        return new DoubleLong(highBits, lowBits);
+    public static @NotNull Int128 fromBits(long highBits, long lowBits) {
+        return new Int128(highBits, lowBits);
     }
 
-    public static @NotNull DoubleLong fromBits(long @NotNull [] longs) {
+    public static @NotNull Int128 fromBits(long @NotNull [] longs) {
         assert longs.length == 2 : "Invalid long[] length: expected=%d, actual=%d".formatted(2, longs.length);
         return fromBits(longs[0], longs[1]);
     }
 
-    public static @NotNull DoubleLong fromBits(int @NotNull [] ints) {
+    public static @NotNull Int128 fromBits(int @NotNull [] ints) {
         assert ints.length == 4 : "Invalid int[] length: expected=%d, actual=%d".formatted(4, ints.length);
         long high = intsToLong(ints[0], ints[1]);
         long low = intsToLong(ints[2], ints[3]);
         return fromBits(high, low);
     }
 
-    public static @NotNull DoubleLong fromBits(byte @NotNull [] bytes) {
+    public static @NotNull Int128 fromBits(byte @NotNull [] bytes) {
         assert bytes.length == BYTES : "Invalid byte[] length: expected=%d, actual=%d".formatted(BYTES, bytes.length);
         long high = Longs.fromBytes(bytes[0], bytes[1], bytes[2], bytes[3], bytes[4], bytes[5], bytes[6], bytes[7]);
         long low = Longs.fromBytes(bytes[8], bytes[9], bytes[10], bytes[11], bytes[12], bytes[13], bytes[14], bytes[15]);
         return fromBits(high, low);
     }
 
-    public static @NotNull DoubleLong from(@NotNull BigInteger value) {
+    public static @NotNull Int128 from(@NotNull BigInteger value) {
         byte[] bytes = resizePreservingSign(value.toByteArray());
         return fromBits(bytes);
     }
 
-    public static @NotNull DoubleLong from(@NotNull UnsignedLong value) {
+    public static @NotNull Int128 from(@NotNull UnsignedLong value) {
         return from(value.longValue());
     }
 
-    public static @NotNull DoubleLong from(@NotNull CharSequence value) {
+    public static @NotNull Int128 from(@NotNull CharSequence value) {
         return from(new BigInteger(value.toString()));
     }
 
-    public static @NotNull DoubleLong fromHex(@NotNull String value) {
+    public static @NotNull Int128 fromHex(@NotNull String value) {
         boolean minus = value.startsWith("-");
         int start = value.startsWith("-0x") ? 3 : value.startsWith("0x") ? 2 : value.startsWith("-") ? 1 : 0;
         long high = 0, low = 0;
@@ -109,12 +111,12 @@ public final class DoubleLong extends Number implements Comparable<DoubleLong> {
         return minus ? fromBitsFlipSign(high, low) : fromBits(high, low);
     }
 
-    public static @NotNull DoubleLong from(long value) {
+    public static @NotNull Int128 from(long value) {
         return value >= 0 ? fromBits(0, value) : fromBits(-1, value);
     }
 
     @Beta
-    public static @NotNull DoubleLong from(double value) {
+    public static @NotNull Int128 from(double value) {
         return from(toBigInteger(value));
     }
 
@@ -148,18 +150,18 @@ public final class DoubleLong extends Number implements Comparable<DoubleLong> {
     }
 
     public @NotNull UnsignedLong toUnsignedLong() {
-        assert fitsIntoLong() : "The value does not fit into `UnsignedLong`";
+        assert is64Bit() : "The value does not fit into `UnsignedLong`";
         return UnsignedLong.fromLongBits(low);
     }
 
     /* Comparison */
 
     @Override
-    public int compareTo(@NotNull DoubleLong that) {
+    public int compareTo(@NotNull Int128 that) {
         return compare(this.high, this.low, that.high, that.low);
     }
 
-    public static int compare(@NotNull DoubleLong lhs, @NotNull DoubleLong rhs) {
+    public static int compare(@NotNull Int128 lhs, @NotNull Int128 rhs) {
         return compare(lhs.high, lhs.low, rhs.high, rhs.low);
     }
 
@@ -168,7 +170,7 @@ public final class DoubleLong extends Number implements Comparable<DoubleLong> {
         return cmp != 0 ? cmp : Long.compareUnsigned(lo1, lo2);
     }
 
-    public static int compareUnsigned(@NotNull DoubleLong lhs, @NotNull DoubleLong rhs) {
+    public static int compareUnsigned(@NotNull Int128 lhs, @NotNull Int128 rhs) {
         return compareUnsigned(lhs.high, lhs.low, rhs.high, rhs.low);
     }
 
@@ -177,11 +179,11 @@ public final class DoubleLong extends Number implements Comparable<DoubleLong> {
         return cmp != 0 ? cmp : Long.compareUnsigned(lo1, lo2);
     }
 
-    public static @NotNull DoubleLong max(@NotNull DoubleLong lhs, @NotNull DoubleLong rhs) {
+    public static @NotNull Int128 max(@NotNull Int128 lhs, @NotNull Int128 rhs) {
         return compare(lhs, rhs) > 0 ? lhs : rhs;
     }
 
-    public static @NotNull DoubleLong min(@NotNull DoubleLong lhs, @NotNull DoubleLong rhs) {
+    public static @NotNull Int128 min(@NotNull Int128 lhs, @NotNull Int128 rhs) {
         return compare(lhs, rhs) < 0 ? lhs : rhs;
     }
 
@@ -193,22 +195,22 @@ public final class DoubleLong extends Number implements Comparable<DoubleLong> {
 
     // Note: `DoubleLong.MIN_VALUE.negate() == DoubleLong.MIN_VALUE`!
     // https://stackoverflow.com/questions/5444611/math-abs-returns-wrong-value-for-integer-min-value
-    public @NotNull DoubleLong negate() {
+    public @NotNull Int128 negate() {
         return fromBitsFlipSign(high, low);
     }
 
-    private static @NotNull DoubleLong fromBitsFlipSign(long high, long low) {
+    private static @NotNull Int128 fromBitsFlipSign(long high, long low) {
         // General formula: -X = ~X + 1. The "+1" can be further optimized because usually it only changes the `low`
-        return low == 0 ? DoubleLong.fromBits(~high + 1, 0) : DoubleLong.fromBits(~high, ~low + 1);
+        return low == 0 ? Int128.fromBits(~high + 1, 0) : Int128.fromBits(~high, ~low + 1);
     }
 
     // Note: `DoubleLong.MIN_VALUE.abs() == DoubleLong.MIN_VALUE`!
     // https://stackoverflow.com/questions/5444611/math-abs-returns-wrong-value-for-integer-min-value
-    public @NotNull DoubleLong abs() {
+    public @NotNull Int128 abs() {
         return high >= 0 ? this : this.negate();
     }
 
-    private @NotNull DoubleLong flipSign(boolean flip) {
+    private @NotNull Int128 flipSign(boolean flip) {
         return flip ? this.negate() : this;
     }
 
@@ -234,29 +236,29 @@ public final class DoubleLong extends Number implements Comparable<DoubleLong> {
         return toBigInteger().doubleValue();
     }
 
-    public boolean fitsIntoLong() {
+    public boolean is64Bit() {
         return (high == 0 && low >= 0) || (high == -1 && low < 0);
     }
 
     /* Math and arithmetic */
 
-    public @NotNull DoubleLong increment() {
-        return low == -1 ? DoubleLong.fromBits(high + 1, 0) : DoubleLong.fromBits(high, low + 1);
+    public @NotNull Int128 increment() {
+        return low == -1 ? Int128.fromBits(high + 1, 0) : Int128.fromBits(high, low + 1);
     }
 
-    public @NotNull DoubleLong decrement() {
-        return low == 0 ? DoubleLong.fromBits(high - 1, -1) : DoubleLong.fromBits(high, low - 1);
+    public @NotNull Int128 decrement() {
+        return low == 0 ? Int128.fromBits(high - 1, -1) : Int128.fromBits(high, low - 1);
     }
 
-    public @NotNull DoubleLong add(@NotNull DoubleLong that) {
+    public @NotNull Int128 add(@NotNull Int128 that) {
         return add(this.high, this.low, that.high, that.low);
     }
 
-    public @NotNull DoubleLong add(long value) {
+    public @NotNull Int128 add(long value) {
         return value >= 0 ? add(this.high, this.low, 0, value) : add(this.high, this.low, -1, value);
     }
 
-    private static @NotNull DoubleLong add(long hi1, long lo1, long hi2, long lo2) {
+    private static @NotNull Int128 add(long hi1, long lo1, long hi2, long lo2) {
         // Notes:
         // - zero comparison calculates the sign bit: sign_bit(x) = "0" for x >= 0 and "1" for x < 0
         // - should carry if the sum rolls over 2^64, not 2^63 (which is Long overflow)
@@ -268,36 +270,36 @@ public final class DoubleLong extends Number implements Comparable<DoubleLong> {
         return fromBits(hi_sum, lo_sum);
     }
 
-    public @NotNull DoubleLong subtract(@NotNull DoubleLong that) {
+    public @NotNull Int128 subtract(@NotNull Int128 that) {
         // The following code inlined:
         //   this.add(that.negate());
         return subtract(this.high, this.low, that.high, that.low);
     }
 
-    private static @NotNull DoubleLong subtract(long hi1, long lo1, long hi2, long lo2) {
+    private static @NotNull Int128 subtract(long hi1, long lo1, long hi2, long lo2) {
         return lo2 == 0 ? add(hi1, lo1, ~hi2 + 1, 0) : add(hi1, lo1, ~hi2, ~lo2 + 1);
     }
 
-    public @NotNull DoubleLong subtract(long value) {
+    public @NotNull Int128 subtract(long value) {
         return value == Long.MIN_VALUE ? subtract(from(value)) : add(-value);
     }
 
-    public @NotNull DoubleLong multiply(@NotNull DoubleLong that) {
+    public @NotNull Int128 multiply(@NotNull Int128 that) {
         return multiply(this.high, this.low, that.high, that.low);
     }
 
-    private static @NotNull DoubleLong multiply(long hi1, long lo1, long hi2, long lo2) {
+    private static @NotNull Int128 multiply(long hi1, long lo1, long hi2, long lo2) {
         // https://stackoverflow.com/questions/18859207/high-bits-of-long-multiplication-in-java
         long low = lo1 * lo2;
         long high = Math.unsignedMultiplyHigh(lo1, lo2) + hi1 * lo2 + hi2 * lo1;
         return fromBits(high, low);
     }
 
-    public @NotNull DoubleLong divide(@NotNull DoubleLong that) {
+    public @NotNull Int128 divide(@NotNull Int128 that) {
         assert that.high != 0 || that.low != 0 : "Division by zero: %s / 0".formatted(this);
 
-        DoubleLong a = this.abs();
-        DoubleLong b = that.abs();
+        Int128 a = this.abs();
+        Int128 b = that.abs();
         boolean sameSign = this.high < 0 == that.high < 0;
         if (a.high == Long.MIN_VALUE) {
           return a.subtract(b).divide(b).increment().flipSign(!sameSign);
@@ -308,43 +310,43 @@ public final class DoubleLong extends Number implements Comparable<DoubleLong> {
         }
     }
 
-    private static @NotNull DoubleLong divide64BitUnsigned(long hi, long lo, long num) {
+    private static @NotNull Int128 divide64BitUnsigned(long hi, long lo, long num) {
         if (num == 1) {
-            return DoubleLong.fromBits(hi, lo);
+            return Int128.fromBits(hi, lo);
         }
         if (hi == 0) {
-            return DoubleLong.from(Long.divideUnsigned(lo, num));
+            return Int128.from(Long.divideUnsigned(lo, num));
         }
 
         int n = Long.numberOfLeadingZeros(num) - Long.numberOfLeadingZeros(hi) + 64;
         while (n >= 0) {
-            DoubleLong div = DoubleLong.ONE.shiftLeft(n);
-            DoubleLong multiply = DoubleLong.fromBits(0, num).shiftLeft(n);
+            Int128 div = Int128.ONE.shiftLeft(n);
+            Int128 multiply = Int128.fromBits(0, num).shiftLeft(n);
             if (compareUnsigned(hi, lo, multiply.high, multiply.low) >= 0) {
-                DoubleLong sub = subtract(hi, lo, multiply.high, multiply.low);
+                Int128 sub = subtract(hi, lo, multiply.high, multiply.low);
                 return divide64BitUnsigned(sub.high, sub.low, num).add(div);
             }
             n--;
         }
 
-        throw newAssertionError("Internal error. Failed to divide %s / %s", DoubleLong.fromBits(hi, lo), num);
+        throw newAssertionError("Internal error. Failed to divide %s / %s", Int128.fromBits(hi, lo), num);
     }
 
-    private static @NotNull DoubleLong divide128BitUnsigned(long hi1, long lo1, long hi2, long lo2) {
+    private static @NotNull Int128 divide128BitUnsigned(long hi1, long lo1, long hi2, long lo2) {
         assert hi2 != 0 : "Internal error. The method must not be called, call divideLongUnsigned()";
 
         if (Long.compareUnsigned(hi1, hi2) < 0) {
-            return DoubleLong.ZERO;
+            return Int128.ZERO;
         }
         if (Long.compareUnsigned(hi1, hi2) == 0) {
-            return Long.compareUnsigned(lo1, lo2) < 0 ? DoubleLong.ZERO : DoubleLong.ONE;
+            return Long.compareUnsigned(lo1, lo2) < 0 ? Int128.ZERO : Int128.ONE;
         }
 
         long div = Long.divideUnsigned(hi1, hi2);
         while (div > 0) {
-            DoubleLong multiply = div == 1 ? DoubleLong.fromBits(hi2, lo2) : DoubleLong.multiply(0, div, hi2, lo2);
+            Int128 multiply = div == 1 ? Int128.fromBits(hi2, lo2) : Int128.multiply(0, div, hi2, lo2);
             if (compareUnsigned(hi1, lo1, multiply.high, multiply.low) >= 0) {
-                DoubleLong sub = subtract(hi1, lo1, multiply.high, multiply.low);
+                Int128 sub = subtract(hi1, lo1, multiply.high, multiply.low);
                 return divide128BitUnsigned(sub.high, sub.low, hi2, lo2).add(div);
             }
             div = div >> 1;
@@ -355,23 +357,23 @@ public final class DoubleLong extends Number implements Comparable<DoubleLong> {
 
     /* Logical ops */
 
-    public @NotNull DoubleLong not() {
-        return DoubleLong.fromBits(~high, ~low);
+    public @NotNull Int128 not() {
+        return Int128.fromBits(~high, ~low);
     }
 
-    public @NotNull DoubleLong and(@NotNull DoubleLong that) {
-        return DoubleLong.fromBits(this.high & that.high, this.low & that.low);
+    public @NotNull Int128 and(@NotNull Int128 that) {
+        return Int128.fromBits(this.high & that.high, this.low & that.low);
     }
 
-    public @NotNull DoubleLong or(@NotNull DoubleLong that) {
-        return DoubleLong.fromBits(this.high | that.high, this.low | that.low);
+    public @NotNull Int128 or(@NotNull Int128 that) {
+        return Int128.fromBits(this.high | that.high, this.low | that.low);
     }
 
-    public @NotNull DoubleLong xor(@NotNull DoubleLong that) {
-        return DoubleLong.fromBits(this.high ^ that.high, this.low ^ that.low);
+    public @NotNull Int128 xor(@NotNull Int128 that) {
+        return Int128.fromBits(this.high ^ that.high, this.low ^ that.low);
     }
 
-    public @NotNull DoubleLong shiftLeft(int len) {
+    public @NotNull Int128 shiftLeft(int len) {
         if (len < 0) return shiftRight(-len);
         if (len == 0) return this;
         return len < 64 ?
@@ -380,7 +382,7 @@ public final class DoubleLong extends Number implements Comparable<DoubleLong> {
     }
 
     // signed version
-    public @NotNull DoubleLong shiftRight(int len) {
+    public @NotNull Int128 shiftRight(int len) {
         if (len < 0) return shiftLeft(-len);
         if (len == 0) return this;
         return len < 64 ?
@@ -391,7 +393,7 @@ public final class DoubleLong extends Number implements Comparable<DoubleLong> {
     }
 
     // unsigned version
-    public @NotNull DoubleLong shiftRightUnsigned(int len) {
+    public @NotNull Int128 shiftRightUnsigned(int len) {
         if (len < 0) return shiftLeft(-len);
         if (len == 0) return this;
         return len < 64 ?
@@ -403,7 +405,7 @@ public final class DoubleLong extends Number implements Comparable<DoubleLong> {
 
     @Override
     public boolean equals(Object object) {
-        return object instanceof DoubleLong that && high == that.high && low == that.low;
+        return object instanceof Int128 that && high == that.high && low == that.low;
     }
 
     public boolean equals(long value) {

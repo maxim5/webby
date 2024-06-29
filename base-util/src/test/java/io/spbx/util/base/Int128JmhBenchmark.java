@@ -19,20 +19,20 @@ import java.util.stream.IntStream;
 @OutputTimeUnit(TimeUnit.SECONDS)
 @Warmup(iterations = 2, time = 1000, timeUnit = TimeUnit.MILLISECONDS)
 @Measurement(iterations = 5, time = 1000, timeUnit = TimeUnit.MILLISECONDS)
-public class DoubleLongJmhBenchmark {
+public class Int128JmhBenchmark {
     private static final int N = 2000;
     private static final Random RAND = new Random(42);
     private static final long[] LONGS = IntStream.range(0, N).mapToLong(i -> RAND.nextLong()).toArray();
-    private static final List<DoubleLong> DOUBLES_64 = Arrays.stream(LONGS).mapToObj(DoubleLong::from).toList();
-    private static final List<DoubleLong> DOUBLES_128 = Arrays.stream(LONGS).mapToObj(v -> DoubleLong.fromBits(v, ~v)).toList();
-    private static final List<BigInteger> BIGS_64 = DOUBLES_64.stream().map(DoubleLong::toBigInteger).toList();
-    private static final List<BigInteger> BIGS_128 = DOUBLES_128.stream().map(DoubleLong::toBigInteger).toList();
+    private static final List<Int128> DOUBLES_64 = Arrays.stream(LONGS).mapToObj(Int128::from).toList();
+    private static final List<Int128> DOUBLES_128 = Arrays.stream(LONGS).mapToObj(v -> Int128.fromBits(v, ~v)).toList();
+    private static final List<BigInteger> BIGS_64 = DOUBLES_64.stream().map(Int128::toBigInteger).toList();
+    private static final List<BigInteger> BIGS_128 = DOUBLES_128.stream().map(Int128::toBigInteger).toList();
 
     @Benchmark
     public void DoubleLong_divide_64(Blackhole blackhole) {
-        for (DoubleLong x : DOUBLES_128) {
-            for (DoubleLong y : DOUBLES_64) {
-                DoubleLong z = x.divide(y);
+        for (Int128 x : DOUBLES_128) {
+            for (Int128 y : DOUBLES_64) {
+                Int128 z = x.divide(y);
                 blackhole.consume(z);
             }
         }
@@ -40,9 +40,9 @@ public class DoubleLongJmhBenchmark {
 
     @Benchmark
     public void DoubleLong_divide_128(Blackhole blackhole) {
-        for (DoubleLong x : DOUBLES_128) {
-            for (DoubleLong y : DOUBLES_128) {
-                DoubleLong z = x.divide(y);
+        for (Int128 x : DOUBLES_128) {
+            for (Int128 y : DOUBLES_128) {
+                Int128 z = x.divide(y);
                 blackhole.consume(z);
             }
         }
@@ -71,7 +71,7 @@ public class DoubleLongJmhBenchmark {
     public static void main(String[] args) throws RunnerException {
         System.out.println(Arrays.toString(LONGS));
         System.setProperty("jmh.separateClasspathJAR", "true");
-        Options options = new OptionsBuilder().include(DoubleLongJmhBenchmark.class.getSimpleName()).build();
+        Options options = new OptionsBuilder().include(Int128JmhBenchmark.class.getSimpleName()).build();
         new Runner(options).run();
     }
 }
