@@ -24,6 +24,7 @@ import static io.spbx.orm.arch.InvalidSqlModelException.create;
 import static io.spbx.orm.arch.model.JavaNameValidator.validateJavaIdentifier;
 import static io.spbx.orm.arch.model.JavaNameValidator.validateJavaPackage;
 import static io.spbx.orm.arch.model.SqlNameValidator.validateSqlName;
+import static io.spbx.util.base.EasyExceptions.newInternalError;
 
 @Immutable
 public final class TableArch implements JavaNameHolder, HasColumns, HasPrefixedColumns {
@@ -143,7 +144,7 @@ public final class TableArch implements JavaNameHolder, HasColumns, HasPrefixedC
     }
 
     public @NotNull ForeignTableField leftBridgeFieldOrDie() {
-        assert bridgeInfo != null : "Internal error. Many-to-many not available for table: " + this;
+        assert bridgeInfo != null : newInternalError("Many-to-many not available for table: %s", this);
         String leftName = bridgeInfo.leftField();
         Stream<ForeignTableField> stream = foreignFields(FOLLOW_ONE_LEVEL).stream();
         if (leftName != null) {
@@ -158,7 +159,7 @@ public final class TableArch implements JavaNameHolder, HasColumns, HasPrefixedC
     }
 
     public @NotNull ForeignTableField rightBridgeFieldOrDie() {
-        assert bridgeInfo != null : "Internal error. Many-to-many not available for table: " + this;
+        assert bridgeInfo != null : newInternalError("Many-to-many not available for table: %s", this);
         String rightName = bridgeInfo.rightField();
         Stream<ForeignTableField> stream = foreignFields(FOLLOW_ONE_LEVEL).stream();
         if (rightName != null) {

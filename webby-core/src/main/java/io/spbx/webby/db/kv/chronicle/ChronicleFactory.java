@@ -21,6 +21,7 @@ import java.util.function.Consumer;
 import java.util.function.LongConsumer;
 import java.util.logging.Level;
 
+import static io.spbx.util.base.EasyExceptions.newInternalError;
 import static io.spbx.util.base.Unchecked.Suppliers.rethrow;
 import static java.util.Objects.requireNonNull;
 
@@ -70,15 +71,15 @@ public class ChronicleFactory extends BaseKeyValueFactory {
             case FIXED -> {
                 onSize.accept(SizeMarshaller.constant(codecSize.numBytes()));
                 if (!serialization.sizeIsStaticallyKnown) {
-                    assert codec != null : "Internal error: %s".formatted(klass);
+                    assert codec != null : newInternalError("No codec for: %s", klass);
                     onMarshaller.accept(new BytesReaderWriter<>(codec));
                 }
             }
             case AVERAGE, MIN -> {
-                assert !serialization.sizeIsStaticallyKnown : "Internal error: %s".formatted(klass);
+                assert !serialization.sizeIsStaticallyKnown : newInternalError("Unexpected size for: %s", klass);
                 onAverageValueSize.accept(codecSize.numBytes());
                 if (isDefaultReader(serialization.reader())) {
-                    assert codec != null : "Internal error: %s".formatted(klass);
+                    assert codec != null : newInternalError("No codec for: %s", klass);
                     onMarshaller.accept(new BytesReaderWriter<>(codec));
                 }
             }

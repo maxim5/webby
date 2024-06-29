@@ -61,6 +61,13 @@ public class EasyExceptions {
             }
         }
 
+        public static <T> @NotNull T assureNotNull(@Nullable T value, @NotNull String message,
+                                                   @Nullable Object @NotNull ... args) {
+            failIf(value == null, message, args);
+            assert value != null : "Impossible";
+            return value;
+        }
+
         public static void failIf(boolean cond, @NotNull String message, @Nullable Object @NotNull ... args) {
             if (cond) {
                 InternalErrors.fail(message, args);

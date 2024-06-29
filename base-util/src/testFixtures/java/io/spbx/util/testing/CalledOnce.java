@@ -1,5 +1,6 @@
 package io.spbx.util.testing;
 
+import io.spbx.util.base.EasyExceptions.InternalErrors;
 import io.spbx.util.func.ThrowConsumer;
 import org.jetbrains.annotations.NotNull;
 
@@ -32,7 +33,7 @@ public class CalledOnce<T, E extends Throwable> implements Consumer<T>, ThrowCon
             .withMessage("Called more than once. First: %s, then: %s", value.get(), item)
             .isTrue();
         boolean set = called.compareAndSet(false, true);
-        assert set : "Internal error: the flag is already set: " + this;
+        InternalErrors.assure(set, "Fhe flag is already set: %s", this);
     }
 
     public @NotNull T getValue() {

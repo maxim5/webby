@@ -4,6 +4,7 @@ import com.google.common.annotations.Beta;
 import com.google.common.collect.ImmutableMap;
 import io.spbx.util.base.CharArray;
 import io.spbx.util.base.EasyExceptions.IllegalArgumentExceptions;
+import io.spbx.util.base.EasyExceptions.InternalErrors;
 import io.spbx.util.base.EasyNulls;
 import io.spbx.util.base.MutableCharArray;
 import io.spbx.util.base.Unchecked;
@@ -27,6 +28,7 @@ import java.util.function.*;
 import java.util.stream.Collector;
 import java.util.stream.Collectors;
 
+import static io.spbx.util.base.EasyExceptions.newInternalError;
 import static java.util.Objects.requireNonNull;
 
 @Beta
@@ -99,7 +101,7 @@ final class ClassFilterStringConverter implements Reversible<ClassFilter, String
                 wrap.write(bytes);
             }
             String result = output.toString(charset);
-            assert result.length() == size : "Internal error: wrong size allocated";
+            assert result.length() == size : newInternalError("Wrong size allocated: result=%s, size=%s", result, size);
             return result;
         } catch (IOException e) {
             return Unchecked.rethrow(e);
@@ -243,8 +245,8 @@ final class ClassFilterStringConverter implements Reversible<ClassFilter, String
 
         static void parsePredicate(@NotNull CharArray input, @NotNull Map<Kind, Map<Cmp, RuleSet>> rules) {
             ParsedPredicate parsed = ParsedPredicate.parseFrom(input);
-            RuleSet ruleSet = requireNonNull(rules.get(parsed.kind()).get(parsed.cmp()),
-                                             () -> "Internal error: Missing rule set for: " + parsed);
+            RuleSet ruleSet =
+                InternalErrors.assureNotNull(rules.get(parsed.kind).get(parsed.cmp), "Missing rule set: %s", parsed);
             assert ruleSet.matches(parsed);
             ruleSet.accept(parsed.value());
         }
