@@ -2,7 +2,6 @@ package io.spbx.webby.db.kv.sql;
 
 import com.google.inject.Inject;
 import io.spbx.orm.api.TableObj;
-import io.spbx.util.base.EasyExceptions.IllegalArgumentExceptions;
 import io.spbx.webby.db.codec.Codec;
 import io.spbx.webby.db.kv.DbOptions;
 import io.spbx.webby.db.kv.KeyValueDb;
@@ -10,6 +9,8 @@ import io.spbx.webby.db.kv.impl.BaseKeyValueFactory;
 import io.spbx.webby.db.model.BlobKv;
 import io.spbx.webby.db.sql.TableManager;
 import org.jetbrains.annotations.NotNull;
+
+import static io.spbx.util.base.EasyExceptions.newIllegalArgumentException;
 
 public class SqlTableDbFactory extends BaseKeyValueFactory {
     @Inject private TableManager tableManager;
@@ -29,7 +30,7 @@ public class SqlTableDbFactory extends BaseKeyValueFactory {
                 return new BlobTableDb<>(blobTable, options.name(), keyCodec, valueCodec);
             }
 
-            throw IllegalArgumentExceptions.format(
+            throw newIllegalArgumentException(
                 "Failed to find a matching SQL table for %s. " +
                 "In order to support any key-value pairs, make sure `BlobKv` is in the models list.",
                 options

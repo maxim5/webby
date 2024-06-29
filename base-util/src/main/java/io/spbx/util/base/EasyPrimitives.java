@@ -10,12 +10,14 @@ import java.io.IOException;
 import java.util.Arrays;
 import java.util.stream.Collector;
 
+import static io.spbx.util.base.EasyExceptions.newIllegalArgumentException;
+
 public class EasyPrimitives {
     @Pure
     public static int firstNonNegative(int a, int b) {
         if (a >= 0) return a;
         if (b >= 0) return b;
-        throw IllegalArgumentExceptions.format("All numbers are negative: %d, %d", a, b);
+        throw newIllegalArgumentException("All numbers are negative: %d, %d", a, b);
     }
 
     @Pure
@@ -23,7 +25,7 @@ public class EasyPrimitives {
         if (a >= 0) return a;
         if (b >= 0) return b;
         if (c >= 0) return c;
-        throw IllegalArgumentExceptions.format("All numbers are negative: %d, %d, %d", a, b, c);
+        throw newIllegalArgumentException("All numbers are negative: %d, %d, %d", a, b, c);
     }
 
     @Pure
@@ -33,7 +35,7 @@ public class EasyPrimitives {
                 return num;
             }
         }
-        throw IllegalArgumentExceptions.format("All numbers are negative: %s", Arrays.toString(nums));
+        throw newIllegalArgumentException("All numbers are negative: %s", Arrays.toString(nums));
     }
 
     @Pure

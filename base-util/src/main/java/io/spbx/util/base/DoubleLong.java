@@ -6,14 +6,15 @@ import com.google.common.primitives.Bytes;
 import com.google.common.primitives.Longs;
 import com.google.common.primitives.UnsignedLong;
 import com.google.errorprone.annotations.Immutable;
-import io.spbx.util.base.EasyExceptions.AssertionErrors;
-import io.spbx.util.base.EasyExceptions.IllegalArgumentExceptions;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.VisibleForTesting;
 
 import java.math.BigInteger;
 import java.util.Arrays;
 import java.util.Comparator;
+
+import static io.spbx.util.base.EasyExceptions.newAssertionError;
+import static io.spbx.util.base.EasyExceptions.newIllegalArgumentException;
 
 /**
  * Represents the signed 128-bit integer.
@@ -326,7 +327,7 @@ public final class DoubleLong extends Number implements Comparable<DoubleLong> {
             n--;
         }
 
-        throw AssertionErrors.format("Internal error. Failed to divide %s / %s", DoubleLong.fromBits(hi, lo), num);
+        throw newAssertionError("Internal error. Failed to divide %s / %s", DoubleLong.fromBits(hi, lo), num);
     }
 
     private static @NotNull DoubleLong divide128BitUnsigned(long hi1, long lo1, long hi2, long lo2) {
@@ -349,7 +350,7 @@ public final class DoubleLong extends Number implements Comparable<DoubleLong> {
             div = div >> 1;
         }
 
-        throw AssertionErrors.format("Internal error. Failed to divide %s / %s", fromBits(hi1, lo1), fromBits(hi2, lo2));
+        throw newAssertionError("Internal error. Failed to divide %s / %s", fromBits(hi1, lo1), fromBits(hi2, lo2));
     }
 
     /* Logical ops */
@@ -462,7 +463,7 @@ public final class DoubleLong extends Number implements Comparable<DoubleLong> {
         if (ch >= '0' && ch <= '9') return (long) ch - '0';
         if (ch >= 'a' && ch <= 'f') return (long) ch - 'a' + 10;
         if (ch >= 'A' && ch <= 'F') return (long) ch - 'A' + 10;
-        throw IllegalArgumentExceptions.format("Invalid hex character found: %s", ch);
+        throw newIllegalArgumentException("Invalid hex character found: %s", ch);
     }
 
     // https://stackoverflow.com/questions/8240704/resizing-a-byte-twos-complement-represented-integer

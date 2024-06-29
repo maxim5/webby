@@ -1,14 +1,14 @@
 package io.spbx.webby.db.kv;
 
 import com.google.common.flogger.FluentLogger;
-import io.spbx.util.base.EasyExceptions;
-import io.spbx.util.base.EasyExceptions.IllegalStateExceptions;
 import io.spbx.util.base.Pair;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.function.Function;
 import java.util.function.Supplier;
 import java.util.logging.Level;
+
+import static io.spbx.util.base.EasyExceptions.newIllegalStateException;
 
 public class KeyValueAutoRetryInserter<K, V> {
     private static final FluentLogger log = FluentLogger.forEnclosingClass();
@@ -33,7 +33,7 @@ public class KeyValueAutoRetryInserter<K, V> {
             }
             log.at(Level.WARNING).log("Failed to insert a (key, value) pair: attempt=%d, key=%s", attempt, key);
         }
-        throw IllegalStateExceptions.format("Too many failed attempts to insert (key, value) pair: %s", maxAttempts);
+        throw newIllegalStateException("Too many failed attempts to insert (key, value) pair: %s", maxAttempts);
     }
 
     private boolean tryInsert(@NotNull K key, @NotNull V value) {
