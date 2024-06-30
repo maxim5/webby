@@ -3,12 +3,14 @@ package io.spbx.webby.db.codec.standard;
 import com.carrotsearch.hppc.IntArrayList;
 import com.carrotsearch.hppc.IntHashSet;
 import io.spbx.util.testing.ext.HppcBytecodeExtension;
+import io.spbx.webby.testing.ext.TestingGuiceExtension;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.RegisterExtension;
 
 import static io.spbx.webby.db.codec.AssertCodec.assertCodec;
 
 public class IntContainerCodecTest {
+    @RegisterExtension private static final TestingGuiceExtension GUICE = TestingGuiceExtension.lite();
     @RegisterExtension private static final HppcBytecodeExtension HPPC_ORDER_FIX = new HppcBytecodeExtension();
 
     @Test
