@@ -3,6 +3,8 @@ package io.spbx.util.base;
 import com.google.errorprone.annotations.Immutable;
 import org.jetbrains.annotations.NotNull;
 
+import java.io.Serializable;
+import java.util.Comparator;
 import java.util.Map;
 import java.util.function.*;
 
@@ -10,9 +12,10 @@ import java.util.function.*;
  * Holds an immutable pair of nullable objects.
  *
  * @see OneOf
+ * @see Triple
  */
 @Immutable
-public record Pair<U, V>(U first, V second) implements Map.Entry<U, V> {
+public record Pair<U, V>(U first, V second) implements Map.Entry<U, V>, Serializable {
     public static <U, V> @NotNull Pair<U, V> of(U first, V second) {
         return new Pair<>(first, second);
     }
@@ -72,6 +75,15 @@ public record Pair<U, V>(U first, V second) implements Map.Entry<U, V> {
 
     public void apply(@NotNull BiConsumer<U, V> action) {
         action.accept(first, second);
+    }
+
+    public static <U extends Comparable<U>, V extends Comparable<V>> @NotNull Comparator<Pair<U, V>> comparator() {
+        return Comparator.<Pair<U, V>, U>comparing(Pair::first).thenComparing(Pair::second);
+    }
+
+    public static <U, V> @NotNull Comparator<Pair<U, V>> comparator(@NotNull Comparator<U> cmpFirst,
+                                                                    @NotNull Comparator<V> cmpSecond) {
+        return Comparator.<Pair<U, V>, U>comparing(Pair::first, cmpFirst).thenComparing(Pair::second, cmpSecond);
     }
 
     @Override
