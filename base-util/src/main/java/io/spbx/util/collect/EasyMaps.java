@@ -5,14 +5,36 @@ import org.checkerframework.dataflow.qual.Pure;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
-import java.util.Arrays;
-import java.util.LinkedHashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
+import java.util.concurrent.ConcurrentHashMap;
 
 import static io.spbx.util.base.EasyCast.castAny;
 
 public class EasyMaps {
+    public static <K, V> @NotNull Map<K, V> mutableMap() {
+        return new HashMap<>();
+    }
+
+    public static <K, V> @NotNull Map<K, V> mutableMap(int size) {
+        return new HashMap<>(size);
+    }
+
+    public static <K, V> @NotNull Map<K, V> orderedMap() {
+        return new LinkedHashMap<>();
+    }
+
+    public static <K, V> @NotNull Map<K, V> orderedMap(int size) {
+        return new LinkedHashMap<>(size);
+    }
+
+    public static <K, V> @NotNull Map<K, V> concurrentMap() {
+        return new ConcurrentHashMap<>();
+    }
+
+    public static <K, V> @NotNull Map<K, V> concurrentMap(int size) {
+        return new ConcurrentHashMap<>(size);
+    }
+
     @Pure
     public static <K, V> @NotNull LinkedHashMap<K, V> asMap(@Nullable Object @NotNull ... items) {
         return asMap(Arrays.asList(items));
@@ -65,13 +87,13 @@ public class EasyMaps {
 
     @Pure
     public static <K, V> @NotNull ImmutableMap<K, V> mergeToImmutable(@NotNull Map<K, V> map1, @NotNull Map<K, V> map2) {
-        return ImmutableMap.<K, V>builder().putAll(map1).putAll(map2).build();
+        return ImmutableMap.<K, V>builder().putAll(map1).putAll(map2).buildOrThrow();
     }
 
     @Pure
     public static <K, V> @NotNull ImmutableMap<K, V> mergeToImmutable(@NotNull Map<K, V> map1,
                                                                       @NotNull Map<K, V> map2,
                                                                       @NotNull Map<K, V> map3) {
-        return ImmutableMap.<K, V>builder().putAll(map1).putAll(map2).putAll(map3).build();
+        return ImmutableMap.<K, V>builder().putAll(map1).putAll(map2).putAll(map3).buildOrThrow();
     }
 }
