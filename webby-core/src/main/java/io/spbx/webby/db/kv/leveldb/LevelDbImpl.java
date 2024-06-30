@@ -139,9 +139,9 @@ public class LevelDbImpl<K, V> extends ByteArrayDb<K, V> implements KeyValueDb<K
     public void putAll(@NotNull Iterable<? extends K> keys, @NotNull Iterable<? extends V> values) {
         writeBatch(batch ->
             BiStream.zip(Streams.stream(keys), Streams.stream(values))
-                    .mapKeys(this::fromKey)
-                    .mapValues(this::fromValue)
-                    .forEach(batch::put)
+                .mapKeys(this::fromKey)
+                .mapValues(this::fromValue)
+                .forEach(batch::put)
         );
     }
 

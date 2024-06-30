@@ -25,7 +25,7 @@ public class ThirdPartyMimeTypeDetectors {
         for (Map.Entry<String, ThrowFunction<File, String, Exception>> entry : SUPPORTED_DETECTORS.entrySet()) {
             String className = entry.getKey();
             ThrowFunction<File, String, Exception> function = entry.getValue();
-            if (EasyClasspath.isInClassPath(className)) {
+            if (EasyClasspath.isInClasspath(className)) {
                 String mimeType = function.apply(file);
                 if (mimeType != null) {
                     return mimeType;

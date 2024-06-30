@@ -62,14 +62,14 @@ public class MarshallerFactory implements Provider<Json> {
             log.at(Level.CONFIG).log("Unrecognized json library. Available: %s", SUPPORTED_JSON.keySet());
         }
         if (pair != null) {
-            if (!EasyClasspath.isInClassPath(pair.first())) {
+            if (!EasyClasspath.isInClasspath(pair.first())) {
                 log.at(Level.WARNING).log("Json library not found in classpath: %s", pair.first());
             }
             return pair.second();
         }
 
         for (Pair<String, Class<? extends Json>> val : SUPPORTED_JSON.values()) {
-            if (EasyClasspath.isInClassPath(val.first())) {
+            if (EasyClasspath.isInClasspath(val.first())) {
                 log.at(Level.INFO).log("Using Json library: %s", val.first());
                 return val.second();
             }

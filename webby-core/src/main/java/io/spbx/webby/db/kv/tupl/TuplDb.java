@@ -196,9 +196,9 @@ public class TuplDb<K, V> extends ByteArrayDb<K, V> implements KeyValueDb<K, V> 
     public void putAll(@NotNull Iterable<? extends K> keys, @NotNull Iterable<? extends V> values) {
         inWriteTransaction(transaction -> {
             BiStream.zip(Streams.stream(keys), Streams.stream(values))
-                    .mapKeys(this::fromKey)
-                    .mapValues(this::fromValue)
-                    .forEach(Consumers.rethrow((k, v) -> index.store(transaction, k, v)));
+                .mapKeys(this::fromKey)
+                .mapValues(this::fromValue)
+                .forEach(Consumers.rethrow((k, v) -> index.store(transaction, k, v)));
         });
     }
 

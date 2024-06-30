@@ -61,16 +61,16 @@ public class PalDbImpl<K, V> extends ByteArrayDb<K, V> implements KeyValueDb<K, 
     @Override
     public boolean containsValue(@NotNull V value) {
         return streamOf(reader().iterator())
-                .map(Map.Entry::getValue)
-                .map(this::asValueNotNull)
-                .anyMatch(value::equals);
+            .map(Map.Entry::getValue)
+            .map(this::asValueNotNull)
+            .anyMatch(value::equals);
     }
 
     @Override
     public void forEach(@NotNull BiConsumer<? super K, ? super V> action) {
         streamOf(reader().iterator())
-                .map(e -> asMapEntry(e.getKey(), e.getValue()))
-                .forEach(entry -> action.accept(entry.getKey(), entry.getValue()));
+            .map(e -> asMapEntry(e.getKey(), e.getValue()))
+            .forEach(entry -> action.accept(entry.getKey(), entry.getValue()));
     }
 
     @Override
@@ -91,8 +91,8 @@ public class PalDbImpl<K, V> extends ByteArrayDb<K, V> implements KeyValueDb<K, 
     @Override
     public @NotNull Set<Map.Entry<K, V>> entrySet() {
         return streamOf(reader().iterator())
-                .map(e -> asMapEntry(e.getKey(), e.getValue()))
-                .collect(Collectors.toSet());
+            .map(e -> asMapEntry(e.getKey(), e.getValue()))
+            .collect(Collectors.toSet());
     }
 
     @Override

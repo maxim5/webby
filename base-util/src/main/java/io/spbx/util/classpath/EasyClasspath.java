@@ -20,7 +20,7 @@ public class EasyClasspath {
         }
     }
 
-    public static boolean isInClassPath(@NotNull String name) {
+    public static boolean isInClasspath(@NotNull String name) {
         return classForNameOrNull(name) != null;
     }
 }

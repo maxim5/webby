@@ -40,11 +40,11 @@ public class ChronicleFactory extends BaseKeyValueFactory {
             long defaultSize = settings.getLong("db.chronicle.default.size", 1 << 20);
 
             ChronicleMapBuilder<K, V> builder = ChronicleMap.of(options.key(), options.value())
-                    .entries(defaultSize)
-                    .name(options.name())
-                    .putReturnsNull(putReturnsNull)
-                    .removeReturnsNull(removeReturnsNull)
-                    .skipCloseOnExitHook(skipExitHook);
+                .entries(defaultSize)
+                .name(options.name())
+                .putReturnsNull(putReturnsNull)
+                .removeReturnsNull(removeReturnsNull)
+                .skipCloseOnExitHook(skipExitHook);
             if (replicationId > 0) {
                 builder.replication((byte) replicationId);
             }

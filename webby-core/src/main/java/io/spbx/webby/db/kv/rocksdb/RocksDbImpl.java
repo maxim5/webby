@@ -141,9 +141,9 @@ public class RocksDbImpl<K, V> extends ByteArrayDb<K, V> implements KeyValueDb<K
     public void putAll(@NotNull Iterable<? extends Map.Entry<? extends K, ? extends V>> entries) {
         writeBatch(batch -> {
             for (Map.Entry<? extends K, ? extends V> entry : entries) {
-               byte[] key = fromKey(entry.getKey());
-               byte[] value = fromValue(entry.getValue());
-               batch.put(key, value);
+                byte[] key = fromKey(entry.getKey());
+                byte[] value = fromValue(entry.getValue());
+                batch.put(key, value);
             }
         });
     }
@@ -152,9 +152,9 @@ public class RocksDbImpl<K, V> extends ByteArrayDb<K, V> implements KeyValueDb<K
     public void putAll(@NotNull Stream<? extends Map.Entry<? extends K, ? extends V>> entries) {
         writeBatch(batch ->
             entries.forEach(Consumers.rethrow(entry -> {
-               byte[] key = fromKey(entry.getKey());
-               byte[] value = fromValue(entry.getValue());
-               batch.put(key, value);
+                byte[] key = fromKey(entry.getKey());
+                byte[] value = fromValue(entry.getValue());
+                batch.put(key, value);
             }))
         );
     }
@@ -173,9 +173,9 @@ public class RocksDbImpl<K, V> extends ByteArrayDb<K, V> implements KeyValueDb<K
     public void putAll(@NotNull Iterable<? extends K> keys, @NotNull Iterable<? extends V> values) {
         writeBatch(batch ->
             BiStream.zip(Streams.stream(keys), Streams.stream(values))
-                   .mapKeys(this::fromKey)
-                   .mapValues(this::fromValue)
-                   .forEach(Consumers.rethrow(batch::put))
+                .mapKeys(this::fromKey)
+                .mapValues(this::fromValue)
+                .forEach(Consumers.rethrow(batch::put))
         );
     }
 
@@ -191,9 +191,9 @@ public class RocksDbImpl<K, V> extends ByteArrayDb<K, V> implements KeyValueDb<K
     @Override
     public void removeAll(@NotNull K @NotNull [] keys) {
         writeBatch(batch -> {
-           for (K key : keys) {
-               batch.delete(fromKey(key));
-           }
+            for (K key : keys) {
+                batch.delete(fromKey(key));
+            }
         });
     }
 

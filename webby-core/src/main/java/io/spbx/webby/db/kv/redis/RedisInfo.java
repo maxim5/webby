@@ -16,9 +16,9 @@ public class RedisInfo {
 
     public static @NotNull RedisInfo parseFrom(@NotNull String info) {
         ImmutableMap<String, String> props = info.lines()
-                .filter(line -> !line.isBlank() && !line.startsWith("#"))
-                .map(line -> Pair.of(line.split(":", 2)))
-                .collect(ImmutableMap.toImmutableMap(Pair::first, Pair::second));
+            .filter(line -> !line.isBlank() && !line.startsWith("#"))
+            .map(line -> Pair.of(line.split(":", 2)))
+            .collect(ImmutableMap.toImmutableMap(Pair::first, Pair::second));
         return new RedisInfo(props);
     }
 

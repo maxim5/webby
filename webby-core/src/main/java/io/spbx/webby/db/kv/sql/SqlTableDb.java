@@ -62,8 +62,8 @@ public class SqlTableDb<K, V> implements KeyValueDb<K, V> {
     @Override
     public @NotNull Set<Map.Entry<K, V>> entrySet() {
         return table.fetchAll().stream()
-                .map(entity -> new AbstractMap.SimpleEntry<>(table.keyOf(entity), entity))
-                .collect(Collectors.toSet());
+            .map(entity -> new AbstractMap.SimpleEntry<>(table.keyOf(entity), entity))
+            .collect(Collectors.toSet());
     }
 
     @Override
