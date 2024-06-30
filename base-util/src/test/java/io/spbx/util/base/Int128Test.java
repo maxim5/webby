@@ -230,6 +230,18 @@ public class Int128Test {
         }
     }
 
+    /** {@link Int128#compareTo} */
+
+    @Test
+    public void compare_ultimate() {
+        for (BigInteger a : BIG_INTEGERS) {
+            for (BigInteger b : BIG_INTEGERS) {
+                assertThat(Int128.from(a).compareTo(Int128.from(b))).isEqualTo(a.compareTo(b));
+                assertThat(Int128.from(b).compareTo(Int128.from(a))).isEqualTo(b.compareTo(a));
+            }
+        }
+    }
+
     /** {@link Int128#increment()} */
 
     @ParameterizedTest
@@ -259,6 +271,31 @@ public class Int128Test {
         for (BigInteger num : BIG_INTEGERS) {
             BigInteger expected = RANGE_INT128.fitIn(num.subtract($1));
             assertThat(Int128.from(num).decrement()).isEqualTo(Int128.from(expected));
+        }
+    }
+
+    /** {@link Int128#add} */
+
+    @Test
+    public void add_ultimate() {
+        for (BigInteger a : BIG_INTEGERS) {
+            for (BigInteger b : BIG_INTEGERS) {
+                BigInteger expected = RANGE_INT128.fitIn(a.add(b));
+                assertThat(Int128.from(a).add(Int128.from(b)).toBigInteger()).isEqualTo(expected);
+                assertThat(Int128.from(b).add(Int128.from(a)).toBigInteger()).isEqualTo(expected);
+            }
+        }
+    }
+
+    /** {@link Int128#subtract} */
+
+    @Test
+    public void subtract_ultimate() {
+        for (BigInteger a : BIG_INTEGERS) {
+            for (BigInteger b : BIG_INTEGERS) {
+                assertThat(Int128.from(a).subtract(Int128.from(b)).toBigInteger()).isEqualTo(RANGE_INT128.fitIn(a.subtract(b)));
+                assertThat(Int128.from(b).subtract(Int128.from(a)).toBigInteger()).isEqualTo(RANGE_INT128.fitIn(b.subtract(a)));
+            }
         }
     }
 
@@ -585,10 +622,7 @@ public class Int128Test {
                 .roundtripBigInteger()
                 .roundtripUnsignedLong()
                 .roundtripLong()
-                .fitsIntoLongConsistency()
-                .compareMatchesBigInteger()
-                .addMatchesBigInteger()
-                .subtractMatchesBigInteger()
+                .is64BitConsistency()
                 .internalConstruction();
         }
 
@@ -646,7 +680,7 @@ public class Int128Test {
             return this;
         }
 
-        public @NotNull DoubleLongSubject fitsIntoLongConsistency() {
+        public @NotNull DoubleLongSubject is64BitConsistency() {
             boolean isPositiveOrZero = actual.compareTo(Int128.ZERO) >= 0;
             try {
                 Long.parseLong(actual.toString());
@@ -660,33 +694,6 @@ public class Int128Test {
                 assertThat(actual.compareTo(Int128.from(Long.MIN_VALUE))).isEqualTo(isPositiveOrZero ? 1 : -1);
             }
             assertThat(actual.is64Bit()).isEqualTo(RANGE_INT64.contains(actual.toBigInteger()));
-            return this;
-        }
-
-        public @NotNull DoubleLongSubject compareMatchesBigInteger() {
-            for (BigInteger big : BIG_INTEGERS) {
-                assertThat(actual.compareTo(Int128.from(big))).isEqualTo(actual.toBigInteger().compareTo(big));
-                assertThat(Int128.from(big).compareTo(actual)).isEqualTo(big.compareTo(actual.toBigInteger()));
-            }
-            return this;
-        }
-
-        public @NotNull DoubleLongSubject addMatchesBigInteger() {
-            for (BigInteger big : BIG_INTEGERS) {
-                BigInteger expected = RANGE_INT128.fitIn(actual.toBigInteger().add(big));
-                assertThat(actual.add(Int128.from(big)).toBigInteger()).isEqualTo(expected);
-                assertThat(Int128.from(big).add(actual).toBigInteger()).isEqualTo(expected);
-            }
-            return this;
-        }
-
-        public @NotNull DoubleLongSubject subtractMatchesBigInteger() {
-            for (BigInteger big : BIG_INTEGERS) {
-                assertThat(actual.subtract(Int128.from(big)).toBigInteger())
-                    .isEqualTo(RANGE_INT128.fitIn(actual.toBigInteger().subtract(big)));
-                assertThat(Int128.from(big).subtract(actual).toBigInteger())
-                    .isEqualTo(RANGE_INT128.fitIn(big.subtract(actual.toBigInteger())));
-            }
             return this;
         }
 
