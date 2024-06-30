@@ -5,6 +5,8 @@ import io.spbx.util.func.TriConsumer;
 import io.spbx.util.func.TriFunction;
 import org.jetbrains.annotations.NotNull;
 
+import java.util.Iterator;
+import java.util.SequencedCollection;
 import java.util.function.Function;
 import java.util.function.Predicate;
 
@@ -21,8 +23,15 @@ public record Triple<U, V, W>(U first, V second, W third) {
     }
 
     public static <T> @NotNull Triple<T, T, T> of(@NotNull T[] array) {
-        assert array.length == 3 : "Invalid array to create a pair from: length=%d".formatted(array.length);
+        assert array.length == 3 : "Invalid array to create a triple from: length=%d".formatted(array.length);
         return new Triple<>(array[0], array[1], array[2]);
+    }
+
+    public static <T> @NotNull Triple<T, T, T> of(@NotNull SequencedCollection<T> collection) {
+        assert collection.size() == 3 : "Invalid list to create a triple from: size=%d".formatted(collection.size());
+        Iterator<T> iterator = collection.iterator();
+        // JLS 15.7.4 Argument Lists are Evaluated Left-to-Right
+        return new Triple<>(iterator.next(), iterator.next(), iterator.next());
     }
 
     public <T, S, R> @NotNull Triple<T, S, R> map(@NotNull Function<U, T> convertFirst,

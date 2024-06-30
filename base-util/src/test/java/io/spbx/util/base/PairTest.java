@@ -1,13 +1,13 @@
 package io.spbx.util.base;
 
 import com.google.common.base.Objects;
-import io.spbx.util.testing.MockConsumer;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import org.junit.jupiter.api.Test;
 
 import java.util.AbstractMap;
 import java.util.Comparator;
+import java.util.List;
 
 import static com.google.common.truth.Truth.assertThat;
 import static io.spbx.util.testing.TestingBasics.array;
@@ -19,6 +19,7 @@ public class PairTest {
         assertPair(Pair.of(1, 2), 1, 2);
         assertPair(Pair.of(1, "2"), 1, "2");
         assertPair(Pair.of(array(1, 2)), 1, 2);
+        assertPair(Pair.of(List.of(1, 2)), 1, 2);
         assertPair(Pair.of(new AbstractMap.SimpleEntry<>(1, "2")), 1, "2");
     }
     

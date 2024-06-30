@@ -6,6 +6,7 @@ import org.jetbrains.annotations.NotNull;
 import java.io.Serializable;
 import java.util.Comparator;
 import java.util.Map;
+import java.util.SequencedCollection;
 import java.util.function.*;
 
 /**
@@ -27,6 +28,11 @@ public record Pair<U, V>(U first, V second) implements Map.Entry<U, V>, Serializ
     public static <T> @NotNull Pair<T, T> of(@NotNull T[] array) {
         assert array.length == 2 : "Invalid array to create a pair from: length=%d".formatted(array.length);
         return new Pair<>(array[0], array[1]);
+    }
+
+    public static <T> @NotNull Pair<T, T> of(@NotNull SequencedCollection<T> collection) {
+        assert collection.size() == 2 : "Invalid collection to create a pair from: size=%d".formatted(collection.size());
+        return new Pair<>(collection.getFirst(), collection.getLast());
     }
 
     public @NotNull Pair<V, U> swap() {
