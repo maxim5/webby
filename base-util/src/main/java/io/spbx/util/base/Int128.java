@@ -364,6 +364,10 @@ public final class Int128 extends Number implements Comparable<Int128> {
         return Int128.fromBits(this.high & that.high, this.low & that.low);
     }
 
+    public @NotNull Int128 andNot(@NotNull Int128 that) {
+        return Int128.fromBits(this.high & ~that.high, this.low & ~that.low);
+    }
+
     public @NotNull Int128 or(@NotNull Int128 that) {
         return Int128.fromBits(this.high | that.high, this.low | that.low);
     }

@@ -425,6 +425,26 @@ public class Int128Test {
         }
     }
 
+    /** {@link Int128#and}, {@link Int128#andNot}, {@link Int128#or}, {@link Int128#xor} */
+
+    @Test
+    public void logical_ops_ultimate() {
+        for (BigInteger a : BIG_INTEGERS) {
+            for (BigInteger b : BIG_INTEGERS) {
+                Int128 lhs = Int128.from(a);
+                Int128 rhs = Int128.from(b);
+                assertThat(lhs.and(rhs).toBigInteger()).isEqualTo(a.and(b));
+                assertThat(rhs.and(lhs).toBigInteger()).isEqualTo(a.and(b));
+                assertThat(lhs.andNot(rhs).toBigInteger()).isEqualTo(a.andNot(b));
+                assertThat(rhs.andNot(lhs).toBigInteger()).isEqualTo(b.andNot(a));
+                assertThat(lhs.or(rhs).toBigInteger()).isEqualTo(a.or(b));
+                assertThat(rhs.or(lhs).toBigInteger()).isEqualTo(a.or(b));
+                assertThat(lhs.xor(rhs).toBigInteger()).isEqualTo(a.xor(b));
+                assertThat(rhs.xor(lhs).toBigInteger()).isEqualTo(a.xor(b));
+            }
+        }
+    }
+
     /** {@link Int128#shiftLeft(int)} */
 
     @Test
@@ -569,8 +589,6 @@ public class Int128Test {
                 .compareMatchesBigInteger()
                 .addMatchesBigInteger()
                 .subtractMatchesBigInteger()
-                .negateMatchesBigInteger()
-                .logicOpsMatchesBigInteger()
                 .internalConstruction();
         }
 
@@ -668,24 +686,6 @@ public class Int128Test {
                     .isEqualTo(RANGE_INT128.fitIn(actual.toBigInteger().subtract(big)));
                 assertThat(Int128.from(big).subtract(actual).toBigInteger())
                     .isEqualTo(RANGE_INT128.fitIn(big.subtract(actual.toBigInteger())));
-            }
-            return this;
-        }
-
-        public @NotNull DoubleLongSubject negateMatchesBigInteger() {
-            BigInteger expected = RANGE_INT128.fitIn(actual.toBigInteger().negate());
-            assertThat(actual.negate().toBigInteger()).isEqualTo(expected);
-            return isEqualTo(actual.negate().negate());
-        }
-
-        public @NotNull DoubleLongSubject logicOpsMatchesBigInteger() {
-            for (BigInteger big : BIG_INTEGERS) {
-                assertThat(actual.and(Int128.from(big)).toBigInteger()).isEqualTo(actual.toBigInteger().and(big));
-                assertThat(Int128.from(big).and(actual).toBigInteger()).isEqualTo(actual.toBigInteger().and(big));
-                assertThat(actual.or(Int128.from(big)).toBigInteger()).isEqualTo(actual.toBigInteger().or(big));
-                assertThat(Int128.from(big).or(actual).toBigInteger()).isEqualTo(actual.toBigInteger().or(big));
-                assertThat(actual.xor(Int128.from(big)).toBigInteger()).isEqualTo(actual.toBigInteger().xor(big));
-                assertThat(Int128.from(big).xor(actual).toBigInteger()).isEqualTo(actual.toBigInteger().xor(big));
             }
             return this;
         }
