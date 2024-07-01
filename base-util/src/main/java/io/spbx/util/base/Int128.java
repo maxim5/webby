@@ -410,7 +410,7 @@ public final class Int128 extends Number implements Comparable<Int128> {
         if (len < 0) return shiftLeft(-len);
         if (len == 0) return this;
         return len < 64 ?
-            fromBits(high >> len, ((high & ((1L << len) - 1)) << (64 - len)) + (low >>> len)) :
+            fromBits(high >>> len, ((high & ((1L << len) - 1)) << (64 - len)) + (low >>> len)) :
             fromBits(0, high >>> (len - 64));
     }
 

@@ -486,7 +486,7 @@ public class Int128Test {
 
     @Test
     public void shiftLeft_ultimate() {
-        SHIFT_LEFT.assertMatchAll(BIG_INTEGERS, List.of(1, 10, 32, 63, 64, 90, 127));
+        SHIFT_LEFT.assertMatchAll(BIG_INTEGERS, List.of(0, 1, 10, 32, 63, 64, 90, 127, -1, -2, -63, -64, -127));
     }
 
     /** {@link Int128#shiftRight(int)} */
@@ -508,32 +508,40 @@ public class Int128Test {
 
     @Test
     public void shiftRight_ultimate() {
-        SHIFT_RIGHT.assertMatchAll(BIG_INTEGERS, List.of(1, 10, 32, 63, 64, 90, 127));
+        SHIFT_RIGHT.assertMatchAll(BIG_INTEGERS, List.of(0, 1, 10, 32, 63, 64, 90, 127, -1, -2, -63, -64, -127));
     }
 
     /** {@link Int128#shiftRightUnsigned(int)} */
 
-    /*
-    private static final IntOpTester<Int128, BigInteger>
-        SHIFT_RIGHT_UNSIGNED = testInt(Int128::shiftRightUnsigned, BigInteger::shiftRight);
+    private static final IntOpTester<Int128, BigInteger> SHIFT_RIGHT_UNSIGNED = testInt(
+        Int128::shiftRightUnsigned,
+        (a, n) -> a.compareTo($0) >= 0 ? a.shiftRight(n) : a.add($2_128).shiftRight(n)
+    );
 
     @Test
     public void shiftRightUnsigned_simple() {
-        assertThat(Int128.ONE.shiftRight(0)).isEqualTo(Int128.ONE);
-        assertThat(Int128.ONE.shiftRight(1)).isEqualTo(Int128.ZERO);
+        assertThat(Int128.ONE.shiftRightUnsigned(0)).isEqualTo(Int128.ONE);
+        assertThat(Int128.ONE.shiftRightUnsigned(1)).isEqualTo(Int128.ZERO);
 
-        assertThat(Int128.from(POW2[5]).shiftRight(4)).isEqualTo(Int128.from(POW2[1]));
-        assertThat(Int128.from(POW2[5]).shiftRight(5)).isEqualTo(Int128.ONE);
+        assertThat(Int128.from(POW2[5]).shiftRightUnsigned(4)).isEqualTo(Int128.from(POW2[1]));
+        assertThat(Int128.from(POW2[5]).shiftRightUnsigned(5)).isEqualTo(Int128.ONE);
 
-        assertThat(Int128.fromBits(1, 1).shiftRight(1)).isEqualTo(Int128.fromBits(0, POW2[63]));
-        assertThat(Int128.fromBits(3, 3).shiftRight(1)).isEqualTo(Int128.fromBits(1, POW2[63] + 1));
+        assertThat(Int128.fromBits(1, 1).shiftRightUnsigned(1)).isEqualTo(Int128.fromBits(0, POW2[63]));
+        assertThat(Int128.fromBits(3, 3).shiftRightUnsigned(1)).isEqualTo(Int128.fromBits(1, POW2[63] + 1));
+
+        assertThat(Int128.from(-1).shiftRightUnsigned(0)).isEqualTo(Int128.fromBits(-1L, -1L));
+        assertThat(Int128.from(-1).shiftRightUnsigned(1)).isEqualTo(Int128.fromBits(-1L >>> 1, -1L));
+        assertThat(Int128.from(-1).shiftRightUnsigned(2)).isEqualTo(Int128.fromBits(-1L >>> 2, -1L));
+        assertThat(Int128.from(-1).shiftRightUnsigned(63)).isEqualTo(Int128.fromBits(-1L >>> 63, -1L));
+        assertThat(Int128.from(-1).shiftRightUnsigned(64)).isEqualTo(Int128.fromBits(0, -1L));
+        assertThat(Int128.from(-1).shiftRightUnsigned(65)).isEqualTo(Int128.fromBits(0, -1L >>> 1));
+        assertThat(Int128.from(-1).shiftRightUnsigned(127)).isEqualTo(Int128.fromBits(0, -1L >>> 63));
     }
 
     @Test
     public void shiftRightUnsigned_ultimate() {
-        SHIFT_RIGHT_UNSIGNED.assertMatchAll(BIG_INTEGERS, List.of(1, 10, 32, 63, 64, 90, 127));
+        SHIFT_RIGHT_UNSIGNED.assertMatchAll(BIG_INTEGERS, List.of(0, 1, 10, 32, 63, 64, 90, 127, -1, -2, -63, -64, -127));
     }
-    */
 
     /** {@link Int128#bitAt}, {@link Int128#setBitAt}, {@link Int128#clearBitAt}, {@link Int128#flipBitAt} */
 
@@ -1120,11 +1128,17 @@ public class Int128Test {
         public IntOpTester(@NotNull BiFunction<Int128, Integer, X> op, @NotNull BiFunction<BigInteger, Integer, Y> $op) {
             super(op, $op);
         }
+        @Override public @NotNull IntOpTester<X, Y> noFitIn128() {
+            return castAny(super.noFitIn128());
+        }
     }
 
     private static class LongOpTester<X, Y> extends NumOpTester<X, Y, Long> {
         public LongOpTester(@NotNull BiFunction<Int128, Long, X> op, @NotNull BiFunction<BigInteger, Long, Y> $op) {
             super(op, $op);
+        }
+        @Override public @NotNull LongOpTester<X, Y> noFitIn128() {
+            return castAny(super.noFitIn128());
         }
     }
 }
