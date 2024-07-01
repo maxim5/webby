@@ -607,7 +607,7 @@ public class Int128Test {
         }
     }
 
-    /** {@link Int128#numberOfLeadingZeros()}, {@link Int128#numberOfTrailingZeros()} */
+    /** {@link Int128#numberOfLeadingZeros()}, {@link Int128#numberOfTrailingZeros()}, {@link Int128#bitCount()} */
 
     private static final UnOpTester<Integer, Integer> LEADING_ZEROS = test(
         Int128::numberOfLeadingZeros,
@@ -617,6 +617,10 @@ public class Int128Test {
         Int128::numberOfTrailingZeros,
         a -> a.compareTo($0) == 0 ? 128 : a.getLowestSetBit()
     );
+    private static final UnOpTester<Integer, Integer> BIT_COUNT = test(
+        Int128::bitCount,
+        a -> a.compareTo($0) >= 0 ? a.bitCount() : 128 - a.bitCount()
+    );
 
     @Test
     public void numberOfLeadingZeros_simple() {
@@ -625,6 +629,8 @@ public class Int128Test {
         LEADING_ZEROS.assertMatch($10);
         LEADING_ZEROS.assertMatch($2_31);
         LEADING_ZEROS.assertMatch($2_32);
+        LEADING_ZEROS.assertMatch($2_63);
+        LEADING_ZEROS.assertMatch($2_64);
         LEADING_ZEROS.assertMatch($(-1));
         LEADING_ZEROS.assertMatch($(-100));
     }
@@ -636,8 +642,22 @@ public class Int128Test {
         TRAILING_ZEROS.assertMatch($10);
         TRAILING_ZEROS.assertMatch($2_31);
         TRAILING_ZEROS.assertMatch($2_32);
+        TRAILING_ZEROS.assertMatch($2_63);
+        TRAILING_ZEROS.assertMatch($2_64);
         TRAILING_ZEROS.assertMatch($(-1));
         TRAILING_ZEROS.assertMatch($(-100));
+    }
+
+    @Test
+    public void bitCount_simple() {
+        BIT_COUNT.assertMatch($0);
+        BIT_COUNT.assertMatch($1);
+        BIT_COUNT.assertMatch($10);
+        BIT_COUNT.assertMatch($2_31);
+        BIT_COUNT.assertMatch($2_63);
+        BIT_COUNT.assertMatch($2_64);
+        BIT_COUNT.assertMatch($(-1));
+        BIT_COUNT.assertMatch($(-100));
     }
 
     @Test
@@ -648,6 +668,11 @@ public class Int128Test {
     @Test
     public void numberOfTrailingZeros_ultimate() {
         TRAILING_ZEROS.assertMatchAll(BIG_INTEGERS);
+    }
+
+    @Test
+    public void bitCount_ultimate() {
+        BIT_COUNT.assertMatchAll(BIG_INTEGERS);
     }
 
     /** {@link Int128#fastZeroOrValue(long, long)}, {@link Int128#fastZeroOrMinusOne(long)} */

@@ -444,6 +444,10 @@ public final class Int128 extends Number implements Comparable<Int128> {
         return low == 0 ? Long.numberOfTrailingZeros(high) + 64 : Long.numberOfTrailingZeros(low);
     }
 
+    public int bitCount() {
+        return Long.bitCount(low) + Long.bitCount(high);
+    }
+
     /* `Object` methods */
 
     @Override
