@@ -4,13 +4,14 @@ import com.google.inject.Inject;
 import io.netty.handler.codec.http.HttpMethod;
 import io.netty.handler.codec.http.HttpRequest;
 import io.netty.handler.codec.http.HttpResponse;
-import io.spbx.util.base.EasyExceptions.IllegalStateExceptions;
 import io.spbx.webby.db.content.FileId;
 import io.spbx.webby.db.content.UserContentLocation;
 import io.spbx.webby.db.content.UserContentStorage;
 import org.jetbrains.annotations.NotNull;
 
 import java.io.IOException;
+
+import static io.spbx.util.base.EasyExceptions.newIllegalStateException;
 
 public class UserContentServing implements Serving {
     @Inject private UserContentStorage storage;
@@ -31,7 +32,7 @@ public class UserContentServing implements Serving {
         } else if (location.isRemote()) {
             return factory.newResponseRedirect(location.getRemoteUrl().toString(), true);
         } else {
-            throw IllegalStateExceptions.format("Internal error. Unsupported location: %s", location);
+            throw newIllegalStateException("Internal error. Unsupported location: %s", location);
         }
     }
 }

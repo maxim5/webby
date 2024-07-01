@@ -11,6 +11,7 @@ import java.nio.ByteBuffer;
 import java.util.Arrays;
 
 import static com.google.common.truth.Truth.assertThat;
+import static io.spbx.util.testing.AssertBasics.assertReversibleRoundtrip;
 import static io.spbx.util.testing.TestingBytes.assertBytes;
 
 public class AssertCodec {
@@ -51,6 +52,11 @@ public class AssertCodec {
             assertThat(value).isEqualTo(codec.readFromBytes(prefix.length, prefixedBytes));
             assertSize(prefixedBytes.length - prefix.length, predictedSize);
 
+            return reversibleRoundtrip(value);
+        }
+
+        public @NotNull CodecSubject<T> reversibleRoundtrip(@NotNull T value) {
+            assertReversibleRoundtrip(codec.reverse(), value);
             return this;
         }
 

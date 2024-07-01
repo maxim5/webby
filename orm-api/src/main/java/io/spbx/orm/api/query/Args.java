@@ -22,6 +22,7 @@ import java.util.logging.Level;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
+import static io.spbx.util.base.EasyExceptions.newInternalError;
 import static io.spbx.util.collect.ImmutableArrayList.toImmutableArrayList;
 
 /**
@@ -246,7 +247,7 @@ public final class Args {
             return this;
         }
 
-        assert type == InternalType.GENERIC_LIST : "Internal error: type=%s, internal=%s".formatted(type, internal);
+        assert type == InternalType.GENERIC_LIST : newInternalError("Wrong type: type=%s, internal=%s", type, internal);
 
         ListBuilder<Object> result = new ListBuilder<>();
         int index = 0;
@@ -277,7 +278,7 @@ public final class Args {
             return this;
         }
 
-        assert type == InternalType.GENERIC_LIST : "Internal error: type=%s, internal=%s".formatted(type, internal);
+        assert type == InternalType.GENERIC_LIST : newInternalError("Wrong type: type=%s, internal=%s", type, internal);
 
         ListBuilder<Object> result = new ListBuilder<>();
         Iterator<?> iterator = resolved.iterator();

@@ -66,8 +66,8 @@ public class HaloDbImpl<K, V> extends ByteArrayDb<K, V> implements KeyValueDb<K,
     @Override
     public @NotNull Set<Map.Entry<K, V>> entrySet() {
         return streamOf(dbIterator())
-                .map(record -> asMapEntry(record.getKey(), record.getValue()))
-                .collect(Collectors.toSet());
+            .map(record -> asMapEntry(record.getKey(), record.getValue()))
+            .collect(Collectors.toSet());
     }
 
     @Override

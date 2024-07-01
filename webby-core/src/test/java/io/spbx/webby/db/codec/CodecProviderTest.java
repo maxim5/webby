@@ -2,6 +2,7 @@ package io.spbx.webby.db.codec;
 
 import com.carrotsearch.hppc.IntArrayList;
 import com.carrotsearch.hppc.IntHashSet;
+import io.spbx.util.base.Int128;
 import io.spbx.util.testing.ext.HppcBytecodeExtension;
 import io.spbx.webby.auth.session.DefaultSession;
 import io.spbx.webby.auth.user.DefaultUser;
@@ -15,13 +16,17 @@ import static io.spbx.webby.db.codec.AssertCodec.assertCodec;
 
 public class CodecProviderTest {
     @RegisterExtension private static final HppcBytecodeExtension HPPC_ORDER_FIX = new HppcBytecodeExtension();
-
     private final CodecProvider provider = Testing.testStartup().getInstance(CodecProvider.class);
 
     @Test
     public void codecs_roundtrip() throws Exception {
         assertCodec(provider.getCodecOrDie(Integer.class)).roundtrip(0);
+        assertCodec(provider.getCodecOrDie(Integer.class)).roundtrip(0x0123_4567);
         assertCodec(provider.getCodecOrDie(Long.class)).roundtrip(0L);
+        assertCodec(provider.getCodecOrDie(Long.class)).roundtrip(0x0123_4567_89ab_cdefL);
+        assertCodec(provider.getCodecOrDie(Int128.class)).roundtrip(Int128.ZERO);
+        assertCodec(provider.getCodecOrDie(Int128.class)).roundtrip(Int128.fromBits(0x0123_4567_89ab_cdefL,
+                                                                                    0xfedc_ba98_7654_3210L));
         assertCodec(provider.getCodecOrDie(String.class)).roundtrip("");
         assertCodec(provider.getCodecOrDie(String.class)).roundtrip("foo");
         assertCodec(provider.getCodecOrDie(IntArrayList.class)).roundtrip(IntArrayList.from(1, 2, 3));

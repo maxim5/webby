@@ -21,6 +21,7 @@ import java.util.function.Consumer;
 import java.util.function.LongConsumer;
 import java.util.logging.Level;
 
+import static io.spbx.util.base.EasyExceptions.newInternalError;
 import static io.spbx.util.base.Unchecked.Suppliers.rethrow;
 import static java.util.Objects.requireNonNull;
 
@@ -39,11 +40,11 @@ public class ChronicleFactory extends BaseKeyValueFactory {
             long defaultSize = settings.getLong("db.chronicle.default.size", 1 << 20);
 
             ChronicleMapBuilder<K, V> builder = ChronicleMap.of(options.key(), options.value())
-                    .entries(defaultSize)
-                    .name(options.name())
-                    .putReturnsNull(putReturnsNull)
-                    .removeReturnsNull(removeReturnsNull)
-                    .skipCloseOnExitHook(skipExitHook);
+                .entries(defaultSize)
+                .name(options.name())
+                .putReturnsNull(putReturnsNull)
+                .removeReturnsNull(removeReturnsNull)
+                .skipCloseOnExitHook(skipExitHook);
             if (replicationId > 0) {
                 builder.replication((byte) replicationId);
             }
@@ -70,15 +71,15 @@ public class ChronicleFactory extends BaseKeyValueFactory {
             case FIXED -> {
                 onSize.accept(SizeMarshaller.constant(codecSize.numBytes()));
                 if (!serialization.sizeIsStaticallyKnown) {
-                    assert codec != null : "Internal error: %s".formatted(klass);
+                    assert codec != null : newInternalError("No codec for: %s", klass);
                     onMarshaller.accept(new BytesReaderWriter<>(codec));
                 }
             }
             case AVERAGE, MIN -> {
-                assert !serialization.sizeIsStaticallyKnown : "Internal error: %s".formatted(klass);
+                assert !serialization.sizeIsStaticallyKnown : newInternalError("Unexpected size for: %s", klass);
                 onAverageValueSize.accept(codecSize.numBytes());
                 if (isDefaultReader(serialization.reader())) {
-                    assert codec != null : "Internal error: %s".formatted(klass);
+                    assert codec != null : newInternalError("No codec for: %s", klass);
                     onMarshaller.accept(new BytesReaderWriter<>(codec));
                 }
             }

@@ -70,8 +70,8 @@ public class LmdbJavaDb<K, V> extends ByteArrayDb<K, V> implements KeyValueDb<K,
     public boolean containsValue(@NotNull V value) {
         ByteBuffer buffer = directBufferFromValue(value);
         return iterate(iterable -> Streams.stream(iterable)
-                .map(CursorIterable.KeyVal::val)
-                .anyMatch(val -> val.equals(buffer)));
+            .map(CursorIterable.KeyVal::val)
+            .anyMatch(val -> val.equals(buffer)));
     }
 
     @Override
@@ -94,9 +94,9 @@ public class LmdbJavaDb<K, V> extends ByteArrayDb<K, V> implements KeyValueDb<K,
     @Override
     public @NotNull Set<K> keySet() {
         return iterate(iterable -> Streams.stream(iterable)
-                .map(CursorIterable.KeyVal::key)
-                .map(this::asKey)
-                .collect(Collectors.toSet()));
+            .map(CursorIterable.KeyVal::key)
+            .map(this::asKey)
+            .collect(Collectors.toSet()));
     }
 
     @Override

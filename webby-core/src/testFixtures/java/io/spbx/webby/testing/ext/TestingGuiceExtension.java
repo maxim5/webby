@@ -6,6 +6,7 @@ import org.jetbrains.annotations.NotNull;
 import org.junit.jupiter.api.extension.BeforeAllCallback;
 import org.junit.jupiter.api.extension.ExtensionContext;
 
+// Makes sure that the properties are initialized in fast tests.
 public class TestingGuiceExtension implements BeforeAllCallback {
     private AppSettings settings;
 

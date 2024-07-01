@@ -2,7 +2,6 @@ package io.spbx.orm.arch.model;
 
 import com.google.common.collect.ImmutableList;
 import io.spbx.orm.arch.util.Naming;
-import io.spbx.util.base.EasyExceptions.IllegalStateExceptions;
 import io.spbx.util.lazy.AtomicCacheCompute;
 import io.spbx.util.lazy.CacheCompute;
 import org.jetbrains.annotations.NotNull;
@@ -13,6 +12,7 @@ import java.util.Objects;
 import java.util.function.Consumer;
 
 import static io.spbx.orm.arch.model.JavaNameValidator.validateJavaIdentifier;
+import static io.spbx.util.base.EasyExceptions.newInternalError;
 
 public final class PojoArch implements HasColumns {
     private final @NotNull Class<?> pojoType;
@@ -50,16 +50,14 @@ public final class PojoArch implements HasColumns {
         return columnsCache.getOrCompute(() -> {
             ArrayList<Column> result = new ArrayList<>();
             iterateAllFields(field -> {
-                if (field instanceof PojoFieldNative fieldNative) {
-                    result.add(fieldNative.column());
-                } else if (field instanceof PojoFieldMapper fieldMapper) {
-                    result.add(fieldMapper.column());
-                } else if (field instanceof PojoFieldAdapter fieldAdapter) {
-                    result.addAll(fieldAdapter.columns());
-                } else if (field instanceof PojoFieldNested ignore) {
-                    // no columns for this field (nested to be processed later)
-                } else {
-                    throw IllegalStateExceptions.format("Internal error. Unrecognized field: %s", field);
+                switch (field) {
+                    case PojoFieldNative fieldNative -> result.add(fieldNative.column());
+                    case PojoFieldMapper fieldMapper -> result.add(fieldMapper.column());
+                    case PojoFieldAdapter fieldAdapter -> result.addAll(fieldAdapter.columns());
+                    case PojoFieldNested ignore -> {
+                        // no columns for this field (nested to be processed later)
+                    }
+                    case null, default -> throw newInternalError("Unrecognized field: %s", field);
                 }
             });
             return result;

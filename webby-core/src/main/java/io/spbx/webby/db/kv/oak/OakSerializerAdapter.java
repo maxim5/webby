@@ -36,7 +36,6 @@ public final class OakSerializerAdapter<T> implements OakSerializer<T> {
     public int calculateSize(T object) {
         int size;
         return fixedSizeInBytes >= 0 ? fixedSizeInBytes :
-                (size = codec.sizeOf(object)) >= 0 ? size :
-                        codec.writeToBytes(object).length;
+            (size = codec.sizeOf(object)) >= 0 ? size : codec.writeToBytes(object).length;
     }
 }

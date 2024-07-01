@@ -1,5 +1,6 @@
 package io.spbx.webby.netty.response;
 
+import com.google.common.collect.ImmutableMap;
 import com.google.common.io.CharStreams;
 import com.google.inject.Inject;
 import io.netty.buffer.ByteBuf;
@@ -8,17 +9,18 @@ import io.netty.handler.codec.http.FullHttpResponse;
 import io.netty.handler.codec.http.HttpResponse;
 import io.netty.handler.codec.http.HttpResponseStatus;
 import io.spbx.util.base.CharArray;
+import io.spbx.util.collect.ClassMap;
 import io.spbx.util.base.Unchecked;
-import io.spbx.webby.app.Settings;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
+import org.jetbrains.annotations.VisibleForTesting;
 
 import java.io.*;
 import java.nio.ByteBuffer;
 import java.nio.CharBuffer;
 import java.nio.channels.Channels;
 import java.nio.channels.ReadableByteChannel;
-import java.util.HashMap;
+import java.nio.charset.Charset;
 import java.util.Map;
 import java.util.function.Function;
 
@@ -27,33 +29,40 @@ import static io.spbx.util.base.Unchecked.Functions.rethrow;
 import static io.spbx.util.io.EasyIo.Close.closeRethrow;
 
 public class ResponseMapper {
-    private final Map<Class<?>, Function<?, HttpResponse>> classMap = new HashMap<>();
-    private final Map<Class<?>, Function<?, HttpResponse>> interfaceMap = new HashMap<>();
-
+    private final ClassMap<Function<?, HttpResponse>> classMap;
+    private final ClassMap<Function<?, HttpResponse>> interfaceMap;
     private final HttpResponseFactory factory;
-    private final Settings settings;
+    private final Charset charset;
 
     @Inject
-    public ResponseMapper(@NotNull HttpResponseFactory factory, @NotNull Settings settings) {
+    public ResponseMapper(@NotNull HttpResponseFactory factory, @NotNull Charset charset) {
+        Builder builder = initClassMaps();
+        this.classMap = ClassMap.immutableOf(builder.buildClasses());
+        this.interfaceMap = ClassMap.immutableOf(builder.buildInterfaces());
         this.factory = factory;
-        this.settings = settings;
+        this.charset = charset;
+    }
 
-        add(byte[].class, bytes -> respond(Unpooled.wrappedBuffer(bytes)));
-        add(ByteBuf.class, this::respond);
-        add(ByteBuffer.class, buffer -> respond(Unpooled.wrappedBuffer(buffer)));
-        add(ReadableByteChannel.class, byteChannel -> respond(Channels.newInputStream(byteChannel)));
+    private @NotNull Builder initClassMaps() {
+        Builder builder = new Builder();
 
-        add(char[].class, chars -> respond(new CharArray(chars)));
-        add(CharBuffer.class, buf -> buf.hasArray() ? respond(asByteBuf(buf)) : respond(buf.toString()));
+        builder.map(byte[].class, bytes -> respond(Unpooled.wrappedBuffer(bytes)));
+        builder.map(ByteBuf.class, this::respond);
+        builder.map(ByteBuffer.class, buffer -> respond(Unpooled.wrappedBuffer(buffer)));
+        builder.map(ReadableByteChannel.class, byteChannel -> respond(Channels.newInputStream(byteChannel)));
 
-        add(CharSequence.class, this::respond);
-        add(String.class, this::respond);
-        add(CharArray.class, this::respond);
+        builder.map(char[].class, chars -> respond(new CharArray(chars)));
+        builder.map(CharBuffer.class, buf -> buf.hasArray() ? respond(asByteBuf(buf)) : respond(buf.toString()));
 
-        add(InputStream.class, this::respond);
-        add(Readable.class, readable -> respond(readToString(readable)));
-        add(Reader.class, reader -> respond(readToString(reader)));
-        add(File.class, rethrow(this::respond));
+        builder.map(CharSequence.class, this::respond);
+        builder.map(String.class, this::respond);
+        builder.map(CharArray.class, this::respond);
+
+        builder.map(InputStream.class, this::respond);
+        builder.map(Readable.class, readable -> respond(readToString(readable)));
+        builder.map(Reader.class, reader -> respond(readToString(reader)));
+        builder.map(File.class, rethrow(this::respond));
+        return builder;
     }
 
     public @Nullable Function<Object, HttpResponse> mapInstance(@NotNull Object instance) {
@@ -72,17 +81,9 @@ public class ResponseMapper {
         return null;
     }
 
-    // https://stackoverflow.com/questions/32229528/inheritance-aware-class-to-value-map-to-replace-series-of-instanceof
-    public <T extends U, U> @Nullable Function<U, HttpResponse> lookupClass(@Nullable Class<T> klass) {
-        if (klass == null) {
-            return null;
-        }
-        Function<?, HttpResponse> value = classMap.get(klass);
-        if (value == null) {
-            Class<?> superclass = klass.getSuperclass();
-            return castAny(lookupClass(superclass));
-        }
-        return castAny(value);
+    @VisibleForTesting
+    <T extends U, U> @Nullable Function<U, HttpResponse> lookupClass(@NotNull Class<T> klass) {
+        return castAny(classMap.getSuper(klass));
     }
 
     private @NotNull FullHttpResponse respond(@NotNull ByteBuf byteBuf) {
@@ -101,20 +102,12 @@ public class ResponseMapper {
         return factory.newResponse(file, HttpResponseStatus.OK);
     }
 
-    private <B> void add(@NotNull Class<B> key, @NotNull Function<B, HttpResponse> value) {
-        if (key.isInterface()) {
-            interfaceMap.put(key, value);
-        } else {
-            classMap.put(key, value);
-        }
-    }
-
     private @NotNull ByteBuf asByteBuf(CharBuffer buffer) {
         return Unpooled.copiedBuffer(
-                buffer.array(),
-                buffer.arrayOffset() + buffer.position(),
-                buffer.arrayOffset() + buffer.limit(),
-                settings.charset()
+            buffer.array(),
+            buffer.arrayOffset() + buffer.position(),
+            buffer.arrayOffset() + buffer.limit(),
+            charset
         );
     }
 
@@ -127,6 +120,27 @@ public class ResponseMapper {
             if (readable instanceof Closeable closeable) {
                 closeRethrow(closeable);
             }
+        }
+    }
+
+    private static class Builder {
+        private final ImmutableMap.Builder<Class<?>, Function<?, HttpResponse>> classes = new ImmutableMap.Builder<>();
+        private final ImmutableMap.Builder<Class<?>, Function<?, HttpResponse>> interfaces = new ImmutableMap.Builder<>();
+
+        public <B> void map(@NotNull Class<B> key, @NotNull Function<B, HttpResponse> value) {
+            if (key.isInterface()) {
+                interfaces.put(key, value);
+            } else {
+                classes.put(key, value);
+            }
+        }
+
+        public @NotNull Map<Class<?>, Function<?, HttpResponse>> buildClasses() {
+            return classes.buildOrThrow();
+        }
+
+        public @NotNull Map<Class<?>, Function<?, HttpResponse>> buildInterfaces() {
+            return interfaces.buildOrThrow();
         }
     }
 }

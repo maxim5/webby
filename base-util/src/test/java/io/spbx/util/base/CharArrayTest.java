@@ -72,6 +72,42 @@ public class CharArrayTest {
     }
 
     @Test
+    public void char_at() {
+        CharArray array = new CharArray("foobar");
+
+        assertThat(array.charAt(0)).isEqualTo('f');
+        assertThat(array.charAt(1)).isEqualTo('o');
+        assertThat(array.charAt(2)).isEqualTo('o');
+        assertThat(array.charAt(3)).isEqualTo('b');
+        assertThat(array.charAt(4)).isEqualTo('a');
+        assertThat(array.charAt(5)).isEqualTo('r');
+        assertThrows(AssertionError.class, () -> array.charAt(-1));
+        assertThrows(AssertionError.class, () -> array.charAt(6));
+    }
+
+    @Test
+    public void at() {
+        CharArray array = new CharArray("foobar");
+
+        assertThat(array.at(0)).isEqualTo('f');
+        assertThat(array.at(1)).isEqualTo('o');
+        assertThat(array.at(2)).isEqualTo('o');
+        assertThat(array.at(3)).isEqualTo('b');
+        assertThat(array.at(4)).isEqualTo('a');
+        assertThat(array.at(5)).isEqualTo('r');
+        assertThat(array.at(6)).isEqualTo(-1);
+        assertThat(array.at(-1)).isEqualTo('r');
+        assertThat(array.at(-2)).isEqualTo('a');
+        assertThat(array.at(-3)).isEqualTo('b');
+        assertThat(array.at(-4)).isEqualTo('o');
+        assertThat(array.at(-5)).isEqualTo('o');
+        assertThat(array.at(-6)).isEqualTo('f');
+        assertThat(array.at(-7)).isEqualTo(-1);
+        assertThat(array.at(+100)).isEqualTo(-1);
+        assertThat(array.at(-100)).isEqualTo(-1);
+    }
+
+    @Test
     public void indexOf() {
         CharArray array = new CharArray("foo-bar-baz");
 
@@ -259,6 +295,45 @@ public class CharArrayTest {
         assertThat(new CharArray(".ab").split('.')).containsExactly(new CharArray(""), new CharArray("ab"));
         assertThat(new CharArray("ab.cd").split('.')).containsExactly(new CharArray("ab"), new CharArray("cd"));
         assertThat(new CharArray("a.b.c").split('.')).containsExactly(new CharArray("a"), new CharArray("b"), new CharArray("c"));
+    }
+
+    @Test
+    public void trim_by_predicate() {
+        assertThat(new CharArray("").trimStart(Character::isDigit)).isEqualTo(new CharArray(""));
+        assertThat(new CharArray("").trimStart(Character::isDigit)).isEqualTo(new CharArray(""));
+        assertThat(new CharArray("").trimStart(Character::isDigit)).isEqualTo(new CharArray(""));
+
+        assertThat(new CharArray("foobar").trimStart(Character::isDigit)).isEqualTo(new CharArray("foobar"));
+        assertThat(new CharArray("foobar").trimEnd(Character::isDigit)).isEqualTo(new CharArray("foobar"));
+        assertThat(new CharArray("foobar").trim(Character::isDigit)).isEqualTo(new CharArray("foobar"));
+
+        assertThat(new CharArray("123foobar456").trimStart(Character::isDigit)).isEqualTo(new CharArray("foobar456"));
+        assertThat(new CharArray("123foobar456").trimEnd(Character::isDigit)).isEqualTo(new CharArray("123foobar"));
+        assertThat(new CharArray("123foobar456").trim(Character::isDigit)).isEqualTo(new CharArray("foobar"));
+
+        assertThat(new CharArray("123").trimStart(Character::isDigit)).isEqualTo(new CharArray(""));
+        assertThat(new CharArray("123").trimStart(Character::isDigit)).isEqualTo(new CharArray(""));
+        assertThat(new CharArray("123").trimStart(Character::isDigit)).isEqualTo(new CharArray(""));
+    }
+
+    @Test
+    public void trim_char() {
+        assertThat(new CharArray("").trim('a')).isEqualTo(new CharArray(""));
+        assertThat(new CharArray("bbb").trim('a')).isEqualTo(new CharArray("bbb"));
+        assertThat(new CharArray("abba").trim('a')).isEqualTo(new CharArray("bb"));
+        assertThat(new CharArray("baba").trim('a')).isEqualTo(new CharArray("bab"));
+        assertThat(new CharArray("aba").trim('a')).isEqualTo(new CharArray("b"));
+        assertThat(new CharArray("a-a-a").trim('a')).isEqualTo(new CharArray("-a-"));
+        assertThat(new CharArray("aaa").trim('a')).isEqualTo(new CharArray(""));
+    }
+
+    @Test
+    public void trim_spaces() {
+        assertThat(new CharArray("").trim()).isEqualTo(new CharArray(""));
+        assertThat(new CharArray(" ").trim()).isEqualTo(new CharArray(""));
+        assertThat(new CharArray("    ").trim()).isEqualTo(new CharArray(""));
+        assertThat(new CharArray("  \t\n\r").trim()).isEqualTo(new CharArray(""));
+        assertThat(new CharArray("\nfoo bar  \t\t").trim()).isEqualTo(new CharArray("foo bar"));
     }
 
     @Test
@@ -627,5 +702,19 @@ public class CharArrayTest {
         assertThat(new CharArray("foo").contentEquals("a")).isFalse();
         assertThat(new CharArray("foo").contentEquals("foo")).isTrue();
         assertThat(new CharArray("foo").contentEquals("Foo")).isFalse();
+    }
+
+    @Test
+    public void equalsIgnoreCase() {
+        assertThat(new CharArray("foo").equalsIgnoreCase("foo")).isTrue();
+        assertThat(new CharArray("foo").equalsIgnoreCase("FOO")).isTrue();
+        assertThat(new CharArray("foo").equalsIgnoreCase("FoO")).isTrue();
+
+        assertThat(new CharArray("foo").equalsIgnoreCase("foo.")).isFalse();
+        assertThat(new CharArray("foo").equalsIgnoreCase("fooo")).isFalse();
+        assertThat(new CharArray("foo").equalsIgnoreCase("bar")).isFalse();
+        assertThat(new CharArray("foo").equalsIgnoreCase("oo")).isFalse();
+        assertThat(new CharArray("foo").equalsIgnoreCase("fof")).isFalse();
+        assertThat(new CharArray("foo").equalsIgnoreCase("")).isFalse();
     }
 }

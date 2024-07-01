@@ -39,12 +39,11 @@ public class TestingBasics {
     }
 
     private static <T> void addRecursive(@NotNull ListBuilder<T> builder, @Nullable Object item) {
-        if (item instanceof Iterable<?> iterable) {
-            iterable.forEach(it -> addRecursive(builder, it));
-        } else if (item instanceof Stream<?> stream) {
-            stream.forEach(it -> addRecursive(builder, it));
-        } else {
-            builder.add(castAny(item));
+        switch (item) {
+            case Iterable<?> iterable -> iterable.forEach(it -> addRecursive(builder, it));
+            case Stream<?> stream -> stream.forEach(it -> addRecursive(builder, it));
+            case Object[] array -> Arrays.stream(array).forEach(it -> addRecursive(builder, it));
+            case null, default -> builder.add(castAny(item));
         }
     }
 

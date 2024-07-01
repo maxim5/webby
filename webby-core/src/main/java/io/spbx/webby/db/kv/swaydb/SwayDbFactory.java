@@ -27,10 +27,10 @@ public class SwayDbFactory extends BaseKeyValueFactory {
             Codec<V> valueCodec = valueCodecOrDie(options);
 
             PersistentMap.Config<K, V, Void> config = PersistentMap
-                    .functionsOff(path, getSerializer(keyCodec), getSerializer(valueCodec))
-                    .setMapSize(mapSize)
-                    .setSegmentConfig(DefaultConfigs.segmentConfig(false).copyWithMinSegmentSize(minSegmentSize))
-                    .setAppendixFlushCheckpointSize(checkpointSize);
+                .functionsOff(path, getSerializer(keyCodec), getSerializer(valueCodec))
+                .setMapSize(mapSize)
+                .setSegmentConfig(DefaultConfigs.segmentConfig(false).copyWithMinSegmentSize(minSegmentSize))
+                .setAppendixFlushCheckpointSize(checkpointSize);
             Map<K, V, Void> map = config.get();
             return new SwayDb<>(map);
         });

@@ -91,8 +91,8 @@ public class BlobTableDb<V, K> extends ByteArrayDb<K, V> implements KeyValueDb<K
     @Override
     public @NotNull Set<Map.Entry<K, V>> entrySet() {
         return table.fetchAllMatching(whereNamespace).stream()
-                .map(entity -> new AbstractMap.SimpleEntry<>(asKey(entity.id()), asValue(entity.value())))
-                .collect(Collectors.toSet());
+            .map(entity -> new AbstractMap.SimpleEntry<>(asKey(entity.id()), asValue(entity.value())))
+            .collect(Collectors.toSet());
     }
 
     @Override

@@ -7,7 +7,7 @@ import io.spbx.orm.adapter.JdbcSingleValueAdapter;
 import io.spbx.orm.api.ResultSetIterator;
 import io.spbx.orm.arch.model.*;
 import io.spbx.orm.arch.util.Naming;
-import io.spbx.util.base.EasyExceptions.IllegalStateExceptions;
+import io.spbx.util.base.EasyExceptions.InternalErrors;
 import io.spbx.util.collect.EasyMaps;
 import org.jetbrains.annotations.NotNull;
 
@@ -22,6 +22,7 @@ import java.util.stream.Stream;
 
 import static io.spbx.orm.codegen.Indent.INDENT1;
 import static io.spbx.orm.codegen.Joining.*;
+import static io.spbx.util.base.EasyExceptions.newInternalError;
 
 @SuppressWarnings("UnnecessaryStringEscape")
 public class ModelAdapterCodegen extends BaseCodegen {
@@ -140,9 +141,9 @@ public class ModelAdapterCodegen extends BaseCodegen {
         Map<PojoField, Column> result = new LinkedHashMap<>();
         pojo.iterateAllFields(field -> {
             if (field instanceof PojoFieldNative fieldNative) {
-                assert !result.containsKey(field) :
-                    "Internal error. Several columns for one field: `%s` of `%s`: %s, %s"
-                    .formatted(field, pojo.pojoType(), fieldNative.column(), result.get(field));
+                InternalErrors.failIf(result.containsKey(field),
+                    "Several columns for one field: `%s` of `%s`: %s, %s",
+                    field, pojo.pojoType(), fieldNative.column(), result.get(field));
                 result.put(field, fieldNative.column());
             }
         });
@@ -155,17 +156,15 @@ public class ModelAdapterCodegen extends BaseCodegen {
         String canonicalName = Naming.shortCanonicalJavaName(pojo.pojoType());
         builder.append("new ").append(canonicalName).append("(");
         for (PojoField field : pojo.fields()) {
-            if (field instanceof PojoFieldNative) {
-                builder.append(field.fullSqlName());
-            } else if (field instanceof PojoFieldMapper) {
-                builder.append(field.mapperApiOrDie().expr().jdbcToField(field.fullSqlName()));
-            } else if (field instanceof PojoFieldNested fieldNested) {
-                fieldConstructor(fieldNested.pojo(), nativeFieldsColumns, builder);
-            } else if (field instanceof PojoFieldAdapter fieldAdapter) {
-                String params = fieldAdapter.columns().stream().map(Column::sqlName).collect(COMMA_JOINER);
-                builder.append(fieldAdapter.adapterApiOrDie().expr().createInstance(params));
-            } else {
-                IllegalStateExceptions.fail("Internal error. Unrecognized field: %s", field);
+            switch (field) {
+                case PojoFieldNative ignore -> builder.append(field.fullSqlName());
+                case PojoFieldMapper ignore -> builder.append(field.mapperApiOrDie().expr().jdbcToField(field.fullSqlName()));
+                case PojoFieldNested fieldNested -> fieldConstructor(fieldNested.pojo(), nativeFieldsColumns, builder);
+                case PojoFieldAdapter fieldAdapter -> {
+                    String params = fieldAdapter.columns().stream().map(Column::sqlName).collect(COMMA_JOINER);
+                    builder.append(fieldAdapter.adapterApiOrDie().expr().createInstance(params));
+                }
+                case null, default -> throw newInternalError("Unrecognized field: %s", field);
             }
             builder.append(", ");
         }

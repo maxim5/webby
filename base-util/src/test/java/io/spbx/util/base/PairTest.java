@@ -6,6 +6,8 @@ import org.jetbrains.annotations.Nullable;
 import org.junit.jupiter.api.Test;
 
 import java.util.AbstractMap;
+import java.util.Comparator;
+import java.util.List;
 
 import static com.google.common.truth.Truth.assertThat;
 import static io.spbx.util.testing.TestingBasics.array;
@@ -17,6 +19,7 @@ public class PairTest {
         assertPair(Pair.of(1, 2), 1, 2);
         assertPair(Pair.of(1, "2"), 1, "2");
         assertPair(Pair.of(array(1, 2)), 1, 2);
+        assertPair(Pair.of(List.of(1, 2)), 1, 2);
         assertPair(Pair.of(new AbstractMap.SimpleEntry<>(1, "2")), 1, "2");
     }
     
@@ -121,6 +124,62 @@ public class PairTest {
         assertThat(Pair.of(1, null).test((x, y) -> x != null && y == null)).isTrue();
         assertThat(Pair.of(null, 1).test((x, y) -> x == null && y != null)).isTrue();
         assertThat(Pair.of(null, null).test((x, y) -> x == null && y == null)).isTrue();
+    }
+
+    @Test
+    public void pair_apply() {
+        Pair.of(1, 2).apply((first, second) -> {
+            assertThat(first).isEqualTo(1);
+            assertThat(second).isEqualTo(2);
+        });
+        Pair.of(1, null).apply((first, second) -> {
+            assertThat(first).isEqualTo(1);
+            assertThat(second).isNull();
+        });
+        Pair.of(null, 2).apply((first, second) -> {
+            assertThat(first).isNull();
+            assertThat(second).isEqualTo(2);
+        });
+        Pair.of(null, null).apply((first, second) -> {
+            assertThat(first).isNull();
+            assertThat(second).isNull();
+        });
+    }
+
+    @Test
+    public void pair_compare_comparable() {
+        assertThat(Pair.<Integer, String>comparator().compare(Pair.of(1, "a"), Pair.of(2, "b"))).isAtMost(-1);
+        assertThat(Pair.<Integer, String>comparator().compare(Pair.of(1, "a"), Pair.of(2, "a"))).isAtMost(-1);
+        assertThat(Pair.<Integer, String>comparator().compare(Pair.of(1, "a"), Pair.of(2, ""))).isAtMost(-1);
+
+        assertThat(Pair.<Integer, String>comparator().compare(Pair.of(1, "a"), Pair.of(1, "b"))).isAtMost(-1);
+        assertThat(Pair.<Integer, String>comparator().compare(Pair.of(1, "a"), Pair.of(1, "a"))).isEqualTo(0);
+        assertThat(Pair.<Integer, String>comparator().compare(Pair.of(1, "a"), Pair.of(1, ""))).isAtLeast(1);
+
+        assertThat(Pair.<Integer, String>comparator().compare(Pair.of(1, "a"), Pair.of(0, "b"))).isAtLeast(1);
+        assertThat(Pair.<Integer, String>comparator().compare(Pair.of(1, "a"), Pair.of(0, "a"))).isAtLeast(1);
+        assertThat(Pair.<Integer, String>comparator().compare(Pair.of(1, "a"), Pair.of(0, ""))).isAtLeast(1);
+    }
+
+    @Test
+    public void pair_compare_of_comparator() {
+        Comparator<Integer> absCmp = Comparator.comparingInt(Math::abs);
+        Comparator<String> lenCmp = Comparator.comparingInt(String::length);
+
+        assertThat(Pair.comparator(absCmp, lenCmp).compare(Pair.of(1, "a"), Pair.of(1, "a"))).isEqualTo(0);
+        assertThat(Pair.comparator(absCmp, lenCmp).compare(Pair.of(1, "a"), Pair.of(-1, "b"))).isEqualTo(0);
+        assertThat(Pair.comparator(absCmp, lenCmp).compare(Pair.of(-1, "a"), Pair.of(1, "b"))).isEqualTo(0);
+        assertThat(Pair.comparator(absCmp, lenCmp).compare(Pair.of(-1, "a"), Pair.of(-1, "b"))).isEqualTo(0);
+
+        assertThat(Pair.comparator(absCmp, lenCmp).compare(Pair.of(1, "aaa"), Pair.of(1, "b"))).isEqualTo(1);
+        assertThat(Pair.comparator(absCmp, lenCmp).compare(Pair.of(1, "aaa"), Pair.of(-1, "bb"))).isEqualTo(1);
+        assertThat(Pair.comparator(absCmp, lenCmp).compare(Pair.of(-1, "aaa"), Pair.of(1, "bb"))).isEqualTo(1);
+        assertThat(Pair.comparator(absCmp, lenCmp).compare(Pair.of(1, "aaa"), Pair.of(0, "ccc"))).isEqualTo(1);
+
+        assertThat(Pair.comparator(absCmp, lenCmp).compare(Pair.of(1, "aaa"), Pair.of(2, "b"))).isEqualTo(-1);
+        assertThat(Pair.comparator(absCmp, lenCmp).compare(Pair.of(1, "aaa"), Pair.of(2, "bbb"))).isEqualTo(-1);
+        assertThat(Pair.comparator(absCmp, lenCmp).compare(Pair.of(1, "aaa"), Pair.of(-2, "bbb"))).isEqualTo(-1);
+        assertThat(Pair.comparator(absCmp, lenCmp).compare(Pair.of(1, "aaa"), Pair.of(-1, "bbb+"))).isEqualTo(-1);
     }
 
     private static <U, V> void assertPair(@NotNull Pair<U, V> pair, @Nullable Object first, @Nullable Object second) {

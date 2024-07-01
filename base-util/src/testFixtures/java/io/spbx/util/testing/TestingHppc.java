@@ -1,11 +1,11 @@
 package io.spbx.util.testing;
 
 import com.carrotsearch.hppc.*;
-import io.spbx.util.base.EasyExceptions.IllegalArgumentExceptions;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
 import static io.spbx.util.base.EasyCast.castAny;
+import static io.spbx.util.base.EasyExceptions.newIllegalArgumentException;
 import static io.spbx.util.testing.TestingBasics.array;
 import static io.spbx.util.testing.TestingPrimitives.ints;
 import static io.spbx.util.testing.TestingPrimitives.longs;
@@ -129,6 +129,6 @@ public class TestingHppc {
         if (obj instanceof IntContainer container) {
             return new IntHashSet(container);
         }
-        throw IllegalArgumentExceptions.format("Unrecognized object: %s", obj);
+        throw newIllegalArgumentException("Unrecognized object: %s", obj);
     }
 }

@@ -9,6 +9,7 @@ import java.util.List;
 
 import static io.spbx.orm.api.ReadFollow.FOLLOW_ALL;
 import static io.spbx.orm.api.ReadFollow.NO_FOLLOW;
+import static io.spbx.util.base.EasyExceptions.newInternalError;
 
 @Immutable
 public class ForeignTableField extends TableField {
@@ -53,7 +54,7 @@ public class ForeignTableField extends TableField {
     public @NotNull OneColumnTableField primaryKeyFieldInForeignTable() {
         TableField primaryKeyField = foreignTable.primaryKeyField();
         assert primaryKeyField instanceof OneColumnTableField :
-            "Internal error. Primary key in foreign table does not match the foreign key: " + this;
+            newInternalError("Primary key in foreign table does not match the foreign key: %s", this);
         return (OneColumnTableField) primaryKeyField;
     }
 

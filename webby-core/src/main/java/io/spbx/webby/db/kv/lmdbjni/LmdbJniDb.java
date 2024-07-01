@@ -18,7 +18,7 @@ import java.util.stream.Stream;
 
 import static io.spbx.webby.db.kv.impl.KeyValueCommons.streamOf;
 
-public class LmdbJniDb <K, V> extends ByteArrayDb<K, V> implements KeyValueDb<K, V> {
+public class LmdbJniDb<K, V> extends ByteArrayDb<K, V> implements KeyValueDb<K, V> {
     private final Env env;
     private final Database db;
 

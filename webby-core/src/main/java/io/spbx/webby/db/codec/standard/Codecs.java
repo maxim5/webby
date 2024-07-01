@@ -5,6 +5,7 @@ import com.google.common.flogger.FluentLogger;
 import com.google.common.primitives.Ints;
 import com.google.common.primitives.Longs;
 import com.google.common.primitives.Shorts;
+import io.spbx.util.base.Int128;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import org.jetbrains.annotations.VisibleForTesting;
@@ -24,6 +25,7 @@ public class Codecs {
     public static final int INT16_SIZE = Short.BYTES;
     public static final int INT32_SIZE = Integer.BYTES;
     public static final int INT64_SIZE = Long.BYTES;
+    public static final int INT128_SIZE = Int128.BYTES;
 
     public static int writeByte8(int value, @NotNull OutputStream output) throws IOException {
         assert Byte.MIN_VALUE <= value && value <= Byte.MAX_VALUE : "Value does not fit in byte: %d".formatted(value);
@@ -61,6 +63,15 @@ public class Codecs {
 
     public static long readLong64(@NotNull InputStream input) throws IOException {
         return Longs.fromByteArray(input.readNBytes(INT64_SIZE));
+    }
+
+    public static int writeInt128(@NotNull Int128 value, @NotNull OutputStream output) throws IOException {
+        output.write(value.toByteArray());
+        return INT128_SIZE;
+    }
+
+    public static @NotNull Int128 readInt128(@NotNull InputStream input) throws IOException {
+        return Int128.fromBits(input.readNBytes(INT128_SIZE));
     }
 
     public static int writeBoolean8(boolean value, @NotNull OutputStream output) throws IOException {

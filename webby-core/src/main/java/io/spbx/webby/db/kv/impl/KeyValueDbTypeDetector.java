@@ -32,7 +32,7 @@ public class KeyValueDbTypeDetector {
 
     public static @Nullable DbType autoDetectDbTypeFromClasspath() {
         for (Pair<DbType, String> val : AUTO_TYPES) {
-            if (EasyClasspath.isInClassPath(val.second())) {
+            if (EasyClasspath.isInClasspath(val.second())) {
                 log.at(Level.INFO).log("Found key-value persistence library in classpath: %s", val.second());
                 return val.first();
             }

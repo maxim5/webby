@@ -1,12 +1,12 @@
 package io.spbx.webby.db.count.vote;
 
-import io.spbx.util.base.EasyExceptions.IllegalArgumentExceptions;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.Arrays;
 import java.util.List;
 
 import static com.google.common.truth.Truth.assertThat;
+import static io.spbx.util.base.EasyExceptions.newIllegalArgumentException;
 
 record Vote(int key, int val) {
     public Vote {
@@ -25,7 +25,7 @@ record Vote(int key, int val) {
         } else if (obj instanceof Vote vote) {
             return vote;
         }
-        throw IllegalArgumentExceptions.format("Unrecognized object: %s", obj);
+        throw newIllegalArgumentException("Unrecognized object: %s", obj);
     }
 
     public static @NotNull List<Vote> votes(@NotNull Object @NotNull ... array) {

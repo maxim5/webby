@@ -2,7 +2,6 @@ package io.spbx.orm.arch.model;
 
 import com.google.common.collect.Streams;
 import com.google.errorprone.annotations.Immutable;
-import io.spbx.util.base.EasyExceptions.IllegalStateExceptions;
 import io.spbx.util.base.Pair;
 import io.spbx.util.lazy.AtomicCacheCompute;
 import io.spbx.util.lazy.CacheCompute;
@@ -10,6 +9,8 @@ import org.jetbrains.annotations.NotNull;
 
 import java.util.*;
 import java.util.stream.Collectors;
+
+import static io.spbx.util.base.EasyExceptions.newInternalError;
 
 @Immutable
 public abstract class PojoField {
@@ -64,11 +65,11 @@ public abstract class PojoField {
     }
 
     public @NotNull MapperApi mapperApiOrDie() {
-        throw IllegalStateExceptions.format("Internal error. Field does not have a mapper: %s", this);
+        throw newInternalError("This field does not have a mapper: %s", this);
     }
 
     public @NotNull AdapterApi adapterApiOrDie() {
-        throw IllegalStateExceptions.format("Internal error. Field does not have an adapter: %s", this);
+        throw newInternalError("This field does not have an adapter: %s", this);
     }
 
     public abstract @NotNull PojoField reattachedTo(@NotNull PojoParent parent);

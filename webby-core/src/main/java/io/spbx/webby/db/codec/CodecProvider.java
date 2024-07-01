@@ -5,6 +5,7 @@ import com.carrotsearch.hppc.IntHashSet;
 import com.google.common.collect.ImmutableMap;
 import com.google.inject.Inject;
 import com.google.inject.Injector;
+import io.spbx.util.base.Int128;
 import io.spbx.util.collect.EasyMaps;
 import io.spbx.util.lazy.LazyBoolean;
 import io.spbx.webby.app.Settings;
@@ -33,6 +34,7 @@ public class CodecProvider {
         DefaultUser.class, DefaultUserCodec.DEFAULT_INSTANCE,
         Integer.class, INT_CODEC,
         Long.class, LONG_CODEC,
+        Int128.class, INT128_CODEC,
         String.class, STRING_CODEC,
         IntArrayList.class, IntArrayListCodec.INSTANCE,
         IntHashSet.class, IntHashSetCodec.INSTANCE
@@ -97,6 +99,23 @@ public class CodecProvider {
         @Override
         public @NotNull Long readFrom(@NotNull InputStream input, int available) throws IOException {
             return readLong64(input);
+        }
+    };
+
+    public static final Codec<Int128> INT128_CODEC = new Codec<>() {
+        @Override
+        public @NotNull CodecSize size() {
+            return CodecSize.fixed(INT128_SIZE);
+        }
+
+        @Override
+        public int writeTo(@NotNull OutputStream output, @NotNull Int128 instance) throws IOException {
+            return writeInt128(instance, output);
+        }
+
+        @Override
+        public @NotNull Int128 readFrom(@NotNull InputStream input, int available) throws IOException {
+            return readInt128(input);
         }
     };
 

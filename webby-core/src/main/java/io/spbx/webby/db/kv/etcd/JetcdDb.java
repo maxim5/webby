@@ -79,8 +79,8 @@ public class JetcdDb<K, V> extends ByteArrayDb<K, V> implements KeyValueDb<K, V>
     public @NotNull Set<Map.Entry<K, V>> entrySet() {
         List<KeyValue> keyValues = runRethrow(() -> kv.get(namespace, withGetOptions(false)).get().getKvs());
         return keyValues.stream()
-                .map(entry -> asMapEntry(toKey(entry.getKey()), toValue(entry.getValue())))
-                .collect(Collectors.toSet());
+            .map(entry -> asMapEntry(toKey(entry.getKey()), toValue(entry.getValue())))
+            .collect(Collectors.toSet());
     }
 
     @Override
@@ -116,12 +116,12 @@ public class JetcdDb<K, V> extends ByteArrayDb<K, V> implements KeyValueDb<K, V>
 
     private @NotNull GetOption withGetOptions(boolean keysOnly) {
         return GetOption.builder()
-                .withKeysOnly(keysOnly)
-                .withSortField(GetOption.SortTarget.KEY)
-                .withSortOrder(GetOption.SortOrder.DESCEND)
-                .withRange(namespace)
-                .isPrefix(prefixed)
-                .build();
+            .withKeysOnly(keysOnly)
+            .withSortField(GetOption.SortTarget.KEY)
+            .withSortOrder(GetOption.SortOrder.DESCEND)
+            .withRange(namespace)
+            .isPrefix(prefixed)
+            .build();
     }
 
     @Override

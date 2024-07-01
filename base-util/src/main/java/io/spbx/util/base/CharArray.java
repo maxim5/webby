@@ -8,6 +8,7 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.function.Consumer;
 import java.util.function.IntConsumer;
+import java.util.function.IntPredicate;
 import java.util.stream.IntStream;
 
 /**
@@ -79,10 +80,12 @@ public class CharArray implements CharSequence, Comparable<CharArray> {
     @Override
     public char charAt(int index) {
         assert index >= 0 : "Index can't be negative: %d".formatted(index);
+        assert index < length() : "Index is out of bounds: %d".formatted(index);
         return chars[start + index];
     }
 
     public int at(int index) {
+        index = index >= 0 ? index : index + length();  // allows negative from the end (-1 is `length()-1`)
         return index >= 0 && index < length() ? chars[start + index] : -1;
     }
 
@@ -126,12 +129,12 @@ public class CharArray implements CharSequence, Comparable<CharArray> {
 
     public boolean startsWith(CharArray prefix) {
         return length() >= prefix.length() &&
-                Arrays.equals(chars, start, start + prefix.length(), prefix.chars, prefix.start, prefix.end);
+               Arrays.equals(chars, start, start + prefix.length(), prefix.chars, prefix.start, prefix.end);
     }
 
     public boolean endsWith(CharArray suffix) {
         return length() >= suffix.length() &&
-                Arrays.equals(chars, end - suffix.length(), end, suffix.chars, suffix.start, suffix.end);
+               Arrays.equals(chars, end - suffix.length(), end, suffix.chars, suffix.start, suffix.end);
     }
 
     public boolean startsWith(char ch) {
@@ -294,6 +297,35 @@ public class CharArray implements CharSequence, Comparable<CharArray> {
         return list;
     }
 
+    public CharArray trimStart(IntPredicate check) {
+        int i = start;
+        while (i < end && check.test(chars[i])) {
+            ++i;
+        }
+        return i == start ? this : new CharArray(chars, i, end);
+    }
+
+    public CharArray trimEnd(IntPredicate check) {
+        int i = end - 1;
+        while (i >= start && check.test(chars[i])) {
+            --i;
+        }
+        ++i;
+        return i == end ? this : new CharArray(chars, start, i);
+    }
+
+    public CharArray trim(IntPredicate check) {
+        return trimStart(check).trimEnd(check);
+    }
+
+    public CharArray trim(char ch) {
+        return trim(value -> value == ch);
+    }
+
+    public CharArray trim() {
+        return trim(Character::isWhitespace);
+    }
+
     // Returns the length of the common prefix
     public int commonPrefix(CharArray array) {
         int index = Arrays.mismatch(chars, start, end, array.chars, array.start, array.end);
@@ -368,6 +400,18 @@ public class CharArray implements CharSequence, Comparable<CharArray> {
     @Override
     public boolean equals(Object o) {
         return this == o || o instanceof CharArray that && Arrays.equals(chars, start, end, that.chars, that.start, that.end);
+    }
+
+    public boolean equalsIgnoreCase(CharSequence str) {
+        if (length() != str.length()) {
+            return false;
+        }
+        for (int i = 0, len = length(); i < len; ++i) {
+            if (Character.toLowerCase(charAt(i)) != Character.toLowerCase(str.charAt(i))) {
+                return false;
+            }
+        }
+        return true;
     }
 
     public boolean contentEquals(char ch) {
