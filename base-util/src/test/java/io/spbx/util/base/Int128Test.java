@@ -675,7 +675,7 @@ public class Int128Test {
         BIT_COUNT.assertMatchAll(BIG_INTEGERS);
     }
 
-    /** {@link Int128#fastZeroOrValue(long, long)}, {@link Int128#fastZeroOrMinusOne(long)} */
+    /** {@link Int128#fastZeroOrValue}, {@link Int128#fastZeroOrMinusOne}, {@link Int128#fastZeroOrOne} */
 
     @Test
     public void fastZeroOrValue_ultimate() {
@@ -686,10 +686,6 @@ public class Int128Test {
         }
     }
 
-    private static long slowZeroOrValue(long test, long value) {
-        return test < 0 ? value : 0;
-    }
-
     @Test
     public void fastZeroOrMinusOne_ultimate() {
         for (long a : EDGE_CASE_LONGS) {
@@ -697,8 +693,23 @@ public class Int128Test {
         }
     }
 
+    @Test
+    public void fastZeroOrOne_ultimate() {
+        for (long a : EDGE_CASE_LONGS) {
+            assertThat(Int128.fastZeroOrOne(a)).isEqualTo(slowZeroOrOne(a));
+        }
+    }
+
+    private static long slowZeroOrValue(long test, long value) {
+        return test < 0 ? value : 0;
+    }
+
     private static long slowZeroOrMinusOne(long test) {
         return test < 0 ? -1 : 0;
+    }
+
+    private static int slowZeroOrOne(long test) {
+        return test == 0 ? 0 : 1;
     }
 
     /** Assertion utils */
