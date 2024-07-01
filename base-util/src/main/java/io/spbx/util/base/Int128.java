@@ -475,6 +475,30 @@ public final class Int128 extends Number implements Comparable<Int128> {
 
     /* Implementation details */
 
+    /**
+     * Branch-less form of
+     * <pre>
+     * if (test < 0) {
+     *   return value;
+     * }
+     * else {
+     *   return 0;
+     * }
+     * </pre>
+     */
+    @VisibleForTesting
+    static long fastZeroOrValue(long test, long value) {
+        return value & (test >> 63);
+    }
+
+    /**
+     * Branch-less form of <code>return test < 0 ? -1 : 0;</code>
+     */
+    @VisibleForTesting
+    static long fastZeroOrMinusOne(long test) {
+        return test >> 63;
+    }
+
     @VisibleForTesting
     static long intsToLong(int high, int low) {
         return ((long) high << 32) | (low & 0xffffffffL);
