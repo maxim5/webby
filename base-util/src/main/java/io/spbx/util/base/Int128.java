@@ -111,7 +111,9 @@ public final class Int128 extends Number implements Comparable<Int128> {
     }
 
     public static @NotNull Int128 from(long value) {
-        return value >= 0 ? fromBits(0, value) : fromBits(-1, value);
+        // Long version:
+        //   return value >= 0 ? fromBits(0, value) : fromBits(-1, value);
+        return fromBits(fastZeroOrMinusOne(value), value);
     }
 
     @Beta
@@ -254,7 +256,9 @@ public final class Int128 extends Number implements Comparable<Int128> {
     }
 
     public @NotNull Int128 add(long value) {
-        return value >= 0 ? add(this.high, this.low, 0, value) : add(this.high, this.low, -1, value);
+        // Long version:
+        //   return value >= 0 ? add(this.high, this.low, 0, value) : add(this.high, this.low, -1, value);
+        return add(this.high, this.low, fastZeroOrMinusOne(value), value);
     }
 
     private static @NotNull Int128 add(long hi1, long lo1, long hi2, long lo2) {
@@ -270,12 +274,12 @@ public final class Int128 extends Number implements Comparable<Int128> {
     }
 
     public @NotNull Int128 subtract(@NotNull Int128 that) {
-        // The following code inlined:
-        //   this.add(that.negate());
         return subtract(this.high, this.low, that.high, that.low);
     }
 
     private static @NotNull Int128 subtract(long hi1, long lo1, long hi2, long lo2) {
+        // Long version:
+        //   add(this, that.negate());
         return lo2 == 0 ? add(hi1, lo1, ~hi2 + 1, 0) : add(hi1, lo1, ~hi2, ~lo2 + 1);
     }
 
@@ -288,7 +292,9 @@ public final class Int128 extends Number implements Comparable<Int128> {
     }
 
     public @NotNull Int128 multiply(long value) {
-        return value >= 0 ? multiply(this.high, this.low, 0, value) : multiply(this.high, this.low, -1, value);
+        // Long version:
+        //   return value >= 0 ? multiply(this.high, this.low, 0, value) : multiply(this.high, this.low, -1, value);
+        return multiply(this.high, this.low, fastZeroOrMinusOne(value), value);
     }
 
     private static @NotNull Int128 multiply(long hi1, long lo1, long hi2, long lo2) {
@@ -438,7 +444,9 @@ public final class Int128 extends Number implements Comparable<Int128> {
     }
 
     public boolean equals(long value) {
-        return low == value && high == (value >= 0 ? 0 : -1);
+        // Long version:
+        //   return low == value && high == (value >= 0 ? 0 : -1);
+        return low == value && high == fastZeroOrMinusOne(value);
     }
 
     @Override
@@ -476,7 +484,7 @@ public final class Int128 extends Number implements Comparable<Int128> {
     /* Implementation details */
 
     /**
-     * Branch-less form of
+     * Branch-less form of <code>return test < 0 ? value : 0;</code> or
      * <pre>
      * if (test < 0) {
      *   return value;
@@ -492,7 +500,7 @@ public final class Int128 extends Number implements Comparable<Int128> {
     }
 
     /**
-     * Branch-less form of <code>return test < 0 ? -1 : 0;</code>
+     * Branch-less form of <code>return test < 0 ? -1 : 0;</code> or <code>return test >= 0 ? 0 : -1;</code>
      */
     @VisibleForTesting
     static long fastZeroOrMinusOne(long test) {
