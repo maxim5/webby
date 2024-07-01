@@ -607,6 +607,49 @@ public class Int128Test {
         }
     }
 
+    /** {@link Int128#numberOfLeadingZeros()}, {@link Int128#numberOfTrailingZeros()} */
+
+    private static final UnOpTester<Integer, Integer> LEADING_ZEROS = test(
+        Int128::numberOfLeadingZeros,
+        a -> a.compareTo($0) >= 0 ? 128 - a.bitLength() : 0
+    );
+    private static final UnOpTester<Integer, Integer> TRAILING_ZEROS = test(
+        Int128::numberOfTrailingZeros,
+        a -> a.compareTo($0) == 0 ? 128 : a.getLowestSetBit()
+    );
+
+    @Test
+    public void numberOfLeadingZeros_simple() {
+        LEADING_ZEROS.assertMatch($0);
+        LEADING_ZEROS.assertMatch($1);
+        LEADING_ZEROS.assertMatch($10);
+        LEADING_ZEROS.assertMatch($2_31);
+        LEADING_ZEROS.assertMatch($2_32);
+        LEADING_ZEROS.assertMatch($(-1));
+        LEADING_ZEROS.assertMatch($(-100));
+    }
+
+    @Test
+    public void numberOfTrailingZeros_simple() {
+        TRAILING_ZEROS.assertMatch($0);
+        TRAILING_ZEROS.assertMatch($1);
+        TRAILING_ZEROS.assertMatch($10);
+        TRAILING_ZEROS.assertMatch($2_31);
+        TRAILING_ZEROS.assertMatch($2_32);
+        TRAILING_ZEROS.assertMatch($(-1));
+        TRAILING_ZEROS.assertMatch($(-100));
+    }
+
+    @Test
+    public void numberOfLeadingZeros_ultimate() {
+        LEADING_ZEROS.assertMatchAll(BIG_INTEGERS);
+    }
+
+    @Test
+    public void numberOfTrailingZeros_ultimate() {
+        TRAILING_ZEROS.assertMatchAll(BIG_INTEGERS);
+    }
+
     /** {@link Int128#fastZeroOrValue(long, long)}, {@link Int128#fastZeroOrMinusOne(long)} */
 
     @Test

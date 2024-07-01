@@ -436,6 +436,14 @@ public final class Int128 extends Number implements Comparable<Int128> {
         return new Int128(pos < 64 ? high : high ^ (1L << (pos - 64)), pos < 64 ? low ^ (1L << pos) : low);
     }
 
+    public int numberOfLeadingZeros() {
+        return high == 0 ? Long.numberOfLeadingZeros(low) + 64 : Long.numberOfLeadingZeros(high);
+    }
+
+    public int numberOfTrailingZeros() {
+        return low == 0 ? Long.numberOfTrailingZeros(high) + 64 : Long.numberOfTrailingZeros(low);
+    }
+
     /* `Object` methods */
 
     @Override
