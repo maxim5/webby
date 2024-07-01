@@ -287,6 +287,10 @@ public final class Int128 extends Number implements Comparable<Int128> {
         return multiply(this.high, this.low, that.high, that.low);
     }
 
+    public @NotNull Int128 multiply(long value) {
+        return value >= 0 ? multiply(this.high, this.low, 0, value) : multiply(this.high, this.low, -1, value);
+    }
+
     private static @NotNull Int128 multiply(long hi1, long lo1, long hi2, long lo2) {
         // https://stackoverflow.com/questions/18859207/high-bits-of-long-multiplication-in-java
         long low = lo1 * lo2;

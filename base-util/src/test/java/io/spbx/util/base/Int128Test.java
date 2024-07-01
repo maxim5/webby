@@ -7,7 +7,6 @@ import io.spbx.util.collect.ListBuilder;
 import io.spbx.util.testing.TestingBasics;
 import org.jetbrains.annotations.CheckReturnValue;
 import org.jetbrains.annotations.NotNull;
-import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.MethodSource;
@@ -16,11 +15,15 @@ import org.junit.jupiter.params.provider.ValueSource;
 import java.math.BigInteger;
 import java.util.Comparator;
 import java.util.List;
+import java.util.function.BiFunction;
+import java.util.function.Function;
 import java.util.stream.IntStream;
 import java.util.stream.LongStream;
 import java.util.stream.Stream;
 
 import static com.google.common.truth.Truth.assertThat;
+import static io.spbx.util.base.EasyCast.castAny;
+import static io.spbx.util.base.EasyExceptions.newInternalError;
 import static io.spbx.util.testing.TestingBigIntegers.*;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 
@@ -219,7 +222,6 @@ public class Int128Test {
         );
     }
 
-    @Tag("slow")
     @Test
     public void internal_consistency_ultimate() {
         for (BigInteger num : BIG_INTEGERS) {
@@ -232,17 +234,16 @@ public class Int128Test {
 
     /** {@link Int128#compareTo} */
 
+    private static final BiOpTester<Integer, Integer> COMPARE_TO = test(Int128::compareTo, BigInteger::compareTo);
+
     @Test
     public void compare_ultimate() {
-        for (BigInteger a : BIG_INTEGERS) {
-            for (BigInteger b : BIG_INTEGERS) {
-                assertThat(Int128.from(a).compareTo(Int128.from(b))).isEqualTo(a.compareTo(b));
-                assertThat(Int128.from(b).compareTo(Int128.from(a))).isEqualTo(b.compareTo(a));
-            }
-        }
+        COMPARE_TO.assertMatchAll(BIG_INTEGERS);
     }
 
     /** {@link Int128#increment()} */
+
+    private static final UnOpTester<Int128, BigInteger> INCREMENT = test(Int128::increment, b -> b.add($1));
 
     @ParameterizedTest
     @ValueSource(longs = { 0, 1, -1, Integer.MAX_VALUE, Integer.MIN_VALUE, Long.MIN_VALUE, Long.MAX_VALUE - 1 })
@@ -252,13 +253,12 @@ public class Int128Test {
 
     @Test
     public void increment_ultimate() {
-        for (BigInteger num : BIG_INTEGERS) {
-            BigInteger expected = RANGE_INT128.fitIn(num.add($1));
-            assertThat(Int128.from(num).increment()).isEqualTo(Int128.from(expected));
-        }
+        INCREMENT.assertMatchAll(BIG_INTEGERS);
     }
 
     /** {@link Int128#decrement()} */
+
+    private static final UnOpTester<Int128, BigInteger> DECREMENT = test(Int128::decrement, b -> b.subtract($1));
 
     @ParameterizedTest
     @ValueSource(longs = { 0, 1, -1, Integer.MAX_VALUE, Integer.MIN_VALUE, Long.MIN_VALUE + 1, Long.MAX_VALUE })
@@ -268,39 +268,42 @@ public class Int128Test {
 
     @Test
     public void decrement_ultimate() {
-        for (BigInteger num : BIG_INTEGERS) {
-            BigInteger expected = RANGE_INT128.fitIn(num.subtract($1));
-            assertThat(Int128.from(num).decrement()).isEqualTo(Int128.from(expected));
-        }
+        DECREMENT.assertMatchAll(BIG_INTEGERS);
     }
 
-    /** {@link Int128#add} */
+    /** {@link Int128#add(Int128)}, {@link Int128#add(long)} */
+
+    private static final BiOpTester<Int128, BigInteger> ADD = test(Int128::add, BigInteger::add);
+    private static final LongOpTester<Int128, BigInteger> ADD_LONG = testLong(Int128::add, (a, l) -> a.add($(l)));
 
     @Test
     public void add_ultimate() {
-        for (BigInteger a : BIG_INTEGERS) {
-            for (BigInteger b : BIG_INTEGERS) {
-                BigInteger expected = RANGE_INT128.fitIn(a.add(b));
-                assertThat(Int128.from(a).add(Int128.from(b)).toBigInteger()).isEqualTo(expected);
-                assertThat(Int128.from(b).add(Int128.from(a)).toBigInteger()).isEqualTo(expected);
-            }
-        }
+        ADD.assertMatchAll(BIG_INTEGERS);
     }
 
-    /** {@link Int128#subtract} */
+    @Test
+    public void add_long_ultimate() {
+        ADD_LONG.assertMatchAll(BIG_INTEGERS, EDGE_CASE_LONGS);
+    }
+
+    /** {@link Int128#subtract(Int128)}, {@link Int128#subtract(long)} */
+
+    private static final BiOpTester<Int128, BigInteger> SUBTRACT = test(Int128::subtract, BigInteger::subtract);
+    private static final LongOpTester<Int128, BigInteger> SUBTRACT_LONG = testLong(Int128::subtract, (a, l) -> a.subtract($(l)));
 
     @Test
     public void subtract_ultimate() {
-        for (BigInteger a : BIG_INTEGERS) {
-            for (BigInteger b : BIG_INTEGERS) {
-                assertThat(Int128.from(a).subtract(Int128.from(b)).toBigInteger()).isEqualTo(RANGE_INT128.fitIn(a.subtract(b)));
-                assertThat(Int128.from(b).subtract(Int128.from(a)).toBigInteger()).isEqualTo(RANGE_INT128.fitIn(b.subtract(a)));
-            }
-        }
+        SUBTRACT.assertMatchAll(BIG_INTEGERS);
+    }
+
+    @Test
+    public void subtract_long_ultimate() {
+        SUBTRACT_LONG.assertMatchAll(BIG_INTEGERS, EDGE_CASE_LONGS);
     }
 
     /** {@link Int128#is64Bit()} */
 
+    private static final UnOpTester<Boolean, Boolean> IS_64_BIT = test(Int128::is64Bit, RANGE_INT64::contains);
     private static final List<Int128> FIT_INTO_LONG =
         List.of(Int128.ZERO, Int128.ONE, Int128.from(Long.MAX_VALUE), Int128.from(Long.MIN_VALUE));
     private static final List<Int128> NOT_FIT_INTO_LONG = List.of(
@@ -323,12 +326,13 @@ public class Int128Test {
 
     @Test
     public void is64Bit_ultimate() {
-        for (BigInteger num : BIG_INTEGERS) {
-            assertThat(Int128.from(num).is64Bit()).isEqualTo(RANGE_INT64.contains(num));
-        }
+        IS_64_BIT.assertMatchAll(BIG_INTEGERS);
     }
 
     /** {@link Int128#multiply(Int128)} */
+
+    private static final BiOpTester<Int128, BigInteger> MULTIPLY = test(Int128::multiply, BigInteger::multiply);
+    private static final LongOpTester<Int128, BigInteger> MULTIPLY_LONG = testLong(Int128::multiply, (a, l) -> a.multiply($(l)));
 
     @Test
     public void multiply_simple() {
@@ -341,46 +345,46 @@ public class Int128Test {
 
     @Test
     public void multiply_positive() {
-        assertMultiplyMatchesBigInteger(Int128.fromBits(0, POW2[36] + 1),
-                                        Int128.fromBits(0, POW2[36] + 2));
-        assertMultiplyMatchesBigInteger(Int128.fromBits(POW2[16], POW2[24] + 1),
-                                        Int128.fromBits(POW2[10], POW2[18] + 2));
-        assertMultiplyMatchesBigInteger(Int128.fromBits(POW2[20] + 1, POW2[30] + 1),
-                                        Int128.fromBits(POW2[20] - 1, POW2[18] - 1));
-        assertMultiplyMatchesBigInteger(Int128.fromBits(POW2[30] - 1, POW2[24] - 1),
-                                        Int128.fromBits(POW2[15] - 1, POW2[12] - 1));
-        assertMultiplyMatchesBigInteger(Int128.from(Integer.MAX_VALUE),
-                                        Int128.from(Integer.MAX_VALUE));
-        assertMultiplyMatchesBigInteger(Int128.from(Long.MAX_VALUE),
-                                        Int128.from(Long.MAX_VALUE));
+        MULTIPLY.assertMatch(Int128.fromBits(0, POW2[36] + 1), Int128.fromBits(0, POW2[36] + 2));
+        MULTIPLY.assertMatch(Int128.fromBits(POW2[16], POW2[24] + 1), Int128.fromBits(POW2[10], POW2[18] + 2));
+        MULTIPLY.assertMatch(Int128.fromBits(POW2[20] + 1, POW2[30] + 1), Int128.fromBits(POW2[20] - 1, POW2[18] - 1));
+        MULTIPLY.assertMatch(Int128.fromBits(POW2[30] - 1, POW2[24] - 1), Int128.fromBits(POW2[15] - 1, POW2[12] - 1));
+        MULTIPLY.assertMatch(Int128.from(Integer.MAX_VALUE), Int128.from(Integer.MAX_VALUE));
+        MULTIPLY.assertMatch(Int128.from(Long.MAX_VALUE), Int128.from(Long.MAX_VALUE));
     }
 
     @Test
     public void multiply_negative() {
-        assertMultiplyMatchesBigInteger(Int128.from(-1), Int128.from(1));
-        assertMultiplyMatchesBigInteger(Int128.from(-1), Int128.from(-1));
-        assertMultiplyMatchesBigInteger(Int128.from(Integer.MAX_VALUE), Int128.from(Integer.MIN_VALUE));
-        assertMultiplyMatchesBigInteger(Int128.from(Integer.MIN_VALUE), Int128.from(Integer.MIN_VALUE));
-        assertMultiplyMatchesBigInteger(Int128.from(Long.MAX_VALUE), Int128.from(Long.MIN_VALUE));
-        assertMultiplyMatchesBigInteger(Int128.from(Long.MIN_VALUE), Int128.from(Long.MIN_VALUE));
+        MULTIPLY.assertMatch(Int128.from(-1), Int128.from(1));
+        MULTIPLY.assertMatch(Int128.from(-1), Int128.from(-1));
+        MULTIPLY.assertMatch(Int128.from(Integer.MAX_VALUE), Int128.from(Integer.MIN_VALUE));
+        MULTIPLY.assertMatch(Int128.from(Integer.MIN_VALUE), Int128.from(Integer.MIN_VALUE));
+        MULTIPLY.assertMatch(Int128.from(Long.MAX_VALUE), Int128.from(Long.MIN_VALUE));
+        MULTIPLY.assertMatch(Int128.from(Long.MIN_VALUE), Int128.from(Long.MIN_VALUE));
     }
 
-    @Tag("slow")
     @Test
     public void multiply_ultimate() {
-        for (BigInteger a : BIG_INTEGERS) {
-            for (BigInteger b : BIG_INTEGERS) {
-                assertMultiplyMatchesBigInteger(Int128.from(a), Int128.from(b));
-            }
-        }
+        MULTIPLY.assertMatchAll(BIG_INTEGERS);
     }
 
-    private static void assertMultiplyMatchesBigInteger(@NotNull Int128 lhs, @NotNull Int128 rhs) {
-        BigInteger expected = RANGE_INT128.fitIn(lhs.toBigInteger().multiply(rhs.toBigInteger()));
-        assertThat(lhs.multiply(rhs).toBigInteger()).isEqualTo(expected);
+    @Test
+    public void multiply_long_ultimate() {
+        MULTIPLY_LONG.assertMatchAll(BIG_INTEGERS, EDGE_CASE_LONGS);
     }
 
     /** {@link Int128#divide(Int128)} */
+
+    private static final BiOpTester<Int128, BigInteger> DIVIDE = test(
+        (a, b) -> {
+            if (b.equals(Int128.ZERO)) {
+                assertThrows(AssertionError.class, () -> a.divide(b));
+                return null;
+            }
+            return a.divide(b);
+        },
+        (a, b) -> b.equals($0) ? null : a.divide(b)
+    );
 
     private static final BigInteger $2_20 = $pow2(20);              // (1 << 20)
     private static final BigInteger $2_36 = $pow2(36);              // (1 << 36)
@@ -399,52 +403,32 @@ public class Int128Test {
 
     @Test
     public void divide_simple_positive_only() {
-        for (BigInteger a : SIMPLE_POSITIVE_INTEGERS) {
-            for (BigInteger b : SIMPLE_POSITIVE_INTEGERS) {
-                assertDivideMatchesBigInteger(Int128.from(a), Int128.from(b));
-            }
-        }
+        DIVIDE.assertMatchAll(SIMPLE_POSITIVE_INTEGERS);
     }
 
     @Test
     public void divide_simple_negative_only() {
-        for (BigInteger a : SIMPLE_POSITIVE_INTEGERS) {
-            for (BigInteger b : SIMPLE_POSITIVE_INTEGERS) {
-                assertDivideMatchesBigInteger(Int128.from(a), Int128.from(b));
-            }
-        }
+        DIVIDE.assertMatchAll(SIMPLE_NEGATIVE_INTEGERS);
     }
 
     @Test
     public void divide_simple_positive_and_negative() {
         List<BigInteger> list = ListBuilder.concat(SIMPLE_POSITIVE_INTEGERS, SIMPLE_NEGATIVE_INTEGERS);
-        for (BigInteger a : list) {
-            for (BigInteger b : list) {
-                assertDivideMatchesBigInteger(Int128.from(a), Int128.from(b));
-            }
-        }
+        DIVIDE.assertMatchAll(list);
     }
 
-    @Tag("slow")
     @Test
     public void divide_ultimate() {
-        for (BigInteger a : BIG_INTEGERS) {
-            for (BigInteger b : BIG_INTEGERS) {
-                assertDivideMatchesBigInteger(Int128.from(a), Int128.from(b));
-            }
-        }
+        DIVIDE.assertMatchAll(BIG_INTEGERS);
     }
 
-    private static void assertDivideMatchesBigInteger(Int128 lhs, Int128 rhs) {
-        if (rhs.equals(Int128.ZERO)) {
-            assertThrows(AssertionError.class, () -> lhs.divide(rhs));
-        } else {
-            BigInteger expected = RANGE_INT128.fitIn(lhs.toBigInteger().divide(rhs.toBigInteger()));
-            assertThat(lhs.divide(rhs).toBigInteger()).isEqualTo(expected);
-        }
-    }
+    /** {@link Int128#negate()}, {@link Int128#and}, {@link Int128#andNot}, {@link Int128#or}, {@link Int128#xor} */
 
-    /** {@link Int128#negate()} */
+    private static final UnOpTester<Int128, BigInteger> NEGATE = test(Int128::negate, BigInteger::negate);
+    private static final BiOpTester<Int128, BigInteger> AND = test(Int128::and, BigInteger::and).noFitIn128();
+    private static final BiOpTester<Int128, BigInteger> AND_NOT = test(Int128::andNot, BigInteger::andNot).noFitIn128();
+    private static final BiOpTester<Int128, BigInteger> OR = test(Int128::or, BigInteger::or).noFitIn128();
+    private static final BiOpTester<Int128, BigInteger> XOR = test(Int128::xor, BigInteger::xor).noFitIn128();
 
     @Test
     public void negate_simple() {
@@ -456,33 +440,33 @@ public class Int128Test {
 
     @Test
     public void negate_ultimate() {
-        for (BigInteger num : BIG_INTEGERS) {
-            BigInteger expected = RANGE_INT128.fitIn(num.negate());
-            assertThat(Int128.from(num).negate().toBigInteger()).isEqualTo(expected);
-        }
+        NEGATE.assertMatchAll(BIG_INTEGERS);
     }
 
-    /** {@link Int128#and}, {@link Int128#andNot}, {@link Int128#or}, {@link Int128#xor} */
+    @Test
+    public void and_ultimate() {
+        AND.assertMatchAll(BIG_INTEGERS);
+    }
 
     @Test
-    public void logical_ops_ultimate() {
-        for (BigInteger a : BIG_INTEGERS) {
-            for (BigInteger b : BIG_INTEGERS) {
-                Int128 lhs = Int128.from(a);
-                Int128 rhs = Int128.from(b);
-                assertThat(lhs.and(rhs).toBigInteger()).isEqualTo(a.and(b));
-                assertThat(rhs.and(lhs).toBigInteger()).isEqualTo(a.and(b));
-                assertThat(lhs.andNot(rhs).toBigInteger()).isEqualTo(a.andNot(b));
-                assertThat(rhs.andNot(lhs).toBigInteger()).isEqualTo(b.andNot(a));
-                assertThat(lhs.or(rhs).toBigInteger()).isEqualTo(a.or(b));
-                assertThat(rhs.or(lhs).toBigInteger()).isEqualTo(a.or(b));
-                assertThat(lhs.xor(rhs).toBigInteger()).isEqualTo(a.xor(b));
-                assertThat(rhs.xor(lhs).toBigInteger()).isEqualTo(a.xor(b));
-            }
-        }
+    public void andNot_ultimate() {
+        AND_NOT.assertMatchAll(BIG_INTEGERS);
+    }
+
+    @Test
+    public void or_ultimate() {
+        OR.assertMatchAll(BIG_INTEGERS);
+    }
+
+    @Test
+    public void xor_ultimate() {
+        XOR.assertMatchAll(BIG_INTEGERS);
     }
 
     /** {@link Int128#shiftLeft(int)} */
+
+    private static final NumOpTester<Int128, BigInteger, Integer>
+        SHIFT_LEFT = testInt(Int128::shiftLeft, BigInteger::shiftLeft);
 
     @Test
     public void shiftLeft_simple() {
@@ -502,23 +486,13 @@ public class Int128Test {
 
     @Test
     public void shiftLeft_ultimate() {
-        for (BigInteger bigInteger : BIG_INTEGERS) {
-            assertShiftLeftMatchesBigInteger(bigInteger, 1);
-            assertShiftLeftMatchesBigInteger(bigInteger, 10);
-            assertShiftLeftMatchesBigInteger(bigInteger, 32);
-            assertShiftLeftMatchesBigInteger(bigInteger, 63);
-            assertShiftLeftMatchesBigInteger(bigInteger, 64);
-            assertShiftLeftMatchesBigInteger(bigInteger, 90);
-            assertShiftLeftMatchesBigInteger(bigInteger, 127);
-        }
-    }
-
-    private static void assertShiftLeftMatchesBigInteger(BigInteger num, int len) {
-        BigInteger expected = RANGE_INT128.fitIn(num.shiftLeft(len));
-        assertThat(Int128.from(num).shiftLeft(len).toBigInteger()).isEqualTo(expected);
+        SHIFT_LEFT.assertMatchAll(BIG_INTEGERS, List.of(1, 10, 32, 63, 64, 90, 127));
     }
 
     /** {@link Int128#shiftRight(int)} */
+
+    private static final NumOpTester<Int128, BigInteger, Integer>
+        SHIFT_RIGHT = testInt(Int128::shiftRight, BigInteger::shiftRight);
 
     @Test
     public void shiftRight_simple() {
@@ -534,26 +508,46 @@ public class Int128Test {
 
     @Test
     public void shiftRight_ultimate() {
-        for (BigInteger bigInteger : BIG_INTEGERS) {
-            assertShiftRightMatchesBigInteger(bigInteger, 1);
-            assertShiftRightMatchesBigInteger(bigInteger, 10);
-            assertShiftRightMatchesBigInteger(bigInteger, 32);
-            assertShiftRightMatchesBigInteger(bigInteger, 63);
-            assertShiftRightMatchesBigInteger(bigInteger, 64);
-            assertShiftRightMatchesBigInteger(bigInteger, 90);
-            assertShiftRightMatchesBigInteger(bigInteger, 127);
-        }
+        SHIFT_RIGHT.assertMatchAll(BIG_INTEGERS, List.of(1, 10, 32, 63, 64, 90, 127));
     }
 
-    private static void assertShiftRightMatchesBigInteger(BigInteger num, int len) {
-        BigInteger expected = RANGE_INT128.fitIn(num.shiftRight(len));
-        assertThat(Int128.from(num).shiftRight(len).toBigInteger()).isEqualTo(expected);
+    /** {@link Int128#shiftRightUnsigned(int)} */
+
+    /*
+    private static final IntOpTester<Int128, BigInteger>
+        SHIFT_RIGHT_UNSIGNED = testInt(Int128::shiftRightUnsigned, BigInteger::shiftRight);
+
+    @Test
+    public void shiftRightUnsigned_simple() {
+        assertThat(Int128.ONE.shiftRight(0)).isEqualTo(Int128.ONE);
+        assertThat(Int128.ONE.shiftRight(1)).isEqualTo(Int128.ZERO);
+
+        assertThat(Int128.from(POW2[5]).shiftRight(4)).isEqualTo(Int128.from(POW2[1]));
+        assertThat(Int128.from(POW2[5]).shiftRight(5)).isEqualTo(Int128.ONE);
+
+        assertThat(Int128.fromBits(1, 1).shiftRight(1)).isEqualTo(Int128.fromBits(0, POW2[63]));
+        assertThat(Int128.fromBits(3, 3).shiftRight(1)).isEqualTo(Int128.fromBits(1, POW2[63] + 1));
     }
+
+    @Test
+    public void shiftRightUnsigned_ultimate() {
+        SHIFT_RIGHT_UNSIGNED.assertMatchAll(BIG_INTEGERS, List.of(1, 10, 32, 63, 64, 90, 127));
+    }
+    */
 
     /** {@link Int128#bitAt}, {@link Int128#setBitAt}, {@link Int128#clearBitAt}, {@link Int128#flipBitAt} */
 
+    private static final NumOpTester<Integer, Integer, Integer>
+        BIT_AT = testInt(Int128::bitAt, (a, n) -> a.testBit(n) ? 1 : 0);
+    private static final NumOpTester<Int128, BigInteger, Integer>
+        SET_BIT_AT = testInt(Int128::setBitAt, BigInteger::setBit).noFitIn128();
+    private static final NumOpTester<Int128, BigInteger, Integer>
+        CLEAR_BIT_AT = testInt(Int128::clearBitAt, BigInteger::clearBit).noFitIn128();
+    private static final NumOpTester<Int128, BigInteger, Integer>
+        FLIP_BIT_AT = testInt(Int128::flipBitAt, BigInteger::flipBit).noFitIn128();
+
     @Test
-    public void bits_simple() {
+    public void bitAt_simple() {
         assertThat(Int128.fromBits(0, 0x0f).bitAt(0)).isEqualTo(1);
         assertThat(Int128.fromBits(0, 0x0f).bitAt(1)).isEqualTo(1);
         assertThat(Int128.fromBits(0, 0x0f).bitAt(3)).isEqualTo(1);
@@ -562,7 +556,10 @@ public class Int128Test {
         assertThat(Int128.fromBits(-1, -100).bitAt(1)).isEqualTo(0);
         assertThat(Int128.fromBits(-1, -100).bitAt(2)).isEqualTo(1);
         assertThat(Int128.fromBits(-1, -100).bitAt(6)).isEqualTo(0);
+    }
 
+    @Test
+    public void setBitAt_simple() {
         assertThat(Int128.fromBits(0, 0).setBitAt(0)).isEqualTo(Int128.fromBits(0, 1));
         assertThat(Int128.fromBits(0, 0).setBitAt(1)).isEqualTo(Int128.fromBits(0, 2));
         assertThat(Int128.fromBits(0, 0).setBitAt(2)).isEqualTo(Int128.fromBits(0, 4));
@@ -578,23 +575,35 @@ public class Int128Test {
     }
 
     @Test
-    public void bits_ultimate() {
+    public void bitAt_ultimate() {
+        BIT_AT.assertMatchAll(BIG_INTEGERS, List.of(0, 1, 2, 10, 20, 32, 63, 64, 70, 80, 100, 120, 125, 126, 127));
+    }
+
+    @Test
+    public void setBitAt_ultimate() {
+        SET_BIT_AT.assertMatchAll(BIG_INTEGERS, List.of(0, 1, 2, 10, 20, 32, 63, 64, 70, 80, 100, 120, 125, 126));
+    }
+
+    @Test
+    public void clearBitAt_ultimate() {
+        CLEAR_BIT_AT.assertMatchAll(BIG_INTEGERS, List.of(0, 1, 2, 10, 20, 32, 63, 64, 70, 80, 100, 120, 125, 126));
+    }
+
+    @Test
+    public void flipBitAt_ultimate() {
+        FLIP_BIT_AT.assertMatchAll(BIG_INTEGERS, List.of(0, 1, 2, 10, 20, 32, 63, 64, 70, 80, 100, 120, 125, 126));
+    }
+
+    @Test
+    public void bit_operations_with_sign_bit_ultimate() {
+        int pos = Int128.BITS - 1;
+        Int128 pow127 = Int128.fromBits(POW2[63], 0);
         for (BigInteger num : BIG_INTEGERS) {
             Int128 value = Int128.from(num);
-            for (int i = 0; i < Int128.BITS; i++) {
-                assertThat(value.bitAt(i)).isEqualTo(num.testBit(i) ? 1 : 0);
-                if (i < Int128.BITS - 1) {
-                    assertThat(value.setBitAt(i).toBigInteger()).isEqualTo(num.setBit(i));
-                    assertThat(value.clearBitAt(i).toBigInteger()).isEqualTo(num.clearBit(i));
-                    assertThat(value.flipBitAt(i).toBigInteger()).isEqualTo(num.flipBit(i));
-                } else {
-                    Int128 pow127 = Int128.fromBits(POW2[63], 0);
-                    boolean bit = value.bitAt(i) == 1;
-                    assertThat(value.setBitAt(i)).isEqualTo(bit ? value : value.add(pow127));
-                    assertThat(value.clearBitAt(i)).isEqualTo(bit ? value.subtract(pow127) : value);
-                    assertThat(value.flipBitAt(i)).isEqualTo(bit ? value.subtract(pow127) : value.add(pow127));
-                }
-            }
+            boolean bit = value.bitAt(pos) == 1;
+            assertThat(value.setBitAt(pos)).isEqualTo(bit ? value : value.add(pow127));
+            assertThat(value.clearBitAt(pos)).isEqualTo(bit ? value.subtract(pow127) : value);
+            assertThat(value.flipBitAt(pos)).isEqualTo(bit ? value.subtract(pow127) : value.add(pow127));
         }
     }
 
@@ -838,5 +847,179 @@ public class Int128Test {
 
     private static @NotNull BigInteger bitsToBigInteger(long highBits, long lowBits) {
         return $(highBits).shiftLeft(64).add(UnsignedLong.fromLongBits(lowBits).bigIntegerValue());
+    }
+
+    /** Testers */
+
+    private static <X, Y> @NotNull UnOpTester<X, Y> test(@NotNull Function<Int128, X> op,
+                                                         @NotNull Function<BigInteger, Y> $op) {
+        return new UnOpTester<>(op, $op);
+    }
+
+    private static <X, Y> @NotNull BiOpTester<X, Y> test(@NotNull BiFunction<Int128, Int128, X> op,
+                                                         @NotNull BiFunction<BigInteger, BigInteger, Y> $op) {
+        return new BiOpTester<>(op, $op);
+    }
+
+    private static <X, Y> @NotNull IntOpTester<X, Y> testInt(@NotNull BiFunction<Int128, Integer, X> op,
+                                                             @NotNull BiFunction<BigInteger, Integer, Y> $op) {
+        return new IntOpTester<>(op, $op);
+    }
+
+    private static <X, Y> @NotNull LongOpTester<X, Y> testLong(@NotNull BiFunction<Int128, Long, X> op,
+                                                               @NotNull BiFunction<BigInteger, Long, Y> $op) {
+        return new LongOpTester<>(op, $op);
+    }
+
+    private static abstract class Tester<T extends Tester<T>> {
+        protected boolean fitIn128 = true;
+        protected Int128 a;
+        protected BigInteger $a;
+
+        public @NotNull T fitIn128() {
+            fitIn128 = true;
+            return castAny(this);
+        }
+
+        public @NotNull T noFitIn128() {
+            fitIn128 = false;
+            return castAny(this);
+        }
+
+        protected @NotNull T withA(@NotNull BigInteger bigInteger) {
+            a = Int128.from(bigInteger);
+            $a = bigInteger;
+            return castAny(this);
+        }
+
+        protected @NotNull T withA(@NotNull Int128 int128) {
+            a = int128;
+            $a = int128.toBigInteger();
+            return castAny(this);
+        }
+
+        protected <X, Y> void castAndAssertEquality(X c, Y $c) {
+            Object actual = c instanceof Int128 int128 ? int128.toBigInteger() : c;
+            Object expected = $c instanceof BigInteger bigInteger && fitIn128 ? RANGE_INT128.fitIn(bigInteger) : $c;
+            assertThat(actual).isEqualTo(expected);
+        }
+    }
+
+    private static class UnOpTester<X, Y> extends Tester<UnOpTester<X, Y>> {
+        private final Function<Int128, X> op;
+        private final Function<BigInteger, Y> $op;
+
+        public UnOpTester(@NotNull Function<Int128, X> op, @NotNull Function<BigInteger, Y> $op) {
+            this.op = op;
+            this.$op = $op;
+        }
+
+        public void assertMatchAll(@NotNull List<BigInteger> list) {
+            for (BigInteger num : list) {
+                assertMatch(num);
+            }
+        }
+
+        public void assertMatch(@NotNull BigInteger num) {
+            withA(num).assertMatch();
+        }
+
+        public void assertMatch(@NotNull Int128 num) {
+            withA(num).assertMatch();
+        }
+
+        private void assertMatch() {
+            assert a != null && $a != null : newInternalError("Tester not initialized properly");
+            X c = op.apply(a);
+            Y $c = $op.apply($a);
+            castAndAssertEquality(c, $c);
+        }
+    }
+
+    private static class BiOpTester<X, Y> extends Tester<BiOpTester<X, Y>> {
+        private final BiFunction<Int128, Int128, X> op;
+        private final BiFunction<BigInteger, BigInteger, Y> $op;
+        private Int128 b;
+        private BigInteger $b;
+
+        public BiOpTester(@NotNull BiFunction<Int128, Int128, X> op, @NotNull BiFunction<BigInteger, BigInteger, Y> $op) {
+            this.op = op;
+            this.$op = $op;
+        }
+
+        public void assertMatchAll(@NotNull List<BigInteger> list) {
+            for (BigInteger left : list) {
+                withA(left);
+                for (BigInteger right : list) {
+                    withB(right);
+                    assertMatch();
+                }
+            }
+        }
+
+        public void assertMatch(@NotNull BigInteger left, @NotNull BigInteger right) {
+            withA(left).withB(right).assertMatch();
+        }
+
+        public void assertMatch(@NotNull Int128 left, @NotNull Int128 right) {
+            withA(left).withB(right).assertMatch();
+        }
+
+        private @NotNull BiOpTester<X, Y> withB(@NotNull BigInteger bigInteger) {
+            b = Int128.from(bigInteger);
+            $b = bigInteger;
+            return this;
+        }
+
+        private @NotNull BiOpTester<X, Y> withB(@NotNull Int128 int128) {
+            b = int128;
+            $b = int128.toBigInteger();
+            return this;
+        }
+
+        private void assertMatch() {
+            assert a != null && b != null && $a != null && $b != null : newInternalError("Tester not initialized properly");
+            X c = op.apply(a, b);
+            Y $c = $op.apply($a, $b);
+            castAndAssertEquality(c, $c);
+        }
+    }
+
+    private static abstract class NumOpTester<X, Y, N> extends Tester<NumOpTester<X, Y, N>> {
+        private final BiFunction<Int128, N, X> op;
+        private final BiFunction<BigInteger, N, Y> $op;
+
+        public NumOpTester(@NotNull BiFunction<Int128, N, X> op, @NotNull BiFunction<BigInteger, N, Y> $op) {
+            this.op = op;
+            this.$op = $op;
+        }
+
+        public void assertMatchAll(@NotNull List<BigInteger> list, @NotNull List<N> nums) {
+            for (BigInteger a : list) {
+                withA(a);
+                for (N num : nums) {
+                    assertMatch(num);
+                }
+            }
+        }
+
+        private void assertMatch(@NotNull N num) {
+            assert a != null && $a != null : newInternalError("Tester not initialized properly");
+            X c = op.apply(a, num);
+            Y $c = $op.apply($a, num);
+            castAndAssertEquality(c, $c);
+        }
+    }
+
+    private static class IntOpTester<X, Y> extends NumOpTester<X, Y, Integer> {
+        public IntOpTester(@NotNull BiFunction<Int128, Integer, X> op, @NotNull BiFunction<BigInteger, Integer, Y> $op) {
+            super(op, $op);
+        }
+    }
+
+    private static class LongOpTester<X, Y> extends NumOpTester<X, Y, Long> {
+        public LongOpTester(@NotNull BiFunction<Int128, Long, X> op, @NotNull BiFunction<BigInteger, Long, Y> $op) {
+            super(op, $op);
+        }
     }
 }
