@@ -8,6 +8,7 @@ import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.ValueSource;
 
 import static com.google.common.truth.Truth.assertThat;
+import static io.spbx.util.base.EasyCast.castToInt;
 import static io.spbx.util.testing.TestingBytes.CHARSET;
 import static io.spbx.util.testing.TestingBytes.assertBytes;
 import static io.spbx.webby.db.codec.standard.Codecs.*;
@@ -18,17 +19,17 @@ public class CodecsTest {
     private final Buffer buffer = new Buffer();
 
     @ParameterizedTest
-    @ValueSource(ints = {0, 12, -1, Byte.MAX_VALUE, Byte.MIN_VALUE})
+    @ValueSource(ints = { 0, 12, -1, Byte.MAX_VALUE, Byte.MIN_VALUE })
     public void primitives_byte(int value) throws Exception {
         assertThat(writeByte8(value, buffer.outputStream())).isEqualTo(INT8_SIZE);
         assertThat(buffer.size()).isEqualTo(INT8_SIZE);
         assertThat(buffer.snapshot().hex()).isEqualTo("%02x".formatted((byte) value));
-        assertBytes(buffer.snapshot().toByteArray()).isEqualTo(new byte[]{(byte) value});
+        assertBytes(buffer.snapshot().toByteArray()).isEqualTo(new byte[] { (byte) value });
         assertThat(readByte8(buffer.inputStream())).isEqualTo(value);
     }
 
     @ParameterizedTest
-    @ValueSource(ints = {0, 12, -1, Short.MAX_VALUE, Short.MIN_VALUE})
+    @ValueSource(ints = { 0, 12, -1, Short.MAX_VALUE, Short.MIN_VALUE })
     public void primitives_short(int value) throws Exception {
         assertThat(writeInt16(value, buffer.outputStream())).isEqualTo(INT16_SIZE);
         assertThat(buffer.size()).isEqualTo(INT16_SIZE);
@@ -38,7 +39,7 @@ public class CodecsTest {
     }
 
     @ParameterizedTest
-    @ValueSource(ints = {0, 12, -1, Integer.MAX_VALUE, Integer.MIN_VALUE})
+    @ValueSource(ints = { 0, 12, -1, Integer.MAX_VALUE, Integer.MIN_VALUE })
     public void primitives_int(int value) throws Exception {
         assertThat(writeInt32(value, buffer.outputStream())).isEqualTo(INT32_SIZE);
         assertThat(buffer.size()).isEqualTo(INT32_SIZE);
@@ -48,7 +49,7 @@ public class CodecsTest {
     }
 
     @ParameterizedTest
-    @ValueSource(longs = {0, 12, -1, Long.MAX_VALUE, Long.MIN_VALUE})
+    @ValueSource(longs = { 0, 12, -1, Long.MAX_VALUE, Long.MIN_VALUE })
     public void primitives_long(long value) throws Exception {
         assertThat(writeLong64(value, buffer.outputStream())).isEqualTo(INT64_SIZE);
         assertThat(buffer.size()).isEqualTo(INT64_SIZE);
@@ -58,17 +59,17 @@ public class CodecsTest {
     }
 
     @ParameterizedTest
-    @ValueSource(booleans = {true, false})
+    @ValueSource(booleans = { true, false })
     public void primitives_long(boolean value) throws Exception {
         assertThat(writeBoolean8(value, buffer.outputStream())).isEqualTo(INT8_SIZE);
         assertThat(buffer.size()).isEqualTo(INT8_SIZE);
-        assertThat(buffer.snapshot().hex()).isEqualTo("%02x".formatted(value ? 1 : 0));
-        assertBytes(buffer.snapshot().toByteArray()).isEqualTo(new byte[]{(byte) (value ? 1 : 0)});
+        assertThat(buffer.snapshot().hex()).isEqualTo("%02x".formatted(castToInt(value)));
+        assertBytes(buffer.snapshot().toByteArray()).isEqualTo(new byte[] { (byte) castToInt(value) });
         assertThat(readBoolean8(buffer.inputStream())).isEqualTo(value);
     }
 
     @ParameterizedTest
-    @ValueSource(strings = {"[]", "null", "0, 0, 0", "-1, -2, -3", "127, 127, 127", "-128, -128, -128"})
+    @ValueSource(strings = { "[]", "null", "0, 0, 0", "-1, -2, -3", "127, 127, 127", "-128, -128, -128" })
     public void byte_arrays(String encoded) throws Exception {
         byte[] bytes = paramToBytes(encoded);
 
@@ -88,7 +89,7 @@ public class CodecsTest {
     }
 
     @ParameterizedTest
-    @ValueSource(strings = {"", "null", "foo", "0", "0,1,2,3"})
+    @ValueSource(strings = { "", "null", "foo", "0", "0,1,2,3" })
     public void strings(String encoded) throws Exception {
         String input = paramToString(encoded);
 

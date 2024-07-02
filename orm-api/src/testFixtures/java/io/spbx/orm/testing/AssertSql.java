@@ -17,6 +17,7 @@ import java.util.List;
 import java.util.function.Supplier;
 
 import static io.spbx.util.base.EasyCast.castAny;
+import static io.spbx.util.base.EasyCast.castToInt;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 
 public class AssertSql {
@@ -146,7 +147,7 @@ public class AssertSql {
 
         private static @Nullable Object adjust(@Nullable Object val) {
             if (val instanceof Boolean) {
-                return val == Boolean.TRUE ? 1 : 0;
+                return castToInt(val == Boolean.TRUE);
             }
             if (val instanceof Number number && (long) (number.intValue()) == number.longValue() &&
                 (val instanceof Long || val instanceof BigInteger)) {

@@ -18,6 +18,8 @@ import java.nio.charset.StandardCharsets;
 import java.util.Set;
 import java.util.logging.Level;
 
+import static io.spbx.util.base.EasyCast.castToInt;
+
 public class Codecs {
     private static final FluentLogger log = FluentLogger.forEnclosingClass();
 
@@ -75,7 +77,7 @@ public class Codecs {
     }
 
     public static int writeBoolean8(boolean value, @NotNull OutputStream output) throws IOException {
-        return writeByte8(value ? 1 : 0, output);
+        return writeByte8(castToInt(value), output);
     }
 
     public static boolean readBoolean8(@NotNull InputStream input) throws IOException {

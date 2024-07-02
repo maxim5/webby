@@ -23,6 +23,7 @@ import java.util.stream.Stream;
 
 import static com.google.common.truth.Truth.assertThat;
 import static io.spbx.util.base.EasyCast.castAny;
+import static io.spbx.util.base.EasyCast.castToInt;
 import static io.spbx.util.base.EasyExceptions.newInternalError;
 import static io.spbx.util.testing.TestingBigIntegers.*;
 import static org.junit.jupiter.api.Assertions.assertThrows;
@@ -540,7 +541,7 @@ public class Int128Test {
     /** {@link Int128#bitAt}, {@link Int128#setBitAt}, {@link Int128#clearBitAt}, {@link Int128#flipBitAt} */
 
     private static final NumOpTester<Integer, Integer, Integer>
-        BIT_AT = testInt(Int128::bitAt, (a, n) -> a.testBit(n) ? 1 : 0);
+        BIT_AT = testInt(Int128::bitAt, (a, n) -> castToInt(a.testBit(n)));
     private static final NumOpTester<Int128, BigInteger, Integer>
         SET_BIT_AT = testInt(Int128::setBitAt, BigInteger::setBit).noFitIn128();
     private static final NumOpTester<Int128, BigInteger, Integer>
