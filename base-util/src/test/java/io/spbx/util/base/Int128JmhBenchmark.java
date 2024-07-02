@@ -29,7 +29,7 @@ public class Int128JmhBenchmark {
     private static final List<BigInteger> BIGS_128 = DOUBLES_128.stream().map(Int128::toBigInteger).toList();
 
     @Benchmark
-    public void DoubleLong_divide_64(Blackhole blackhole) {
+    public void Int128_divide_64(Blackhole blackhole) {
         for (Int128 x : DOUBLES_128) {
             for (Int128 y : DOUBLES_64) {
                 Int128 z = x.divide(y);
@@ -39,7 +39,7 @@ public class Int128JmhBenchmark {
     }
 
     @Benchmark
-    public void DoubleLong_divide_128(Blackhole blackhole) {
+    public void Int128_divide_128(Blackhole blackhole) {
         for (Int128 x : DOUBLES_128) {
             for (Int128 y : DOUBLES_128) {
                 Int128 z = x.divide(y);

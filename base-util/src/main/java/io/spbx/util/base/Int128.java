@@ -206,7 +206,7 @@ public final class Int128 extends Number implements Comparable<Int128> {
         return high == 0 && low == 0;
     }
 
-    // Note: `DoubleLong.MIN_VALUE.negate() == DoubleLong.MIN_VALUE`!
+    // Note: `Int128.MIN_VALUE.negate() == Int128.MIN_VALUE`!
     // https://stackoverflow.com/questions/5444611/math-abs-returns-wrong-value-for-integer-min-value
     public @NotNull Int128 negate() {
         return fromBitsFlipSign(high, low);
@@ -217,7 +217,7 @@ public final class Int128 extends Number implements Comparable<Int128> {
         return low == 0 ? Int128.fromBits(~high + 1, 0) : Int128.fromBits(~high, ~low + 1);
     }
 
-    // Note: `DoubleLong.MIN_VALUE.abs() == DoubleLong.MIN_VALUE`!
+    // Note: `Int128.MIN_VALUE.abs() == Int128.MIN_VALUE`!
     // https://stackoverflow.com/questions/5444611/math-abs-returns-wrong-value-for-integer-min-value
     public @NotNull Int128 abs() {
         return high >= 0 ? this : this.negate();

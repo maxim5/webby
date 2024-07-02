@@ -212,7 +212,7 @@ public class Int128Test {
     @ParameterizedTest
     @MethodSource
     public void internal_consistency_simple(Int128 val) {
-        assertThatDoubleLong(val).internalConsistency();
+        assertThatInt128(val).internalConsistency();
     }
 
     private static @NotNull List<Int128> internal_consistency_simple() {
@@ -226,10 +226,10 @@ public class Int128Test {
     @Test
     public void internal_consistency_ultimate() {
         for (BigInteger num : BIG_INTEGERS) {
-            assertThatDoubleLong(Int128.from(num)).internalConsistency();
+            assertThatInt128(Int128.from(num)).internalConsistency();
         }
         for (long num : EDGE_CASE_LONGS) {
-            assertThatDoubleLong(Int128.from(num)).internalConsistency();
+            assertThatInt128(Int128.from(num)).internalConsistency();
         }
     }
 
@@ -718,18 +718,18 @@ public class Int128Test {
     /** Assertion utils */
 
     @CheckReturnValue
-    private @NotNull DoubleLongSubject assertThatDoubleLong(@NotNull Int128 actual) {
-        return new DoubleLongSubject(actual);
+    private @NotNull Int128Subject assertThatInt128(@NotNull Int128 actual) {
+        return new Int128Subject(actual);
     }
 
     @CanIgnoreReturnValue
-    private record DoubleLongSubject(@NotNull Int128 actual) {
-        public @NotNull DoubleLongSubject isEqualTo(@NotNull Int128 other) {
+    private record Int128Subject(@NotNull Int128 actual) {
+        public @NotNull Int128Subject isEqualTo(@NotNull Int128 other) {
             assertEquality(actual, other);
             return this;
         }
 
-        public @NotNull DoubleLongSubject internalConsistency() {
+        public @NotNull Int128Subject internalConsistency() {
             return isEqualTo(actual)
                 .roundtripLongBits()
                 .roundtripByteArrayBits()
@@ -743,42 +743,42 @@ public class Int128Test {
                 .internalConstruction();
         }
 
-        public @NotNull DoubleLongSubject roundtripLongBits() {
+        public @NotNull Int128Subject roundtripLongBits() {
             Int128 copy = Int128.fromBits(actual.highBits(), actual.lowBits());
             return isEqualTo(copy);
         }
 
-        public @NotNull DoubleLongSubject roundtripByteArrayBits() {
+        public @NotNull Int128Subject roundtripByteArrayBits() {
             byte[] bytes = actual.toByteArray();
             Int128 copy = Int128.fromBits(bytes);
             return isEqualTo(copy);
         }
 
-        public @NotNull DoubleLongSubject roundtripIntArrayBits() {
+        public @NotNull Int128Subject roundtripIntArrayBits() {
             int[] ints = actual.toIntArray();
             Int128 copy = Int128.fromBits(ints);
             return isEqualTo(copy);
         }
 
-        public @NotNull DoubleLongSubject roundtripLongArrayBits() {
+        public @NotNull Int128Subject roundtripLongArrayBits() {
             long[] longs = actual.toLongArray();
             Int128 copy = Int128.fromBits(longs);
             return isEqualTo(copy);
         }
 
-        public @NotNull DoubleLongSubject roundtripString() {
+        public @NotNull Int128Subject roundtripString() {
             String str = actual.toString();
             Int128 copy = Int128.from(str);
             return isEqualTo(copy);
         }
 
-        public @NotNull DoubleLongSubject roundtripBigInteger() {
+        public @NotNull Int128Subject roundtripBigInteger() {
             BigInteger bigInteger = actual.toBigInteger();
             Int128 copy = Int128.from(bigInteger);
             return isEqualTo(copy);
         }
 
-        private @NotNull DoubleLongSubject roundtripUnsignedLong() {
+        private @NotNull Int128Subject roundtripUnsignedLong() {
             if (actual.is64Bit()) {
                 UnsignedLong unsignedLong = actual.toUnsignedLong();
                 Int128 copy = Int128.from(unsignedLong);
@@ -788,7 +788,7 @@ public class Int128Test {
             return this;
         }
 
-        public @NotNull DoubleLongSubject roundtripLong() {
+        public @NotNull Int128Subject roundtripLong() {
             if (actual.is64Bit()) {
                 long parsed = EasyPrimitives.parseLongSafe(actual.toString());
                 Int128 copy = Int128.from(parsed);
@@ -797,7 +797,7 @@ public class Int128Test {
             return this;
         }
 
-        public @NotNull DoubleLongSubject is64BitConsistency() {
+        public @NotNull Int128Subject is64BitConsistency() {
             boolean isPositiveOrZero = actual.compareTo(Int128.ZERO) >= 0;
             try {
                 Long.parseLong(actual.toString());
@@ -814,7 +814,7 @@ public class Int128Test {
             return this;
         }
 
-        public @NotNull DoubleLongSubject internalConstruction() {
+        public @NotNull Int128Subject internalConstruction() {
             assertConstruction(actual.toString());
             return this;
         }
