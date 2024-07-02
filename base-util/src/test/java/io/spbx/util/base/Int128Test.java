@@ -873,7 +873,11 @@ public class Int128Test {
         Int128 value = Int128.from(bigInteger);
 
         assertThat(value.toBigInteger()).isEqualTo(bigInteger);
+
         assertThat(value.signum()).isEqualTo(bigInteger.signum());
+        assertThat(value.isPositive()).isEqualTo(bigInteger.compareTo($0) > 0);
+        assertThat(value.isNegative()).isEqualTo(bigInteger.compareTo($0) < 0);
+        assertThat(value.isZero()).isEqualTo(bigInteger.equals($0));
 
         assertThat(value.longValue()).isEqualTo(bigInteger.longValue());
         assertThat(value.intValue()).isEqualTo(bigInteger.intValue());

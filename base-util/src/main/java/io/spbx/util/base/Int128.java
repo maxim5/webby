@@ -194,6 +194,18 @@ public final class Int128 extends Number implements Comparable<Int128> {
         return high != 0 ? Long.signum(high) : low == 0 ? 0 : 1;
     }
 
+    public boolean isPositive() {
+        return signum() > 0;
+    }
+
+    public boolean isNegative() {
+        return signum() < 0;
+    }
+
+    public boolean isZero() {
+        return high == 0 && low == 0;
+    }
+
     // Note: `DoubleLong.MIN_VALUE.negate() == DoubleLong.MIN_VALUE`!
     // https://stackoverflow.com/questions/5444611/math-abs-returns-wrong-value-for-integer-min-value
     public @NotNull Int128 negate() {
