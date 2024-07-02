@@ -6,6 +6,8 @@ import io.netty.handler.codec.http.HttpResponse;
 import io.netty.handler.codec.http.HttpResponseStatus;
 import io.netty.handler.codec.http.HttpVersion;
 
+import static io.spbx.util.base.EasyExceptions.notImplemented;
+
 public class EmptyHttpResponse implements AsyncResponse, HttpResponse {
     public static final EmptyHttpResponse INSTANCE = new EmptyHttpResponse();
 
@@ -21,7 +23,7 @@ public class EmptyHttpResponse implements AsyncResponse, HttpResponse {
 
     @Override
     public HttpResponse setStatus(HttpResponseStatus status) {
-        throw new UnsupportedOperationException("Not implemented");
+        throw notImplemented("EmptyHttpResponse.setStatus()");
     }
 
     @Override
@@ -36,7 +38,7 @@ public class EmptyHttpResponse implements AsyncResponse, HttpResponse {
 
     @Override
     public HttpResponse setProtocolVersion(HttpVersion version) {
-        throw new UnsupportedOperationException("Not implemented");
+        throw notImplemented("EmptyHttpResponse.setProtocolVersion()");
     }
 
     @Override
@@ -46,16 +48,16 @@ public class EmptyHttpResponse implements AsyncResponse, HttpResponse {
 
     @Override
     public DecoderResult getDecoderResult() {
-        throw new UnsupportedOperationException("Not implemented");
+        throw notImplemented("EmptyHttpResponse.getDecoderResult()");
     }
 
     @Override
     public DecoderResult decoderResult() {
-        throw new UnsupportedOperationException("Not implemented");
+        throw notImplemented("EmptyHttpResponse.decoderResult()");
     }
 
     @Override
     public void setDecoderResult(DecoderResult result) {
-        throw new UnsupportedOperationException("Not implemented");
+        throw notImplemented("EmptyHttpResponse.setDecoderResult()");
     }
 }

@@ -17,7 +17,7 @@ public interface ThrowIterator<T, E extends Throwable> extends Iterator<T> {
     T nextThrow() throws E;
 
     default void removeThrow() throws E {
-        throw new UnsupportedOperationException("remove");
+        throw new UnsupportedOperationException("ThrowIterator.removeThrow()");
     }
 
     default boolean hasNext() {

@@ -48,6 +48,7 @@ import java.util.function.IntPredicate;
 import java.util.logging.Level;
 
 import static io.spbx.util.base.EasyCast.castAny;
+import static io.spbx.util.base.EasyExceptions.newInternalError;
 import static io.spbx.webby.ws.WebsocketAgentConfigError.assure;
 import static io.spbx.webby.ws.WebsocketAgentConfigError.failIf;
 import static io.spbx.webby.ws.meta.FrameMetadata.MAX_ID_SIZE;
@@ -273,7 +274,7 @@ public class WebsocketAgentBinder {
             failIf(serve.render().length > 1, "@Serve can have only one render: %s", elem);
             return serve;
         }
-        throw new UnsupportedOperationException("Internal error: %s does not have @Serve annotation".formatted(elem));
+        throw newInternalError("%s does not have @Serve annotation".formatted(elem));
     }
 
     @VisibleForTesting

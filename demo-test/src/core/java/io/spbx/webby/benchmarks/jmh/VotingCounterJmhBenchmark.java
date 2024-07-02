@@ -24,6 +24,7 @@ import java.util.Random;
 import java.util.concurrent.TimeUnit;
 import java.util.stream.IntStream;
 
+import static io.spbx.util.base.EasyExceptions.notImplemented;
 import static io.spbx.webby.demo.model.UserRateModelTable.OwnColumn.*;
 
 @Fork(value = 1, warmups = 0)
@@ -66,7 +67,7 @@ public class VotingCounterJmhBenchmark {
 
             storage = switch (storeType) {
                 case SQL_DB -> new TableVotingStorage(table, content_id, user_id, value);
-                case KEY_VALUE_DB -> throw new UnsupportedOperationException();
+                case KEY_VALUE_DB -> throw notImplemented("KEY_VALUE_DB");
             };
 
             counter = switch (counterType) {

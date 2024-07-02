@@ -42,6 +42,11 @@ public class EasyExceptions {
         return new IllegalStateException(message);
     }
 
+    public static @NotNull UnsupportedOperationException notImplemented(@NotNull String message,
+                                                                        @Nullable Object @NotNull ... args) {
+        return new UnsupportedOperationException("Not Implemented: " + message.formatted(args));
+    }
+
     // Usage:
     // assert runOnlyInDev(...);
     public static <E extends Throwable> boolean runOnlyInDev(@NotNull ThrowRunnable<E> runnable) {

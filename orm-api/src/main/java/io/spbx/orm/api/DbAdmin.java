@@ -12,6 +12,8 @@ import java.sql.Connection;
 import java.sql.SQLException;
 import java.util.logging.Level;
 
+import static io.spbx.util.base.EasyExceptions.notImplemented;
+
 /**
  * An admin API to the database, e.g. DDL queries for DB schema manipulation.
  *
@@ -48,7 +50,7 @@ public class DbAdmin {
             case MySQL, MariaDB -> runner().runAndGetString(HardcodedSelectQuery.of("SELECT DATABASE()"));
             case SQLite ->
                 runner().runAndGetString(HardcodedSelectQuery.of("SELECT name FROM pragma_database_list LIMIT 1"));
-            default -> throw new UnsupportedOperationException("Failed to get the current database in " + engine());
+            default -> throw notImplemented("Failed to get the current database for %s DB", engine());
         };
     }
 

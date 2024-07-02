@@ -21,6 +21,7 @@ import java.util.stream.Collectors;
 
 import static io.spbx.orm.api.query.CompareType.EQ;
 import static io.spbx.orm.api.query.Shortcuts.*;
+import static io.spbx.util.base.EasyExceptions.notImplemented;
 
 public class BlobTableDb<V, K> extends ByteArrayDb<K, V> implements KeyValueDb<K, V> {
     // Hardcoding the table columns to avoid a dep on the generated BlobKvTable from the core...
@@ -43,7 +44,7 @@ public class BlobTableDb<V, K> extends ByteArrayDb<K, V> implements KeyValueDb<K
         this.whereNamespace = switch (table.engine()) {
             case H2 -> Where.of(like(ID_COLUMN, literal(lowerhex(this.namespace) + "%")));
             case MySQL, MariaDB, SQLite -> Where.of(like(ID_COLUMN, literal(namespace + "%")));
-            default -> throw new UnsupportedOperationException("BlobTableDb not implemented for SQL engine: " + table.engine());
+            default -> throw notImplemented("BlobTableDb() for SQL engine: %s", table.engine());
         };
     }
 
@@ -64,7 +65,7 @@ public class BlobTableDb<V, K> extends ByteArrayDb<K, V> implements KeyValueDb<K
         Compare compare = switch (table.engine()) {
             case SQLite -> EQ.compare(Func.HEX.apply(VALUE_COLUMN), var(upperhex(bytes)));
             case MySQL, MariaDB, H2 -> EQ.compare(VALUE_COLUMN, var(bytes));
-            default -> throw new UnsupportedOperationException("containsValue() not implemented for SQL engine:" + table.engine());
+            default -> throw notImplemented("BlobTableDb.containsValue() for SQL engine: %s", table.engine());
         };
 
         if (compare != null) {
